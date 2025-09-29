@@ -125,6 +125,23 @@ class VitessHibernateTransacterPoolIntegrationTest {
   }
 
   @Test
+  fun `replicaRead on reader transacter works`() {
+    val movieId = writerTransacter.transaction { session ->
+      val movie = DbMovie("Tenet", LocalDate.of(2020, 9, 3))
+      session.save(movie)
+    }
+
+    val replicaReadResult = readerTransacter.replicaRead { session ->
+      queryFactory.newQuery<MovieQuery>()
+        .id(movieId)
+        .uniqueResult(session)
+    }
+
+    assertThat(replicaReadResult).isNotNull
+    assertThat(replicaReadResult!!.name).isEqualTo("Tenet")
+  }
+
+  @Test
   fun `replicaRead on writer transacter also works`() {
     val movieId = writerTransacter.transaction { session ->
       val movie = DbMovie("Tenet", LocalDate.of(2020, 9, 3))

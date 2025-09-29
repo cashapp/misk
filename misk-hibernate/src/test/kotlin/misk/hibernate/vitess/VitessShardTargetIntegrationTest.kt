@@ -199,7 +199,7 @@ class VitessShardTargetIntegrationTest {
   }
 
   @Test
-  fun `target(Destination) works in transactions`() {
+  fun `target(destination) works in transactions`() {
     transacter.transaction { session ->
       session.target(Destination(shard = jp.shard(session), tabletType = TabletType.PRIMARY)) {
         assertThat(

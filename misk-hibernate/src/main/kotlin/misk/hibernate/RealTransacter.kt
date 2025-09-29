@@ -156,6 +156,7 @@ private constructor(
     }
     return transactionWithRetriesInternal {
       replicaReadWithoutTransactionInternalSession { session ->
+        // No need to target replica explicitly if `@replica` is already set as the database
         if (config.type.isVitess && config.database != Destination.replica().toString()) {
           session.target(Destination.replica(), block)
         } else {
@@ -566,18 +567,14 @@ private constructor(
         true -> {
           useConnection { connection ->
             val previous = currentTarget(connection)
-            // Merge Destinations to support composition (e.g., targeting a shard with TabletType not specified within a replica read)
-            // This will prefer values from the new Destination when merging.
-            val mergedDestination = previous.mergedWith(destination)
-            val targetHasChanged = previous != mergedDestination
-            
+            val targetHasChanged = previous != destination
             try {
               if (targetHasChanged) {
                 logger.debug {
-                  "The new destination was updated from previous target. Destination target: $mergedDestination, " +
+                  "The new destination was updated from previous target. Destination target: $destination, " +
                     "previous target: $previous"
                 }
-                use(connection, mergedDestination)
+                use(connection, destination)
               }
               block(this)
             } catch (e: Exception) {
@@ -588,7 +585,7 @@ private constructor(
                   use(connection, previous)
                 } catch (e: Exception) {
                   logger.error(e) {
-                    "Exception restoring destination, previous = $previous, destination = $mergedDestination, " +
+                    "Exception restoring destination, previous = $previous, destination = $destination, " +
                       "cause = ${e.message}"
                   }
                 }
