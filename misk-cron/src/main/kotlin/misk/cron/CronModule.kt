@@ -14,15 +14,16 @@ import misk.inject.toKey
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
 import java.time.ZoneId
+import wisp.lease.LeaseManager
 
 class CronModule @JvmOverloads constructor(
   private val zoneId: ZoneId,
   private val threadPoolSize: Int = 10,
   private val dependencies: List<Key<out Service>> = listOf(),
   private val installDashboardTab: Boolean = true,
-  // NOTE: `useDistributedExecution = true` may cause overlapping execution during deployments.
+  // NOTE: `useMultipleLeases = true` may cause overlapping execution during deployments.
   // Deploy during downtime or ensure tasks are idempotent.
-  private val useDistributedExecution: Boolean = false
+  private val useMultipleLeases: Boolean = false
 ) : KInstallOnceModule() {
   override fun configure() {
     install(
@@ -31,7 +32,7 @@ class CronModule @JvmOverloads constructor(
         threadPoolSize = threadPoolSize,
         dependencies = dependencies,
         installDashboardTab = installDashboardTab,
-        useDistributedExecution = useDistributedExecution,
+        useMultipleLeases = useMultipleLeases,
       ),
     )
     install(ServiceModule<RepeatedTaskQueue>(ForMiskCron::class).dependsOn<ReadyService>())
@@ -55,7 +56,7 @@ class FakeCronModule @JvmOverloads constructor(
   private val threadPoolSize: Int = 10,
   private val dependencies: List<Key<out Service>> = listOf(),
   private val installDashboardTab: Boolean = false,
-  private val useDistributedExecution: Boolean = false,
+  private val useMultipleLeases: Boolean = false,
 ) : KAbstractModule() {
   override fun configure() {
     bind<ZoneId>().annotatedWith<ForMiskCron>().toInstance(zoneId)
@@ -80,9 +81,10 @@ class FakeCronModule @JvmOverloads constructor(
   }
 
   @Provides
+  @ForMiskCron
   @Singleton
-  fun cronCoordinator(leaseManager: wisp.lease.LeaseManager): CronCoordinator =
-    if (useDistributedExecution) {
+  fun cronCoordinator(leaseManager: LeaseManager): CronCoordinator =
+    if (useMultipleLeases) {
       MultipleLeaseCronCoordinator(leaseManager)
     } else {
       SingleLeaseCronCoordinator(leaseManager)

@@ -42,23 +42,23 @@ Note that there are **not** strong guarantees on task execution; tasks can be de
    - Tasks are idempotent
    - You want to avoid a single point of failure
 
-## Distributed Execution
+## Multiple-lease Execution
 
-To enable distributed execution, set `useDistributedExecution = true`. In this mode, leases are granted per task, allowing tasks to run in parallel across the cluster:
+To enable multiple-lease mode of execution, set `useMultipleLeases = true`. In this mode, leases are granted per task, allowing tasks to run in parallel across the cluster:
 
 ```kotlin
 class MyAppModule : KAbstractModule {
   override fun configure() {
     install(CronModule(
       zoneId = ZoneId.of("America/Los_Angeles"),
-      useDistributedExecution = true
+      useMultipleLeases = true
     ))
     install(CronEntryModule.create<MyCronTask>())
   }
 }
 ```
 
-## Migration to Distributed Mode
+## Migration to Distributed (Multiple-lease) Mode
 
 ### Callout
 During rolling deployments, cron tasks may briefly run twice (once per old pod and once per new pod).
@@ -76,8 +76,8 @@ During rolling deployments, cron tasks may briefly run twice (once per old pod a
 - Tasks should not produce incorrect results or side effects when re-run.
 
 ### Migration Steps
-1. Deploy with `useDistributedExecution = false` (no behavior change).
+1. Deploy with `useMultipleLeases = false` (no behavior change).
 2. Verify deployment stability across all environments.
-3. **Redeploy** with `useDistributedExecution = true` (requires full redeploy of all pods, not a runtime config toggle).
+3. **Redeploy** with `useMultipleLeases = true` (requires full redeploy of all pods, not a runtime config toggle).
 4. Monitor logs/metrics to validate task distribution and performance.
-5. If issues arise, redeploy with `useDistributedExecution = false`.
+5. If issues arise, redeploy with `useMultipleLeases = false`.

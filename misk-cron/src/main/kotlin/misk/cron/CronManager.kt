@@ -21,7 +21,7 @@ class CronManager @Inject constructor() {
   @Inject private lateinit var clock: Clock
   @Inject @ForMiskCron private lateinit var executorService: ExecutorService
   @Inject @ForMiskCron private lateinit var zoneId: ZoneId
-  @Inject private lateinit var cronCoordinator: CronCoordinator
+  @Inject @ForMiskCron private lateinit var cronCoordinator: CronCoordinator
 
   private val runningCrons = mutableListOf<RunningCronEntry>()
   internal fun getRunningCrons() = runningCrons.toList()
