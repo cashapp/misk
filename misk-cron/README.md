@@ -32,13 +32,14 @@ Note that there are **not** strong guarantees on task execution; tasks can be de
 - Only one pod in the cluster executes cron tasks at a time
 - **Best when:**
    - Tasks idempotency is uncertain or unverified
-   - Tasks have execution order dependencies
+   - You have only a small number of tasks with non-overlapping schedules 
+   - You want a slightly simpler operational model (all tasks run on a single pod)
 
 ### Distributed mode (multiple lease execution)
 - Each cron task has its own lease
 - Multiple pods can run tasks concurrently, increasing resource utilization and fault tolerance
 - **Best when:**
-   - You have multiple independent tasks
+   - You have multiple independent tasks with overlapping schedules
    - Tasks are idempotent
    - You want to avoid a single point of failure
 

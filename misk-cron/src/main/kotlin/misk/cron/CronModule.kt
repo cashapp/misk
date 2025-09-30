@@ -16,13 +16,22 @@ import misk.tasks.RepeatedTaskQueueFactory
 import java.time.ZoneId
 import wisp.lease.LeaseManager
 
+/**
+ * Provides cron scheduling functionality for Misk services.
+ *
+ * @param useMultipleLeases Controls lease coordination strategy. Changing this value may cause
+ *   overlapping task execution during deployments.
+ *
+ *   Example: switching false→true means old pods use cluster-wide leases while new pods use
+ *   per-task leases, potentially running the same task on both.
+ *
+ *   Deploy during downtime or ensure tasks are idempotent.
+ */
 class CronModule @JvmOverloads constructor(
   private val zoneId: ZoneId,
   private val threadPoolSize: Int = 10,
   private val dependencies: List<Key<out Service>> = listOf(),
   private val installDashboardTab: Boolean = true,
-  // NOTE: `useMultipleLeases = true` may cause overlapping execution during deployments.
-  // Deploy during downtime or ensure tasks are idempotent.
   private val useMultipleLeases: Boolean = false
 ) : KInstallOnceModule() {
   override fun configure() {
