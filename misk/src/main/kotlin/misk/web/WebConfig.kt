@@ -209,6 +209,13 @@ data class WebConfig @JvmOverloads constructor(
   /** Config used by client and server interceptors installed by DeadlinePropagationModule
    * Only applies if DeadlinePropagationModule is installed, ignored otherwise  */
   val request_deadlines: RequestDeadlinesConfig = RequestDeadlinesConfig(),
+
+  /**
+   * Exposed configuration for Jetty's HTTP/2 frame rate limiter to avoid DDoS (CVE-2023-44487, CVE-2025-5115).
+   * -1 will effectively disable rate limiting but will still emit metrics on the rate limiter queue.
+   * See https://jetty.org/docs/jetty/10/operations-guide/modules/standard.html#http2
+   */
+  val jetty_http2_max_events_per_second: Int = 128,
 ) : Config
 
 data class WebSslConfig @JvmOverloads constructor(

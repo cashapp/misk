@@ -132,6 +132,7 @@ jettyAlpnServerJava = { module = "org.eclipse.jetty:jetty-alpn-java-server" }
 jettyBom = { module = "org.eclipse.jetty:jetty-bom", version = "10.0.26" }
 jettyHttp = { module = "org.eclipse.jetty:jetty-http" }
 jettyHttp2 = { module = "org.eclipse.jetty.http2:http2-server" }
+jettyHttp2Common = { module = "org.eclipse.jetty.http2:http2-common" }
 jettyIo = { module = "org.eclipse.jetty:jetty-io" }
 jettyServer = { module = "org.eclipse.jetty:jetty-server" }
 jettyServlet = { module = "org.eclipse.jetty:jetty-servlet" }
