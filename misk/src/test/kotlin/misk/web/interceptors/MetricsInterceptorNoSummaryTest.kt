@@ -94,7 +94,7 @@ class MetricsInterceptorNoSummaryTest {
     override fun configure() {
       install(AccessControlModule())
       install(WebServerTestingModule())
-      install(MiskTestingServiceModule())
+      install(MiskTestingServiceModule(installFakeMetrics = true))
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
       install(WebActionModule.create<MetricsInterceptorNoSummaryTestAction>())
 
