@@ -36,6 +36,7 @@ dependencies {
   testImplementation(libs.kotlinxCoroutinesTest)
   testImplementation(libs.mockk)
   testImplementation(testFixtures(project(":misk-mcp")))
+  testImplementation(testFixtures(project(":misk-metrics")))
   testImplementation(project(":misk-testing"))
 
   testFixturesApi(libs.mcpKotlinSdkClient)
