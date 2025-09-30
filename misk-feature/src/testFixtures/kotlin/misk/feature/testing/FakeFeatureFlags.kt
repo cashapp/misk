@@ -23,7 +23,8 @@ import jakarta.inject.Singleton
  */
 @Singleton
 class FakeFeatureFlags @Inject constructor(
-  val delegate: wisp.feature.testing.FakeFeatureFlags
+  // TODO remove default parameter once callsites are migrated
+  val delegate: wisp.feature.testing.FakeFeatureFlags = wisp.feature.testing.FakeFeatureFlags()
 ) : AbstractIdleService(),
   FeatureFlags,
   FeatureService,
