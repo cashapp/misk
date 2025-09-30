@@ -7,6 +7,7 @@ import misk.hibernate.MovieQuery
 import misk.hibernate.Movies
 import misk.hibernate.MoviesTestModule
 import misk.hibernate.Query
+import misk.hibernate.Session
 import misk.hibernate.Transacter
 import misk.hibernate.VitessTestExtensions.createInSeparateShard
 import misk.hibernate.VitessTestExtensions.save
@@ -24,6 +25,7 @@ import misk.vitess.testing.utilities.DockerVitess
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 @MiskTest(startService = true)
@@ -66,6 +68,8 @@ class VitessShardTargetIntegrationTest {
           queryFactory.newQuery<MovieQuery>().allowTableScan()
             .name("Star Wars").uniqueResult(session)
         ).isNull()
+
+       assertShardWriteFails(session)
       }
 
       session.target(sw.shard(session)) {
@@ -78,6 +82,8 @@ class VitessShardTargetIntegrationTest {
           queryFactory.newQuery<MovieQuery>().allowTableScan()
             .name("Star Wars").uniqueResult(session)
         ).isNotNull
+
+        assertShardWriteFails(session)
       }
     }
   }
@@ -95,6 +101,8 @@ class VitessShardTargetIntegrationTest {
           queryFactory.newQuery<MovieQuery>().allowTableScan()
             .name("Star Wars").uniqueResult(session)
         ).isNull()
+
+        assertShardWriteFails(session)
       }
 
       session.target(Destination(shard = sw.shard(session), tabletType = TabletType.REPLICA)) {
@@ -107,6 +115,8 @@ class VitessShardTargetIntegrationTest {
           queryFactory.newQuery<MovieQuery>().allowTableScan()
             .name("Star Wars").uniqueResult(session)
         ).isNotNull
+
+        assertShardWriteFails(session)
       }
     }
   }
@@ -224,6 +234,15 @@ class VitessShardTargetIntegrationTest {
             .name("Star Wars").uniqueResult(session)
         ).isNotNull
       }
+    }
+  }
+
+  fun assertShardWriteFails(session: Session) {
+    assertThrows<IllegalStateException> {
+      val movie = DbMovie("Should Fail", LocalDate.of(2023, 1, 1))
+      session.save(movie)
+    }.also { ex ->
+      assertThat(ex).hasMessage("Saving isn't permitted in a read only session.")
     }
   }
 }
