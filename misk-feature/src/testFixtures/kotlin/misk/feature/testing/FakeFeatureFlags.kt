@@ -23,7 +23,7 @@ import jakarta.inject.Singleton
  */
 @Singleton
 class FakeFeatureFlags @Inject constructor(
-  val delegate: wisp.feature.testing.FakeFeatureFlags
+  val delegate: wisp.feature.testing.FakeFeatureFlags = wisp.feature.testing.FakeFeatureFlags()
 ) : AbstractIdleService(),
   FeatureFlags,
   FeatureService,
