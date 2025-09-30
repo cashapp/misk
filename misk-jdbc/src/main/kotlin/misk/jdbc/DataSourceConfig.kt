@@ -134,6 +134,8 @@ data class DataSourceConfig @JvmOverloads constructor(
   val mysql_enforce_writable_connections: Boolean = false,
   val migrations_format: MigrationsFormat = MigrationsFormat.TRADITIONAL,
   val declarative_schema_config: DeclarativeSchemaConfig? = null,
+  val mysql_use_aws_secret_for_credentials: Boolean = false,
+  val mysql_aws_secret_name: String? = null,
 ) {
   init {
     if (migrations_format == MigrationsFormat.DECLARATIVE) {
@@ -283,7 +285,15 @@ data class DataSourceConfig @JvmOverloads constructor(
           queryParams += "&$key=$value"
         }
 
-        "jdbc:tracing:mysql://${config.host}:${config.port}/${config.database}$queryParams"
+        if(mysql_use_aws_secret_for_credentials) {
+          val region = "us-east-1"
+          queryParams += "&secretId=$mysql_aws_secret_name&region=$region"
+          Class.forName( "com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver" )
+          "jdbc:tracing:jdbc-secretsmanager:mysql://${config.host}:${config.port}/${config.database}$queryParams"
+        }
+        else {
+          "jdbc:tracing:mysql://${config.host}:${config.port}/${config.database}$queryParams"
+        }
       }
       DataSourceType.HSQLDB -> {
         "jdbc:hsqldb:mem:${database!!};sql.syntax_mys=true"
