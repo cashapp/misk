@@ -10,7 +10,6 @@ application {
 
 dependencies {
   implementation(libs.jakartaInject)
-  implementation(project(":wisp:wisp-config"))
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
   implementation(project(":misk-clustering"))
