@@ -26,11 +26,6 @@ interface Session: misk.jdbc.Session {
   /**
    * Target a specific Vitess destination (shard, tablet type, or both) for database operations.
    *
-   * The destination is merged with the current destination, allowing for composable targeting:
-   * - In a regular transaction: target(Destination(shard)) routes to that shard
-   * - In a replica read: target(Destination(shard)) routes to that shard's replica
-   * - Can explicitly target: target(Destination(shard, TabletType.REPLICA))
-   * 
    * @param destination The destination to target (shard, tablet type, or both)
    * @param block Function that receives the session and executes within the targeted context
    */
