@@ -4,6 +4,7 @@ import misk.vitess.testing.DefaultSettings
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import misk.containers.ContainerUtil
+import org.junitpioneer.jupiter.SetEnvironmentVariable
 import wisp.deployment.TESTING
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -286,5 +287,22 @@ class DataSourceConfigTest {
     )
     assertThat(config.migrations_format).isEqualTo(MigrationsFormat.EXTERNALLY_MANAGED)
     assertThat(config.declarative_schema_config?.excluded_tables).containsExactly("table")
+  }
+
+  @Test
+  @SetEnvironmentVariable(key = "AWS_REGION", value = "us-east-1")
+  fun buildMysqlJDBCUrlUsingAWSSecretForCredential() {
+    val config = DataSourceConfig(
+      DataSourceType.MYSQL,
+      mysql_use_aws_secret_for_credentials = true,
+      mysql_aws_secret_name = "secret_name",
+    )
+    assertEquals(
+      "jdbc:tracing:jdbc-secretsmanager:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
+          "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
+          "sslMode=PREFERRED&enabledTLSProtocols=TLSv1.2,TLSv1.3&" +
+          "secretId=secret_name&region=us-east-1",
+      config.buildJdbcUrl(TESTING)
+    )
   }
 }

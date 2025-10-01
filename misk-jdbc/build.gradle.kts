@@ -34,6 +34,7 @@ dependencies {
   implementation(project(":misk-logging"))
   implementation(project(":wisp:wisp-moshi"))
   implementation(libs.jsqlparser)
+  runtimeOnly(libs.aws2SecretManager)
   runtimeOnly(libs.hsqldb)
   runtimeOnly(libs.openTracingJdbc)
   runtimeOnly(libs.postgresql)
@@ -69,6 +70,7 @@ dependencies {
   testImplementation(project(":misk-jdbc"))
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-jdbc")))
+  testImplementation(libs.junitPioneer)
 
   testImplementation(libs.guice)
   testImplementation(libs.hikariCp)
@@ -100,4 +102,10 @@ mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )
+}
+
+// Allows us to set environment variables in tests using JUnit Pioneer
+tasks.test {
+  jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
+  jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
 }
