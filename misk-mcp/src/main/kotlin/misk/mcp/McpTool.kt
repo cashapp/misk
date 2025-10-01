@@ -243,13 +243,13 @@ abstract class McpTool<I : Any> {
   }
 
 
-  protected sealed interface ToolResult {
+  sealed interface ToolResult {
     val isError: Boolean
     val _meta: JsonObject
   }
 
   @ConsistentCopyVisibility
-  protected data class PromptToolResult internal constructor(
+  data class PromptToolResult internal constructor(
     val result: List<PromptMessageContent>,
     override val isError: Boolean,
     override val _meta: JsonObject,
@@ -284,7 +284,7 @@ abstract class McpTool<I : Any> {
     }
   }
 
-  protected abstract suspend fun handle(input: I): ToolResult
+  abstract suspend fun handle(input: I): ToolResult
 
   private val inputClass: KClass<I> by lazy {
     @Suppress("UNCHECKED_CAST")
@@ -502,7 +502,7 @@ abstract class StructuredMcpTool<I : Any, O : Any> : McpTool<I>() {
 
   @OptIn(ExperimentalMiskApi::class)
   @ConsistentCopyVisibility
-  protected data class StructuredToolResult<O : Any> internal constructor(
+  data class StructuredToolResult<O : Any> internal constructor(
     val result: O,
     override val isError: Boolean,
     override val _meta: JsonObject,
