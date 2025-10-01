@@ -45,6 +45,7 @@ aws2DynamodbEnhanced = { module = "software.amazon.awssdk:dynamodb-enhanced", ve
 aws2Regions = { module = "software.amazon.awssdk:regions", version.ref = "aws2" }
 aws2S3 = { module = "software.amazon.awssdk:s3", version.ref = "aws2" }
 aws2Sqs = { module = "software.amazon.awssdk:sqs", version.ref = "aws2" }
+aws2SecretManager = { module = "com.amazonaws.secretsmanager:aws-secretsmanager-jdbc", version = "2.0.0" }
 awsCore = { module = "com.amazonaws:aws-java-sdk-core", version.ref = "aws1" }
 awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version.ref = "aws1" }
 awsS3 = { module = "com.amazonaws:aws-java-sdk-s3", version.ref = "aws1" }
