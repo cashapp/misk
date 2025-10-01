@@ -30,7 +30,6 @@ import misk.vitess.Destination
 import misk.vitess.Keyspace
 import misk.vitess.Shard
 import misk.vitess.Shard.Companion.SINGLE_SHARD_SET
-import misk.vitess.TabletType
 import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException
@@ -154,13 +153,42 @@ private constructor(
     if (!options.readOnly) {
       return readOnly().replicaRead(block)
     }
-    return transactionWithRetriesInternal {
-      replicaReadWithoutTransactionInternalSession { session ->
-        // No need to target replica explicitly if `@replica` is already set as the database
-        if (config.type.isVitess && config.database != Destination.replica().toString()) {
-          session.target(Destination.replica(), block)
-        } else {
+
+    if (!config.type.isVitess) {
+      return transactionWithRetriesInternal {
+        replicaReadWithoutTransactionInternalSession { session ->
           block(session)
+        }
+      }
+    }
+
+    return vitessReplicaRead(block)
+  }
+
+  private fun <T> vitessReplicaRead(block: (session: Session) -> T): T {
+    // Use connection holding to prevent connection changes during nested target operations
+    return transactionWithRetriesInternal {
+      val connectionHandlingMode = PhysicalConnectionHandlingMode.IMMEDIATE_ACQUISITION_AND_HOLD
+      
+      withNewHibernateSession(reader(), connectionHandlingMode) { hibernateSession ->
+        val session = RealSession(
+          hibernateSession = hibernateSession,
+          readOnly = true,
+          config = config,
+          disabledChecks = options.disabledChecks,
+          transacter = this
+        )
+
+        session.use {
+          useSession(session) {
+            // target `@replica` if the datasource does not originate from a Reader config.
+            if (config.database != Destination.replica().toString()) {
+              session.target(Destination.replica(), block)
+            } else {
+              // otherwise just run the block, which avoids an unnecessary shard target.
+              block(session)
+            }
+          }
         }
       }
     }
