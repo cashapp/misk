@@ -1,6 +1,7 @@
 package misk.config
 
 import misk.inject.KAbstractModule
+import wisp.config.Config
 
 class ConfigModule<T : Config>(
   private val configClass: Class<T>,

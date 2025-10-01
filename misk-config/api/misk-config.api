@@ -7,7 +7,7 @@ public final class misk/config/AppNameModule : misk/inject/KAbstractModule {
 
 public final class misk/config/ConfigModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/config/ConfigModule$Companion;
-	public fun <init> (Ljava/lang/Class;Ljava/lang/String;Lmisk/config/Config;)V
+	public fun <init> (Ljava/lang/Class;Ljava/lang/String;Lwisp/config/Config;)V
 }
 
 public final class misk/config/ConfigModule$Companion {

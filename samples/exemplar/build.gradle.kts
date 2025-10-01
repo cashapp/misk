@@ -44,6 +44,7 @@ dependencies {
   implementation(project(":misk-tailwind"))
   implementation(project(":misk-tokens"))
   implementation(project(":misk-testing"))
+  implementation(project(":wisp:wisp-config"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.awsDynamodb)

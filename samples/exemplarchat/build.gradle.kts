@@ -26,6 +26,8 @@ dependencies {
   implementation(project(":wisp:wisp-deployment"))
   implementation(project(":misk-config"))
   implementation(testFixtures(project(":misk-redis")))
+  implementation(project(":wisp:wisp-config"))
+
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
