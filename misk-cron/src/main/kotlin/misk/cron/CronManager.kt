@@ -21,6 +21,7 @@ class CronManager @Inject constructor() {
   @Inject private lateinit var clock: Clock
   @Inject @ForMiskCron private lateinit var executorService: ExecutorService
   @Inject @ForMiskCron private lateinit var zoneId: ZoneId
+  @Inject @ForMiskCron private lateinit var cronCoordinator: CronCoordinator
 
   private val runningCrons = mutableListOf<RunningCronEntry>()
   internal fun getRunningCrons() = runningCrons.toList()
@@ -122,7 +123,7 @@ class CronManager @Inject constructor() {
         .withSecond(0)
         .withNano(0)
 
-      if (nextExecutionTime.toInstant() <= now) {
+      if (nextExecutionTime.toInstant() <= now && cronCoordinator.shouldRunTask(cronEntry.name)) {
         logger.info {
           "CronJob ${cronEntry.name} was ready at $nextExecutionTime"
         }
