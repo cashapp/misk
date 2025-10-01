@@ -20,7 +20,7 @@ internal class InjectingParameterResolverTest {
     myString: String,
     @TestAnnotation myList: List<String>
   ) {
-    assertThat(myString).isEqualTo("not a string")
+    assertThat(myString).isEqualTo("a string")
 
     assertThat(myList).containsExactly("strings?")
   }
