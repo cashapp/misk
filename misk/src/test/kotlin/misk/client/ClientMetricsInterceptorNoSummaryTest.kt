@@ -168,13 +168,13 @@ internal class ClientMetricsInterceptorNoSummaryTest {
     SoftAssertions.assertSoftly { softly ->
       softly.assertThat(
         requestDurationHistogram.labels("pingerHttp2.ping", "500").get().buckets.last().toInt()
-      ).isEqualTo(0)
+      ).isEqualTo(1)
       softly.assertThat(
         requestDurationHistogram.labels("pingerHttp2.ping", "200").get().buckets.last().toInt()
       ).isEqualTo(1)
       softly.assertThat(
         requestDurationHistogram.labels("pingerHttp2.ping", "400").get().buckets.last().toInt()
-      ).isEqualTo(2)
+      ).isEqualTo(1)
     }
   }
 

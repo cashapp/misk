@@ -44,6 +44,7 @@ dependencies {
   implementation(libs.jettyAlpnServer)
   implementation(libs.jettyHttp)
   implementation(libs.jettyHttp2)
+  implementation(libs.jettyHttp2Common)
   implementation(libs.jettyIo)
   implementation(libs.jettyServlet)
   implementation(libs.jettyServlets)
@@ -92,6 +93,7 @@ dependencies {
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":wisp:wisp-tracing"))
   testImplementation(testFixtures(project(":misk-audit-client")))
+  testImplementation(testFixtures(project(":misk-metrics")))
 }
 
 val generatedSourceDir = layout.buildDirectory.dir("generated/source/wire-test").get().asFile.path
