@@ -261,10 +261,7 @@ class JettyService @Inject internal constructor(
       val udsConnFactories = mutableListOf<ConnectionFactory>()
       udsConnFactories.add(HttpConnectionFactory(httpConfig))
       if (socketConfig.h2c == true) {
-        val http2 = HTTP2CServerConnectionFactory(httpConfig)
-        http2.rateControlFactory =
-          MeasuredWindowRateControl.Factory(metrics, webConfig.jetty_http2_max_events_per_second)
-        udsConnFactories.add(http2)
+        udsConnFactories.add(HTTP2CServerConnectionFactory(httpConfig))
       }
 
       if (isJEP380Supported(socketConfig.path)) {
