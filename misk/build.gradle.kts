@@ -77,6 +77,8 @@ dependencies {
   runtimeOnly(libs.jettyAlpnServerJava)
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
   testImplementation(libs.assertj)
+  testImplementation(libs.awaitility)
+  testImplementation(libs.awaitilityKotlin)
   testImplementation(libs.guavaTestLib)
   testImplementation(libs.junitApi)
   testImplementation(libs.junitParams)
