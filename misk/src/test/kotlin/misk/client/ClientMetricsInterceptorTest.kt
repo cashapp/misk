@@ -184,23 +184,23 @@ internal class ClientMetricsInterceptorTest {
     SoftAssertions.assertSoftly { softly ->
       softly.assertThat(
         requestDurationSummary.labels("pingerHttp2.ping", "500").get().count.toInt()
-      ).isEqualTo(0)
+      ).isEqualTo(1)
       softly.assertThat(
         requestDurationSummary.labels("pingerHttp2.ping", "200").get().count.toInt()
       ).isEqualTo(1)
       softly.assertThat(
         requestDurationSummary.labels("pingerHttp2.ping", "400").get().count.toInt()
-      ).isEqualTo(2)
+      ).isEqualTo(1)
 
       softly.assertThat(
         requestDurationHistogram.labels("pingerHttp2.ping", "500").get().buckets.last().toInt()
-      ).isEqualTo(0)
+      ).isEqualTo(1)
       softly.assertThat(
         requestDurationHistogram.labels("pingerHttp2.ping", "200").get().buckets.last().toInt()
       ).isEqualTo(1)
       softly.assertThat(
         requestDurationHistogram.labels("pingerHttp2.ping", "400").get().buckets.last().toInt()
-      ).isEqualTo(2)
+      ).isEqualTo(1)
     }
   }
 
