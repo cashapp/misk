@@ -18,7 +18,7 @@ import misk.web.dashboard.DashboardTheme
 import misk.web.dashboard.MiskWebTheme
 import misk.web.metadata.all.AllMetadataAccess
 import misk.web.metadata.all.AllMetadataModule
-import misk.config.Config
+import wisp.config.Config
 
 // Common test module used to be able to test admin dashboard WebActions
 class MetadataTestingModule : KAbstractModule() {

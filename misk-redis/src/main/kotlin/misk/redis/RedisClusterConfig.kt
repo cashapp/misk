@@ -3,7 +3,7 @@ package misk.redis
 import misk.config.Redact
 import redis.clients.jedis.JedisCluster.DEFAULT_MAX_ATTEMPTS
 import redis.clients.jedis.Protocol
-import misk.config.Config
+import wisp.config.Config
 
 /**
  * Top-level configuration element for all redis clusters

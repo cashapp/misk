@@ -31,6 +31,7 @@ dependencies {
   implementation(project(":misk-hotwire"))
   implementation(project(":misk-moshi"))
   implementation(project(":misk-tailwind"))
+  implementation(project(":wisp:wisp-config"))
   implementation(project(":misk-logging"))
   implementation(project(":wisp:wisp-moshi"))
 

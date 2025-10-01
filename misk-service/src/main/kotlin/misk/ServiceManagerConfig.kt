@@ -1,6 +1,6 @@
 package misk
 
-import misk.config.Config
+import wisp.config.Config
 
 @Suppress("PropertyName")
 data class ServiceManagerConfig @JvmOverloads constructor(

@@ -20,6 +20,7 @@ dependencies {
   api(project(":misk-config"))
   api(project(":misk-core"))
   api(project(":misk-inject"))
+  api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-deployment"))
   implementation(libs.dockerTransportHttpClient)
   implementation(libs.dockerTransportCore)

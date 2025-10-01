@@ -11,7 +11,7 @@ import misk.environment.DeploymentModule
 import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import misk.config.Config
+import wisp.config.Config
 import wisp.deployment.TESTING
 import kotlin.test.assertFailsWith
 

@@ -18,7 +18,7 @@ import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import misk.config.Config
+import wisp.config.Config
 import wisp.deployment.TESTING
 import java.sql.Connection
 import java.sql.SQLException

@@ -14,7 +14,7 @@ import misk.tailwind.components.CodeBlock
 import misk.tailwind.components.ToggleContainer
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
-import misk.config.Config
+import wisp.config.Config
 import wisp.deployment.Deployment
 
 internal data class ConfigMetadata(

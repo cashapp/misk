@@ -1,3 +1,6 @@
+public abstract interface class misk/config/Config : wisp/config/Config {
+}
+
 public abstract interface class misk/healthchecks/HealthCheck {
 	public abstract fun status ()Lmisk/healthchecks/HealthStatus;
 }

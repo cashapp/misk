@@ -11,6 +11,7 @@ dependencies {
   api(libs.guava)
   api(libs.jakartaInject)
   api(libs.jedis)
+  api(project(":wisp:wisp-config"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
   api(project(":misk-metrics"))

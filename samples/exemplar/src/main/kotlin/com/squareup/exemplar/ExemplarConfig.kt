@@ -6,7 +6,7 @@ import misk.config.Secret
 import misk.jdbc.DataSourceClustersConfig
 import misk.metrics.backends.prometheus.PrometheusConfig
 import misk.web.WebConfig
-import misk.config.Config
+import wisp.config.Config
 
 data class ExemplarConfig(
   val apiKey: Secret<String>,

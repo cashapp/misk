@@ -3,7 +3,7 @@
 package misk.redis.lettuce
 
 import misk.config.Redact
-import misk.config.Config
+import wisp.config.Config
 
 /** Default timeout in milliseconds for Redis operations */
 const val DEFAULT_TIMEOUT_MS = 10000

@@ -1,7 +1,7 @@
 package misk.web.exceptions
 
 import org.slf4j.event.Level
-import misk.config.Config
+import wisp.config.Config
 
 /**
  * Configures the log [Level] for an ActionException.

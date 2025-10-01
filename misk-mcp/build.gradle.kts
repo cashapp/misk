@@ -18,7 +18,7 @@ dependencies {
   api(project(":misk-api"))
   api(project(":misk-inject"))
   api(project(":misk"))
-  api(project(":misk-config"))
+  api(project(":wisp:wisp-config"))
 
   
   implementation(libs.kotlinReflect)

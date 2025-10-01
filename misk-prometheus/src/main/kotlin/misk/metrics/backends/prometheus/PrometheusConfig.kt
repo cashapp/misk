@@ -1,7 +1,7 @@
 package misk.metrics.backends.prometheus
 
 import jakarta.inject.Inject
-import misk.config.Config
+import wisp.config.Config
 
 /** Configuration for exporting metrics to prometheus */
 @Suppress("AnnotatePublicApisWithJvmOverloads")

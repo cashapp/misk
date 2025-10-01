@@ -13,6 +13,7 @@ dependencies {
   api(libs.guice)
   api(libs.jakartaInject)
   api(libs.tink)
+  api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-deployment"))
   api(project(":misk-config"))
   api(project(":misk-inject"))

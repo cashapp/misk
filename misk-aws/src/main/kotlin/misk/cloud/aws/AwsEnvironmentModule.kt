@@ -4,16 +4,17 @@ import com.google.inject.Provides
 import misk.environment.EnvVarLoader
 import misk.environment.ForEnvVars
 import misk.inject.KAbstractModule
+import wisp.aws.environment.AwsEnvironment
 
 /** [AwsEnvironmentModule] pulls region and account information from installed env vars */
 class AwsEnvironmentModule : KAbstractModule() {
 
   @Provides fun awsRegion(envVarLoader: EnvVarLoader): AwsRegion {
-    return AwsEnvironment.awsRegion(envVarLoader)
+    return AwsEnvironment.awsRegion(envVarLoader).toMiskAwsRegion()
   }
 
   @Provides fun awsAccountId(envVarLoader: EnvVarLoader): AwsAccountId {
-    return AwsEnvironment.awsAccountId(envVarLoader)
+    return AwsEnvironment.awsAccountId(envVarLoader).toMiskAwsAccountId()
   }
 }
 

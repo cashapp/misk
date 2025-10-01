@@ -39,6 +39,7 @@ dependencies {
   api(project(":misk-moshi"))
   api(project(":misk-sampling"))
   api(project(":misk-service"))
+  api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-deployment"))
   implementation(libs.jCommander)
   implementation(libs.jettyAlpnServer)
