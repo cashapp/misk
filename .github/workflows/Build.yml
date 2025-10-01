@@ -73,12 +73,12 @@ jobs:
         run: ${{ matrix.cmd }}
 
       - name: Publish Test Report
-        if: ${{ always() }}
-        uses: mikepenz/action-junit-report@v3
+        uses: dorny/test-reporter@v2
+        if: ${{ !cancelled() }}
         with:
-          check_name: Test Report - ${{ matrix.cmd }}
-          report_paths: '**/build/test-results/test/TEST-*.xml'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          name: JUnit
+          path: "**/build/test-results/test/*.xml"
+          reporter: java-junit
 
   publish:
     name: Publish
