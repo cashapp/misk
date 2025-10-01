@@ -70,7 +70,7 @@ class MetricsInterceptorTest {
     requestDuration.labels(*labels(200, "<user>")).observe(1.0)
 
     // Promteheus processes events asynchronously, thus we might have to wait for a bit.
-    await withPollInterval ONE_MILLISECOND atMost ONE_HUNDRED_MILLISECONDS untilAsserted {
+    await.withPollInterval(ONE_MILLISECOND).atMost(ONE_HUNDRED_MILLISECONDS).untilAsserted {
       // Summary metrics assertions
       assertThat(requestDuration.labels(*labels(200)).get().count.toInt()).isEqualTo(3)
       assertThat(requestDuration.labels(*labels(202)).get().count.toInt()).isEqualTo(2)

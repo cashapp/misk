@@ -65,7 +65,7 @@ class MetricsInterceptorNoSummaryTest {
     assertThat(metricsInterceptorFactory.requestDurationSummary).isNull()
 
     // Prometheus processes events asynchronously, thus we might have to wait for a bit.
-    await withPollInterval ONE_MILLISECOND atMost ONE_HUNDRED_MILLISECONDS untilAsserted {
+    await.withPollInterval(ONE_MILLISECOND).atMost(ONE_HUNDRED_MILLISECONDS).untilAsserted {
       // Make sure all the right histo metrics were generated
       val histoDuration = metricsInterceptorFactory.requestDurationHistogram
       assertThat(histoDuration.labels(*labels(200)).get().count()).isEqualTo(2)
