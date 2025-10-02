@@ -5,9 +5,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.jetty.MeasuredWindowRateControl
 import org.assertj.core.api.Assertions.assertThat
-import org.eclipse.jetty.io.EndPoint
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
 
 @MiskTest(startService = false)
 class MeasuredWindowRateControlTest {
@@ -21,7 +19,7 @@ class MeasuredWindowRateControlTest {
     val rateControl = MeasuredWindowRateControl.Factory(
       metrics,
       maxEventRate = 5
-    ).newRateControl(mock(EndPoint::class.java))
+    ).newRateControl(null)
 
     repeat(5) {
       assertThat(rateControl.onEvent("test")).isTrue()
@@ -33,7 +31,7 @@ class MeasuredWindowRateControlTest {
     val rateControl = MeasuredWindowRateControl.Factory(
       metrics,
       maxEventRate = 2
-    ).newRateControl(mock(EndPoint::class.java))
+    ).newRateControl(null)
 
     assertThat(rateControl.onEvent("test1")).isTrue()
     assertThat(rateControl.onEvent("test2")).isTrue()
@@ -46,7 +44,7 @@ class MeasuredWindowRateControlTest {
     val rateControl = MeasuredWindowRateControl.Factory(
       metrics,
       maxEventRate = -1
-    ).newRateControl(mock(EndPoint::class.java))
+    ).newRateControl(null)
 
     repeat(100) {
       assertThat(rateControl.onEvent("test")).isTrue()
@@ -58,7 +56,7 @@ class MeasuredWindowRateControlTest {
     val rateControl = MeasuredWindowRateControl.Factory(
       metrics,
       maxEventRate = 2
-    ).newRateControl(mock(EndPoint::class.java))
+    ).newRateControl(null)
 
     assertThat(rateControl.onEvent("test1")).isTrue()
     assertThat(rateControl.onEvent("test2")).isTrue()

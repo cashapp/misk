@@ -74,7 +74,7 @@ class MeasuredWindowRateControl private constructor(
       "Count of rate limited events"
     )
 
-    override fun newRateControl(endPoint: EndPoint): RateControl {
+    override fun newRateControl(endPoint: EndPoint?): RateControl {
       return MeasuredWindowRateControl(
         maxEventRate,
         rateEventsPeakGauge,
