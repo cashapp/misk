@@ -90,6 +90,7 @@ dependencies {
   testImplementation(libs.okHttpMockWebServer)
   testImplementation(libs.okHttpSse)
   testImplementation(libs.openTracingMock)
+  testImplementation(libs.mockitoCore)
   testImplementation(project(":misk"))
   testImplementation(project(":misk-testing"))
   testImplementation(project(":wisp:wisp-logging-testing"))
