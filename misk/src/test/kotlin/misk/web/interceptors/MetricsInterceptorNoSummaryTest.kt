@@ -22,6 +22,12 @@ import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.Durations.ONE_HUNDRED_MILLISECONDS
+import org.awaitility.Durations.ONE_MILLISECOND
+import org.awaitility.kotlin.atMost
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.untilAsserted
+import org.awaitility.kotlin.withPollInterval
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -58,14 +64,17 @@ class MetricsInterceptorNoSummaryTest {
     // Make sure all the right non-histo metrics were not generated.
     assertThat(metricsInterceptorFactory.requestDurationSummary).isNull()
 
-    // Make sure all the right histo metrics were generated
-    val histoDuration = metricsInterceptorFactory.requestDurationHistogram
-    assertThat(histoDuration.labels(*labels(200)).get().count()).isEqualTo(2)
-    assertThat(histoDuration.labels(*labels(202)).get().count()).isEqualTo(1)
-    assertThat(histoDuration.labels(*labels(404)).get().count()).isEqualTo(1)
-    assertThat(histoDuration.labels(*labels(403)).get().count()).isEqualTo(2)
-    assertThat(histoDuration.labels(*labels(200, "my-peer")).get().count()).isEqualTo(4)
-    assertThat(histoDuration.labels(*labels(200, "<user>")).get().count()).isEqualTo(1)
+    // Prometheus processes events asynchronously, thus we might have to wait for a bit.
+    await.withPollInterval(ONE_MILLISECOND).atMost(ONE_HUNDRED_MILLISECONDS).untilAsserted {
+      // Make sure all the right histo metrics were generated
+      val histoDuration = metricsInterceptorFactory.requestDurationHistogram
+      assertThat(histoDuration.labels(*labels(200)).get().count()).isEqualTo(2)
+      assertThat(histoDuration.labels(*labels(202)).get().count()).isEqualTo(1)
+      assertThat(histoDuration.labels(*labels(404)).get().count()).isEqualTo(1)
+      assertThat(histoDuration.labels(*labels(403)).get().count()).isEqualTo(2)
+      assertThat(histoDuration.labels(*labels(200, "my-peer")).get().count()).isEqualTo(4)
+      assertThat(histoDuration.labels(*labels(200, "<user>")).get().count()).isEqualTo(1)
+    }
   }
 
   fun invoke(
