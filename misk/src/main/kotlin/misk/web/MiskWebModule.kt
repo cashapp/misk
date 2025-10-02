@@ -129,24 +129,27 @@ class MiskWebModule @JvmOverloads constructor(
     bind<WebConfig>().toInstance(config)
     bind<ActionExceptionLogLevelConfig>().toInstance(config.action_exception_log_level)
 
-    install(
-      ServiceModule(
-        key = JettyService::class.toKey(),
-        dependsOn = jettyDependsOn
-      ).dependsOn<ReadyService>()
-    )
-    install(
-      ServiceModule<JettyThreadPoolMetricsCollector>()
-        .enhancedBy<ReadyService>()
-    )
-    install(
-      ServiceModule<JettyConnectionMetricsCollector>()
-        .enhancedBy<ReadyService>()
-    )
-    install(
-      ServiceModule<ReadinessCheckService>()
-        .enhancedBy<ReadyService>()
-    )
+    // Only install JettyService if not disabled.
+    if (!config.disable_jetty) {
+      install(
+        ServiceModule(
+          key = JettyService::class.toKey(),
+          dependsOn = jettyDependsOn
+        ).dependsOn<ReadyService>()
+      )
+      install(
+        ServiceModule<JettyThreadPoolMetricsCollector>()
+          .enhancedBy<ReadyService>()
+      )
+      install(
+        ServiceModule<JettyConnectionMetricsCollector>()
+          .enhancedBy<ReadyService>()
+      )
+      install(
+        ServiceModule<ReadinessCheckService>()
+          .enhancedBy<ReadyService>()
+      )
+    }
 
     install(ServiceModule<RepeatedTaskQueue>(ReadinessRefreshQueue::class))
 
