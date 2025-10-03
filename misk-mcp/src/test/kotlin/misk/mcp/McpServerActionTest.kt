@@ -8,6 +8,7 @@ import io.modelcontextprotocol.kotlin.sdk.ListPromptsRequest
 import io.modelcontextprotocol.kotlin.sdk.ListResourcesRequest
 import io.modelcontextprotocol.kotlin.sdk.ListToolsRequest
 import io.modelcontextprotocol.kotlin.sdk.ReadResourceRequest
+import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.channels.SendChannel
@@ -28,7 +29,10 @@ import misk.mcp.tools.CalculatorTool
 import misk.mcp.tools.CalculatorToolInput.Operation
 import misk.mcp.tools.CalculatorToolOutput
 import misk.mcp.tools.KotlinSdkTool
+import misk.mcp.tools.ThrowingTool
 import misk.mcp.tools.callCalculatorTool
+import misk.mcp.tools.callThrowingTool
+import misk.metrics.summaryCount
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.RequestBody
@@ -38,6 +42,8 @@ import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.sse.ServerSentEvent
 import okhttp3.OkHttpClient
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -52,6 +58,8 @@ internal class McpServerActionTest {
 
   @Inject
   private lateinit var jettyService: JettyService
+  @Inject
+  private lateinit var registry: CollectorRegistry
 
   private val okHttpClient = OkHttpClient()
 
@@ -61,7 +69,7 @@ internal class McpServerActionTest {
     val request = ListToolsRequest()
     val response = mcpClient.listTools(request)
     assertEquals(
-      expected = 2,
+      expected = 3,
       actual = response.tools.size,
       message = "Expecting three tools to be registered",
     )
@@ -276,6 +284,55 @@ internal class McpServerActionTest {
       message = "Expected the placeholder content to be returned",
     )
   }
+
+  @Test
+  fun `test success metrics`(): Unit = runBlocking {
+    val mcpClient = okHttpClient.asMcpClient(jettyService.httpServerUrl, "/mcp")
+
+    mcpClient.callCalculatorTool(4, 2, Operation.DIVIDE)
+
+    assertThat(
+      registry.summaryCount(
+        "mcp_tool_handler_latency",
+        "server_name" to "mcp-server-action-test-server",
+        "tool_name" to "calculator",
+        "tool_outcome" to "Success",
+      )
+    ).isEqualTo(1.0)
+  }
+
+  @Test
+  fun `test error metrics`(): Unit = runBlocking {
+    val mcpClient = okHttpClient.asMcpClient(jettyService.httpServerUrl, "/mcp")
+
+    // Divide by zero
+    mcpClient.callCalculatorTool(4, 0, Operation.DIVIDE)
+    
+    assertThat(
+      registry.summaryCount(
+        "mcp_tool_handler_latency",
+        "server_name" to "mcp-server-action-test-server",
+        "tool_name" to "calculator",
+        "tool_outcome" to "Error",
+      )
+    ).isEqualTo(1.0)
+  }
+
+  @Test
+  fun `test exception metrics`(): Unit = runBlocking {
+    val mcpClient = okHttpClient.asMcpClient(jettyService.httpServerUrl, "/mcp")
+
+    assertThrows<IllegalStateException> { mcpClient.callThrowingTool() }
+    
+    assertThat(
+      registry.summaryCount(
+        "mcp_tool_handler_latency",
+        "server_name" to "mcp-server-action-test-server",
+        "tool_name" to "throwing",
+        "tool_outcome" to "Exception",
+      )
+    ).isEqualTo(1.0)
+  }
 }
 
 val mcpServerActionTestConfig = McpConfig(
@@ -306,6 +363,7 @@ class McpServerActionTestModule : KAbstractModule() {
     install(WebActionModule.create<McpServerActionTestModulePostAction>())
     install(McpToolModule.create<CalculatorTool>())
     install(McpToolModule.create<KotlinSdkTool>())
+    install(McpToolModule.create<ThrowingTool>())
     install(McpPromptModule.create<KotlinDeveloperPrompt>())
     install(McpResourceModule.create<WebSearchResource>())
 

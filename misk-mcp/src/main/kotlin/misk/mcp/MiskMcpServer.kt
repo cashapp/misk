@@ -1,5 +1,7 @@
 package misk.mcp
 
+import io.modelcontextprotocol.kotlin.sdk.CallToolRequest
+import io.modelcontextprotocol.kotlin.sdk.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.Implementation
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCNotification
@@ -21,6 +23,7 @@ import misk.mcp.config.asPrompts
 import misk.mcp.config.asResources
 import misk.mcp.config.asTools
 import misk.mcp.internal.MiskServerTransport
+import kotlin.time.Duration.Companion.nanoseconds
 
 /**
  * Misk implementation of a Model Context Protocol (MCP) server.
@@ -106,6 +109,7 @@ class MiskMcpServer internal constructor(
   tools: Set<McpTool<*>>,
   resources: Set<McpResource>,
   prompts: Set<McpPrompt>,
+  private val mcpMetrics: McpMetrics,
 ) : Server(
   Implementation(
     name = name,
@@ -160,8 +164,32 @@ class MiskMcpServer internal constructor(
           idempotentHint = tool.idempotentHint,
           openWorldHint = tool.openWorldHint,
         ),
-        handler = tool::handler,
+        handler = metricReportingHandler(tool.name, tool::handler),
       )
+    }
+  }
+
+  private fun metricReportingHandler(
+    toolName: String,
+    handler: suspend (CallToolRequest) -> CallToolResult
+  ): suspend (CallToolRequest) -> CallToolResult {
+    return { request ->
+      val start = System.nanoTime()
+      var outcome = McpMetrics.ToolCallOutcome.Success
+      
+      try {
+        handler(request).also { result ->
+          outcome =
+            if (result.isError == true) McpMetrics.ToolCallOutcome.Error
+            else McpMetrics.ToolCallOutcome.Success
+        }
+      } catch (ex: Exception) {
+        outcome = McpMetrics.ToolCallOutcome.Exception
+        throw ex
+      } finally {
+        val duration = (System.nanoTime() - start).nanoseconds
+        mcpMetrics.mcpToolHandlerLatency(duration, name, toolName, outcome)
+      }
     }
   }
 

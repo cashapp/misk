@@ -57,6 +57,8 @@ class McpServerModule private constructor(
     val promptsProvider = binder().getProvider(setOfType<McpPrompt>().toKey(groupAnnotationClass))
     val resourcesProvider = binder().getProvider(setOfType<McpResource>().toKey(groupAnnotationClass))
     val toolsProvider = binder().getProvider(setOfType<McpTool<*>>().toKey(groupAnnotationClass))
+    
+    val mcpMetricsProvider = binder().getProvider(McpMetrics::class.java)
 
     // If there is only one configured server, bind without a name qualifier
     val serverKey = keyOf<MiskMcpServer>(groupAnnotationClass)
@@ -68,6 +70,7 @@ class McpServerModule private constructor(
         tools = toolsProvider.get().toSet(),
         resources = resourcesProvider.get().toSet(),
         prompts = promptsProvider.get().toSet(),
+        mcpMetrics = mcpMetricsProvider.get(),
       )
     }
     bind(serverKey).toProvider(serverProvider).asSingleton()
