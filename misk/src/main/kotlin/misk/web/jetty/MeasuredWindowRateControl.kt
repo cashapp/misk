@@ -13,8 +13,11 @@
 package misk.web.jetty
 
 import io.prometheus.client.Counter
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.metrics.v2.Metrics
 import misk.metrics.v2.PeakGauge
+import misk.web.WebConfig
 import org.eclipse.jetty.http2.parser.RateControl
 import org.eclipse.jetty.io.EndPoint
 import org.eclipse.jetty.util.NanoTime
@@ -57,14 +60,16 @@ class MeasuredWindowRateControl private constructor(
     return allowed
   }
 
-  class Factory(
+  /**
+   * Ensure the factory remains a singleton to prevent
+   * multiple instantiations of the same metric objects
+   */
+  @Singleton
+  class Factory @Inject constructor(
     metrics: Metrics,
-    private val maxEventRate: Int
+    private val webConfig: WebConfig,
   ) : RateControl.Factory {
 
-    // Metrics are instantiated in the factory and passed to the class because
-    // there overhead in recreating them for every http/2 connection
-    // (can result in java.io.IOException: FRAME_SIZE_ERROR: 4740180 on the client)
     private val rateEventsPeakGauge = metrics.peakGauge(
       "jetty_http2_rate_control_events_peak",
       "Peak gauge of observed events per second"
@@ -76,7 +81,7 @@ class MeasuredWindowRateControl private constructor(
 
     override fun newRateControl(endPoint: EndPoint?): RateControl {
       return MeasuredWindowRateControl(
-        maxEventRate,
+        webConfig.jetty_http2_max_events_per_second,
         rateEventsPeakGauge,
         rateLimitedEventCounter)
     }

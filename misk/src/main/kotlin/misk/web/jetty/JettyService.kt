@@ -45,7 +45,6 @@ import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import misk.logging.getLogger
-import misk.metrics.v2.Metrics
 import java.io.File
 import java.io.IOException
 import java.lang.Thread.sleep
@@ -69,7 +68,7 @@ class JettyService @Inject internal constructor(
   private val connectionMetricsCollector: JettyConnectionMetricsCollector,
   private val statisticsHandler: StatisticsHandler,
   private val gzipHandler: GzipHandler,
-  private val metrics: Metrics
+  private val http2RateControlFactory: MeasuredWindowRateControl.Factory
 ) : AbstractIdleService() {
   private val server = Server(threadPool)
   val healthServerUrl: HttpUrl? get() = server.healthUrl
@@ -130,7 +129,7 @@ class JettyService @Inject internal constructor(
     if (webConfig.http2) {
       val http2 = HTTP2CServerConnectionFactory(httpConfig)
       http2.customize(webConfig)
-      http2.rateControlFactory = MeasuredWindowRateControl.Factory(metrics, webConfig.jetty_http2_max_events_per_second)
+      http2.rateControlFactory = http2RateControlFactory
       httpConnectionFactories += http2
     }
 
@@ -215,7 +214,7 @@ class JettyService @Inject internal constructor(
       if (webConfig.http2) {
         val http2 = HTTP2ServerConnectionFactory(httpsConfig)
         http2.customize(webConfig)
-        http2.rateControlFactory = MeasuredWindowRateControl.Factory(metrics, webConfig.jetty_http2_max_events_per_second)
+        http2.rateControlFactory = http2RateControlFactory
         httpsConnectionFactories += http2
       }
 
@@ -260,7 +259,7 @@ class JettyService @Inject internal constructor(
       udsConnFactories.add(HttpConnectionFactory(httpConfig))
       if (socketConfig.h2c == true) {
         val http2 = HTTP2CServerConnectionFactory(httpConfig)
-        http2.rateControlFactory = MeasuredWindowRateControl.Factory(metrics, webConfig.jetty_http2_max_events_per_second)
+        http2.rateControlFactory = http2RateControlFactory
         udsConnFactories.add(http2)
       }
 
