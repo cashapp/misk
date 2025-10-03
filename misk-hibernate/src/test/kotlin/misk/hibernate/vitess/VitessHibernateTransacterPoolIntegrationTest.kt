@@ -15,6 +15,7 @@ import misk.hibernate.allowTableScan
 import misk.hibernate.load
 import misk.hibernate.newQuery
 import misk.jdbc.DataSourceType
+import misk.jdbc.uniqueString
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -23,6 +24,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import kotlin.use
 
 /**
  * Integration test that verifies Vitess reader transacter properly uses the reader connection pool
@@ -125,7 +127,42 @@ class VitessHibernateTransacterPoolIntegrationTest {
   }
 
   @Test
-  fun `replicaRead on writer transacter also works`() {
+  fun `replicaRead on reader transacter works`() {
+    val movieId = writerTransacter.transaction { session ->
+      val movie = DbMovie("Tenet", LocalDate.of(2020, 9, 3))
+      session.save(movie)
+    }
+
+    val replicaReadResult = readerTransacter.replicaRead { session ->
+      queryFactory.newQuery<MovieQuery>()
+        .id(movieId)
+        .uniqueResult(session)
+    }
+
+    assertThat(replicaReadResult).isNotNull
+    assertThat(replicaReadResult!!.name).isEqualTo("Tenet")
+
+    val target = readerTransacter.replicaRead { session ->
+      session.useConnection { c ->
+        c.createStatement().use {
+          it.executeQuery("SHOW VITESS_TARGET").uniqueString()
+        }
+      }
+    }
+    assertThat(target).isEqualTo("@replica")
+
+    val exception = assertThrows<IllegalStateException> {
+      readerTransacter.replicaRead { session ->
+        val movie = DbMovie("Should Fail", LocalDate.of(2023, 1, 1))
+        session.save(movie)
+      }
+    }
+
+    assertThat(exception).hasMessageContaining("Saving isn't permitted in a read only session")
+  }
+
+  @Test
+  fun `replicaRead on writer transacter works`() {
     val movieId = writerTransacter.transaction { session ->
       val movie = DbMovie("Tenet", LocalDate.of(2020, 9, 3))
       session.save(movie)
@@ -139,6 +176,24 @@ class VitessHibernateTransacterPoolIntegrationTest {
 
     assertThat(replicaReadResult).isNotNull
     assertThat(replicaReadResult!!.name).isEqualTo("Tenet")
+
+   val target = writerTransacter.replicaRead { session ->
+      session.useConnection { c ->
+        c.createStatement().use {
+          it.executeQuery("SHOW VITESS_TARGET").uniqueString()
+        }
+      }
+    }
+    assertThat(target).isEqualTo("@replica")
+
+    val exception = assertThrows<IllegalStateException> {
+      writerTransacter.replicaRead { session ->
+        val movie = DbMovie("Should Fail", LocalDate.of(2023, 1, 1))
+        session.save(movie)
+      }
+    }
+
+    assertThat(exception).hasMessageContaining("Saving isn't permitted in a read only session")
   }
 
   @Test

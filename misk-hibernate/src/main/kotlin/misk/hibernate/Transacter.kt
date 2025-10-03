@@ -2,8 +2,10 @@ package misk.hibernate
 
 import com.google.common.annotations.VisibleForTesting
 import misk.jdbc.DataSourceConfig
+import misk.vitess.Destination
 import misk.vitess.Keyspace
 import misk.vitess.Shard
+import misk.vitess.TabletType
 import misk.vitess.tabletDoesNotExists
 import javax.persistence.PersistenceException
 import kotlin.reflect.KClass
@@ -119,7 +121,7 @@ fun Transacter.shards(keyspace: Keyspace) = transaction { it.shards(keyspace) }
  *
  */
 fun <T> Transacter.transaction(shard: Shard, block: (session: Session) -> T): T =
-  transaction { it.target(shard) { block(it) } }
+  transaction { it.target(Destination(shard = shard, tabletType = TabletType.PRIMARY)) { block(it) } }
 
 /**
  * Runs a read on primary first then tries it on replicas on failure. This method is here only for
@@ -139,9 +141,6 @@ fun <T> Transacter.failSafeRead(block: (session: Session) -> T): T =
       throw e
     }
   }
-
-fun <T> Transacter.failSafeRead(shard: Shard, block: (session: Session) -> T): T =
-  failSafeRead { it.target(shard) { block(it) } }
 
 /**
  * Thrown to explicitly trigger a retry, subject to retry limits and config such as noRetries().
