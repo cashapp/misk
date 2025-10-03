@@ -80,6 +80,7 @@ import misk.web.interceptors.hooks.RequestResponseHook
 import misk.web.interceptors.hooks.RequestResponseLoggingHook
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
+import misk.web.jetty.WebActionsServlet
 import misk.web.jetty.JettyThreadPoolHealthCheck
 import misk.web.jetty.JettyThreadPoolMetricsCollector
 import misk.web.jetty.MeasuredQueuedThreadPool
@@ -94,6 +95,7 @@ import misk.web.marshal.PlainTextMarshaller
 import misk.web.marshal.ProtobufMarshaller
 import misk.web.marshal.ProtobufUnmarshaller
 import misk.web.marshal.Unmarshaller
+import misk.web.MiskServlet
 import misk.web.mdc.LogContextProvider
 import misk.web.mdc.RequestHttpMethodLogContextProvider
 import misk.web.mdc.RequestProtocolLogContextProvider
@@ -105,6 +107,7 @@ import misk.web.shutdown.GracefulShutdownModule
 import misk.web.sse.ServerSentEventMarshaller
 import misk.web.sse.ServerSentEventUnmarshaller
 import org.eclipse.jetty.io.EofException
+import org.eclipse.jetty.websocket.server.JettyWebSocketServlet
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.util.VirtualThreads
@@ -118,6 +121,7 @@ import java.util.concurrent.BlockingQueue
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
 import kotlin.math.min
 
@@ -129,24 +133,31 @@ class MiskWebModule @JvmOverloads constructor(
     bind<WebConfig>().toInstance(config)
     bind<ActionExceptionLogLevelConfig>().toInstance(config.action_exception_log_level)
 
-    install(
-      ServiceModule(
-        key = JettyService::class.toKey(),
-        dependsOn = jettyDependsOn
-      ).dependsOn<ReadyService>()
-    )
-    install(
-      ServiceModule<JettyThreadPoolMetricsCollector>()
-        .enhancedBy<ReadyService>()
-    )
-    install(
-      ServiceModule<JettyConnectionMetricsCollector>()
-        .enhancedBy<ReadyService>()
-    )
-    install(
-      ServiceModule<ReadinessCheckService>()
-        .enhancedBy<ReadyService>()
-    )
+    if (!config.disable_jetty) {
+      install(
+        ServiceModule(
+          key = JettyService::class.toKey(),
+          dependsOn = jettyDependsOn
+        ).dependsOn<ReadyService>()
+      )
+      install(
+        ServiceModule<JettyThreadPoolMetricsCollector>()
+          .enhancedBy<ReadyService>()
+      )
+      install(
+        ServiceModule<JettyConnectionMetricsCollector>()
+          .enhancedBy<ReadyService>()
+      )
+      install(
+        ServiceModule<ReadinessCheckService>()
+          .enhancedBy<ReadyService>()
+      )
+    }
+
+    // Expose WebActionsServlet for externally managed servlet container
+    bind<HttpServlet>()
+      .annotatedWith<MiskServlet>()
+      .to<WebActionsServlet>()
 
     install(ServiceModule<RepeatedTaskQueue>(ReadinessRefreshQueue::class))
 

@@ -131,26 +131,13 @@ internal class WebActionsServlet @Inject constructor(
 
       val httpCall = ServletHttpCall.create(
         request = request,
-        linkLayerLocalAddress = with((request as? Request)?.httpChannel) {
-          when (this?.connector) {
-            is UnixDomainServerConnector -> SocketAddress.Unix(
-              (this.connector as UnixDomainServerConnector).unixDomainPath.toString()
-            )
-
-            is UnixSocketConnector -> SocketAddress.Unix(
-              (this.connector as UnixSocketConnector).unixSocket
-            )
-
-            is ServerConnector -> SocketAddress.Network(
-              this.endPoint.remoteAddress.address.hostAddress,
-              (this.connector as ServerConnector).localPort
-            )
-
-            else -> throw IllegalStateException("Unknown socket connector.")
-          }
-        },
+        linkLayerLocalAddress = extractLinkLayerLocalAddress(request),
         dispatchMechanism = dispatchMechanism,
-        upstreamResponse = JettyServletUpstreamResponse(response as Response),
+        upstreamResponse = if (response is Response) {
+          JettyServletUpstreamResponse(response)
+        } else {
+          GenericServletUpstreamResponse(response)
+        },
         requestBody = request.inputStream.source().buffer(),
         responseBody = responseBody
       )
@@ -274,5 +261,31 @@ internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism? {
     HttpMethod.PUT.name -> DispatchMechanism.PUT
     HttpMethod.DELETE.name -> DispatchMechanism.DELETE
     else -> null
+  }
+}
+
+/**
+ * Extracts socket address information from an HttpServletRequest if available.
+ */
+private fun extractLinkLayerLocalAddress(request: HttpServletRequest): SocketAddress? {
+  val jettyRequest = request as? Request ?: return null
+  val httpChannel = jettyRequest.httpChannel ?: return null
+  val connector = httpChannel.connector ?: return null
+
+  return when (connector) {
+    is UnixDomainServerConnector -> SocketAddress.Unix(
+      connector.unixDomainPath.toString()
+    )
+
+    is UnixSocketConnector -> SocketAddress.Unix(
+      connector.unixSocket
+    )
+
+    is ServerConnector -> SocketAddress.Network(
+      httpChannel.endPoint.remoteAddress.address.hostAddress,
+      connector.localPort
+    )
+
+    else -> throw IllegalStateException("Unknown socket connector.")
   }
 }

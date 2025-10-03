@@ -74,15 +74,16 @@ internal class BoundAction<A : WebAction>(
   }
 
   fun matchByUrl(url: HttpUrl): BoundActionMatch? {
-    val patchMather = pathPattern.matcher(url) ?: return null
+    val pathMatcher = pathPattern.matcher(url) ?: return null
     return BoundActionMatch(
       action = this,
-      pathMatcher = patchMather,
+      pathMatcher = pathMatcher,
       acceptedMediaRange = MediaRange.ALL_MEDIA,
       requestCharsetMatch = false,
       responseContentType = MediaTypes.ALL_MEDIA_TYPE
     )
   }
+
 
   /**
    * Returns true if this [BoundAction] has identical routing annotations as the provided
