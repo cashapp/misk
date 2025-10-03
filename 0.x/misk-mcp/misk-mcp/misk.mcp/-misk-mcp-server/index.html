@@ -1,0 +1,1717 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Misk: Microservice Container for Kotlin">
+      
+      
+        <meta name="author" content="Square, Inc.">
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../../../../img/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>Index - Misk</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../assets/stylesheets/main.2a3383ac.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../css/app.css">
+    
+    <script>__md_scope=new URL("../../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="grey" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#miskmcpserver" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../../.." title="Misk" class="md-header__button md-logo" aria-label="Misk" data-md-component="logo">
+      
+  <img src="../../../../../img/cashapp.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Misk
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Index
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/cashapp/misk" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Misk
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../../.." title="Misk" class="md-nav__button md-logo" aria-label="Misk" data-md-component="logo">
+      
+  <img src="../../../../../img/cashapp.png" alt="logo">
+
+    </a>
+    Misk
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/cashapp/misk" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Misk
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../actions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Actions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../multipart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Multipart Forms
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../clients/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Clients
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    0.x API
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            0.x API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-aws/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-aws
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-aws-dynamodb/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-aws-dynamodb
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-aws2-dynamodb/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-aws2-dynamodb
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-crypto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-crypto
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-eventrouter/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-eventrouter
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-events-core/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-events-core
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-events/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-events
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-gcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-gcp
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-grpc-tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-grpc-tests
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-hibernate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-hibernate
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-hibernate-testing/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-hibernate-testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-inject/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-inject
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-jobqueue/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-jobqueue
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-jobqueue-testing/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-jobqueue-testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-metrics-digester/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-metrics-digester
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-prometheus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-prometheus
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-redis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-redis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-zookeeper/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-zookeeper
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../misk-zoopkeeper-testing/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    misk-zoopkeeper-testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Internals
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Internals
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../internals/graceful-shutdown/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Graceful Shutdown
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../internals/service-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Service Management
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../wisp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Wisp
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Migrations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Migrations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../migrations/misk-metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Misk Metrics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Change Log
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../releasing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Releasing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../developer-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Developer Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://stackoverflow.com/questions/tagged/misk?sort=active" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Stack Overflow ⏏
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Features
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-to-server-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Client-to-Server Events
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#server-to-client-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Server-to-Client Events
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      See also
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Types
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Functions
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<p>//<a href="../../../">misk-mcp</a>/<a href="../">misk.mcp</a>/<a href="./">MiskMcpServer</a></p>
+<h1 id="miskmcpserver">MiskMcpServer<a class="headerlink" href="#miskmcpserver" title="Permanent link">&para;</a></h1>
+<p>@ExperimentalMiskApi</p>
+<p>class <a href="./">MiskMcpServer</a> : Server</p>
+<p>Misk implementation of a Model Context Protocol (MCP) server.</p>
+<p>This class extends the MCP Kotlin SDK&rsquo;s Server class to provide MCP server capabilities within the Misk framework. It handles both client-to-server events (tool calls, resource reads, prompt requests) and server-to-client events (resource update notifications, logging).</p>
+<p>The Misk dependency injection system automatically configures the server with registered tools, resources, and prompts, and the server exposes them to MCP clients through JSON-RPC 2.0 messages over Server-Sent Events (SSE).</p>
+<h2 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Tool Execution</strong>: Handles client requests to execute registered <a href="../-mcp-tool/">McpTool</a> implementations</li>
+<li><strong>Resource Access</strong>: Serves registered <a href="../-mcp-resource/">McpResource</a> content to clients</li>
+<li><strong>Prompt Templates</strong>: Provides registered <a href="../-mcp-prompt/">McpPrompt</a> templates for client use</li>
+<li><strong>Capability Negotiation</strong>: The server automatically configures capabilities based on registered components</li>
+<li><strong>Session Management</strong>: Manages multiple concurrent client sessions through SSE connections</li>
+</ul>
+<h2 id="client-to-server-events">Client-to-Server Events<a class="headerlink" href="#client-to-server-events" title="Permanent link">&para;</a></h2>
+<p>The server handles these incoming client requests:</p>
+<ul>
+<li><code>tools/call</code> - Execute a registered tool with provided arguments</li>
+<li><code>resources/read</code> - Read content from a registered resource</li>
+<li><code>prompts/get</code> - Retrieve a prompt template with optional arguments</li>
+<li><code>resources/subscribe</code> - Subscribe to resource update notifications (if enabled)</li>
+</ul>
+<h2 id="server-to-client-events">Server-to-Client Events<a class="headerlink" href="#server-to-client-events" title="Permanent link">&para;</a></h2>
+<p>The server can send these events to clients:</p>
+<ul>
+<li><code>resources/updated</code> - Notify clients of resource changes (when subscriptions are enabled)</li>
+<li><code>logging</code> - Send log messages to clients for debugging</li>
+</ul>
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
+<p><a href="../-mcp-server-module/">McpServerModule</a> typically creates and manages the server, and web actions access it through <a href="../../misk.mcp.action/-mcp-stream-manager/">misk.mcp.action.McpStreamManager</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Singleton</span>
+<span class="kd">class</span><span class="w"> </span><span class="nc">MyMcpWebAction</span><span class="w"> </span><span class="nd">@Inject</span><span class="w"> </span><span class="k">constructor</span><span class="p">(</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">val</span><span class="w"> </span><span class="nv">mcpStreamManager</span><span class="p">:</span><span class="w"> </span><span class="n">McpStreamManager</span>
+<span class="p">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">WebAction</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">  </span><span class="nd">@McpPost</span>
+<span class="w">  </span><span class="kd">suspend</span><span class="w"> </span><span class="kd">fun</span><span class="w"> </span><span class="nf">handleMcpRequest</span><span class="p">(</span>
+<span class="w">    </span><span class="nd">@RequestBody</span><span class="w"> </span><span class="n">message</span><span class="p">:</span><span class="w"> </span><span class="n">JSONRPCMessage</span><span class="p">,</span>
+<span class="w">    </span><span class="n">sendChannel</span><span class="p">:</span><span class="w"> </span><span class="n">SendChannel</span><span class="o">&lt;</span><span class="n">ServerSentEvent</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">mcpStreamManager</span><span class="p">.</span><span class="na">withResponseChannel</span><span class="p">(</span><span class="n">sendChannel</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// &#39;this&#39; is MiskMcpServer - handle the client message</span>
+<span class="w">      </span><span class="n">handleMessage</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<p>The server automatically determines capabilities from the <a href="../../misk.mcp.config/-mcp-server-config/">McpServerConfig</a> and registered components:</p>
+<ul>
+<li>The server enables tools capability if any <a href="../-mcp-tool/">McpTool</a> implementations are registered</li>
+<li>The server enables resources capability if any <a href="../-mcp-resource/">McpResource</a> implementations are registered</li>
+<li>The server enables prompts capability if any <a href="../-mcp-prompt/">McpPrompt</a> implementations are registered</li>
+</ul>
+<h4 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h4>
+<p>jvm</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>name</td>
+<td>The unique name identifier for this MCP server instance</td>
+</tr>
+<tr>
+<td>config</td>
+<td>Configuration settings including version and capability flags</td>
+</tr>
+<tr>
+<td>tools</td>
+<td>Set of tool implementations to register with the server</td>
+</tr>
+<tr>
+<td>resources</td>
+<td>Set of resource implementations to register with the server</td>
+</tr>
+<tr>
+<td>prompts</td>
+<td>Set of prompt implementations to register with the server</td>
+</tr>
+</tbody>
+</table>
+<h4 id="see-also">See also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../misk.mcp.action/-mcp-stream-manager/">McpStreamManager</a></td>
+<td>For managing SSE streams and server lifecycle</td>
+</tr>
+<tr>
+<td><a href="../-mcp-tool/">McpTool</a></td>
+<td>For implementing executable tools</td>
+</tr>
+<tr>
+<td><a href="../-mcp-resource/">McpResource</a></td>
+<td>For implementing accessible resources</td>
+</tr>
+<tr>
+<td><a href="../-mcp-prompt/">McpPrompt</a></td>
+<td>For implementing prompt templates</td>
+</tr>
+</tbody>
+</table>
+<h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="-companion/">Companion</a></td>
+<td>[jvm]<br>object <a href="-companion/">Companion</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="./#1586591395%2FProperties%2F445930111">clientCapabilities</a></td>
+<td>[jvm]<br>var <a href="./#1586591395%2FProperties%2F445930111">clientCapabilities</a>: ClientCapabilities?</td>
+</tr>
+<tr>
+<td><a href="./#-1715632503%2FProperties%2F445930111">clientVersion</a></td>
+<td>[jvm]<br>var <a href="./#-1715632503%2FProperties%2F445930111">clientVersion</a>: Implementation?</td>
+</tr>
+<tr>
+<td><a href="config/">config</a></td>
+<td>[jvm]<br>val <a href="config/">config</a>: <a href="../../misk.mcp.config/-mcp-server-config/">McpServerConfig</a></td>
+</tr>
+<tr>
+<td><a href="./#-1758052378%2FProperties%2F445930111">fallbackNotificationHandler</a></td>
+<td>[jvm]<br>var <a href="./#-1758052378%2FProperties%2F445930111">fallbackNotificationHandler</a>: suspend (notification: JSONRPCNotification) -&gt; <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a>?</td>
+</tr>
+<tr>
+<td><a href="./#-1260983750%2FProperties%2F445930111">fallbackRequestHandler</a></td>
+<td>[jvm]<br>var <a href="./#-1260983750%2FProperties%2F445930111">fallbackRequestHandler</a>: suspend (request: JSONRPCRequest, extra: RequestHandlerExtra) -&gt; RequestResult??</td>
+</tr>
+<tr>
+<td><a href="name/">name</a></td>
+<td>[jvm]<br>val <a href="name/">name</a>: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></td>
+</tr>
+<tr>
+<td><a href="./#520899939%2FProperties%2F445930111">notificationHandlers</a></td>
+<td>[jvm]<br>val <a href="./#520899939%2FProperties%2F445930111">notificationHandlers</a>: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a>&lt;<a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>, suspend (notification: JSONRPCNotification) -&gt; <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#2134090081%2FProperties%2F445930111">progressHandlers</a></td>
+<td>[jvm]<br>val <a href="./#2134090081%2FProperties%2F445930111">progressHandlers</a>: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a>&lt;RequestId, ProgressCallback&gt;</td>
+</tr>
+<tr>
+<td><a href="./#1482174087%2FProperties%2F445930111">prompts</a></td>
+<td>[jvm]<br>val <a href="./#1482174087%2FProperties%2F445930111">prompts</a>: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a>&lt;<a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>, RegisteredPrompt&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1118598965%2FProperties%2F445930111">requestHandlers</a></td>
+<td>[jvm]<br>val <a href="./#-1118598965%2FProperties%2F445930111">requestHandlers</a>: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a>&lt;<a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>, suspend (request: JSONRPCRequest, extra: RequestHandlerExtra) -&gt; RequestResult?&gt;</td>
+</tr>
+<tr>
+<td><a href="./#814300785%2FProperties%2F445930111">resources</a></td>
+<td>[jvm]<br>val <a href="./#814300785%2FProperties%2F445930111">resources</a>: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a>&lt;<a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>, RegisteredResource&gt;</td>
+</tr>
+<tr>
+<td><a href="./#1063182797%2FProperties%2F445930111">responseHandlers</a></td>
+<td>[jvm]<br>val <a href="./#1063182797%2FProperties%2F445930111">responseHandlers</a>: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a>&lt;RequestId, (response: JSONRPCResponse?, <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-exception/index.html">Exception</a>?) -&gt; <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a>&gt;</td>
+</tr>
+<tr>
+<td><a href="./#-1541918725%2FProperties%2F445930111">tools</a></td>
+<td>[jvm]<br>val <a href="./#-1541918725%2FProperties%2F445930111">tools</a>: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a>&lt;<a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>, RegisteredTool&gt;</td>
+</tr>
+<tr>
+<td><a href="./#1392522586%2FProperties%2F445930111">transport</a></td>
+<td>[jvm]<br>var <a href="./#1392522586%2FProperties%2F445930111">transport</a>: Transport?</td>
+</tr>
+</tbody>
+</table>
+<h2 id="functions">Functions<a class="headerlink" href="#functions" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="./#1239763714%2FFunctions%2F445930111">addPrompt</a></td>
+<td>[jvm]<br>fun <a href="./#1239763714%2FFunctions%2F445930111">addPrompt</a>(prompt: Prompt, promptProvider: suspend (GetPromptRequest) -&gt; GetPromptResult)<br>fun <a href="./#-916102131%2FFunctions%2F445930111">addPrompt</a>(name: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>, description: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>?, arguments: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a>&lt;PromptArgument&gt;?, promptProvider: suspend (GetPromptRequest) -&gt; GetPromptResult)</td>
+</tr>
+<tr>
+<td><a href="./#-1340101474%2FFunctions%2F445930111">addPrompts</a></td>
+<td>[jvm]<br>fun <a href="./#-1340101474%2FFunctions%2F445930111">addPrompts</a>(promptsToAdd: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a>&lt;RegisteredPrompt&gt;)</td>
+</tr>
+<tr>
+<td><a href="./#-855691026%2FFunctions%2F445930111">addResource</a></td>
+<td>[jvm]<br>fun <a href="./#-855691026%2FFunctions%2F445930111">addResource</a>(uri: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>, name: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>, description: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>, mimeType: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>, readHandler: suspend (ReadResourceRequest) -&gt; ReadResourceResult)</td>
+</tr>
+<tr>
+<td><a href="./#-6965794%2FFunctions%2F445930111">addResources</a></td>
+<td>[jvm]<br>fun <a href="./#-6965794%2FFunctions%2F445930111">addResources</a>(resourcesToAdd: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a>&lt;RegisteredResource&gt;)</td>
+</tr>
+<tr>
+<td><a href="./#1454065286%2FFunctions%2F445930111">addTool</a></td>
+<td>[jvm]<br>fun <a href="./#1454065286%2FFunctions%2F445930111">addTool</a>(tool: Tool, handler: suspend (CallToolRequest) -&gt; CallToolResult)<br>fun <a href="./#-222405307%2FFunctions%2F445930111">addTool</a>(name: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>, description: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>, inputSchema: Tool.Input, title: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>?, outputSchema: Tool.Output?, toolAnnotations: ToolAnnotations?, handler: suspend (CallToolRequest) -&gt; CallToolResult)</td>
+</tr>
+<tr>
+<td><a href="./#-669851746%2FFunctions%2F445930111">addTools</a></td>
+<td>[jvm]<br>fun <a href="./#-669851746%2FFunctions%2F445930111">addTools</a>(toolsToAdd: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a>&lt;RegisteredTool&gt;)</td>
+</tr>
+<tr>
+<td><a href="./#-1961183907%2FFunctions%2F445930111">assertRequestHandlerCapability</a></td>
+<td>[jvm]<br>open override fun <a href="./#-1961183907%2FFunctions%2F445930111">assertRequestHandlerCapability</a>(method: Method)</td>
+</tr>
+<tr>
+<td><a href="./#971540587%2FFunctions%2F445930111">close</a></td>
+<td>[jvm]<br>suspend fun <a href="./#971540587%2FFunctions%2F445930111">close</a>()</td>
+</tr>
+<tr>
+<td><a href="./#2124873520%2FFunctions%2F445930111">connect</a></td>
+<td>[jvm]<br>open suspend fun <a href="./#2124873520%2FFunctions%2F445930111">connect</a>(transport: Transport)</td>
+</tr>
+<tr>
+<td><a href="./#-1962846011%2FFunctions%2F445930111">createElicitation</a></td>
+<td>[jvm]<br>suspend fun <a href="./#-1962846011%2FFunctions%2F445930111">createElicitation</a>(message: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>, requestedSchema: CreateElicitationRequest.RequestedSchema, options: RequestOptions?): CreateElicitationResult</td>
+</tr>
+<tr>
+<td><a href="./#167731997%2FFunctions%2F445930111">createMessage</a></td>
+<td>[jvm]<br>suspend fun <a href="./#167731997%2FFunctions%2F445930111">createMessage</a>(params: CreateMessageRequest, options: RequestOptions?): CreateMessageResult</td>
+</tr>
+<tr>
+<td><a href="handle-message/">handleMessage</a></td>
+<td>[jvm]<br>@<a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.jvm/-jvm-overloads/index.html">JvmOverloads</a><br>suspend fun <a href="handle-message/">handleMessage</a>(message: JSONRPCMessage, sessionId: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>? = null)</td>
+</tr>
+<tr>
+<td><a href="./#-1747473942%2FFunctions%2F445930111">listRoots</a></td>
+<td>[jvm]<br>suspend fun <a href="./#-1747473942%2FFunctions%2F445930111">listRoots</a>(params: JsonObject, options: RequestOptions?): ListRootsResult</td>
+</tr>
+<tr>
+<td><a href="./#-1501855982%2FFunctions%2F445930111">notification</a></td>
+<td>[jvm]<br>suspend fun <a href="./#-1501855982%2FFunctions%2F445930111">notification</a>(notification: Notification)</td>
+</tr>
+<tr>
+<td><a href="./#-243087875%2FFunctions%2F445930111">onClose</a></td>
+<td>[jvm]<br>open override fun <a href="./#-243087875%2FFunctions%2F445930111">onClose</a>()<br>fun <a href="./#-869715223%2FFunctions%2F445930111">onClose</a>(block: () -&gt; <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a>)</td>
+</tr>
+<tr>
+<td><a href="./#1025172167%2FFunctions%2F445930111">onError</a></td>
+<td>[jvm]<br>open fun <a href="./#1025172167%2FFunctions%2F445930111">onError</a>(error: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a>)</td>
+</tr>
+<tr>
+<td><a href="./#-1392391995%2FFunctions%2F445930111">onInitialized</a></td>
+<td>[jvm]<br>fun <a href="./#-1392391995%2FFunctions%2F445930111">onInitialized</a>(block: () -&gt; <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a>)</td>
+</tr>
+<tr>
+<td><a href="./#-521301582%2FFunctions%2F445930111">ping</a></td>
+<td>[jvm]<br>suspend fun <a href="./#-521301582%2FFunctions%2F445930111">ping</a>(): EmptyRequestResult</td>
+</tr>
+<tr>
+<td><a href="./#-1729417824%2FFunctions%2F445930111">removeNotificationHandler</a></td>
+<td>[jvm]<br>fun <a href="./#-1729417824%2FFunctions%2F445930111">removeNotificationHandler</a>(method: Method)</td>
+</tr>
+<tr>
+<td><a href="./#-68390744%2FFunctions%2F445930111">removePrompt</a></td>
+<td>[jvm]<br>fun <a href="./#-68390744%2FFunctions%2F445930111">removePrompt</a>(name: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#403533813%2FFunctions%2F445930111">removePrompts</a></td>
+<td>[jvm]<br>fun <a href="./#403533813%2FFunctions%2F445930111">removePrompts</a>(promptNames: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a>&lt;<a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>&gt;): <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></td>
+</tr>
+<tr>
+<td><a href="./#970992336%2FFunctions%2F445930111">removeRequestHandler</a></td>
+<td>[jvm]<br>fun <a href="./#970992336%2FFunctions%2F445930111">removeRequestHandler</a>(method: Method)</td>
+</tr>
+<tr>
+<td><a href="./#-815495022%2FFunctions%2F445930111">removeResource</a></td>
+<td>[jvm]<br>fun <a href="./#-815495022%2FFunctions%2F445930111">removeResource</a>(uri: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1306519713%2FFunctions%2F445930111">removeResources</a></td>
+<td>[jvm]<br>fun <a href="./#-1306519713%2FFunctions%2F445930111">removeResources</a>(uris: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a>&lt;<a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>&gt;): <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></td>
+</tr>
+<tr>
+<td><a href="./#1492552988%2FFunctions%2F445930111">removeTool</a></td>
+<td>[jvm]<br>fun <a href="./#1492552988%2FFunctions%2F445930111">removeTool</a>(name: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>): <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></td>
+</tr>
+<tr>
+<td><a href="./#-1289215127%2FFunctions%2F445930111">removeTools</a></td>
+<td>[jvm]<br>fun <a href="./#-1289215127%2FFunctions%2F445930111">removeTools</a>(toolNames: <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a>&lt;<a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a>&gt;): <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></td>
+</tr>
+<tr>
+<td><a href="./#1906565281%2FFunctions%2F445930111">request</a></td>
+<td>[jvm]<br>suspend fun &lt;<a href="./#1906565281%2FFunctions%2F445930111">T</a> : RequestResult&gt; <a href="./#1906565281%2FFunctions%2F445930111">request</a>(request: Request, options: RequestOptions?): <a href="./#1906565281%2FFunctions%2F445930111">T</a></td>
+</tr>
+<tr>
+<td><a href="./#244505026%2FFunctions%2F445930111">sendLoggingMessage</a></td>
+<td>[jvm]<br>suspend fun <a href="./#244505026%2FFunctions%2F445930111">sendLoggingMessage</a>(params: LoggingMessageNotification)</td>
+</tr>
+<tr>
+<td><a href="./#-509745876%2FFunctions%2F445930111">sendPromptListChanged</a></td>
+<td>[jvm]<br>suspend fun <a href="./#-509745876%2FFunctions%2F445930111">sendPromptListChanged</a>()</td>
+</tr>
+<tr>
+<td><a href="./#317255318%2FFunctions%2F445930111">sendResourceListChanged</a></td>
+<td>[jvm]<br>suspend fun <a href="./#317255318%2FFunctions%2F445930111">sendResourceListChanged</a>()</td>
+</tr>
+<tr>
+<td><a href="./#-546541422%2FFunctions%2F445930111">sendResourceUpdated</a></td>
+<td>[jvm]<br>suspend fun <a href="./#-546541422%2FFunctions%2F445930111">sendResourceUpdated</a>(params: ResourceUpdatedNotification)</td>
+</tr>
+<tr>
+<td><a href="./#-176238688%2FFunctions%2F445930111">sendToolListChanged</a></td>
+<td>[jvm]<br>suspend fun <a href="./#-176238688%2FFunctions%2F445930111">sendToolListChanged</a>()</td>
+</tr>
+<tr>
+<td><a href="./#1818989555%2FFunctions%2F445930111">setNotificationHandler</a></td>
+<td>[jvm]<br>fun &lt;<a href="./#1818989555%2FFunctions%2F445930111">T</a> : Notification&gt; <a href="./#1818989555%2FFunctions%2F445930111">setNotificationHandler</a>(method: Method, handler: (notification: <a href="./#1818989555%2FFunctions%2F445930111">T</a>) -&gt; Deferred&lt;<a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a>&gt;)</td>
+</tr>
+<tr>
+<td><a href="./#904304186%2FFunctions%2F445930111">setRequestHandler</a></td>
+<td>[jvm]<br>inline fun &lt;<a href="./#904304186%2FFunctions%2F445930111">T</a> : Request&gt; <a href="./#904304186%2FFunctions%2F445930111">setRequestHandler</a>(method: Method, noinline block: suspend (<a href="./#904304186%2FFunctions%2F445930111">T</a>, RequestHandlerExtra) -&gt; RequestResult?)</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2018-2021 Square, Inc.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../../../..", "features": [], "search": "../../../../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>

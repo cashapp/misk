@@ -1,0 +1,15 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.testing////PointingToDeclaration/misk-testing-api/misk.testing/index.md
+$dokka.location:misk.testing/FakeFixture///PointingToDeclaration/misk-testing-api/misk.testing/-fake-fixture/index.md
+$dokka.location:misk.testing/FakeFixture/FakeFixture/#/PointingToDeclaration/misk-testing-api/misk.testing/-fake-fixture/-fake-fixture.md
+$dokka.location:misk.testing/FakeFixture/reset/#/PointingToDeclaration/misk-testing-api/misk.testing/-fake-fixture/reset.md
+$dokka.location:misk.testing/FakeFixture/resettable/#kotlin.Function0[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/misk-testing-api/misk.testing/-fake-fixture/resettable.md
+$dokka.location:misk.testing/ResettablePropertyDelegate///PointingToDeclaration/misk-testing-api/misk.testing/-resettable-property-delegate/index.md
+$dokka.location:misk.testing/ResettablePropertyDelegate/ResettablePropertyDelegate/#kotlin.Function0[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/misk-testing-api/misk.testing/-resettable-property-delegate/-resettable-property-delegate.md
+$dokka.location:misk.testing/ResettablePropertyDelegate/getValue/#kotlin.Any?#kotlin.reflect.KProperty[*]/PointingToDeclaration/misk-testing-api/misk.testing/-resettable-property-delegate/get-value.md
+$dokka.location:misk.testing/ResettablePropertyDelegate/reset/#/PointingToDeclaration/misk-testing-api/misk.testing/-resettable-property-delegate/reset.md
+$dokka.location:misk.testing/ResettablePropertyDelegate/setValue/#kotlin.Any?#kotlin.reflect.KProperty[*]#TypeParam(bounds=[kotlin.Any?])/PointingToDeclaration/misk-testing-api/misk.testing/-resettable-property-delegate/set-value.md
+$dokka.location:misk.testing/TestFixture///PointingToDeclaration/misk-testing-api/misk.testing/-test-fixture/index.md
+$dokka.location:misk.testing/TestFixture/reset/#/PointingToDeclaration/misk-testing-api/misk.testing/-test-fixture/reset.md
+misk.testing

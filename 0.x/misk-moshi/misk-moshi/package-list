@@ -1,0 +1,35 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.moshi.adapters////PointingToDeclaration/misk-moshi/misk.moshi.adapters/index.md
+$dokka.location:misk.moshi.adapters/BigDecimalAdapter///PointingToDeclaration/misk-moshi/misk.moshi.adapters/-big-decimal-adapter/index.md
+$dokka.location:misk.moshi.adapters/BigDecimalAdapter/decode/#kotlin.String/PointingToDeclaration/misk-moshi/misk.moshi.adapters/-big-decimal-adapter/decode.md
+$dokka.location:misk.moshi.adapters/BigDecimalAdapter/encode/#java.math.BigDecimal/PointingToDeclaration/misk-moshi/misk.moshi.adapters/-big-decimal-adapter/encode.md
+$dokka.location:misk.moshi.okio////PointingToDeclaration/misk-moshi/misk.moshi.okio/index.md
+$dokka.location:misk.moshi.okio/ByteStringAdapter///PointingToDeclaration/misk-moshi/misk.moshi.okio/-byte-string-adapter/index.md
+$dokka.location:misk.moshi.okio/ByteStringAdapter/fromJson/#kotlin.String/PointingToDeclaration/misk-moshi/misk.moshi.okio/-byte-string-adapter/from-json.md
+$dokka.location:misk.moshi.okio/ByteStringAdapter/toJson/#okio.ByteString/PointingToDeclaration/misk-moshi/misk.moshi.okio/-byte-string-adapter/to-json.md
+$dokka.location:misk.moshi.time////PointingToDeclaration/misk-moshi/misk.moshi.time/index.md
+$dokka.location:misk.moshi.time/InstantAdapter///PointingToDeclaration/misk-moshi/misk.moshi.time/-instant-adapter/index.md
+$dokka.location:misk.moshi.time/InstantAdapter/fromJson/#java.util.Date?/PointingToDeclaration/misk-moshi/misk.moshi.time/-instant-adapter/from-json.md
+$dokka.location:misk.moshi.time/InstantAdapter/toJson/#java.time.Instant?/PointingToDeclaration/misk-moshi/misk.moshi.time/-instant-adapter/to-json.md
+$dokka.location:misk.moshi.time/LocalDateAdapter///PointingToDeclaration/misk-moshi/misk.moshi.time/-local-date-adapter/index.md
+$dokka.location:misk.moshi.time/LocalDateAdapter/fromJson/#java.util.Date?/PointingToDeclaration/misk-moshi/misk.moshi.time/-local-date-adapter/from-json.md
+$dokka.location:misk.moshi.time/LocalDateAdapter/toJson/#java.time.LocalDate?/PointingToDeclaration/misk-moshi/misk.moshi.time/-local-date-adapter/to-json.md
+$dokka.location:misk.moshi.time/OffsetDateTimeAdapter///PointingToDeclaration/misk-moshi/misk.moshi.time/-offset-date-time-adapter/index.md
+$dokka.location:misk.moshi.time/OffsetDateTimeAdapter/fromJson/#kotlin.String?/PointingToDeclaration/misk-moshi/misk.moshi.time/-offset-date-time-adapter/from-json.md
+$dokka.location:misk.moshi.time/OffsetDateTimeAdapter/toJson/#java.time.OffsetDateTime?/PointingToDeclaration/misk-moshi/misk.moshi.time/-offset-date-time-adapter/to-json.md
+$dokka.location:misk.moshi////PointingToDeclaration/misk-moshi/misk.moshi/index.md
+$dokka.location:misk.moshi//adapter/com.squareup.moshi.Moshi#/PointingToDeclaration/misk-moshi/misk.moshi/adapter.md
+$dokka.location:misk.moshi/MoshiAdapterModule.Companion///PointingToDeclaration/misk-moshi/misk.moshi/-moshi-adapter-module/-companion/index.md
+$dokka.location:misk.moshi/MoshiAdapterModule.Companion/invoke/#com.squareup.moshi.JsonAdapter[TypeParam(bounds=[kotlin.Any?])]#kotlin.Boolean/PointingToDeclaration/misk-moshi/misk.moshi/-moshi-adapter-module/-companion/invoke.md
+$dokka.location:misk.moshi/MoshiAdapterModule///PointingToDeclaration/misk-moshi/misk.moshi/-moshi-adapter-module/index.md
+$dokka.location:misk.moshi/MoshiAdapterModule/MoshiAdapterModule/#kotlin.Any#kotlin.Boolean/PointingToDeclaration/misk-moshi/misk.moshi/-moshi-adapter-module/-moshi-adapter-module.md
+$dokka.location:misk.moshi/MoshiModule.Companion///PointingToDeclaration/misk-moshi/misk.moshi/-moshi-module/-companion/index.md
+$dokka.location:misk.moshi/MoshiModule.Companion/defaultMoshiAdapters/#/PointingToDeclaration/misk-moshi/misk.moshi/-moshi-module/-companion/default-moshi-adapters.md
+$dokka.location:misk.moshi/MoshiModule///PointingToDeclaration/misk-moshi/misk.moshi/-moshi-module/index.md
+$dokka.location:misk.moshi/MoshiModule/MoshiModule/#kotlin.Boolean#kotlin.Boolean/PointingToDeclaration/misk-moshi/misk.moshi/-moshi-module/-moshi-module.md
+$dokka.location:misk.moshi/MoshiModule/provideMoshi/#kotlin.collections.List[kotlin.Any]#kotlin.collections.List[kotlin.Any]/PointingToDeclaration/misk-moshi/misk.moshi/-moshi-module/provide-moshi.md
+misk.moshi
+misk.moshi.adapters
+misk.moshi.okio
+misk.moshi.time
