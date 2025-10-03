@@ -31,6 +31,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import org.awaitility.Awaitility.await
 import jakarta.inject.Inject
 import kotlin.test.assertFailsWith
 import com.squareup.moshi.Moshi
@@ -174,31 +175,33 @@ internal class SqsJobQueueTest {
       "9"
     )
 
-    // Confirm metrics
-    assertThat(sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()).isEqualTo(
-      10.0
-    )
-    assertThat(
-      sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(0.0)
-    assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(10)
+    // Confirm metrics. Retry, as metrics are recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      assertThat(sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()).isEqualTo(
+        10.0
+      )
+      assertThat(
+        sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(0.0)
+      assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(10)
 
-    assertThat(sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()).isEqualTo(
-      10.0
-    )
-    // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
-    // messages in varying batches
-    assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
+      assertThat(sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()).isEqualTo(
+        10.0
+      )
+      // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
+      // messages in varying batches
+      assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
 
-    assertThat(
-      sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(10.0)
-    assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(10)
-    assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(10)
+      assertThat(
+        sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(10.0)
+      assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(10)
+      assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(10)
 
-    assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
-      0.0
-    )
+      assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
+        0.0
+      )
+    }
   }
 
   private fun createDeadLetterQueue(queueName: String): String?{
@@ -257,34 +260,42 @@ internal class SqsJobQueueTest {
     assertThat(handledJobs.map { it.body }).containsExactly("this is my job", "this is my job")
     assertThat(handledJobs).allSatisfy { assertThat(it.id).isEqualTo(messageId) }
 
-    // Confirm metrics
-    assertThat(
-      sqsMetrics.jobsEnqueued.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()
-    ).isEqualTo(1.0)
-    assertThat(
-      sqsMetrics.jobEnqueueFailures.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()
-    ).isEqualTo(0.0)
-    assertThat(sqsMetrics.sqsSendTime.count(queueNameWithRedrive.value, queueNameWithRedrive.value)).isEqualTo(1)
+    // Confirm metrics. Retry, as metrics are recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      assertThat(
+        sqsMetrics.jobsEnqueued.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()
+      ).isEqualTo(1.0)
+      assertThat(
+        sqsMetrics.jobEnqueueFailures.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()
+      ).isEqualTo(0.0)
+      assertThat(sqsMetrics.sqsSendTime.count(queueNameWithRedrive.value, queueNameWithRedrive.value)).isEqualTo(1)
 
-    assertThat(
-      sqsMetrics.jobsReceived.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()
-    ).isEqualTo(2.0)
-    // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
-    // messages in varying batches
-    assertThat(sqsMetrics.sqsReceiveTime.count(queueNameWithRedrive.value, queueNameWithRedrive.value)).isNotZero()
+      assertThat(
+        sqsMetrics.jobsReceived.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()
+      ).isEqualTo(2.0)
+      // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
+      // messages in varying batches
+      assertThat(sqsMetrics.sqsReceiveTime.count(queueNameWithRedrive.value, queueNameWithRedrive.value)).isNotZero()
 
-    // Since we are using jitter, we can't predict what would be the exact timeout time assigned
-    assertThat(sqsMetrics.visibilityTime.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()).isGreaterThanOrEqualTo(1.0)
+      // Since we are using jitter, we can't predict what would be the exact timeout time assigned
+      assertThat(
+        sqsMetrics.visibilityTime.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()
+      ).isGreaterThanOrEqualTo(1.0)
 
-    assertThat(
-      sqsMetrics.jobsAcknowledged.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()
-    ).isEqualTo(1.0)
-    assertThat(sqsMetrics.sqsDeleteTime.count(queueNameWithRedrive.value, queueNameWithRedrive.value)).isEqualTo(1)
-    assertThat(sqsMetrics.queueProcessingLag.count(queueNameWithRedrive.value, queueNameWithRedrive.value)).isEqualTo(1)
+      assertThat(
+        sqsMetrics.jobsAcknowledged.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()
+      ).isEqualTo(1.0)
+      assertThat(sqsMetrics.sqsDeleteTime.count(queueNameWithRedrive.value, queueNameWithRedrive.value)).isEqualTo(1)
+      assertThat(sqsMetrics.queueProcessingLag.count(queueNameWithRedrive.value, queueNameWithRedrive.value)).isEqualTo(
+        1
+      )
 
-    assertThat(sqsMetrics.handlerFailures.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()).isEqualTo(
-      0.0
-    )
+      assertThat(
+        sqsMetrics.handlerFailures.labels(queueNameWithRedrive.value, queueNameWithRedrive.value).get()
+      ).isEqualTo(
+        0.0
+      )
+    }
 
     // now assert the redrive policy has been applied correctly
     val redrivePolicyJson = sqs.getQueueAttributes(
@@ -339,34 +350,36 @@ internal class SqsJobQueueTest {
     assertThat(handledJobs.map { it.body }).containsExactly("this is my job", "this is my job", "this is my job")
     assertThat(handledJobs).allSatisfy { assertThat(it.id).isEqualTo(messageId) }
 
-    // Confirm metrics
-    assertThat(
-      sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(1.0)
-    assertThat(
-      sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(0.0)
-    assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(1)
+    // Confirm metrics. Retry, as metrics are recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      assertThat(
+        sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(1.0)
+      assertThat(
+        sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(0.0)
+      assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(1)
 
-    assertThat(
-      sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(3.0)
-    // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
-    // messages in varying batches
-    assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
+      assertThat(
+        sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(3.0)
+      // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
+      // messages in varying batches
+      assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
 
-    // Since we are using jitter, we can't predict what would be the exact timeout time assigned
-    assertThat(sqsMetrics.visibilityTime.labels(queueName.value, queueName.value).get()).isGreaterThanOrEqualTo(2.0)
+      // Since we are using jitter, we can't predict what would be the exact timeout time assigned
+      assertThat(sqsMetrics.visibilityTime.labels(queueName.value, queueName.value).get()).isGreaterThanOrEqualTo(2.0)
 
-    assertThat(
-      sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(1.0)
-    assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(1)
-    assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(1)
+      assertThat(
+        sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(1.0)
+      assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(1)
+      assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(1)
 
-    assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
-      0.0
-    )
+      assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
+        0.0
+      )
+    }
   }
 
   @TestAllReceiverPolicies
@@ -392,31 +405,33 @@ internal class SqsJobQueueTest {
     assertThat(handledJobs.map { it.body }).containsExactly("this is my job", "this is my job")
     assertThat(handledJobs).allSatisfy { assertThat(it.id).isEqualTo(messageId) }
 
-    // Confirm metrics
-    assertThat(
-      sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(1.0)
-    assertThat(
-      sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(0.0)
-    assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(1)
+    // Confirm metrics. Retry, as metrics are recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      assertThat(
+        sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(1.0)
+      assertThat(
+        sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(0.0)
+      assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(1)
 
-    assertThat(
-      sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(2.0)
-    // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
-    // messages in varying batches
-    assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
+      assertThat(
+        sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(2.0)
+      // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
+      // messages in varying batches
+      assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
 
-    assertThat(
-      sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(1.0)
-    assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(1)
-    assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(1)
+      assertThat(
+        sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(1.0)
+      assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(1)
+      assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(1)
 
-    assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
-      0.0
-    )
+      assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
+        0.0
+      )
+    }
   }
 
   @TestAllReceiverPolicies
@@ -453,82 +468,84 @@ internal class SqsJobQueueTest {
       "this is job 2"
     )
 
-    // Confirm metrics
-    assertThat(
-      sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(2.0)
-    assertThat(
-      sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(0.0)
-    assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(2)
+    // Confirm metrics. Retry, as metrics are recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      assertThat(
+        sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(2.0)
+      assertThat(
+        sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(0.0)
+      assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(2)
 
-    assertThat(
-      sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(2.0)
-    // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
-    // messages in varying batches
-    assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
+      assertThat(
+        sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(2.0)
+      // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
+      // messages in varying batches
+      assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
 
-    assertThat(
-      sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(0.0)
-    assertThat(
-      sqsMetrics.jobsDeadLettered.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(2.0)
-    assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(2)
-    assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(2)
+      assertThat(
+        sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(0.0)
+      assertThat(
+        sqsMetrics.jobsDeadLettered.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(2.0)
+      assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(2)
+      assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(2)
 
-    assertThat(
-      sqsMetrics.jobsEnqueued.labels(deadLetterQueueName.value, deadLetterQueueName.value).get()
-    ).isEqualTo(0.0)
-    assertThat(
-      sqsMetrics.jobEnqueueFailures.labels(
-        deadLetterQueueName.value,
-        deadLetterQueueName.value
-      ).get()
-    ).isEqualTo(0.0)
-    assertThat(
-      sqsMetrics.sqsSendTime.count(
-        deadLetterQueueName.value,
-        deadLetterQueueName.value
+      assertThat(
+        sqsMetrics.jobsEnqueued.labels(deadLetterQueueName.value, deadLetterQueueName.value).get()
+      ).isEqualTo(0.0)
+      assertThat(
+        sqsMetrics.jobEnqueueFailures.labels(
+          deadLetterQueueName.value,
+          deadLetterQueueName.value
+        ).get()
+      ).isEqualTo(0.0)
+      assertThat(
+        sqsMetrics.sqsSendTime.count(
+          deadLetterQueueName.value,
+          deadLetterQueueName.value
+        )
+      ).isEqualTo(0)
+
+      assertThat(
+        sqsMetrics.jobsReceived.labels(deadLetterQueueName.value, deadLetterQueueName.value).get()
+      ).isEqualTo(2.0)
+      // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
+      // messages in varying batches
+      assertThat(
+        sqsMetrics.sqsReceiveTime.count(
+          deadLetterQueueName.value,
+          deadLetterQueueName.value
+        )
+      ).isNotZero()
+
+      assertThat(
+        sqsMetrics.jobsAcknowledged.labels(
+          deadLetterQueueName.value,
+          deadLetterQueueName.value
+        ).get()
+      ).isEqualTo(2.0)
+      assertThat(
+        sqsMetrics.jobsDeadLettered.labels(
+          deadLetterQueueName.value,
+          deadLetterQueueName.value
+        ).get()
+      ).isEqualTo(0.0)
+      assertThat(
+        sqsMetrics.sqsDeleteTime.count(
+          deadLetterQueueName.value,
+          deadLetterQueueName.value
+        )
+      ).isEqualTo(2)
+      assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(2)
+
+      assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
+        0.0
       )
-    ).isEqualTo(0)
-
-    assertThat(
-      sqsMetrics.jobsReceived.labels(deadLetterQueueName.value, deadLetterQueueName.value).get()
-    ).isEqualTo(2.0)
-    // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
-    // messages in varying batches
-    assertThat(
-      sqsMetrics.sqsReceiveTime.count(
-        deadLetterQueueName.value,
-        deadLetterQueueName.value
-      )
-    ).isNotZero()
-
-    assertThat(
-      sqsMetrics.jobsAcknowledged.labels(
-        deadLetterQueueName.value,
-        deadLetterQueueName.value
-      ).get()
-    ).isEqualTo(2.0)
-    assertThat(
-      sqsMetrics.jobsDeadLettered.labels(
-        deadLetterQueueName.value,
-        deadLetterQueueName.value
-      ).get()
-    ).isEqualTo(0.0)
-    assertThat(
-      sqsMetrics.sqsDeleteTime.count(
-        deadLetterQueueName.value,
-        deadLetterQueueName.value
-      )
-    ).isEqualTo(2)
-    assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(2)
-
-    assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
-      0.0
-    )
+    }
   }
 
   @TestAllReceiverPolicies
@@ -575,34 +592,36 @@ internal class SqsJobQueueTest {
     assertThat(handledJobs.map { it.body }).containsExactly("keep failing away")
     assertThat(deliveryAttempts.get()).isEqualTo(3)
 
-    // Confirm metrics
-    assertThat(
-      sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(1.0)
-    assertThat(
-      sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(0.0)
-    assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(1)
+    // Confirm metrics. Retry, as metrics are recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      assertThat(
+        sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(1.0)
+      assertThat(
+        sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(0.0)
+      assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(1)
 
-    assertThat(
-      sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(3.0)
-    // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
-    // messages in varying batches
-    assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
+      assertThat(
+        sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(3.0)
+      // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
+      // messages in varying batches
+      assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
 
-    assertThat(
-      sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(1.0)
-    assertThat(
-      sqsMetrics.jobsDeadLettered.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(0.0)
-    assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(1)
-    assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(1)
+      assertThat(
+        sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(1.0)
+      assertThat(
+        sqsMetrics.jobsDeadLettered.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(0.0)
+      assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(1)
+      assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(1)
 
-    assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
-      2.0
-    )
+      assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
+        2.0
+      )
+    }
   }
 
   @TestAllReceiverPolicies
@@ -723,31 +742,33 @@ internal class SqsJobQueueTest {
       "9"
     )
 
-    // Confirm metrics
-    assertThat(sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()).isEqualTo(
-      10.0
-    )
-    assertThat(
-      sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(0.0)
-    assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(1)
+    // Confirm metrics. Retry, as metrics are recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      assertThat(sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()).isEqualTo(
+        10.0
+      )
+      assertThat(
+        sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(0.0)
+      assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(1)
 
-    assertThat(sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()).isEqualTo(
-      10.0
-    )
-    // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
-    // messages in varying batches
-    assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
+      assertThat(sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()).isEqualTo(
+        10.0
+      )
+      // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
+      // messages in varying batches
+      assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
 
-    assertThat(
-      sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(10.0)
-    assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(10)
-    assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(10)
+      assertThat(
+        sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(10.0)
+      assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(10)
+      assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(10)
 
-    assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
-      0.0
-    )
+      assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
+        0.0
+      )
+    }
   }
 
   @TestAllReceiverPolicies
@@ -863,31 +884,33 @@ internal class SqsJobQueueTest {
       "9"
     )
 
-    // Confirm metrics
-    assertThat(sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()).isEqualTo(
-      10.0
-    )
-    assertThat(
-      sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(0.0)
-    assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(1)
+    // Confirm metrics. Retry, as metrics are recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      assertThat(sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()).isEqualTo(
+        10.0
+      )
+      assertThat(
+        sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(0.0)
+      assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(1)
 
-    assertThat(sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()).isEqualTo(
-      10.0
-    )
-    // Can't predict how many times we'll receive since consumers may get 0 messages and retry, or may get many
-    // messages in varying batches
-    assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
+      assertThat(sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()).isEqualTo(
+        10.0
+      )
+      // Can't predict how many times we'll receive since consumers may get 0 messages and retry, or may get many
+      // messages in varying batches
+      assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
 
-    assertThat(
-      sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(10.0)
-    assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(10)
-    assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(10)
+      assertThat(
+        sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(10.0)
+      assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(10)
+      assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(10)
 
-    assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
-      0.0
-    )
+      assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
+        0.0
+      )
+    }
   }
 
   @TestAllReceiverPolicies
@@ -926,31 +949,33 @@ internal class SqsJobQueueTest {
     // CONSUMERS_BATCH_WAIT_TIME_SECONDS.
     assertThat(allJobsCompleted.await(10, TimeUnit.SECONDS)).isTrue()
 
-    // Confirm metrics
-    assertThat(sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()).isEqualTo(
-      10.0
-    )
-    assertThat(
-      sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(0.0)
-    assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(1)
+    // Confirm metrics. Retry, as metrics are recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      assertThat(sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()).isEqualTo(
+        10.0
+      )
+      assertThat(
+        sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(0.0)
+      assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(1)
 
-    assertThat(sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()).isEqualTo(
-      10.0
-    )
-    // Can't predict how many times we'll receive since consumers may get 0 messages and retry, or may get many
-    // messages in varying batches
-    assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
+      assertThat(sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()).isEqualTo(
+        10.0
+      )
+      // Can't predict how many times we'll receive since consumers may get 0 messages and retry, or may get many
+      // messages in varying batches
+      assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
 
-    assertThat(
-      sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(10.0)
-    assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(10)
-    assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(10)
+      assertThat(
+        sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(10.0)
+      assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(10)
+      assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(10)
 
-    assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
-      0.0
-    )
+      assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
+        0.0
+      )
+    }
   }
 
   @Test
@@ -988,34 +1013,36 @@ internal class SqsJobQueueTest {
     assertThat(handledJobs.map { it.body }).containsExactly("keep failing away")
     assertThat(deliveryAttempts.get()).isEqualTo(3)
 
-    // Confirm metrics
-    assertThat(
-      sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(1.0)
-    assertThat(
-      sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(0.0)
-    assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(1)
+    // Confirm metrics. Retry, as metrics are recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      assertThat(
+        sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(1.0)
+      assertThat(
+        sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(0.0)
+      assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(1)
 
-    assertThat(
-      sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(3.0)
-    // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
-    // messages in varying batches
-    assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
+      assertThat(
+        sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(3.0)
+      // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
+      // messages in varying batches
+      assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
 
-    assertThat(
-      sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(1.0)
-    assertThat(
-      sqsMetrics.jobsDeadLettered.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(0.0)
-    assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(1)
-    assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(1)
+      assertThat(
+        sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(1.0)
+      assertThat(
+        sqsMetrics.jobsDeadLettered.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(0.0)
+      assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(1)
+      assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(1)
 
-    assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
-      2.0
-    )
+      assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
+        2.0
+      )
+    }
   }
 
   @Test
@@ -1061,32 +1088,34 @@ internal class SqsJobQueueTest {
 
     assertThat(allJobsCompleted.await(10, TimeUnit.SECONDS)).isTrue()
 
-    // Confirm metrics
-    assertThat(sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()).isEqualTo(
-      100.0
-    )
-    assertThat(
-      sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(0.0)
-    assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(100)
+    // Confirm metrics. Retry, as metrics are recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      assertThat(sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()).isEqualTo(
+        100.0
+      )
+      assertThat(
+        sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(0.0)
+      assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(100)
 
-    assertThat(sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()).isEqualTo(
-      100.0
-    )
-    // Can't predict how many times we'll receive since consumers may get 0 messages and retry, or may get many
-    // messages in varying batches
-    assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
+      assertThat(sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()).isEqualTo(
+        100.0
+      )
+      // Can't predict how many times we'll receive since consumers may get 0 messages and retry, or may get many
+      // messages in varying batches
+      assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
 
-    assertThat(
-      sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
-    ).isEqualTo(100.0)
-    assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(100)
-    assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(100)
+      assertThat(
+        sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
+      ).isEqualTo(100.0)
+      assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(100)
+      assertThat(sqsMetrics.queueProcessingLag.count(queueName.value, queueName.value)).isEqualTo(100)
 
-    assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
-      0.0
-    )
-    assertThat(sqsMetrics.handlerDispatchTime.count(queueName.value, queueName.value)).isEqualTo(1)
+      assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
+        0.0
+      )
+      assertThat(sqsMetrics.handlerDispatchTime.count(queueName.value, queueName.value)).isEqualTo(1)
+    }
   }
 
   private fun enablePerPodConsumers() {
