@@ -68,6 +68,7 @@ class JettyService @Inject internal constructor(
   private val connectionMetricsCollector: JettyConnectionMetricsCollector,
   private val statisticsHandler: StatisticsHandler,
   private val gzipHandler: GzipHandler,
+  private val http2RateControlFactory: MeasuredWindowRateControl.Factory
 ) : AbstractIdleService() {
   private val server = Server(threadPool)
   val healthServerUrl: HttpUrl? get() = server.healthUrl
@@ -128,6 +129,7 @@ class JettyService @Inject internal constructor(
     if (webConfig.http2) {
       val http2 = HTTP2CServerConnectionFactory(httpConfig)
       http2.customize(webConfig)
+      http2.rateControlFactory = http2RateControlFactory
       httpConnectionFactories += http2
     }
 
@@ -212,6 +214,7 @@ class JettyService @Inject internal constructor(
       if (webConfig.http2) {
         val http2 = HTTP2ServerConnectionFactory(httpsConfig)
         http2.customize(webConfig)
+        http2.rateControlFactory = http2RateControlFactory
         httpsConnectionFactories += http2
       }
 
@@ -255,7 +258,9 @@ class JettyService @Inject internal constructor(
       val udsConnFactories = mutableListOf<ConnectionFactory>()
       udsConnFactories.add(HttpConnectionFactory(httpConfig))
       if (socketConfig.h2c == true) {
-        udsConnFactories.add(HTTP2CServerConnectionFactory(httpConfig))
+        val http2 = HTTP2CServerConnectionFactory(httpConfig)
+        http2.rateControlFactory = http2RateControlFactory
+        udsConnFactories.add(http2)
       }
 
       if (isJEP380Supported(socketConfig.path)) {
