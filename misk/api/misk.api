@@ -2162,6 +2162,16 @@ public final class misk/web/jetty/MeasuredThreadPoolExecutor : misk/web/jetty/Me
 	public fun queueSize ()I
 }
 
+public final class misk/web/jetty/MeasuredWindowRateControl : org/eclipse/jetty/http2/parser/RateControl {
+	public synthetic fun <init> (ILmisk/metrics/v2/PeakGauge;Lio/prometheus/client/Counter;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun onEvent (Ljava/lang/Object;)Z
+}
+
+public final class misk/web/jetty/MeasuredWindowRateControl$Factory : org/eclipse/jetty/http2/parser/RateControl$Factory {
+	public fun <init> (Lmisk/metrics/v2/Metrics;Lmisk/web/WebConfig;)V
+	public fun newRateControl (Lorg/eclipse/jetty/io/EndPoint;)Lorg/eclipse/jetty/http2/parser/RateControl;
+}
+
 public final class misk/web/jetty/ThreadPoolQueueMetrics {
 	public final fun recordQueueLatency (Ljava/time/Duration;)V
 }
