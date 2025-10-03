@@ -302,6 +302,19 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     return Supplier { response.get()?.toByteString() }
   }
 
+  override fun blpop(keys: Array<String>, timeoutSeconds: Double): Supplier<Pair<String, ByteString>?> {
+    val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
+    val response = pipeline.blpop(timeoutSeconds, *keysAsBytes)
+    return Supplier { 
+      val result = response.get()
+      if (result != null && result.isNotEmpty()) {
+        Pair(result[0].toString(charset), result[1].toByteString())
+      } else {
+        null
+      }
+    }
+  }
+
   override fun rpop(key: String, count: Int): Supplier<List<ByteString?>> {
     val keyBytes = key.toByteArray(charset)
     val response = pipeline.rpop(keyBytes, count)
