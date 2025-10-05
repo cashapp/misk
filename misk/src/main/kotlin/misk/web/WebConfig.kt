@@ -216,6 +216,9 @@ data class WebConfig @JvmOverloads constructor(
    * See https://jetty.org/docs/jetty/10/operations-guide/modules/standard.html#http2
    */
   val jetty_http2_max_events_per_second: Int = 128,
+
+  /** If true, disables the embedded Jetty server. */
+  val disable_jetty: Boolean = false,
 ) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
