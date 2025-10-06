@@ -42,8 +42,8 @@ class RealSlackClient @Inject constructor(
     return callSlack { slackApi.updateUserGroup(request).execute() }
   }
 
-  fun getChatPermalink(channel: String, ts: String): GetChatPermalinkResponse {
-    return callSlack { slackApi.getChatPermalink(channel, ts).execute() }
+  fun getChatPermalink(channel: String, message_timestamp: String): GetChatPermalinkResponse {
+    return callSlack { slackApi.getChatPermalink(channel, message_timestamp).execute() }
   }
 
   private fun <T> callSlack(callable: () -> Response<T>): T {
