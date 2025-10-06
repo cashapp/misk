@@ -81,14 +81,17 @@ class ExclusiveTimingInterceptorTest {
 
     val metric = exclusiveTimingInterceptorFactory.requestDurationHistogram
 
-    // Make sure all the right metrics were generated
-    // Note: buckets.last() always contains the count of samples
-    assertThat(metric.labels(*labels(200)).get().count()).isEqualTo(2)
-    assertThat(metric.labels(*labels(202)).get().count()).isEqualTo(1)
-    assertThat(metric.labels(*labels(404)).get().count()).isEqualTo(1)
-    assertThat(metric.labels(*labels(403)).get().count()).isEqualTo(2)
-    assertThat(metric.labels(*labels(200, "my-peer")).get().count()).isEqualTo(4)
-    assertThat(metric.labels(*labels(200, "<user>")).get().count()).isEqualTo(1)
+    // Wait for metrics to be recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      // Make sure all the right metrics were generated
+      // Note: buckets.last() always contains the count of samples
+      assertThat(metric.labels(*labels(200)).get().count()).isEqualTo(2)
+      assertThat(metric.labels(*labels(202)).get().count()).isEqualTo(1)
+      assertThat(metric.labels(*labels(404)).get().count()).isEqualTo(1)
+      assertThat(metric.labels(*labels(403)).get().count()).isEqualTo(2)
+      assertThat(metric.labels(*labels(200, "my-peer")).get().count()).isEqualTo(4)
+      assertThat(metric.labels(*labels(200, "<user>")).get().count()).isEqualTo(1)
+    }
   }
 
   fun invoke(
