@@ -20,8 +20,12 @@ import org.jooq.impl.DataSourceConnectionProvider
 import org.jooq.impl.DefaultExecuteListenerProvider
 import org.jooq.impl.DefaultTransactionProvider
 import misk.logging.getLogger
+import java.sql.SQLException
+import java.sql.SQLRecoverableException
+import java.sql.SQLTransientException
 import java.time.Clock
 import java.time.Duration
+import javax.persistence.OptimisticLockException
 
 class JooqTransacter @JvmOverloads constructor(
   private val dataSourceService: DataSourceService,
@@ -45,8 +49,20 @@ class JooqTransacter @JvmOverloads constructor(
       try {
         return performInTransaction(options, callback, ++attempt)
       } catch (e: Exception) {
-        if (e !is DataAccessException || attempt >= options.maxAttempts) throw e
+        if (!isRetryable(e)) throw e
+
+        if (attempt >= options.maxAttempts) {
+          log.info {
+              "jooq recoverable transaction exception (attempt $attempt), no more attempts"
+          }
+          throw e
+        }
+
         val sleepDuration = backoff.nextRetry()
+        log.info(e) {
+            "jooq recoverable transaction exception (attempt $attempt), will retry after a $sleepDuration delay"
+        }
+
         if (!sleepDuration.isZero) {
           Thread.sleep(sleepDuration.toMillis())
         }
@@ -152,8 +168,72 @@ class JooqTransacter @JvmOverloads constructor(
     DataSourceType.VITESS_MYSQL -> SQLDialect.MYSQL
     DataSourceType.POSTGRESQL -> SQLDialect.POSTGRES
     DataSourceType.TIDB -> SQLDialect.MYSQL
+    DataSourceType.COCKROACHDB -> throw IllegalArgumentException("CockroachDB is not supported in JOOQ")
     else -> throw IllegalArgumentException("no SQLDialect for " + this.name)
   }
+
+  /**
+   * Determines if an exception should trigger a transaction retry.
+   * Adapted from Hibernate RealTransacter exception handling logic (without CockroachDB support).
+   */
+  private fun isRetryable(th: Throwable): Boolean {
+    return when (th) {
+      is SQLRecoverableException,
+      is SQLTransientException,
+      is OptimisticLockException -> true
+      is DataAccessException -> {
+        // Check if the underlying cause is retryable
+        val cause = th.cause
+        if (cause is SQLException) {
+          isMessageRetryable(cause) || isCauseRetryable(th)
+        } else {
+          // For DataAccessException without SQLException cause, always retry to match original behavior
+          true
+        }
+      }
+      is SQLException -> if (isMessageRetryable(th)) true else isCauseRetryable(th)
+      else -> isCauseRetryable(th)
+    }
+  }
+
+  private fun isMessageRetryable(th: SQLException) =
+    isConnectionClosed(th) ||
+      isVitessTransactionNotFound(th) ||
+      isTidbWriteConflict(th)
+
+  /**
+   * This is thrown as a raw SQLException from Hikari even though it is most certainly a recoverable exception. See
+   * com/zaxxer/hikari/pool/ProxyConnection.java:493
+   */
+  private fun isConnectionClosed(th: SQLException) = th.message.equals("Connection is closed")
+
+  /**
+   * We get this error as a MySQLQueryInterruptedException when a tablet gracefully terminates, we just need to retry
+   * the transaction and the new primary should handle it.
+   *
+   * ```
+   * vttablet: rpc error: code = Aborted desc = transaction 1572922696317821557:
+   * not found (CallerID: )
+   * ```
+   */
+  private fun isVitessTransactionNotFound(th: SQLException): Boolean {
+    val message = th.message
+    return message != null &&
+      message.contains("vttablet: rpc error") &&
+      message.contains("code = Aborted") &&
+      message.contains("transaction") &&
+      message.contains("not found")
+  }
+
+  /**
+   * "Transactions in TiKV encounter write conflicts". This can happen when optimistic transaction mode is on. Conflicts
+   * are detected during transaction commit https://docs.pingcap.com/tidb/dev/tidb-faq#error-9007-hy000-write-conflict
+   */
+  private fun isTidbWriteConflict(th: SQLException): Boolean {
+    return th.errorCode == 9007
+  }
+
+  private fun isCauseRetryable(th: Throwable) = th.cause?.let { isRetryable(it) } ?: false
 
   data class TransacterOptions @JvmOverloads constructor(
     val maxAttempts: Int = 3,

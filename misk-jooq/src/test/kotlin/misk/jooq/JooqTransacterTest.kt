@@ -1,5 +1,9 @@
 package misk.jooq
 
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceService
+import misk.jdbc.DataSourceType
+import misk.jdbc.DatabasePool
 import misk.jdbc.PostCommitHookFailedException
 import misk.jooq.JooqTransacter.Companion.noRetriesOptions
 import misk.jooq.config.ClientJooqTestingModule
@@ -7,25 +11,31 @@ import misk.jooq.config.DeleteOrUpdateWithoutWhereException
 import misk.jooq.config.JooqDBIdentifier
 import misk.jooq.config.JooqDBReadOnlyIdentifier
 import misk.jooq.listeners.AvoidUsingSelectStarException
+import misk.jooq.listeners.JooqTimestampRecordListenerOptions
 import misk.jooq.model.Genre
 import misk.jooq.testgen.tables.references.MOVIE
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.time.FakeClock
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.jooq.exception.DataAccessException
 import org.junit.jupiter.api.Test
-import misk.time.FakeClock
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
-import misk.jooq.JooqTransacter.TransacterOptions
-import misk.jooq.testgen.tables.records.MovieRecord
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
+import java.sql.SQLException
+import java.sql.SQLRecoverableException
+import java.sql.SQLTransientException
+import java.time.Clock
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import jakarta.inject.Inject
+import javax.persistence.OptimisticLockException
+import misk.jooq.JooqTransacter.TransacterOptions
+import misk.jooq.testgen.tables.records.MovieRecord
 
 @MiskTest(startService = true)
 internal class JooqTransacterTest {
@@ -471,6 +481,147 @@ internal class JooqTransacterTest {
           }
         }
       }
+    }
+  }
+
+  @Nested
+  inner class ExceptionHandlingTests {
+
+    // Note: CockroachDB support test removed due to test infrastructure limitations
+
+    @Test fun `retries on SQLRecoverableException`() {
+      var numberOfRetries = 0
+      assertThatExceptionOfType(DataAccessException::class.java).isThrownBy {
+        transacter.transaction {
+          numberOfRetries++
+          throw SQLRecoverableException("Connection lost")
+        }
+      }
+      assertThat(numberOfRetries).isEqualTo(3)
+    }
+
+    @Test fun `retries on SQLTransientException`() {
+      var numberOfRetries = 0
+      assertThatExceptionOfType(DataAccessException::class.java).isThrownBy {
+        transacter.transaction {
+          numberOfRetries++
+          throw SQLTransientException("Temporary failure")
+        }
+      }
+      assertThat(numberOfRetries).isEqualTo(3)
+    }
+
+    @Test fun `retries on OptimisticLockException`() {
+      var numberOfRetries = 0
+      assertThatExceptionOfType(OptimisticLockException::class.java).isThrownBy {
+        transacter.transaction {
+          numberOfRetries++
+          throw OptimisticLockException("Optimistic lock failed")
+        }
+      }
+      assertThat(numberOfRetries).isEqualTo(3)
+    }
+
+    @Test fun `retries on DataAccessException with retryable SQLException cause`() {
+      var numberOfRetries = 0
+      assertThatExceptionOfType(DataAccessException::class.java).isThrownBy {
+        transacter.transaction {
+          numberOfRetries++
+          val sqlException = SQLException("Connection is closed")
+          throw DataAccessException("JOOQ error", sqlException)
+        }
+      }
+      assertThat(numberOfRetries).isEqualTo(3)
+    }
+
+    @Test fun `retries on SQLException with connection closed message`() {
+      var numberOfRetries = 0
+      assertThatExceptionOfType(DataAccessException::class.java).isThrownBy {
+        transacter.transaction {
+          numberOfRetries++
+          throw SQLException("Connection is closed")
+        }
+      }
+      assertThat(numberOfRetries).isEqualTo(3)
+    }
+
+    @Test fun `retries on SQLException with Vitess transaction not found message`() {
+      var numberOfRetries = 0
+      assertThatExceptionOfType(DataAccessException::class.java).isThrownBy {
+        transacter.transaction {
+          numberOfRetries++
+          throw SQLException("vttablet: rpc error: code = Aborted desc = transaction 1572922696317821557: not found (CallerID: )")
+        }
+      }
+      assertThat(numberOfRetries).isEqualTo(3)
+    }
+
+    @Test fun `retries on SQLException with TiDB write conflict`() {
+      var numberOfRetries = 0
+      assertThatExceptionOfType(DataAccessException::class.java).isThrownBy {
+        transacter.transaction {
+          numberOfRetries++
+          val sqlException = SQLException("Write conflict", "HY000", 9007)
+          throw sqlException
+        }
+      }
+      assertThat(numberOfRetries).isEqualTo(3)
+    }
+
+    @Test fun `does not retry on non-retryable SQLException`() {
+      var numberOfRetries = 0
+      assertThatExceptionOfType(DataAccessException::class.java).isThrownBy {
+        transacter.transaction {
+          numberOfRetries++
+          throw SQLException("Syntax error", "42000", 1064)
+        }
+      }
+      // Non-retryable SQLException should not retry
+      assertThat(numberOfRetries).isEqualTo(1)
+    }
+
+    @Test fun `does not retry on DataAccessException with non-retryable cause`() {
+      var numberOfRetries = 0
+      assertThatExceptionOfType(DataAccessException::class.java).isThrownBy {
+        transacter.transaction {
+          numberOfRetries++
+          val sqlException = SQLException("Syntax error", "42000", 1064)
+          throw DataAccessException("JOOQ error", sqlException)
+        }
+      }
+      // DataAccessException with non-retryable SQLException cause should not retry
+      assertThat(numberOfRetries).isEqualTo(1)
+    }
+
+    @Test fun `retries on nested retryable exception in cause chain`() {
+      var numberOfRetries = 0
+      assertThatExceptionOfType(DataAccessException::class.java).isThrownBy {
+        transacter.transaction {
+          numberOfRetries++
+          val rootCause = SQLRecoverableException("Connection lost")
+          val intermediateCause = RuntimeException("Intermediate", rootCause)
+          throw DataAccessException("JOOQ error", intermediateCause)
+        }
+      }
+      assertThat(numberOfRetries).isEqualTo(3)
+    }
+
+    @Test fun `succeeds after retryable exception on second attempt`() {
+      var numberOfRetries = 0
+      var result: String? = null
+
+      assertThatCode {
+        result = transacter.transaction {
+          numberOfRetries++
+          if (numberOfRetries == 1) {
+            throw SQLRecoverableException("Connection lost")
+          }
+          "success"
+        }
+      }.doesNotThrowAnyException()
+
+      assertThat(numberOfRetries).isEqualTo(2)
+      assertThat(result).isEqualTo("success")
     }
   }
 }
