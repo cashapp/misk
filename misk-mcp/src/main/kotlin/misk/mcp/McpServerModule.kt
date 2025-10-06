@@ -31,6 +31,7 @@ import kotlin.reflect.KClass
 class McpServerModule private constructor(
   private val name: String,
   private val config: McpConfig,
+  private val instructionsProvider: Provider<String>?,
   private val groupAnnotationClass: KClass<out Annotation>?,
 ) : KAbstractModule() {
 
@@ -68,6 +69,7 @@ class McpServerModule private constructor(
         tools = toolsProvider.get().toSet(),
         resources = resourcesProvider.get().toSet(),
         prompts = promptsProvider.get().toSet(),
+        instructionsProvider = instructionsProvider
       )
     }
     bind(serverKey).toProvider(serverProvider).asSingleton()
@@ -90,13 +92,20 @@ class McpServerModule private constructor(
     fun create(
       name: String,
       config: McpConfig,
+      instructionsProvider: Provider<String>? = null,
       groupAnnotation: KClass<out Annotation>? = null,
-    ) = McpServerModule(name, config, groupAnnotation)
+    ) = McpServerModule(name, config, instructionsProvider, groupAnnotation)
 
-    inline fun <reified GA : Annotation> create(name: String, config: McpConfig) = create(name, config, GA::class)
+    inline fun <reified GA : Annotation> create(
+      name: String,
+      config: McpConfig,
+      instructionsProvider: Provider<String>? = null
+    ) =
+      create(name, config, instructionsProvider, GA::class)
 
     @JvmName("createWithNoGroup")
-    fun create(name: String, config: McpConfig) = create(name, config, null)
+    fun create(name: String, config: McpConfig, instructionsProvider: Provider<String>? = null) =
+      create(name, config, instructionsProvider, null)
   }
 
   private class CommonModule() : KInstallOnceModule() {

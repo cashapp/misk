@@ -41,13 +41,14 @@ public final class misk/mcp/McpResourceModule$Companion {
 
 public final class misk/mcp/McpServerModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/mcp/McpServerModule$Companion;
-	public synthetic fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpConfig;Lkotlin/reflect/KClass;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpConfig;Lcom/google/inject/Provider;Lkotlin/reflect/KClass;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/mcp/McpServerModule$Companion {
-	public final fun create (Ljava/lang/String;Lmisk/mcp/config/McpConfig;Lkotlin/reflect/KClass;)Lmisk/mcp/McpServerModule;
-	public static synthetic fun create$default (Lmisk/mcp/McpServerModule$Companion;Ljava/lang/String;Lmisk/mcp/config/McpConfig;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lmisk/mcp/McpServerModule;
-	public final fun createWithNoGroup (Ljava/lang/String;Lmisk/mcp/config/McpConfig;)Lmisk/mcp/McpServerModule;
+	public final fun create (Ljava/lang/String;Lmisk/mcp/config/McpConfig;Lcom/google/inject/Provider;Lkotlin/reflect/KClass;)Lmisk/mcp/McpServerModule;
+	public static synthetic fun create$default (Lmisk/mcp/McpServerModule$Companion;Ljava/lang/String;Lmisk/mcp/config/McpConfig;Lcom/google/inject/Provider;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lmisk/mcp/McpServerModule;
+	public final fun createWithNoGroup (Ljava/lang/String;Lmisk/mcp/config/McpConfig;Lcom/google/inject/Provider;)Lmisk/mcp/McpServerModule;
+	public static synthetic fun createWithNoGroup$default (Lmisk/mcp/McpServerModule$Companion;Ljava/lang/String;Lmisk/mcp/config/McpConfig;Lcom/google/inject/Provider;ILjava/lang/Object;)Lmisk/mcp/McpServerModule;
 }
 
 public abstract interface class misk/mcp/McpSessionHandler {
