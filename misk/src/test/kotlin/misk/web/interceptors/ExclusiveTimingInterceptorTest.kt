@@ -22,7 +22,9 @@ import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Offset
+import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
+import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.milliseconds
 
 @MiskTest(startService = true)
@@ -44,19 +46,22 @@ class ExclusiveTimingInterceptorTest {
     val response = invoke(200)
     assertThat(response.code).isEqualTo(200)
 
-    // Figure out how long each of the latency metrics was
-    val requestDuration = metricsInterceptorFactory.requestDurationSummary!!
-    val exclusiveRequestDuration = exclusiveTimingInterceptorFactory.requestDurationHistogram
-    val difference =
-      requestDuration.labels(*labels(200)).get().sum -
-        exclusiveRequestDuration.labels(*labels(200)).get().sum
+    // Wait for metrics to be recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      // Figure out how long each of the latency metrics was
+      val requestDuration = metricsInterceptorFactory.requestDurationSummary!!
+      val exclusiveRequestDuration = exclusiveTimingInterceptorFactory.requestDurationHistogram
+      val difference =
+        requestDuration.labels(*labels(200)).get().sum -
+          exclusiveRequestDuration.labels(*labels(200)).get().sum
 
-    // Verify that the sleep time was excluded
-    // (but leave some room for small differences due to execution time.)
-    assertThat(difference).isCloseTo(
-      /* expected = */ ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble(),
-      /* offset = */ Offset.offset(ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble() / 2)
-    )
+      // Verify that the sleep time was excluded
+      // (but leave some room for small differences due to execution time.)
+      assertThat(difference).isCloseTo(
+        /* expected = */ ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble(),
+        /* offset = */ Offset.offset(ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble() / 2)
+      )
+    }
   }
 
   @Test
