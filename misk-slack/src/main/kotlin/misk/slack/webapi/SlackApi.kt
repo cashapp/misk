@@ -1,5 +1,6 @@
 package misk.slack.webapi
 
+import misk.slack.webapi.helpers.GetChatPermalinkResponse
 import misk.slack.webapi.helpers.PostMessageRequest
 import misk.slack.webapi.helpers.PostMessageResponse
 import misk.slack.webapi.helpers.GetUserResponse
@@ -79,6 +80,17 @@ interface SlackApi {
   fun updateUserGroup(
     @Body updateRequestJson: UserGroupRequest,
   ): Call<UserGroupResponse>
+
+  /**
+   * Calls Slack and retrieve a permalink URL for a specific extant message
+   * https://slack.com/api/chat.getPermalink/
+   */
+  @GET("/api/chat.getPermalink")
+  @Headers(value = ["accept: application/json"])
+  fun getChatPermalink(
+    @Query("channel") channel: String,
+    @Query("message_ts") ts: String
+  ): Call<GetChatPermalinkResponse>
 }
 
 fun Response<PostMessageResponse>.checkSuccessful() {

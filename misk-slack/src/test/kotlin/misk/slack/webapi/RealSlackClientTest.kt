@@ -26,6 +26,7 @@ import wisp.deployment.TESTING
 import jakarta.inject.Inject
 import misk.slack.webapi.helpers.Channel
 import misk.slack.webapi.helpers.ConversationTopic
+import misk.slack.webapi.helpers.GetChatPermalinkResponse
 import misk.slack.webapi.helpers.InviteRequest
 import misk.slack.webapi.helpers.InviteResponse
 import misk.slack.webapi.helpers.LatestMessage
@@ -93,6 +94,14 @@ class RealSlackClientTest {
     server.enqueueUserGroupResponse(sampleUserGroupResponse)
 
     val response = slackApi.updateUserGroup(sampleUserGroupRequest).execute()
+    assertThat(response.isSuccessful).isTrue()
+  }
+
+  @Test
+  fun `get chat permalink`() {
+    server.enqueueChatPermalinkResponse(sampleChatPermalinkResponse)
+
+    val response = slackApi.getChatPermalink("C123ABC456", "1759595633.721029").execute()
     assertThat(response.isSuccessful).isTrue()
   }
 
@@ -283,6 +292,12 @@ class RealSlackClientTest {
     val sampleUserGroupRequest = UserGroupRequest(
       usergroup = "U7654321098",
       users = "U1234567890,U9876543210"
+    )
+
+    val sampleChatPermalinkResponse = GetChatPermalinkResponse(
+      ok = true,
+      channel = "C012AB3CD",
+      permalink = "https://test.slack.com/archives/C1H9RMHGA/p135854659800008"
     )
 
     val sampleUserGroupResponse = UserGroupResponse(
