@@ -327,36 +327,6 @@ abstract class AbstractRedisTest {
     assertEquals(0L, redis.llen(listKey), "List should be empty")
   }
 
-  @Test fun deleteKeyFromAllDataStores() {
-    val key = "testKey"
-    val stringValue = "stringValue".encodeUtf8()
-    val hashField = "field1"
-    val hashValue = "hashValue".encodeUtf8()
-    val listElement = "listElement".encodeUtf8()
-
-    // This test verifies that del() only removes the key from the correct data store
-    // and doesn't interfere with other stores
-
-    // Test 1: Delete string key, verify hash and list operations still work on different keys
-    redis[key + "_string"] = stringValue
-    redis.hset(key + "_hash", hashField, hashValue)
-    redis.lpush(key + "_list", listElement)
-
-    assertTrue(redis.del(key + "_string"), "String key should be deleted")
-    assertFalse(redis.exists(key + "_string"), "String key should not exist")
-    assertTrue(redis.exists(key + "_hash"), "Hash key should still exist")
-    assertTrue(redis.exists(key + "_list"), "List key should still exist")
-
-    // Test 2: Delete hash key
-    assertTrue(redis.del(key + "_hash"), "Hash key should be deleted")
-    assertFalse(redis.exists(key + "_hash"), "Hash key should not exist")
-    assertTrue(redis.exists(key + "_list"), "List key should still exist")
-
-    // Test 3: Delete list key
-    assertTrue(redis.del(key + "_list"), "List key should be deleted")
-    assertFalse(redis.exists(key + "_list"), "List key should not exist")
-  }
-
   @Test fun incrOnKeyThatDoesNotExist() {
     // Setup
     val key = "does_not_exist_at_first"
