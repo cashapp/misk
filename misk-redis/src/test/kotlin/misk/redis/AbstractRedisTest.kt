@@ -255,6 +255,78 @@ abstract class AbstractRedisTest {
     listOf(*keysToInsert, key3).forEach { assertNull(redis[it], "Key should have been deleted") }
   }
 
+  @Test fun deleteHashKey() {
+    val key = "hashKey"
+    val field = "field1"
+    val value = "value".encodeUtf8()
+
+    // Set hash field
+    redis.hset(key, field, value)
+    assertEquals(value, redis.hget(key, field), "Hash field should have been set")
+    assertTrue(redis.exists(key), "Hash key should exist")
+
+    // Delete hash key
+    assertTrue(redis.del(key), "Hash key should have been deleted")
+    assertNull(redis.hget(key, field), "Hash field should be gone after key deletion")
+    assertFalse(redis.exists(key), "Hash key should not exist after deletion")
+
+    // Try deleting the same key again
+    assertFalse(redis.del(key), "Should not have deleted anything")
+  }
+
+  @Test fun deleteListKey() {
+    val key = "listKey"
+    val elements = listOf("element1", "element2").map { it.encodeUtf8() }
+
+    // Push elements to list
+    redis.lpush(key, *elements.toTypedArray())
+    assertEquals(2L, redis.llen(key), "List should have 2 elements")
+    assertTrue(redis.exists(key), "List key should exist")
+
+    // Delete list key
+    assertTrue(redis.del(key), "List key should have been deleted")
+    assertEquals(0L, redis.llen(key), "List should be empty after key deletion")
+    assertFalse(redis.exists(key), "List key should not exist after deletion")
+
+    // Try deleting the same key again
+    assertFalse(redis.del(key), "Should not have deleted anything")
+  }
+
+  @Test fun deleteMixedDataTypes() {
+    val stringKey = "stringKey"
+    val hashKey = "hashKey"
+    val listKey = "listKey"
+    val nonExistentKey = "nonExistentKey"
+
+    val stringValue = "stringValue".encodeUtf8()
+    val hashField = "field1"
+    val hashValue = "hashValue".encodeUtf8()
+    val listElements = listOf("element1", "element2").map { it.encodeUtf8() }
+
+    // Set up different data types
+    redis[stringKey] = stringValue
+    redis.hset(hashKey, hashField, hashValue)
+    redis.lpush(listKey, *listElements.toTypedArray())
+
+    // Verify all keys exist
+    assertTrue(redis.exists(stringKey), "String key should exist")
+    assertTrue(redis.exists(hashKey), "Hash key should exist")
+    assertTrue(redis.exists(listKey), "List key should exist")
+    assertFalse(redis.exists(nonExistentKey), "Non-existent key should not exist")
+
+    // Delete all keys at once (including non-existent one)
+    assertEquals(3, redis.del(stringKey, hashKey, listKey, nonExistentKey),
+      "3 keys should have been deleted")
+
+    // Verify all keys are gone
+    assertFalse(redis.exists(stringKey), "String key should not exist after deletion")
+    assertFalse(redis.exists(hashKey), "Hash key should not exist after deletion")
+    assertFalse(redis.exists(listKey), "List key should not exist after deletion")
+    assertNull(redis[stringKey], "String value should be null")
+    assertNull(redis.hget(hashKey, hashField), "Hash field should be null")
+    assertEquals(0L, redis.llen(listKey), "List should be empty")
+  }
+
   @Test fun incrOnKeyThatDoesNotExist() {
     // Setup
     val key = "does_not_exist_at_first"
