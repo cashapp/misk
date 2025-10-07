@@ -74,6 +74,7 @@ public final class misk/slack/SlackWebhookResponse : java/lang/Enum {
 
 public final class misk/slack/webapi/RealSlackClient : misk/slack/webapi/SlackClient {
 	public fun <init> (Lmisk/slack/webapi/SlackApi;)V
+	public final fun getChatPermalink (Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/webapi/helpers/GetChatPermalinkResponse;
 	public fun getUserByEmail (Ljava/lang/String;)Lmisk/slack/webapi/helpers/GetUserResponse;
 	public final fun inviteToConversation (Lmisk/slack/webapi/helpers/InviteRequest;)Lmisk/slack/webapi/helpers/InviteResponse;
 	public fun postConfirmation (Ljava/lang/String;Lmisk/slack/webapi/helpers/PostMessageRequest;)Lmisk/slack/webapi/helpers/PostMessageResponse;
@@ -87,6 +88,7 @@ public final class misk/slack/webapi/RealSlackClientModule : misk/inject/KAbstra
 }
 
 public abstract interface class misk/slack/webapi/SlackApi {
+	public abstract fun getChatPermalink (Ljava/lang/String;Ljava/lang/String;)Lretrofit2/Call;
 	public abstract fun getUserByEmail (Ljava/lang/String;)Lretrofit2/Call;
 	public abstract fun inviteToConversation (Lmisk/slack/webapi/helpers/InviteRequest;)Lretrofit2/Call;
 	public abstract fun postConfirmation (Ljava/lang/String;Lmisk/slack/webapi/helpers/PostMessageRequest;)Lretrofit2/Call;
@@ -401,6 +403,27 @@ public final class misk/slack/webapi/helpers/EnterpriseUser {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/slack/webapi/helpers/GetChatPermalinkResponse {
+	public fun <init> (Z)V
+	public fun <init> (ZLjava/lang/String;)V
+	public fun <init> (ZLjava/lang/String;Ljava/lang/String;)V
+	public fun <init> (ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/webapi/helpers/GetChatPermalinkResponse;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/GetChatPermalinkResponse;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/GetChatPermalinkResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChannel ()Ljava/lang/String;
+	public final fun getError ()Ljava/lang/String;
+	public final fun getOk ()Z
+	public final fun getPermalink ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/slack/webapi/helpers/GetUserResponse {
 	public fun <init> (Z)V
 	public fun <init> (ZLjava/lang/String;)V
@@ -524,17 +547,20 @@ public final class misk/slack/webapi/helpers/MrkdwnBuilderKt {
 
 public final class misk/slack/webapi/helpers/PostMessageRequest {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/slack/webapi/helpers/PostMessageRequest;
-	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/PostMessageRequest;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/PostMessageRequest;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)Lmisk/slack/webapi/helpers/PostMessageRequest;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/helpers/PostMessageRequest;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lmisk/slack/webapi/helpers/PostMessageRequest;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBlocks ()Ljava/util/List;
 	public final fun getChannel ()Ljava/lang/String;
 	public final fun getResponse_type ()Ljava/lang/String;
+	public final fun getThread_timestamp ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

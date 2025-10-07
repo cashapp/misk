@@ -8,6 +8,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.slack.webapi.helpers.GetChatPermalinkResponse
 import misk.slack.webapi.helpers.InviteResponse
 import misk.slack.webapi.helpers.SetConversationTopicResponse
 import misk.slack.webapi.helpers.UserGroupResponse
@@ -23,6 +24,7 @@ class MockSlackServer @Inject constructor(
 
   private val messageJsonAdapter = moshi.adapter(PostMessageRequest::class.java)
   private val userJsonAdapter = moshi.adapter(UserData::class.java)
+  private val chatPermalinkJsonAdapter = moshi.adapter(GetChatPermalinkResponse::class.java)
   private val topicJsonAdapter = moshi.adapter(SetConversationTopicResponse::class.java)
   private val inviteJsonAdapter = moshi.adapter(InviteResponse::class.java)
   private val usergroupJsonAdapter = moshi.adapter(UserGroupResponse::class.java)
@@ -48,6 +50,15 @@ class MockSlackServer @Inject constructor(
     server.enqueue(
       MockResponse()
         .setBody(userJsonAdapter.toJson(userData))
+    )
+  }
+
+  /** [SlackApi.getPermalink] returns this */
+  fun enqueueChatPermalinkResponse(chatPermalinkData: GetChatPermalinkResponse) {
+    server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(chatPermalinkData.toString())
     )
   }
 

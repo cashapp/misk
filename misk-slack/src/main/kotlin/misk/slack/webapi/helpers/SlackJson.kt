@@ -9,6 +9,7 @@ data class PostMessageRequest @JvmOverloads constructor(
   val channel: String,
   val response_type: String? = "in_channel",
   val blocks: List<Any>,
+  val thread_timestamp: String? = null,
 )
 
 /**
@@ -494,6 +495,18 @@ data class GetUserResponse @JvmOverloads constructor(
   val ok: Boolean,
   val error: String? = null,
   val user: UserData? = null
+)
+
+/**
+ * Chat permalink for the requested channel and ts
+ *
+ * https://api.slack.com/methods/chat.getPermalink/
+ */
+data class GetChatPermalinkResponse @JvmOverloads constructor(
+  val ok: Boolean,
+  val channel: String? = null,
+  val error: String? = null,
+  val permalink: String? = null
 )
 
 /**
