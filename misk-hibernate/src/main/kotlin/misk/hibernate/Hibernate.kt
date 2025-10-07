@@ -38,11 +38,11 @@ internal val Metadata.allProperties: Multimap<Class<*>, Property>
         if (value is Component) {
           for (subProperty in value.propertyIterator) {
             if (subProperty is Property) {
-              result.put(Class.forName(value.componentClass.name), subProperty)
+              result.put(Class.forName(value.componentClass.name, false, Thread.currentThread().contextClassLoader), subProperty)
             }
           }
         } else {
-          result.put(Class.forName(entityBinding.className), property)
+          result.put(Class.forName(entityBinding.className, false, Thread.currentThread().contextClassLoader), property)
         }
       }
     }
@@ -70,7 +70,7 @@ internal fun Properties.getField(name: String): Field? {
   val declaringClassName = getProperty("${name}DeclaringClass") ?: return null
   val fieldName = getProperty("${name}Name") ?: return null
 
-  val entityClass = Class.forName(declaringClassName)
+  val entityClass = Class.forName(declaringClassName, false, Thread.currentThread().contextClassLoader)
   return entityClass.getDeclaredField(fieldName)
 }
 
