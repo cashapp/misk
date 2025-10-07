@@ -26,6 +26,9 @@ data class Destination(
     }
   }
 
+ /**
+  * Merge the current Destination with another Destination, with the other Destination taking precedence.
+  */
   fun mergedWith(other: Destination) =
     Destination(
       if (other.keyspace != null) other.keyspace else this.keyspace,
