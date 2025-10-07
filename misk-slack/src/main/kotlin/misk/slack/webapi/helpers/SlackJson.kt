@@ -9,7 +9,7 @@ data class PostMessageRequest @JvmOverloads constructor(
   val channel: String,
   val response_type: String? = "in_channel",
   val blocks: List<Any>,
-  val thread_timestamp: String? = null,
+  val thread_ts: String? = null,
 )
 
 /**
