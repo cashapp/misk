@@ -33,7 +33,7 @@ import java.time.Clock
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
-import javax.persistence.OptimisticLockException
+import org.jooq.exception.DataChangedException
 import misk.jooq.JooqTransacter.TransacterOptions
 import misk.jooq.testgen.tables.records.MovieRecord
 
@@ -511,12 +511,12 @@ internal class JooqTransacterTest {
       assertThat(numberOfRetries).isEqualTo(3)
     }
 
-    @Test fun `retries on OptimisticLockException`() {
+    @Test fun `retries on DataChangedException`() {
       var numberOfRetries = 0
-      assertThatExceptionOfType(OptimisticLockException::class.java).isThrownBy {
+      assertThatExceptionOfType(DataChangedException::class.java).isThrownBy {
         transacter.transaction {
           numberOfRetries++
-          throw OptimisticLockException("Optimistic lock failed")
+          throw DataChangedException("Optimistic lock failed")
         }
       }
       assertThat(numberOfRetries).isEqualTo(3)

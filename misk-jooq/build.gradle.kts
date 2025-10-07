@@ -17,7 +17,6 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":misk-jdbc"))
   implementation(libs.jakartaInject)
-  implementation(libs.hibernateJpaApi)
   implementation(project(":misk-backoff"))
   implementation(project(":misk-logging"))
 
