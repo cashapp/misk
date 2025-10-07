@@ -78,10 +78,12 @@ class FakeRedis @Inject constructor(
 
   @Synchronized
   override fun del(key: String): Boolean {
-    if (!keyValueStore.containsKey(key)) {
-      return false
-    }
-    return keyValueStore.remove(key) != null
+    var deleted = false
+    if (keyValueStore.remove(key) != null) deleted = true
+    if (hKeyValueStore.remove(key) != null) deleted = true
+    if (lKeyValueStore.remove(key) != null) deleted = true
+    if (sortedSetKeyValueStore.remove(key) != null) deleted = true
+    return deleted
   }
 
   @Synchronized
