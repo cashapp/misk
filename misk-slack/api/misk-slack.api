@@ -560,7 +560,7 @@ public final class misk/slack/webapi/helpers/PostMessageRequest {
 	public final fun getBlocks ()Ljava/util/List;
 	public final fun getChannel ()Ljava/lang/String;
 	public final fun getResponse_type ()Ljava/lang/String;
-	public final fun getThread_timestamp ()Ljava/lang/String;
+	public final fun getThread_ts ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
