@@ -15,6 +15,7 @@ import org.jooq.conf.MappedSchema
 import org.jooq.conf.RenderMapping
 import org.jooq.conf.Settings
 import org.jooq.exception.DataAccessException
+import org.jooq.exception.DataChangedException
 import org.jooq.impl.DSL
 import org.jooq.impl.DataSourceConnectionProvider
 import org.jooq.impl.DefaultExecuteListenerProvider
@@ -25,7 +26,6 @@ import java.sql.SQLRecoverableException
 import java.sql.SQLTransientException
 import java.time.Clock
 import java.time.Duration
-import javax.persistence.OptimisticLockException
 
 class JooqTransacter @JvmOverloads constructor(
   private val dataSourceService: DataSourceService,
@@ -180,7 +180,7 @@ class JooqTransacter @JvmOverloads constructor(
     return when (th) {
       is SQLRecoverableException,
       is SQLTransientException,
-      is OptimisticLockException -> true
+      is DataChangedException -> true
       is DataAccessException -> {
         // Check if the underlying cause is retryable
         val cause = th.cause
