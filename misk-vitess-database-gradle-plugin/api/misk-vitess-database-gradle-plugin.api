@@ -1,6 +1,7 @@
 public abstract class misk/vitess/gradle/StartVitessDatabaseTask : org/gradle/api/DefaultTask {
 	public fun <init> ()V
 	public abstract fun getAutoApplySchemaChanges ()Lorg/gradle/api/provider/Property;
+	public abstract fun getClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getContainerName ()Lorg/gradle/api/provider/Property;
 	public abstract fun getDebugStartup ()Lorg/gradle/api/provider/Property;
 	public abstract fun getEnableDeclarativeSchemaChanges ()Lorg/gradle/api/provider/Property;
