@@ -816,9 +816,10 @@ abstract class AbstractRedisTest {
   }
 
   @Test fun blpopWithMultipleKeysReturnsFromFirstNonEmptyList() {
-    val key1 = "queue1"
-    val key2 = "queue2"
-    val key3 = "queue3"
+    // Hash tags ensure all keys map to the same Redis Cluster slot, required for multi-key operations
+    val key1 = "{same-slot-key}queue1"
+    val key2 = "{same-slot-key}queue2"
+    val key3 = "{same-slot-key}queue3"
 
     redis.rpush(key2, "value2a".encodeUtf8(), "value2b".encodeUtf8())
     redis.rpush(key3, "value3".encodeUtf8())

@@ -315,10 +315,8 @@ class RealRedis(
   override fun blpop(keys: Array<String>, timeoutSeconds: Double): Pair<String, ByteString>? {
     val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
     val result = jedis { blpop(timeoutSeconds, *keysAsBytes) }
-    return if (result != null && result.isNotEmpty()) {
-      Pair(result[0].toString(charset), result[1].toByteString())
-    } else {
-      null
+    return result?.let {
+      Pair(it.key.toString(charset), it.value.toByteString())
     }
   }
 
