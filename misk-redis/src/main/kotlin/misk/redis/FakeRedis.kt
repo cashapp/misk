@@ -315,6 +315,20 @@ class FakeRedis : Redis {
   override fun lpop(key: String): ByteString? = lpop(key, count = 1).firstOrNull()
 
   @Synchronized
+  override fun blpop(keys: Array<String>, timeoutSeconds: Double): Pair<String, ByteString>? {
+    // For the fake implementation, we'll check each key in order and return the first non-empty list
+    for (key in keys) {
+      val element = lpop(key)
+      if (element != null) {
+        return Pair(key, element)
+      }
+    }
+    // In a real implementation, this would block until timeout or an element is available
+    // For the fake, we just return null immediately
+    return null
+  }
+
+  @Synchronized
   override fun rpop(key: String, count: Int): List<ByteString?> {
     val value = lKeyValueStore[key] ?: Value(emptyList(), clock.instant())
     if (clock.instant() >= value.expiryInstant) {

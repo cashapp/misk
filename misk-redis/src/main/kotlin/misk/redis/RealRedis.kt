@@ -312,6 +312,14 @@ class RealRedis(
     return jedis { lpop(keyBytes) }?.toByteString()
   }
 
+  override fun blpop(keys: Array<String>, timeoutSeconds: Double): Pair<String, ByteString>? {
+    val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
+    val result = jedis { blpop(timeoutSeconds, *keysAsBytes) }
+    return result?.let {
+      Pair(it.key.toString(charset), it.value.toByteString())
+    }
+  }
+
   override fun rpop(key: String, count: Int): List<ByteString?> {
     val keyBytes = key.toByteArray(charset)
     return jedis { rpop(keyBytes, count) ?: emptyList() }

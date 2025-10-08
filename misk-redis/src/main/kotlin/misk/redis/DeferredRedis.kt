@@ -82,6 +82,8 @@ interface DeferredRedis {
 
   fun lpop(key: String): Supplier<ByteString?>
 
+  fun blpop(keys: Array<String>, timeoutSeconds: Double): Supplier<Pair<String, ByteString>?>
+
   fun rpop(key: String, count: Int): Supplier<List<ByteString?>>
 
   fun rpop(key: String): Supplier<ByteString?>
