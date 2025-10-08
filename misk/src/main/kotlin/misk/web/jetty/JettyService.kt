@@ -117,6 +117,9 @@ class JettyService @Inject internal constructor(
     if (webConfig.http_request_header_size != null) {
       httpConfig.requestHeaderSize = webConfig.http_request_header_size
     }
+    if (webConfig.http_response_header_size != null) {
+      httpConfig.responseHeaderSize = webConfig.http_response_header_size
+    }
     if (webConfig.http_header_cache_size != null) {
       httpConfig.headerCacheSize = webConfig.http_header_cache_size
     }
