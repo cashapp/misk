@@ -148,3 +148,10 @@ open class DefaultExceptionClassifier : ExceptionClassifier {
   protected fun isCauseRetryable(th: Throwable): Boolean = 
     th.cause?.let { isRetryable(it) } ?: false
 }
+
+/**
+ * Exception that can be thrown by application code to force a transaction retry.
+ * This is commonly used in Hibernate-based applications.
+ */
+class RetryTransactionException(message: String? = null, cause: Throwable? = null) : 
+  RuntimeException(message, cause)

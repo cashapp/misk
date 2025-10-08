@@ -6,6 +6,7 @@ import misk.hibernate.VitessTestExtensions.createInSeparateShard
 import misk.hibernate.VitessTestExtensions.save
 import misk.hibernate.VitessTestExtensions.shard
 import misk.jdbc.DataSourceType
+import misk.jdbc.RetryTransactionException
 import misk.jdbc.uniqueString
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
