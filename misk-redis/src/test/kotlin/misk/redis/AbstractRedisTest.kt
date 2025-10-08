@@ -801,6 +801,45 @@ abstract class AbstractRedisTest {
     assertThat(redis.rpop("droids", 1)).isEmpty()
   }
 
+  @Test fun blpopWithSingleKeyReturnsFirstElement() {
+    val key = "queue"
+    redis.rpush(key, "first".encodeUtf8(), "second".encodeUtf8(), "third".encodeUtf8())
+
+    val result = redis.blpop(arrayOf(key), 1.0)
+
+    assertThat(result).isNotNull()
+    assertThat(result!!.first).isEqualTo(key)
+    assertThat(result.second).isEqualTo("first".encodeUtf8())
+    assertThat(redis.lrange(key, 0, -1)).containsExactly(
+      "second".encodeUtf8(), "third".encodeUtf8()
+    )
+  }
+
+  @Test fun blpopWithMultipleKeysReturnsFromFirstNonEmptyList() {
+    val key1 = "queue1"
+    val key2 = "queue2"
+    val key3 = "queue3"
+
+    redis.rpush(key2, "value2a".encodeUtf8(), "value2b".encodeUtf8())
+    redis.rpush(key3, "value3".encodeUtf8())
+
+    val result = redis.blpop(arrayOf(key1, key2, key3), 1.0)
+
+    assertThat(result).isNotNull()
+    assertThat(result!!.first).isEqualTo(key2)
+    assertThat(result.second).isEqualTo("value2a".encodeUtf8())
+    // Verify only the left element was popped from key2
+    assertThat(redis.lrange(key2, 0, -1)).containsExactly("value2b".encodeUtf8())
+  }
+
+  @Test fun blpopWithEmptyKeysReturnsNull() {
+    val key = "empty_queue"
+
+    val result = redis.blpop(arrayOf(key), 0.1)
+
+    assertThat(result).isNull()
+  }
+
   @Test fun lpushAndRpushAreOrderedCorrectly() {
     // This test is pulled directly from the Redis documentation for LPUSH and RPUSH.
     val elements = listOf("a", "b", "c").map { it.encodeUtf8() }
