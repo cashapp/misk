@@ -25,6 +25,7 @@ import misk.mcp.config.asResources
 import misk.mcp.config.asTools
 import misk.mcp.internal.MiskServerTransport
 import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.TimeSource
 
 /**
  * Misk implementation of a Model Context Protocol (MCP) server.
@@ -177,7 +178,7 @@ class MiskMcpServer internal constructor(
     handler: suspend (CallToolRequest) -> CallToolResult
   ): suspend (CallToolRequest) -> CallToolResult {
     return { request ->
-      val start = System.nanoTime()
+      val mark =  TimeSource.Monotonic.markNow()
       var outcome = McpMetrics.ToolCallOutcome.Success
       
       try {
@@ -190,7 +191,7 @@ class MiskMcpServer internal constructor(
         outcome = McpMetrics.ToolCallOutcome.Exception
         throw ex
       } finally {
-        val duration = (System.nanoTime() - start).nanoseconds
+        val duration = mark.elapsedNow()
         mcpMetrics.mcpToolHandlerLatency(duration, name, toolName, outcome)
       }
     }
