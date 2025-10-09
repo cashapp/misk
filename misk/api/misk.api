@@ -1532,6 +1532,10 @@ public final class misk/web/SocketAddress$Unix : misk/web/SocketAddress {
 	public final fun getPath ()Ljava/lang/String;
 }
 
+public abstract interface class misk/web/UrlMatcher {
+	public abstract fun hasBoundAction (Ljava/lang/String;)Z
+}
+
 public abstract interface class misk/web/WebActionSeedDataTransformerFactory {
 	public abstract fun create (Lmisk/web/PathPattern;Lmisk/Action;)Lmisk/scope/SeedDataTransformer;
 }
