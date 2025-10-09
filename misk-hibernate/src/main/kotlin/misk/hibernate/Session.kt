@@ -1,9 +1,9 @@
 package misk.hibernate
 
 import misk.jdbc.Check
+import misk.vitess.Destination
 import misk.vitess.Keyspace
 import misk.vitess.Shard
-import java.sql.Connection
 import kotlin.reflect.KClass
 
 interface Session: misk.jdbc.Session {
@@ -19,7 +19,17 @@ interface Session: misk.jdbc.Session {
   fun <R : DbRoot<R>, T : DbSharded<R, T>> loadSharded(gid: Gid<R, T>, type: KClass<T>): T
   fun shards(): Set<Shard>
   fun shards(keyspace: Keyspace): Collection<Shard>
+
+  @Deprecated("Use target(Destination, block) which has more explicit targeting")
   fun <T> target(shard: Shard, function: () -> T): T
+
+  /**
+   * Target a specific Vitess destination (shard, tablet type, or both) for database operations.
+   *
+   * @param destination The destination to target (shard, tablet type, or both)
+   * @param block Function that receives the session and executes within the targeted context
+   */
+  fun <T> target(destination: Destination, block: (session: Session) -> T): T
   /**
    * Disable one or more checks for the duration of the execution of [body]. The passed in checks
    * will entirely replace the other ignored checks at this point, they will not be merged with

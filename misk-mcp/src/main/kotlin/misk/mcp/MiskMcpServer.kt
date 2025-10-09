@@ -1,5 +1,6 @@
 package misk.mcp
 
+import com.google.inject.Provider
 import io.modelcontextprotocol.kotlin.sdk.CallToolRequest
 import io.modelcontextprotocol.kotlin.sdk.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.Implementation
@@ -109,6 +110,7 @@ class MiskMcpServer internal constructor(
   tools: Set<McpTool<*>>,
   resources: Set<McpResource>,
   prompts: Set<McpPrompt>,
+  instructionsProvider: Provider<String>? = null,
   private val mcpMetrics: McpMetrics,
 ) : Server(
   Implementation(
@@ -125,6 +127,7 @@ class MiskMcpServer internal constructor(
       tools = if (tools.isNotEmpty()) config.tools.asTools() else null,
     ),
   ),
+  // TODO: propagate instructionsProvider once supported in MCP SDK
 ) {
 
   init {

@@ -153,6 +153,9 @@ data class WebConfig @JvmOverloads constructor(
   /** The maximum allowed size in bytes for the HTTP request line and HTTP request headers. */
   val http_request_header_size: Int? = 32768,
 
+  /** The maximum allowed size in bytes for the HTTP response headers. */
+  val http_response_header_size: Int? = null,
+
   /** The size of Jetty's header field cache, in terms of unique character branches. */
   val http_header_cache_size: Int? = null,
 
@@ -216,6 +219,9 @@ data class WebConfig @JvmOverloads constructor(
    * See https://jetty.org/docs/jetty/10/operations-guide/modules/standard.html#http2
    */
   val jetty_http2_max_events_per_second: Int = 128,
+
+  /** If true, disables the embedded Jetty server. */
+  val disable_jetty: Boolean = false,
 ) : Config
 
 data class WebSslConfig @JvmOverloads constructor(

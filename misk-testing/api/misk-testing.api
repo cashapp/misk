@@ -314,6 +314,16 @@ public final class misk/testing/TemporaryFolderModule$DeleteTempFolder : org/jun
 	public fun afterEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
 }
 
+public final class misk/testing/TestFixtureBindingValidator {
+	public static final field Companion Lmisk/testing/TestFixtureBindingValidator$Companion;
+	public fun <init> (Lcom/google/inject/Injector;)V
+	public final fun validate ()Ljava/util/List;
+	public final fun validateAndLog ()V
+}
+
+public final class misk/testing/TestFixtureBindingValidator$Companion {
+}
+
 public class misk/time/FakeClock : java/time/Clock, misk/testing/TestFixture {
 	public static final field Companion Lmisk/time/FakeClock$Companion;
 	public fun <init> ()V
