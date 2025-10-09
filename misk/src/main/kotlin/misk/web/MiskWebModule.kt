@@ -159,6 +159,8 @@ class MiskWebModule @JvmOverloads constructor(
       .annotatedWith<MiskServlet>()
       .to<WebActionsServlet>()
 
+    bind<UrlMatcher>().to<RealUrlMatcher>()
+
     install(ServiceModule<RepeatedTaskQueue>(ReadinessRefreshQueue::class))
 
     // Install support for accessing the current request and caller as ActionScoped types
