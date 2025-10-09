@@ -15,8 +15,14 @@ import java.time.Duration
  */
 class TransactionRetryHandler(
   private val qualifierName: String = "database",
-  private val exceptionClassifier: ExceptionClassifier = DefaultExceptionClassifier()
+  private val exceptionClassifier: ExceptionClassifier = DefaultExceptionClassifier(),
+  databaseType: DataSourceType? = null
 ) {
+  
+  constructor(
+    qualifierName: String = "database",
+    databaseType: DataSourceType? = null
+  ) : this(qualifierName, DefaultExceptionClassifier(databaseType), databaseType)
   
   /**
    * Executes a block with retry logic for transient database failures.
@@ -85,7 +91,9 @@ interface ExceptionClassifier {
 /**
  * Default exception classifier that handles common database retry scenarios.
  */
-open class DefaultExceptionClassifier : ExceptionClassifier {
+open class DefaultExceptionClassifier(
+  private val databaseType: DataSourceType? = null
+) : ExceptionClassifier {
   
   override fun isRetryable(th: Throwable): Boolean {
     return when (th) {
@@ -98,9 +106,9 @@ open class DefaultExceptionClassifier : ExceptionClassifier {
 
   protected fun isMessageRetryable(th: SQLException): Boolean =
     isConnectionClosed(th) ||
-      isVitessTransactionNotFound(th) ||
-      isCockroachRestartTransaction(th) ||
-      isTidbWriteConflict(th)
+      (databaseType == DataSourceType.VITESS_MYSQL && isRecoverableVitessException(th)) ||
+      (databaseType == DataSourceType.COCKROACHDB && isRecoverableCockroachException(th)) ||
+      (databaseType == DataSourceType.TIDB && isRecoverableTidbException(th))
 
   /**
    * This is thrown as a raw SQLException from Hikari even though it is most certainly a recoverable exception.
@@ -108,6 +116,27 @@ open class DefaultExceptionClassifier : ExceptionClassifier {
    */
   protected fun isConnectionClosed(th: SQLException): Boolean = 
     th.message.equals("Connection is closed")
+
+  /**
+   * Vitess-specific recoverable exceptions.
+   */
+  protected fun isRecoverableVitessException(th: SQLException): Boolean {
+    return isVitessTransactionNotFound(th)
+  }
+
+  /**
+   * CockroachDB-specific recoverable exceptions.
+   */
+  protected fun isRecoverableCockroachException(th: SQLException): Boolean {
+    return isCockroachRestartTransaction(th)
+  }
+
+  /**
+   * TiDB-specific recoverable exceptions.
+   */
+  protected fun isRecoverableTidbException(th: SQLException): Boolean {
+    return isTidbWriteConflict(th)
+  }
 
   /**
    * We get this error as a MySQLQueryInterruptedException when a tablet gracefully terminates, we just need to retry
@@ -118,7 +147,7 @@ open class DefaultExceptionClassifier : ExceptionClassifier {
    * not found (CallerID: )
    * ```
    */
-  protected fun isVitessTransactionNotFound(th: SQLException): Boolean {
+  private fun isVitessTransactionNotFound(th: SQLException): Boolean {
     val message = th.message
     return message != null &&
       message.contains("vttablet: rpc error") &&
@@ -132,7 +161,7 @@ open class DefaultExceptionClassifier : ExceptionClassifier {
    * it conflicted with another concurrent or recent transaction accessing the same data. The transaction needs to be
    * retried by the client." https://www.cockroachlabs.com/docs/stable/common-errors.html#restart-transaction
    */
-  protected fun isCockroachRestartTransaction(th: SQLException): Boolean {
+  private fun isCockroachRestartTransaction(th: SQLException): Boolean {
     val message = th.message
     return th.errorCode == 40001 && message != null && message.contains("restart transaction")
   }
@@ -141,7 +170,7 @@ open class DefaultExceptionClassifier : ExceptionClassifier {
    * "Transactions in TiKV encounter write conflicts". This can happen when optimistic transaction mode is on. Conflicts
    * are detected during transaction commit https://docs.pingcap.com/tidb/dev/tidb-faq#error-9007-hy000-write-conflict
    */
-  protected fun isTidbWriteConflict(th: SQLException): Boolean {
+  private fun isTidbWriteConflict(th: SQLException): Boolean {
     return th.errorCode == 9007
   }
 
