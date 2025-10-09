@@ -131,7 +131,6 @@ class JooqTransacter @JvmOverloads constructor(
     DataSourceType.VITESS_MYSQL -> SQLDialect.MYSQL
     DataSourceType.POSTGRESQL -> SQLDialect.POSTGRES
     DataSourceType.TIDB -> SQLDialect.MYSQL
-    DataSourceType.COCKROACHDB -> throw IllegalArgumentException("CockroachDB is not supported in JOOQ")
     else -> throw IllegalArgumentException("no SQLDialect for " + this.name)
   }
 
