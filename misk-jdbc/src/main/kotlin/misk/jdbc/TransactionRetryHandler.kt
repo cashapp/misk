@@ -13,7 +13,7 @@ import java.time.Duration
  * This class provides a unified way to handle retryable database exceptions across
  * different persistence technologies (Hibernate, JOOQ, etc.).
  */
-class TransactionRetryHandler(
+class TransactionRetryHandler @JvmOverloads constructor(
   private val qualifierName: String = "database",
   private val exceptionClassifier: ExceptionClassifier = DefaultExceptionClassifier(),
   databaseType: DataSourceType? = null
@@ -27,7 +27,8 @@ class TransactionRetryHandler(
   /**
    * Executes a block with retry logic for transient database failures.
    */
-  fun <T> executeWithRetries(
+  @JvmOverloads
+ fun <T> executeWithRetries(
     maxAttempts: Int = 3,
     minRetryDelayMillis: Long = 100,
     maxRetryDelayMillis: Long = 500,
@@ -91,7 +92,7 @@ interface ExceptionClassifier {
 /**
  * Default exception classifier that handles common database retry scenarios.
  */
-open class DefaultExceptionClassifier(
+open class DefaultExceptionClassifier @JvmOverloads constructor(
   private val databaseType: DataSourceType? = null
 ) : ExceptionClassifier {
   
@@ -182,5 +183,5 @@ open class DefaultExceptionClassifier(
  * Exception that can be thrown by application code to force a transaction retry.
  * This is commonly used in Hibernate-based applications.
  */
-class RetryTransactionException(message: String? = null, cause: Throwable? = null) : 
+class RetryTransactionException @JvmOverloads constructor(message: String? = null, cause: Throwable? = null) : 
   RuntimeException(message, cause)

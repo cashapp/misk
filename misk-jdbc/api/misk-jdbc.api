@@ -580,6 +580,7 @@ public final class misk/jdbc/RealTransacter : misk/jdbc/Transacter {
 
 public final class misk/jdbc/RetryTransactionException : java/lang/RuntimeException {
 	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
@@ -703,11 +704,17 @@ public abstract interface class misk/jdbc/Transacter {
 public final class misk/jdbc/TransactionRetryHandler {
 	public static final field Companion Lmisk/jdbc/TransactionRetryHandler$Companion;
 	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Lmisk/jdbc/DataSourceType;)V
 	public synthetic fun <init> (Ljava/lang/String;Lmisk/jdbc/DataSourceType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lmisk/jdbc/ExceptionClassifier;)V
 	public fun <init> (Ljava/lang/String;Lmisk/jdbc/ExceptionClassifier;Lmisk/jdbc/DataSourceType;)V
 	public synthetic fun <init> (Ljava/lang/String;Lmisk/jdbc/ExceptionClassifier;Lmisk/jdbc/DataSourceType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun executeWithRetries (IJJJLkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public final fun executeWithRetries (IJJLkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public final fun executeWithRetries (IJLkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public final fun executeWithRetries (ILkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public final fun executeWithRetries (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public static synthetic fun executeWithRetries$default (Lmisk/jdbc/TransactionRetryHandler;IJJJLkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
