@@ -1,5 +1,6 @@
 public abstract interface class misk/redis/DeferredRedis {
 	public abstract fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Ljava/util/function/Supplier;
+	public abstract fun blpop ([Ljava/lang/String;D)Ljava/util/function/Supplier;
 	public abstract fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Ljava/util/function/Supplier;
 	public abstract fun close ()V
 	public abstract fun del (Ljava/lang/String;)Ljava/util/function/Supplier;
@@ -63,6 +64,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public field random Lkotlin/random/Random;
 	public fun <init> ()V
 	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
+	public fun blpop ([Ljava/lang/String;D)Lkotlin/Pair;
 	public fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Lokio/ByteString;
 	public fun close ()V
 	public fun del (Ljava/lang/String;)Z
@@ -136,6 +138,7 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public static final field Companion Lmisk/redis/RealRedis$Companion;
 	public fun <init> (Lredis/clients/jedis/UnifiedJedis;Lmisk/redis/RedisClientMetrics;)V
 	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
+	public fun blpop ([Ljava/lang/String;D)Lkotlin/Pair;
 	public fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Lokio/ByteString;
 	public fun close ()V
 	public fun del (Ljava/lang/String;)Z
@@ -204,6 +207,7 @@ public final class misk/redis/RealRedis$Companion {
 
 public abstract interface class misk/redis/Redis {
 	public abstract fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
+	public abstract fun blpop ([Ljava/lang/String;D)Lkotlin/Pair;
 	public abstract fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Lokio/ByteString;
 	public abstract fun close ()V
 	public abstract fun del (Ljava/lang/String;)Z
@@ -559,6 +563,7 @@ public final class misk/redis/testing/DockerRedisKt {
 public final class misk/redis/testing/FakeRedis : misk/redis/Redis, misk/testing/TestFixture {
 	public fun <init> (Ljava/time/Clock;Lkotlin/random/Random;)V
 	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Lokio/ByteString;
+	public fun blpop ([Ljava/lang/String;D)Lkotlin/Pair;
 	public fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Lokio/ByteString;
 	public fun close ()V
 	public fun del (Ljava/lang/String;)Z
@@ -625,6 +630,7 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis, misk/testing
 public final class misk/redis/testing/FakeRedis$FakePipelinedRedis : misk/redis/DeferredRedis {
 	public fun <init> (Lmisk/redis/testing/FakeRedis;)V
 	public fun blmove (Ljava/lang/String;Ljava/lang/String;Lredis/clients/jedis/args/ListDirection;Lredis/clients/jedis/args/ListDirection;D)Ljava/util/function/Supplier;
+	public fun blpop ([Ljava/lang/String;D)Ljava/util/function/Supplier;
 	public fun brpoplpush (Ljava/lang/String;Ljava/lang/String;I)Ljava/util/function/Supplier;
 	public fun close ()V
 	public fun del (Ljava/lang/String;)Ljava/util/function/Supplier;

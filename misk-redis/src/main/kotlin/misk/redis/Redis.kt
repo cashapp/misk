@@ -355,6 +355,17 @@ interface Redis {
   fun lpop(key: String): ByteString?
 
   /**
+   * Blocking version of [lpop]. Pops an element from the first non-empty list in [keys],
+   * checking keys in the provided order. If all lists are empty, blocks the connection until
+   * an [lpush] or [rpush] operation occurs on one of the keys, or until [timeoutSeconds] expires.
+   *
+   * @param keys the keys to check for elements, in order
+   * @param timeoutSeconds the maximum number of seconds to block. 0 blocks indefinitely.
+   * @return a pair of the key name and the element that was popped, or null if timeout occurred
+   */
+  fun blpop(keys: Array<String>, timeoutSeconds: Double): Pair<String, ByteString>?
+
+  /**
    * Removes and returns the last [count] elements of the list stored at [key].
    *
    * Only available on Redis 6.2.0 and higher.
