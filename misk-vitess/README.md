@@ -61,7 +61,7 @@ Other configurable parameters include:
 - `inMemoryStorageSize` (default `1024M`): The size of in-memory storage (tmpfs) when `enableInMemoryStorage` is set to `true`.
 - `keepAlive` (default `true`): Whether to keep the container running between test runs. It will detect schema changes and argument changes and restart the container if needed.
 - `lintSchema` (default `false`): Whether to lint the schema before starting the test database, which can help detect errors early.
-- `mysqlVersion` (default `8.0.36`): The MySQL version to use.
+- `mysqlVersion` (default `8.0.42`): The MySQL version to use.
 - `port` (default `27003`): The port used to connect to the sharded database, aka the vtgate.
 - `sqlMode` (defaults to the [MySQL8 defaults](https://dev.mysql.com/doc/refman/8.0/en/sql-mode.html)): The server side `sql_mode` setting.
 - `transactionIsolationLevel` (default `REPEATABLE_READ`): The transaction isolation level.

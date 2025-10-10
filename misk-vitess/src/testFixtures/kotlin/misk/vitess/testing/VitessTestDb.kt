@@ -17,7 +17,7 @@ import kotlin.time.measureTime
  * @property enableScatters Whether to enable scatter queries, which fan out to all shards. Default is `true`.
  * @property inMemoryStorageSize The size of in-memory storage (tmpfs) if `enableInMemoryStorage` is `true` (e.g., "1G", "512M"). Default is "1024M".
  * @property keepAlive Whether to keep the database running after the test suite completes. Default is `true`.
- * @property mysqlVersion The MySQL version to use. Default is `8.0.36`.
+ * @property mysqlVersion The MySQL version to use. Default is `8.0.42`.
  * @property port The port to connect to the database, which represents the vtgate. Default is `27003`.
  * @property schemaDir The location of vschema and SQL schema change files, which can be a classpath or filesystem path, which
  * is designated by the prefix `classpath:` or `filesystem:`. When using `classpath:`, `VitessTestDb` looks within `resources`.
