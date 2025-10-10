@@ -1,9 +1,9 @@
 package misk.jooq
 
-import misk.backoff.ExponentialBackoff
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceService
 import misk.jdbc.DataSourceType
+import misk.jdbc.TransactionRetryHandler
 import misk.jooq.listeners.AvoidUsingSelectStarListener
 import misk.jooq.listeners.JooqSQLLogger
 import misk.jooq.listeners.JooqTimestampRecordListener
@@ -14,14 +14,12 @@ import org.jooq.SQLDialect
 import org.jooq.conf.MappedSchema
 import org.jooq.conf.RenderMapping
 import org.jooq.conf.Settings
-import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.jooq.impl.DataSourceConnectionProvider
 import org.jooq.impl.DefaultExecuteListenerProvider
 import org.jooq.impl.DefaultTransactionProvider
 import misk.logging.getLogger
 import java.time.Clock
-import java.time.Duration
 
 class JooqTransacter @JvmOverloads constructor(
   private val dataSourceService: DataSourceService,
@@ -32,51 +30,32 @@ class JooqTransacter @JvmOverloads constructor(
   private val clock: Clock,
   private val jooqConfigExtension: Configuration.() -> Unit = {}
 ) {
+  
+  private val retryHandler = TransactionRetryHandler(
+    qualifierName = "jooq",
+    exceptionClassifier = JooqExceptionClassifier()
+  )
 
   @JvmOverloads
   fun <RETURN_TYPE> transaction(
     options: TransacterOptions = TransacterOptions(),
     callback: (jooqSession: JooqSession) -> RETURN_TYPE
   ): RETURN_TYPE {
-    val backoff = ExponentialBackoff(Duration.ofMillis(10L), Duration.ofMillis(options.maxRetryDelayMillis))
-    var attempt = 0
-
-    while (true) {
-      try {
-        return performInTransaction(options, callback, ++attempt)
-      } catch (e: Exception) {
-        if (e !is DataAccessException || attempt >= options.maxAttempts) throw e
-        val sleepDuration = backoff.nextRetry()
-        if (!sleepDuration.isZero) {
-          Thread.sleep(sleepDuration.toMillis())
-        }
-      }
+    return retryHandler.executeWithRetries(
+      maxAttempts = options.maxAttempts,
+      minRetryDelayMillis = 10L, // Use a shorter initial delay for JOOQ
+      maxRetryDelayMillis = options.maxRetryDelayMillis,
+      retryJitterMillis = 400L
+    ) {
+      performInTransaction(options, callback)
     }
   }
 
   private fun <RETURN_TYPE> performInTransaction(
     options: TransacterOptions,
-    callback: (jooqSession: JooqSession) -> RETURN_TYPE,
-    attempt: Int,
+    callback: (jooqSession: JooqSession) -> RETURN_TYPE
   ): RETURN_TYPE {
-    return try {
-      val result = createDSLContextAndCallback(options, callback)
-      if (attempt > 1) {
-        log.info {
-          "Retried jooq transaction succeeded after [attempts=$attempt]"
-        }
-      }
-      result
-    } catch (e: Exception) {
-      if (attempt >= options.maxAttempts) {
-        log.warn(e) {
-          "Recoverable transaction exception [attempts=$attempt], no more attempts"
-        }
-        throw e
-      }
-      log.info(e) { "Exception thrown while transacting with the db via jooq" }
-      throw e
-    }
+    return createDSLContextAndCallback(options, callback)
   }
 
   private fun <RETURN_TYPE> createDSLContextAndCallback(
@@ -154,6 +133,8 @@ class JooqTransacter @JvmOverloads constructor(
     DataSourceType.TIDB -> SQLDialect.MYSQL
     else -> throw IllegalArgumentException("no SQLDialect for " + this.name)
   }
+
+
 
   data class TransacterOptions @JvmOverloads constructor(
     val maxAttempts: Int = 3,
