@@ -184,6 +184,9 @@ data class WebConfig @JvmOverloads constructor(
   /** If true install NotFoundAction, the default action when a path is not found. */
   val install_default_not_found_action: Boolean = true,
 
+  /** If true, disables health check endpoints (/_status, /_readiness, /_liveness). */
+  val disable_health_checks: Boolean = false,
+
   /** The output buffer size of Jetty (default is 32KB). */
   val jetty_output_buffer_size: Int? = null,
 

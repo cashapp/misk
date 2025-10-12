@@ -1,5 +1,7 @@
 package misk.web
 
+import com.google.inject.Guice
+import com.google.inject.Key
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.testing.MiskTest
@@ -10,7 +12,7 @@ import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-@MiskTest(startService = true)
+@MiskTest
 internal class UrlMatcherTest {
   @MiskTestModule
   val module = TestModule()
@@ -55,9 +57,31 @@ internal class UrlMatcherTest {
     assertThat(urlMatcher.hasBoundAction("http://different-host.com/hello")).isTrue()
   }
 
-  class TestModule : KAbstractModule() {
+  @Test
+  fun `Health checks are available by default`() {
+    assertThat(urlMatcher.hasBoundAction("http://example.com/_status")).isTrue()
+    assertThat(urlMatcher.hasBoundAction("http://example.com/_readiness")).isTrue()
+    assertThat(urlMatcher.hasBoundAction("http://example.com/_liveness")).isTrue()
+  }
+
+  @Test
+  fun `Health checks are not available when disabled`() {
+    val injector = Guice.createInjector(TestModule(disableHealthChecks = true))
+    val urlMatcher = injector.getInstance(Key.get(UrlMatcher::class.java))
+
+    assertThat(urlMatcher.hasBoundAction("http://example.com/_status")).isFalse()
+    assertThat(urlMatcher.hasBoundAction("http://example.com/_readiness")).isFalse()
+    assertThat(urlMatcher.hasBoundAction("http://example.com/_liveness")).isFalse()
+  }
+
+  class TestModule(
+    private val disableHealthChecks: Boolean = false
+  ) : KAbstractModule() {
     override fun configure() {
-      install(WebServerTestingModule())
+      install(WebServerTestingModule(webConfig = WebConfig(
+        port = 0,
+        disable_health_checks = disableHealthChecks
+      )))
       install(MiskTestingServiceModule())
       install(WebActionModule.create<HelloAction>())
       install(WebActionModule.create<UserAction>())

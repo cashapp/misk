@@ -302,10 +302,11 @@ class MiskWebModule @JvmOverloads constructor(
     install(GrpcReflectModule())
 
     // Bind build-in actions.
-    install(WebActionModule.create<StatusAction>())
-    install(WebActionModule.create<ReadinessCheckAction>())
-
-    install(WebActionModule.create<LivenessCheckAction>())
+    if (!config.disable_health_checks) {
+      install(WebActionModule.create<StatusAction>())
+      install(WebActionModule.create<ReadinessCheckAction>())
+      install(WebActionModule.create<LivenessCheckAction>())
+    }
     if (config.install_default_not_found_action) {
       install(WebActionModule.create<NotFoundAction>())
     }
