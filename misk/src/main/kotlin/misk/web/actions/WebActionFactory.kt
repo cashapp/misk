@@ -58,6 +58,7 @@ class WebActionFactory @Inject constructor(
 ) {
 
   /** Returns the bound actions for `webActionClass`. */
+  @JvmOverloads
   fun <A : WebAction> newBoundAction(
     webActionClass: KClass<A>,
     pathPrefix: String = "/"
