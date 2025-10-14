@@ -40,7 +40,7 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.full.functions
 
 @Singleton
-internal class WebActionFactory @Inject constructor(
+class WebActionFactory @Inject constructor(
   private val injector: Injector,
   @BeforeContentEncoding
   private val beforeContentEncodingNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
