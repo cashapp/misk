@@ -12,6 +12,7 @@ dependencies {
   implementation(libs.jakartaInject)
   implementation(libs.kotlinReflect)
   implementation(libs.kotlinStdLibJdk8)
+  implementation(project(":misk-api"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
