@@ -31,3 +31,5 @@ docs/changelog.md
 docs/contributing.md
 docs/releasing.md
 docs/wisp/**
+.goose
+local.settings.gradle.kts
