@@ -4,6 +4,8 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import misk.ReadyService
 import misk.ServiceModule
+import misk.annotation.ExperimentalMiskApi
+import misk.inject.AsyncKAbstractModule
 import misk.inject.KAbstractModule
 import misk.inject.toKey
 import misk.jobqueue.BatchJobHandler
@@ -20,14 +22,9 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
   private val handler: KClass<T>,
   private val installRetryQueue: Boolean,
   private val dependsOn: List<Key<out Service>>,
-) : KAbstractModule() {
+) : AsyncKAbstractModule() {
   override fun configure() {
-    newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
-    newMapBinder<QueueName, BatchJobHandler>()
-
-    if (installRetryQueue) {
-      newMapBinder<QueueName, JobHandler>().addBinding(queueName.retryQueue).to(handler.java)
-    }
+    install(CommonModule(queueName, handler, installRetryQueue))
 
     install(
       ServiceModule(
@@ -35,6 +32,25 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
         dependsOn = dependsOn
       ).dependsOn<ReadyService>()
     )
+  }
+
+  @OptIn(ExperimentalMiskApi::class)
+  override fun moduleWhenAsyncDisabled(): KAbstractModule = CommonModule(queueName, handler, installRetryQueue)
+
+  private class CommonModule<T : JobHandler>(
+    private val queueName: QueueName,
+    private val handler: KClass<T>,
+    private val installRetryQueue: Boolean,
+  ) : KAbstractModule() {
+    override fun configure() {
+
+      newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
+      newMapBinder<QueueName, BatchJobHandler>()
+
+      if (installRetryQueue) {
+        newMapBinder<QueueName, JobHandler>().addBinding(queueName.retryQueue).to(handler.java)
+      }
+    }
   }
 
   companion object {
@@ -45,7 +61,8 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
       dependsOn: List<Key<out Service>> = emptyList(),
     ): AwsSqsJobHandlerModule<T> = create(queueName, T::class, installRetryQueue, dependsOn)
 
-    @JvmStatic @JvmOverloads
+    @JvmStatic
+    @JvmOverloads
     fun <T : JobHandler> create(
       queueName: QueueName,
       handlerClass: Class<T>,
