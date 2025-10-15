@@ -66,7 +66,7 @@ class DataSourceService @JvmOverloads constructor(
     config = databasePool.takeDatabase(baseConfig)
 
     val hikariConfig = HikariConfig()
-    hikariConfig.driverClassName = config.type.driverClassName
+    hikariConfig.driverClassName = config.getDriverClassName()
     hikariConfig.jdbcUrl = config.buildJdbcUrl(deployment)
     if (config.username != null) {
       hikariConfig.username = config.username
