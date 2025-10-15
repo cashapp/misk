@@ -29,6 +29,7 @@ import misk.testing.TestFixture
 import okio.ByteString.Companion.encodeUtf8
 import org.apache.commons.io.FilenameUtils
 import java.util.SortedMap
+import java.util.concurrent.ConcurrentMap
 import java.util.function.Supplier
 import kotlin.math.max
 import kotlin.math.min
@@ -49,48 +50,93 @@ class FakeRedis @Inject constructor(
   private val clock: Clock,
   @ForFakeRedis private val random: Random,
 ) : Redis, TestFixture {
-  /** The value type stored in our key-value store. */
-  private data class Value<T>(val data: T, var expiryInstant: Instant)
+  /**
+   * Represents a value in the key-value store.
+   * By grouping all data types that the [Redis] interface supports under a single sealed class we can use a single
+   * key-value store for all entries which simplifies implementation of several Redis operations and better mimic in
+   * tests how Redis actually behaves.
+   */
+  private sealed interface Value {
+    var expiryInstant: Instant
+
+    data class String(
+      val data: ByteString,
+      override var expiryInstant: Instant,
+    ) : Value
+
+    /** A nested hash map for hash operations. */
+    data class Hash(
+      val data: ConcurrentHashMap<kotlin.String, ByteString>,
+      override var expiryInstant: Instant,
+    ) : Value
+
+    /** A hash map for list operations. */
+    data class List(
+      val data: kotlin.collections.List<ByteString>,
+      override var expiryInstant: Instant,
+    ) : Value
+
+    /**
+     * Note: Redis sorted set actually orders by value. It is quite complex to implement it here.
+     * In this Fake Redis implementation which is generally used for testing, we have simply used a
+     * HashMap to key score->members. So any sorting based on values will have to be handled in the
+     * implementation of the functions for this sorted set.
+     */
+    data class SortedSet(
+      val data: SortedMap<Double, HashSet<kotlin.String>>,
+      override var expiryInstant: Instant,
+    ) : Value
+  }
+
+  private inner class KeyValueStore(
+    private val store: ConcurrentHashMap<String, Value>,
+  ) : ConcurrentMap<String, Value> by store {
+    override operator fun get(key: String): Value? {
+      val value = store[key] ?: return null
+      if (clock.instant() >= value.expiryInstant) {
+        store.remove(key)
+        return null
+      }
+      return value
+    }
+
+    override fun containsKey(key: String): Boolean = get(key) != null
+
+    inline fun <reified T : Value> getTyped(key: String): T? {
+      val value = this[key] ?: return null
+
+      return when (value) {
+        is T -> value
+        else -> throw RuntimeException("WRONGTYPE Operation against a key holding the wrong kind of value")
+      }
+    }
+  }
 
   /** Acts as the Redis key-value store. */
-  private val keyValueStore = ConcurrentHashMap<String, Value<ByteString>>()
-
-  /** A nested hash map for hash operations. */
-  private val hKeyValueStore = ConcurrentHashMap<String, Value<ConcurrentHashMap<String, ByteString>>>()
-
-  /**
-   * Note: Redis sorted set actually orders by value. It is quite complex to implement it here.
-   * In this Fake Redis implementation which is generally used for testing, we have simply used a
-   * HashMap to key score->members. So any sorting based on values will have to be handled in the
-   * implementation of the functions for this sorted set.
-   */
-  private val sortedSetKeyValueStore = ConcurrentHashMap<String, Value<SortedMap<Double, HashSet<String>>>>()
-
-  /** A hash map for list operations. */
-  private val lKeyValueStore = ConcurrentHashMap<String, Value<List<ByteString>>>()
+  private val keyValueStore = KeyValueStore(ConcurrentHashMap<String, Value>())
 
   override fun reset() {
     keyValueStore.clear()
-    hKeyValueStore.clear()
-    sortedSetKeyValueStore.clear()
-    lKeyValueStore.clear()
   }
 
   @Synchronized
   override fun del(key: String): Boolean {
-    var deleted = false
-    if (keyValueStore.remove(key) != null) deleted = true
-    if (hKeyValueStore.remove(key) != null) deleted = true
-    if (lKeyValueStore.remove(key) != null) deleted = true
-    if (sortedSetKeyValueStore.remove(key) != null) deleted = true
-    return deleted
+    return keyValueStore.remove(key) != null
   }
 
   @Synchronized
   override fun del(vararg keys: String): Int = keys.count { del(it) }
 
   @Synchronized
-  override fun mget(vararg keys: String): List<ByteString?> = keys.map { get(it) }
+  override fun mget(vararg keys: String): List<ByteString?> {
+    // MGET returns null instead of throwing for non-string values so we can't reuse the regular GET function
+    return keys.map { key ->
+      when (val value = keyValueStore[key]) {
+        is Value.String -> value.data
+        else -> null
+      }
+    }
+  }
 
   @Synchronized
   override fun mset(vararg keyValues: ByteString) {
@@ -103,13 +149,8 @@ class FakeRedis @Inject constructor(
 
   @Synchronized
   override fun get(key: String): ByteString? {
-    val value = keyValueStore[key] ?: return null
+    val value = keyValueStore.getTyped<Value.String>(key) ?: return null
 
-    // Check if the key has expired
-    if (clock.instant() >= value.expiryInstant) {
-      keyValueStore.remove(key)
-      return null
-    }
     return value.data
   }
 
@@ -122,13 +163,7 @@ class FakeRedis @Inject constructor(
 
   @Synchronized
   override fun hdel(key: String, vararg fields: String): Long {
-    val value = hKeyValueStore[key] ?: return 0L
-
-    // Check if the key has expired
-    if (clock.instant() >= value.expiryInstant) {
-      hKeyValueStore.remove(key)
-      return 0L
-    }
+    val value = keyValueStore.getTyped<Value.Hash>(key) ?: return 0L
 
     var countDeleted = 0L
     fields.forEach {
@@ -142,47 +177,35 @@ class FakeRedis @Inject constructor(
 
   @Synchronized
   override fun hget(key: String, field: String): ByteString? {
-    val value = hKeyValueStore[key] ?: return null
+    val value = keyValueStore.getTyped<Value.Hash>(key) ?: return null
 
-    // Check if the key has expired
-    if (clock.instant() >= value.expiryInstant) {
-      hKeyValueStore.remove(key)
-      return null
-    }
     return value.data[field]
   }
 
   @Synchronized
   override fun hgetAll(key: String): Map<String, ByteString> {
-    val value = hKeyValueStore[key] ?: return emptyMap()
+    val value = keyValueStore.getTyped<Value.Hash>(key) ?: return emptyMap()
 
-    // Check if the key has expired
-    if (clock.instant() >= value.expiryInstant) {
-      hKeyValueStore.remove(key)
-      return emptyMap()
-    }
     return value.data.mapValues { it.value }
   }
 
   @Synchronized
-  override fun hlen(key: String): Long = hKeyValueStore[key]?.data?.size?.toLong() ?: 0L
+  override fun hlen(key: String): Long {
+    val value = keyValueStore.getTyped<Value.Hash>(key) ?: return 0L
+
+    return value.data.size.toLong()
+  }
 
   @Synchronized
   override fun hkeys(key: String): List<ByteString> {
-    val value = hKeyValueStore[key] ?: return emptyList()
-
-    // Check if the key has expired
-    if (clock.instant() >= value.expiryInstant) {
-      hKeyValueStore.remove(key)
-      return emptyList()
-    }
+    val value = keyValueStore.getTyped<Value.Hash>(key) ?: return emptyList()
 
     return value.data.keys().toList().map { it.encode(Charsets.UTF_8) }
   }
 
   @Synchronized
   override fun hmget(key: String, vararg fields: String): List<ByteString?> {
-    val hash: Map<String, ByteString> = hKeyValueStore[key]?.data ?: emptyMap()
+    val hash: Map<String, ByteString> = keyValueStore.getTyped<Value.Hash>(key)?.data ?: emptyMap()
     return buildList {
       for (field in fields) {
         add(hash[field])
@@ -227,12 +250,12 @@ class FakeRedis @Inject constructor(
   @Synchronized
   override fun set(key: String, value: ByteString) {
     // Set the key to expire at the latest possible instant
-    keyValueStore[key] = Value(data = value, expiryInstant = Instant.MAX)
+    keyValueStore[key] = Value.String(data = value, expiryInstant = Instant.MAX)
   }
 
   @Synchronized
   override fun set(key: String, expiryDuration: Duration, value: ByteString) {
-    keyValueStore[key] = Value(
+    keyValueStore[key] = Value.String(
       data = value,
       expiryInstant = clock.instant().plusSeconds(expiryDuration.seconds)
     )
@@ -240,7 +263,7 @@ class FakeRedis @Inject constructor(
 
   @Synchronized
   override fun setnx(key: String, value: ByteString): Boolean {
-    return setWithExpiry(key, value, Instant.MAX)
+    return setWithExpiry(key, value, expiryInstant = Instant.MAX)
   }
 
   @Synchronized
@@ -249,16 +272,17 @@ class FakeRedis @Inject constructor(
   }
 
   private fun setWithExpiry(key: String, value: ByteString, expiryInstant: Instant): Boolean {
-    return keyValueStore.putIfAbsent(key, Value(data = value, expiryInstant)) == null
+    return keyValueStore.putIfAbsent(key, Value.String(data = value, expiryInstant)) == null
   }
 
   @Synchronized
   override fun hset(key: String, field: String, value: ByteString): Long {
-    if (!hKeyValueStore.containsKey(key)) {
-      hKeyValueStore[key] = Value(data = ConcurrentHashMap(), expiryInstant = Instant.MAX)
+    if (!keyValueStore.containsKey(key)) {
+      keyValueStore[key] = Value.Hash(data = ConcurrentHashMap(), expiryInstant = Instant.MAX)
     }
-    val newFieldCount = if (hKeyValueStore[key]!!.data[field] != null) 0L else 1L
-    hKeyValueStore[key]!!.data[field] = value
+    val valueHash = keyValueStore.getTyped<Value.Hash>(key)!!
+    val newFieldCount = if (valueHash.data[field] != null) 0L else 1L
+    valueHash.data[field] = value
     return newFieldCount
   }
 
@@ -304,50 +328,47 @@ class FakeRedis @Inject constructor(
     from: ListDirection,
     to: ListDirection
   ): ByteString? {
-    val sourceList = lKeyValueStore[sourceKey]?.data?.toMutableList() ?: return null
+    val sourceList = keyValueStore.getTyped<Value.List>(sourceKey)?.data?.toMutableList() ?: return null
     val sourceValue = when (from) {
       ListDirection.LEFT -> sourceList.removeFirst()
       ListDirection.RIGHT -> sourceList.removeLast()
     }
-    lKeyValueStore[sourceKey] = Value(data = sourceList, expiryInstant = Instant.MAX)
+    keyValueStore[sourceKey] = Value.List(data = sourceList, expiryInstant = Instant.MAX)
 
-    val destinationList = lKeyValueStore[destinationKey]?.data?.toMutableList() ?: mutableListOf()
+    val destinationList = keyValueStore.getTyped<Value.List>(destinationKey)?.data?.toMutableList() ?: mutableListOf()
     when (to) {
       ListDirection.LEFT -> destinationList.add(index = 0, element = sourceValue)
       ListDirection.RIGHT -> destinationList.add(element = sourceValue)
     }
-    lKeyValueStore[destinationKey] = Value(data = destinationList, expiryInstant = Instant.MAX)
+    keyValueStore[destinationKey] = Value.List(data = destinationList, expiryInstant = Instant.MAX)
     return sourceValue
   }
 
   @Synchronized
   override fun lpush(key: String, vararg elements: ByteString): Long {
-    val updated = lKeyValueStore[key]?.data?.toMutableList() ?: mutableListOf()
+    val updated = keyValueStore.getTyped<Value.List>(key)?.data?.toMutableList() ?: mutableListOf()
     for (element in elements) {
       updated.add(0, element)
     }
-    lKeyValueStore[key] = Value(data = updated, expiryInstant = Instant.MAX)
+    keyValueStore[key] = Value.List(data = updated, expiryInstant = Instant.MAX)
     return updated.size.toLong()
   }
 
   @Synchronized
   override fun rpush(key: String, vararg elements: ByteString): Long {
-    val updated = lKeyValueStore[key]?.data?.toMutableList() ?: mutableListOf()
+    val updated = keyValueStore.getTyped<Value.List>(key)?.data?.toMutableList() ?: mutableListOf()
     updated.addAll(elements)
-    lKeyValueStore[key] = Value(data = updated, expiryInstant = Instant.MAX)
+    keyValueStore[key] = Value.List(data = updated, expiryInstant = Instant.MAX)
     return updated.size.toLong()
   }
 
   @Synchronized
   override fun lpop(key: String, count: Int): List<ByteString?> {
-    val value = lKeyValueStore[key] ?: Value(emptyList(), clock.instant())
-    if (clock.instant() >= value.expiryInstant) {
-      return emptyList()
-    }
+    val value = keyValueStore.getTyped<Value.List>(key) ?: return emptyList()
     val result = with(value) {
       data.subList(0, min(data.size, count)).toList()
     }
-    lKeyValueStore[key] = value.copy(data = value.data.drop(count))
+    keyValueStore[key] = value.copy(data = value.data.drop(count))
     return result
   }
 
@@ -370,27 +391,24 @@ class FakeRedis @Inject constructor(
 
   @Synchronized
   override fun rpop(key: String, count: Int): List<ByteString?> {
-    val value = lKeyValueStore[key] ?: Value(emptyList(), clock.instant())
-    if (clock.instant() >= value.expiryInstant) {
-      return emptyList()
-    }
+    val value = keyValueStore.getTyped<Value.List>(key) ?: return emptyList()
     val result = with(value) {
       data.takeLast(min(data.size, count)).asReversed()
     }
-    lKeyValueStore[key] = value.copy(data = value.data.dropLast(count))
+    keyValueStore[key] = value.copy(data = value.data.dropLast(count))
     return result
   }
 
   @Synchronized
   override fun llen(key: String): Long {
-    return lKeyValueStore[key]?.data?.size?.toLong() ?: 0L
+    return keyValueStore.getTyped<Value.List>(key)?.data?.size?.toLong() ?: 0L
   }
 
   override fun rpop(key: String): ByteString? = rpop(key, count = 1).firstOrNull()
 
   @Synchronized
   override fun lrange(key: String, start: Long, stop: Long): List<ByteString?> {
-    val list = lKeyValueStore[key]?.data ?: return emptyList()
+    val list = keyValueStore.getTyped<Value.List>(key)?.data ?: return emptyList()
     if (start >= list.size) return emptyList()
 
     // Redis allows negative values starting from the end of the list.
@@ -403,24 +421,20 @@ class FakeRedis @Inject constructor(
 
   @Synchronized
   override fun ltrim(key: String, start: Long, stop: Long) {
-    val list = lKeyValueStore[key]?.data ?: return
+    val list = keyValueStore.getTyped<Value.List>(key)?.data ?: return
 
     val startIdx = if (start < 0) list.size + start else start
     val stopIdx = if (stop < 0) list.size + stop else stop
     if (startIdx > stopIdx || startIdx >= list.size) {
-      lKeyValueStore[key] = Value(data = emptyList(), expiryInstant = Instant.MAX)
+      keyValueStore[key] = Value.List(data = emptyList(), expiryInstant = Instant.MAX)
       return
     }
     val trimmedList = list.subList(max(0, startIdx.toInt()), min(list.size, stopIdx.toInt() + 1))
-    lKeyValueStore[key] = Value(data = trimmedList, expiryInstant = Instant.MAX)
+    keyValueStore[key] = Value.List(data = trimmedList, expiryInstant = Instant.MAX)
   }
 
   override fun lrem(key: String, count: Long, element: ByteString): Long {
-    val value = lKeyValueStore[key] ?: return 0L
-    if (clock.instant() >= value.expiryInstant) {
-      lKeyValueStore.remove(key)
-      return 0L
-    }
+    val value = keyValueStore.getTyped<Value.List>(key) ?: return 0L
 
     val list = value.data.toMutableList()
     var totalCount = count
@@ -436,7 +450,7 @@ class FakeRedis @Inject constructor(
       iterList.remove(element)
       deleteCount += 1
     }
-    lKeyValueStore[key] = Value(data = list, expiryInstant = Instant.MAX)
+    keyValueStore[key] = Value.List(data = list, expiryInstant = Instant.MAX)
 
     return deleteCount
   }
@@ -450,14 +464,7 @@ class FakeRedis @Inject constructor(
   )
 
   override fun exists(key: String): Boolean {
-    val value = keyValueStore[key]
-    val hValue = hKeyValueStore[key]
-    val lValue = lKeyValueStore[key]
-    val lValueSize = lValue?.data?.size ?: 0
-
-    return (value != null && clock.instant() < value.expiryInstant) ||
-      (hValue != null && clock.instant() < hValue.expiryInstant) ||
-      (lValue != null && lValueSize > 0 && clock.instant() < lValue.expiryInstant)
+    return keyValueStore.containsKey(key)
   }
 
   override fun exists(vararg key: String): Long {
@@ -468,16 +475,13 @@ class FakeRedis @Inject constructor(
 
   override fun persist(key: String): Boolean {
     val value = keyValueStore[key]
-    val hValue = hKeyValueStore[key]
-    val lValue = lKeyValueStore[key]
 
-    when {
-      value != null -> value.expiryInstant = Instant.MAX
-      hValue != null -> hValue.expiryInstant = Instant.MAX
-      lValue != null -> lValue.expiryInstant = Instant.MAX
-      else -> return false
+    if (value != null) {
+      value.expiryInstant = Instant.MAX
+      return true
+    } else {
+      return false
     }
-    return true
   }
 
   @Synchronized
@@ -499,17 +503,13 @@ class FakeRedis @Inject constructor(
   @Synchronized
   override fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean {
     val value = keyValueStore[key]
-    val hValue = hKeyValueStore[key]
-    val lValue = lKeyValueStore[key]
-    val expiresAt = Instant.ofEpochMilli(timestampMilliseconds)
 
-    when {
-      value != null -> value.expiryInstant = expiresAt
-      hValue != null -> hValue.expiryInstant = expiresAt
-      lValue != null -> lValue.expiryInstant = expiresAt
-      else -> return false
+    if (value != null) {
+      value.expiryInstant = Instant.ofEpochMilli(timestampMilliseconds)
+      return true
+    } else {
+      return false
     }
-    return true
   }
 
   override fun watch(vararg keys: String) {
@@ -826,8 +826,6 @@ class FakeRedis @Inject constructor(
 
   override fun flushAll() {
     keyValueStore.clear()
-    hKeyValueStore.clear()
-    lKeyValueStore.clear()
   }
 
   private fun zaddInternal(
@@ -841,10 +839,10 @@ class FakeRedis @Inject constructor(
     var elementsChanged = 0L
     val trackChange = options.contains(CH)
 
-    if (!sortedSetKeyValueStore.containsKey(key)) {
-      sortedSetKeyValueStore[key] = Value(data = sortedMapOf(), expiryInstant = Instant.MAX)
+    if (!keyValueStore.containsKey(key)) {
+      keyValueStore[key] = Value.SortedSet(data = sortedMapOf(), expiryInstant = Instant.MAX)
     }
-    val sortedSet = sortedSetKeyValueStore[key]!!.data
+    val sortedSet = keyValueStore.getTyped<Value.SortedSet>(key)!!.data
     var currentScore: Double? = null
     var exists = false
 
@@ -939,10 +937,10 @@ class FakeRedis @Inject constructor(
   }
 
   override fun zscore(key: String, member: String): Double? {
-    if (sortedSetKeyValueStore[key] == null) return null
+    val sortedSet = keyValueStore.getTyped<Value.SortedSet>(key) ?: return null
 
     var currentScore: Double? = null
-    for (entries in sortedSetKeyValueStore[key]!!.data.entries) {
+    for (entries in sortedSet.data.entries) {
       if (entries.value.contains(member)) {
         currentScore = entries.key
         break
@@ -972,7 +970,7 @@ class FakeRedis @Inject constructor(
     reverse: Boolean,
     limit: ZRangeLimit?,
   ): List<Pair<ByteString?, Double>> {
-    val sortedSet = sortedSetKeyValueStore[key]?.data?.toSortedMap() ?: return listOf()
+    val sortedSet = keyValueStore.getTyped<Value.SortedSet>(key)?.data?.toSortedMap() ?: return listOf()
 
     val ansWithScore = when (type) {
       ZRangeType.INDEX ->
@@ -1001,7 +999,7 @@ class FakeRedis @Inject constructor(
     start: ZRangeRankMarker,
     stop: ZRangeRankMarker,
   ): Long {
-    val sortedSet = sortedSetKeyValueStore[key]?.data ?: return 0
+    val sortedSet = keyValueStore.getTyped<Value.SortedSet>(key)?.data ?: return 0
     val scores = sortedSet.keys.toList()
 
     val (minInt, maxInt, length) = getMinMaxIndex(sortedSet, start.longValue, stop.longValue)
@@ -1028,7 +1026,7 @@ class FakeRedis @Inject constructor(
       if (newMembers.isNotEmpty()) newSortedSet[score] = newMembers
     }
 
-    sortedSetKeyValueStore[key] = Value(data = newSortedSet, expiryInstant = Instant.MAX)
+    keyValueStore[key] = Value.SortedSet(data = newSortedSet, expiryInstant = Instant.MAX)
 
     return (length - added)
   }
@@ -1036,7 +1034,7 @@ class FakeRedis @Inject constructor(
   override fun zcard(
     key: String
   ): Long {
-    val sortedSet = sortedSetKeyValueStore[key]?.data ?: return 0
+    val sortedSet = keyValueStore.getTyped<Value.SortedSet>(key)?.data ?: return 0
     var length = 0L
     sortedSet.values.forEach { length += it.size }
     return length
