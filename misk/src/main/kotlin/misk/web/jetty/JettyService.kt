@@ -313,6 +313,7 @@ class JettyService @Inject internal constructor(
 
     // TODO(mmihic): Force security handler?
     val servletContextHandler = ServletContextHandler()
+    servletContextHandler.classLoader = Thread.currentThread().contextClassLoader
     servletContextHandler.addServlet(ServletHolder(webActionsServlet), "/*")
 
     JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null)
