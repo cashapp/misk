@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class DataSourceConfigTest {
-  private val dockerVitessPort = DefaultSettings.PORT;
+  private val dockerVitessPort = DefaultSettings.PORT
 
   @Test
   fun buildVitessJDBCUrlNoSSL() {
@@ -298,7 +298,7 @@ class DataSourceConfigTest {
       mysql_aws_secret_name = "secret_name",
     )
     assertEquals(
-      "jdbc:tracing:jdbc-secretsmanager:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
+      "jdbc-secretsmanager:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
           "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
           "sslMode=PREFERRED&enabledTLSProtocols=TLSv1.2,TLSv1.3&" +
           "secretId=secret_name&region=us-east-1",
