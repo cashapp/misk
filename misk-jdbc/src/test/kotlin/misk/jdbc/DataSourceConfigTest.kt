@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class DataSourceConfigTest {
-  private val dockerVitessPort = DefaultSettings.PORT;
+  private val dockerVitessPort = DefaultSettings.PORT
 
   @Test
   fun buildVitessJDBCUrlNoSSL() {
@@ -298,11 +298,45 @@ class DataSourceConfigTest {
       mysql_aws_secret_name = "secret_name",
     )
     assertEquals(
-      "jdbc:tracing:jdbc-secretsmanager:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
+      "jdbc-secretsmanager:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
           "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
           "sslMode=PREFERRED&enabledTLSProtocols=TLSv1.2,TLSv1.3&" +
           "secretId=secret_name&region=us-east-1",
       config.buildJdbcUrl(TESTING)
     )
+  }
+
+  @Test
+  fun testAwsSecretsManagerDriverSelection() {
+    val config = DataSourceConfig(
+      type = DataSourceType.MYSQL,
+      mysql_use_aws_secret_for_credentials = true,
+      mysql_aws_secret_name = "test-secret"
+    )
+
+    // Should use AWS Secrets Manager driver instead of TracingDriver
+    assertThat(config.getDriverClassName())
+      .isEqualTo("com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver")
+
+    // Should generate correct JDBC URL
+    val jdbcUrl = config.buildJdbcUrl(TESTING)
+    assertThat(jdbcUrl).startsWith("jdbc-secretsmanager:mysql://")
+    assertThat(jdbcUrl).contains("secretId=test-secret")
+  }
+
+  @Test
+  fun testNormalMysqlStillUsesTracingDriver() {
+    val config = DataSourceConfig(
+      type = DataSourceType.MYSQL,
+      mysql_use_aws_secret_for_credentials = false
+    )
+
+    // Should use TracingDriver for normal MySQL
+    assertThat(config.getDriverClassName())
+      .isEqualTo("io.opentracing.contrib.jdbc.TracingDriver")
+
+    // Should generate correct JDBC URL
+    val jdbcUrl = config.buildJdbcUrl(TESTING)
+    assertThat(jdbcUrl).startsWith("jdbc:tracing:mysql://")
   }
 }
