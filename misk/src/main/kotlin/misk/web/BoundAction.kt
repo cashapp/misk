@@ -27,7 +27,7 @@ import kotlin.reflect.full.findAnnotation
  * Decodes an HTTP request into a call to a web action, then encodes its response into an HTTP
  * response.
  */
-internal class BoundAction<A : WebAction>(
+class BoundAction<A : WebAction>(
   private val scope: ActionScope,
   private val webActionProvider: Provider<A>,
   private val networkInterceptors: List<NetworkInterceptor>,
@@ -105,7 +105,7 @@ internal class BoundAction<A : WebAction>(
     return true
   }
 
-  internal fun scopeAndHandle(
+  fun scopeAndHandle(
     request: HttpServletRequest,
     httpCall: HttpCall,
     pathMatcher: Matcher
@@ -120,9 +120,39 @@ internal class BoundAction<A : WebAction>(
       seedDataTransformers.fold(initialSeedData) { seedData, interceptor ->
         interceptor.transform(seedData)
       }
-    
+
     MDC.clear() // MDC should already be empty, but clear it again just in case
-    
+
+    try {
+      scope.enter(seedData).use {
+        handle(httpCall, pathMatcher)
+      }
+    } finally {
+      MDC.clear() // don't let any MDC tags leak to subsequent requests
+    }
+  }
+
+  /**
+   * Overload for non-Jetty environments (like Armeria) where HttpServletRequest is not available.
+   * Provides null for HttpServletRequest in seed data.
+   */
+  fun scopeAndHandle(
+    httpCall: HttpCall,
+    pathMatcher: Matcher
+  ) {
+    val initialSeedData = mapOf<Key<*>, Any?>(
+      keyOf<HttpServletRequest>() to null,
+      keyOf<HttpCall>() to httpCall,
+      keyOf<HttpRequest>() to httpCall,
+      keyOf<Action>() to action,
+    )
+    val seedData =
+      seedDataTransformers.fold(initialSeedData) { seedData, interceptor ->
+        interceptor.transform(seedData)
+      }
+
+    MDC.clear() // MDC should already be empty, but clear it again just in case
+
     try {
       scope.enter(seedData).use {
         handle(httpCall, pathMatcher)
@@ -199,7 +229,7 @@ internal class BoundAction<A : WebAction>(
 }
 
 /** Matches a request. Can be sorted to pick the most specific match amongst a set of candidates. */
-internal open class RequestMatch(
+open class RequestMatch(
   private val pathPattern: PathPattern,
   private val acceptedMediaRange: MediaRange,
   private val requestCharsetMatch: Boolean,
@@ -231,7 +261,7 @@ internal open class RequestMatch(
 }
 
 /** A [RequestMatch] associated with the action that matched. */
-internal class BoundActionMatch(
+class BoundActionMatch(
   val action: BoundAction<*>,
   val pathMatcher: Matcher,
   acceptedMediaRange: MediaRange,

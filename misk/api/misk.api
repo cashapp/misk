@@ -1219,6 +1219,24 @@ public final class misk/tracing/TracerExtKt {
 	public static final fun withNewScope (Lio/opentracing/Tracer;Lio/opentracing/Span;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
+public final class misk/web/BoundAction {
+	public fun <init> (Lmisk/scope/ActionScope;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;Lmisk/web/WebActionBinding;Ljava/util/List;Lmisk/web/ProtoDocumentationProvider;Lmisk/web/PathPattern;Lmisk/Action;)V
+	public final fun getAction ()Lmisk/Action;
+	public final fun getPathPattern ()Lmisk/web/PathPattern;
+	public final fun hasIdenticalRouting (Lmisk/web/BoundAction;)Z
+	public final fun match (Lmisk/web/DispatchMechanism;Lokhttp3/MediaType;Ljava/util/List;Lokhttp3/HttpUrl;)Lmisk/web/BoundActionMatch;
+	public final fun matchByUrl (Lokhttp3/HttpUrl;)Lmisk/web/BoundActionMatch;
+	public final fun scopeAndHandle (Ljavax/servlet/http/HttpServletRequest;Lmisk/web/HttpCall;Ljava/util/regex/Matcher;)V
+	public final fun scopeAndHandle (Lmisk/web/HttpCall;Ljava/util/regex/Matcher;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/BoundActionMatch : misk/web/RequestMatch {
+	public fun <init> (Lmisk/web/BoundAction;Ljava/util/regex/Matcher;Lmisk/web/mediatype/MediaRange;ZLokhttp3/MediaType;)V
+	public final fun getAction ()Lmisk/web/BoundAction;
+	public final fun getPathMatcher ()Ljava/util/regex/Matcher;
+}
+
 public final class misk/web/ConcurrencyLimiterConfig {
 	public fun <init> ()V
 	public fun <init> (Z)V
@@ -1511,6 +1529,13 @@ public final class misk/web/RequestDeadlinesConfig {
 	public fun toString ()Ljava/lang/String;
 }
 
+public class misk/web/RequestMatch : java/lang/Comparable {
+	public fun <init> (Lmisk/web/PathPattern;Lmisk/web/mediatype/MediaRange;ZLokhttp3/MediaType;)V
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public fun compareTo (Lmisk/web/RequestMatch;)I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/web/ResponseExtensionsKt {
 	public static final fun readUtf8 (Lmisk/web/Response;)Ljava/lang/String;
 	public static final fun toMisk (Lokhttp3/Response;)Lmisk/web/Response;
@@ -1534,6 +1559,27 @@ public final class misk/web/SocketAddress$Unix : misk/web/SocketAddress {
 
 public abstract interface class misk/web/UrlMatcher {
 	public abstract fun hasBoundAction (Ljava/lang/String;)Z
+}
+
+public final class misk/web/WebActionBinding {
+	public fun <init> (Lmisk/Action;Ljava/util/Set;Ljava/util/Set;Lmisk/web/FeatureBinding;Ljava/util/List;Lmisk/web/FeatureBinding;Lmisk/web/FeatureBinding;)V
+	public final fun afterCall (Lmisk/web/actions/WebAction;Lmisk/web/HttpCall;Ljava/util/regex/Matcher;Ljava/lang/Object;)V
+	public final fun beforeCall (Lmisk/web/actions/WebAction;Lmisk/web/HttpCall;Ljava/util/regex/Matcher;)Ljava/util/List;
+}
+
+public final class misk/web/WebActionBinding$Factory {
+	public fun <init> (Ljava/util/List;Ljava/util/List;)V
+	public final fun create (Lmisk/Action;Lmisk/web/PathPattern;)Lmisk/web/WebActionBinding;
+}
+
+public final class misk/web/WebActionBinding$RealClaimer : misk/web/FeatureBinding$Claimer {
+	public fun <init> (Lmisk/Action;)V
+	public fun claimParameter (I)V
+	public fun claimParameter (Lkotlin/reflect/KParameter;)V
+	public fun claimRequestBody ()V
+	public fun claimResponseBody ()V
+	public fun claimReturnValue ()V
+	public final fun getAction ()Lmisk/Action;
 }
 
 public abstract interface class misk/web/WebActionSeedDataTransformerFactory {
@@ -1789,6 +1835,17 @@ public final class misk/web/actions/StatusAction$ServerStatus {
 	public final fun getServiceStatus ()Ljava/util/Map;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/actions/WebActionFactory {
+	public static final field Companion Lmisk/web/actions/WebActionFactory$Companion;
+	public fun <init> (Lcom/google/inject/Injector;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lmisk/web/WebActionBinding$Factory;Lmisk/scope/ActionScope;Ljava/util/List;Ljava/util/Optional;)V
+	public final fun newBoundAction (Lkotlin/reflect/KClass;)Ljava/util/List;
+	public final fun newBoundAction (Lkotlin/reflect/KClass;Ljava/lang/String;)Ljava/util/List;
+	public static synthetic fun newBoundAction$default (Lmisk/web/actions/WebActionFactory;Lkotlin/reflect/KClass;Ljava/lang/String;ILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class misk/web/actions/WebActionFactory$Companion {
 }
 
 public final class misk/web/actions/WebActionsKt {

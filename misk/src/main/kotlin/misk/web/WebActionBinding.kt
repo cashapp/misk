@@ -10,7 +10,7 @@ import misk.web.extractors.StringConverter
 import kotlin.reflect.KParameter
 
 /** HTTP binding as specified by [FeatureBinding]. */
-internal class WebActionBinding @Inject constructor(
+class WebActionBinding @Inject constructor(
   private val action: Action,
   private val beforeCallBindings: Set<FeatureBinding>,
   private val afterCallBindings: Set<FeatureBinding>,
