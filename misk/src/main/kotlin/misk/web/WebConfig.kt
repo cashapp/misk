@@ -153,6 +153,9 @@ data class WebConfig @JvmOverloads constructor(
   /** The maximum allowed size in bytes for the HTTP request line and HTTP request headers. */
   val http_request_header_size: Int? = 32768,
 
+  /** The maximum allowed size in bytes for the HTTP response headers. */
+  val http_response_header_size: Int? = null,
+
   /** The size of Jetty's header field cache, in terms of unique character branches. */
   val http_header_cache_size: Int? = null,
 

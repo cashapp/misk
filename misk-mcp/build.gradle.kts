@@ -28,14 +28,17 @@ dependencies {
   implementation(libs.loggingApi)
   implementation(project(":misk-core"))
   implementation(project(":misk-logging"))
+  implementation(project(":misk-metrics"))
   implementation(libs.okHttp)
   implementation(libs.okio)
+  implementation(libs.prometheusClient)
 
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.kotlinxCoroutinesTest)
   testImplementation(libs.mockk)
   testImplementation(testFixtures(project(":misk-mcp")))
+  testImplementation(testFixtures(project(":misk-metrics")))
   testImplementation(project(":misk-testing"))
 
   testFixturesApi(libs.mcpKotlinSdkClient)
