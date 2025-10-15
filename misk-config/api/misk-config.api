@@ -5,7 +5,7 @@ public final class misk/config/AppNameModule : misk/inject/KAbstractModule {
 	public fun <init> (Ljava/lang/String;)V
 }
 
-public abstract interface class misk/config/Config : wisp/config/Config {
+public abstract interface class misk/config/Config {
 }
 
 public final class misk/config/ConfigModule : misk/inject/KAbstractModule {
