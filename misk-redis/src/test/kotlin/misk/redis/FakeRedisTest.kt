@@ -10,8 +10,12 @@ import org.junit.jupiter.api.Test
 import misk.time.FakeClock
 import java.time.Duration
 import jakarta.inject.Inject
+import org.junit.jupiter.api.assertThrows
 import kotlin.random.Random
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -163,7 +167,15 @@ class FakeRedisTest: AbstractRedisTest() {
     val expectedKeys = mutableSetOf<String>()
     for (i in 1..100) {
       expectedKeys.add(i.toString())
-      redis[i.toString()] = i.toString().encodeUtf8()
+      if (i <= 25) {
+        redis[i.toString()] = i.toString().encodeUtf8()
+      } else if (i <= 50) {
+        redis.hset(i.toString(), i.toString(), i.toString().encodeUtf8())
+      } else if (i <= 75) {
+        redis.lpush(i.toString(), i.toString().encodeUtf8())
+      } else {
+        redis.zadd(i.toString(), mapOf(i.toString() to i.toDouble()))
+      }
     }
 
     val scanResult = redis.scan("0")
@@ -207,4 +219,30 @@ class FakeRedisTest: AbstractRedisTest() {
     assertEquals(listOf("two", "one"), redis.lrange(key, 0, -1).map { it?.utf8() })
   }
 
+
+  @Test fun `cannot set same key multiple times with different data types`() {
+    val key = "mykey"
+    val value = "value".encodeUtf8()
+    redis[key] = value
+
+    assertEquals(value, redis[key])
+
+    assertFails {
+      redis.hset(key, "field", value)
+    }.also { exception ->
+      assertContains(exception.message!!, "WRONGTYPE")
+    }
+
+    assertFails {
+      redis.lpush(key, value)
+    }.also { exception ->
+      assertContains(exception.message!!, "WRONGTYPE")
+    }
+
+    assertFails {
+      redis.zadd(key, mapOf(value.toString() to 1.0))
+    }.also { exception ->
+      assertContains(exception.message!!, "WRONGTYPE")
+    }
+  }
 }
