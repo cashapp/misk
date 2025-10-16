@@ -18,10 +18,6 @@ import misk.mcp.internal.McpJson
 import misk.mcp.internal.generateJsonSchema
 import misk.mcp.util.resolveTypeArgument
 import kotlin.reflect.KClass
-import kotlin.reflect.KType
-import kotlin.reflect.KTypeParameter
-import kotlin.reflect.KTypeProjection
-import kotlin.reflect.full.createType
 
 /**
  * Base class for tools in the Model Context Protocol (MCP) specification with type-safe input handling.
@@ -292,7 +288,7 @@ abstract class McpTool<I : Any> {
   abstract suspend fun handle(input: I): ToolResult
 
   private val inputClass: KClass<I> by lazy {
-    resolveTypeArgument<McpTool<*>>(this::class, 0).classifier as KClass<I>
+    this::class.resolveTypeArgument<McpTool<*>>(0).classifier as KClass<I>
   }
 }
 
@@ -540,6 +536,6 @@ abstract class StructuredMcpTool<I : Any, O : Any> : McpTool<I>() {
   }
 
   private val outputClass: KClass<O> by lazy {
-    resolveTypeArgument<StructuredMcpTool<*, *>>(this::class, 1).classifier as KClass<O>
+    this::class.resolveTypeArgument<StructuredMcpTool<*, *>>(1).classifier as KClass<O>
   }
 }

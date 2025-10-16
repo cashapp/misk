@@ -7,14 +7,10 @@ import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.createType
 
 /**
- * Resolves the type argument at [argumentIndex] of [T] as used by [concreteClass].
+ * Resolves the type argument at [argumentIndex] of [T] as used by [this@resolveTypeArgument].
  */
-internal inline fun <reified T> resolveTypeArgument(
-  concreteClass: KClass<*>,
-  argumentIndex: Int
-): KType {
-  return resolveTypeArgument(concreteClass, T::class, argumentIndex)
-}
+internal inline fun <reified T> KClass<*>.resolveTypeArgument(argumentIndex: Int): KType =
+  resolveTypeArgument(this, T::class, argumentIndex)
 
 internal fun resolveTypeArgument(
   concreteClass: KClass<*>,
