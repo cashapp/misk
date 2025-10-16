@@ -292,7 +292,7 @@ abstract class McpTool<I : Any> {
   abstract suspend fun handle(input: I): ToolResult
 
   private val inputClass: KClass<I> by lazy {
-    resolveTypeArgument(this::class, McpTool::class, 0).classifier as KClass<I>
+    resolveTypeArgument<McpTool<*>>(this::class, 0).classifier as KClass<I>
   }
 }
 
@@ -540,6 +540,6 @@ abstract class StructuredMcpTool<I : Any, O : Any> : McpTool<I>() {
   }
 
   private val outputClass: KClass<O> by lazy {
-    resolveTypeArgument(this::class, StructuredMcpTool::class, 1).classifier as KClass<O>
+    resolveTypeArgument<StructuredMcpTool<*, *>>(this::class, 1).classifier as KClass<O>
   }
 }
