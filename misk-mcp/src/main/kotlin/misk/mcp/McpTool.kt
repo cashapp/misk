@@ -17,6 +17,7 @@ import misk.annotation.ExperimentalMiskApi
 import misk.mcp.internal.McpJson
 import misk.mcp.internal.generateJsonSchema
 import kotlin.reflect.KClass
+import kotlin.reflect.full.allSupertypes
 
 /**
  * Base class for tools in the Model Context Protocol (MCP) specification with type-safe input handling.
@@ -288,7 +289,7 @@ abstract class McpTool<I : Any> {
 
   private val inputClass: KClass<I> by lazy {
     @Suppress("UNCHECKED_CAST")
-    this::class.supertypes
+    this::class.allSupertypes
       .first { type ->
         (type.classifier as? KClass<*>)?.simpleName?.let { simpleName ->
           simpleName == McpTool::class.simpleName
@@ -544,7 +545,7 @@ abstract class StructuredMcpTool<I : Any, O : Any> : McpTool<I>() {
 
   private val outputClass: KClass<O> by lazy {
     @Suppress("UNCHECKED_CAST")
-    this::class.supertypes
+    this::class.allSupertypes
       .first { type ->
         (type.classifier as? KClass<*>)?.simpleName?.let { simpleName ->
           simpleName == StructuredMcpTool::class.simpleName

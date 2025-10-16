@@ -28,9 +28,12 @@ import misk.mcp.testing.asMcpClient
 import misk.mcp.tools.CalculatorTool
 import misk.mcp.tools.CalculatorToolInput.Operation
 import misk.mcp.tools.CalculatorToolOutput
+import misk.mcp.tools.HierarchicalTool
+import misk.mcp.tools.HierarchicalToolOutput
 import misk.mcp.tools.KotlinSdkTool
 import misk.mcp.tools.ThrowingTool
 import misk.mcp.tools.callCalculatorTool
+import misk.mcp.tools.callHierarchicalTool
 import misk.mcp.tools.callThrowingTool
 import misk.metrics.summaryCount
 import misk.testing.MiskTest
@@ -69,9 +72,9 @@ internal class McpServerActionTest {
     val request = ListToolsRequest()
     val response = mcpClient.listTools(request)
     assertEquals(
-      expected = 3,
+      expected = 4,
       actual = response.tools.size,
-      message = "Expecting three tools to be registered",
+      message = "Expecting four tools to be registered",
     )
 
     // Check calculator tool
@@ -333,6 +336,19 @@ internal class McpServerActionTest {
       )
     ).isEqualTo(1.0)
   }
+
+  @Test
+  fun `test hierarchical tool`(): Unit = runBlocking {
+    val mcpClient = okHttpClient.asMcpClient(jettyService.httpServerUrl, "/mcp")
+
+    val response = mcpClient.callHierarchicalTool()
+
+    val structuredResult = McpJson.decodeFromJsonElement<HierarchicalToolOutput>(
+      assertNotNull(response?.structuredContent),
+    )
+    
+    assertThat(structuredResult).isEqualTo(HierarchicalToolOutput("test"))
+  }
 }
 
 val mcpServerActionTestConfig = McpConfig(
@@ -364,6 +380,7 @@ class McpServerActionTestModule : KAbstractModule() {
     install(McpToolModule.create<CalculatorTool>())
     install(McpToolModule.create<KotlinSdkTool>())
     install(McpToolModule.create<ThrowingTool>())
+    install(McpToolModule.create<HierarchicalTool>())
     install(McpPromptModule.create<KotlinDeveloperPrompt>())
     install(McpResourceModule.create<WebSearchResource>())
 
