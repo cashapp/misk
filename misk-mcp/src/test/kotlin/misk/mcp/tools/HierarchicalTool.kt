@@ -23,8 +23,7 @@ data class HierarchicalToolOutput(
 )
 
 @OptIn(ExperimentalMiskApi::class)
-class HierarchicalTool @Inject constructor() :
-  AbstractTool<HierarchicalToolInput, HierarchicalToolOutput>() {
+class HierarchicalTool @Inject constructor() : AbstractTool<HierarchicalToolInput>() {
   override val name = "hierarchical"
   override val description =
     """A tool that implements StructuredMcpTool transitively instead of directly. 
@@ -36,7 +35,7 @@ class HierarchicalTool @Inject constructor() :
 }
 
 @OptIn(ExperimentalMiskApi::class)
-abstract class AbstractTool<I : Any, O : Any> : StructuredMcpTool<I, O>()
+abstract class AbstractTool<I : Any> : StructuredMcpTool<I, HierarchicalToolOutput>()
 
 suspend fun Client.callHierarchicalTool() = callTool(
   name = "hierarchical",
