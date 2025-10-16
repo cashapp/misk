@@ -59,6 +59,7 @@ abstract class AbstractRedisTest {
     val value = "value".encodeUtf8()
     val value2 = "value2".encodeUtf8()
     val unknownKey = "this key doesn't exist"
+    val hashKey = "hashKey"
 
     assertThat(redis.mget(key)).isEqualTo(listOf(null))
     assertThat(redis.mget(key, key2)).isEqualTo(listOf(null, null))
@@ -67,15 +68,17 @@ abstract class AbstractRedisTest {
     assertThat(redis.mget(key)).isEqualTo(listOf(firstValue))
 
     redis.mset(key.encodeUtf8(), value, key2.encodeUtf8(), value2)
+    redis.hset(hashKey, "field", value)
     assertThat(redis.mget(key)).isEqualTo(listOf(value))
     assertThat(redis.mget(key, key2)).isEqualTo(listOf(value, value2))
     assertThat(redis.mget(key2, key)).isEqualTo(listOf(value2, value))
-    assertThat(redis.mget(key, unknownKey, key2, key))
-      .isEqualTo(listOf(value, null, value2, value))
+    assertThat(redis.mget(key, unknownKey, key2, hashKey, key))
+      .isEqualTo(listOf(value, null, value2, null, value))
 
     assertThat(redis[key]).isEqualTo(value)
     assertThat(redis[key2]).isEqualTo(value2)
     assertThat(redis[unknownKey]).isNull()
+    assertThat(redis.hget(hashKey, "field")).isEqualTo(value)
   }
 
   @Test fun hsetReturnsCorrectValues() {

@@ -148,6 +148,14 @@ data class DataSourceConfig @JvmOverloads constructor(
       }
     }
   }
+  fun getDriverClassName(): String {
+    return if (mysql_use_aws_secret_for_credentials) {
+      "com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver"
+    } else {
+      type.driverClassName
+    }
+  }
+
   fun withDefaults(): DataSourceConfig {
     val server_hostname = ContainerUtil.dockerTargetOrLocalIp()
     return when (type) {
@@ -288,8 +296,7 @@ data class DataSourceConfig @JvmOverloads constructor(
         if(mysql_use_aws_secret_for_credentials) {
           val region = "us-east-1"
           queryParams += "&secretId=$mysql_aws_secret_name&region=$region"
-          Class.forName( "com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver" )
-          "jdbc:tracing:jdbc-secretsmanager:mysql://${config.host}:${config.port}/${config.database}$queryParams"
+          "jdbc-secretsmanager:mysql://${config.host}:${config.port}/${config.database}$queryParams"
         }
         else {
           "jdbc:tracing:mysql://${config.host}:${config.port}/${config.database}$queryParams"
