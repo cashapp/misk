@@ -16,7 +16,12 @@ import kotlinx.serialization.serializer
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.internal.McpJson
 import misk.mcp.internal.generateJsonSchema
+import misk.mcp.util.resolveTypeArgument
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.KTypeParameter
+import kotlin.reflect.KTypeProjection
+import kotlin.reflect.full.createType
 
 /**
  * Base class for tools in the Model Context Protocol (MCP) specification with type-safe input handling.
@@ -287,15 +292,7 @@ abstract class McpTool<I : Any> {
   abstract suspend fun handle(input: I): ToolResult
 
   private val inputClass: KClass<I> by lazy {
-    @Suppress("UNCHECKED_CAST")
-    this::class.supertypes
-      .first { type ->
-        (type.classifier as? KClass<*>)?.simpleName?.let { simpleName ->
-          simpleName == McpTool::class.simpleName
-            || simpleName == StructuredMcpTool::class.simpleName
-        } ?: false
-      }
-      .arguments.first().type!!.classifier as KClass<I>
+    resolveTypeArgument(this::class, McpTool::class, 0).classifier as KClass<I>
   }
 }
 
@@ -543,13 +540,6 @@ abstract class StructuredMcpTool<I : Any, O : Any> : McpTool<I>() {
   }
 
   private val outputClass: KClass<O> by lazy {
-    @Suppress("UNCHECKED_CAST")
-    this::class.supertypes
-      .first { type ->
-        (type.classifier as? KClass<*>)?.simpleName?.let { simpleName ->
-          simpleName == StructuredMcpTool::class.simpleName
-        } ?: false
-      }
-      .arguments.last().type!!.classifier as KClass<O>
+    resolveTypeArgument(this::class, StructuredMcpTool::class, 1).classifier as KClass<O>
   }
 }
