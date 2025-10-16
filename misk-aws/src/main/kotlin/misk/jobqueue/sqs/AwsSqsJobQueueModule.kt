@@ -36,7 +36,7 @@ open class AwsSqsJobQueueModule(
   private val config: AwsSqsJobQueueConfig
 ) : AsyncKAbstractModule() {
   override fun configure() {
-    install(CommonModule(config))
+    install(CommonModule(config, ::configureSyncClient, ::configureAsyncClient))
 
     install(ServiceModule(keyOf<RepeatedTaskQueue>(ForSqsHandling::class)).dependsOn<ReadyService>())
 
@@ -60,10 +60,20 @@ open class AwsSqsJobQueueModule(
   }
 
   @OptIn(ExperimentalMiskApi::class)
-  override fun moduleWhenAsyncDisabled(): KAbstractModule = CommonModule(config)
+  override fun moduleWhenAsyncDisabled(): KAbstractModule = CommonModule(
+    config,
+    ::configureSyncClient,
+    ::configureAsyncClient
+  )
+
+  open fun <BuilderT : AwsClientBuilder<BuilderT, ClientT>, ClientT> configureClient(builder: BuilderT) {}
+  private fun configureSyncClient(builder: AmazonSQSClientBuilder) = configureClient(builder)
+  private fun configureAsyncClient(builder: AmazonSQSAsyncClientBuilder) = configureClient(builder)
 
   private class CommonModule(
-    private val config: AwsSqsJobQueueConfig
+    private val config: AwsSqsJobQueueConfig,
+    private val configureSyncClient: (AmazonSQSClientBuilder) -> Unit,
+    private val configureAsyncClient: (AmazonSQSAsyncClientBuilder) -> Unit
   ) : KAbstractModule() {
     override fun configure() {
       requireBinding<AWSCredentialsProvider>()
@@ -85,7 +95,7 @@ open class AwsSqsJobQueueModule(
         .distinct()
         .forEach {
           regionSpecificClientBinder.addBinding(it).toProvider(
-            AmazonSQSProvider(config, it, false, ::configureSyncClient, ::configureAsyncClient),
+            AmazonSQSProvider(config, it, false, configureSyncClient, configureAsyncClient),
           )
         }
       val regionSpecificClientBinderForReceiving =
@@ -101,8 +111,8 @@ open class AwsSqsJobQueueModule(
                 config,
                 it,
                 true,
-                ::configureSyncClient,
-                ::configureAsyncClient,
+                configureSyncClient,
+                configureAsyncClient,
               ),
             )
         }
@@ -122,7 +132,7 @@ open class AwsSqsJobQueueModule(
       credentials: AWSCredentialsProvider,
       features: FeatureFlags
     ): AmazonSQS {
-      return buildClient(appName, config, credentials, region, features, ::configureAsyncClient)
+      return buildClient(appName, config, credentials, region, features, configureAsyncClient)
     }
 
     @Provides
@@ -132,12 +142,8 @@ open class AwsSqsJobQueueModule(
       region: AwsRegion,
       credentials: AWSCredentialsProvider
     ): AmazonSQS {
-      return buildReceivingClient(credentials, region, ::configureSyncClient)
+      return buildReceivingClient(credentials, region, configureSyncClient)
     }
-
-    private fun <BuilderT : AwsClientBuilder<BuilderT, ClientT>, ClientT> configureClient(builder: BuilderT) {}
-    private fun configureSyncClient(builder: AmazonSQSClientBuilder) = configureClient(builder)
-    private fun configureAsyncClient(builder: AmazonSQSAsyncClientBuilder) = configureClient(builder)
 
     @Provides
     @ForSqsHandling
@@ -181,8 +187,6 @@ open class AwsSqsJobQueueModule(
       }
     }
   }
-
-  open fun <BuilderT : AwsClientBuilder<BuilderT, ClientT>, ClientT> configureClient(builder: BuilderT) {}
 
   companion object {
     /** Build an unbuffered [AmazonSQS] client for receiving messages. */
