@@ -685,6 +685,11 @@ public final class misk/redis/testing/FakeRedis$FakePipelinedRedis : misk/redis/
 public abstract interface annotation class misk/redis/testing/ForFakeRedis : java/lang/annotation/Annotation {
 }
 
+public final class misk/redis/testing/RealRedisTestModule : misk/inject/KAbstractModule {
+	public fun <init> (Lmisk/redis/RedisReplicationGroupConfig;Lredis/clients/jedis/ConnectionPoolConfig;Z)V
+	public synthetic fun <init> (Lmisk/redis/RedisReplicationGroupConfig;Lredis/clients/jedis/ConnectionPoolConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
 public final class misk/redis/testing/RedisFlushService : com/google/common/util/concurrent/AbstractIdleService, misk/testing/TestFixture {
 	public static final field Companion Lmisk/redis/testing/RedisFlushService$Companion;
 	public fun <init> ()V
