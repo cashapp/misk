@@ -14,12 +14,10 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
-import misk.annotation.ExperimentalMiskApi
 import misk.cloud.aws.AwsRegion
 import misk.concurrent.ExecutorServiceModule
 import misk.config.AppName
 import misk.feature.FeatureFlags
-import misk.inject.AsyncKAbstractModule
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
 import misk.jobqueue.JobConsumer
@@ -34,9 +32,18 @@ import wisp.lease.LeaseManager
 /** [AwsSqsJobQueueModule] installs job queue support provided by SQS. */
 open class AwsSqsJobQueueModule(
   private val config: AwsSqsJobQueueConfig
-) : AsyncKAbstractModule() {
+) : KAbstractModule() {
   override fun configure() {
-    install(CommonModule(config))
+    requireBinding<AWSCredentialsProvider>()
+    requireBinding<AwsRegion>()
+    requireBinding<LeaseManager>()
+    requireBinding<FeatureFlags>()
+
+    bind<AwsSqsJobQueueConfig>().toInstance(config)
+
+    bind<JobConsumer>().to<SqsJobConsumer>()
+    bind<JobQueue>().to<SqsJobQueue>()
+    bind<TransactionalJobQueue>().to<SqsTransactionalJobQueue>()
 
     install(ServiceModule(keyOf<RepeatedTaskQueue>(ForSqsHandling::class)).dependsOn<ReadyService>())
 
@@ -45,8 +52,8 @@ open class AwsSqsJobQueueModule(
     install(
       ExecutorServiceModule.withUnboundThreadPool(
         ForSqsHandling::class,
-        "sqs-consumer-%d",
-      ),
+        "sqs-consumer-%d"
+      )
     )
 
     // We use an unbounded thread pool for number of receivers, as this will be controlled dynamically
@@ -54,135 +61,107 @@ open class AwsSqsJobQueueModule(
     install(
       ExecutorServiceModule.withUnboundThreadPool(
         ForSqsReceiving::class,
-        "sqs-receiver-%d",
-      ),
+        "sqs-receiver-%d"
+      )
+    )
+
+    // Bind a map of AmazonSQS clients for each external region that we need to contact
+    val regionSpecificClientBinder = newMapBinder<AwsRegion, AmazonSQS>()
+    config.external_queues
+      .mapNotNull { (_, config) -> config.region }
+      .map { AwsRegion(it) }
+      .distinct()
+      .forEach {
+        regionSpecificClientBinder.addBinding(it).toProvider(
+          AmazonSQSProvider(config, it, false, ::configureSyncClient, ::configureAsyncClient)
+        )
+      }
+    val regionSpecificClientBinderForReceiving =
+      newMapBinder<AwsRegion, AmazonSQS>(ForSqsReceiving::class)
+    config.external_queues
+      .mapNotNull { (_, config) -> config.region }
+      .map { AwsRegion(it) }
+      .distinct()
+      .forEach {
+        regionSpecificClientBinderForReceiving.addBinding(it)
+          .toProvider(
+            AmazonSQSProvider(
+              config,
+              it,
+              true,
+              ::configureSyncClient,
+              ::configureAsyncClient
+            )
+          )
+      }
+
+    // Bind the configs for external queues
+    val externalQueueConfigBinder = newMapBinder<QueueName, AwsSqsQueueConfig>()
+    config.external_queues.map { QueueName(it.key) to it.value }.forEach { (queueName, config) ->
+      externalQueueConfigBinder.addBinding(queueName).toInstance(config)
+    }
+  }
+
+  @Provides
+  @Singleton
+  fun provideSQSClient(
+    @AppName appName: String,
+    region: AwsRegion,
+    credentials: AWSCredentialsProvider,
+    features: FeatureFlags
+  ): AmazonSQS {
+    return buildClient(appName, config, credentials, region, features, ::configureAsyncClient)
+  }
+
+  @Provides
+  @Singleton
+  @ForSqsReceiving
+  fun provideSQSClientForReceiving(
+    region: AwsRegion,
+    credentials: AWSCredentialsProvider
+  ): AmazonSQS {
+    return buildReceivingClient(credentials, region, ::configureSyncClient)
+  }
+
+  @Provides
+  @ForSqsHandling
+  @Singleton
+  fun consumerRepeatedTaskQueue(
+    queueFactory: RepeatedTaskQueueFactory,
+    config: AwsSqsJobQueueConfig
+  ): RepeatedTaskQueue {
+    return queueFactory.new(
+      "sqs-consumer-poller",
+      repeatedTaskQueueConfig(config)
     )
   }
 
-  @OptIn(ExperimentalMiskApi::class)
-  override fun moduleWhenAsyncDisabled(): KAbstractModule = CommonModule(config)
+  private fun repeatedTaskQueueConfig(config: AwsSqsJobQueueConfig) =
+    config.task_queue ?: RepeatedTaskQueueConfig(num_parallel_tasks = -1)
 
-  private class CommonModule(
-    private val config: AwsSqsJobQueueConfig
-  ) : KAbstractModule() {
-    override fun configure() {
-      requireBinding<AWSCredentialsProvider>()
-      requireBinding<AwsRegion>()
-      requireBinding<LeaseManager>()
-      requireBinding<FeatureFlags>()
+  open fun <BuilderT : AwsClientBuilder<BuilderT, ClientT>, ClientT> configureClient(builder: BuilderT) {}
+  private fun configureSyncClient(builder: AmazonSQSClientBuilder) = configureClient(builder)
+  private fun configureAsyncClient(builder: AmazonSQSAsyncClientBuilder) = configureClient(builder)
 
-      bind<AwsSqsJobQueueConfig>().toInstance(config)
+  private class AmazonSQSProvider(
+    val config: AwsSqsJobQueueConfig,
+    val region: AwsRegion,
+    val forSqsReceiving: Boolean,
+    val configureClient: (AmazonSQSClientBuilder) -> Unit,
+    val configureAsyncClient: (AmazonSQSAsyncClientBuilder) -> Unit
+  ) : Provider<AmazonSQS> {
+    @Inject lateinit var credentials: AWSCredentialsProvider
+    @Inject lateinit var features: FeatureFlags
+    @Inject @AppName lateinit var appName: String
 
-      bind<JobConsumer>().to<SqsJobConsumer>()
-      bind<JobQueue>().to<SqsJobQueue>()
-      bind<TransactionalJobQueue>().to<SqsTransactionalJobQueue>()
-
-      // Bind a map of AmazonSQS clients for each external region that we need to contact
-      val regionSpecificClientBinder = newMapBinder<AwsRegion, AmazonSQS>()
-      config.external_queues
-        .mapNotNull { (_, config) -> config.region }
-        .map { AwsRegion(it) }
-        .distinct()
-        .forEach {
-          regionSpecificClientBinder.addBinding(it).toProvider(
-            AmazonSQSProvider(config, it, false, ::configureSyncClient, ::configureAsyncClient),
-          )
-        }
-      val regionSpecificClientBinderForReceiving =
-        newMapBinder<AwsRegion, AmazonSQS>(ForSqsReceiving::class)
-      config.external_queues
-        .mapNotNull { (_, config) -> config.region }
-        .map { AwsRegion(it) }
-        .distinct()
-        .forEach {
-          regionSpecificClientBinderForReceiving.addBinding(it)
-            .toProvider(
-              AmazonSQSProvider(
-                config,
-                it,
-                true,
-                ::configureSyncClient,
-                ::configureAsyncClient,
-              ),
-            )
-        }
-
-      // Bind the configs for external queues
-      val externalQueueConfigBinder = newMapBinder<QueueName, AwsSqsQueueConfig>()
-      config.external_queues.map { QueueName(it.key) to it.value }.forEach { (queueName, config) ->
-        externalQueueConfigBinder.addBinding(queueName).toInstance(config)
-      }
-    }
-
-    @Provides
-    @Singleton
-    fun provideSQSClient(
-      @AppName appName: String,
-      region: AwsRegion,
-      credentials: AWSCredentialsProvider,
-      features: FeatureFlags
-    ): AmazonSQS {
-      return buildClient(appName, config, credentials, region, features, ::configureAsyncClient)
-    }
-
-    @Provides
-    @Singleton
-    @ForSqsReceiving
-    fun provideSQSClientForReceiving(
-      region: AwsRegion,
-      credentials: AWSCredentialsProvider
-    ): AmazonSQS {
-      return buildReceivingClient(credentials, region, ::configureSyncClient)
-    }
-
-    private fun <BuilderT : AwsClientBuilder<BuilderT, ClientT>, ClientT> configureClient(builder: BuilderT) {}
-    private fun configureSyncClient(builder: AmazonSQSClientBuilder) = configureClient(builder)
-    private fun configureAsyncClient(builder: AmazonSQSAsyncClientBuilder) = configureClient(builder)
-
-    @Provides
-    @ForSqsHandling
-    @Singleton
-    fun consumerRepeatedTaskQueue(
-      queueFactory: RepeatedTaskQueueFactory,
-      config: AwsSqsJobQueueConfig
-    ): RepeatedTaskQueue {
-      return queueFactory.new(
-        "sqs-consumer-poller",
-        repeatedTaskQueueConfig(config),
-      )
-    }
-
-    private fun repeatedTaskQueueConfig(config: AwsSqsJobQueueConfig) =
-      config.task_queue ?: RepeatedTaskQueueConfig(num_parallel_tasks = -1)
-
-    private class AmazonSQSProvider(
-      val config: AwsSqsJobQueueConfig,
-      val region: AwsRegion,
-      val forSqsReceiving: Boolean,
-      val configureClient: (AmazonSQSClientBuilder) -> Unit,
-      val configureAsyncClient: (AmazonSQSAsyncClientBuilder) -> Unit
-    ) : Provider<AmazonSQS> {
-      @Inject
-      lateinit var credentials: AWSCredentialsProvider
-
-      @Inject
-      lateinit var features: FeatureFlags
-
-      @Inject
-      @AppName
-      lateinit var appName: String
-
-      override fun get(): AmazonSQS {
-        return if (forSqsReceiving) {
-          buildReceivingClient(credentials, region, configureClient)
-        } else {
-          buildClient(appName, config, credentials, region, features, configureAsyncClient)
-        }
+    override fun get(): AmazonSQS {
+      return if (forSqsReceiving) {
+        buildReceivingClient(credentials, region, configureClient)
+      } else {
+        buildClient(appName, config, credentials, region, features, configureAsyncClient)
       }
     }
   }
-
-  open fun <BuilderT : AwsClientBuilder<BuilderT, ClientT>, ClientT> configureClient(builder: BuilderT) {}
 
   companion object {
     /** Build an unbuffered [AmazonSQS] client for receiving messages. */
