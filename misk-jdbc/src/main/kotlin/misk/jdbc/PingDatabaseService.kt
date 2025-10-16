@@ -65,7 +65,7 @@ class PingDatabaseService @Inject constructor(
 
   private fun createDataSource(jdbcUrl: String): DriverDataSource {
     return DriverDataSource(
-            jdbcUrl, config.type.driverClassName, Properties(), config.username, config.password)
+            jdbcUrl, config.getDriverClassName(), Properties(), config.username, config.password)
   }
 
   /** Kotlin thinks getConnection() is a val but it's really a function. */
