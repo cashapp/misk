@@ -19,6 +19,13 @@ public final class wisp/lease/ExtensionsKt {
 	public static synthetic fun acquireOrNull$default (Lwisp/lease/LeaseManager;Ljava/lang/String;ZILjava/lang/Object;)Lwisp/lease/AutoCloseableLease;
 }
 
+public abstract interface class wisp/lease/LeaderLeaseManager : wisp/lease/LeaseManager {
+}
+
+public final class wisp/lease/LeaderLeaseManager$DefaultImpls {
+	public static fun releaseAll (Lwisp/lease/LeaderLeaseManager;)V
+}
+
 public abstract interface class wisp/lease/Lease {
 	public abstract fun acquire ()Z
 	public abstract fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
@@ -42,5 +49,19 @@ public abstract interface class wisp/lease/LeaseManager {
 
 public final class wisp/lease/LeaseManager$DefaultImpls {
 	public static fun releaseAll (Lwisp/lease/LeaseManager;)V
+}
+
+public abstract interface class wisp/lease/LoadBalancedLeaseManager : wisp/lease/LeaseManager {
+}
+
+public final class wisp/lease/LoadBalancedLeaseManager$DefaultImpls {
+	public static fun releaseAll (Lwisp/lease/LoadBalancedLeaseManager;)V
+}
+
+public abstract interface class wisp/lease/PersistentLeaseManager : wisp/lease/LeaseManager {
+}
+
+public final class wisp/lease/PersistentLeaseManager$DefaultImpls {
+	public static fun releaseAll (Lwisp/lease/PersistentLeaseManager;)V
 }
 
