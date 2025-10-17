@@ -57,7 +57,8 @@ internal class VitessSchemaApplier(
     hostname = hostname,
     mysqlPort = mysqlPort,
     dbaUser = dbaUser,
-    dbaUserPassword = dbaUserPassword)
+    dbaUserPassword = dbaUserPassword,
+    debugStartup = debugStartup)
 
 
   /**
