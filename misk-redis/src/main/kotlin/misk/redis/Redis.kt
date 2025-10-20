@@ -568,6 +568,11 @@ interface Redis {
   fun flushAll()
 
   /**
+   * Flushes the current database only.
+   */
+  fun flushDB()
+
+  /**
    * Adds the specified [member] with the specified [score] to the sorted set at the [key].
    * If a specified [member] is already a member of the sorted set, the [score] is updated and the
    * element reinserted at the right position to ensure the correct ordering.
