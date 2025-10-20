@@ -828,6 +828,10 @@ class FakeRedis @Inject constructor(
     keyValueStore.clear()
   }
 
+  override fun flushDB() {
+    flushAll()
+  }
+
   private fun zaddInternal(
     key: String,
     score: Double,

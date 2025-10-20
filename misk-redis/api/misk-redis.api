@@ -74,6 +74,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun expire (Ljava/lang/String;J)Z
 	public fun expireAt (Ljava/lang/String;J)Z
 	public fun flushAll ()V
+	public fun flushDB ()V
 	public fun get (Ljava/lang/String;)Lokio/ByteString;
 	public final fun getClock ()Ljava/time/Clock;
 	public fun getDel (Ljava/lang/String;)Lokio/ByteString;
@@ -148,6 +149,7 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun expire (Ljava/lang/String;J)Z
 	public fun expireAt (Ljava/lang/String;J)Z
 	public fun flushAll ()V
+	public fun flushDB ()V
 	public fun get (Ljava/lang/String;)Lokio/ByteString;
 	public fun getDel (Ljava/lang/String;)Lokio/ByteString;
 	public fun hdel (Ljava/lang/String;[Ljava/lang/String;)J
@@ -217,6 +219,7 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun expire (Ljava/lang/String;J)Z
 	public abstract fun expireAt (Ljava/lang/String;J)Z
 	public abstract fun flushAll ()V
+	public abstract fun flushDB ()V
 	public abstract fun get (Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun getDel (Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun hdel (Ljava/lang/String;[Ljava/lang/String;)J
@@ -573,6 +576,7 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis, misk/testing
 	public fun expire (Ljava/lang/String;J)Z
 	public fun expireAt (Ljava/lang/String;J)Z
 	public fun flushAll ()V
+	public fun flushDB ()V
 	public fun get (Ljava/lang/String;)Lokio/ByteString;
 	public fun getDel (Ljava/lang/String;)Lokio/ByteString;
 	public fun hdel (Ljava/lang/String;[Ljava/lang/String;)J
