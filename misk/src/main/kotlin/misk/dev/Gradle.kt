@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 fun runGradleAsyncCompile(projectDir : String, compilationComplete: () -> Unit, additionalGradleArgs: List<String>) {
   val t = Thread {
     val pb = ProcessBuilder(listOf("gradle", "classes", "--continuous") + additionalGradleArgs)
+    pb.environment().put("MISK_HOT_RELOAD", "true")
     pb.directory(File(projectDir))
 
     val first = AtomicBoolean(false)
