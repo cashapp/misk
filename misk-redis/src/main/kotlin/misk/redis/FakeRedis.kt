@@ -516,6 +516,10 @@ class FakeRedis : Redis {
     lKeyValueStore.clear()
   }
 
+  override fun flushDB() {
+    flushAll()
+  }
+
   override fun zadd(
     key: String,
     score: Double,

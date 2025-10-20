@@ -454,6 +454,10 @@ class RealRedis(
     unifiedJedis.flushAllWithClusterSupport(logger)
   }
 
+  override fun flushDB() {
+    unifiedJedis.flushDB()
+  }
+
   override fun zadd(
     key: String,
     score: Double,

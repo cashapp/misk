@@ -27,6 +27,7 @@ class RealRedisTestModule(
         RedisModule(redisReplicationGroupConfig, connectionPoolConfig, useSsl)
       ).with(TestUnifiedJedisModule(connectionPoolConfig, useSsl))
     )
+    install(RedisTestFlushModule())
   }
 }
 
