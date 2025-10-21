@@ -108,6 +108,11 @@ public abstract class misk/hibernate/HibernateEntityModule : misk/inject/KAbstra
 	protected final fun installHibernateAdminDashboardWebActions ()V
 }
 
+public final class misk/hibernate/HibernateExceptionClassifier : misk/jdbc/DefaultExceptionClassifier {
+	public fun <init> ()V
+	public fun isRetryable (Ljava/lang/Throwable;)Z
+}
+
 public final class misk/hibernate/HibernateExceptionLogLevelConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Lorg/slf4j/event/Level;)V
