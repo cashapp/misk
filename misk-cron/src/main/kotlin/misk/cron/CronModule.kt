@@ -7,14 +7,16 @@ import jakarta.inject.Qualifier
 import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
+import misk.annotation.ExperimentalMiskApi
 import misk.concurrent.ExecutorServiceModule
+import misk.inject.AsyncKInstallOnceModule
 import misk.inject.KAbstractModule
 import misk.inject.KInstallOnceModule
 import misk.inject.toKey
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
-import java.time.ZoneId
 import wisp.lease.LeaseManager
+import java.time.ZoneId
 
 /**
  * Provides cron scheduling functionality for Misk services.
@@ -33,16 +35,16 @@ class CronModule @JvmOverloads constructor(
   private val dependencies: List<Key<out Service>> = listOf(),
   private val installDashboardTab: Boolean = true,
   private val useMultipleLeases: Boolean = false
-) : KInstallOnceModule() {
+) : AsyncKInstallOnceModule, KInstallOnceModule() {
   override fun configure() {
     install(
-      FakeCronModule(
+      CommonModule(
         zoneId = zoneId,
         threadPoolSize = threadPoolSize,
         dependencies = dependencies,
         installDashboardTab = installDashboardTab,
         useMultipleLeases = useMultipleLeases,
-      ),
+      )
     )
     install(ServiceModule<RepeatedTaskQueue>(ForMiskCron::class).dependsOn<ReadyService>())
     install(
@@ -51,6 +53,37 @@ class CronModule @JvmOverloads constructor(
         dependsOn = dependencies,
       ).dependsOn<ReadyService>(),
     )
+  }
+
+  @OptIn(ExperimentalMiskApi::class)
+  override fun moduleWhenAsyncDisabled(): KInstallOnceModule {
+    return CommonModule(
+      zoneId = zoneId,
+      threadPoolSize = threadPoolSize,
+      dependencies = dependencies,
+      installDashboardTab = installDashboardTab,
+      useMultipleLeases = useMultipleLeases,
+    )
+  }
+
+  private class CommonModule(
+    private val zoneId: ZoneId,
+    private val threadPoolSize: Int = 10,
+    private val dependencies: List<Key<out Service>> = listOf(),
+    private val installDashboardTab: Boolean = true,
+    private val useMultipleLeases: Boolean = false
+  ) : KInstallOnceModule() {
+    override fun configure() {
+      install(
+        FakeCronModule(
+          zoneId = zoneId,
+          threadPoolSize = threadPoolSize,
+          dependencies = dependencies,
+          installDashboardTab = installDashboardTab,
+          useMultipleLeases = useMultipleLeases,
+        ),
+      )
+    }
   }
 
   @Provides

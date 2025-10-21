@@ -18,3 +18,22 @@ open class AsyncKAbstractModule : KAbstractModule() {
   @ExperimentalMiskApi
   open fun moduleWhenAsyncDisabled(): KAbstractModule? = null
 }
+
+// TODO move to interface so it can go on either kabstract or kinstall or reustable test module
+/**
+ * This class should be extended by modules that want to contribute tasks to which involve async processing.
+ * For example, background jobs, job queues, eventing, message pub/sub.
+ *
+ * At service build time, these modules can be optionally filtered out before the Guice injector is created,
+ * in cases where async processing is not desired, such as in separated main and jobs deployments.
+ */
+open class AsyncKInstallOnceModule : KAbstractModule() {
+  /**
+   * Returns a module that would be installed when async tasks are disabled.
+   * By default, this is a module that calls [configureWhenAsyncDisabled].
+   * Subclasses can override this method to provide a different module if needed.
+   */
+  @ExperimentalMiskApi
+  open fun moduleWhenAsyncDisabled(): KAbstractModule? = null
+}
+
