@@ -294,8 +294,8 @@ data class DataSourceConfig @JvmOverloads constructor(
         }
 
         if(mysql_use_aws_secret_for_credentials) {
-          val region = "us-east-1"
-          queryParams += "&secretId=$mysql_aws_secret_name&region=$region"
+          // val region = "us-east-1"
+          // queryParams += "&secretId=$mysql_aws_secret_name&region=$region"
           "jdbc-secretsmanager:mysql://${config.host}:${config.port}/${config.database}$queryParams"
         }
         else {

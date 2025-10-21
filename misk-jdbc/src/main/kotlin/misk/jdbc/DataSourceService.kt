@@ -68,11 +68,19 @@ class DataSourceService @JvmOverloads constructor(
     val hikariConfig = HikariConfig()
     hikariConfig.driverClassName = config.getDriverClassName()
     hikariConfig.jdbcUrl = config.buildJdbcUrl(deployment)
-    if (config.username != null) {
-      hikariConfig.username = config.username
-    }
-    if (config.password != null) {
-      hikariConfig.password = config.password
+    if (config.mysql_use_aws_secret_for_credentials) {
+      // For AWS Secrets Manager, the username should be the secret ID
+      require(!config.mysql_aws_secret_name.isNullOrBlank()) {
+        "mysql_aws_secret_name must be set when mysql_use_aws_secret_for_credentials is true"
+      }
+      hikariConfig.username = config.mysql_aws_secret_name
+    } else {
+      if (config.username != null) {
+        hikariConfig.username = config.username
+      }
+      if (config.password != null) {
+        hikariConfig.password = config.password
+      }
     }
     hikariConfig.minimumIdle = config.fixed_pool_size
     hikariConfig.maximumPoolSize = config.fixed_pool_size
@@ -112,6 +120,9 @@ class DataSourceService @JvmOverloads constructor(
       hikariConfig.dataSourceProperties["prepStmtCacheSqlLimit"] = "2048"
       if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.VITESS_MYSQL || config.type == DataSourceType.TIDB) {
         hikariConfig.dataSourceProperties["useServerPrepStmts"] = "true"
+      }
+      if(config.mysql_use_aws_secret_for_credentials) {
+        hikariConfig.dataSourceProperties["user"] = config.mysql_aws_secret_name
       }
       hikariConfig.dataSourceProperties["useLocalSessionState"] = "true"
       hikariConfig.dataSourceProperties["rewriteBatchedStatements"] = "true"
