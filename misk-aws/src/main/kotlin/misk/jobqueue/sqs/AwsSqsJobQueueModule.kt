@@ -39,24 +39,6 @@ open class AwsSqsJobQueueModule(
     install(CommonModule(config, ::configureSyncClient, ::configureAsyncClient))
 
     install(ServiceModule(keyOf<RepeatedTaskQueue>(ForSqsHandling::class)).dependsOn<ReadyService>())
-
-    // We use an unbounded thread pool for the number of consumers, as we want to process
-    // the messages received as fast a possible.
-    install(
-      ExecutorServiceModule.withUnboundThreadPool(
-        ForSqsHandling::class,
-        "sqs-consumer-%d",
-      ),
-    )
-
-    // We use an unbounded thread pool for number of receivers, as this will be controlled dynamically
-    // using a feature flag.
-    install(
-      ExecutorServiceModule.withUnboundThreadPool(
-        ForSqsReceiving::class,
-        "sqs-receiver-%d",
-      ),
-    )
   }
 
   @OptIn(ExperimentalMiskApi::class)
@@ -86,6 +68,24 @@ open class AwsSqsJobQueueModule(
       bind<JobConsumer>().to<SqsJobConsumer>()
       bind<JobQueue>().to<SqsJobQueue>()
       bind<TransactionalJobQueue>().to<SqsTransactionalJobQueue>()
+
+      // We use an unbounded thread pool for the number of consumers, as we want to process
+      // the messages received as fast a possible.
+      install(
+        ExecutorServiceModule.withUnboundThreadPool(
+          ForSqsHandling::class,
+          "sqs-consumer-%d",
+        ),
+      )
+
+      // We use an unbounded thread pool for number of receivers, as this will be controlled dynamically
+      // using a feature flag.
+      install(
+        ExecutorServiceModule.withUnboundThreadPool(
+          ForSqsReceiving::class,
+          "sqs-receiver-%d",
+        ),
+      )
 
       // Bind a map of AmazonSQS clients for each external region that we need to contact
       val regionSpecificClientBinder = newMapBinder<AwsRegion, AmazonSQS>()
