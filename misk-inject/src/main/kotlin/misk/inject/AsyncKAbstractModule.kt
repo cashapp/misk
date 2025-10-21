@@ -12,14 +12,14 @@ import misk.annotation.ExperimentalMiskApi
 @Deprecated(
   message = "Extend both AsyncModule interface and KAbstractModule() or KInstallOnceModule() directly.",
 )
-open class AsyncKAbstractModule : KAbstractModule() {
+open class AsyncKAbstractModule : AsyncModule, KAbstractModule() {
   /**
    * Returns a module that would be installed when async tasks are disabled.
    * By default, this is a module that calls [configureWhenAsyncDisabled].
    * Subclasses can override this method to provide a different module if needed.
    */
   @ExperimentalMiskApi
-  open fun moduleWhenAsyncDisabled(): KAbstractModule? = null
+  override fun moduleWhenAsyncDisabled(): KAbstractModule? = null
 }
 
 /**
