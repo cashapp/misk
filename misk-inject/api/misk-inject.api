@@ -3,6 +3,14 @@ public class misk/inject/AsyncKAbstractModule : misk/inject/KAbstractModule {
 	public fun moduleWhenAsyncDisabled ()Lmisk/inject/KAbstractModule;
 }
 
+public abstract interface class misk/inject/AsyncModule {
+	public abstract fun moduleWhenAsyncDisabled ()Lmisk/inject/KAbstractModule;
+}
+
+public final class misk/inject/AsyncModule$DefaultImpls {
+	public static fun moduleWhenAsyncDisabled (Lmisk/inject/AsyncModule;)Lmisk/inject/KAbstractModule;
+}
+
 public final class misk/inject/GuiceKt {
 	public static final fun asSingleton (Lcom/google/inject/binder/ScopedBindingBuilder;)V
 	public static final fun getSetOf (Lcom/google/inject/Injector;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Ljava/util/Set;
