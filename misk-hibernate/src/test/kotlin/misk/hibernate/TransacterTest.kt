@@ -721,7 +721,7 @@ abstract class TransacterTest {
       if (callCount.getAndIncrement() < 2) throw RetryTransactionException()
     }
 
-    val logs = logCollector.takeMessages(RealTransacter::class)
+    val logs = logCollector.takeMessages(misk.jdbc.TransactionRetryHandler::class)
     assertThat(logs).hasSize(3)
     assertThat(logs[0]).matches(
       "Movies recoverable transaction exception " +

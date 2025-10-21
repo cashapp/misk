@@ -33,7 +33,7 @@ class JooqTransacter @JvmOverloads constructor(
   
   private val retryHandler = TransactionRetryHandler(
     qualifierName = "jooq",
-    exceptionClassifier = JooqExceptionClassifier()
+    exceptionClassifier = JooqExceptionClassifier(dataSourceConfig.type)
   )
 
   @JvmOverloads

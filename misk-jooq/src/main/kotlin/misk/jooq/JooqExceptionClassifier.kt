@@ -1,5 +1,6 @@
 package misk.jooq
 
+import misk.jdbc.DataSourceType
 import misk.jdbc.DefaultExceptionClassifier
 import org.jooq.exception.DataAccessException
 import org.jooq.exception.DataChangedException
@@ -9,9 +10,12 @@ import java.sql.SQLException
  * Exception classifier for JOOQ-specific exceptions.
  * 
  * This extends the default classifier to handle JOOQ-specific retryable exceptions
- * like DataChangedException and DataAccessException.
+ * like DataChangedException and DataAccessException, while also supporting
+ * database type-specific retry logic.
  */
-class JooqExceptionClassifier : DefaultExceptionClassifier() {
+class JooqExceptionClassifier @JvmOverloads constructor(
+  databaseType: DataSourceType? = null
+) : DefaultExceptionClassifier(databaseType) {
   
   override fun isRetryable(th: Throwable): Boolean {
     return when (th) {
@@ -27,7 +31,7 @@ class JooqExceptionClassifier : DefaultExceptionClassifier() {
           true
         }
       }
-      // Fall back to default classification
+      // Fall back to default classification (which now includes database type-specific logic)
       else -> super.isRetryable(th)
     }
   }

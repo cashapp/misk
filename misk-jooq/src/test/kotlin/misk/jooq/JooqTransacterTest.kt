@@ -22,6 +22,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.jooq.exception.DataAccessException
+import org.jooq.exception.DataChangedException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -33,7 +34,6 @@ import java.time.Clock
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
-import org.jooq.exception.DataChangedException
 import misk.jooq.JooqTransacter.TransacterOptions
 import misk.jooq.testgen.tables.records.MovieRecord
 
@@ -545,7 +545,7 @@ internal class JooqTransacterTest {
       assertThat(numberOfRetries).isEqualTo(3)
     }
 
-    @Test fun `retries on SQLException with Vitess transaction not found message`() {
+    @Test fun `does not retry on SQLException with Vitess transaction not found message when database type not configured`() {
       var numberOfRetries = 0
       assertThatExceptionOfType(DataAccessException::class.java).isThrownBy {
         transacter.transaction {
@@ -553,10 +553,10 @@ internal class JooqTransacterTest {
           throw SQLException("vttablet: rpc error: code = Aborted desc = transaction 1572922696317821557: not found (CallerID: )")
         }
       }
-      assertThat(numberOfRetries).isEqualTo(3)
+      assertThat(numberOfRetries).isEqualTo(1)
     }
 
-    @Test fun `retries on SQLException with TiDB write conflict`() {
+    @Test fun `does not retry on SQLException with TiDB write conflict when database type not configured`() {
       var numberOfRetries = 0
       assertThatExceptionOfType(DataAccessException::class.java).isThrownBy {
         transacter.transaction {
@@ -565,7 +565,18 @@ internal class JooqTransacterTest {
           throw sqlException
         }
       }
-      assertThat(numberOfRetries).isEqualTo(3)
+      assertThat(numberOfRetries).isEqualTo(1)
+    }
+
+    @Test fun `always retries on SQLException with connection closed message regardless of database type`() {
+      var numberOfRetries = 0
+      assertThatExceptionOfType(DataAccessException::class.java).isThrownBy {
+        transacter.transaction {
+          numberOfRetries++
+          throw SQLException("Connection is closed")
+        }
+      }
+      assertThat(numberOfRetries).isEqualTo(3) // This should always retry
     }
 
     @Test fun `does not retry on non-retryable SQLException`() {
