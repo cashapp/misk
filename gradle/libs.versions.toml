@@ -26,7 +26,7 @@ prometheus = "0.16.0"
 protobuf = "3.25.8"
 retrofit = "3.0.0"
 sqldelight = "2.1.0"
-tempest = "2025.09.18.063705-9bd8953"
+tempest = "2025.10.21.114346-63954e1"
 wire = "5.4.0"
 
 [libraries]
