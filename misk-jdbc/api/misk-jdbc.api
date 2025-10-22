@@ -303,6 +303,7 @@ public final class misk/jdbc/DataSourceConfig {
 	public final fun getConnection_idle_timeout ()Ljava/time/Duration;
 	public final fun getConnection_max_lifetime ()Ljava/time/Duration;
 	public final fun getConnection_timeout ()Ljava/time/Duration;
+	public final fun getDataSourceProperties ()Ljava/util/Properties;
 	public final fun getDatabase ()Ljava/lang/String;
 	public final fun getDeclarative_schema_config ()Lmisk/jdbc/DeclarativeSchemaConfig;
 	public final fun getDriverClassName ()Ljava/lang/String;
