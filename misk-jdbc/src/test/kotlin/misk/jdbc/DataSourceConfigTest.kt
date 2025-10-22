@@ -300,8 +300,7 @@ class DataSourceConfigTest {
     assertEquals(
       "jdbc-secretsmanager:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
           "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
-          "sslMode=PREFERRED&enabledTLSProtocols=TLSv1.2,TLSv1.3&" +
-          "secretId=secret_name&region=us-east-1",
+          "sslMode=PREFERRED&enabledTLSProtocols=TLSv1.2,TLSv1.3",
       config.buildJdbcUrl(TESTING)
     )
   }
@@ -321,7 +320,6 @@ class DataSourceConfigTest {
     // Should generate correct JDBC URL
     val jdbcUrl = config.buildJdbcUrl(TESTING)
     assertThat(jdbcUrl).startsWith("jdbc-secretsmanager:mysql://")
-    assertThat(jdbcUrl).contains("secretId=test-secret")
   }
 
   @Test

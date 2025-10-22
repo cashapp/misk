@@ -7,7 +7,6 @@ import misk.backoff.retry
 import wisp.deployment.Deployment
 import misk.logging.getLogger
 import java.time.Duration
-import java.util.*
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.backoff.RetryConfig
@@ -65,7 +64,9 @@ class PingDatabaseService @Inject constructor(
 
   private fun createDataSource(jdbcUrl: String): DriverDataSource {
     return DriverDataSource(
-            jdbcUrl, config.getDriverClassName(), Properties(), config.username, config.password)
+      jdbcUrl, config.getDriverClassName(), config.getDataSourceProperties(),
+      config.username, config.password
+    )
   }
 
   /** Kotlin thinks getConnection() is a val but it's really a function. */
