@@ -6,7 +6,7 @@ import misk.ServiceModule
 import misk.annotation.ExperimentalMiskApi
 import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.cloud.aws.AwsRegion
-import misk.inject.AsyncKAbstractModule
+import misk.inject.AsyncModule
 import misk.inject.KAbstractModule
 import misk.jobqueue.v2.JobConsumer
 import misk.jobqueue.v2.JobEnqueuer
@@ -17,7 +17,7 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClientBuilder
 open class SqsJobQueueModule @JvmOverloads constructor(
   private val config: SqsConfig,
   private val configureClient: SqsAsyncClientBuilder.() -> Unit = {}
-) : AsyncKAbstractModule() {
+) : AsyncModule, KAbstractModule() {
   override fun configure() {
     install(CommonModule(config, configureClient))
     install(ServiceModule<SqsJobConsumer>().dependsOn<ReadyService>())

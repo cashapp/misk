@@ -5,7 +5,7 @@ import com.google.inject.Key
 import misk.ReadyService
 import misk.ServiceModule
 import misk.annotation.ExperimentalMiskApi
-import misk.inject.AsyncKAbstractModule
+import misk.inject.AsyncModule
 import misk.inject.KAbstractModule
 import misk.inject.toKey
 import misk.jobqueue.BatchJobHandler
@@ -22,7 +22,7 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
   private val handler: KClass<T>,
   private val installRetryQueue: Boolean,
   private val dependsOn: List<Key<out Service>>,
-) : AsyncKAbstractModule() {
+) : AsyncModule, KAbstractModule() {
   override fun configure() {
     install(CommonModule(queueName, handler, installRetryQueue))
 
