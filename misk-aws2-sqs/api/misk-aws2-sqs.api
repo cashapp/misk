@@ -60,7 +60,7 @@ public final class misk/aws2/sqs/jobqueue/SqsJobEnqueuer : misk/jobqueue/v2/JobE
 	public fun enqueueBlocking (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
 }
 
-public final class misk/aws2/sqs/jobqueue/SqsJobHandlerModule : misk/inject/AsyncKAbstractModule {
+public final class misk/aws2/sqs/jobqueue/SqsJobHandlerModule : misk/inject/KAbstractModule, misk/inject/AsyncModule {
 	public static final field Companion Lmisk/aws2/sqs/jobqueue/SqsJobHandlerModule$Companion;
 	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun moduleWhenAsyncDisabled ()Lmisk/inject/KAbstractModule;
@@ -70,7 +70,7 @@ public final class misk/aws2/sqs/jobqueue/SqsJobHandlerModule$Companion {
 	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;)Lmisk/aws2/sqs/jobqueue/SqsJobHandlerModule;
 }
 
-public class misk/aws2/sqs/jobqueue/SqsJobQueueModule : misk/inject/AsyncKAbstractModule {
+public class misk/aws2/sqs/jobqueue/SqsJobQueueModule : misk/inject/KAbstractModule, misk/inject/AsyncModule {
 	public fun <init> (Lmisk/aws2/sqs/jobqueue/config/SqsConfig;)V
 	public fun <init> (Lmisk/aws2/sqs/jobqueue/config/SqsConfig;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lmisk/aws2/sqs/jobqueue/config/SqsConfig;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
