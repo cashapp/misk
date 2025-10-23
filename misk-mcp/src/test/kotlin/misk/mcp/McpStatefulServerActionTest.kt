@@ -18,10 +18,11 @@ import misk.mcp.action.McpDelete
 import misk.mcp.action.McpPost
 import misk.mcp.action.McpStreamManager
 import misk.mcp.action.SESSION_ID_HEADER
+import misk.mcp.action.handleMessage
 import misk.mcp.config.McpConfig
 import misk.mcp.config.McpServerConfig
 import misk.mcp.internal.McpJson
-import misk.mcp.testing.asMcpClient
+import misk.mcp.testing.asMcpStreamableHttpClient
 import misk.mcp.tools.SessionIdentifierOutput
 import misk.mcp.tools.SessionIdentifierTool
 import misk.testing.MiskTest
@@ -47,9 +48,59 @@ import kotlin.test.assertTrue
 
 @MiskTest(startService = true)
 internal class McpStatefulServerActionTest {
+
+  val mcpStatefulServerActionTestConfig = McpConfig(
+    buildMap {
+      put(
+        SERVER_NAME,
+        McpServerConfig(
+          version = "1.0.0",
+        ),
+      )
+    },
+  )
+
+  @OptIn(ExperimentalMiskApi::class)
+  @Suppress("unused")
+  @Singleton
+  class McpStatefulServerActionTestPostAction @Inject constructor(private val mcpStreamManager: McpStreamManager) :
+    WebAction {
+    @McpPost
+    suspend fun mcpPost(@RequestBody message: JSONRPCMessage, sendChannel: SendChannel<ServerSentEvent>) {
+      mcpStreamManager.withSseChannel(sendChannel) { handleMessage(message) }
+    }
+  }
+
+  @OptIn(ExperimentalMiskApi::class)
+  @Suppress("unused")
+  @Singleton
+  class McpStatefulServerActionTestDeleteAction @Inject constructor(
+    private val mcpSessionHandler: McpSessionHandler
+  ) : WebAction {
+    @McpDelete
+    suspend fun deleteSession(@RequestHeader(SESSION_ID_HEADER) sessionId: String): Response<Unit> {
+      mcpSessionHandler.terminate(sessionId)
+      return Response(
+        body = Unit,
+        statusCode = 204, // No Content
+      )
+    }
+  }
+
   @Suppress("unused")
   @MiskTestModule
-  val module = McpStatefulServerActionTestModule()
+  val module = object : KAbstractModule() {
+    override fun configure() {
+      install(McpServerModule.create(SERVER_NAME, mcpStatefulServerActionTestConfig))
+      install(McpSessionHandlerModule.create<InMemoryMcpSessionHandler>())
+      install(WebActionModule.create<McpStatefulServerActionTestPostAction>())
+      install(WebActionModule.create<McpStatefulServerActionTestDeleteAction>())
+      install(McpToolModule.create<SessionIdentifierTool>())
+
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
+    }
+  }
 
   @Inject
   private lateinit var jettyService: JettyService
@@ -58,17 +109,17 @@ internal class McpStatefulServerActionTest {
 
   @Test
   fun `test ListTools`() = runBlocking {
-    val mcpClient = okHttpClient.asMcpClient(jettyService.httpServerUrl, "/mcp")
+    val mcpClient = okHttpClient.asMcpStreamableHttpClient(jettyService.httpServerUrl, "/mcp")
     val request = ListToolsRequest()
     val response = mcpClient.listTools(request)
     assertEquals(
       expected = 1,
-      actual = response?.tools?.size,
+      actual = response.tools.size,
       message = "Expecting only one tool to be registered",
     )
 
     // Check session identifier tool
-    val sessionIdentifierTool = response?.tools?.find { it.name == "session_identifier" }
+    val sessionIdentifierTool = response.tools.find { it.name == "session_identifier" }
     assertNotNull(sessionIdentifierTool)
     assertEquals(
       expected = "session_identifier",
@@ -92,7 +143,7 @@ internal class McpStatefulServerActionTest {
 
   @Test
   fun `test SessionIdentifierTool returns session ID`() = runBlocking {
-    val mcpClient = okHttpClient.asMcpClient(jettyService.httpServerUrl, "/mcp")
+    val mcpClient = okHttpClient.asMcpStreamableHttpClient(jettyService.httpServerUrl, "/mcp")
 
     // Call the session identifier tool
     val response = mcpClient.callTool(
@@ -127,7 +178,7 @@ internal class McpStatefulServerActionTest {
   @Test
   fun `test session deletion invalidates session ID tool`() = runBlocking {
     // Initialize a session by creating an MCP client
-    val mcpClient = okHttpClient.asMcpClient(jettyService.httpServerUrl, "/mcp")
+    val mcpClient = okHttpClient.asMcpStreamableHttpClient(jettyService.httpServerUrl, "/mcp")
 
     // Get the session ID from the client's transport
     val clientTransport = assertNotNull(mcpClient.transport as? StreamableHttpClientTransport)
@@ -167,7 +218,7 @@ internal class McpStatefulServerActionTest {
   @Test
   fun `test missing session ID after session establishment`() = runBlocking {
     // Initialize a session by creating an MCP client
-    val mcpClient = okHttpClient.asMcpClient(jettyService.httpServerUrl, "/mcp")
+    val mcpClient = okHttpClient.asMcpStreamableHttpClient(jettyService.httpServerUrl, "/mcp")
 
 
     // Verify the session works initially by calling the session identifier tool
@@ -179,7 +230,7 @@ internal class McpStatefulServerActionTest {
     assertNotNull(initialResponse.structuredContent)
 
     // Now remove the session ID from the client's transport to simulate a missing session ID
-    // Use the reflection hack to workaround the set call being private
+    // Use the reflection hack to work around the set call being private
     val clientTransport = assertNotNull(mcpClient.transport as? StreamableHttpClientTransport)
     StreamableHttpClientTransport::class.java.getDeclaredField("sessionId").apply {
       isAccessible = true
@@ -195,56 +246,13 @@ internal class McpStatefulServerActionTest {
     }
     assertEquals(HTTP_BAD_REQUEST, error.code)
   }
-}
 
-val mcpStatefulServerActionTestConfig = McpConfig(
-  buildMap {
-    put(
-      "mcp-stateful-server-action-test-server",
-      McpServerConfig(
-        version = "1.0.0",
-      ),
-    )
-  },
-)
-
-@OptIn(ExperimentalMiskApi::class)
-@Suppress("unused")
-@Singleton
-class McpStatefulServerActionTestPostAction @Inject constructor(private val mcpStreamManager: McpStreamManager) :
-  WebAction {
-  @McpPost
-  suspend fun mcpPost(@RequestBody message: JSONRPCMessage, sendChannel: SendChannel<ServerSentEvent>) {
-    mcpStreamManager.withResponseChannel(sendChannel) { handleMessage(message) }
+  companion object {
+    private const val SERVER_NAME = "mcp-stateful-server-action-test-server"
   }
 }
 
-@OptIn(ExperimentalMiskApi::class)
-@Suppress("unused")
-@Singleton
-class McpStatefulServerActionTestDeleteAction @Inject constructor(
-  private val mcpSessionHandler: McpSessionHandler
-) : WebAction {
-  @McpDelete
-  suspend fun deleteSession(@RequestHeader(SESSION_ID_HEADER) sessionId: String): Response<Unit> {
-    mcpSessionHandler.terminate(sessionId)
-    return Response(
-      body = Unit,
-      statusCode = 204, // No Content
-    )
-  }
-}
 
-class McpStatefulServerActionTestModule : KAbstractModule() {
-  override fun configure() {
-    install(McpServerModule.create("mcp-stateful-server-action-test-server", mcpStatefulServerActionTestConfig))
-    install(McpSessionHandlerModule.create<InMemoryMcpSessionHandler>())
-    install(WebActionModule.create<McpStatefulServerActionTestPostAction>())
-    install(WebActionModule.create<McpStatefulServerActionTestDeleteAction>())
-    install(McpToolModule.create<SessionIdentifierTool>())
 
-    install(WebServerTestingModule())
-    install(MiskTestingServiceModule())
-  }
-}
+
 

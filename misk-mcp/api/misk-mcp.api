@@ -114,9 +114,6 @@ public final class misk/mcp/MiskMcpServer : io/modelcontextprotocol/kotlin/sdk/s
 	public static final field Companion Lmisk/mcp/MiskMcpServer$Companion;
 	public final fun getConfig ()Lmisk/mcp/config/McpServerConfig;
 	public final fun getName ()Ljava/lang/String;
-	public final fun handleMessage (Lio/modelcontextprotocol/kotlin/sdk/JSONRPCMessage;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun handleMessage (Lio/modelcontextprotocol/kotlin/sdk/JSONRPCMessage;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun handleMessage$default (Lmisk/mcp/MiskMcpServer;Lio/modelcontextprotocol/kotlin/sdk/JSONRPCMessage;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/MiskMcpServer$Companion {
@@ -141,6 +138,21 @@ public final class misk/mcp/StructuredMcpTool$StructuredToolResult : misk/mcp/Mc
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/mcp/TypedCreateElicitationResult {
+	public fun <init> (Lio/modelcontextprotocol/kotlin/sdk/CreateElicitationResult$Action;Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;)V
+	public final fun component1 ()Lio/modelcontextprotocol/kotlin/sdk/CreateElicitationResult$Action;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun component3 ()Lkotlinx/serialization/json/JsonObject;
+	public final fun copy (Lio/modelcontextprotocol/kotlin/sdk/CreateElicitationResult$Action;Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;)Lmisk/mcp/TypedCreateElicitationResult;
+	public static synthetic fun copy$default (Lmisk/mcp/TypedCreateElicitationResult;Lio/modelcontextprotocol/kotlin/sdk/CreateElicitationResult$Action;Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Lmisk/mcp/TypedCreateElicitationResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAction ()Lio/modelcontextprotocol/kotlin/sdk/CreateElicitationResult$Action;
+	public final fun getContent ()Ljava/lang/Object;
+	public final fun get_meta ()Lkotlinx/serialization/json/JsonObject;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface annotation class misk/mcp/action/McpDelete : java/lang/annotation/Annotation {
 }
 
@@ -148,6 +160,11 @@ public abstract interface annotation class misk/mcp/action/McpGet : java/lang/an
 }
 
 public abstract interface annotation class misk/mcp/action/McpPost : java/lang/annotation/Annotation {
+}
+
+public final class misk/mcp/action/McpServerSessionsKt {
+	public static final fun currentServerSession (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun handleMessage (Lio/modelcontextprotocol/kotlin/sdk/server/ServerSession;Lio/modelcontextprotocol/kotlin/sdk/JSONRPCMessage;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/action/McpSessionId {
@@ -161,11 +178,15 @@ public final class misk/mcp/action/McpSessionIdKt {
 
 public final class misk/mcp/action/McpStreamManager {
 	public static final field Companion Lmisk/mcp/action/McpStreamManager$Companion;
-	public fun <init> (Lmisk/scope/ActionScoped;Lcom/google/inject/Provider;)V
 	public final fun withResponseChannel (Lkotlinx/coroutines/channels/SendChannel;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun withSseChannel (Lkotlinx/coroutines/channels/SendChannel;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun withWebSocket (Lmisk/web/actions/WebSocket;)Lmisk/web/actions/WebSocketListener;
 }
 
 public final class misk/mcp/action/McpStreamManager$Companion {
+}
+
+public abstract interface annotation class misk/mcp/action/McpWebSocket : java/lang/annotation/Annotation {
 }
 
 public final class misk/mcp/config/McpConfig : java/util/LinkedHashMap, misk/config/Config {
@@ -231,14 +252,17 @@ public final class misk/mcp/config/McpServerConfig : misk/config/Config {
 	public fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;)V
 	public fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;)V
 	public fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;)V
-	public synthetic fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lmisk/mcp/config/McpPromptConfig;
 	public final fun component3 ()Lmisk/mcp/config/McpResourceConfig;
 	public final fun component4 ()Lmisk/mcp/config/McpToolConfig;
-	public final fun copy (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;)Lmisk/mcp/config/McpServerConfig;
-	public static synthetic fun copy$default (Lmisk/mcp/config/McpServerConfig;Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;ILjava/lang/Object;)Lmisk/mcp/config/McpServerConfig;
+	public final fun component5 ()Z
+	public final fun copy (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;Z)Lmisk/mcp/config/McpServerConfig;
+	public static synthetic fun copy$default (Lmisk/mcp/config/McpServerConfig;Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;ZILjava/lang/Object;)Lmisk/mcp/config/McpServerConfig;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnforce_strict_capabilities ()Z
 	public final fun getPrompts ()Lmisk/mcp/config/McpPromptConfig;
 	public final fun getResources ()Lmisk/mcp/config/McpResourceConfig;
 	public final fun getTools ()Lmisk/mcp/config/McpToolConfig;
@@ -260,16 +284,52 @@ public final class misk/mcp/config/McpToolConfig : misk/config/Config {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/mcp/internal/JsonSchemaExtensionsKt {
+	public static final fun generateJsonSchema (Lkotlin/reflect/KClass;ILjava/lang/String;)Lkotlinx/serialization/json/JsonObject;
+	public static synthetic fun generateJsonSchema$default (Lkotlin/reflect/KClass;ILjava/lang/String;ILjava/lang/Object;)Lkotlinx/serialization/json/JsonObject;
+}
+
 public final class misk/mcp/internal/McpJsonKt {
 	public static final fun getMcpJson ()Lkotlinx/serialization/json/Json;
 }
 
+public final class misk/mcp/internal/McpServerSession : kotlin/coroutines/AbstractCoroutineContextElement {
+	public static final field Key Lmisk/mcp/internal/McpServerSession$Key;
+	public fun <init> (Lio/modelcontextprotocol/kotlin/sdk/server/ServerSession;)V
+	public final fun component1 ()Lio/modelcontextprotocol/kotlin/sdk/server/ServerSession;
+	public final fun copy (Lio/modelcontextprotocol/kotlin/sdk/server/ServerSession;)Lmisk/mcp/internal/McpServerSession;
+	public static synthetic fun copy$default (Lmisk/mcp/internal/McpServerSession;Lio/modelcontextprotocol/kotlin/sdk/server/ServerSession;ILjava/lang/Object;)Lmisk/mcp/internal/McpServerSession;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getServerSession ()Lio/modelcontextprotocol/kotlin/sdk/server/ServerSession;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/internal/McpServerSession$Key : kotlin/coroutines/CoroutineContext$Key {
+}
+
+public abstract class misk/mcp/internal/MiskServerTransport : io/modelcontextprotocol/kotlin/sdk/shared/AbstractTransport {
+	public fun <init> ()V
+	public abstract fun getCall ()Lmisk/web/HttpCall;
+	public abstract fun getStreamId ()Ljava/lang/String;
+	public abstract fun handleMessage (Lio/modelcontextprotocol/kotlin/sdk/JSONRPCMessage;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public final class misk/mcp/testing/ClientExtensionsKt {
-	public static final fun asKtorClient (Lokhttp3/OkHttpClient;)Lio/ktor/client/HttpClient;
-	public static final fun asMcpClient (Lio/modelcontextprotocol/kotlin/sdk/client/StreamableHttpClientTransport;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun asMcpClient (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun asMcpClient$default (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun asKtorClient (Lokhttp3/OkHttpClient;Z)Lio/ktor/client/HttpClient;
+	public static synthetic fun asKtorClient$default (Lokhttp3/OkHttpClient;ZILjava/lang/Object;)Lio/ktor/client/HttpClient;
+	public static final fun asMcpClient (Lio/modelcontextprotocol/kotlin/sdk/shared/AbstractTransport;Ljava/lang/String;Ljava/lang/String;Lio/modelcontextprotocol/kotlin/sdk/client/ClientOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun asMcpClient$default (Lio/modelcontextprotocol/kotlin/sdk/shared/AbstractTransport;Ljava/lang/String;Ljava/lang/String;Lio/modelcontextprotocol/kotlin/sdk/client/ClientOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun asMcpStreamableHttpClient (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun asMcpStreamableHttpClient$default (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun asMcpStreamableHttpTransport (Lio/ktor/client/HttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;)Lio/modelcontextprotocol/kotlin/sdk/client/StreamableHttpClientTransport;
 	public static synthetic fun asMcpStreamableHttpTransport$default (Lio/ktor/client/HttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;ILjava/lang/Object;)Lio/modelcontextprotocol/kotlin/sdk/client/StreamableHttpClientTransport;
+	public static final fun asMcpWebSocketClient (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun asMcpWebSocketClient$default (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun asMcpWebSocketTransport (Lio/ktor/client/HttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;)Lio/modelcontextprotocol/kotlin/sdk/client/WebSocketClientTransport;
+	public static synthetic fun asMcpWebSocketTransport$default (Lio/ktor/client/HttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;ILjava/lang/Object;)Lio/modelcontextprotocol/kotlin/sdk/client/WebSocketClientTransport;
+	public static final fun clientOptionsFor (ZZZZZ)Lio/modelcontextprotocol/kotlin/sdk/client/ClientOptions;
+	public static synthetic fun clientOptionsFor$default (ZZZZZILjava/lang/Object;)Lio/modelcontextprotocol/kotlin/sdk/client/ClientOptions;
+	public static final fun normalizeWebSocketUrlString (Lokhttp3/HttpUrl;)Ljava/lang/String;
 }
 
