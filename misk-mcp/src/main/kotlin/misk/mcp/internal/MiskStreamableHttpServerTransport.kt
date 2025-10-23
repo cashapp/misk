@@ -108,8 +108,8 @@ internal class MiskStreamableHttpServerTransport
             }
 
             // Add metadata if available
-            matchingTool.metadata?.let { metadata ->
-              put("_meta", metadata)
+            matchingTool.meta?.let { metadata ->
+              put("_meta", McpJson.encodeToJsonElement(metadata))
             }
           }
         } else {

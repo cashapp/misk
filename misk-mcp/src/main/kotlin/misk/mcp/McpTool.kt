@@ -206,7 +206,7 @@ abstract class McpTool<I : Any> {
    * Metadata included in the tool descriptor. Not officially part of the MCP spec, but relied
    * upon by some clients (e.g., OpenAI Apps SDK).
    */
-  open val metadata: JsonObject? = null
+  open val meta: Any? = null
 
   internal val inputSchema: Tool.Input by lazy {
     val schema = inputClass.generateJsonSchema()

@@ -414,7 +414,7 @@ class MiskStreamableHttpServerTransportTest {
     val testTool = object : McpTool<Unit>() {
       override val name = "test-tool"
       override val description = "A test tool"
-      override val metadata = testMetadata
+      override val meta = testMetadata
 
       override suspend fun handle(input: Unit) = throw NotImplementedError("Not used in test")
     }
