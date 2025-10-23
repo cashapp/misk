@@ -96,7 +96,8 @@ class McpServerModule private constructor(
     val mcpMetricsProvider = binder().getProvider(McpMetrics::class.java)
 
     // Bind the factories for the transports
-    bind<MiskStreamableHttpServerTransport.Factory>().toProvider(
+    val streamableHttpServerTransportFactoryKey = keyOf<MiskStreamableHttpServerTransport.Factory>(groupAnnotationClass)
+    bind(streamableHttpServerTransportFactoryKey).toProvider(
       object : Provider<MiskStreamableHttpServerTransport.Factory> {
         @Inject
         lateinit var httpCall: ActionScoped<HttpCall>
@@ -112,8 +113,10 @@ class McpServerModule private constructor(
           }
       }
     )
+    val streamableHttpServerTransportFactoryProvider = binder().getProvider(streamableHttpServerTransportFactoryKey)
 
-    bind<MiskWebSocketServerTransport.Factory>().toProvider(
+    val webSocketServerTransportFactoryKey = keyOf<MiskWebSocketServerTransport.Factory>(groupAnnotationClass)
+    bind(keyOf<MiskWebSocketServerTransport.Factory>(groupAnnotationClass)).toProvider(
       object : Provider<MiskWebSocketServerTransport.Factory> {
         @Inject
         lateinit var httpCall: ActionScoped<HttpCall>
@@ -128,6 +131,7 @@ class McpServerModule private constructor(
           }
       }
     )
+    val webSocketServerTransportFactoryProvider = binder().getProvider(webSocketServerTransportFactoryKey)
 
     // Create a qualified binding for the MiskMcpServer
     val serverKey = keyOf<MiskMcpServer>(groupAnnotationClass)
@@ -147,18 +151,12 @@ class McpServerModule private constructor(
     // Create a qualified binding for the McpStreamManager
     val streamManagerKey = keyOf<McpStreamManager>(groupAnnotationClass)
     bind(streamManagerKey).toProvider(
-      object : Provider<McpStreamManager> {
-        @Inject
-        lateinit var streamableHttpServerTransportFactory: MiskStreamableHttpServerTransport.Factory
-
-        @Inject
-        lateinit var webSocketServerTransportFactory: MiskWebSocketServerTransport.Factory
-        override fun get(): McpStreamManager =
-          McpStreamManager(
-            streamableHttpServerTransportFactory,
-            webSocketServerTransportFactory,
-            mcpServer = mcpServerProvider.get()
-          )
+      Provider {
+        McpStreamManager(
+          streamableHttpServerTransportFactoryProvider.get(),
+          webSocketServerTransportFactoryProvider.get(),
+          mcpServer = mcpServerProvider.get()
+        )
       },
     )
   }
