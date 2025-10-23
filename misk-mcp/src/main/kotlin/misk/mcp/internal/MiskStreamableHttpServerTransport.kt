@@ -71,21 +71,15 @@ internal class MiskStreamableHttpServerTransport
 
     val jsonObject: JsonObject = McpJson.encodeToJsonElement(message).jsonObject
 
-    val jsonObjectWithMetadata = if (message is JSONRPCResponse) {
-      val messageResult = message.result
-      if (messageResult is ListToolsResult) {
-        // Transform the JSON object to include tool metadata
-        transformJsonObjectWithToolMetadata(jsonObject)
-      } else {
-        jsonObject
-      }
+    val jsonObjectWithMetadata = if (message is JSONRPCResponse && message.result is ListToolsResult) {
+      transformJsonObjectWithToolMetadata(jsonObject)
     } else {
       jsonObject
     }
 
     val event = ServerSentEvent(
       event = "message",
-      data = jsonObjectWithMetadata.toString()
+      data = McpJson.encodeToString(jsonObjectWithMetadata)
     )
 
     logger.trace { "Sending SSE: $event" }
