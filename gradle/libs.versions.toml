@@ -18,6 +18,7 @@ kotlin = "2.1.21"
 kotlinBinaryCompatibilityPlugin = "0.18.1"
 ktor = "3.3.0"
 mavenPublish = "0.34.0"
+mcp = "0.7.3"
 micrometer = "1.12.13"
 netty = "4.2.6.Final"
 okHttp = "5.1.0"
@@ -184,9 +185,9 @@ lettuceCore = { module = "io.lettuce:lettuce-core", version = "6.8.1.RELEASE" }
 logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.6" }
 logbackCore = { module = "ch.qos.logback:logback-core", version = "1.5.6" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
-mcpKotlinSdkClient = { module = "io.modelcontextprotocol:kotlin-sdk-client", version = "0.7.2" }
-mcpKotlinSdkCore = { module = "io.modelcontextprotocol:kotlin-sdk-core", version = "0.7.2" }
-mcpKotlinSdkServer = { module = "io.modelcontextprotocol:kotlin-sdk-server", version = "0.7.2" }
+mcpKotlinSdkClient = { module = "io.modelcontextprotocol:kotlin-sdk-client", version.ref = "mcp" }
+mcpKotlinSdkCore = { module = "io.modelcontextprotocol:kotlin-sdk-core", version.ref = "mcp" }
+mcpKotlinSdkServer = { module = "io.modelcontextprotocol:kotlin-sdk-server", version.ref = "mcp" }
 micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
 mockitoCore = { module = "org.mockito:mockito-core", version = "5.20.0" }

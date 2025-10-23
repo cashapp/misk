@@ -6,11 +6,17 @@ import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
 
 /**
- * Marks a web action method as an MCP (Model Context Protocol) HTTP GET endpoint for server-to-client event streaming.
+ * Marks a web action method as an MCP (Model Context Protocol) HTTP GET endpoint for StreamableHttp transport.
  *
- * This annotation creates endpoints that allow clients to listen for messages sent from the MCP server,
- * as specified in the MCP transport specification. The endpoint establishes a Server-Sent Events (SSE)
- * connection for real-time server-to-client communication.
+ * This annotation creates endpoints that allow clients to listen for messages sent from the MCP server
+ * using StreamableHttp transport (Server-Sent Events). The endpoint establishes an SSE connection
+ * for real-time server-to-client communication.
+ *
+ * ## Transport Compatibility
+ *
+ * **StreamableHttp Transport Only**: This annotation is designed exclusively for StreamableHttp
+ * transport using Server-Sent Events. For WebSocket-based MCP communication, use `@McpWebSocket`
+ * instead, which handles all communication over a persistent WebSocket connection.
  *
  * ## Purpose
  * Implements the MCP specification requirement for "listening for messages from the server"
@@ -30,11 +36,9 @@ import misk.web.mediatype.MediaTypes
  * ```kotlin
  * @McpGet
  * suspend fun listenForServerMessages(
- *   @RequestHeaders headers: Headers,
  *   sendChannel: SendChannel<ServerSentEvent>
  * ) {
- *   val sessionId = headers[SESSION_ID_PARAM]
- *   mcpStreamManager.withResponseChannel(sendChannel, sessionId) {
+ *   mcpStreamManager.withSseChannel(sendChannel) {
  *     // Stream server events for this session
  *   }
  * }
@@ -63,11 +67,9 @@ import misk.web.mediatype.MediaTypes
  *
  *   @McpGet
  *   suspend fun streamServerEvents(
- *     @RequestHeaders headers: Headers,
  *     sendChannel: SendChannel<ServerSentEvent>
  *   ) {
- *     val sessionId = headers[SESSION_ID_PARAM]
- *     mcpStreamManager.withResponseChannel(sendChannel, sessionId) {
+ *     mcpStreamManager.withSseChannel(sendChannel) {
  *       // Client connects to listen for server-initiated messages
  *       // Server can push notifications, progress updates, etc.
  *     }
@@ -79,7 +81,7 @@ import misk.web.mediatype.MediaTypes
  * @see McpDelete for session termination
  * @see SESSION_ID_HEADER for the session ID header constant
  * @see McpStreamManager For managing MCP streams and server lifecycle
- * @see MiskMcpServer For the underlying MCP server implementation
+ * @see misk.mcp.MiskMcpServer For the underlying MCP server implementation
  */
 @Get("/mcp")
 @ResponseContentType(MediaTypes.SERVER_EVENT_STREAM)

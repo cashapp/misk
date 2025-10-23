@@ -34,40 +34,44 @@ class MyAppModule : KAbstractModule() {
 
 ## Web Action Integration
 
-To expose MCP functionality through HTTP endpoints, you need to create web actions using the MCP annotations and install the appropriate WebActionModule.
+To expose MCP functionality through HTTP endpoints, you need to create web actions using the MCP annotations and install the appropriate WebActionModule. The misk-mcp module supports two transport protocols:
 
-### Required and Optional Endpoints
+### Transport Options
 
+#### Server-Sent Events (SSE) Transport
+Uses HTTP POST requests with SSE responses for real-time communication:
 - **`@McpPost`** (Required): Handles incoming MCP requests from clients
-- **`@McpGet`** (Optional): Enables out-of-band server-to-client notifications, typically used when a stateful session is present
+- **`@McpGet`** (Optional): Enables out-of-band server-to-client notifications
 - **`@McpDelete`** (Optional): Allows clients to explicitly delete an existing stateful session
+
+#### WebSocket Transport  
+Uses persistent WebSocket connections for full bidirectional communication:
+- **`@McpWebSocket`** (Required): Handles all MCP communication over WebSocket
+
+### SSE Transport Example
 
 ```kotlin
 @ExperimentalMiskApi
 @Singleton
-class MyMcpWebAction @Inject constructor(
+class MyMcpSseAction @Inject constructor(
   private val mcpStreamManager: McpStreamManager
 ) : WebAction {
 
   @McpPost
   suspend fun handleMcpRequest(
     @RequestBody message: JSONRPCMessage,
-    @RequestHeaders headers: Headers,
     sendChannel: SendChannel<ServerSentEvent>
   ) {
-    val sessionId = headers[SESSION_ID_HEADER]
-    mcpStreamManager.withResponseChannel(sendChannel) {
+    mcpStreamManager.withSseChannel(sendChannel) {
       handleMessage(message)
     }
   }
 
   @McpGet  
   suspend fun streamServerEvents(
-    @RequestHeaders headers: Headers,
     sendChannel: SendChannel<ServerSentEvent>
   ) {
-    val sessionId = headers[SESSION_ID_HEADER]
-    mcpStreamManager.withResponseChannel(sendChannel) {
+    mcpStreamManager.withSseChannel(sendChannel) {
       // Stream server-initiated events to client
     }
   }
@@ -82,6 +86,47 @@ class MyMcpWebAction @Inject constructor(
   }
 }
 ```
+
+### WebSocket Transport Example
+
+```kotlin
+@ExperimentalMiskApi
+@Singleton
+class MyMcpWebSocketAction @Inject constructor(
+  private val mcpStreamManager: McpStreamManager
+) : WebAction {
+
+  @McpWebSocket
+  fun handleWebSocket(webSocket: WebSocket): WebSocketListener {
+    return mcpStreamManager.withWebSocket(webSocket)
+  }
+}
+```
+
+### Transport Comparison
+
+| Feature | SSE Transport | WebSocket Transport |
+|---------|---------------|-------------------|
+| **Connection Type** | HTTP POST + SSE | Persistent WebSocket |
+| **Communication** | Client→Server (POST)<br/>Server→Client (SSE) | Full bidirectional |
+| **Complexity** | Multiple endpoints | Single endpoint |
+| **Session Management** | Optional via headers | Built-in connection state |
+| **Use Cases** | Traditional web apps<br/>Request-response patterns | Real-time applications<br/>Interactive AI tools |
+| **Client Support** | Universal HTTP support | WebSocket support required |
+
+### Choosing a Transport
+
+**Use SSE Transport when:**
+- Building traditional web applications
+- Need maximum client compatibility
+- Implementing request-response patterns
+- Want explicit control over session management
+
+**Use WebSocket Transport when:**
+- Building real-time interactive applications
+- Need bidirectional communication
+- Want simplified connection management
+- Implementing conversational AI interfaces
 
 **Important**: You must install a WebActionModule to register your MCP web actions:
 

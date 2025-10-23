@@ -6,11 +6,19 @@ import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
 
 /**
- * Annotation for web action methods that handle MCP session deletion via HTTP DELETE.
+ * Annotation for web action methods that handle MCP session deletion for StreamableHttp transport.
  *
- * This annotation configures a web action to handle explicit MCP session termination
- * as specified in the MCP specification for session management. The client sends a
- * DELETE request with the session ID to cleanly terminate an existing MCP session.
+ * This annotation configures a web action to handle explicit MCP session termination for
+ * StreamableHttp transport (Server-Sent Events) as specified in the MCP specification for
+ * session management. The client sends a DELETE request with the session ID to cleanly
+ * terminate an existing MCP session.
+ *
+ * ## Transport Compatibility
+ *
+ * **StreamableHttp Transport Only**: This annotation is designed exclusively for StreamableHttp
+ * transport using Server-Sent Events. WebSocket transport (`@McpWebSocket`) does not use
+ * explicit session deletion endpoints, as session termination is handled automatically when
+ * the WebSocket connection is closed.
  *
  * ## Configuration
  *
