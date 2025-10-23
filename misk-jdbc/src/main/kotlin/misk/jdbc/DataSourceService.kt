@@ -105,21 +105,7 @@ class DataSourceService @JvmOverloads constructor(
         else -> {}
       }
 
-
-      // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
-      hikariConfig.dataSourceProperties["cachePrepStmts"] = "true"
-      hikariConfig.dataSourceProperties["prepStmtCacheSize"] = "250"
-      hikariConfig.dataSourceProperties["prepStmtCacheSqlLimit"] = "2048"
-      if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.VITESS_MYSQL || config.type == DataSourceType.TIDB) {
-        hikariConfig.dataSourceProperties["useServerPrepStmts"] = "true"
-      }
-      hikariConfig.dataSourceProperties["useLocalSessionState"] = "true"
-      hikariConfig.dataSourceProperties["rewriteBatchedStatements"] = "true"
-      hikariConfig.dataSourceProperties["cacheResultSetMetadata"] = "true"
-      hikariConfig.dataSourceProperties["cacheServerConfiguration"] = "true"
-      hikariConfig.dataSourceProperties["elideSetAutoCommits"] = "true"
-      hikariConfig.dataSourceProperties["maintainTimeStats"] = "false"
-      hikariConfig.dataSourceProperties["characterEncoding"] = "UTF-8"
+      hikariConfig.dataSourceProperties = config.getDataSourceProperties()
     }
 
     // TODO(sahilm): The same mitigation _might_ be applicable to the DataSourceTypes VITESS_MYSQL and TIDB
