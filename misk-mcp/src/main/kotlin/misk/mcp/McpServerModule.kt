@@ -37,24 +37,24 @@ import kotlin.reflect.KClass
 
 /**
  * Guice module for configuring MCP (Model Context Protocol) server functionality.
- * 
+ *
  * This module sets up the necessary bindings for MCP tools, resources, prompts,
- * and transport mechanisms (WebSocket and Server-Sent Events). It provides factory 
+ * and transport mechanisms (WebSocket and Server-Sent Events). It provides factory
  * methods for creating configured MCP server instances with different transport options
  * and optional tool grouping via annotations.
- * 
+ *
  * The module automatically configures:
  * - Multi-binders for tools, resources, and prompts
  * - Transport layer factories for HTTP streaming and WebSocket connections
  * - JSON RPC message unmarshalling
  * - Optional session handling
  * - Metrics collection
- * 
+ *
  * Example usage:
  * ```kotlin
  * install(McpServerModule.create("my-server", mcpConfig))
  * ```
- * 
+ *
  * @see MiskMcpServer
  * @see McpConfig
  * @see McpTool
@@ -108,7 +108,8 @@ class McpServerModule private constructor(
               MiskStreamableHttpServerTransport(
                 call = httpCall.get(),
                 mcpSessionHandler = mcpSessionHandlerProvider.get().getOrNull(),
-                sendChannel = sendChannel
+                sendChannel = sendChannel,
+                mcpTools = toolsProvider.get(),
               )
           }
       }
@@ -164,7 +165,7 @@ class McpServerModule private constructor(
   companion object {
     /**
      * Create an [McpServerModule] for the given [McpConfig] with an optional tool [groupAnnotation].
-     * 
+     *
      * @param name The name of the MCP server configuration to use from the config
      * @param config The MCP configuration containing server settings
      * @param instructionsProvider Optional provider for server instructions/documentation
@@ -180,9 +181,9 @@ class McpServerModule private constructor(
 
     /**
      * Create an [McpServerModule] with a reified group annotation type.
-     * 
+     *
      * @param name The name of the MCP server configuration to use from the config
-     * @param config The MCP configuration containing server settings  
+     * @param config The MCP configuration containing server settings
      * @param instructionsProvider Optional provider for server instructions/documentation
      * @return A configured McpServerModule instance with the specified group annotation
      */
@@ -195,7 +196,7 @@ class McpServerModule private constructor(
 
     /**
      * Create an [McpServerModule] without any group annotation.
-     * 
+     *
      * @param name The name of the MCP server configuration to use from the config
      * @param config The MCP configuration containing server settings
      * @param instructionsProvider Optional provider for server instructions/documentation

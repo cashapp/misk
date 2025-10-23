@@ -76,6 +76,7 @@ public abstract class misk/mcp/McpTool {
 	public abstract fun getDescription ()Ljava/lang/String;
 	public fun getDestructiveHint ()Z
 	public fun getIdempotentHint ()Z
+	public fun getMetadata ()Lkotlinx/serialization/json/JsonObject;
 	public abstract fun getName ()Ljava/lang/String;
 	public fun getOpenWorldHint ()Z
 	public fun getReadOnlyHint ()Z

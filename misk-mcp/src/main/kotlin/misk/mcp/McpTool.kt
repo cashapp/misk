@@ -202,6 +202,14 @@ abstract class McpTool<I : Any> {
    */
   open val openWorldHint: Boolean = true
 
+  /**
+   * Metadata included in the tool descriptor. Not officially part of the MCP spec, but relied
+   * upon by some clients (e.g., OpenAI Apps SDK).
+   *
+   * This field type is expected to have a breaking change in the near future.
+   */
+  open val metadata: JsonObject? = null
+
   internal val inputSchema: Tool.Input by lazy {
     val schema = inputClass.generateJsonSchema()
     Tool.Input(
