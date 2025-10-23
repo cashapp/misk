@@ -187,9 +187,9 @@ class SqsJobEnqueuer @Inject constructor(
     )
 
     // Update metrics
-    sqsMetrics.jobsEnqueued.labels(queueName.value).inc(result.successCount.toDouble())
-    if (result.hasAnyFailure) {
-      sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc(result.failureCount.toDouble())
+    sqsMetrics.jobsEnqueued.labels(queueName.value).inc(result.successful.size.toDouble())
+    if (!result.isFullySuccessful) {
+      sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc((result.invalid.size + result.retriable.size).toDouble())
     }
 
     return result

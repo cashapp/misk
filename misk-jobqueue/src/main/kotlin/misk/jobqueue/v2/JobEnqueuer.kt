@@ -89,14 +89,7 @@ interface JobEnqueuer {
     val successful: List<String>,           // Successfully enqueued message IDs (your batch entry IDs)
     val invalid: List<String>,              // Invalid message IDs - don't retry (client errors)
     val retriable: List<String>             // Retriable message IDs - can retry (server errors)
-  ) {
-    // Convenience properties
-    val hasPartialFailure: Boolean = successful.isNotEmpty() && (invalid.isNotEmpty() || retriable.isNotEmpty())
-    val hasAnyFailure: Boolean = invalid.isNotEmpty() || retriable.isNotEmpty()
-    val totalProcessed: Int = successful.size + invalid.size + retriable.size
-    val successCount: Int = successful.size
-    val failureCount: Int = invalid.size + retriable.size
-  }
+  )
 
   /**
    * Data class containing the necessary information to be enqueued in a batch enqueue
