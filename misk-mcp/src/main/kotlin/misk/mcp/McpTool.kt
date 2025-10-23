@@ -205,6 +205,8 @@ abstract class McpTool<I : Any> {
   /**
    * Metadata included in the tool descriptor. Not officially part of the MCP spec, but relied
    * upon by some clients (e.g., OpenAI Apps SDK).
+   *
+   * This field type is expected to have a breaking change in the near future.
    */
   open val metadata: JsonObject? = null
 
