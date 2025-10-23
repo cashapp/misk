@@ -39,19 +39,6 @@ dependencies {
   testImplementation(libs.assertj)
   testImplementation(libs.aws2DynamodbEnhanced)
   testImplementation(libs.junitApi)
-  // Have to clamp until DynamoDBLocal supports later versions (dependency from tempest).
-  testRuntimeOnly("org.antlr:antlr4-runtime") {
-    version {
-      strictly("4.9.3")
-    }
-  }
-
-  if (org.apache.tools.ant.taskdefs.condition.Os.isArch("aarch64")) {
-    // Without this, we can't compile on Apple Silicon currently.
-    // This is likely not necessary to have long term,
-    // so we should remove it when things get fixed upstream.
-    testImplementation("io.github.ganadist.sqlite4java:libsqlite4java-osx-aarch64:1.0.392")
-  }
 
   testImplementation(libs.tempest2Testing)
   testImplementation(libs.tempest2TestingDocker)
