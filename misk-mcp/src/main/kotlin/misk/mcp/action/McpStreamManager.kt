@@ -14,6 +14,7 @@ import misk.logging.getLogger
 import misk.mcp.MiskMcpServer
 import misk.mcp.internal.McpJson
 import misk.mcp.internal.McpServerSession
+import misk.mcp.internal.MiskServerTransport
 import misk.mcp.internal.MiskStreamableHttpServerTransport
 import misk.mcp.internal.MiskWebSocketServerTransport
 import misk.web.actions.WebSocket
@@ -266,13 +267,19 @@ class McpStreamManager internal constructor(
    * Handles internal initialization of a new [ServerSession].
    */
   private fun ServerSession.initialize(): ServerSession {
+    val miskServerTransport = checkNotNull(transport as? MiskServerTransport) {
+      "Expected transport to be MiskServerTransport but was ${transport?.let { it::class.simpleName }}"
+    }
+    val serverName = mcpServer.name
+    val streamId = miskServerTransport.streamId
+
     onInitialized {
-      logger.info { "MCP server ${mcpServer.name} initialized" }
+      logger.info { "Initialized mcp server session for '$serverName' with stream id '$streamId'" }
     }
     onClose {
-      logger.info { "Server Session closed" }
+      logger.info { "Closed mcp server session for '$serverName' with stream id '$streamId'" }
     }
-    logger.debug { "Server Session connected to transport" }
+    logger.debug { "Server Session connected to transport with stream id '$streamId'" }
     return this
   }
 
