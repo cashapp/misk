@@ -14,7 +14,6 @@ import misk.jobqueue.sqs.parentQueue
 import misk.jobqueue.v2.JobEnqueuer
 import misk.moshi.adapter
 import misk.tokens.TokenGenerator
-import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.MessageAttributeValue
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import java.time.Clock
@@ -71,7 +70,7 @@ class SqsJobEnqueuer @Inject constructor(
           sqsMetrics.sqsSendTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
           span.finish()
           scope.close()
-        }.thenCompose { CompletableFuture.supplyAsync { true } }
+        }.thenApply { true }
       } catch (e: Exception) {
         sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc()
         throw e
