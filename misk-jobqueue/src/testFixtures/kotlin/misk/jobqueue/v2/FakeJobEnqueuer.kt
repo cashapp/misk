@@ -95,6 +95,70 @@ class FakeJobEnqueuer @Inject constructor(
     return CompletableFuture.supplyAsync { true }
   }
 
+  override suspend fun batchEnqueue(
+    queueName: QueueName,
+    jobs: List<JobEnqueuer.JobRequest>
+  ): JobEnqueuer.BatchEnqueueResult {
+    return batchEnqueueAsync(queueName, jobs).await()
+  }
+
+  override fun batchEnqueueBlocking(
+    queueName: QueueName,
+    jobs: List<JobEnqueuer.JobRequest>
+  ): JobEnqueuer.BatchEnqueueResult {
+    return batchEnqueueAsync(queueName, jobs).join()
+  }
+
+  override fun batchEnqueueAsync(
+    queueName: QueueName,
+    jobs: List<JobEnqueuer.JobRequest>
+  ): CompletableFuture<JobEnqueuer.BatchEnqueueResult> {
+    require(jobs.size <= JobEnqueuer.SQS_MAX_BATCH_ENQUEUE_JOB_SIZE) {
+      "a maximum of 10 jobs can be batched (got ${jobs.size})"
+    }
+
+    return CompletableFuture.supplyAsync {
+      try {
+        throwIfQueuedFailure(queueName)
+
+        val successful = mutableListOf<String>()
+        val jobQueue = jobQueues.getOrPut(queueName, ::PriorityBlockingQueue)
+
+        jobs.forEach { jobRequest ->
+          val id = tokenGenerator.generate("fakeJobQueue")
+          val resolvedIdempotencyKey = jobRequest.idempotencyKey
+          val fakeJob = FakeJob(
+            queueName,
+            id,
+            resolvedIdempotencyKey,
+            jobRequest.body,
+            jobRequest.attributes,
+            clock.instant(),
+            jobRequest.deliveryDelay
+          )
+          jobQueue.add(fakeJob)
+          successful.add(resolvedIdempotencyKey)
+        }
+
+        JobEnqueuer.BatchEnqueueResult(
+          isFullySuccessful = true,
+          successful = successful,
+          invalid = emptyList(),
+          retriable = emptyList()
+        )
+      } catch (e: Exception) {
+        // If there's a failure, treat all jobs as retriable (server error)
+        val jobIds = jobs.map { it.idempotencyKey }
+        JobEnqueuer.BatchEnqueueResult(
+          isFullySuccessful = false,
+          successful = emptyList(),
+          invalid = emptyList(),
+          retriable = jobIds
+        )
+      }
+    }
+  }
+
   private fun nextFailure(queueName: QueueName?): Exception? {
     return queueName?.let { failureJobQueues.get(it)?.poll() } ?: failureJobQueue.poll()
   }
