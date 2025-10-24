@@ -6,15 +6,23 @@ import misk.inject.keyOf
 import kotlin.reflect.KClass
 
 /**
- * Guice module for installing MCP session handlers.
+ * Guice module for installing MCP session handlers for StreamableHttp transport.
  *
  * This module registers an [McpSessionHandler] implementation with the dependency injection
- * framework, enabling automatic session management for MCP servers.
+ * framework, enabling automatic session management for MCP servers using StreamableHttp
+ * transport (SSE-based communication via `@McpPost`, `@McpGet`, and `@McpDelete` endpoints).
+ *
+ * ## Transport Compatibility
+ *
+ * **StreamableHttp Transport Only**: This module is designed exclusively for StreamableHttp
+ * transport using Server-Sent Events. Session handlers are not used with WebSocket transport
+ * (`@McpWebSocket`), which maintains connection state through the persistent WebSocket
+ * connection itself.
  *
  * ## Basic Installation
  *
  * ```kotlin
- * // Install a session handler implementation
+ * // Install a session handler implementation for StreamableHttp transport
  * install(McpSessionHandlerModule.create<MySessionHandler>())
  * ```
  *
@@ -48,8 +56,13 @@ import kotlin.reflect.KClass
  * }
  * ```
  *
- * Once installed, the framework will automatically handle session lifecycle and include
- * session IDs in the "Mcp-Session-Id" response header.
+ * Once installed, the framework will automatically handle session lifecycle for StreamableHttp
+ * requests and include session IDs in the "Mcp-Session-Id" response header.
+ *
+ * @see McpSessionHandler for session management interface
+ * @see misk.mcp.action.McpPost for StreamableHttp request handling
+ * @see misk.mcp.action.McpGet for StreamableHttp event streaming
+ * @see misk.mcp.action.McpDelete for StreamableHttp session termination
  */
 class McpSessionHandlerModule<T: McpSessionHandler>(
   private val mcpSessionHandlerClass: KClass<T>,

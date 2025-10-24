@@ -1,8 +1,8 @@
 package misk.feature.testing;
 
 import org.jetbrains.annotations.NotNull;
-import wisp.feature.Attributes;
-import wisp.feature.Feature;
+import misk.feature.Attributes;
+import misk.feature.Feature;
 import wisp.feature.JsonFeatureFlag;
 
 public class TestJsonFlag implements JsonFeatureFlag<TestJsonObject> {
