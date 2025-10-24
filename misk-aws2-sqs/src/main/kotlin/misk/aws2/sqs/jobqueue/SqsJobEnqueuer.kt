@@ -181,15 +181,15 @@ class SqsJobEnqueuer @Inject constructor(
 
     val result = JobEnqueuer.BatchEnqueueResult(
       isFullySuccessful = invalid.isEmpty() && retriable.isEmpty(),
-      successful = successful,
-      invalid = invalid,
-      retriable = retriable
+      successfulIds = successful,
+      invalidIds = invalid,
+      retriableIds = retriable
     )
 
     // Update metrics
-    sqsMetrics.jobsEnqueued.labels(queueName.value).inc(result.successful.size.toDouble())
+    sqsMetrics.jobsEnqueued.labels(queueName.value).inc(result.successfulIds.size.toDouble())
     if (!result.isFullySuccessful) {
-      sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc((result.invalid.size + result.retriable.size).toDouble())
+      sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc((result.invalidIds.size + result.retriableIds.size).toDouble())
     }
 
     return result

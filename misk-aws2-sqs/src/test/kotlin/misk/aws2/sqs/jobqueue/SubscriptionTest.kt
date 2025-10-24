@@ -127,9 +127,9 @@ class SubscriptionTest {
     )
 
     assertTrue(batchResult1.isFullySuccessful)
-    assertEquals(2, batchResult1.successful.size)
-    assertEquals(0, batchResult1.invalid.size)
-    assertEquals(0, batchResult1.retriable.size)
+    assertEquals(2, batchResult1.successfulIds.size)
+    assertEquals(0, batchResult1.invalidIds.size)
+    assertEquals(0, batchResult1.retriableIds.size)
 
     // Test batchEnqueueBlocking
     val batchResult2 = jobEnqueuer.batchEnqueueBlocking(
@@ -145,7 +145,7 @@ class SubscriptionTest {
     )
 
     assertTrue(batchResult2.isFullySuccessful)
-    assertEquals(1, batchResult2.successful.size)
+    assertEquals(1, batchResult2.successfulIds.size)
 
     // Test batchEnqueueAsync
     val batchResult3 = jobEnqueuer.batchEnqueueAsync(
@@ -166,7 +166,7 @@ class SubscriptionTest {
     ).join()
 
     assertTrue(batchResult3.isFullySuccessful)
-    assertEquals(2, batchResult3.successful.size)
+    assertEquals(2, batchResult3.successfulIds.size)
 
     // Wait for all jobs to be processed
     val latch = handler.counter
@@ -216,7 +216,7 @@ class SubscriptionTest {
 
     val result = jobEnqueuer.batchEnqueue(queueName, maxJobs)
     assertTrue(result.isFullySuccessful)
-    assertEquals(10, result.successful.size)
+    assertEquals(10, result.successfulIds.size)
   }
 
   @Test
@@ -250,8 +250,8 @@ class SubscriptionTest {
     val result = jobEnqueuer.batchEnqueue(queueName, mixedJobs)
 
     assertTrue(result.isFullySuccessful)
-    assertEquals(3, result.successful.size)
-    assertEquals(setOf("immediate_key", "delayed_key", "no_delay_key"), result.successful.toSet())
+    assertEquals(3, result.successfulIds.size)
+    assertEquals(setOf("immediate_key", "delayed_key", "no_delay_key"), result.successfulIds.toSet())
 
     // Wait for jobs to be processed
     val latch = handler.counter
@@ -293,7 +293,7 @@ class SubscriptionTest {
 
     val result = jobEnqueuer.batchEnqueue(queueName, listOf(validJob))
     assertTrue(result.isFullySuccessful)
-    assertEquals(1, result.successful.size)
+    assertEquals(1, result.successfulIds.size)
   }
 }
 

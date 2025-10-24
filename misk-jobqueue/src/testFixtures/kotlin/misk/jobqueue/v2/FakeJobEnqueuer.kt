@@ -142,18 +142,18 @@ class FakeJobEnqueuer @Inject constructor(
 
         JobEnqueuer.BatchEnqueueResult(
           isFullySuccessful = true,
-          successful = successful,
-          invalid = emptyList(),
-          retriable = emptyList()
+          successfulIds = successful,
+          invalidIds = emptyList(),
+          retriableIds = emptyList()
         )
       } catch (e: Exception) {
         // If there's a failure, treat all jobs as retriable (server error)
         val jobIds = jobs.map { it.idempotencyKey }
         JobEnqueuer.BatchEnqueueResult(
           isFullySuccessful = false,
-          successful = emptyList(),
-          invalid = emptyList(),
-          retriable = jobIds
+          successfulIds = emptyList(),
+          invalidIds = emptyList(),
+          retriableIds = jobIds
         )
       }
     }

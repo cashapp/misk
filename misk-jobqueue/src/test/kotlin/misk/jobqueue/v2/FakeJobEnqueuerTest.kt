@@ -484,9 +484,9 @@ internal class FakeJobEnqueuerTest {
       )
     )
     assertThat(result1.isFullySuccessful).isTrue()
-    assertThat(result1.successful).containsExactly("batch_key_1", "batch_key_2")
-    assertThat(result1.invalid).isEmpty()
-    assertThat(result1.retriable).isEmpty()
+    assertThat(result1.successfulIds).containsExactly("batch_key_1", "batch_key_2")
+    assertThat(result1.invalidIds).isEmpty()
+    assertThat(result1.retriableIds).isEmpty()
 
     // Test batchEnqueueBlocking
     val result2 = fakeJobQueue.batchEnqueueBlocking(
@@ -500,7 +500,7 @@ internal class FakeJobEnqueuerTest {
       )
     )
     assertThat(result2.isFullySuccessful).isTrue()
-    assertThat(result2.successful).containsExactly("batch_red_key")
+    assertThat(result2.successfulIds).containsExactly("batch_red_key")
 
     // Test batchEnqueueAsync
     val result3 = fakeJobQueue.batchEnqueueAsync(
@@ -520,7 +520,7 @@ internal class FakeJobEnqueuerTest {
       )
     ).join()
     assertThat(result3.isFullySuccessful).isTrue()
-    assertThat(result3.successful).containsExactly("batch_async_key_1", "batch_async_key_2")
+    assertThat(result3.successfulIds).containsExactly("batch_async_key_1", "batch_async_key_2")
 
     // Verify jobs are in queues
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(4)
@@ -564,7 +564,7 @@ internal class FakeJobEnqueuerTest {
 
     val result = fakeJobQueue.batchEnqueue(GREEN_QUEUE, maxJobs)
     assertThat(result.isFullySuccessful).isTrue()
-    assertThat(result.successful).hasSize(10)
+    assertThat(result.successfulIds).hasSize(10)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(10)
   }
 
@@ -584,9 +584,9 @@ internal class FakeJobEnqueuerTest {
 
     // When there's a failure, all jobs should be marked as retriable
     assertThat(result.isFullySuccessful).isFalse()
-    assertThat(result.successful).isEmpty()
-    assertThat(result.invalid).isEmpty()
-    assertThat(result.retriable).containsExactly("key1", "key2")
+    assertThat(result.successfulIds).isEmpty()
+    assertThat(result.invalidIds).isEmpty()
+    assertThat(result.retriableIds).containsExactly("key1", "key2")
 
     // No jobs should actually be enqueued
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
@@ -619,7 +619,7 @@ internal class FakeJobEnqueuerTest {
     val result = fakeJobQueue.batchEnqueue(GREEN_QUEUE, mixedJobs)
 
     assertThat(result.isFullySuccessful).isTrue()
-    assertThat(result.successful).containsExactly("immediate_key", "delayed_key", "no_delay_key")
+    assertThat(result.successfulIds).containsExactly("immediate_key", "delayed_key", "no_delay_key")
 
     val jobs = fakeJobQueue.peekJobs(GREEN_QUEUE)
     assertThat(jobs).hasSize(3)

@@ -86,25 +86,20 @@ interface JobEnqueuer {
    */
   data class BatchEnqueueResult(
     val isFullySuccessful: Boolean,
-    val successful: List<String>,           // Successfully enqueued message IDs (your batch entry IDs)
-    val invalid: List<String>,              // Invalid message IDs - don't retry (client errors)
-    val retriable: List<String>             // Retriable message IDs - can retry (server errors)
+    val successfulIds: List<String>,        // Successfully enqueued message IDs (your batch entry IDs)
+    val invalidIds: List<String>,           // Invalid message IDs - don't retry (client errors)
+    val retriableIds: List<String>          // Retriable message IDs - can retry (server errors)
   )
 
   /**
    * Data class containing the necessary information to be enqueued in a batch enqueue
-   * @param body The body of the job; can be any arbitrary string - it is up to the enqueuer and
-   * consumer to agree on the format of the body.
-   * @param idempotencyKey Client-assigned unique key, useful for application code to detect duplicate work.
-   * Implementations of both [JobEnqueuer] and [JobConsumer] are expected to _not_ perform any filtering based on this
-   * value, as it carries meaning only for application code (i.e. any logic around this property should take place in
-   * [JobHandler]s). Defaults to a randomly generated UUID when not explicitly set.
+   * @param body The body of the job;
+   * @param idempotencyKey Client-assigned unique key. Defaults to a randomly generated UUID when not explicitly set.
    * @param deliveryDelay If specified, the job will only become visible to the consumer after
-   * the provided duration. Used for jobs that should delay processing for a period of time.
+   * the provided duration.
    * Note that depending on implementation, there may be an upper limit to this value. For instance, SQS implementation
    * limits `deliveryDelay` to 900s (15m).
-   * @param attributes Arbitrary contextual attributes associated with the job. Implementations may limit the number of
-   * attributes per message.
+   * @param attributes Arbitrary contextual attributes associated with the job.
    */
   data class JobRequest @JvmOverloads constructor(
     val body: String,
