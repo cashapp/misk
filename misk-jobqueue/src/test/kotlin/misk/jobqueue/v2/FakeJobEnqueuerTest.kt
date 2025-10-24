@@ -29,6 +29,7 @@ internal class FakeJobEnqueuerTest {
   @Inject private lateinit var fakeClock: FakeClock
   @Inject private lateinit var fakeJobQueue: FakeJobEnqueuer
   @Inject private lateinit var logCollector: LogCollector
+  @Inject private lateinit var moshi: Moshi
 
   @Test
   fun basic() = runTest {
@@ -456,6 +457,191 @@ internal class FakeJobEnqueuerTest {
       "received GREEN job with message: J1",
       "received GREEN job with message: J2",
     )
+  }
+
+  @Test
+  fun batchEnqueueAllThreeApisWork() = runTest {
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+
+    // Create properly formatted JSON job bodies using injected Moshi (with Kotlin support)
+    val jobAdapter = moshi.adapter<ExampleJob>()
+
+    // Test batchEnqueue (suspend)
+    val result1 = fakeJobQueue.batchEnqueue(
+      GREEN_QUEUE,
+      listOf(
+        JobEnqueuer.JobRequest(
+          body = jobAdapter.toJson(ExampleJob(Color.GREEN, "batch_msg_1")),
+          idempotencyKey = "batch_key_1",
+          deliveryDelay = Duration.ofMillis(100),
+          attributes = mapOf("key" to "value")
+        ),
+        JobEnqueuer.JobRequest(
+          body = jobAdapter.toJson(ExampleJob(Color.GREEN, "batch_msg_2")),
+          idempotencyKey = "batch_key_2",
+          attributes = mapOf("key" to "value")
+        )
+      )
+    )
+    assertThat(result1.isFullySuccessful).isTrue()
+    assertThat(result1.successfulIds).containsExactly("batch_key_1", "batch_key_2")
+    assertThat(result1.invalidIds).isEmpty()
+    assertThat(result1.retriableIds).isEmpty()
+
+    // Test batchEnqueueBlocking
+    val result2 = fakeJobQueue.batchEnqueueBlocking(
+      RED_QUEUE,
+      listOf(
+        JobEnqueuer.JobRequest(
+          body = jobAdapter.toJson(ExampleJob(Color.RED, "batch_red_msg")),
+          idempotencyKey = "batch_red_key",
+          attributes = mapOf("key" to "value")
+        )
+      )
+    )
+    assertThat(result2.isFullySuccessful).isTrue()
+    assertThat(result2.successfulIds).containsExactly("batch_red_key")
+
+    // Test batchEnqueueAsync
+    val result3 = fakeJobQueue.batchEnqueueAsync(
+      GREEN_QUEUE,
+      listOf(
+        JobEnqueuer.JobRequest(
+          body = jobAdapter.toJson(ExampleJob(Color.GREEN, "batch_async_1")),
+          idempotencyKey = "batch_async_key_1",
+          attributes = mapOf("key" to "value")
+        ),
+        JobEnqueuer.JobRequest(
+          body = jobAdapter.toJson(ExampleJob(Color.GREEN, "batch_async_2")),
+          idempotencyKey = "batch_async_key_2",
+          deliveryDelay = Duration.ofSeconds(1),
+          attributes = mapOf("key" to "value")
+        )
+      )
+    ).join()
+    assertThat(result3.isFullySuccessful).isTrue()
+    assertThat(result3.successfulIds).containsExactly("batch_async_key_1", "batch_async_key_2")
+
+    // Verify jobs are in queues
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(4)
+    assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).hasSize(1)
+
+    // Process all jobs
+    fakeJobQueue.handleJobs()
+
+    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+      "received GREEN job with message: batch_msg_1",
+      "received GREEN job with message: batch_msg_2",
+      "received GREEN job with message: batch_async_1",
+      "received GREEN job with message: batch_async_2",
+      "received RED job with message: batch_red_msg"
+    )
+  }
+
+  @Test
+  fun batchEnqueueRespectsSizeLimit() = runTest {
+    // Test that batches > 10 jobs are rejected
+    val tooManyJobs = (1..11).map { i ->
+      JobEnqueuer.JobRequest("message_$i", "key_$i")
+    }
+
+    assertFailsWith<IllegalArgumentException> {
+      fakeJobQueue.batchEnqueue(GREEN_QUEUE, tooManyJobs)
+    }
+
+    assertFailsWith<IllegalArgumentException> {
+      fakeJobQueue.batchEnqueueBlocking(GREEN_QUEUE, tooManyJobs)
+    }
+
+    assertFailsWith<IllegalArgumentException> {
+      fakeJobQueue.batchEnqueueAsync(GREEN_QUEUE, tooManyJobs)
+    }
+
+    // Test that exactly 10 jobs works
+    val maxJobs = (1..10).map { i ->
+      JobEnqueuer.JobRequest("message_$i", "max_key_$i")
+    }
+
+    val result = fakeJobQueue.batchEnqueue(GREEN_QUEUE, maxJobs)
+    assertThat(result.isFullySuccessful).isTrue()
+    assertThat(result.successfulIds).hasSize(10)
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(10)
+  }
+
+  @Test
+  fun batchEnqueueWithFailuresReturnsRetriableJobs() = runTest {
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+
+    // Set up a failure for GREEN_QUEUE
+    fakeJobQueue.pushFailure(RuntimeException("SQS is down"), GREEN_QUEUE)
+
+    val jobs = listOf(
+      JobEnqueuer.JobRequest("job1", "key1"),
+      JobEnqueuer.JobRequest("job2", "key2")
+    )
+
+    val result = fakeJobQueue.batchEnqueueAsync(GREEN_QUEUE, jobs).join()
+
+    // When there's a failure, all jobs should be marked as retriable
+    assertThat(result.isFullySuccessful).isFalse()
+    assertThat(result.successfulIds).isEmpty()
+    assertThat(result.invalidIds).isEmpty()
+    assertThat(result.retriableIds).containsExactly("key1", "key2")
+
+    // No jobs should actually be enqueued
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+  }
+
+  @Test
+  fun batchEnqueueWithMixedDeliveryDelaysAndAttributes() = runTest {
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+
+    val mixedJobs = listOf(
+      JobEnqueuer.JobRequest(
+        body = "immediate_job",
+        idempotencyKey = "immediate_key",
+        deliveryDelay = Duration.ZERO,
+        attributes = mapOf("priority" to "high")
+      ),
+      JobEnqueuer.JobRequest(
+        body = "delayed_job",
+        idempotencyKey = "delayed_key",
+        deliveryDelay = Duration.ofMillis(500),
+        attributes = mapOf("priority" to "normal", "type" to "delayed")
+      ),
+      JobEnqueuer.JobRequest(
+        body = "no_delay_job",
+        idempotencyKey = "no_delay_key",
+        attributes = mapOf("priority" to "low")
+      )
+    )
+
+    val result = fakeJobQueue.batchEnqueue(GREEN_QUEUE, mixedJobs)
+
+    assertThat(result.isFullySuccessful).isTrue()
+    assertThat(result.successfulIds).containsExactly("immediate_key", "delayed_key", "no_delay_key")
+
+    val jobs = fakeJobQueue.peekJobs(GREEN_QUEUE)
+    assertThat(jobs).hasSize(3)
+
+    // Verify job attributes and delays are preserved
+    val fakeJobs = jobs.map { it as FakeJob }
+
+    val immediateJob = fakeJobs.find { it.idempotenceKey == "immediate_key" }!!
+    assertThat(immediateJob.body).isEqualTo("immediate_job")
+    assertThat(immediateJob.deliveryDelay).isEqualTo(Duration.ZERO)
+    assertThat(immediateJob.attributes).containsEntry("priority", "high")
+
+    val delayedJob = fakeJobs.find { it.idempotenceKey == "delayed_key" }!!
+    assertThat(delayedJob.body).isEqualTo("delayed_job")
+    assertThat(delayedJob.deliveryDelay).isEqualTo(Duration.ofMillis(500))
+    assertThat(delayedJob.attributes).containsEntry("priority", "normal")
+    assertThat(delayedJob.attributes).containsEntry("type", "delayed")
+
+    val noDelayJob = fakeJobs.find { it.idempotenceKey == "no_delay_key" }!!
+    assertThat(noDelayJob.body).isEqualTo("no_delay_job")
+    assertThat(noDelayJob.deliveryDelay).isNull()
+    assertThat(noDelayJob.attributes).containsEntry("priority", "low")
   }
 
 }
