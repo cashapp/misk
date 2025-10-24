@@ -1,0 +1,43 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.concurrent////PointingToDeclaration/misk-sampling/misk.concurrent/index.md
+$dokka.location:misk.concurrent/ExecutorServiceFactory///PointingToDeclaration/misk-sampling/misk.concurrent/-executor-service-factory/index.md
+$dokka.location:misk.concurrent/ExecutorServiceFactory/fixed/#kotlin.String#kotlin.Int/PointingToDeclaration/misk-sampling/misk.concurrent/-executor-service-factory/fixed.md
+$dokka.location:misk.concurrent/ExecutorServiceFactory/scheduled/#kotlin.String#kotlin.Int/PointingToDeclaration/misk-sampling/misk.concurrent/-executor-service-factory/scheduled.md
+$dokka.location:misk.concurrent/ExecutorServiceFactory/single/#kotlin.String/PointingToDeclaration/misk-sampling/misk.concurrent/-executor-service-factory/single.md
+$dokka.location:misk.concurrent/ExecutorServiceFactory/unbounded/#kotlin.String/PointingToDeclaration/misk-sampling/misk.concurrent/-executor-service-factory/unbounded.md
+$dokka.location:misk.concurrent/Sleeper.Companion///PointingToDeclaration/misk-sampling/misk.concurrent/-sleeper/-companion/index.md
+$dokka.location:misk.concurrent/Sleeper.Companion/DEFAULT/#/PointingToDeclaration/misk-sampling/misk.concurrent/-sleeper/-companion/-d-e-f-a-u-l-t.md
+$dokka.location:misk.concurrent/Sleeper///PointingToDeclaration/misk-sampling/misk.concurrent/-sleeper/index.md
+$dokka.location:misk.concurrent/Sleeper/sleep/#java.time.Duration/PointingToDeclaration/misk-sampling/misk.concurrent/-sleeper/sleep.md
+$dokka.location:misk.sampling////PointingToDeclaration/misk-sampling/misk.sampling/index.md
+$dokka.location:misk.sampling/AlwaysSampler///PointingToDeclaration/misk-sampling/misk.sampling/-always-sampler/index.md
+$dokka.location:misk.sampling/AlwaysSampler/AlwaysSampler/#/PointingToDeclaration/misk-sampling/misk.sampling/-always-sampler/-always-sampler.md
+$dokka.location:misk.sampling/AlwaysSampler/sample/#/PointingToDeclaration/misk-sampling/misk.sampling/-always-sampler/sample.md
+$dokka.location:misk.sampling/PercentSampler///PointingToDeclaration/misk-sampling/misk.sampling/-percent-sampler/index.md
+$dokka.location:misk.sampling/PercentSampler/PercentSampler/#kotlin.Function0[kotlin.Int]#kotlin.Function0[kotlin.Int]/PointingToDeclaration/misk-sampling/misk.sampling/-percent-sampler/-percent-sampler.md
+$dokka.location:misk.sampling/PercentSampler/PercentSampler/#kotlin.Int#kotlin.Function0[kotlin.Int]/PointingToDeclaration/misk-sampling/misk.sampling/-percent-sampler/-percent-sampler.md
+$dokka.location:misk.sampling/PercentSampler/PercentSampler/#kotlin.Int/PointingToDeclaration/misk-sampling/misk.sampling/-percent-sampler/-percent-sampler.md
+$dokka.location:misk.sampling/PercentSampler/random/#/PointingToDeclaration/misk-sampling/misk.sampling/-percent-sampler/random.md
+$dokka.location:misk.sampling/PercentSampler/sample/#/PointingToDeclaration/misk-sampling/misk.sampling/-percent-sampler/sample.md
+$dokka.location:misk.sampling/PercentSampler/samplePercentage/#/PointingToDeclaration/misk-sampling/misk.sampling/-percent-sampler/sample-percentage.md
+$dokka.location:misk.sampling/RateLimiter.Factory///PointingToDeclaration/misk-sampling/misk.sampling/-rate-limiter/-factory/index.md
+$dokka.location:misk.sampling/RateLimiter.Factory/Factory/#com.google.common.base.Ticker#misk.concurrent.Sleeper/PointingToDeclaration/misk-sampling/misk.sampling/-rate-limiter/-factory/-factory.md
+$dokka.location:misk.sampling/RateLimiter.Factory/create/#kotlin.Long/PointingToDeclaration/misk-sampling/misk.sampling/-rate-limiter/-factory/create.md
+$dokka.location:misk.sampling/RateLimiter///PointingToDeclaration/misk-sampling/misk.sampling/-rate-limiter/index.md
+$dokka.location:misk.sampling/RateLimiter/getPermitsRemaining/#java.util.concurrent.TimeUnit#kotlin.Long/PointingToDeclaration/misk-sampling/misk.sampling/-rate-limiter/get-permits-remaining.md
+$dokka.location:misk.sampling/RateLimiter/permitsPerSecond/#/PointingToDeclaration/misk-sampling/misk.sampling/-rate-limiter/permits-per-second.md
+$dokka.location:misk.sampling/RateLimiter/tryAcquire/#kotlin.Long#kotlin.Long#java.util.concurrent.TimeUnit/PointingToDeclaration/misk-sampling/misk.sampling/-rate-limiter/try-acquire.md
+$dokka.location:misk.sampling/RateLimitingSampler///PointingToDeclaration/misk-sampling/misk.sampling/-rate-limiting-sampler/index.md
+$dokka.location:misk.sampling/RateLimitingSampler/RateLimitingSampler/#kotlin.Long/PointingToDeclaration/misk-sampling/misk.sampling/-rate-limiting-sampler/-rate-limiting-sampler.md
+$dokka.location:misk.sampling/RateLimitingSampler/RateLimitingSampler/#misk.sampling.RateLimiter/PointingToDeclaration/misk-sampling/misk.sampling/-rate-limiting-sampler/-rate-limiting-sampler.md
+$dokka.location:misk.sampling/RateLimitingSampler/sample/#/PointingToDeclaration/misk-sampling/misk.sampling/-rate-limiting-sampler/sample.md
+$dokka.location:misk.sampling/Sampler.Companion///PointingToDeclaration/misk-sampling/misk.sampling/-sampler/-companion/index.md
+$dokka.location:misk.sampling/Sampler.Companion/always/#/PointingToDeclaration/misk-sampling/misk.sampling/-sampler/-companion/always.md
+$dokka.location:misk.sampling/Sampler.Companion/percentage/#kotlin.Int/PointingToDeclaration/misk-sampling/misk.sampling/-sampler/-companion/percentage.md
+$dokka.location:misk.sampling/Sampler.Companion/rateLimiting/#kotlin.Long/PointingToDeclaration/misk-sampling/misk.sampling/-sampler/-companion/rate-limiting.md
+$dokka.location:misk.sampling/Sampler///PointingToDeclaration/misk-sampling/misk.sampling/-sampler/index.md
+$dokka.location:misk.sampling/Sampler/sample/#/PointingToDeclaration/misk-sampling/misk.sampling/-sampler/sample.md
+$dokka.location:misk.sampling/Sampler/sampledCall/#kotlin.Function0[kotlin.Unit]/PointingToDeclaration/misk-sampling/misk.sampling/-sampler/sampled-call.md
+misk.concurrent
+misk.sampling
