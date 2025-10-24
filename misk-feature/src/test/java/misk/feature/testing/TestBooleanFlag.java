@@ -1,9 +1,9 @@
 package misk.feature.testing;
 
 import org.jetbrains.annotations.NotNull;
-import wisp.feature.Attributes;
+import misk.feature.Attributes;
 import wisp.feature.BooleanFeatureFlag;
-import wisp.feature.Feature;
+import misk.feature.Feature;
 
 public class TestBooleanFlag implements BooleanFeatureFlag {
   public final String clientIdentifier;

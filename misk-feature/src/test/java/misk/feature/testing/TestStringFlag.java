@@ -1,9 +1,9 @@
 package misk.feature.testing;
 
 import org.jetbrains.annotations.NotNull;
-import wisp.feature.Attributes;
+import misk.feature.Attributes;
 import wisp.feature.StringFeatureFlag;
-import wisp.feature.Feature;
+import misk.feature.Feature;
 
 public class TestStringFlag implements StringFeatureFlag {
   public final String clientIdentifier;

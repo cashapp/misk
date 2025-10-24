@@ -20,7 +20,7 @@ import software.amazon.awssdk.services.s3.model.HeadBucketRequest
 import software.amazon.awssdk.services.s3.model.ListBucketsRequest
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request
 import software.amazon.awssdk.services.s3.model.NoSuchBucketException
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.net.URI
 
 /**
