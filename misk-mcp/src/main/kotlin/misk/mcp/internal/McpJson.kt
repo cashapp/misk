@@ -1,5 +1,6 @@
 package misk.mcp.internal
 
+import jakarta.inject.Qualifier
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.ClassDiscriminatorMode
 import kotlinx.serialization.json.Json
@@ -21,3 +22,10 @@ internal val McpJson: Json by lazy {
   }
 }
 
+/**
+ * Qualifier for the [Json] instance used in the MCP module.
+ * This is used to differentiate the MCP-specific JSON configuration from other JSON configurations
+ */
+@Qualifier
+@Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.FUNCTION)
+internal annotation class MiskMcp
