@@ -95,6 +95,9 @@ class SqsJobEnqueuer @Inject constructor(
       "a maximum of 10 jobs can be batched (got ${jobs.size})"
     }
 
+    // Track batch size distribution
+    sqsMetrics.batchEnqueueSize.labels(queueName.value).observe(jobs.size.toDouble())
+
     return tracer.withSpanAsync("batch-enqueue-job-${queueName.value}") { span, scope ->
       val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
 
@@ -138,14 +141,14 @@ class SqsJobEnqueuer @Inject constructor(
         val response = client.sendMessageBatch(request)
 
         response.whenComplete { _, _ ->
-          sqsMetrics.sqsSendTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
+          sqsMetrics.sqsBatchSendTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
           span.finish()
           scope.close()
         }.thenApply { result ->
           processBatchResponse(result, queueName)
         }
       } catch (e: Exception) {
-        sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc(jobs.size.toDouble())
+        sqsMetrics.jobBatchEnqueueFailures.labels(queueName.value).inc(jobs.size.toDouble())
         throw e
       }
     }
@@ -187,9 +190,10 @@ class SqsJobEnqueuer @Inject constructor(
     )
 
     // Update metrics
-    sqsMetrics.jobsEnqueued.labels(queueName.value).inc(result.successfulIds.size.toDouble())
+    sqsMetrics.jobsBatchEnqueued.labels(queueName.value).inc(result.successfulIds.size.toDouble())
     if (!result.isFullySuccessful) {
-      sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc((result.invalidIds.size + result.retriableIds.size).toDouble())
+      sqsMetrics.jobBatchEnqueueFailures.labels(queueName.value).inc(
+        (result.invalidIds.size + result.retriableIds.size).toDouble())
     }
 
     return result
