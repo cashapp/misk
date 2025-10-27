@@ -126,7 +126,7 @@ class FakeJobEnqueuer @Inject constructor(
 
         jobs.forEach { jobRequest ->
           val id = tokenGenerator.generate("fakeJobQueue")
-          val resolvedIdempotencyKey = jobRequest.idempotencyKey
+          val resolvedIdempotencyKey = jobRequest.idempotencyKey ?: tokenGenerator.generate("fakeJobIdempotence")
           val fakeJob = FakeJob(
             queueName,
             id,
@@ -148,7 +148,7 @@ class FakeJobEnqueuer @Inject constructor(
         )
       } catch (e: Exception) {
         // If there's a failure, treat all jobs as retriable (server error)
-        val jobIds = jobs.map { it.idempotencyKey }
+        val jobIds = jobs.map { it.idempotencyKey ?: tokenGenerator.generate("fakeJobIdempotence") }
         JobEnqueuer.BatchEnqueueResult(
           isFullySuccessful = false,
           successfulIds = emptyList(),
