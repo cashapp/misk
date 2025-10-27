@@ -311,9 +311,9 @@ public final class misk/jobqueue/v2/JobEnqueuer$BatchEnqueueResult {
 	public final fun copy (ZLjava/util/List;Ljava/util/List;Ljava/util/List;)Lmisk/jobqueue/v2/JobEnqueuer$BatchEnqueueResult;
 	public static synthetic fun copy$default (Lmisk/jobqueue/v2/JobEnqueuer$BatchEnqueueResult;ZLjava/util/List;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lmisk/jobqueue/v2/JobEnqueuer$BatchEnqueueResult;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getInvalid ()Ljava/util/List;
-	public final fun getRetriable ()Ljava/util/List;
-	public final fun getSuccessful ()Ljava/util/List;
+	public final fun getInvalidIds ()Ljava/util/List;
+	public final fun getRetriableIds ()Ljava/util/List;
+	public final fun getSuccessfulIds ()Ljava/util/List;
 	public fun hashCode ()I
 	public final fun isFullySuccessful ()Z
 	public fun toString ()Ljava/lang/String;
