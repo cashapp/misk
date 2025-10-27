@@ -2,12 +2,12 @@ package misk.web
 
 import misk.annotation.ExperimentalMiskApi
 import misk.client.HTTP_SERVICE_UNAVAILABLE
+import misk.config.Config
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
 import misk.web.concurrencylimits.ConcurrencyLimiterStrategy
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.slf4j.event.Level
-import misk.config.Config
 
 data class WebConfig @JvmOverloads constructor(
   /** HTTP port to listen on, or 0 for any available port. */
@@ -222,6 +222,9 @@ data class WebConfig @JvmOverloads constructor(
 
   /** If true, disables the embedded Jetty server. */
   val disable_jetty: Boolean = false,
+
+  /** WebSocket idle timeout in seconds. Defaults to -1 (no timeout). */
+  val websocket_idle_timeout_seconds: Long = -1,
 ) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
