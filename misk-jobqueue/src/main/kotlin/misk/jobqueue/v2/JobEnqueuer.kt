@@ -103,7 +103,7 @@ interface JobEnqueuer {
    */
   data class JobRequest @JvmOverloads constructor(
     val body: String,
-    val idempotencyKey: String = UUID.randomUUID().toString(),
+    val idempotencyKey : String? = null,
     val deliveryDelay: Duration? = null,
     val attributes: Map<String, String> = emptyMap()
   )

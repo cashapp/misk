@@ -106,7 +106,7 @@ class SqsJobEnqueuer @Inject constructor(
       }
 
       val messageEntries = jobs.map { job ->
-        val resolvedIdempotencyKey = job.idempotencyKey
+        val resolvedIdempotencyKey = job.idempotencyKey ?: tokenGenerator.generate()
 
         val attrs = job.attributes.map {
           it.key to MessageAttributeValue.builder().dataType("String").stringValue(it.value).build()
