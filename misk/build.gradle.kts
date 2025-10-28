@@ -67,6 +67,7 @@ dependencies {
   implementation(libs.retrofitWire)
   implementation(libs.wireGrpcClient)
   implementation(libs.wireRuntime)
+  implementation(project(":misk-feature"))
   implementation(project(":misk-grpc-reflect"))
   implementation(project(":misk-logging"))
   implementation(project(":misk-prometheus"))
