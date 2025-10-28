@@ -57,6 +57,7 @@ dependencies {
   implementation(libs.kotlinStdLibJdk8)
   implementation(libs.kotlinxCoroutinesCore)
   implementation(libs.kotlinxCoroutinesSlf4j)
+  implementation(libs.logbackClassic)
   implementation(libs.loggingApi)
   implementation(libs.okio)
   implementation(libs.openTracingConcurrent)
@@ -66,6 +67,7 @@ dependencies {
   implementation(libs.retrofitWire)
   implementation(libs.wireGrpcClient)
   implementation(libs.wireRuntime)
+  implementation(project(":misk-feature"))
   implementation(project(":misk-grpc-reflect"))
   implementation(project(":misk-logging"))
   implementation(project(":misk-prometheus"))
@@ -86,7 +88,6 @@ dependencies {
   testImplementation(libs.kotlinTest)
   testImplementation(libs.kotlinxCoroutinesCore)
   testImplementation(libs.kotlinxCoroutinesTest)
-  testImplementation(libs.logbackClassic)
   testImplementation(libs.mockitoCore)
   testImplementation(libs.okHttpMockWebServer)
   testImplementation(libs.okHttpSse)
@@ -96,6 +97,7 @@ dependencies {
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":wisp:wisp-tracing"))
   testImplementation(testFixtures(project(":misk-audit-client")))
+  testImplementation(testFixtures(project(":misk-feature")))
   testImplementation(testFixtures(project(":misk-metrics")))
 }
 
