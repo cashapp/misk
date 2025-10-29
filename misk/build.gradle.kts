@@ -97,6 +97,7 @@ dependencies {
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":wisp:wisp-tracing"))
   testImplementation(testFixtures(project(":misk-audit-client")))
+  testImplementation(testFixtures(project(":misk-feature")))
   testImplementation(testFixtures(project(":misk-metrics")))
 }
 
