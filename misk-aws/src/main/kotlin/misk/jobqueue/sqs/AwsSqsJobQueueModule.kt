@@ -19,7 +19,7 @@ import misk.cloud.aws.AwsRegion
 import misk.concurrent.ExecutorServiceModule
 import misk.config.AppName
 import misk.feature.FeatureFlags
-import misk.inject.AsyncKAbstractModule
+import misk.inject.AsyncModule
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
 import misk.jobqueue.JobConsumer
@@ -34,7 +34,7 @@ import wisp.lease.LeaseManager
 /** [AwsSqsJobQueueModule] installs job queue support provided by SQS. */
 open class AwsSqsJobQueueModule(
   private val config: AwsSqsJobQueueConfig
-) : AsyncKAbstractModule() {
+) : AsyncModule, KAbstractModule() {
   override fun configure() {
     install(CommonModule(config, ::configureSyncClient, ::configureAsyncClient))
 
