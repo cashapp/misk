@@ -22,7 +22,7 @@ constructor(
 
   private val podName = System.getenv("MY_POD_NAME")
   private val controller: DynamicLogLevelController = DynamicLogLevelController()
-  private val feature = Feature(config.featureFlagName)
+  private val feature = Feature(config.feature_flag_name)
 
   override fun startUp() {
     if (!config.enabled) {
