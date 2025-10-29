@@ -11,8 +11,8 @@ private const val REAL_TOKEN_GENERATOR_BIT_MASK = 31.toByte()
 @Deprecated(
   message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
   replaceWith = ReplaceWith(
-    expression = "RealTokenGenerator2()",
-    imports = ["misk.tokens.RealTokenGenerator2"]
+    expression = "RealTokenGenerator()",
+    imports = ["misk.tokens.RealTokenGenerator"]
   )
 )
 class RealTokenGenerator : TokenGenerator {

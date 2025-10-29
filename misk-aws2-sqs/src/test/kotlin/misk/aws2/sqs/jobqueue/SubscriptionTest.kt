@@ -5,6 +5,7 @@ import kotlinx.coroutines.test.runTest
 import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
 import misk.jobqueue.QueueName
+import misk.jobqueue.v2.JobEnqueuer
 import misk.jobqueue.v2.JobHandler
 import misk.testing.ExternalDependency
 import misk.testing.MiskExternalDependency
@@ -15,6 +16,8 @@ import software.amazon.awssdk.services.sqs.model.CreateQueueRequest
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import java.time.Duration
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 @MiskTest(startService = true)
 class SubscriptionTest {
@@ -95,6 +98,202 @@ class SubscriptionTest {
 
     val jobs = handler.jobs
     assertEquals(1, jobs.size)
+  }
+
+  @Test
+  fun `batch enqueue with all three APIs works`() = runTest {
+    val queueName = QueueName("test-queue-1")
+    val handler = handlers[queueName] as ExampleHandler
+
+    // Reset counter for 5 jobs (2 + 1 + 2 from the three batch operations)
+    handler.resetCounter(5)
+
+    // Test batchEnqueue (suspend)
+    val batchResult1 = jobEnqueuer.batchEnqueue(
+      queueName = queueName,
+      jobs = listOf(
+        JobEnqueuer.JobRequest(
+          body = "batch_message_1",
+          idempotencyKey = "batch_key_1",
+          deliveryDelay = Duration.ofMillis(100),
+          attributes = mapOf("batch" to "1")
+        ),
+        JobEnqueuer.JobRequest(
+          body = "batch_message_2",
+          idempotencyKey = "batch_key_2",
+          attributes = mapOf("batch" to "1")
+        )
+      )
+    )
+
+    assertTrue(batchResult1.isFullySuccessful)
+    assertEquals(2, batchResult1.successfulIds.size)
+    assertEquals(0, batchResult1.invalidIds.size)
+    assertEquals(0, batchResult1.retriableIds.size)
+
+    // Test batchEnqueueBlocking
+    val batchResult2 = jobEnqueuer.batchEnqueueBlocking(
+      queueName = queueName,
+      jobs = listOf(
+        JobEnqueuer.JobRequest(
+          body = "batch_message_3",
+          idempotencyKey = "batch_key_3",
+          deliveryDelay = Duration.ZERO,
+          attributes = mapOf("batch" to "2")
+        )
+      )
+    )
+
+    assertTrue(batchResult2.isFullySuccessful)
+    assertEquals(1, batchResult2.successfulIds.size)
+
+    // Test batchEnqueueAsync
+    val batchResult3 = jobEnqueuer.batchEnqueueAsync(
+      queueName = queueName,
+      jobs = listOf(
+        JobEnqueuer.JobRequest(
+          body = "batch_message_4",
+          idempotencyKey = "batch_key_4",
+          attributes = mapOf("batch" to "3")
+        ),
+        JobEnqueuer.JobRequest(
+          body = "batch_message_5",
+          idempotencyKey = "batch_key_5",
+          deliveryDelay = Duration.ofSeconds(1),
+          attributes = mapOf("batch" to "3")
+        )
+      )
+    ).join()
+
+    assertTrue(batchResult3.isFullySuccessful)
+    assertEquals(2, batchResult3.successfulIds.size)
+
+    // Wait for all jobs to be processed
+    val latch = handler.counter
+    latch.await()
+    assertEquals(0, latch.count)
+
+    // Verify all 5 jobs were processed
+    val jobs = handler.jobs
+    assertEquals(5, jobs.size)
+  }
+
+  @Test
+  fun `batch enqueue respects size limits`() = runTest {
+    val queueName = QueueName("test-queue-1")
+    val handler = handlers[queueName] as ExampleHandler
+
+    // Reset counter for 10 jobs (we'll test the max case)
+    handler.resetCounter(10)
+
+    // Test that batches > 10 jobs are rejected
+    val tooManyJobs = (1..11).map { i ->
+      JobEnqueuer.JobRequest(
+        body = "message_$i",
+        idempotencyKey = "key_$i"
+      )
+    }
+
+    assertFailsWith<IllegalArgumentException> {
+      jobEnqueuer.batchEnqueue(queueName, tooManyJobs)
+    }
+
+    assertFailsWith<IllegalArgumentException> {
+      jobEnqueuer.batchEnqueueBlocking(queueName, tooManyJobs)
+    }
+
+    assertFailsWith<IllegalArgumentException> {
+      jobEnqueuer.batchEnqueueAsync(queueName, tooManyJobs)
+    }
+
+    // Test that exactly 10 jobs works
+    val maxJobs = (1..10).map { i ->
+      JobEnqueuer.JobRequest(
+        body = "message_$i",
+        idempotencyKey = "max_key_$i"
+      )
+    }
+
+    val result = jobEnqueuer.batchEnqueue(queueName, maxJobs)
+    assertTrue(result.isFullySuccessful)
+    assertEquals(10, result.successfulIds.size)
+  }
+
+  @Test
+  fun `batch enqueue with mixed delivery delays and attributes`() = runTest {
+    val queueName = QueueName("test-queue-1")
+    val handler = handlers[queueName] as ExampleHandler
+
+    // Reset counter for 3 jobs
+    handler.resetCounter(3)
+
+    val mixedJobs = listOf(
+      JobEnqueuer.JobRequest(
+        body = "immediate_job",
+        idempotencyKey = "immediate_key",
+        deliveryDelay = Duration.ZERO,
+        attributes = mapOf("priority" to "high", "type" to "immediate")
+      ),
+      JobEnqueuer.JobRequest(
+        body = "delayed_job",
+        idempotencyKey = "delayed_key",
+        deliveryDelay = Duration.ofMillis(500),
+        attributes = mapOf("priority" to "normal", "type" to "delayed")
+      ),
+      JobEnqueuer.JobRequest(
+        body = "no_delay_job",
+        idempotencyKey = "no_delay_key",
+        attributes = mapOf("priority" to "low")
+      )
+    )
+
+    val result = jobEnqueuer.batchEnqueue(queueName, mixedJobs)
+
+    assertTrue(result.isFullySuccessful)
+    assertEquals(3, result.successfulIds.size)
+    assertEquals(setOf("immediate_key", "delayed_key", "no_delay_key"), result.successfulIds.toSet())
+
+    // Wait for jobs to be processed
+    val latch = handler.counter
+    latch.await()
+    assertEquals(0, latch.count)
+
+    val jobs = handler.jobs
+    assertEquals(3, jobs.size)
+  }
+
+  @Test
+  fun `batch enqueue with too many attributes per job fails`() = runTest {
+    val queueName = QueueName("test-queue-1")
+    val handler = handlers[queueName] as ExampleHandler
+
+    // Reset counter for 1 job (we'll successfully enqueue one job at the end)
+    handler.resetCounter(1)
+
+    // Create a job with 10 attributes (exceeds limit of 9)
+    val tooManyAttributes = (1..10).associate { "attr_$it" to "value_$it" }
+
+    val jobWithTooManyAttributes = JobEnqueuer.JobRequest(
+      body = "test_message",
+      idempotencyKey = "test_key",
+      attributes = tooManyAttributes
+    )
+
+    assertFailsWith<IllegalArgumentException> {
+      jobEnqueuer.batchEnqueue(queueName, listOf(jobWithTooManyAttributes))
+    }
+
+    // Verify that 9 attributes works
+    val validAttributes = (1..9).associate { "attr_$it" to "value_$it" }
+    val validJob = JobEnqueuer.JobRequest(
+      body = "valid_message",
+      idempotencyKey = "valid_key",
+      attributes = validAttributes
+    )
+
+    val result = jobEnqueuer.batchEnqueue(queueName, listOf(validJob))
+    assertTrue(result.isFullySuccessful)
+    assertEquals(1, result.successfulIds.size)
   }
 }
 
