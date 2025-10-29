@@ -70,6 +70,7 @@ data class McpServerConfig @JvmOverloads constructor(
   val prompts: McpPromptConfig = McpPromptConfig(),
   val resources: McpResourceConfig = McpResourceConfig(),
   val tools: McpToolConfig = McpToolConfig(),
+  val enforce_strict_capabilities: Boolean = false
 ) : Config
 
 /**
