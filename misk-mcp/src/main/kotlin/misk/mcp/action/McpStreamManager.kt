@@ -248,16 +248,19 @@ class McpStreamManager internal constructor(
     )
     
     override fun onMessage(webSocket: WebSocket, text: String) {
+      logger.debug { "Received message: $text" }
       val message: JSONRPCMessage = McpJson.decodeFromString(text)
       coroutineScope.launch { serverSession.handleMessage(message) }
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String?) {
+      logger.info { "Websocket connection closing with code: $code, reason: $reason" }
       coroutineScope.cancel("closing")
       runBlocking(McpServerSession(serverSession)) { webSocketTransport.close() }
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable) {
+      logger.info { "WebSocket failure, closing: $t" }
       coroutineScope.cancel("failure", t)
       runBlocking(McpServerSession(serverSession)) { webSocketTransport.close() }
     }

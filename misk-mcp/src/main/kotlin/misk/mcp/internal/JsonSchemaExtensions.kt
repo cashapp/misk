@@ -1,5 +1,6 @@
 package misk.mcp.internal
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -53,7 +54,7 @@ internal fun <T : Any> KClass<T>.generateJsonSchema(level: Int = 1, description:
 }
 
 /**
- * Generates JSON schema for a Kotlin type, handling primitives, collections, maps, and nested objects.
+ * Generates JSON schema for a Kotlin type, handling primitives, collections, maps, enums, and nested objects.
  * 
  * @param level The current recursion depth for nested object processing
  * @param description Optional description to include in the schema
@@ -92,7 +93,30 @@ private fun KType.generateJsonSchema(level: Int, description: String? = null): J
       put("additionalProperties", collectionType.generateJsonSchema(level + 1))
     }
 
-    else -> (classifier as KClass<*>).generateJsonSchema(level + 1, description)
+    else -> {
+      val kClass = classifier as KClass<*>
+      // Check if the class is an enum
+      if (kClass.java.isEnum) {
+        buildJsonObject {
+          put("type", JsonPrimitive("string"))
+          description?.let {
+            put("description", JsonPrimitive(it))
+          }
+          // Get all enum constants and add them to the schema
+          // Check for @SerialName annotation, fallback to enum constant name
+          val enumValues = kClass.java.enumConstants.map { enumConstant ->
+            val enumValue = enumConstant as Enum<*>
+            // Get the field for this enum constant to check for @SerialName
+            runCatching { kClass.java.getField(enumValue.name) }.getOrNull()
+              ?.getAnnotation(SerialName::class.java)?.value
+              ?: enumValue.name
+          }
+          put("enum", JsonArray(enumValues.map { JsonPrimitive(it) }))
+        }
+      } else {
+        kClass.generateJsonSchema(level + 1, description)
+      }
+    }
   }
 }
 
