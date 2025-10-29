@@ -18,9 +18,21 @@ class SqsMetrics @Inject internal constructor(metrics: Metrics) {
     listOf("QueueName")
   )
 
+  val jobsBatchEnqueued = metrics.counter(
+    "jobs_batch_enqueued_v2_total",
+    "total # of jobs sent in batch to a queueName",
+    listOf("QueueName")
+  )
+
   val jobEnqueueFailures = metrics.counter(
     "job_enqueue_failures_v2_total",
     "total # of jobs that failed to enqueue",
+    listOf("QueueName")
+  )
+
+  val jobBatchEnqueueFailures = metrics.counter(
+    "job_batch_enqueue_failures_v2_total",
+    "total # of jobs that failed to enqueue in batch",
     listOf("QueueName")
   )
 
@@ -69,6 +81,18 @@ class SqsMetrics @Inject internal constructor(metrics: Metrics) {
   val sqsSendTime = metrics.histogram(
     "jobs_sqs_send_latency_v2",
     "the round trip time to send messages to SQS",
+    listOf("QueueName")
+  )
+
+  val sqsBatchSendTime = metrics.histogram(
+    "jobs_sqs_batch_send_latency_v2",
+    "the round trip time to send batch messages to SQS",
+    listOf("QueueName")
+  )
+
+  val batchEnqueueSize = metrics.histogram(
+    "jobs_sqs_batch_enqueued_size_v2",
+    "distribution of batch sizes for SQS enqueue operations",
     listOf("QueueName")
   )
 
