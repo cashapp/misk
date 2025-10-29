@@ -13,8 +13,18 @@ import kotlin.reflect.full.primaryConstructor
 
 /**
  * Generates a JSON schema for a data class, including properties, types, and required fields.
- * Processes @Description annotations and handles nested objects.
+ * Processes @Description annotations and handles nested objects with configurable recursion depth.
+ * 
+ * This function introspects the primary constructor parameters of a Kotlin data class and
+ * generates a corresponding JSON schema that can be used for validation or documentation.
+ * It handles nested objects, collections, maps, and primitive types.
+ * 
+ * @param level The recursion depth for nested object schema generation (default: 1)
+ * @param description Optional description to include in the root schema object
+ * @return JsonObject representing the generated JSON schema with type, properties, and required fields
+ * @throws IllegalArgumentException if the class has no primary constructor
  */
+@PublishedApi
 internal fun <T : Any> KClass<T>.generateJsonSchema(level: Int = 1, description: String? = null): JsonObject {
   val ctor = primaryConstructor ?: throw IllegalArgumentException("No primary constructor")
   val properties = mutableMapOf<String, JsonObject>()
@@ -43,7 +53,11 @@ internal fun <T : Any> KClass<T>.generateJsonSchema(level: Int = 1, description:
 }
 
 /**
- * Generates JSON schema for a Kotlin type, handling primitives, collections, maps, and nested objects.
+ * Generates JSON schema for a Kotlin type, handling primitives, collections, maps, enums, and nested objects.
+ * 
+ * @param level The current recursion depth for nested object processing
+ * @param description Optional description to include in the schema
+ * @return JsonObject representing the JSON schema for this type
  */
 private fun KType.generateJsonSchema(level: Int, description: String? = null): JsonObject {
   return when (classifier) {
@@ -78,12 +92,31 @@ private fun KType.generateJsonSchema(level: Int, description: String? = null): J
       put("additionalProperties", collectionType.generateJsonSchema(level + 1))
     }
 
-    else -> (classifier as KClass<*>).generateJsonSchema(level + 1, description)
+    else -> {
+      val kClass = classifier as KClass<*>
+      // Check if the class is an enum
+      if (kClass.java.isEnum) {
+        buildJsonObject {
+          put("type", JsonPrimitive("string"))
+          description?.let {
+            put("description", JsonPrimitive(it))
+          }
+          // Get all enum constants and add them to the schema
+          val enumValues = kClass.java.enumConstants.map { (it as Enum<*>).name }
+          put("enum", JsonArray(enumValues.map { JsonPrimitive(it) }))
+        }
+      } else {
+        kClass.generateJsonSchema(level + 1, description)
+      }
+    }
   }
 }
 
 /**
  * Maps Kotlin types to their corresponding JSON schema type strings.
+ * 
+ * @return The JSON schema type string for the given Kotlin classifier
+ * @throws IllegalArgumentException if the classifier is null
  */
 private val KClassifier?.jsonType: String
   get() = when (this) {
