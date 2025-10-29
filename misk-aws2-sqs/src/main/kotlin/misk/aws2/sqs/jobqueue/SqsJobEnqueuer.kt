@@ -63,14 +63,14 @@ class SqsJobEnqueuer @Inject constructor(
         .messageAttributes(attrs)
         .build()
 
-      val startTime = clock.millis()
+      val startTimeMs = clock.millis()
       try {
         val region = sqsConfig.getQueueConfig(queueName).region!!
         val client = sqsClientFactory.get(region)
         val response = client.sendMessage(request)
         sqsMetrics.jobsEnqueued.labels(queueName.value).inc()
         response.whenComplete { _, _ ->
-          sqsMetrics.sqsSendTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
+          sqsMetrics.sqsSendTime.labels(queueName.value).observe((clock.millis() - startTimeMs).toDouble())
           span.finish()
           scope.close()
         }.thenApply { true }
@@ -134,14 +134,14 @@ class SqsJobEnqueuer @Inject constructor(
         .entries(messageEntries)
         .build()
 
-      val startTime = clock.millis()
+      val startTimeMs = clock.millis()
       try {
         val region = sqsConfig.getQueueConfig(queueName).region!!
         val client = sqsClientFactory.get(region)
         val response = client.sendMessageBatch(request)
 
         response.whenComplete { _, _ ->
-          sqsMetrics.sqsBatchSendTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
+          sqsMetrics.sqsBatchSendTime.labels(queueName.value).observe((clock.millis() - startTimeMs).toDouble())
           span.finish()
           scope.close()
         }.thenApply { result ->

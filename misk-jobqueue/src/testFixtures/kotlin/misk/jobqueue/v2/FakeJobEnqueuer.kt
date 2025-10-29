@@ -90,7 +90,14 @@ class FakeJobEnqueuer @Inject constructor(
     throwIfQueuedFailure(queueName)
     val id = tokenGenerator.generate("fakeJobQueue")
     val resolvedIdempotencyKey = idempotencyKey ?: tokenGenerator.generate("fakeJobIdempotence")
-    val job = FakeJob(queueName, id, resolvedIdempotencyKey, body, attributes, clock.instant(), deliveryDelay)
+    val job = FakeJob(
+      queueName = queueName,
+      id = id,
+      idempotenceKey = resolvedIdempotencyKey,
+      body = body,
+      attributes = attributes,
+      enqueuedAt = clock.instant(),
+      deliveryDelay= deliveryDelay)
     jobQueues.getOrPut(queueName, ::PriorityBlockingQueue).add(job)
     return CompletableFuture.supplyAsync { true }
   }
@@ -128,13 +135,13 @@ class FakeJobEnqueuer @Inject constructor(
           val id = tokenGenerator.generate("fakeJobQueue")
           val resolvedIdempotencyKey = jobRequest.idempotencyKey ?: tokenGenerator.generate("fakeJobIdempotence")
           val fakeJob = FakeJob(
-            queueName,
-            id,
-            resolvedIdempotencyKey,
-            jobRequest.body,
-            jobRequest.attributes,
-            clock.instant(),
-            jobRequest.deliveryDelay
+            queueName = queueName,
+            id = id,
+            idempotenceKey = resolvedIdempotencyKey,
+            body = jobRequest.body,
+            attributes = jobRequest.attributes,
+            enqueuedAt = clock.instant(),
+            deliveryDelay = jobRequest.deliveryDelay
           )
           jobQueue.add(fakeJob)
           successful.add(resolvedIdempotencyKey)
