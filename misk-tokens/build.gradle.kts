@@ -10,8 +10,10 @@ dependencies {
   api(libs.jakartaInject)
   api(project(":misk-inject"))
   api(project(":misk-testing-api"))
+  api(project(":wisp:wisp-token"))
   implementation(libs.guice)
   implementation(libs.kotlinStdLibJdk8)
+  implementation(project(":wisp:wisp-token-testing"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
