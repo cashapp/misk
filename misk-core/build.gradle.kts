@@ -7,22 +7,18 @@ plugins {
 }
 
 dependencies {
-  api(libs.guava)
   api(libs.jakartaInject)
-  api(libs.loggingApi)
   api(libs.kotlinRetry)
   api(libs.okHttp)
-  api(libs.slf4jApi)
   api(project(":misk-backoff")) // TODO remove once all usages depend on misk-backoff directly
-  api(project(":wisp:wisp-config"))
-  api(project(":wisp:wisp-ssl"))
-  api(project(":wisp:wisp-token"))
   api(project(":misk-config"))
-  api(project(":misk-inject"))
-  api(project(":misk-testing-api"))
-  implementation(libs.guice)
+  api(project(":misk-logging")) // TODO remove once all usages depend on misk-logging directly
+  api(project(":misk-sampling")) // TODO remove once all usages depend on misk-sampling directly
+  api(project(":misk-tokens")) // TODO remove once all usages depend on misk-tokens directly
+  api(project(":wisp:wisp-ssl"))
+  implementation(libs.bouncyCastleProvider)
   implementation(libs.kotlinStdLibJdk8)
-  implementation(project(":wisp:wisp-token-testing"))
+  implementation(libs.okio)
   implementation(project(":wisp:wisp-resource-loader"))
 
   testImplementation(libs.assertj)
@@ -30,11 +26,18 @@ dependencies {
   testImplementation(libs.kotlinTest)
   testImplementation(libs.kotlinxCoroutinesCore)
   testImplementation(libs.logbackClassic)
-  testImplementation(project(":wisp:wisp-logging"))
+  testImplementation(project(":misk-logging"))
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":misk-core"))
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-testing-api"))
+
+  testImplementation(libs.kotestAssertions)
+  testImplementation(libs.kotestAssertionsShared)
+  testImplementation(libs.kotestCommon)
+  testImplementation(libs.kotestFrameworkEngine)
+  testRuntimeOnly(libs.junitEngine)
+  testRuntimeOnly(libs.kotestJunitRunnerJvm)
 }
 
 mavenPublishing {

@@ -13,7 +13,7 @@ import java.time.LocalDate
 @MiskTest(startService = true)
 class RawHibernateApiTest {
   @MiskExternalDependency
-  private val dockerVitess = DockerVitess
+  private val dockerVitess = DockerVitess()
 
   @MiskTestModule
   val module = MoviesTestModule()

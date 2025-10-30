@@ -14,7 +14,7 @@ import jakarta.inject.Singleton
 class RouteChatGrpcAction @Inject constructor() : WebAction, RouteGuideRouteChatBlockingServer {
   var welcomeMessage: String? = null
 
-  @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
+  @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0, includeRequestHeaders = true, includeResponseHeaders = true)
   override fun RouteChat(
     request: MessageSource<RouteNote>,
     response: MessageSink<RouteNote>

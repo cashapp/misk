@@ -229,7 +229,7 @@ class HibernateDatabaseQueryMetadataFactoryTest {
             Field(
               name = "operator",
               type = "Enum<misk.hibernate.Operator,LT,LE,EQ,EQ_OR_IS_NULL,GE,GT,NE,IN,NOT_IN,IS_NOT_NULL," +
-                "IS_NULL>",
+                "IS_NULL,LIKE>",
               repeated = false
             ),
             Field(name = "value", type = "String", repeated = false),

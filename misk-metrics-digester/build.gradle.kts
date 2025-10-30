@@ -12,7 +12,7 @@ dependencies {
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
-  testImplementation(project(":wisp:wisp-time-testing"))
+  testImplementation(project(":misk-testing"))
 }
 
 mavenPublishing {

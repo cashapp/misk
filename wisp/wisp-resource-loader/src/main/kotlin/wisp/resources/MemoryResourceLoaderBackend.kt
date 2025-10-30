@@ -11,6 +11,10 @@ import java.util.*
  *
  * This uses the scheme `memory:`.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  ReplaceWith(expression = "MemoryResourceLoaderBackend","misk.resources.MemoryResourceLoaderBackend")
+)
 class MemoryResourceLoaderBackend : ResourceLoader.Backend() {
     private val resources = TreeMap<String, ByteString>()
     private var resourceChangedListeners = mutableMapOf<String, (address: String) -> Unit>()

@@ -5,18 +5,10 @@ import com.google.inject.multibindings.StringMapKey
 import jakarta.inject.Qualifier
 import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
-import wisp.resources.ClasspathResourceLoaderBackend
-import wisp.resources.EnvironmentResourceLoaderBackend
-import wisp.resources.FakeFilesystemLoaderBackend
-import wisp.resources.FilesystemLoaderBackend
-import wisp.resources.MemoryResourceLoaderBackend
-import wisp.resources.FakeResourceLoaderBackend
-import wisp.resources.OnePasswordResourceLoaderBackend
-import wisp.resources.ResourceLoader as WispResourceLoader
 
 class ResourceLoaderModule @JvmOverloads constructor(private val isReal: Boolean = true) : KAbstractModule() {
   override fun configure() {
-    val mapBinder = newMapBinder<String, WispResourceLoader.Backend>()
+    val mapBinder = newMapBinder<String, ResourceLoader.Backend>()
 
     mapBinder.addBinding(ClasspathResourceLoaderBackend.SCHEME).toInstance(ClasspathResourceLoaderBackend)
     mapBinder.addBinding(FilesystemLoaderBackend.SCHEME).toInstance(FilesystemLoaderBackend)
@@ -34,7 +26,7 @@ class ResourceLoaderModule @JvmOverloads constructor(private val isReal: Boolean
  */
 class TestingResourceLoaderModule : KAbstractModule() {
   override fun configure() {
-    val mapBinder = newMapBinder<String, WispResourceLoader.Backend>()
+    val mapBinder = newMapBinder<String, ResourceLoader.Backend>()
 
     mapBinder.addBinding(ClasspathResourceLoaderBackend.SCHEME).toInstance(ClasspathResourceLoaderBackend)
     mapBinder.addBinding(MemoryResourceLoaderBackend.SCHEME).toInstance(MemoryResourceLoaderBackend())
@@ -49,7 +41,7 @@ class TestingResourceLoaderModule : KAbstractModule() {
   @Suppress("unused")
   internal fun fakeFilesystemLoaderBackend(
     @ForFakeFiles fakeFiles: Map<String, String>
-  ): WispResourceLoader.Backend = FakeFilesystemLoaderBackend(fakeFiles)
+  ): ResourceLoader.Backend = FakeFilesystemLoaderBackend(fakeFiles)
 
   @ProvidesIntoMap
   @StringMapKey(OnePasswordResourceLoaderBackend.SCHEME)
@@ -57,7 +49,7 @@ class TestingResourceLoaderModule : KAbstractModule() {
   @Suppress("unused")
   internal fun fakeOnePasswordResourceLoaderBackend(
     @ForFakeFiles fakeFiles: Map<String, String>
-  ): WispResourceLoader.Backend = FakeResourceLoaderBackend(fakeFiles)
+  ): ResourceLoader.Backend = FakeResourceLoaderBackend(fakeFiles)
 }
 
 @Qualifier

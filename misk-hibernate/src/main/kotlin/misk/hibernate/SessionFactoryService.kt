@@ -21,7 +21,7 @@ import org.hibernate.mapping.SimpleValue
 import org.hibernate.mapping.Value
 import org.hibernate.service.spi.SessionFactoryServiceRegistry
 import org.hibernate.usertype.UserType
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import javax.persistence.Column
 import javax.persistence.Table
 import kotlin.reflect.KClass
@@ -49,6 +49,8 @@ internal class SessionFactoryService(
   val threadInTransaction = object : ThreadLocal<Boolean>() {
     override fun initialValue() = false
   }
+
+  val threadLocalHibernateSession = ThreadLocal<org.hibernate.Session?>()
 
   lateinit var hibernateMetadata: Metadata
 
@@ -78,9 +80,14 @@ internal class SessionFactoryService(
       ) {
       }
     }
-    val bootstrapRegistryBuilder = BootstrapServiceRegistryBuilder()
-      .applyIntegrator(integrator)
-      .build()
+    val bootstrapRegistryBuilder = BootstrapServiceRegistryBuilder().let {
+      it.applyIntegrator(integrator)
+      if (Thread.currentThread().contextClassLoader != null) {
+        it.applyClassLoader(Thread.currentThread().contextClassLoader)
+      }
+      it.build()
+    }
+
 
     val registryBuilder = StandardServiceRegistryBuilder(bootstrapRegistryBuilder)
     registryBuilder.addInitiator(hibernateInjectorAccess)
@@ -249,7 +256,7 @@ internal class SessionFactoryService(
       "float" -> Float::class
       "double" -> Double::class
       "materialized_clob" -> String::class
-      else -> Class.forName(name).kotlin
+      else -> Class.forName(name, false, Thread.currentThread().contextClassLoader).kotlin
     }
   }
 

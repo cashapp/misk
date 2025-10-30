@@ -16,7 +16,7 @@ import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 
@@ -46,7 +46,7 @@ internal class WebSocketsTest {
     // Confirm interceptors were invoked.
     assertThat(logCollector.takeMessage(RequestLoggingInterceptor::class)).matches(
       "EchoWebSocket principal=unknown time=0.000 ns code=200 " +
-        "request=\\[JettyWebSocket\\[.* to /echo]] .* response=EchoListener .*"
+        "request=JettyWebSocket\\[.* to /echo] response=EchoListener"
     )
   }
 

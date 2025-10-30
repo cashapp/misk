@@ -6,6 +6,9 @@ interface OperatorsMovieQuery : Query<DbMovie> {
   @Constraint(path = "name")
   fun name(name: String): OperatorsMovieQuery
 
+  @Constraint(path = "name", operator = Operator.LIKE)
+  fun nameLike(pattern: String): OperatorsMovieQuery
+
   @Constraint(path = "release_date", operator = Operator.LT)
   fun releaseDateLessThan(upperBound: LocalDate?): OperatorsMovieQuery
 

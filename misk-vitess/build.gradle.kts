@@ -8,8 +8,12 @@ plugins {
 }
 
 dependencies {
-
   api(libs.dockerApi)
+  api(libs.guava)
+  api(project(":misk-jdbc"))
+  implementation(project(":misk-logging"))
+  implementation(libs.loggingApi)
+  implementation(libs.okio)
 
   testFixturesApi(libs.docker)
   testFixturesApi(libs.dockerApi)
@@ -18,7 +22,7 @@ dependencies {
   testFixturesApi(project(":misk-docker"))
   testFixturesApi(project(":misk-testing"))
 
-  testFixturesImplementation(libs.mysqlConnector)
+  testFixturesImplementation(libs.mysql)
   testFixturesImplementation(libs.moshiKotlin)
   testFixturesImplementation(libs.dockerApi)
   testFixturesImplementation(libs.dockerTransportCore)
@@ -26,9 +30,9 @@ dependencies {
   testFixturesImplementation(project(":misk-docker"))
   testFixturesImplementation(project(":wisp:wisp-moshi"))
   testFixturesImplementation(project(":wisp:wisp-resource-loader"))
-  testFixturesImplementation(project(":wisp:wisp-containers-testing"))
+  testFixturesImplementation(project(":misk-testing"))
 
-  testImplementation(libs.mysqlConnector)
+  testImplementation(libs.mysql)
   testImplementation(libs.junitApi)
   testImplementation(libs.docker)
   testImplementation(libs.dockerApi)

@@ -19,10 +19,10 @@ import com.google.inject.spi.ProviderInstanceBinding
 import com.google.inject.spi.ProviderKeyBinding
 import com.google.inject.spi.UntargettedBinding
 import jakarta.inject.Inject
+import misk.moshi.adapter
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
 import misk.web.metadata.toFormattedJson
-import wisp.moshi.adapter
 import wisp.moshi.defaultKotlinMoshi
 
 // TODO consider moving to misk-admin so it can be internal scoped

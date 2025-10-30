@@ -1,6 +1,7 @@
 package misk.clustering.dynamo
 
 import com.google.common.util.concurrent.AbstractIdleService
+import com.google.common.util.concurrent.Service
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.clustering.Cluster.Member
@@ -10,6 +11,7 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.enhanced.dynamodb.Expression
+import software.amazon.awssdk.enhanced.dynamodb.Key
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema
 import software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues.numberValue
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest
@@ -46,6 +48,10 @@ internal class DynamoClusterWatcherTask @Inject constructor(
   }
 
   internal fun run(): Status {
+    if (state() >= Service.State.STOPPING) {
+      return Status.NO_RESCHEDULE
+    }
+
     // If we're not active, we don't want to mark ourselves as part of the active cluster.
     if (clusterWeightProvider.get() > 0) {
       updateOurselfInDynamo()
@@ -90,7 +96,20 @@ internal class DynamoClusterWatcherTask @Inject constructor(
     prevMembers = members
   }
 
-  override fun shutDown() {}
+  /**
+   * On pod shutdown, remove the pod from the cluster view
+   */
+  override fun shutDown() {
+    val self = cluster.snapshot.self.name
+    val member = table.getItem(
+      Key.builder()
+        .partitionValue(self)
+        .build()
+    )
+    if (member != null) {
+      table.deleteItem(member)
+    }
+  }
 
   companion object {
     internal val TABLE_SCHEMA = TableSchema.fromClass(DyClusterMember::class.java)

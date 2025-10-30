@@ -23,7 +23,7 @@ import redis.clients.jedis.params.SetParams
 import redis.clients.jedis.params.ZRangeParams
 import redis.clients.jedis.resps.Tuple
 import redis.clients.jedis.util.JedisClusterCRC16
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -135,6 +135,12 @@ class RealRedis(
   override fun hlen(key: String): Long {
     val keyBytes = key.toByteArray(charset)
     return jedis { hlen(keyBytes) }
+  }
+
+  override fun hkeys(key: String): List<ByteString> {
+    val keyBytes = key.toByteArray(charset)
+    return jedis { hkeys(keyBytes) }
+      .map { it.toByteString() }
   }
 
   override fun hmget(key: String, vararg fields: String): List<ByteString?> {
@@ -306,6 +312,14 @@ class RealRedis(
     return jedis { lpop(keyBytes) }?.toByteString()
   }
 
+  override fun blpop(keys: Array<String>, timeoutSeconds: Double): Pair<String, ByteString>? {
+    val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
+    val result = jedis { blpop(timeoutSeconds, *keysAsBytes) }
+    return result?.let {
+      Pair(it.key.toString(charset), it.value.toByteString())
+    }
+  }
+
   override fun rpop(key: String, count: Int): List<ByteString?> {
     val keyBytes = key.toByteArray(charset)
     return jedis { rpop(keyBytes, count) ?: emptyList() }
@@ -344,6 +358,21 @@ class RealRedis(
     val destKeyBytes = destinationKey.toByteArray(charset)
     checkSlot("RPOPLPUSH", listOf(sourceKeyBytes, destKeyBytes))
     return jedis { rpoplpush(sourceKeyBytes, destKeyBytes) }?.toByteString()
+  }
+
+  override fun exists(key: String): Boolean {
+    val keyBytes = key.toByteArray(charset)
+    return jedis { exists(keyBytes) }
+  }
+
+  override fun exists(vararg key: String): Long {
+    val keyBytes = key.map { it.toByteArray(charset) }.toTypedArray()
+    return jedis { exists(*keyBytes) }
+  }
+
+  override fun persist(key: String): Boolean {
+    val keyBytes = key.toByteArray(charset)
+    return jedis { persist(keyBytes) == 1L }
   }
 
   override fun expire(key: String, seconds: Long): Boolean {
@@ -423,6 +452,10 @@ class RealRedis(
 
   override fun flushAll() {
     unifiedJedis.flushAllWithClusterSupport(logger)
+  }
+
+  override fun flushDB() {
+    unifiedJedis.flushDB()
   }
 
   override fun zadd(

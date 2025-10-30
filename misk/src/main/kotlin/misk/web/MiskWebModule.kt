@@ -7,6 +7,7 @@ import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
+import com.google.inject.multibindings.OptionalBinder
 import com.squareup.wire.GrpcException
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -20,6 +21,7 @@ import misk.api.HttpRequest
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.exceptions.WebActionException
 import misk.grpc.GrpcFeatureBinding
+import misk.grpc.reflect.GrpcReflectModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.toKey
@@ -39,6 +41,7 @@ import misk.web.actions.StatusAction
 import misk.web.concurrencylimits.ConcurrencyLimiterFactory
 import misk.web.concurrencylimits.ConcurrencyLimitsModule
 import misk.web.exceptions.ActionExceptionLogLevelConfig
+import misk.web.exceptions.DeadlineExceededExceptionMapper
 import misk.web.exceptions.EofExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
@@ -51,9 +54,13 @@ import misk.web.extractors.PathParamFeatureBinding
 import misk.web.extractors.QueryParamFeatureBinding
 import misk.web.extractors.RequestBodyException
 import misk.web.extractors.RequestBodyFeatureBinding
+import misk.web.requestdeadlines.DeadlineExceededException
+import misk.web.extractors.RequestCookieFeatureBinding
+import misk.web.extractors.RequestCookiesFeatureBinding
 import misk.web.extractors.RequestHeaderFeatureBinding
 import misk.web.extractors.RequestHeadersFeatureBinding
 import misk.web.extractors.ResponseBodyFeatureBinding
+import misk.web.extractors.StringConverter
 import misk.web.extractors.WebSocketFeatureBinding
 import misk.web.extractors.WebSocketListenerFeatureBinding
 import misk.web.interceptors.BeforeContentEncoding
@@ -69,8 +76,11 @@ import misk.web.interceptors.RequestLoggingConfig
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.RequestLoggingTransformer
 import misk.web.interceptors.TracingInterceptor
+import misk.web.interceptors.hooks.RequestResponseHook
+import misk.web.interceptors.hooks.RequestResponseLoggingHook
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
+import misk.web.jetty.WebActionsServlet
 import misk.web.jetty.JettyThreadPoolHealthCheck
 import misk.web.jetty.JettyThreadPoolMetricsCollector
 import misk.web.jetty.MeasuredQueuedThreadPool
@@ -85,6 +95,7 @@ import misk.web.marshal.PlainTextMarshaller
 import misk.web.marshal.ProtobufMarshaller
 import misk.web.marshal.ProtobufUnmarshaller
 import misk.web.marshal.Unmarshaller
+import misk.web.MiskServlet
 import misk.web.mdc.LogContextProvider
 import misk.web.mdc.RequestHttpMethodLogContextProvider
 import misk.web.mdc.RequestProtocolLogContextProvider
@@ -93,7 +104,10 @@ import misk.web.mdc.RequestURILogContextProvider
 import misk.web.proxy.WebProxyEntry
 import misk.web.resources.StaticResourceEntry
 import misk.web.shutdown.GracefulShutdownModule
+import misk.web.sse.ServerSentEventMarshaller
+import misk.web.sse.ServerSentEventUnmarshaller
 import org.eclipse.jetty.io.EofException
+import org.eclipse.jetty.websocket.server.JettyWebSocketServlet
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.util.VirtualThreads
@@ -107,6 +121,7 @@ import java.util.concurrent.BlockingQueue
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
 import kotlin.math.min
 
@@ -118,24 +133,33 @@ class MiskWebModule @JvmOverloads constructor(
     bind<WebConfig>().toInstance(config)
     bind<ActionExceptionLogLevelConfig>().toInstance(config.action_exception_log_level)
 
-    install(
-      ServiceModule(
-        key = JettyService::class.toKey(),
-        dependsOn = jettyDependsOn
-      ).dependsOn<ReadyService>()
-    )
-    install(
-      ServiceModule<JettyThreadPoolMetricsCollector>()
-        .enhancedBy<ReadyService>()
-    )
-    install(
-      ServiceModule<JettyConnectionMetricsCollector>()
-        .enhancedBy<ReadyService>()
-    )
-    install(
-      ServiceModule<ReadinessCheckService>()
-        .enhancedBy<ReadyService>()
-    )
+    if (!config.disable_jetty) {
+      install(
+        ServiceModule(
+          key = JettyService::class.toKey(),
+          dependsOn = jettyDependsOn
+        ).dependsOn<ReadyService>()
+      )
+      install(
+        ServiceModule<JettyThreadPoolMetricsCollector>()
+          .enhancedBy<ReadyService>()
+      )
+      install(
+        ServiceModule<JettyConnectionMetricsCollector>()
+          .enhancedBy<ReadyService>()
+      )
+      install(
+        ServiceModule<ReadinessCheckService>()
+          .enhancedBy<ReadyService>()
+      )
+    }
+
+    // Expose WebActionsServlet for externally managed servlet container
+    bind<HttpServlet>()
+      .annotatedWith<MiskServlet>()
+      .to<WebActionsServlet>()
+
+    bind<UrlMatcher>().to<RealUrlMatcher>()
 
     install(ServiceModule<RepeatedTaskQueue>(ReadinessRefreshQueue::class))
 
@@ -155,12 +179,15 @@ class MiskWebModule @JvmOverloads constructor(
     multibind<Marshaller.Factory>().to<PlainTextMarshaller.Factory>()
     multibind<Marshaller.Factory>().to<JsonMarshaller.Factory>()
     multibind<Marshaller.Factory>().to<ProtobufMarshaller.Factory>()
+    multibind<Marshaller.Factory>().to<ServerSentEventMarshaller.Factory>()
     multibind<Unmarshaller.Factory>().to<JsonUnmarshaller.Factory>()
     multibind<Unmarshaller.Factory>().to<ProtobufUnmarshaller.Factory>()
+    multibind<Unmarshaller.Factory>().to<ServerSentEventUnmarshaller.Factory>()
     multibind<Unmarshaller.Factory>().to<MultipartUnmarshaller.Factory>()
 
     // Initialize empty sets for our multibindings.
     newMultibinder<NetworkInterceptor.Factory>()
+    newMultibinder<StringConverter.Factory>()
     newMultibinder<ApplicationInterceptor.Factory>()
     newMultibinder<StaticResourceEntry>()
     newMultibinder<WebProxyEntry>()
@@ -228,7 +255,9 @@ class MiskWebModule @JvmOverloads constructor(
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
       .to<ExceptionHandlingInterceptor.Factory>()
 
-    // Optionally log request and response details
+    // Optionally audit, log...etc request and response details
+    newMultibinder<RequestResponseHook.Factory>()
+    multibind<RequestResponseHook.Factory>().to<RequestResponseLoggingHook.Factory>()
     newMultibinder<RequestLoggingConfig>()
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
       .to<RequestLoggingInterceptor.Factory>()
@@ -252,6 +281,7 @@ class MiskWebModule @JvmOverloads constructor(
     install(ExceptionMapperModule.create<IOException, IOExceptionMapper>())
     install(ExceptionMapperModule.create<EofException, EofExceptionMapper>())
     install(ExceptionMapperModule.create<RequestBodyException, RequestBodyExceptionMapper>())
+    install(ExceptionMapperModule.create<DeadlineExceededException, DeadlineExceededExceptionMapper>())
 
     // Register built-in feature bindings.
     multibind<FeatureBinding.Factory>().toInstance(PathParamFeatureBinding.Factory)
@@ -259,6 +289,8 @@ class MiskWebModule @JvmOverloads constructor(
     multibind<FeatureBinding.Factory>().toInstance(FormValueFeatureBinding.Factory)
     multibind<FeatureBinding.Factory>().toInstance(RequestHeaderFeatureBinding.Factory)
     multibind<FeatureBinding.Factory>().toInstance(RequestHeadersFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(RequestCookieFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(RequestCookiesFeatureBinding.Factory)
     multibind<FeatureBinding.Factory>().toInstance(WebSocketFeatureBinding.Factory)
     multibind<FeatureBinding.Factory>().toInstance(WebSocketListenerFeatureBinding.Factory)
     multibind<FeatureBinding.Factory>().to<RequestBodyFeatureBinding.Factory>()
@@ -267,6 +299,7 @@ class MiskWebModule @JvmOverloads constructor(
 
     // Install infrastructure support
     install(CertificatesModule())
+    install(GrpcReflectModule())
 
     // Bind build-in actions.
     install(WebActionModule.create<StatusAction>())
@@ -312,6 +345,9 @@ class MiskWebModule @JvmOverloads constructor(
     if (config.enable_thread_pool_health_check) {
       multibind<HealthCheck>().to<JettyThreadPoolHealthCheck>()
     }
+
+    // TODO(adrw) replace this with a config YAML approach to avoid optional Guice bindings
+    OptionalBinder.newOptionalBinder(binder(), ProtoDocumentationProvider::class.java)
   }
 
   @Provides

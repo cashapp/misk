@@ -24,7 +24,7 @@ import okhttp3.Request
 import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.net.ConnectException
 import java.time.Duration
 import kotlin.reflect.KClass

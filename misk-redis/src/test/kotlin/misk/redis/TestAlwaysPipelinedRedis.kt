@@ -7,7 +7,7 @@ import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
 import redis.clients.jedis.UnifiedJedis
 import redis.clients.jedis.args.ListDirection
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Duration
 import java.util.function.Supplier
 
@@ -42,6 +42,8 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(
   override fun hgetAll(key: String): Map<String, ByteString>? = runPipeline { hgetAll(key) }
 
   override fun hlen(key: String): Long = runPipeline { hlen(key) }
+
+  override fun hkeys(key: String): List<ByteString> = runPipeline { hkeys(key) }
 
   override fun hmget(key: String, vararg fields: String): List<ByteString?> =
     runPipeline { hmget(key, *fields) }
@@ -112,6 +114,9 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(
 
   override fun lpop(key: String): ByteString? = runPipeline { lpop(key) }
 
+  override fun blpop(keys: Array<String>, timeoutSeconds: Double): Pair<String, ByteString>? =
+    runPipeline { blpop(keys, timeoutSeconds) }
+
   override fun rpop(key: String, count: Int): List<ByteString?> =
     runPipeline { rpop(key, count) }
 
@@ -130,6 +135,15 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(
 
   override fun rpoplpush(sourceKey: String, destinationKey: String): ByteString? =
     runPipeline { rpoplpush(sourceKey, destinationKey) }
+
+  override fun exists(key: String): Boolean =
+    runPipeline { exists(key)  }
+
+  override fun exists(vararg key: String): Long =
+    runPipeline { exists(*key)  }
+
+  override fun persist(key: String): Boolean =
+    runPipeline { persist(key) }
 
   override fun expire(key: String, seconds: Long): Boolean =
     runPipeline { expire(key, seconds) }
@@ -179,6 +193,10 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(
 
   override fun flushAll() {
     unifiedJedis.flushAllWithClusterSupport(logger)
+  }
+
+  override fun flushDB() {
+    unifiedJedis.flushDB()
   }
 
   override fun zadd(

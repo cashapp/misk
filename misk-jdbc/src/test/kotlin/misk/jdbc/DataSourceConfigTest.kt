@@ -1,14 +1,16 @@
 package misk.jdbc
 
 import misk.vitess.testing.DefaultSettings
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.containers.ContainerUtil
+import misk.containers.ContainerUtil
+import org.junitpioneer.jupiter.SetEnvironmentVariable
 import wisp.deployment.TESTING
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class DataSourceConfigTest {
-  private val dockerVitessPort = DefaultSettings.PORT;
+  private val dockerVitessPort = DefaultSettings.PORT
 
   @Test
   fun buildVitessJDBCUrlNoSSL() {
@@ -18,7 +20,7 @@ class DataSourceConfigTest {
     assertEquals(
       "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@primary?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
-        "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&sslMode=PREFERRED&" +
+        "useServerPrepStmts=true&jdbcCompliantTruncation=false&sslMode=PREFERRED&" +
         "enabledTLSProtocols=TLSv1.2,TLSv1.3",
       config.buildJdbcUrl(TESTING)
     )
@@ -35,7 +37,7 @@ class DataSourceConfigTest {
     assertEquals(
       "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@primary?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
-        "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
+        "useServerPrepStmts=true&jdbcCompliantTruncation=false&" +
         "trustCertificateKeyStoreUrl=path/to/truststore&" +
         "trustCertificateKeyStorePassword=changeit&sslMode=VERIFY_CA&" +
         "enabledTLSProtocols=TLSv1.2,TLSv1.3",
@@ -54,7 +56,7 @@ class DataSourceConfigTest {
     assertEquals(
       "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@primary?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
-        "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
+        "useServerPrepStmts=true&jdbcCompliantTruncation=false&" +
         "clientCertificateKeyStoreUrl=path/to/keystore&clientCertificateKeyStorePassword=" +
         "changeit&sslMode=VERIFY_CA&" +
         "enabledTLSProtocols=TLSv1.2,TLSv1.3",
@@ -75,7 +77,7 @@ class DataSourceConfigTest {
     assertEquals(
       "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@primary?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
-        "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
+        "useServerPrepStmts=true&jdbcCompliantTruncation=false&" +
         "trustCertificateKeyStoreUrl=path/to/truststore&trustCertificateKeyStorePassword=" +
         "changeit&clientCertificateKeyStoreUrl=path/to/keystore&" +
         "clientCertificateKeyStorePassword=changeit&sslMode=VERIFY_CA&" +
@@ -97,7 +99,7 @@ class DataSourceConfigTest {
     assertEquals(
       "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@primary?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
-        "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
+        "useServerPrepStmts=true&jdbcCompliantTruncation=false&" +
         "trustCertificateKeyStoreUrl=file://path/to/truststore&trustCertificateKeyStorePassword" +
         "=changeit&clientCertificateKeyStoreUrl=file://path/to/keystore&" +
         "clientCertificateKeyStorePassword=changeit&sslMode=VERIFY_CA&" +
@@ -119,7 +121,7 @@ class DataSourceConfigTest {
     assertEquals(
       "jdbc:tracing:mysql://${ContainerUtil.dockerTargetOrLocalIp()}:$dockerVitessPort/@primary?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
-        "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
+        "useServerPrepStmts=true&jdbcCompliantTruncation=false&" +
         "trustCertificateKeyStoreUrl=file://path/to/truststore&" +
         "trustCertificateKeyStorePassword=changeit&clientCertificateKeyStoreUrl=" +
         "file://path/to/keystore&clientCertificateKeyStorePassword=changeit&sslMode=VERIFY_CA&" +
@@ -263,5 +265,76 @@ class DataSourceConfigTest {
         declarative_schema_config = DeclarativeSchemaConfig(listOf("table")),
       )
     }
+  }
+
+  @Test
+  fun externallyManagedMigrationsFormatIsValid() {
+    // Should not throw any exception
+    val config = DataSourceConfig(
+      DataSourceType.MYSQL,
+      migrations_format = MigrationsFormat.EXTERNALLY_MANAGED
+    )
+    assertThat(config.migrations_format).isEqualTo(MigrationsFormat.EXTERNALLY_MANAGED)
+  }
+
+  @Test
+  fun externallyManagedMigrationsCanUseDeclarativeSchemaConfig() {
+    // Should not throw any exception - EXTERNALLY_MANAGED can use declarative_schema_config
+    val config = DataSourceConfig(
+      DataSourceType.MYSQL,
+      migrations_format = MigrationsFormat.EXTERNALLY_MANAGED,
+      declarative_schema_config = DeclarativeSchemaConfig(listOf("table"))
+    )
+    assertThat(config.migrations_format).isEqualTo(MigrationsFormat.EXTERNALLY_MANAGED)
+    assertThat(config.declarative_schema_config?.excluded_tables).containsExactly("table")
+  }
+
+  @Test
+  @SetEnvironmentVariable(key = "AWS_REGION", value = "us-east-1")
+  fun buildMysqlJDBCUrlUsingAWSSecretForCredential() {
+    val config = DataSourceConfig(
+      DataSourceType.MYSQL,
+      mysql_use_aws_secret_for_credentials = true,
+      mysql_aws_secret_name = "secret_name",
+    )
+    assertEquals(
+      "jdbc-secretsmanager:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
+          "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
+          "sslMode=PREFERRED&enabledTLSProtocols=TLSv1.2,TLSv1.3",
+      config.buildJdbcUrl(TESTING)
+    )
+  }
+
+  @Test
+  fun testAwsSecretsManagerDriverSelection() {
+    val config = DataSourceConfig(
+      type = DataSourceType.MYSQL,
+      mysql_use_aws_secret_for_credentials = true,
+      mysql_aws_secret_name = "test-secret"
+    )
+
+    // Should use AWS Secrets Manager driver instead of TracingDriver
+    assertThat(config.getDriverClassName())
+      .isEqualTo("com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver")
+
+    // Should generate correct JDBC URL
+    val jdbcUrl = config.buildJdbcUrl(TESTING)
+    assertThat(jdbcUrl).startsWith("jdbc-secretsmanager:mysql://")
+  }
+
+  @Test
+  fun testNormalMysqlStillUsesTracingDriver() {
+    val config = DataSourceConfig(
+      type = DataSourceType.MYSQL,
+      mysql_use_aws_secret_for_credentials = false
+    )
+
+    // Should use TracingDriver for normal MySQL
+    assertThat(config.getDriverClassName())
+      .isEqualTo("io.opentracing.contrib.jdbc.TracingDriver")
+
+    // Should generate correct JDBC URL
+    val jdbcUrl = config.buildJdbcUrl(TESTING)
+    assertThat(jdbcUrl).startsWith("jdbc:tracing:mysql://")
   }
 }

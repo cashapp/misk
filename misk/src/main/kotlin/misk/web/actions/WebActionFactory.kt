@@ -30,14 +30,17 @@ import misk.web.mediatype.MediaTypes
 import okhttp3.MediaType.Companion.toMediaType
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.web.ProtoDocumentationProvider
+import java.util.Optional
+import kotlin.jvm.optionals.getOrNull
+import kotlin.reflect.KAnnotatedElement
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
-import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.functions
 
 @Singleton
-internal class WebActionFactory @Inject constructor(
+class WebActionFactory @Inject constructor(
   private val injector: Injector,
   @BeforeContentEncoding
   private val beforeContentEncodingNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
@@ -51,9 +54,11 @@ internal class WebActionFactory @Inject constructor(
   private val webActionBindingFactory: WebActionBinding.Factory,
   private val scope: ActionScope,
   private val actionScopeSeedDataTransformerFactories: List<WebActionSeedDataTransformerFactory>,
+  private val documentationProvider: Optional<ProtoDocumentationProvider>
 ) {
 
   /** Returns the bound actions for `webActionClass`. */
+  @JvmOverloads
   fun <A : WebAction> newBoundAction(
     webActionClass: KClass<A>,
     pathPrefix: String = "/"
@@ -254,10 +259,20 @@ internal class WebActionFactory @Inject constructor(
       applicationInterceptors,
       webActionBinding,
       httpActionScopeSeedDataInterceptors,
+      documentationProvider.getOrNull(),
       parsedPathPattern,
       action,
     )
   }
+
+  /** Finds annotation of type [T] on this element or its transitive annotations. */
+  private inline fun <reified T : Annotation> KAnnotatedElement.findAnnotation(): T? =
+    @Suppress("UNCHECKED_CAST")
+    annotations
+      .asSequence()
+      .flatMap { sequenceOf(it) + it.annotationClass.annotations.asSequence() }
+      .firstOrNull { it is T } as? T
+
 
   /** Returns a copy of this that overrides the current annotations with [annotations]. */
   private fun KParameter.withAnnotations(annotations: List<Annotation>): KParameter {

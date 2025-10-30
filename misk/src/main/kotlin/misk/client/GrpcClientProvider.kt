@@ -13,6 +13,8 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Proxy
 import jakarta.inject.Inject
 import com.google.inject.Provider
+import com.squareup.wire.GrpcClientStreamingCall
+import com.squareup.wire.GrpcServerStreamingCall
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.reflect.full.createType
@@ -126,7 +128,7 @@ internal class GrpcClientProvider<T : Service, G : T>(
 
     return kclass.cast(
       Proxy.newProxyInstance(
-        ClassLoader.getSystemClassLoader(),
+        Thread.currentThread().contextClassLoader,
         arrayOf(kclass.java),
         invocationHandler
       )
@@ -135,7 +137,9 @@ internal class GrpcClientProvider<T : Service, G : T>(
 
   private fun toClientAction(method: Method): ClientAction? {
     if (method.returnType !== GrpcCall::class.java &&
-      method.returnType !== GrpcStreamingCall::class.java
+      method.returnType !== GrpcStreamingCall::class.java &&
+      method.returnType !== GrpcClientStreamingCall::class.java &&
+      method.returnType !== GrpcServerStreamingCall::class.java
     ) {
       return null
     }
@@ -169,7 +173,7 @@ internal class GrpcClientProvider<T : Service, G : T>(
 
     okHttpClientCommonConfigurator.configure(
       builder = clientBuilder,
-      config = endpointConfig.toWispConfig()
+      config = endpointConfig
     )
 
     for (factory in appInterceptorFactories) {

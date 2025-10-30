@@ -12,7 +12,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import wisp.config.Config
+import misk.config.Config
 import wisp.deployment.TESTING
 import java.sql.SQLException
 import kotlin.test.assertFailsWith
@@ -298,9 +298,9 @@ internal class DeclarativeSchemaMigratorTest {
         KEY idx_customer_token(customer_token),
         KEY idx_transaction_token(transaction_token)
     )
-        ENGINE = InnoDB
-        DEFAULT CHARSET = utf8mb4
-        ROW_FORMAT = DYNAMIC;
+        ENGINE=InnoDB
+        DEFAULT CHARSET=utf8mb4
+        ROW_FORMAT=DYNAMIC;
         """.trimMargin()
     )
 

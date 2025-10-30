@@ -5,6 +5,8 @@ import java.io.File
 import java.net.URLClassLoader
 import jakarta.inject.Inject
 import kotlin.test.assertFailsWith
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.TemporaryFolder
@@ -16,9 +18,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import wisp.resources.ClasspathResourceLoaderBackend
-import wisp.resources.FilesystemLoaderBackend
-import wisp.resources.MemoryResourceLoaderBackend
+import org.junitpioneer.jupiter.SetEnvironmentVariable
 
 @MiskTest
 class ResourceLoaderTest {
@@ -32,6 +32,7 @@ class ResourceLoaderTest {
 
   @BeforeEach
   internal fun setUp() {
+    tempFolder.root.toFile().deleteOnExit()
     tempRoot = tempFolder.root.toAbsolutePath().toFile()
     assertThat(tempRoot.toString()).startsWith("/") // Tests below require this.
   }
@@ -121,6 +122,21 @@ class ResourceLoaderTest {
   }
 
   @Test
+  fun memoryResourcesWatch() {
+    val data1 = "memory:/misk/resources/data1.txt"
+
+    var wasCalled = false
+    resourceLoader.watch(data1) { address ->
+      assertEquals(data1, address)
+      wasCalled = true
+    }
+    resourceLoader.put(data1, "foo")
+
+    Thread.sleep(1000)
+    assertTrue(wasCalled)
+  }
+
+  @Test
   fun filesystemResources() {
     val resource1 = "filesystem:$tempRoot/data1.txt"
     File(tempRoot, "data1.txt").sink().buffer().use {
@@ -158,9 +174,53 @@ class ResourceLoaderTest {
   }
 
   @Test
+  fun filesystemResourcesWatch() {
+    val data1 = "filesystem:$tempRoot/data1.txt"
+
+    val data1File = File(tempRoot, "data1.txt")
+    data1File.sink().buffer().use {
+      it.writeUtf8("foo")
+    }
+
+    resourceLoader.open(data1)!!.use {
+      assertThat(it.readUtf8()).isEqualTo("foo")
+    }
+
+    var wasCalled = false
+    resourceLoader.watch(data1) { address ->
+      assertEquals(data1, address)
+      wasCalled = true
+    }
+    val watchedDirectory = FilesystemLoaderBackend.watchedDirectoryThreads.entries.first().value
+    assertTrue(watchedDirectory.isAlive)
+    assertTrue(watchedDirectory.isDaemon)
+
+    data1File.sink().buffer().use {
+      it.writeUtf8("bar")
+    }
+
+    resourceLoader.open(data1)!!.use {
+      assertThat(it.readUtf8()).isEqualTo("bar")
+    }
+
+    // This will fail to join, but it does yield this thread and give the others a go
+    watchedDirectory.join(5000)
+
+    var retryCount = 0
+    while (retryCount < 10 && !wasCalled) {
+      Thread.sleep(1000)
+      retryCount++
+    }
+
+    assertTrue(wasCalled)
+
+    resourceLoader.unwatch(data1)
+  }
+
+  @Test
   fun addressValidation() {
     assertFailsWith<IllegalArgumentException> {
-      resourceLoader.open(":")
+      resourceLoader.open("filepath:")
     }
     assertFailsWith<IllegalArgumentException> {
       resourceLoader.open("")
@@ -178,6 +238,28 @@ class ResourceLoaderTest {
     }
     assertFailsWith<IllegalArgumentException> {
       resourceLoader.open("$resource://")
+    }
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = ["", "/", "//", " "])
+  fun pathValidationForPathBasedResources(path: String) {
+    assertFailsWith<IllegalArgumentException> {
+      ClasspathResourceLoaderBackend.checkPath(path)
+    }
+    assertFailsWith<IllegalArgumentException> {
+      MemoryResourceLoaderBackend().checkPath(path)
+    }
+    assertFailsWith<IllegalArgumentException> {
+      FilesystemLoaderBackend.checkPath(path)
+    }
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = ["", " "])
+  fun pathValidationForEnvironmentResource(path: String) {
+    assertFailsWith<IllegalArgumentException> {
+      EnvironmentResourceLoaderBackend.checkPath(path)
     }
   }
 
@@ -258,7 +340,39 @@ class ResourceLoaderTest {
       .isFalse()
   }
 
-  private fun <T> withContextClassLoader(classLoader: ClassLoader, block: () -> T): T {
+  @Test
+  @SetEnvironmentVariable(key = "SOME_ENV_VAR", value = "value")
+  fun openEnvironmentVariables() {
+    resourceLoader.open("environment:SOME_ENV_VAR")!!.use {
+      assertThat(it.readUtf8()).isEqualTo("value")
+    }
+
+    resourceLoader.open("environment:  SOME_ENV_VAR  ")!!.use {
+      assertThat(it.readUtf8()).isEqualTo("value")
+    }
+
+    assertThat(resourceLoader.open("environment:NOT_THERE")).isNull()
+
+    assertFailsWith<IllegalArgumentException> {
+      resourceLoader.open("environment:")
+    }
+    assertFailsWith<IllegalArgumentException> {
+      resourceLoader.open("environment:  ")
+    }
+  }
+
+  @Test
+  @SetEnvironmentVariable(key = "SOME_ENV_VAR", value = "value")
+  fun checkEnvironmentVariablesExist() {
+    assertThat(resourceLoader.exists("environment:SOME_ENV_VAR")).isTrue()
+    assertThat(resourceLoader.exists("environment:  SOME_ENV_VAR  ")).isTrue()
+    assertThat(resourceLoader.exists("environment:NOT_THERE")).isFalse()
+    assertThat(resourceLoader.exists("environment:NOT_THERE")).isFalse()
+    assertThat(resourceLoader.exists("environment:")).isFalse()
+    assertThat(resourceLoader.exists("environment:  ")).isFalse()
+  }
+
+  private fun <T> withContextClassLoader(classLoader: ClassLoader?, block: () -> T): T {
     val previousContextClassLoader = Thread.currentThread().contextClassLoader
     Thread.currentThread().contextClassLoader = classLoader
     try {

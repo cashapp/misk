@@ -2,25 +2,6 @@ package misk.hibernate
 
 import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
-import misk.backoff.ExponentialBackoff
-import misk.concurrent.ExecutorServiceFactory
-import misk.jdbc.CheckDisabler
-import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceType
-import misk.jdbc.map
-import misk.jdbc.uniqueString
-import misk.vitess.Destination
-import misk.vitess.Keyspace
-import misk.vitess.Shard
-import misk.vitess.Shard.Companion.SINGLE_SHARD_SET
-import misk.vitess.TabletType
-import org.hibernate.FlushMode
-import org.hibernate.SessionFactory
-import org.hibernate.StaleObjectStateException
-import org.hibernate.exception.ConstraintViolationException
-import org.hibernate.exception.GenericJDBCException
-import org.hibernate.exception.LockAcquisitionException
-import wisp.logging.getLogger
 import java.io.Closeable
 import java.sql.Connection
 import java.sql.SQLException
@@ -28,20 +9,41 @@ import java.sql.SQLIntegrityConstraintViolationException
 import java.sql.SQLRecoverableException
 import java.sql.SQLTransientException
 import java.time.Duration
-import java.util.*
+import java.util.EnumSet
+import java.util.UUID
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import javax.persistence.OptimisticLockException
 import kotlin.reflect.KClass
+import misk.backoff.ExponentialBackoff
+import misk.concurrent.ExecutorServiceFactory
+import misk.hibernate.advisorylocks.tryAcquireLock
+import misk.hibernate.advisorylocks.tryReleaseLock
+import misk.jdbc.CheckDisabler
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceType
+import misk.jdbc.map
+import misk.logging.getLogger
+import misk.vitess.Destination
+import misk.vitess.Keyspace
+import misk.vitess.Shard
+import misk.vitess.Shard.Companion.SINGLE_SHARD_SET
+import org.hibernate.FlushMode
+import org.hibernate.SessionFactory
+import org.hibernate.StaleObjectStateException
+import org.hibernate.exception.ConstraintViolationException
+import org.hibernate.exception.LockAcquisitionException
+import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode
 
 private val logger = getLogger<RealTransacter>()
 
 // Check was moved to misk.jdbc, keeping a type alias to prevent compile breakage for usages.
 typealias Check = misk.jdbc.Check
 
-internal class RealTransacter private constructor(
+internal class RealTransacter
+private constructor(
   private val qualifier: KClass<out Annotation>,
   private val sessionFactoryService: SessionFactoryService,
   /**
@@ -54,7 +56,7 @@ internal class RealTransacter private constructor(
   private val options: TransacterOptions,
   private val executorServiceFactory: ExecutorServiceFactory,
   private val shardListFetcher: ShardListFetcher,
-  private val hibernateEntities: Set<HibernateEntity>
+  private val hibernateEntities: Set<HibernateEntity>,
 ) : Transacter {
   constructor(
     qualifier: KClass<out Annotation>,
@@ -62,7 +64,7 @@ internal class RealTransacter private constructor(
     readerSessionFactoryService: SessionFactoryService?,
     config: DataSourceConfig,
     executorServiceFactory: ExecutorServiceFactory,
-    hibernateEntities: Set<HibernateEntity>
+    hibernateEntities: Set<HibernateEntity>,
   ) : this(
     qualifier = qualifier,
     sessionFactoryService = sessionFactoryService,
@@ -71,7 +73,7 @@ internal class RealTransacter private constructor(
     options = TransacterOptions(),
     executorServiceFactory = executorServiceFactory,
     shardListFetcher = ShardListFetcher(),
-    hibernateEntities = hibernateEntities
+    hibernateEntities = hibernateEntities,
   ) {
     shardListFetcher.init(this, config, executorServiceFactory)
   }
@@ -83,46 +85,49 @@ internal class RealTransacter private constructor(
   }
 
   /**
-   * Uses a dedicated thread to query Vitess for the database's current shards. This caches the
-   * set of shards for 5 minutes.
+   * Uses a dedicated thread to query Vitess for the database's current shards. This caches the set of shards for 5
+   * minutes.
    */
   class ShardListFetcher {
     private lateinit var supplier: Supplier<Future<out Set<Shard>>>
 
-    fun init(
-      transacter: Transacter,
-      config: DataSourceConfig,
-      executorServiceFactory: ExecutorServiceFactory
-    ) {
+    fun init(transacter: Transacter, config: DataSourceConfig, executorServiceFactory: ExecutorServiceFactory) {
       check(!this::supplier.isInitialized)
 
       if (!config.type.isVitess) {
         this.supplier = Suppliers.ofInstance(CompletableFuture.completedFuture(SINGLE_SHARD_SET))
       } else {
-        val executorService = executorServiceFactory.single("shard-list-fetcher-%d")
-        this.supplier = Suppliers.memoizeWithExpiration(
-          {
-            // Needs to be fetched on a separate thread to avoid nested transactions
-            executorService.submit(
-              Callable<Set<Shard>> {
-                transacter.transaction { session ->
-                  session.useConnection { connection ->
-                    connection.createStatement().use { s ->
-                      val shards = s.executeQuery("SHOW VITESS_SHARDS")
-                        .map { rs -> Shard.parse(rs.getString(1)) }
-                        .toSet()
-                      if (shards.isEmpty()) {
-                        throw SQLRecoverableException("Failed to load list of shards")
+        // Add randomness to the executor service name, to avoid
+        // contention with multiple ShardListFetchers/Transacters.
+        val uuid = UUID.randomUUID().toString()
+        val executorService = executorServiceFactory.single(nameFormat = "shard-list-fetcher-$uuid-%d")
+        this.supplier =
+          Suppliers.memoizeWithExpiration(
+            {
+              // Needs to be fetched on a separate thread to avoid nested transactions
+              executorService.submit(
+                Callable<Set<Shard>> {
+                  transacter.transaction { session ->
+                    session.useConnection { connection ->
+                      connection.createStatement().use { s ->
+                        val shards =
+                          s.executeQuery("SHOW VITESS_SHARDS")
+                            .map { rs -> Shard.parse(rs.getString(1)) }
+                            .filterNotNull()
+                            .toSet()
+                        if (shards.isEmpty()) {
+                          throw SQLRecoverableException("Failed to load list of shards")
+                        }
+                        shards
                       }
-                      shards
                     }
                   }
-                }
-              }
-            )
-          },
-          5, TimeUnit.MINUTES
-        )
+                },
+              )
+            },
+            5,
+            TimeUnit.MINUTES,
+          )
       }
     }
 
@@ -140,39 +145,119 @@ internal class RealTransacter private constructor(
   }
 
   override fun <T> transaction(block: (session: Session) -> T): T {
-    return transactionWithRetriesInternal {
-      transactionInternalSession(block)
-    }
+    return transactionWithRetriesInternal { transactionInternalSession(block) }
   }
 
   override fun <T> replicaRead(block: (session: Session) -> T): T {
-    check(!inTransaction) {
-      "Can't do replica reads inside a transaction"
-    }
+    check(!inTransaction) { "Can't do replica reads inside a transaction" }
     if (!options.readOnly) {
       return readOnly().replicaRead(block)
     }
+
+    if (!config.type.isVitess) {
+      return transactionWithRetriesInternal {
+        replicaReadWithoutTransactionInternalSession { session ->
+          block(session)
+        }
+      }
+    }
+
+    return vitessReplicaRead(block)
+  }
+
+  private fun <T> vitessReplicaRead(block: (session: Session) -> T): T {
+    // Use connection holding to prevent connection changes during nested target operations
     return transactionWithRetriesInternal {
-      replicaReadWithoutTransactionInternalSession { session ->
-        session.target(Destination(TabletType.REPLICA)) {
-          // Full scatters are allowed on replica reads as you can increase availability by
-          // adding additional replicas.
-          session.withoutChecks(Check.FULL_SCATTER) {
-            block(session)
+      val connectionHandlingMode = PhysicalConnectionHandlingMode.IMMEDIATE_ACQUISITION_AND_HOLD
+      
+      withNewHibernateSession(reader(), connectionHandlingMode) { hibernateSession ->
+        val session = RealSession(
+          hibernateSession = hibernateSession,
+          readOnly = true,
+          config = config,
+          disabledChecks = options.disabledChecks,
+          transacter = this
+        )
+
+        session.use {
+          useSession(session) {
+            // target `@replica` if the datasource does not originate from a Reader config.
+            if (config.database != Destination.replica().toString()) {
+              session.target(Destination.replica(), block)
+            } else {
+              // otherwise just run the block, which avoids an unnecessary shard target.
+              block(session)
+            }
           }
         }
       }
     }
   }
 
+  override fun <T> withLock(lockKey: String, block: () -> T): T {
+    // This connection handling mode is required to use advisory locks sanely. Without this, hibernate will release the
+    // java.sql.Connection underlying the org.hibernate.Session back to the connection pool after each transaction,
+    // which means any subsequent transaction that gets that connection will think it holds the lock, when it does not.
+    val connectionHandlingMode = PhysicalConnectionHandlingMode.IMMEDIATE_ACQUISITION_AND_HOLD
+    return withNewHibernateSession(sessionFactory, connectionHandlingMode) { hibernateSession ->
+      val primaryTarget = Destination.primary().toString()
+      var previousTarget: String? = null
+      if (config.type.isVitess) {
+        hibernateSession.doReturningWork { conn ->
+          previousTarget = conn.catalog
+          if (previousTarget != primaryTarget) {
+            conn.catalog = primaryTarget
+          }
+        }
+      }
+
+      val didAcquireLock = hibernateSession.tryAcquireLock(lockKey)
+      check(didAcquireLock) { "Unable to acquire lock $lockKey" }
+
+      if (config.type.isVitess && previousTarget != primaryTarget) {
+        // Restore previous destination if it is not primary already.
+        hibernateSession.doReturningWork { conn ->
+          conn.catalog = previousTarget
+        }
+      }
+
+      val blockResult = runCatching { block() }
+
+      try {
+        if (config.type.isVitess) {
+          // Restore to the same destination the lock was acquired on.
+          hibernateSession.doReturningWork { conn ->
+            previousTarget = conn.catalog
+            if (previousTarget != primaryTarget) {
+              conn.catalog = primaryTarget
+            }
+          }
+        }
+        hibernateSession.tryReleaseLock(lockKey)
+        if (config.type.isVitess && previousTarget != primaryTarget) {
+          // Restore to the same destination the lock was acquired on.
+          hibernateSession.doReturningWork { conn ->
+            conn.catalog = previousTarget
+          }
+        }
+      } catch (e: Throwable) {
+        val originalFailure = blockResult.exceptionOrNull()?.apply { addSuppressed(e) }
+        throw originalFailure ?: e
+      }
+
+      blockResult.getOrThrow()
+    }
+  }
+
   private fun <T> transactionWithRetriesInternal(block: () -> T): T {
     require(options.maxAttempts > 0)
 
-    val backoff = ExponentialBackoff(
-      Duration.ofMillis(options.minRetryDelayMillis),
-      Duration.ofMillis(options.maxRetryDelayMillis),
-      Duration.ofMillis(options.retryJitterMillis)
-    )
+    val backoff =
+      ExponentialBackoff(
+        Duration.ofMillis(options.minRetryDelayMillis),
+        Duration.ofMillis(options.maxRetryDelayMillis),
+        Duration.ofMillis(options.retryJitterMillis),
+      )
     var attempt = 0
 
     while (true) {
@@ -181,9 +266,7 @@ internal class RealTransacter private constructor(
         val result = block()
 
         if (attempt > 1) {
-          logger.info {
-            "retried ${qualifier.simpleName} transaction succeeded (attempt $attempt)"
-          }
+          logger.info { "retried ${qualifier.simpleName} transaction succeeded (attempt $attempt)" }
         }
 
         return result
@@ -192,8 +275,7 @@ internal class RealTransacter private constructor(
 
         if (attempt >= options.maxAttempts) {
           logger.info {
-            "${qualifier.simpleName} recoverable transaction exception " +
-              "(attempt $attempt), no more attempts"
+            "${qualifier.simpleName} recoverable transaction exception " + "(attempt $attempt), no more attempts"
           }
           throw e
         }
@@ -213,32 +295,31 @@ internal class RealTransacter private constructor(
 
   private fun <T> transactionInternalSession(block: (session: RealSession) -> T): T {
     return withSession { session ->
-      session.target(Destination(TabletType.PRIMARY)) {
-        val transaction = session.hibernateSession.beginTransaction()!!
-        try {
-          val result = block(session)
+      val transaction = session.hibernateSession.beginTransaction()!!
+      try {
+        val result = block(session)
 
-          // Flush any changes to the database before commit
-          session.hibernateSession.flush()
-          session.preCommit()
-          transaction.commit()
-          session.postCommit()
-          result
-        } catch (e: Throwable) {
-          var rethrow = e
-          if (config.type == DataSourceType.TIDB) {
-            rethrow = mapTidbException(e)
-          }
-
-          if (transaction.isActive) {
-            try {
-              transaction.rollback()
-            } catch (suppressed: Exception) {
-              rethrow.addSuppressed(suppressed)
-            }
-          }
-          throw rethrow
+        // Flush any changes to the database before commit
+        session.hibernateSession.flush()
+        session.preCommit()
+        transaction.commit()
+        session.postCommit()
+        result
+      } catch (e: Throwable) {
+        var rethrow = e
+        if (config.type == DataSourceType.TIDB) {
+          rethrow = mapTidbException(e)
         }
+
+        if (transaction.isActive) {
+          try {
+            transaction.rollback()
+            session.onSessionClose { session.runRollbackHooks(e) }
+          } catch (suppressed: Exception) {
+            rethrow.addSuppressed(suppressed)
+          }
+        }
+        throw rethrow
       }
     }
   }
@@ -262,13 +343,9 @@ internal class RealTransacter private constructor(
     }
   }
 
-  private fun <T> replicaReadWithoutTransactionInternalSession(
-    block: (session: RealSession) -> T
-  ): T {
+  private fun <T> replicaReadWithoutTransactionInternalSession(block: (session: RealSession) -> T): T {
     return withSession(reader()) { session ->
-      check(session.isReadOnly()) {
-        "Reads should be in a read only session"
-      }
+      check(session.isReadOnly()) { "Reads should be in a read only session" }
       try {
         block(session)
       } catch (e: Throwable) {
@@ -281,9 +358,7 @@ internal class RealTransacter private constructor(
     if (readerSessionFactoryService != null) {
       return readerSessionFactoryService.sessionFactory
     }
-    if (config.type.isVitess) {
-      return sessionFactory
-    }
+
     if (config.type == DataSourceType.COCKROACHDB || config.type == DataSourceType.TIDB) {
       return sessionFactory
     }
@@ -291,20 +366,16 @@ internal class RealTransacter private constructor(
       "No reader is configured for replica reads, pass in both a writer and reader qualifier " +
         "and the full DataSourceClustersConfig into HibernateModule, like this:\n" +
         "\tinstall(HibernateModule(AppDb::class, AppReaderDb::class, " +
-        "config.data_source_clusters[\"name\"]))"
+        "config.data_source_clusters[\"name\"]))",
     )
   }
 
-  override fun retries(maxAttempts: Int): Transacter = withOptions(
-    options.copy(maxAttempts = maxAttempts)
-  )
+  override fun retries(maxAttempts: Int): Transacter = withOptions(options.copy(maxAttempts = maxAttempts))
 
   override fun allowCowrites(): Transacter {
     val disableChecks = options.disabledChecks.clone()
     disableChecks.add(Check.COWRITE)
-    return withOptions(
-      options.copy(disabledChecks = disableChecks)
-    )
+    return withOptions(options.copy(disabledChecks = disableChecks))
   }
 
   override fun noRetries(): Transacter = withOptions(options.copy(maxAttempts = 1))
@@ -320,26 +391,62 @@ internal class RealTransacter private constructor(
       config = config,
       executorServiceFactory = executorServiceFactory,
       shardListFetcher = shardListFetcher,
-      hibernateEntities = hibernateEntities
+      hibernateEntities = hibernateEntities,
     )
+
+  /**
+   * Creates a new Hibernate [org.hibernate.Session] and stashes it in a [ThreadLocal] Note that this does *not* start a
+   * transaction on the created session.
+   *
+   * @param sessionFactory The session factory to use when creating the session
+   * @param connectionHandlingMode The Hibernate connection handling mode the new session will use. You should change
+   *   this only for a specific use case, preferring the default from Hibernate.
+   */
+  private fun <T> withNewHibernateSession(
+    sessionFactory: SessionFactory = this.sessionFactory,
+    connectionHandlingMode: PhysicalConnectionHandlingMode =
+      sessionFactory.sessionFactoryOptions.physicalConnectionHandlingMode,
+    block: (session: org.hibernate.Session) -> T,
+  ): T {
+    check(sessionFactoryService.threadLocalHibernateSession.get() == null) { "nested session" }
+    val hibernateSession = sessionFactory.withOptions().connectionHandlingMode(connectionHandlingMode).openSession()
+    sessionFactoryService.threadLocalHibernateSession.set(hibernateSession)
+    try {
+      hibernateSession.use {
+        return block(hibernateSession)
+      }
+    } finally {
+      sessionFactoryService.threadLocalHibernateSession.remove()
+    }
+  }
 
   private fun <T> withSession(
     sessionFactory: SessionFactory = this.sessionFactory,
-    block: (session: RealSession) -> T
+    block: (session: RealSession) -> T,
   ): T {
-    val hibernateSession = sessionFactory.openSession()
-    val realSession = RealSession(
-      hibernateSession = hibernateSession,
-      readOnly = options.readOnly,
-      config = config,
-      disabledChecks = options.disabledChecks,
-      transacter = this
-    )
+    val threadLocalHibernateSession = sessionFactoryService.threadLocalHibernateSession.get()
+    val openedNewSession = threadLocalHibernateSession == null
+    val hibernateSession = threadLocalHibernateSession ?: sessionFactory.openSession()
+    val realSession =
+      RealSession(
+        hibernateSession = hibernateSession,
+        readOnly = options.readOnly,
+        config = config,
+        disabledChecks = options.disabledChecks,
+        transacter = this,
+      )
 
     // Note that the RealSession is closed last so that close hooks run after the thread locals and
     // Hibernate Session have been released. This way close hooks can start their own transactions.
     realSession.use {
-      hibernateSession.use {
+      // If we opened a session, we also must close it.
+      if (openedNewSession) {
+        hibernateSession.use {
+          useSession(realSession) {
+            return block(realSession)
+          }
+        }
+      } else {
         useSession(realSession) {
           return block(realSession)
         }
@@ -361,20 +468,20 @@ internal class RealTransacter private constructor(
   }
 
   private fun isMessageRetryable(th: SQLException) =
-    isConnectionClosed(th) || isVitessTransactionNotFound(th) ||
-      isCockroachRestartTransaction(th) || isTidbWriteConflict(th)
+    isConnectionClosed(th) ||
+      isVitessTransactionNotFound(th) ||
+      isCockroachRestartTransaction(th) ||
+      isTidbWriteConflict(th)
 
   /**
-   * This is thrown as a raw SQLException from Hikari even though it is most certainly a
-   * recoverable exception.
-   * See com/zaxxer/hikari/pool/ProxyConnection.java:493
+   * This is thrown as a raw SQLException from Hikari even though it is most certainly a recoverable exception. See
+   * com/zaxxer/hikari/pool/ProxyConnection.java:493
    */
-  private fun isConnectionClosed(th: SQLException) =
-    th.message.equals("Connection is closed")
+  private fun isConnectionClosed(th: SQLException) = th.message.equals("Connection is closed")
 
   /**
-   * We get this error as a MySQLQueryInterruptedException when a tablet gracefully terminates, we
-   * just need to retry the transaction and the new primary should handle it.
+   * We get this error as a MySQLQueryInterruptedException when a tablet gracefully terminates, we just need to retry
+   * the transaction and the new primary should handle it.
    *
    * ```
    * vttablet: rpc error: code = Aborted desc = transaction 1572922696317821557:
@@ -391,21 +498,18 @@ internal class RealTransacter private constructor(
   }
 
   /**
-   * "Messages with the error code 40001 and the string restart transaction indicate that a
-   * transaction failed because it conflicted with another concurrent or recent transaction
-   * accessing the same data. The transaction needs to be retried by the client."
-   * https://www.cockroachlabs.com/docs/stable/common-errors.html#restart-transaction
+   * "Messages with the error code 40001 and the string restart transaction indicate that a transaction failed because
+   * it conflicted with another concurrent or recent transaction accessing the same data. The transaction needs to be
+   * retried by the client." https://www.cockroachlabs.com/docs/stable/common-errors.html#restart-transaction
    */
   private fun isCockroachRestartTransaction(th: SQLException): Boolean {
     val message = th.message
-    return th.errorCode == 40001 && message != null &&
-      message.contains("restart transaction")
+    return th.errorCode == 40001 && message != null && message.contains("restart transaction")
   }
 
   /**
-   * "Transactions in TiKV encounter write conflicts". This can happen when optimistic transaction
-   * mode is on. Conflicts are detected during transaction commit
-   * https://docs.pingcap.com/tidb/dev/tidb-faq#error-9007-hy000-write-conflict
+   * "Transactions in TiKV encounter write conflicts". This can happen when optimistic transaction mode is on. Conflicts
+   * are detected during transaction commit https://docs.pingcap.com/tidb/dev/tidb-faq#error-9007-hy000-write-conflict
    */
   private fun isTidbWriteConflict(th: SQLException): Boolean {
     return th.errorCode == 9007
@@ -420,7 +524,7 @@ internal class RealTransacter private constructor(
     val minRetryDelayMillis: Long = 100,
     val maxRetryDelayMillis: Long = 500,
     val retryJitterMillis: Long = 400,
-    val readOnly: Boolean = false
+    val readOnly: Boolean = false,
   )
 
   internal class RealSession(
@@ -428,11 +532,13 @@ internal class RealTransacter private constructor(
     private val readOnly: Boolean,
     private val config: DataSourceConfig,
     private val transacter: RealTransacter,
-    var disabledChecks: Collection<Check>
+    var disabledChecks: Collection<Check>,
   ) : Session, Closeable {
     private val preCommitHooks = mutableListOf<() -> Unit>()
     private val postCommitHooks = mutableListOf<() -> Unit>()
     private val sessionCloseHooks = mutableListOf<() -> Unit>()
+    private val rollbackHooks = mutableListOf<(error: Throwable) -> Unit>()
+
     internal var inTransaction = false
 
     init {
@@ -448,13 +554,12 @@ internal class RealTransacter private constructor(
       return when (entity) {
         is DbChild<*, *> -> (hibernateSession.save(entity) as Gid<*, *>).id
         else -> hibernateSession.save(entity)
-      } as Id<T>
+      }
+        as Id<T>
     }
 
     override fun <T : DbEntity<T>> delete(entity: T) {
-      check(!readOnly) {
-        "Deleting isn't permitted in a read only session."
-      }
+      check(!readOnly) { "Deleting isn't permitted in a read only session." }
       return hibernateSession.delete(entity)
     }
 
@@ -462,10 +567,7 @@ internal class RealTransacter private constructor(
       return hibernateSession.get(type.java, id)
     }
 
-    override fun <R : DbRoot<R>, T : DbSharded<R, T>> loadSharded(
-      gid: Gid<R, T>,
-      type: KClass<T>
-    ): T {
+    override fun <R : DbRoot<R>, T : DbSharded<R, T>> loadSharded(gid: Gid<R, T>, type: KClass<T>): T {
       return hibernateSession.get(type.java, gid)
     }
 
@@ -484,65 +586,57 @@ internal class RealTransacter private constructor(
       }
     }
 
-    override fun <T> target(shard: Shard, function: () -> T): T {
-      return if (config.type.isVitess) {
-        target(currentTarget().mergedWith(Destination(shard)), function)
-      } else {
-        function()
-      }
-    }
+    @Deprecated("Use target(Destination, block) which has more explicit targeting")
+    override fun <T> target(shard: Shard, function: () -> T): T = target(Destination(shard)) { _ -> function() }
 
-    internal fun <T> target(destination: Destination, function: () -> T): T {
-      return if (config.type.isVitess) {
-        val previous = currentTarget()
-        use(previous.mergedWith(destination))
-        try {
-          function()
-        } finally {
-          try {
-            use(previous)
-          } catch (exception: GenericJDBCException) {
-            // Ignore the exception if the connection is already closed.
-            if (!isConnectionClosed(exception)) {
-              throw exception
+    override fun <T> target(destination: Destination, block: (session: Session) -> T): T {
+      return when (config.type.isVitess) {
+        false -> block(this)
+        true -> {
+          useConnection { connection ->
+            val previous = currentTarget(connection)
+            val targetHasChanged = previous != destination
+            try {
+              if (targetHasChanged) {
+                logger.debug {
+                  "The new destination was updated from previous target. Destination target: $destination, " +
+                    "previous target: $previous"
+                }
+                use(connection, destination)
+              }
+              block(this)
+            } catch (e: Exception) {
+              throw e
+            } finally {
+              if (targetHasChanged) {
+                try {
+                  use(connection, previous)
+                } catch (e: Exception) {
+                  logger.error(e) {
+                    "Exception restoring destination, previous = $previous, destination = $destination, " +
+                      "cause = ${e.message}"
+                  }
+                }
+              }
             }
           }
         }
-      } else {
-        function()
       }
     }
 
-    private fun isConnectionClosed(exception: GenericJDBCException) =
-      exception.cause?.javaClass == SQLException::class.java &&
-        exception.cause?.message.equals("Connection is closed")
-
-    private fun use(destination: Destination) = useConnection { connection ->
+    private fun use(connection: Connection, destination: Destination) {
       check(config.type.isVitess)
-      connection.createStatement().use { statement ->
-        if (config.type == DataSourceType.VITESS_MYSQL) {
-          val catalog = if (destination.isBlank()) "@primary" else destination.toString()
-          connection.catalog = catalog
-        } else {
-          withoutChecks {
-            val sql = if (destination.isBlank()) "USE" else "USE `$destination`"
-            statement.execute(sql)
-          }
-        }
+      connection.createStatement().use { _ ->
+        val catalog = if (destination.isBlank()) "${Destination.primary()}" else "$destination"
+        connection.catalog = catalog
       }
     }
 
-    private fun currentTarget(): Destination = useConnection { connection ->
+    private fun currentTarget(connection: Connection): Destination {
       check(config.type.isVitess)
-      connection.createStatement().use { statement ->
-        val target = if (config.type == DataSourceType.VITESS_MYSQL) {
-          connection.catalog
-        } else {
-          withoutChecks {
-            statement.executeQuery("SHOW VITESS_TARGET").uniqueString()
-          }
-        }
-        Destination.parse(target)
+      connection.createStatement().use { _ ->
+        val target = connection.catalog
+        return Destination.parse(target)
       }
     }
 
@@ -552,7 +646,7 @@ internal class RealTransacter private constructor(
 
     internal fun preCommit() {
       preCommitHooks.forEach { preCommitHook ->
-        // Propagate hook exceptions up to the transacter so that the the transaction is rolled
+        // Propagate hook exceptions up to the transacter so that the transaction is rolled
         // back and the error gets returned to the application.
         preCommitHook()
       }
@@ -577,13 +671,19 @@ internal class RealTransacter private constructor(
     }
 
     override fun close() {
-      sessionCloseHooks.forEach { sessionCloseHook ->
-        sessionCloseHook()
-      }
+      sessionCloseHooks.forEach { sessionCloseHook -> sessionCloseHook() }
     }
 
     override fun onSessionClose(work: () -> Unit) {
       sessionCloseHooks.add(work)
+    }
+
+    override fun onRollback(work: (error: Throwable) -> Unit) {
+      rollbackHooks.add(work)
+    }
+
+    internal fun runRollbackHooks(error: Throwable) {
+      rollbackHooks.forEach { rollbackHook -> rollbackHook(error) }
     }
 
     override fun <T> withoutChecks(vararg checks: Check, body: () -> T): T {

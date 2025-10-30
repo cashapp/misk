@@ -10,7 +10,7 @@ application {
 }
 
 dependencies {
-  implementation(libs.findbugsJsr305)
+  compileOnly(libs.findbugsJsr305)
   implementation(libs.guava)
   implementation(libs.guice)
   implementation(libs.jakartaInject)
@@ -21,11 +21,10 @@ dependencies {
   implementation(libs.slf4jApi)
   implementation(libs.okHttp)
   implementation(libs.okio)
-  implementation(project(":wisp:wisp-config"))
   implementation(project(":wisp:wisp-deployment"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":wisp:wisp-lease"))
+  implementation(project(":misk-logging"))
   implementation(project(":wisp:wisp-rate-limiting"))
-  implementation(project(":wisp:wisp-token"))
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
   implementation(project(":misk-admin"))
@@ -36,10 +35,13 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-cron"))
   implementation(project(":misk-inject"))
+  implementation(project(":misk-jdbc"))
   implementation(project(":misk-hotwire"))
+  implementation(project(":misk-lease-mysql"))
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-service"))
   implementation(project(":misk-tailwind"))
+  implementation(project(":misk-tokens"))
   implementation(project(":misk-testing"))
 
   testImplementation(libs.assertj)
@@ -69,18 +71,20 @@ tasks.jar {
   archiveClassifier.set("unshaded")
 }
 
-sourceSets {
-  main {
-    java.srcDir(layout.buildDirectory.dir("generated/source/wire"))
-  }
-}
-
 wire {
-  sourcePath {
-    srcDir("src/main/proto/")
+  // Necessary to support Grpc Reflection so proto files are available in the runtime classpath, otherwise can remove
+  protoLibrary = true
+
+  // Generate service interfaces also.
+  kotlin {
+    includes = listOf("com.squareup.exemplar.protos.HelloWebService")
+    rpcRole = "server"
+    rpcCallStyle = "blocking"
+    singleMethodServices = true
   }
 
   kotlin {
+    rpcRole = "client"
     javaInterop = true
   }
 }

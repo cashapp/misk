@@ -44,10 +44,11 @@ class FakeRedis : Redis {
 
   @Synchronized
   override fun del(key: String): Boolean {
-    if (!keyValueStore.containsKey(key)) {
-      return false
-    }
-    return keyValueStore.remove(key) != null
+    var deleted = false
+    if (keyValueStore.remove(key) != null) deleted = true
+    if (hKeyValueStore.remove(key) != null) deleted = true
+    if (lKeyValueStore.remove(key) != null) deleted = true
+    return deleted
   }
 
   @Synchronized
@@ -130,6 +131,19 @@ class FakeRedis : Redis {
 
   @Synchronized
   override fun hlen(key: String): Long = hKeyValueStore[key]?.data?.size?.toLong() ?: 0L
+
+  @Synchronized
+  override fun hkeys(key: String): List<ByteString> {
+    val value = hKeyValueStore[key] ?: return emptyList()
+
+    // Check if the key has expired
+    if (clock.instant() >= value.expiryInstant) {
+      hKeyValueStore.remove(key)
+      return emptyList()
+    }
+
+    return value.data.keys().toList().map { it.encode(Charsets.UTF_8) }
+  }
 
   @Synchronized
   override fun hmget(key: String, vararg fields: String): List<ByteString?> {
@@ -301,6 +315,20 @@ class FakeRedis : Redis {
   override fun lpop(key: String): ByteString? = lpop(key, count = 1).firstOrNull()
 
   @Synchronized
+  override fun blpop(keys: Array<String>, timeoutSeconds: Double): Pair<String, ByteString>? {
+    // For the fake implementation, we'll check each key in order and return the first non-empty list
+    for (key in keys) {
+      val element = lpop(key)
+      if (element != null) {
+        return Pair(key, element)
+      }
+    }
+    // In a real implementation, this would block until timeout or an element is available
+    // For the fake, we just return null immediately
+    return null
+  }
+
+  @Synchronized
   override fun rpop(key: String, count: Int): List<ByteString?> {
     val value = lKeyValueStore[key] ?: Value(emptyList(), clock.instant())
     if (clock.instant() >= value.expiryInstant) {
@@ -384,6 +412,40 @@ class FakeRedis : Redis {
   )
 
   @Synchronized
+  override fun exists(key: String): Boolean {
+    val value = keyValueStore[key]
+    val hValue = hKeyValueStore[key]
+    val lValue = lKeyValueStore[key]
+    val lValueSize = lValue?.data?.size ?: 0
+
+    return (value != null && clock.instant() < value.expiryInstant) ||
+      (hValue != null && clock.instant() < hValue.expiryInstant) ||
+      (lValue != null && lValueSize > 0 && clock.instant() < lValue.expiryInstant)
+  }
+
+  @Synchronized
+  override fun exists(vararg key: String): Long {
+    return key.sumOf {
+      if (exists(it)) 1L else 0L
+    }
+  }
+
+  @Synchronized
+  override fun persist(key: String): Boolean {
+    val value = keyValueStore[key]
+    val hValue = hKeyValueStore[key]
+    val lValue = lKeyValueStore[key]
+
+    when {
+      value != null -> value.expiryInstant = Instant.MAX
+      hValue != null -> hValue.expiryInstant = Instant.MAX
+      lValue != null -> lValue.expiryInstant = Instant.MAX
+      else -> return false
+    }
+    return true
+  }
+
+  @Synchronized
   override fun expire(key: String, seconds: Long): Boolean {
     val ttlMillis = Duration.ofSeconds(seconds).toMillis()
     return pExpireAt(key, clock.millis().plus(ttlMillis))
@@ -452,6 +514,10 @@ class FakeRedis : Redis {
     keyValueStore.clear()
     hKeyValueStore.clear()
     lKeyValueStore.clear()
+  }
+
+  override fun flushDB() {
+    flushAll()
   }
 
   override fun zadd(

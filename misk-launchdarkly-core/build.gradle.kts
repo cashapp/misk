@@ -21,7 +21,7 @@ dependencies {
   testImplementation(libs.micrometerCore)
   testImplementation(libs.mockitoCore)
   testImplementation(libs.moshiCore)
-  testImplementation(project(":wisp:wisp-logging-testing"))
+  testImplementation(project(":misk-testing"))
   testImplementation(project(":wisp:wisp-moshi"))
 }
 

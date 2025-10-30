@@ -6,7 +6,7 @@ import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
-import wisp.config.Config
+import misk.config.Config
 import wisp.deployment.TESTING
 
 class PrimitivesDbTestModule : KAbstractModule() {
@@ -15,7 +15,7 @@ class PrimitivesDbTestModule : KAbstractModule() {
     install(DeploymentModule(TESTING))
 
     val config = MiskConfig.load<RootConfig>("primitivecolumns", TESTING)
-    install(HibernateTestingModule(PrimitivesDb::class, config.data_source))
+    install(HibernateTestingModule(PrimitivesDb::class))
     install(HibernateModule(PrimitivesDb::class, config.data_source))
     install(object : HibernateEntityModule(PrimitivesDb::class) {
       override fun configureHibernate() {

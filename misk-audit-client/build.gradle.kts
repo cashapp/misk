@@ -22,8 +22,9 @@ dependencies {
 
   testFixturesImplementation(project(":misk"))
   testFixturesImplementation(project(":misk-inject"))
+  testFixturesImplementation(project(":misk-testing"))
   testFixturesImplementation(project(":misk-testing-api"))
-  testFixturesImplementation(project(":wisp:wisp-logging"))
+  testFixturesImplementation(project(":misk-logging"))
 }
 
 mavenPublishing {

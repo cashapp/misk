@@ -13,6 +13,10 @@ import java.nio.file.*
  *
  * This uses the scheme `filesystem:`.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  ReplaceWith(expression = "FilesystemLoaderBackend","misk.resources.FilesystemLoaderBackend")
+)
 object FilesystemLoaderBackend : ResourceLoader.Backend() {
 
     private val logger = getLogger<FilesystemLoaderBackend>()

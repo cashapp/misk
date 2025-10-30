@@ -13,7 +13,7 @@ dependencies {
   api(libs.moshiCore)
   api(libs.okHttp)
   api(libs.retrofit)
-  api(project(":misk-core"))
+  api(project(":misk-config"))
   api(project(":misk-inject"))
   api(project(":misk-metrics"))
   implementation(libs.prometheusClient)
@@ -33,7 +33,7 @@ dependencies {
   testFixturesImplementation(libs.loggingApi)
   testFixturesImplementation(libs.okHttp)
   testFixturesImplementation(libs.okio)
-  testFixturesImplementation(project(":wisp:wisp-logging"))
+  testFixturesImplementation(project(":misk-logging"))
   testFixturesImplementation(project(":misk-core"))
   testFixturesImplementation(project(":misk-service"))
 
@@ -52,7 +52,7 @@ dependencies {
   testImplementation(libs.loggingApi)
   testImplementation(libs.okHttp)
   testImplementation(libs.okio)
-  testImplementation(project(":wisp:wisp-logging"))
+  testImplementation(project(":misk-logging"))
   testImplementation(project(":misk-core"))
   testImplementation(project(":misk-service"))
 

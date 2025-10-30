@@ -14,7 +14,7 @@ import misk.inject.uninject
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
@@ -62,7 +62,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     }
 
     val injector = if (context.reuseInjector()) {
-      injectedModules.getOrPut(context.getActionTestModules().toList()) {
+      injectedModules.getOrPut(context.getSortedActionTestModules()) {
         Guice.createInjector(module)
       }
     } else {
@@ -92,7 +92,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
           throw IllegalStateException("This test is configured with `startService` set to true, " +
             "but no ServiceManager is bound. Did you forget to install MiskTestingServiceModule?")
         }
-        if (context.reuseInjector() && runningServices.contains(context.getActionTestModules())) {
+        if (context.reuseInjector() && runningServices.contains(context.getSortedActionTestModules())) {
           return
         }
         try {
@@ -108,11 +108,11 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
               } catch (stopError: Exception) {
                 e.addSuppressed(stopError)
               }
-              injectedModules.remove(context.getActionTestModules())
+              injectedModules.remove(context.getSortedActionTestModules())
               throw e
             }
           }
-          runningServices.add(context.getActionTestModules().toList())
+          runningServices.add(context.getSortedActionTestModules())
           if (context.reuseInjector()) {
             Runtime.getRuntime().addShutdownHook(
               thread(start = false) {
@@ -216,6 +216,10 @@ private fun ExtensionContext.reuseInjector(): Boolean {
 
 private fun ExtensionContext.getActionTestModules(): Iterable<Module> {
   return getFromStoreOrCompute("module") { fieldsAnnotatedBy<MiskTestModule, Module>() }
+}
+
+private fun ExtensionContext.getSortedActionTestModules(): List<Module> {
+  return getActionTestModules().sortedBy { it.javaClass.name }
 }
 
 private fun ExtensionContext.getExternalDependencies(): Iterable<ExternalDependency> {

@@ -17,11 +17,17 @@ object MediaTypes {
   const val APPLICATION_GRPC = "application/grpc"
   val APPLICATION_GRPC_MEDIA_TYPE = APPLICATION_GRPC.asMediaType()
 
+  const val APPLICATION_GRPC_PROTOBUF = "application/grpc+proto"
+  val APPLICATION_GRPC_PROTOBUF_MEDIA_TYPE = APPLICATION_GRPC_PROTOBUF.asMediaType()
+
   const val APPLICATION_JAVASCRIPT = "application/javascript"
   val APPLICATION_JAVASCRIPT_MEDIA_TYPE = APPLICATION_JAVASCRIPT.asMediaType()
 
   const val APPLICATION_JSON = "application/json;charset=utf-8"
   val APPLICATION_JSON_MEDIA_TYPE = APPLICATION_JSON.asMediaType()
+
+  const val APPLICATION_JWT = "application/jwt"
+  val APPLICATION_JWT_MEDIA_TYPE = APPLICATION_JWT.asMediaType()
 
   const val APPLICATION_OCTETSTREAM = "application/octetstream"
   val APPLICATION_OCTETSTREAM_MEDIA_TYPE = APPLICATION_OCTETSTREAM.asMediaType()
@@ -68,6 +74,9 @@ object MediaTypes {
   const val TURBO_STREAM = "text/vnd.turbo-stream.html"
   val TURBO_STREAM_MEDIA_TYPE = TURBO_STREAM.asMediaType()
 
+  const val SERVER_EVENT_STREAM = "text/event-stream"
+  val SERVER_EVENT_STREAM_TYPE = SERVER_EVENT_STREAM.asMediaType()
+
   fun fromFileExtension(ext: String): MediaType {
     return when (ext) {
       "css" -> TEXT_CSS_MEDIA_TYPE
@@ -78,6 +87,7 @@ object MediaTypes {
       "jpeg", "jpg" -> IMAGE_JPEG_MEDIA_TYPE
       "js" -> APPLICATION_JAVASCRIPT_MEDIA_TYPE
       "json" -> APPLICATION_JSON_MEDIA_TYPE
+      "jwt" -> APPLICATION_JWT_MEDIA_TYPE
       "png" -> IMAGE_PNG_MEDIA_TYPE
       "svg" -> IMAGE_SVG_MEDIA_TYPE
       "tiff" -> IMAGE_TIFF_MEDIA_TYPE

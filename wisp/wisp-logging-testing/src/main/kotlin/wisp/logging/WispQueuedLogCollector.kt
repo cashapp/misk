@@ -11,6 +11,8 @@ import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 
+@Deprecated(  "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  ReplaceWith(expression = "RealLogCollector","misk.logging.RealLogCollector"))
 class WispQueuedLogCollector : LogCollector, FakeFixture() {
     private val queue by resettable { LinkedBlockingDeque<ILoggingEvent>() }
 

@@ -36,6 +36,7 @@ class JdbcModule @JvmOverloads constructor(
   readerConfig: DataSourceConfig?,
   val databasePool: DatabasePool = RealDatabasePool,
   private val installHealthCheck: Boolean = true,
+  private val installSchemaMigrator: Boolean = true,
 ) : KAbstractModule() {
   val config = config.withDefaults()
   val readerConfig = readerConfig?.withDefaults()
@@ -45,6 +46,13 @@ class JdbcModule @JvmOverloads constructor(
     config: DataSourceConfig,
     databasePool: DatabasePool = RealDatabasePool,
   ) : this(qualifier, config, null, null, databasePool)
+
+  constructor(
+    qualifier: KClass<out Annotation>,
+    config: DataSourceConfig,
+    databasePool: DatabasePool = RealDatabasePool,
+    installSchemaMigrator: Boolean = true,
+  ) : this(qualifier, config, null, null, databasePool, true, installSchemaMigrator)
 
   override fun configure() {
     if (readerQualifier != null) {
@@ -73,66 +81,73 @@ class JdbcModule @JvmOverloads constructor(
 
     newMultibinder<DataSourceDecorator>(qualifier)
 
-    val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
-    val schemaMigratorProvider = getProvider(schemaMigratorKey)
-    val connectorProvider = getProvider(keyOf<DataSourceConnector>(qualifier))
-    val skeemaWrapperKey = SkeemaWrapper::class.toKey(qualifier)
-    val skeemaWrapperProvider = getProvider(skeemaWrapperKey)
+    // Only bind SchemaMigrator-related services if installSchemaMigrator is true
+    // and migrations are not externally managed.
+    if (installSchemaMigrator && config.migrations_format != MigrationsFormat.EXTERNALLY_MANAGED) {
+      val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
+      val schemaMigratorProvider = getProvider(schemaMigratorKey)
+      val connectorProvider = getProvider(keyOf<DataSourceConnector>(qualifier))
+      val skeemaWrapperKey = SkeemaWrapper::class.toKey(qualifier)
+      val skeemaWrapperProvider = getProvider(skeemaWrapperKey)
 
-    bind(skeemaWrapperKey).toProvider(object : Provider<SkeemaWrapper> {
-      @Inject
-      lateinit var resourceLoader: ResourceLoader
-      override fun get(): SkeemaWrapper = SkeemaWrapper(
-        qualifier = qualifier,
-        resourceLoader = resourceLoader,
-        dataSourceConfig = config,
-      )
-    }).asSingleton()
-
-    val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
-    bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
-      @Inject
-      lateinit var resourceLoader: ResourceLoader
-      override fun get(): SchemaMigrator = when (config.migrations_format) {
-        MigrationsFormat.TRADITIONAL ->
-          TraditionalSchemaMigrator(
-            qualifier = qualifier,
-            resourceLoader = resourceLoader,
-            dataSourceConfig = config,
-            dataSourceService = dataSourceServiceProvider.get(),
-            connector = connectorProvider.get()
-          )
-        MigrationsFormat.DECLARATIVE ->
-          DeclarativeSchemaMigrator(
-            resourceLoader = resourceLoader,
-            dataSourceService = dataSourceServiceProvider.get(),
-            connector = connectorProvider.get(),
-            skeemaWrapper = skeemaWrapperProvider.get(),
-          )
-      }
-    }).asSingleton()
-
-    val schemaMigratorServiceKey = keyOf<SchemaMigratorService>(qualifier)
-    bind(schemaMigratorServiceKey)
-      .toProvider(object : Provider<SchemaMigratorService> {
+      bind(skeemaWrapperKey).toProvider(object : Provider<SkeemaWrapper> {
         @Inject
-        lateinit var deployment: Deployment
-        override fun get(): SchemaMigratorService = SchemaMigratorService(
+        lateinit var resourceLoader: ResourceLoader
+        override fun get(): SkeemaWrapper = SkeemaWrapper(
           qualifier = qualifier,
-          deployment = deployment,
-          schemaMigratorProvider = schemaMigratorProvider,
-          connectorProvider = connectorProvider
+          resourceLoader = resourceLoader,
+          dataSourceConfig = config,
         )
       }).asSingleton()
 
-    install(
-      ServiceModule<SchemaMigratorService>(qualifier)
-        .dependsOn<DataSourceService>(qualifier)
-        .enhancedBy<ReadyService>()
-    )
+      val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
+      bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
+        @Inject
+        lateinit var resourceLoader: ResourceLoader
+        override fun get(): SchemaMigrator = when (config.migrations_format) {
+          MigrationsFormat.TRADITIONAL ->
+            TraditionalSchemaMigrator(
+              qualifier = qualifier,
+              resourceLoader = resourceLoader,
+              dataSourceConfig = config,
+              dataSourceService = dataSourceServiceProvider.get(),
+              connector = connectorProvider.get()
+            )
+          MigrationsFormat.DECLARATIVE ->
+            DeclarativeSchemaMigrator(
+              resourceLoader = resourceLoader,
+              dataSourceService = dataSourceServiceProvider.get(),
+              connector = connectorProvider.get(),
+              skeemaWrapper = skeemaWrapperProvider.get(),
+            )
+          MigrationsFormat.EXTERNALLY_MANAGED ->
+            throw IllegalStateException("SchemaMigrator should not be created for externally managed migrations")
+        }
+      }).asSingleton()
 
-    if (installHealthCheck) {
-      multibind<HealthCheck>().to(schemaMigratorServiceKey)
+      val schemaMigratorServiceKey = keyOf<SchemaMigratorService>(qualifier)
+      bind(schemaMigratorServiceKey)
+        .toProvider(object : Provider<SchemaMigratorService> {
+          @Inject
+          lateinit var deployment: Deployment
+          override fun get(): SchemaMigratorService = SchemaMigratorService(
+            qualifier = qualifier,
+            deployment = deployment,
+            schemaMigratorProvider = schemaMigratorProvider,
+            connectorProvider = connectorProvider
+          )
+        }).asSingleton()
+
+      // Install SchemaMigratorService
+      install(
+        ServiceModule<SchemaMigratorService>(qualifier)
+          .dependsOn<DataSourceService>(qualifier)
+          .enhancedBy<ReadyService>()
+      )
+      
+      if (installHealthCheck) {
+        multibind<HealthCheck>().to(schemaMigratorServiceKey)
+      }
     }
   }
 
@@ -153,14 +168,7 @@ class JdbcModule @JvmOverloads constructor(
       bind(keyOf<PingDatabaseService>(qualifier)).toProvider {
         PingDatabaseService(config, deploymentProvider.get())
       }.asSingleton()
-      // TODO(rhall): depending on Vitess is a hack to simulate Vitess has already been started in the
-      // env. This is to remove flakiness in tests that are not waiting until Vitess is ready.
-      // This should be replaced with an ExternalDependency that manages vitess.
-      // TODO(jontirsen): I don't think this is needed anymore...
-      install(
-        ServiceModule<PingDatabaseService>(qualifier)
-          .dependsOn<StartDatabaseService>(this.qualifier)
-      )
+      install(ServiceModule<PingDatabaseService>(qualifier))
     }
 
     // Bind DataSourceService.
@@ -200,6 +208,17 @@ class JdbcModule @JvmOverloads constructor(
 
           override fun get(): SpanInjector =
             SpanInjector(tracer, config)
+        }).asSingleton()
+    }
+
+    if (config.type == DataSourceType.MYSQL && config.mysql_use_aws_secret_for_credentials) {
+      val tracingDecoratorKey = TracingDataSourceDecorator::class.toKey(qualifier)
+      bind(tracingDecoratorKey)
+        .toProvider(object : Provider<TracingDataSourceDecorator> {
+          @com.google.inject.Inject(optional = true) var tracer: Tracer? = null
+
+          override fun get(): TracingDataSourceDecorator =
+            TracingDataSourceDecorator(tracer, config)
         }).asSingleton()
     }
   }

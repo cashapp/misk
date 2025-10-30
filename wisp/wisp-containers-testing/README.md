@@ -1,5 +1,9 @@
 # wisp-containers-testing
 
+> [!IMPORTANT]
+> This module is deprecated, the containers functionality has been moved to [misk-testing].
+
+
 Create, start and stop containers for use in tests.
 
 ## Usage

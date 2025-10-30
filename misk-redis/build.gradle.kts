@@ -11,7 +11,6 @@ dependencies {
   api(libs.guava)
   api(libs.jakartaInject)
   api(libs.jedis)
-  api(project(":wisp:wisp-config"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
   api(project(":misk-metrics"))
@@ -20,7 +19,7 @@ dependencies {
   implementation(libs.guice)
   implementation(libs.okio)
   implementation(libs.prometheusClient)
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
   implementation(libs.loggingApi)
   implementation(project(":wisp:wisp-deployment"))
   implementation(project(":misk-service"))
@@ -35,16 +34,15 @@ dependencies {
   testFixturesImplementation(libs.guice)
   testFixturesImplementation(libs.loggingApi)
   testFixturesImplementation(libs.okio)
-  testFixturesImplementation(project(":wisp:wisp-containers-testing"))
-  testFixturesImplementation(project(":wisp:wisp-logging"))
+  testFixturesImplementation(project(":misk-testing"))
+  testFixturesImplementation(project(":misk-logging"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
-  testImplementation(project(":wisp:wisp-time-testing"))
+  testImplementation(project(":misk-testing"))
   testImplementation(project(":misk"))
   testImplementation(project(":misk-redis"))
-  testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-redis")))
 
   testImplementation(project(":misk-service"))
@@ -53,15 +51,15 @@ dependencies {
   testImplementation(libs.guice)
   testImplementation(libs.loggingApi)
   testImplementation(libs.okio)
-  testImplementation(project(":wisp:wisp-containers-testing"))
-  testImplementation(project(":wisp:wisp-logging"))
+  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk-logging"))
 
   testFixturesImplementation(libs.apacheCommonsPool)
   testFixturesImplementation(libs.apacheCommonsIo)
   testFixturesImplementation(libs.guice)
   testFixturesImplementation(libs.okio)
   testFixturesImplementation(libs.prometheusClient)
-  testFixturesImplementation(project(":wisp:wisp-logging"))
+  testFixturesImplementation(project(":misk-logging"))
   testFixturesImplementation(libs.loggingApi)
   testFixturesImplementation(project(":wisp:wisp-deployment"))
   testFixturesImplementation(project(":misk-service"))
@@ -69,6 +67,7 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
   dependsOn(":startRedis")
+  dependsOn(":startRedisCluster")
 }
 
 mavenPublishing {

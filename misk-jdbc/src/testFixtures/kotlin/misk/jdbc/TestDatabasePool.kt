@@ -1,6 +1,6 @@
 package misk.jdbc
 
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.sql.SQLException
 import java.time.Clock
 import java.time.Duration

@@ -31,6 +31,8 @@ interface DeferredRedis {
 
   fun hlen(key: String): Supplier<Long>
 
+  fun hkeys(key: String): Supplier<List<ByteString>>
+
   fun hmget(key: String, vararg fields: String): Supplier<List<ByteString?>>
 
   fun hincrBy(key: String, field: String, increment: Long): Supplier<Long>
@@ -80,6 +82,8 @@ interface DeferredRedis {
 
   fun lpop(key: String): Supplier<ByteString?>
 
+  fun blpop(keys: Array<String>, timeoutSeconds: Double): Supplier<Pair<String, ByteString>?>
+
   fun rpop(key: String, count: Int): Supplier<List<ByteString?>>
 
   fun rpop(key: String): Supplier<ByteString?>
@@ -91,6 +95,12 @@ interface DeferredRedis {
   fun lrem(key: String, count: Long, element: ByteString): Supplier<Long>
 
   fun rpoplpush(sourceKey: String, destinationKey: String): Supplier<ByteString?>
+
+  fun exists(key: String): Supplier<Boolean>
+
+  fun exists(vararg keys: String): Supplier<Long>
+
+  fun persist(key: String): Supplier<Boolean>
 
   fun expire(key: String, seconds: Long): Supplier<Boolean>
 

@@ -10,6 +10,13 @@ import java.security.cert.CertificateException
 import java.security.spec.PKCS8EncodedKeySpec
 
 /** Loads keys and certificates from the file system. */
+@Deprecated(
+    message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+    replaceWith = ReplaceWith(
+        expression = "SslLoader(resourceLoader)",
+        imports = ["misk.security.ssl.SslLoader"]
+    )
+)
 open class SslLoader constructor(
     private val resourceLoader: ResourceLoader
 ) {

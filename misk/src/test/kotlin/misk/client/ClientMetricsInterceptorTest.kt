@@ -59,7 +59,7 @@ internal class ClientMetricsInterceptorTest {
 
   @BeforeEach
   fun before() {
-    requestDurationSummary = factory.requestDuration
+    requestDurationSummary = factory.requestDurationSummary!!
     requestDurationHistogram = factory.requestDurationHistogram
   }
 
@@ -113,21 +113,42 @@ internal class ClientMetricsInterceptorTest {
     assertThat(withTrailersResponse.raw().trailers()).isEqualTo(headersOf("grpc-status", "2"))
 
     SoftAssertions.assertSoftly { softly ->
-      softly.assertThat(requestDurationSummary.labels("pinger.ping", "200").get().count.toInt()).isEqualTo(3)
-      softly.assertThat(requestDurationSummary.labels("pinger.ping", "202").get().count.toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationSummary.labels("pinger.ping", "404").get().count.toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationSummary.labels("pinger.ping", "403").get().count.toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationSummary.labels("pinger.ping", "503").get().count.toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationSummary.labels("pinger.ping", "400").get().count.toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationSummary.labels("pinger.ping", "500").get().count.toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationSummary.labels("pinger.ping", "200").get().count.toInt())
+        .isEqualTo(3)
+      softly.assertThat(requestDurationSummary.labels("pinger.ping", "202").get().count.toInt())
+        .isEqualTo(1)
+      softly.assertThat(requestDurationSummary.labels("pinger.ping", "404").get().count.toInt())
+        .isEqualTo(1)
+      softly.assertThat(requestDurationSummary.labels("pinger.ping", "403").get().count.toInt())
+        .isEqualTo(1)
+      softly.assertThat(requestDurationSummary.labels("pinger.ping", "503").get().count.toInt())
+        .isEqualTo(1)
+      softly.assertThat(requestDurationSummary.labels("pinger.ping", "400").get().count.toInt())
+        .isEqualTo(1)
+      softly.assertThat(requestDurationSummary.labels("pinger.ping", "500").get().count.toInt())
+        .isEqualTo(1)
 
-      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "200").get().buckets.last().toInt()).isEqualTo(3)
-      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "202").get().buckets.last().toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "404").get().buckets.last().toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "403").get().buckets.last().toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "503").get().buckets.last().toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "400").get().buckets.last().toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "500").get().buckets.last().toInt()).isEqualTo(1)
+      softly.assertThat(
+        requestDurationHistogram.labels("pinger.ping", "200").get().buckets.last().toInt()
+      ).isEqualTo(3)
+      softly.assertThat(
+        requestDurationHistogram.labels("pinger.ping", "202").get().buckets.last().toInt()
+      ).isEqualTo(1)
+      softly.assertThat(
+        requestDurationHistogram.labels("pinger.ping", "404").get().buckets.last().toInt()
+      ).isEqualTo(1)
+      softly.assertThat(
+        requestDurationHistogram.labels("pinger.ping", "403").get().buckets.last().toInt()
+      ).isEqualTo(1)
+      softly.assertThat(
+        requestDurationHistogram.labels("pinger.ping", "503").get().buckets.last().toInt()
+      ).isEqualTo(1)
+      softly.assertThat(
+        requestDurationHistogram.labels("pinger.ping", "400").get().buckets.last().toInt()
+      ).isEqualTo(1)
+      softly.assertThat(
+        requestDurationHistogram.labels("pinger.ping", "500").get().buckets.last().toInt()
+      ).isEqualTo(1)
     }
   }
 
@@ -161,13 +182,25 @@ internal class ClientMetricsInterceptorTest {
     assertThat(clientHttp2.ping(AppRequest(200)).execute().code()).isEqualTo(200)
 
     SoftAssertions.assertSoftly { softly ->
-      softly.assertThat(requestDurationSummary.labels("pingerHttp2.ping", "500").get().count.toInt()).isEqualTo(0)
-      softly.assertThat(requestDurationSummary.labels("pingerHttp2.ping", "200").get().count.toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationSummary.labels("pingerHttp2.ping", "400").get().count.toInt()).isEqualTo(2)
+      softly.assertThat(
+        requestDurationSummary.labels("pingerHttp2.ping", "500").get().count.toInt()
+      ).isEqualTo(1)
+      softly.assertThat(
+        requestDurationSummary.labels("pingerHttp2.ping", "200").get().count.toInt()
+      ).isEqualTo(1)
+      softly.assertThat(
+        requestDurationSummary.labels("pingerHttp2.ping", "400").get().count.toInt()
+      ).isEqualTo(1)
 
-      softly.assertThat(requestDurationHistogram.labels("pingerHttp2.ping", "500").get().buckets.last().toInt()).isEqualTo(0)
-      softly.assertThat(requestDurationHistogram.labels("pingerHttp2.ping", "200").get().buckets.last().toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationHistogram.labels("pingerHttp2.ping", "400").get().buckets.last().toInt()).isEqualTo(2)
+      softly.assertThat(
+        requestDurationHistogram.labels("pingerHttp2.ping", "500").get().buckets.last().toInt()
+      ).isEqualTo(1)
+      softly.assertThat(
+        requestDurationHistogram.labels("pingerHttp2.ping", "200").get().buckets.last().toInt()
+      ).isEqualTo(1)
+      softly.assertThat(
+        requestDurationHistogram.labels("pingerHttp2.ping", "400").get().buckets.last().toInt()
+      ).isEqualTo(1)
     }
   }
 
@@ -180,12 +213,18 @@ internal class ClientMetricsInterceptorTest {
       .addInterceptor(interceptor)
       .build()
 
-    val targetUrl = mockWebServer.url("/path/to/test///?some&get=params") // leading/trailing slashes and GET params will be dropped in the interceptor
+    val targetUrl =
+      mockWebServer.url("/path/to/test///?some&get=params") // leading/trailing slashes and GET params will be dropped in the interceptor
     val request = Request.Builder().url(targetUrl).tag(URL::class.java, targetUrl.toUrl()).build()
 
     okHttpClient.newCall(request).execute().use { assertThat(it.code).isEqualTo(200) }
-    assertThat(requestDurationSummary.labels("urlTestClient.path.to.test", "200").get().count.toInt()).isEqualTo(1)
-    assertThat(requestDurationHistogram.labels("urlTestClient.path.to.test", "200").get().buckets.last().toInt()).isEqualTo(1)
+    assertThat(
+      requestDurationSummary.labels("urlTestClient.path.to.test", "200").get().count.toInt()
+    ).isEqualTo(1)
+    assertThat(
+      requestDurationHistogram.labels("urlTestClient.path.to.test", "200").get().buckets.last()
+        .toInt()
+    ).isEqualTo(1)
 
   }
 
@@ -196,8 +235,11 @@ internal class ClientMetricsInterceptorTest {
     }
 
     SoftAssertions.assertSoftly { softly ->
-      softly.assertThat(requestDurationSummary.labels("pinger.ping", "timeout").get().count.toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationHistogram.labels("pinger.ping", "timeout").get().buckets.last().toInt()).isEqualTo(1)
+      softly.assertThat(requestDurationSummary.labels("pinger.ping", "timeout").get().count.toInt())
+        .isEqualTo(1)
+      softly.assertThat(
+        requestDurationHistogram.labels("pinger.ping", "timeout").get().buckets.last().toInt()
+      ).isEqualTo(1)
     }
   }
 
@@ -207,12 +249,13 @@ internal class ClientMetricsInterceptorTest {
     val channel = Channel<Unit>()
 
     val call = clientDelay.ping(AppRequest(200))
-    call.enqueue(object: Callback<AppResponse> {
+    call.enqueue(object : Callback<AppResponse> {
       override fun onResponse(call: Call<AppResponse>, response: Response<AppResponse>) {
         runBlocking {
           channel.send(Unit)
         }
       }
+
       override fun onFailure(call: Call<AppResponse>, t: Throwable) {
         runBlocking {
           channel.send(Unit)
@@ -230,8 +273,13 @@ internal class ClientMetricsInterceptorTest {
     }
 
     SoftAssertions.assertSoftly { softly ->
-      softly.assertThat(requestDurationSummary.labels("pingerDelay.ping", "incomplete-response").get().count.toInt()).isEqualTo(1)
-      softly.assertThat(requestDurationHistogram.labels("pingerDelay.ping", "incomplete-response").get().buckets.last().toInt()).isEqualTo(1)
+      softly.assertThat(
+        requestDurationSummary.labels("pingerDelay.ping", "incomplete-response").get().count.toInt()
+      ).isEqualTo(1)
+      softly.assertThat(
+        requestDurationHistogram.labels("pingerDelay.ping", "incomplete-response")
+          .get().buckets.last().toInt()
+      ).isEqualTo(1)
     }
   }
 

@@ -1,5 +1,4 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import com.vanniktech.maven.publish.SonatypeHost
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
@@ -8,23 +7,26 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.STARTED
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.IOException
 import java.net.Socket
+import kotlin.time.Duration.Companion.seconds
 
 plugins {
   alias(libs.plugins.dependencyAnalysis)
   alias(libs.plugins.binaryCompatibilityValidator)
   alias(libs.plugins.detekt) apply false
   alias(libs.plugins.dokka) apply false
-  alias(libs.plugins.flyway) apply false
   alias(libs.plugins.jooq) apply false
   alias(libs.plugins.kotlinAllOpen) apply false
   alias(libs.plugins.kotlinJpa) apply false
   alias(libs.plugins.kotlinJvm) apply false
+  alias(libs.plugins.kotlinSerialization) apply false
   alias(libs.plugins.mavenPublishBase) apply false
   alias(libs.plugins.protobuf) apply false
+  alias(libs.plugins.schemaMigrator) apply false
   alias(libs.plugins.sqldelight) apply false
   alias(libs.plugins.wire) apply false
 }
@@ -32,6 +34,7 @@ plugins {
 dependencyAnalysis {
   issues {
     all {
+      // TODO do a single pass to cleanup tests / testFixtures deps and then remove this block
       ignoreSourceSet("testFixtures", "test")
       onAny {
         severity("fail")
@@ -43,13 +46,12 @@ dependencyAnalysis {
       onUnusedDependencies {
         exclude("com.github.docker-java:docker-java-api")
         exclude("org.jetbrains.kotlin:kotlin-stdlib")
-        // TODO remove when all callsites using old :misk-core callsites are migrated to :misk-backoff
-        exclude(":misk-backoff")
       }
       onIncorrectConfiguration {
         exclude("org.jetbrains.kotlin:kotlin-stdlib")
       }
     }
+
     // False positives.
     project(":misk-gcp") {
       onUsedTransitiveDependencies {
@@ -93,6 +95,23 @@ dependencyAnalysis {
         // For backwards compatibility, we want Action Scoped classes moved to misk-api to still be
         // part of misk-action-scopes api.
         exclude(":misk-api")
+      }
+    }
+    project(":misk") {
+      onIncorrectConfiguration {
+        // For backwards compatibility, we want Moshi classes moved to misk-moshi to still be
+        // part of misk api.
+        exclude(":misk-moshi")
+      }
+    }
+    project(":misk-core") {
+      onUnusedDependencies {
+        // For backwards compatibility to prevent existing misk-core consumers from breaking while classes
+        //    are moved out to smaller modules.
+        exclude(":misk-backoff")
+        exclude(":misk-logging")
+        exclude(":misk-sampling")
+        exclude(":misk-tokens")
       }
     }
   }
@@ -168,6 +187,7 @@ val hibernateProjects = listOf(
 
 val redisProjects = listOf(
   "misk-redis",
+  "misk-redis-lettuce",
   "misk-rate-limiting-bucket4j-redis"
 )
 
@@ -178,6 +198,24 @@ val doNotDetekt = listOf(
   "exemplarchat",
   "misk-bom",
 )
+
+val publishMiskToMavenCentral = tasks.register("publishMiskToMavenCentral")
+val publishWispToMavenCentral = tasks.register("publishWispToMavenCentral")
+
+val publishUrl = System.getProperty("publish_url")
+val hasPublishUrl = !publishUrl.isNullOrBlank()
+if (hasPublishUrl) {
+  publishMiskToMavenCentral.configure {
+    doFirst {
+      error("Cannot publish Misk to Maven Central with a publish_url specified")
+    }
+  }
+  publishWispToMavenCentral.configure {
+    doFirst {
+      error("Cannot publish Wisp to Maven Central with a publish_url specified")
+    }
+  }
+}
 
 subprojects {
   apply(plugin = "org.jetbrains.dokka")
@@ -206,13 +244,13 @@ subprojects {
   // Only apply if the project has the kotlin plugin added:
   plugins.withType<KotlinPluginWrapper> {
     tasks.withType<KotlinCompile>().configureEach {
-      kotlinOptions {
-        jvmTarget = "11"
+      compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
+        freeCompilerArgs.add("-Xjdk-release=11")
       }
     }
     tasks.withType<JavaCompile>().configureEach {
-      sourceCompatibility = "11"
-      targetCompatibility = "11"
+      options.release.set(11)
     }
 
     dependencies {
@@ -220,8 +258,7 @@ subprojects {
       add("testRuntimeOnly", rootProject.libs.junitLauncher)
 
       // Platform/BOM dependencies constrain versions only.
-      // Enforce misk-bom -- it should take priority over external BOMs.
-      add("api", enforcedPlatform(project(":misk-bom")))
+      add("api", platform(project(":misk-bom")))
       add("api", platform(rootProject.libs.grpcBom))
       add("api", platform(rootProject.libs.guavaBom))
       add("api", platform(rootProject.libs.guiceBom))
@@ -327,7 +364,7 @@ subprojects {
   }
 
   val configurationNames = setOf("kapt", "wire", "proto", "Proto")
-  configurations.all {
+  configurations.configureEach {
     // Workaround the Gradle bug resolving multiplatform dependencies.
     // https://github.com/square/okio/issues/647
     if (name in configurationNames) {
@@ -347,8 +384,7 @@ subprojects {
 
 subprojects {
   plugins.withId("com.vanniktech.maven.publish.base") {
-    val publishUrl = System.getProperty("publish_url")
-    if (!publishUrl.isNullOrBlank()) {
+    if (hasPublishUrl) {
       configure<PublishingExtension> {
         repositories {
           maven {
@@ -362,8 +398,15 @@ subprojects {
       }
     } else {
       configure<MavenPublishBaseExtension> {
-        publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
+        publishToMavenCentral(automaticRelease = true)
         signAllPublications()
+      }
+      when (group) {
+        "app.cash.wisp" -> publishWispToMavenCentral
+        "com.squareup.misk" -> publishMiskToMavenCentral
+        else -> error("Unknown group $group in project $path")
+      }.configure {
+        dependsOn(tasks.named("publishToMavenCentral"))
       }
     }
     configure<MavenPublishBaseExtension> {
@@ -409,12 +452,12 @@ abstract class StartRedisTask @Inject constructor(
   @TaskAction
   fun startRedis() {
     val redisVersion = "7.2"
-    val redisPort = System.getenv("REDIS_PORT") ?: "6379"
+    val redisPort = System.getenv("REDIS_PORT")?.toInt() ?: 6379
     val redisContainerName = "miskTestRedis-$redisPort"
     val redisImage = "public.ecr.aws/docker/library/redis:$redisVersion"
 
     val portIsOccupied = try {
-      Socket("localhost", redisPort.toInt()).close()
+      Socket("localhost", redisPort).close()
       true
     } catch (e: IOException) {
       false
@@ -443,9 +486,96 @@ abstract class StartRedisTask @Inject constructor(
   }
 }
 
-tasks.register("startRedis", StartRedisTask::class.java) {
+tasks.register<StartRedisTask>("startRedis") {
   group = "other"
   description = "Ensures a Redis instance is available; " +
     "starts a redis docker container if there isn't something already there."
+  rootDir.set(project.rootDir)
+}
+
+abstract class StartRedisClusterTask @Inject constructor(
+  @get:Internal
+  val execOperations: ExecOperations
+) : DefaultTask() {
+  @get:Internal
+  abstract val rootDir: DirectoryProperty
+
+  @TaskAction
+  fun startRedisCluster() {
+    val redisVersion = "7.0.10"
+    val redisSeedPort = System.getenv("REDIS_CLUSTER_SEED_PORT")?.toInt() ?: 7000
+    val redisContainerName = "miskTestRedisCluster-$redisSeedPort"
+    val redisImage = "grokzen/redis-cluster:$redisVersion"
+
+    val portIsOccupied = try {
+      Socket("localhost", redisSeedPort).close()
+      true
+    } catch (e: IOException) {
+      false
+    }
+    if (portIsOccupied) {
+      logger.info("Port $redisSeedPort is bound, assuming Redis Cluster is already running")
+      return
+    }
+
+    logger.info("Attempting to start Redis Cluster docker image $redisImage on seed port $redisSeedPort...")
+    val dockerArguments = arrayOf(
+      "docker", "run",
+      "--detach",
+      "--rm",
+      "--name", redisContainerName,
+      "-e", "IP=0.0.0.0",
+      "-e", "INITIAL_PORT=$redisSeedPort",
+      "-e", "MASTERS=3",
+      "-e", "SLAVES_PER_MASTER=1",
+      "-p", "7000-7005:7000-7005",
+      redisImage
+    )
+    execOperations.exec {
+      workingDir(rootDir.get().asFile)
+      commandLine(*dockerArguments)
+    }
+
+    waitForRedisCluster(redisContainerName,redisSeedPort)
+
+    logger.info("Started Redis Cluster docker image $redisImage on port $redisSeedPort")
+  }
+
+  private fun waitForRedisCluster(containerName:String, port:Int){
+    println("Waiting for Redis cluster to become available...")
+    val deadline = System.currentTimeMillis() + 60.seconds.inWholeMilliseconds
+
+    fun clusterReady(): Boolean {
+      try {
+        val process = ProcessBuilder("docker", "exec", containerName,
+          "redis-cli", "-c", "-p", port.toString(), "cluster", "info")
+          .redirectErrorStream(true)
+          .start()
+
+        val output = process.inputStream.bufferedReader().readText()
+        process.waitFor(5, TimeUnit.SECONDS)
+
+        return "cluster_state:ok" in output && "slots_assigned:16384" in output
+      } catch (e: Exception) {
+        return false
+      }
+    }
+
+    while (System.currentTimeMillis() < deadline) {
+      if (clusterReady()) {
+        println("✅ Redis Cluster is ready.")
+        return
+      }
+      Thread.sleep(1000)
+    }
+
+    throw GradleException("Redis Cluster did not become ready within timeout.")
+  }
+}
+
+tasks.register<StartRedisClusterTask>("startRedisCluster") {
+  group = "other"
+  description = "Ensures a Redis Cluster instance is available: " +
+    "starts a redis cluster docker container if there isn't something already there."
   rootDir.set(project.rootDir)
 }

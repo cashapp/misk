@@ -23,7 +23,7 @@ dependencies {
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
   testImplementation(libs.junitParams)
-  testImplementation(libs.mysqlConnector)
+  testImplementation(libs.mysql)
 }
 
 mavenPublishing {

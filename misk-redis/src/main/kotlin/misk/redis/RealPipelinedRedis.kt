@@ -8,7 +8,6 @@ import redis.clients.jedis.ClusterPipeline
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Response
 import redis.clients.jedis.args.ListDirection
-import redis.clients.jedis.params.ScanParams
 import redis.clients.jedis.params.SetParams
 import redis.clients.jedis.params.ZRangeParams
 import redis.clients.jedis.resps.Tuple
@@ -140,6 +139,12 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     val keyBytes = key.toByteArray(charset)
     val response = pipeline.hlen(keyBytes)
     return Supplier { response.get() }
+  }
+
+  override fun hkeys(key: String): Supplier<List<ByteString>> {
+    val keyBytes = key.toByteArray(charset)
+    val response = pipeline.hkeys(keyBytes)
+    return Supplier { response.get().map { it.toByteString() } }
   }
 
   override fun hmget(key: String, vararg fields: String): Supplier<List<ByteString?>> {
@@ -296,6 +301,16 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     return Supplier { response.get()?.toByteString() }
   }
 
+  override fun blpop(keys: Array<String>, timeoutSeconds: Double): Supplier<Pair<String, ByteString>?> {
+    val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
+    val response = pipeline.blpop(timeoutSeconds, *keysAsBytes)
+    return Supplier {
+      response.get()?.let {
+        Pair(it.key.toString(charset), it.value.toByteString())
+      }
+    }
+  }
+
   override fun rpop(key: String, count: Int): Supplier<List<ByteString?>> {
     val keyBytes = key.toByteArray(charset)
     val response = pipeline.rpop(keyBytes, count)
@@ -342,6 +357,24 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
 
     val response = pipeline.rpoplpush(sourceKeyBytes, destinationKeyBytes)
     return Supplier { response.get()?.toByteString() }
+  }
+
+  override fun exists(key: String): Supplier<Boolean> {
+    val keyBytes = key.toByteArray(charset)
+    val response = pipeline.exists(keyBytes)
+    return Supplier { response.get() }
+  }
+
+  override fun exists(vararg keys: String): Supplier<Long> {
+    val keysBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
+    val response = pipeline.exists(*keysBytes)
+    return Supplier { response.get() }
+  }
+
+  override fun persist(key: String): Supplier<Boolean> {
+    val keyBytes = key.toByteArray(charset)
+    val response = pipeline.persist(keyBytes)
+    return Supplier { response.get() == 1L }
   }
 
   override fun expire(key: String, seconds: Long): Supplier<Boolean> {

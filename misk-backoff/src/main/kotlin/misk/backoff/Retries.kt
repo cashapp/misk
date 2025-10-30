@@ -1,5 +1,9 @@
 package misk.backoff
 
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+
 /**
  * Retries the provided function up to a certain number of times, applying the given backoff
  * between each retry. If provided, the onRetry callback is called when a retry happens, allowing
@@ -52,6 +56,57 @@ fun <A> retry(
     }
   }
   throw lastException!!
+}
+
+/**
+ * Executor that handles retries in a retryableFuture
+ * This is a single thread with the assumption that what is being retried is non-blocking. This
+ * should only be handling the "retry" logic
+ */
+private val retryExecutor = Executors.newSingleThreadScheduledExecutor {
+  Thread(it, "retry-scheduler").apply { isDaemon = true }
+}
+
+/**
+ * Builds a future, that wraps the provided future returning function, that retries the provided
+ * function up to a certain number of times, applying the given backoff between each retry. This
+ * will use the [retryExecutor] to retry the block when handling a failure
+ * If provided, the onRetry callback is called when a retry happens, allowing clients to perform a
+ * task (log, emit metrics) every time a retry occurs.
+ * The retry function is provided with current retry count, in case this is relevant.
+ */
+fun <A> retryableFuture(
+  config: RetryConfig,
+  block: (retryCount: Int) -> CompletableFuture<A>
+): CompletableFuture<A> {
+
+  fun attempt(remaining: Int): CompletableFuture<A> {
+    val attempt = config.upTo - remaining // zero based
+    return block(attempt).handle { result, throwable ->
+      val exception = throwable?.let { (it as? Exception) ?: throw throwable }
+      if (exception == null) {
+        config.withBackoff.reset()
+        CompletableFuture.completedFuture(result)
+      } else if (config.shouldRetry(exception) && remaining > 1) {
+        config.onRetry?.invoke(attempt + 1, exception)
+        val retry = CompletableFuture<A>()
+        retryExecutor.schedule(
+          {
+            attempt(remaining - 1).whenComplete { remaining, throwable ->
+              if (throwable == null) retry.complete(remaining)
+              else retry.completeExceptionally(throwable)
+            }
+          },
+          config.withBackoff.nextRetry().toMillis(), TimeUnit.MILLISECONDS,
+        )
+        retry
+      } else {
+        CompletableFuture.failedFuture(exception)
+      }
+    }.thenCompose { it }
+  }
+  config.withBackoff.reset()
+  return attempt(config.upTo)
 }
 
 class RetryConfig private constructor(

@@ -6,7 +6,7 @@ import com.google.inject.TypeLiteral
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.inject.typeLiteral
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -77,12 +77,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       this.queryMethodHandlers,
       this.queryLimitsConfig
     )
-    if (copy.maxRows != -1) {
-      copy.maxRows = this.maxRows
-    }
-    if (copy.firstResult != 0) {
-      copy.firstResult = this.firstResult
-    }
+    copy.maxRows = this.maxRows
+    copy.firstResult = this.firstResult
     copy.hints.addAll(this.hints)
     copy.constraints.addAll(this.constraints)
     copy.orderFactories.addAll(this.orderFactories)
@@ -162,6 +158,12 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         }
       }
       Operator.IS_NULL -> isNull(path)
+      Operator.LIKE -> {
+        val pattern = value as String
+        addConstraint { root, builder ->
+          builder.like(root.traverse<String>(path), pattern)
+        }
+      }
     }
   }
 
@@ -851,6 +853,14 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           Operator.IS_NULL -> object : QueryMethodHandler {
             override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
               return reflectionQuery.isNull(path)
+            }
+          }
+          Operator.LIKE -> object : QueryMethodHandler {
+            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+              val pattern = args[0] as String
+              return reflectionQuery.addConstraint { root, builder ->
+                builder.like(root.traverse<String>(path), pattern)
+              }
             }
           }
         }

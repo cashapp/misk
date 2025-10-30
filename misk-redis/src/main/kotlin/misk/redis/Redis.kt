@@ -111,6 +111,14 @@ interface Redis {
   fun hlen(key: String): Long
 
   /**
+   * Returns all field names in the hash stored for the given key.
+   *
+   * @param key the key
+   * @return a List<ByteString> of the field names stored for the given key
+   */
+  fun hkeys(key: String): List<ByteString>
+
+  /**
    * Retrieve the values associated to the specified fields.
    *
    * If some specified fields do not exist, nil values are returned. Non-existing keys are
@@ -347,6 +355,17 @@ interface Redis {
   fun lpop(key: String): ByteString?
 
   /**
+   * Blocking version of [lpop]. Pops an element from the first non-empty list in [keys],
+   * checking keys in the provided order. If all lists are empty, blocks the connection until
+   * an [lpush] or [rpush] operation occurs on one of the keys, or until [timeoutSeconds] expires.
+   *
+   * @param keys the keys to check for elements, in order
+   * @param timeoutSeconds the maximum number of seconds to block. 0 blocks indefinitely.
+   * @return a pair of the key name and the element that was popped, or null if timeout occurred
+   */
+  fun blpop(keys: Array<String>, timeoutSeconds: Double): Pair<String, ByteString>?
+
+  /**
    * Removes and returns the last [count] elements of the list stored at [key].
    *
    * Only available on Redis 6.2.0 and higher.
@@ -411,6 +430,29 @@ interface Redis {
    * code.
    */
   fun rpoplpush(sourceKey: String, destinationKey: String): ByteString?
+
+  /**
+   * Returns if [key] exists.
+   *
+   * @return true if [key] exists. false if [key] does not exist.
+   */
+  fun exists(key: String): Boolean
+
+  /**
+   * Returns if [key] exists.
+   *
+   * @return the number of keys that exist. 0 if none of the keys exist.
+   */
+  fun exists(vararg key: String): Long
+
+  /**
+   * Remove the existing timeout on key, turning the key from volatile (a key with an expire set)
+   * to persistent (a key that will never expire as no timeout is associated).
+   *
+   * @return true if the timeout has been removed. false if the key does not exist or does not have
+   * an associated timeout.
+   */
+  fun persist(key: String): Boolean
 
   /**
    * Set a timeout on key. After the timeout has expired, the key will automatically be deleted. A
@@ -524,6 +566,11 @@ interface Redis {
    * Flushes all keys from all databases.
    */
   fun flushAll()
+
+  /**
+   * Flushes the current database only.
+   */
+  fun flushDB()
 
   /**
    * Adds the specified [member] with the specified [score] to the sorted set at the [key].

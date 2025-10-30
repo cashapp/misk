@@ -8,6 +8,7 @@ import okhttp3.Headers
 import okhttp3.HttpUrl
 import okio.BufferedSink
 import okio.BufferedSource
+import org.eclipse.jetty.server.Request
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 
@@ -26,6 +27,7 @@ internal data class ServletHttpCall(
   var responseBody: BufferedSink? = null,
   var webSocket: WebSocket? = null,
   override var cookies: List<Cookie> = listOf(),
+  override val requestReceivedTimestamp: Long,
 ) : HttpCall {
   private var _actualStatusCode: Int? = null
 
@@ -124,6 +126,14 @@ internal data class ServletHttpCall(
       if (dispatchMechanism == DispatchMechanism.WEBSOCKET) {
         check(webSocket != null)
       }
+      // Try to get the actual request timestamp from Jetty's Request object.
+      // If the request is not a Jetty Request (e.g., WebSocket upgrade requests),
+      // fall back to current system time.
+      val requestReceivedTimestamp = if (request is Request) {
+        request.timeStamp
+      } else {
+        System.currentTimeMillis()
+      }
 
       return ServletHttpCall(
         url = request.httpUrl(),
@@ -135,6 +145,7 @@ internal data class ServletHttpCall(
         responseBody = responseBody,
         webSocket = webSocket,
         cookies = request.cookies?.toList() ?: listOf(),
+        requestReceivedTimestamp = requestReceivedTimestamp
       )
     }
   }

@@ -1,18 +1,28 @@
 package misk.vitess.testing.internal
 
+import misk.vitess.testing.VitessTable
+import misk.vitess.testing.VitessTableType
 import misk.vitess.testing.VitessTestDbException
 import java.sql.Connection
 import java.sql.DriverManager
+import java.sql.SQLRecoverableException
+import java.sql.SQLTransientException
 import java.sql.Statement
 
-/** VitessQueryExecutor exposes methods for querying against the VTGate. */
-internal class VitessQueryExecutor(private val vitessClusterConfig: VitessClusterConfig) {
+/**
+ * VitessQueryExecutor exposes methods for querying against the VTGate on its exposed port.
+ */
+internal class VitessQueryExecutor(
+  val hostname: String,
+  val vtgatePort: Int,
+  val vtgateUser: String,
+  val vtgateUserPassword: String) {
   init {
     try {
       getVtgateConnection()
     } catch (e: Exception) {
       throw VitessQueryExecutorException(
-        "Failed to get vtgate connection on port ${vitessClusterConfig.vtgatePort}: ${e.message}",
+        "Failed to get vtgate connection on port ${vtgatePort}: ${e.message}",
         e,
       )
     }
@@ -23,14 +33,52 @@ internal class VitessQueryExecutor(private val vitessClusterConfig: VitessCluste
     return connection.use { conn -> executeQuery(conn, query, target) }
   }
 
-  fun execute(query: String, target: String = "@primary"): Boolean {
-    val connection = getVtgateConnection()
-    return connection.use { conn -> execute(conn, query, target) }
-  }
-
   fun executeUpdate(query: String, target: String = "@primary"): Int {
     val connection = getVtgateConnection()
     return connection.use { conn -> executeUpdate(conn, query, target) }
+  }
+
+  /**
+   * Execute update with retry logic to handle retryable failures.
+   */
+  fun executeUpdateWithRetries(query: String, target: String = "@primary"): Int {
+    var lastException: Exception? = null
+    val maxRetries = 3
+    val retryDelayMs = 500L
+
+    val retryableErrorMessages = listOf(
+      "Keyspace does not have exactly one shard",
+    )
+    
+    for (attempt in 1..maxRetries) {
+      try {
+        return executeUpdate(query, target)
+      } catch (e: Exception) {
+        lastException = e
+
+        // Check if this is a retryable exception type or message
+        val isRetryableException = e.cause is SQLRecoverableException || 
+                                   e.cause is SQLTransientException ||
+                                   e is SQLRecoverableException ||
+                                   e is SQLTransientException
+        
+        val isRetryableMessage = retryableErrorMessages.any { errorMessage ->
+          e.message?.contains(errorMessage, ignoreCase = true) == true
+        }
+        
+        if ((isRetryableException || isRetryableMessage) && attempt < maxRetries) {
+          Thread.sleep(retryDelayMs * attempt)
+        } else {
+          throw e // Re-throw if not a retry-able error or max retries reached
+        }
+      }
+    }
+    
+    // If we get here, all retries failed
+    throw VitessQueryExecutorException(
+      "Failed to executeUpdate after `$maxRetries` attempts. Query: `$query`, Last error: `${lastException?.message}`",
+      lastException
+    )
   }
 
   fun executeTransaction(query: String, target: String = "@primary"): Boolean {
@@ -151,8 +199,8 @@ internal class VitessQueryExecutor(private val vitessClusterConfig: VitessCluste
 
   private fun getVtgateConnection(): Connection {
     val url =
-      "jdbc:mysql://${vitessClusterConfig.hostname}:${vitessClusterConfig.vtgatePort}/@primary?allowMultiQueries=true"
-    return DriverManager.getConnection(url, vitessClusterConfig.vtgateUser, vitessClusterConfig.vtgateUserPassword)
+      "jdbc:mysql://${hostname}:${vtgatePort}/@primary?allowMultiQueries=true"
+    return DriverManager.getConnection(url, vtgateUser, vtgateUserPassword)
   }
 }
 

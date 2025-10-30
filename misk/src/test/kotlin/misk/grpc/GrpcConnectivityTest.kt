@@ -28,6 +28,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import java.io.InterruptedIOException
 import java.time.Duration
 import jakarta.inject.Inject
@@ -57,9 +59,10 @@ class GrpcConnectivityTest {
     val clientInjector = Guice.createInjector(Http2ClientTestingModule(jetty))
     client = clientInjector.getInstance(OkHttpClient::class.java)
   }
-
-  @Test
-  fun happyPath() {
+  
+  @ParameterizedTest
+  @MethodSource("provideMediaTypes")
+  fun happyPath(mediaType: MediaType) {
     val request = Request.Builder()
       .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
       .addHeader("grpc-trace-bin", "")
@@ -67,7 +70,7 @@ class GrpcConnectivityTest {
       .addHeader("grpc-encoding", "gzip")
       .post(object : RequestBody() {
         override fun contentType(): MediaType? {
-          return MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
+          return mediaType
         }
 
         override fun writeTo(sink: BufferedSink) {
@@ -200,5 +203,10 @@ class GrpcConnectivityTest {
       install(MiskTestingServiceModule())
       install(WebActionModule.create<HelloRpcAction>())
     }
+  }
+
+  companion object {
+    @JvmStatic
+    fun provideMediaTypes() = listOf(MediaTypes.APPLICATION_GRPC_MEDIA_TYPE, MediaTypes.APPLICATION_GRPC_PROTOBUF_MEDIA_TYPE)
   }
 }

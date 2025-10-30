@@ -26,7 +26,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import java.net.HttpURLConnection.HTTP_FORBIDDEN
 import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 import java.net.HttpURLConnection.HTTP_UNAVAILABLE

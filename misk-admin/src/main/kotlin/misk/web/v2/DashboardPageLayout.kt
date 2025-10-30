@@ -16,7 +16,7 @@ import misk.web.dashboard.DashboardNavbarItem
 import misk.web.dashboard.DashboardTab
 import misk.web.v2.DashboardIndexAction.Companion.titlecase
 import wisp.deployment.Deployment
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 /**
  * Builds dashboard UI for index homepage.
@@ -46,6 +46,7 @@ class DashboardPageLayout @Inject constructor(
   private val homeUrl by lazy {
     dashboardHomeUrl?.url ?: "/"
   }
+  private var hotReload = true
 
   private fun setNewBuilder() = apply { newBuilder = true }
 
@@ -63,6 +64,10 @@ class DashboardPageLayout @Inject constructor(
     apply {
       this.title = title
     }
+
+  fun hotReload(hotReload: Boolean) = apply {
+    this.hotReload = hotReload
+  }
 
   fun headBlock(block: TagConsumer<*>.() -> Unit) = apply { this.headBlock = block }
 
@@ -90,7 +95,8 @@ class DashboardPageLayout @Inject constructor(
         appRoot = homeUrl,
         title = title(appName, dashboardHomeUrl, dashboardTab),
         playCdn = deployment.isLocalDevelopment,
-        headBlock = headBlock
+        headBlock = headBlock,
+        hotReload = hotReload,
       ) {
         Navbar(
           appName = appName,
@@ -141,7 +147,7 @@ class DashboardPageLayout @Inject constructor(
           href = if (isAuthorized) it.menuUrl else homeUrl,
           isSelected = currentPath.startsWith(it.menuUrl),
           openInNewTab = isExternalLink,
-          dataTurbo = !isExternalLink,
+          dataTurbo = !it.menuDisableTurboPreload && !isExternalLink,
           hoverText = if (!isAuthorized) "You do not have access to this tab." else null,
         )
       }

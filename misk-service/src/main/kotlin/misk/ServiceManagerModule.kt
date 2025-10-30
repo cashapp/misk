@@ -12,7 +12,7 @@ import misk.inject.asSingleton
 import misk.metadata.servicegraph.ServiceGraphMetadata
 import misk.metadata.servicegraph.ServiceGraphMetadataProvider
 import misk.web.metadata.MetadataModule
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 class ServiceManagerModule @JvmOverloads constructor(
   private val serviceManagerConfig: ServiceManagerConfig = ServiceManagerConfig()

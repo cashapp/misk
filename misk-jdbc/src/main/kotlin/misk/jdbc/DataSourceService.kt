@@ -9,9 +9,8 @@ import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
 import com.zaxxer.hikari.util.DriverDataSource
 import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Singleton
-import misk.vitess.VitessExceptionHandler
 import wisp.deployment.Deployment
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Duration
 import java.util.Properties
 import javax.sql.DataSource
@@ -67,7 +66,7 @@ class DataSourceService @JvmOverloads constructor(
     config = databasePool.takeDatabase(baseConfig)
 
     val hikariConfig = HikariConfig()
-    hikariConfig.driverClassName = config.type.driverClassName
+    hikariConfig.driverClassName = config.getDriverClassName()
     hikariConfig.jdbcUrl = config.buildJdbcUrl(deployment)
     if (config.username != null) {
       hikariConfig.username = config.username
@@ -106,23 +105,7 @@ class DataSourceService @JvmOverloads constructor(
         else -> {}
       }
 
-
-      // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
-      hikariConfig.dataSourceProperties["cachePrepStmts"] = "true"
-      hikariConfig.dataSourceProperties["prepStmtCacheSize"] = "250"
-      hikariConfig.dataSourceProperties["prepStmtCacheSqlLimit"] = "2048"
-      if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.TIDB) {
-        // TODO(jontirsen): Try turning on server side prepared statements again when this issue
-        //  has been fixed: https://github.com/vitessio/vitess/issues/5075
-        hikariConfig.dataSourceProperties["useServerPrepStmts"] = "true"
-      }
-      hikariConfig.dataSourceProperties["useLocalSessionState"] = "true"
-      hikariConfig.dataSourceProperties["rewriteBatchedStatements"] = "true"
-      hikariConfig.dataSourceProperties["cacheResultSetMetadata"] = "true"
-      hikariConfig.dataSourceProperties["cacheServerConfiguration"] = "true"
-      hikariConfig.dataSourceProperties["elideSetAutoCommits"] = "true"
-      hikariConfig.dataSourceProperties["maintainTimeStats"] = "false"
-      hikariConfig.dataSourceProperties["characterEncoding"] = "UTF-8"
+      hikariConfig.dataSourceProperties = config.getDataSourceProperties()
     }
 
     // TODO(sahilm): The same mitigation _might_ be applicable to the DataSourceTypes VITESS_MYSQL and TIDB

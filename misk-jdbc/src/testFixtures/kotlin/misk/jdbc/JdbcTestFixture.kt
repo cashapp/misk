@@ -10,7 +10,7 @@ import misk.vitess.shards
 import misk.vitess.target
 import misk.vitess.testing.DefaultSettings
 import misk.vitess.testing.VitessTestDb
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.util.Locale
 import kotlin.reflect.KClass
 
@@ -30,7 +30,7 @@ class JdbcTestFixture(
 
     if (dataSourceService.config().type == DataSourceType.VITESS_MYSQL) {
       val vtgatePort = dataSourceService.config().port ?: DefaultSettings.PORT
-      VitessTestDb(port = vtgatePort).truncate()
+      VitessTestDb(port = vtgatePort).truncate(vtgatePort)
       logger.info("@${qualifier.simpleName} tables truncated via VitessTestDb in $stopwatch")
       return
     }

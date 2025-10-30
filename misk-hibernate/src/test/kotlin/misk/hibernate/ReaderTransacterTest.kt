@@ -7,7 +7,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import jakarta.inject.Inject
-import misk.hibernate.VitessTransacterExtensions.shard
+import misk.hibernate.VitessTestExtensions.shard
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
@@ -54,7 +54,8 @@ class MySQLReaderTransacterTest {
     }
     transacter.transaction { session ->
       assertThat(
-        queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+        queryFactory.newQuery<MovieQuery>()
+          .allowTableScan()
           .list(session)
       ).isEmpty()
     }

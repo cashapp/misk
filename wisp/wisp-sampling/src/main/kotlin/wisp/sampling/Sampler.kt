@@ -3,6 +3,13 @@ package wisp.sampling
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.TimeUnit
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "Sampler",
+    imports = ["misk.sampling.Sampler"]
+  )
+)
 /**
  * A [Sampler] is used to "sample" whether an action is allowed to occur or not.
  *
@@ -57,16 +64,37 @@ interface Sampler {
     }
 }
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "PercentSampler(samplePercentage, random)",
+    imports = ["misk.sampling"]
+  )
+)
 class PercentageSampler(private val samplePercentage: Int, private val random: () -> Int) : Sampler {
     override fun sample(): Boolean = random() < samplePercentage
 }
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "RateLimitingSampler(rateLimiter)",
+    imports = ["misk.sampling"]
+  )
+)
 class RateLimitingSampler(private val rateLimiter: RateLimiter) : Sampler {
     override fun sample(): Boolean {
         return rateLimiter.tryAcquire(1L, 0, TimeUnit.SECONDS)
     }
 }
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "AlwaysSampler()",
+    imports = ["misk.sampling"]
+  )
+)
 class AlwaysSampler : Sampler {
     override fun sample(): Boolean = true
 }

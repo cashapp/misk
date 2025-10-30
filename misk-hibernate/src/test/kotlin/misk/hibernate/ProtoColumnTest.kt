@@ -10,7 +10,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.config.Config
+import misk.config.Config
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
 import jakarta.inject.Qualifier
@@ -107,7 +107,7 @@ class ProtoColumnTest {
       install(DeploymentModule(TESTING))
 
       val config = MiskConfig.load<RootConfig>("protocolumn", TESTING)
-      install(HibernateTestingModule(SuperHeroMoviesDb::class, config.data_source))
+      install(HibernateTestingModule(SuperHeroMoviesDb::class))
       install(HibernateModule(SuperHeroMoviesDb::class, config.data_source))
       install(object : HibernateEntityModule(SuperHeroMoviesDb::class) {
         override fun configureHibernate() {

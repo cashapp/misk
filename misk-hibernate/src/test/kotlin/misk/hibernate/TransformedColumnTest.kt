@@ -10,7 +10,7 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Percentage
 import org.junit.jupiter.api.Test
-import wisp.config.Config
+import misk.config.Config
 import wisp.deployment.TESTING
 import java.io.Serializable
 import java.util.Objects
@@ -479,7 +479,7 @@ class TransformedColumnTest {
 
       val conf =
         MiskConfig.load<TransformedColumnTestConfig>("transformedcolumn", TESTING)
-      install(HibernateTestingModule(TransformedColumnTestDb::class, conf.data_source))
+      install(HibernateTestingModule(TransformedColumnTestDb::class))
       install(HibernateModule(TransformedColumnTestDb::class, conf.data_source))
       install(object : HibernateEntityModule(TransformedColumnTestDb::class) {
         override fun configureHibernate() {

@@ -1,0 +1,61 @@
+public final class misk/lease/LeaseQueries : app/cash/sqldelight/TransacterImpl {
+	public fun <init> (Lapp/cash/sqldelight/db/SqlDriver;Lmisk/lease/Leases$Adapter;)V
+	public final fun acquire (Ljava/time/Instant;JLjava/lang/String;J)Lapp/cash/sqldelight/db/QueryResult;
+	public final fun insert (Ljava/lang/String;JLjava/time/Instant;)Lapp/cash/sqldelight/db/QueryResult;
+	public final fun release (Ljava/lang/String;J)Lapp/cash/sqldelight/db/QueryResult;
+	public final fun selectByLeaseName (Ljava/lang/String;)Lapp/cash/sqldelight/Query;
+	public final fun selectByLeaseName (Ljava/lang/String;Lkotlin/jvm/functions/Function4;)Lapp/cash/sqldelight/Query;
+}
+
+public final class misk/lease/Leases {
+	public fun <init> (JLjava/lang/String;JLjava/time/Instant;)V
+	public final fun component1 ()J
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()J
+	public final fun component4 ()Ljava/time/Instant;
+	public final fun copy (JLjava/lang/String;JLjava/time/Instant;)Lmisk/lease/Leases;
+	public static synthetic fun copy$default (Lmisk/lease/Leases;JLjava/lang/String;JLjava/time/Instant;ILjava/lang/Object;)Lmisk/lease/Leases;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHeld_until ()Ljava/time/Instant;
+	public final fun getId ()J
+	public final fun getLease_name ()Ljava/lang/String;
+	public final fun getVersion ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/lease/Leases$Adapter {
+	public fun <init> (Lapp/cash/sqldelight/ColumnAdapter;)V
+	public final fun getHeld_untilAdapter ()Lapp/cash/sqldelight/ColumnAdapter;
+}
+
+public abstract interface class misk/lease/mysql/LeaseDatabase : app/cash/sqldelight/Transacter {
+	public static final field Companion Lmisk/lease/mysql/LeaseDatabase$Companion;
+	public abstract fun getLeaseQueries ()Lmisk/lease/LeaseQueries;
+}
+
+public final class misk/lease/mysql/LeaseDatabase$Companion {
+	public final fun getSchema ()Lapp/cash/sqldelight/db/SqlSchema;
+	public final fun invoke (Lapp/cash/sqldelight/db/SqlDriver;Lmisk/lease/Leases$Adapter;)Lmisk/lease/mysql/LeaseDatabase;
+}
+
+public abstract interface annotation class misk/lease/mysql/LeaseDb : java/lang/annotation/Annotation {
+}
+
+public final class misk/lease/mysql/SqlLeaseModule : misk/inject/KAbstractModule {
+	public fun <init> (Lmisk/jdbc/DataSourceClustersConfig;)V
+	public final fun provideLeaseDatabase (Lcom/google/inject/Provider;)Lmisk/lease/mysql/LeaseDatabase;
+}
+
+public final class misk/lease/mysql/SqlLeaseTestingModule : misk/inject/ReusableTestModule {
+	public static final field Companion Lmisk/lease/mysql/SqlLeaseTestingModule$Companion;
+	public fun <init> ()V
+	public fun <init> (Lmisk/jdbc/DataSourceClustersConfig;)V
+	public synthetic fun <init> (Lmisk/jdbc/DataSourceClustersConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/lease/mysql/SqlLeaseTestingModule$Companion {
+	public final fun defaultDbConfig ()Lmisk/jdbc/DataSourceClustersConfig;
+	public final fun getLEASE_DURATION_SECONDS ()J
+}
+

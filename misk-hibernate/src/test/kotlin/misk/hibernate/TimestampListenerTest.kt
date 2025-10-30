@@ -5,7 +5,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.time.FakeClock
+import misk.time.FakeClock
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
@@ -40,7 +40,7 @@ abstract class TimestampListenerTest {
     val updatedAt = clock.instant()
     transacter.transaction { session ->
       val movie = queryFactory.newQuery<MovieQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .uniqueResult(session)!!
       movie.name = "A New Hope"
       session.hibernateSession.update(movie) // TODO(jwilson): expose session.update() directly.
@@ -83,7 +83,7 @@ class MySQLTimestampListenerTest : TimestampListenerTest() {
 @MiskTest(startService = true)
 class VitessMySQLTimestampListenerTest : TimestampListenerTest() {
   @MiskExternalDependency
-  private val dockerVitess = DockerVitess
+  private val dockerVitess = DockerVitess()
 
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)

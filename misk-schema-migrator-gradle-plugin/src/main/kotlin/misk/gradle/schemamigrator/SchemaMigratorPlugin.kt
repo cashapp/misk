@@ -2,7 +2,6 @@ package misk.gradle.schemamigrator
 
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
-import misk.jdbc.MigrationsFormat
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -20,7 +19,7 @@ class SchemaMigratorPlugin : Plugin<Project> {
   override fun apply(project: Project) {
     val extension = create(project)
 
-    project.tasks.register("migrateSchema", SchemaMigratorTask::class.java) {
+    project.tasks.register(SchemaMigratorTask.NAME, SchemaMigratorTask::class.java) {
       it.database.set(extension.database)
       it.host.set(extension.host)
       it.port.set(extension.port)
@@ -40,6 +39,12 @@ class SchemaMigratorPlugin : Plugin<Project> {
 }
 
 abstract class SchemaMigratorTask : DefaultTask() {
+
+  companion object {
+    // Deliberately exposed as a public property for use by other plugins
+    const val NAME = "migrateSchema"
+  }
+
   @get:Input
   abstract val database: Property<String>
 
@@ -59,7 +64,6 @@ abstract class SchemaMigratorTask : DefaultTask() {
 
   @get:Input
   abstract val password: Property<String>
-
 
   @get:PathSensitive(PathSensitivity.RELATIVE)
   @get:InputDirectory

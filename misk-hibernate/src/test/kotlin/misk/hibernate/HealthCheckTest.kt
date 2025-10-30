@@ -14,13 +14,13 @@ import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import wisp.time.FakeClock
+import misk.time.FakeClock
 import java.time.Instant
 
 @MiskTest(startService = true)
 class HealthCheckTest {
   @MiskExternalDependency
-  private val dockerVitess = DockerVitess
+  private val dockerVitess = DockerVitess()
 
   @MiskTestModule
   val module = MoviesTestModule()

@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -64,7 +64,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -74,9 +74,10 @@ jobs:
 
       - name: Publish Test Report
         if: ${{ always() }}
-        uses: mikepenz/action-junit-report@v3
+        uses: mikepenz/action-junit-report@v5
         with:
           check_name: Test Report - ${{ matrix.cmd }}
+          job_name: Test - ${{ matrix.cmd }}
           report_paths: '**/build/test-results/test/TEST-*.xml'
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -86,13 +87,14 @@ jobs:
     needs: [js, jvm]
     runs-on: [ubuntu-latest]
     env:
-      ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
-      ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
-      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY }}
+      ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_CENTRAL_USERNAME }}
+      ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_CENTRAL_PASSWORD }}
+      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_SECRET_KEY }}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_SECRET_PASSPHRASE }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -110,8 +112,9 @@ jobs:
 
       - name: Publish the artifacts
         run: |
-          # disable configuration cache because publishing to Maven Central with CC is not supported yet
-          gradle clean publish --stacktrace --no-configuration-cache
+          # disable caching since it breaks publishing to Maven Central
+          gradle publishMiskToMavenCentral --stacktrace --no-build-cache --no-configuration-cache --no-configure-on-demand
+          gradle publishWispToMavenCentral --stacktrace --no-build-cache --no-configuration-cache --no-configure-on-demand
 
       - name: Tag Misk repo
         uses: mathieudutour/github-tag-action@v6.1

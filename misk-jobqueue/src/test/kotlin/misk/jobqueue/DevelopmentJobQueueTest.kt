@@ -7,7 +7,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import jakarta.inject.Inject
 
 @MiskTest(startService = true)

@@ -12,6 +12,10 @@ import java.util.jar.JarFile
  *
  * This uses the scheme `classpath:`.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  ReplaceWith(expression = "ClasspathResourceLoaderBackend","misk.resources.ClasspathResourceLoaderBackend")
+)
 object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
 
     const val SCHEME = "classpath:"

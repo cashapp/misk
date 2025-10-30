@@ -4,7 +4,6 @@ import com.vanniktech.maven.publish.KotlinJvm
 plugins {
   id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
-  id("java-test-fixtures")
 }
 
 dependencies {
@@ -16,7 +15,7 @@ dependencies {
   api(libs.jakartaInject)
   api(libs.micrometerCore)
 
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
   implementation(libs.awsSdkCore)
   implementation(libs.bucket4jCore)
   implementation(libs.loggingApi)
@@ -29,9 +28,6 @@ dependencies {
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
 
-  testFixturesImplementation(project(":wisp:wisp-logging"))
-  testFixturesImplementation(libs.bucket4jCore)
-  testFixturesImplementation(libs.loggingApi)
 }
 
 mavenPublishing {

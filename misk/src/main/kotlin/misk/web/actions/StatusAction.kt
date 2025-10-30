@@ -10,7 +10,7 @@ import misk.web.AvailableWhenDegraded
 import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Clock
 import java.time.Instant
 import jakarta.inject.Inject

@@ -1,10 +1,11 @@
 package misk.jdbc
 
 import misk.config.Redact
-import wisp.config.Config
-import wisp.containers.ContainerUtil
+import misk.config.Config
+import misk.containers.ContainerUtil
 import wisp.deployment.Deployment
 import java.time.Duration
+import java.util.Properties
 
 /** Defines a type of datasource */
 enum class DataSourceType(
@@ -24,7 +25,7 @@ enum class DataSourceType(
   ),
   VITESS_MYSQL(
     driverClassName = MYSQL.driverClassName,
-    hibernateDialect = "misk.hibernate.VitessDialect",
+    hibernateDialect = "misk.hibernate.vitess.VitessDialect",
     isVitess = true
   ),
   COCKROACHDB(
@@ -52,7 +53,12 @@ enum class MigrationsFormat {
   /**
    * Declarative migrations format where each migration file represents a DB table
    */
-  DECLARATIVE
+  DECLARATIVE,
+  /**
+   * Externally managed migrations where schema migrations are handled outside of the application.
+   * When this format is used, SchemaMigratorService will not be installed.
+   */
+  EXTERNALLY_MANAGED
 }
 
 /** Configuration element for an individual datasource */
@@ -129,6 +135,8 @@ data class DataSourceConfig @JvmOverloads constructor(
   val mysql_enforce_writable_connections: Boolean = false,
   val migrations_format: MigrationsFormat = MigrationsFormat.TRADITIONAL,
   val declarative_schema_config: DeclarativeSchemaConfig? = null,
+  val mysql_use_aws_secret_for_credentials: Boolean = false,
+  val mysql_aws_secret_name: String? = null,
 ) {
   init {
     if (migrations_format == MigrationsFormat.DECLARATIVE) {
@@ -141,6 +149,38 @@ data class DataSourceConfig @JvmOverloads constructor(
       }
     }
   }
+  fun getDriverClassName(): String {
+    return if (mysql_use_aws_secret_for_credentials) {
+      "com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver"
+    } else {
+      type.driverClassName
+    }
+  }
+
+  fun getDataSourceProperties() : Properties {
+    // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
+    val properties = Properties()
+
+    properties["cachePrepStmts"] = "true"
+    properties["prepStmtCacheSize"] = "250"
+    properties["prepStmtCacheSqlLimit"] = "2048"
+    if (type == DataSourceType.MYSQL || type == DataSourceType.VITESS_MYSQL || type == DataSourceType.TIDB) {
+      properties["useServerPrepStmts"] = "true"
+    }
+    if (mysql_use_aws_secret_for_credentials) {
+      properties["user"] = mysql_aws_secret_name
+    }
+    properties["useLocalSessionState"] = "true"
+    properties["rewriteBatchedStatements"] = "true"
+    properties["cacheResultSetMetadata"] = "true"
+    properties["cacheServerConfiguration"] = "true"
+    properties["elideSetAutoCommits"] = "true"
+    properties["maintainTimeStats"] = "false"
+    properties["characterEncoding"] = "UTF-8"
+
+    return properties
+  }
+
   fun withDefaults(): DataSourceConfig {
     val server_hostname = ContainerUtil.dockerTargetOrLocalIp()
     return when (type) {
@@ -212,10 +252,7 @@ data class DataSourceConfig @JvmOverloads constructor(
         }
 
         if (type == DataSourceType.VITESS_MYSQL) {
-          // TODO(jontirsen): Try turning on server side prepared statements again when this issue
-          //  has been fixed: https://github.com/vitessio/vitess/issues/5075
-          queryParams += "&useServerPrepStmts=false"
-          queryParams += "&useUnicode=true"
+          queryParams += "&useServerPrepStmts=true"
           // If we leave this as the default (true) the logs get spammed with the following errors:
           // "Ignored inapplicable SET {sql_mode } = strict_trans_tables"
           // Since Vitess always uses strict_trans_tables this makes no difference here except it
@@ -281,7 +318,12 @@ data class DataSourceConfig @JvmOverloads constructor(
           queryParams += "&$key=$value"
         }
 
-        "jdbc:tracing:mysql://${config.host}:${config.port}/${config.database}$queryParams"
+        if(mysql_use_aws_secret_for_credentials) {
+          "jdbc-secretsmanager:mysql://${config.host}:${config.port}/${config.database}$queryParams"
+        }
+        else {
+          "jdbc:tracing:mysql://${config.host}:${config.port}/${config.database}$queryParams"
+        }
       }
       DataSourceType.HSQLDB -> {
         "jdbc:hsqldb:mem:${database!!};sql.syntax_mys=true"

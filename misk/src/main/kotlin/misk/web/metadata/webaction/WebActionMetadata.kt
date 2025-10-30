@@ -5,6 +5,7 @@ import misk.web.DispatchMechanism
 import misk.web.MiskWebFormBuilder
 import misk.web.NetworkInterceptor
 import misk.web.PathPattern
+import misk.web.ProtoDocumentationProvider
 import misk.web.actions.javaMethod
 import misk.web.formatter.ClassNameFormatter
 import misk.web.mediatype.MediaRange
@@ -54,7 +55,8 @@ data class WebActionMetadata(
     networkInterceptors: List<NetworkInterceptor>,
     dispatchMechanism: DispatchMechanism,
     allowedServices: Set<String>,
-    allowedCapabilities: Set<String>
+    allowedCapabilities: Set<String>,
+    documentationProvider: ProtoDocumentationProvider?
   ) : this(
     name = name,
     function = function.toString(),
@@ -74,9 +76,9 @@ data class WebActionMetadata(
     requestType = requestType.toString(),
     returnType = returnType.toString(),
     responseType = responseType.toString(),
-    types = MiskWebFormBuilder().calculateTypes(requestType),
-    returnTypes = MiskWebFormBuilder().calculateTypes(returnType),
-    responseTypes = MiskWebFormBuilder().calculateTypes(responseType),
+    types = MiskWebFormBuilder(documentationProvider).calculateTypes(requestType),
+    returnTypes = MiskWebFormBuilder(documentationProvider).calculateTypes(returnType),
+    responseTypes = MiskWebFormBuilder(documentationProvider).calculateTypes(responseType),
     pathPattern = pathPattern.toString(),
     applicationInterceptors = applicationInterceptors.map {
       ClassNameFormatter.format(it::class)

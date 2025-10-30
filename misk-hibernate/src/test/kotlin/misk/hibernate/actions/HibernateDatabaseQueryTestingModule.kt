@@ -11,6 +11,9 @@ import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceType
 import misk.security.authz.AccessAnnotationEntry
 import jakarta.inject.Qualifier
+import misk.audit.FakeAuditClientModule
+import misk.web.interceptors.hooks.AuditClientHook
+import misk.web.interceptors.hooks.RequestResponseHook
 
 class HibernateDatabaseQueryTestingModule : KAbstractModule() {
   override fun configure() {
@@ -34,6 +37,8 @@ class HibernateDatabaseQueryTestingModule : KAbstractModule() {
 
     multibind<AccessAnnotationEntry>().toInstance(DYNAMIC_MOVIE_QUERY_ACCESS_ENTRY)
     multibind<AccessAnnotationEntry>().toInstance(OPERATORS_MOVIE_QUERY_ACCESS_ENTRY)
+
+    install(FakeAuditClientModule())
   }
 
   companion object {

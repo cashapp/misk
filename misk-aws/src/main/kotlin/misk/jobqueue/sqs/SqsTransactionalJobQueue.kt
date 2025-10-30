@@ -5,7 +5,7 @@ import misk.hibernate.Session
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
 import misk.jobqueue.TransactionalJobQueue
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Duration
 import jakarta.inject.Inject
 import jakarta.inject.Singleton

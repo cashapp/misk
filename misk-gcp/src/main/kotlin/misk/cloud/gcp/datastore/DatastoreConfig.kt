@@ -1,7 +1,7 @@
 package misk.cloud.gcp.datastore
 
 import misk.cloud.gcp.TransportConfig
-import wisp.config.Config
+import misk.config.Config
 
 /** Configuration for talking to Google datastore */
 data class DatastoreConfig @JvmOverloads constructor(

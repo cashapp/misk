@@ -1,7 +1,7 @@
 package misk.clustering
 
 import com.google.common.util.concurrent.AbstractExecutionThreadService
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
@@ -17,7 +17,7 @@ import jakarta.inject.Singleton
 class DefaultCluster @JvmOverloads constructor(
   self: Cluster.Member,
   private val newResourceMapperFn: (members: Set<Cluster.Member>) -> ClusterResourceMapper =
-    { ClusterHashRing(it) }
+    { HashRingClusterResourceMapper(it) }
 ) : AbstractExecutionThreadService(), Cluster, ClusterService {
   private val snapshotRef = AtomicReference<Cluster.Snapshot>(
     Cluster.Snapshot(

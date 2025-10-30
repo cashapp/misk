@@ -6,10 +6,11 @@ import okio.BufferedSink
 import okio.BufferedSource
 import java.util.regex.Matcher
 import jakarta.inject.Inject
+import misk.web.extractors.StringConverter
 import kotlin.reflect.KParameter
 
 /** HTTP binding as specified by [FeatureBinding]. */
-internal class WebActionBinding @Inject constructor(
+class WebActionBinding @Inject constructor(
   private val action: Action,
   private val beforeCallBindings: Set<FeatureBinding>,
   private val afterCallBindings: Set<FeatureBinding>,
@@ -220,7 +221,8 @@ internal class WebActionBinding @Inject constructor(
 
   /** Creates feature bindings for use before and after a web call. */
   class Factory @Inject constructor(
-    private val featureBindingFactories: List<FeatureBinding.Factory>
+    private val featureBindingFactories: List<FeatureBinding.Factory>,
+    private val stringConverterFactories: List<StringConverter.Factory>,
   ) {
     fun create(
       action: Action,
@@ -228,7 +230,7 @@ internal class WebActionBinding @Inject constructor(
     ): WebActionBinding {
       val claimer = RealClaimer(action)
       for (factory in featureBindingFactories) {
-        val binding = factory.create(action, pathPattern, claimer)
+        val binding = factory.create(action, pathPattern, claimer, stringConverterFactories)
         claimer.commitClaims(factory, binding)
       }
       return claimer.newWebActionBinder()

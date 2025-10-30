@@ -10,7 +10,6 @@ import redis.clients.jedis.DefaultJedisClientConfig
 import redis.clients.jedis.HostAndPort
 import redis.clients.jedis.JedisClientConfig
 import redis.clients.jedis.JedisPooled
-import redis.clients.jedis.Protocol
 import redis.clients.jedis.providers.PooledConnectionProvider
 
 internal class JedisPooledWithMetrics(
@@ -19,11 +18,12 @@ internal class JedisPooledWithMetrics(
   replicationGroupConfig: RedisReplicationGroupConfig,
   ssl: Boolean = true,
   requiresPassword: Boolean = true,
+  database: Int? = null,
 ) : JedisPooled(
   PooledConnectionProviderWithMetrics(
     metrics,
     poolConfig,
-    ConnectionFactoryWithMetrics(metrics, replicationGroupConfig, ssl, requiresPassword)
+    ConnectionFactoryWithMetrics(metrics, replicationGroupConfig, ssl, requiresPassword, database)
   )
 )
 
@@ -32,12 +32,13 @@ private class ConnectionFactoryWithMetrics(
   replicationGroupConfig: RedisReplicationGroupConfig,
   ssl: Boolean = true,
   requiresPassword: Boolean = true,
+  database: Int? = null,
 ) : ConnectionFactory(
   HostAndPort(
     replicationGroupConfig.writer_endpoint.hostname?.takeUnless { it.isBlank() } ?: System.getenv("REDIS_HOST") ?: "127.0.0.1",
     replicationGroupConfig.writer_endpoint.port
   ),
-  createJedisClientConfig(replicationGroupConfig, ssl, requiresPassword),
+  createJedisClientConfig(replicationGroupConfig, ssl, requiresPassword, database),
 ) {
 
   override fun destroyObject(pooledJedis: PooledObject<Connection>) {
@@ -50,6 +51,7 @@ private fun createJedisClientConfig(
   replicationGroupConfig: RedisReplicationGroupConfig,
   ssl: Boolean,
   requiresPassword: Boolean = true,
+  database: Int? = null,
 ): JedisClientConfig {
 
   return DefaultJedisClientConfig.builder()
@@ -62,7 +64,7 @@ private fun createJedisClientConfig(
         }
         null
       })
-    .database(Protocol.DEFAULT_DATABASE)
+    .let { config -> database?.let { config.database(it) } ?: config }
     .ssl(ssl)
     //CLIENT SETINFO is only supported in Redis v7.2+
     .clientSetInfoConfig(ClientSetInfoConfig.DISABLED)

@@ -14,7 +14,7 @@ import misk.vitess.testing.utilities.DockerVitess
 @MiskTest(startService = true)
 class EventListenersTest {
   @MiskExternalDependency
-  private val dockerVitess = DockerVitess
+  private val dockerVitess = DockerVitess()
 
   @MiskTestModule
   val module = Modules.combine(
@@ -48,7 +48,8 @@ class EventListenersTest {
     }
 
     transacter.transaction { session ->
-      val movie = queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+      val movie = queryFactory.newQuery<MovieQuery>()
+        .allowTableScan()
         .uniqueResult(session)!!
       assertThat(eventListener.takeEvents()).containsExactly("preload")
 

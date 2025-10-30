@@ -55,10 +55,9 @@ internal class LaunchDarklyFeatureFlagsTest {
         val user = userCaptor.value
 
         // User fields are package-private, so we fetch it with reflection magicks!
-        val customField = LDContext::class.java.getDeclaredField("attributes")
-        customField.isAccessible = true
-        @Suppress("unchecked_cast")
-        val customAttrs = customField.get(user) as Map<String, LDValue>
+        val attributesField = LDContext::class.java.getDeclaredField("attributes")
+        attributesField.isAccessible = true
+        val customAttrs = attributesField.get(user)
 
         val privateAttrsField = LDContext::class.java.getDeclaredField("privateAttributes")
         privateAttrsField.isAccessible = true
@@ -68,9 +67,11 @@ internal class LaunchDarklyFeatureFlagsTest {
         val platform = UserAttribute.forName("platform")
         val age = UserAttribute.forName("age")
 
-        assertThat(customAttrs.getValue("continent").stringValue()).isEqualTo("europa")
-        assertThat(customAttrs.getValue("platform").stringValue()).isEqualTo("lava")
-        assertThat(customAttrs.getValue("age").intValue()).isEqualTo(100000)
+        val getMethod = Class.forName("com.launchdarkly.sdk.AttributeMap").getDeclaredMethod("get", String::class.java)
+        getMethod.isAccessible = true
+        assertThat((getMethod.invoke(customAttrs, "continent") as LDValue).stringValue()).isEqualTo("europa")
+        assertThat((getMethod.invoke(customAttrs, "platform") as LDValue).stringValue()).isEqualTo("lava")
+        assertThat((getMethod.invoke(customAttrs, "age") as LDValue).intValue()).isEqualTo(100000)
         assertThat(privateAttrs.toSet().equals(setOf(continent, platform, age)))
     }
 

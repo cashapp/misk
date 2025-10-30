@@ -9,7 +9,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.config.Config
+import misk.config.Config
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
 import jakarta.inject.Qualifier
@@ -54,7 +54,7 @@ class JsonColumnTest {
       install(DeploymentModule(TESTING))
 
       val config = MiskConfig.load<RootConfig>("jsoncolumn", TESTING)
-      install(HibernateTestingModule(WillFerrellDb::class, config.data_source))
+      install(HibernateTestingModule(WillFerrellDb::class))
       install(HibernateModule(WillFerrellDb::class, config.data_source))
       install(object : HibernateEntityModule(WillFerrellDb::class) {
         override fun configureHibernate() {

@@ -20,7 +20,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.util.thread.ExecutorThreadPool
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit

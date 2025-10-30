@@ -11,10 +11,10 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.DeleteQueueRequest
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException
-import wisp.containers.Composer
-import wisp.containers.Container
-import wisp.containers.ContainerUtil
-import wisp.logging.getLogger
+import misk.containers.Composer
+import misk.containers.Container
+import misk.containers.ContainerUtil
+import misk.logging.getLogger
 import java.net.URI
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionException

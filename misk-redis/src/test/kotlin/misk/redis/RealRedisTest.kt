@@ -6,6 +6,7 @@ import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.redis.testing.DockerRedis
+import misk.redis.testing.RedisTestFlushModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
@@ -13,6 +14,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import redis.clients.jedis.ConnectionPoolConfig
 import wisp.deployment.TESTING
+import java.time.Duration
 
 @MiskTest
 class RealRedisTest : AbstractRedisTest() {
@@ -23,6 +25,7 @@ class RealRedisTest : AbstractRedisTest() {
       install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
+      install(RedisTestFlushModule())
     }
   }
 
@@ -137,6 +140,71 @@ class RealRedisTest : AbstractRedisTest() {
     redis.ltrim(listKey, -3, -1)
 
     assertThat(redis.lrange(listKey, 0, -1).map { it?.utf8() }).containsExactly("two", "three", "four")
+  }
+
+  @Test
+  fun `hkeys returns all map keys within a given key`() {
+    val hashKey = "myhash"
+
+    val map = mapOf(
+      "field1" to "value1".encodeUtf8(),
+      "field2" to "value2".encodeUtf8(),
+      "field3" to "value3".encodeUtf8()
+    )
+
+    redis.hset(hashKey, map)
+
+    assertThat(redis.hkeys(hashKey).map { it.utf8() })
+      .containsExactly("field1", "field2", "field3")
+  }
+
+  @Test
+  fun `hkeys returns empty list if given key is not set`() {
+    val hashKey = "myhash"
+
+    assertThat(redis.hkeys(hashKey)).isEmpty()
+  }
+
+  @Test
+  fun `persist returns true if the timeout for a key was removed`() {
+    val key = "mykey"
+
+    redis.set(key, Duration.ofSeconds(10), "value".encodeUtf8())
+
+    assertThat(redis.persist(key)).isTrue()
+  }
+
+  @Test
+  fun `persist returns false if the key does not exist`() {
+    assertThat(redis.persist("persist_false_key")).isFalse()
+  }
+
+  @Test
+  fun `exists returns true if the key exists`() {
+    val key = "mykey"
+
+    redis.set(key, "value".encodeUtf8())
+
+    assertThat(redis.exists(key)).isTrue()
+  }
+
+  @Test
+  fun `exists returns false if the key does not exist`() {
+    val key = "mykey"
+
+    assertThat(redis.exists(key)).isFalse()
+  }
+
+  @Test
+  fun `returns count of keys that exist`() {
+    val key1 = "mykey1"
+    val key2 = "mykey2"
+    val key3 = "mykey3"
+
+    redis.set(key1, "value".encodeUtf8())
+    redis.set(key2, "value".encodeUtf8())
+
+    assertThat(redis.exists(key1, key2, key3)).isEqualTo(2L)
   }
 
   private fun scanAll(

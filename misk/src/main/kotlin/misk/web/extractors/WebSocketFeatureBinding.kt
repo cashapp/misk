@@ -21,7 +21,8 @@ internal class WebSocketFeatureBinding(
     override fun create(
       action: Action,
       pathPattern: PathPattern,
-      claimer: Claimer
+      claimer: Claimer,
+      stringConverterFactories: List<StringConverter.Factory>
     ): FeatureBinding? {
       val parameter = action.parameters.firstOrNull {
         it.type.classifier == WebSocket::class

@@ -9,10 +9,10 @@ import misk.redis.RedisNodeConfig
 import misk.redis.RedisReplicationGroupConfig
 import misk.testing.ExternalDependency
 import redis.clients.jedis.JedisPooled
-import wisp.containers.Composer
-import wisp.containers.Container
-import wisp.containers.ContainerUtil
-import wisp.logging.getLogger
+import misk.containers.Composer
+import misk.containers.Container
+import misk.containers.ContainerUtil
+import misk.logging.getLogger
 import java.lang.Thread.sleep
 import java.time.Duration
 

@@ -8,7 +8,7 @@ pluginManagement {
 }
 
 plugins {
-  id("com.gradle.develocity") version "3.18.2"
+  id("com.gradle.develocity") version "4.1.1"
 }
 
 develocity {
@@ -84,12 +84,12 @@ include(":misk")
 include(":misk-action-scopes")
 include(":misk-actions")
 include(":misk-admin")
-include(":misk-admin-web-actions")
 include(":misk-api")
 include(":misk-audit-client")
 include(":misk-aws")
 include(":misk-aws-dynamodb")
 include(":misk-aws2-dynamodb")
+include(":misk-aws2-s3")
 include(":misk-aws2-sqs")
 include(":misk-backoff")
 include(":misk-bom")
@@ -119,8 +119,12 @@ include(":misk-jooq")
 include(":misk-launchdarkly")
 include(":misk-launchdarkly-core")
 include(":misk-lease")
+include(":misk-lease-mysql")
+include(":misk-logging")
+include(":misk-mcp")
 include(":misk-metrics")
 include(":misk-metrics-digester")
+include(":misk-moshi")
 include(":misk-policy")
 include(":misk-prometheus")
 include(":misk-proto")
@@ -129,6 +133,8 @@ include(":misk-rate-limiting-bucket4j-dynamodb-v2")
 include(":misk-rate-limiting-bucket4j-mysql")
 include(":misk-rate-limiting-bucket4j-redis")
 include(":misk-redis")
+include(":misk-redis-lettuce")
+include(":misk-sampling")
 include(":misk-schema-migrator-gradle-plugin")
 include(":misk-service")
 include(":misk-slack")
@@ -137,9 +143,17 @@ include(":misk-sqldelight-testing")
 include(":misk-tailwind")
 include(":misk-testing")
 include(":misk-testing-api")
+include(":misk-tokens")
 include(":misk-transactional-jobqueue")
 include(":misk-warmup")
 include(":misk-vitess")
 include(":misk-vitess-database-gradle-plugin")
 include(":samples:exemplar")
 include(":samples:exemplarchat")
+
+val localSettings = file("local.settings.gradle.kts")
+if (localSettings.exists()) {
+  logger.lifecycle("Applying local settings at ${localSettings.absolutePath}")
+  apply(from = localSettings)
+}
+

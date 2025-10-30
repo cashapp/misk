@@ -4,6 +4,13 @@ import java.time.Duration
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "RateLimiter.Factory()",
+    imports = ["misk.sampling.RateLimiter"]
+  )
+)
 /**
  * A deterministic testable rate limiter that uses two variables:
  *

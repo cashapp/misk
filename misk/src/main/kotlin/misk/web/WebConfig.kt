@@ -2,12 +2,12 @@ package misk.web
 
 import misk.annotation.ExperimentalMiskApi
 import misk.client.HTTP_SERVICE_UNAVAILABLE
+import misk.config.Config
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
 import misk.web.concurrencylimits.ConcurrencyLimiterStrategy
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.slf4j.event.Level
-import wisp.config.Config
 
 data class WebConfig @JvmOverloads constructor(
   /** HTTP port to listen on, or 0 for any available port. */
@@ -153,6 +153,9 @@ data class WebConfig @JvmOverloads constructor(
   /** The maximum allowed size in bytes for the HTTP request line and HTTP request headers. */
   val http_request_header_size: Int? = 32768,
 
+  /** The maximum allowed size in bytes for the HTTP response headers. */
+  val http_response_header_size: Int? = null,
+
   /** The size of Jetty's header field cache, in terms of unique character branches. */
   val http_header_cache_size: Int? = null,
 
@@ -205,7 +208,24 @@ data class WebConfig @JvmOverloads constructor(
 
   /** Configurations to enable Jetty to listen for traffic on a unix domain socket being proxied through a sidecar (e.g. envoy, istio) */
   val unix_domain_sockets: List<WebUnixDomainSocketConfig>? = null,
-  ) : Config
+
+  /** Config used by client and server interceptors installed by DeadlinePropagationModule
+   * Only applies if DeadlinePropagationModule is installed, ignored otherwise  */
+  val request_deadlines: RequestDeadlinesConfig = RequestDeadlinesConfig(),
+
+  /**
+   * Exposed configuration for Jetty's HTTP/2 frame rate limiter to avoid DDoS (CVE-2023-44487, CVE-2025-5115).
+   * -1 will effectively disable rate limiting but will still emit metrics on the rate limiter queue.
+   * See https://jetty.org/docs/jetty/10/operations-guide/modules/standard.html#http2
+   */
+  val jetty_http2_max_events_per_second: Int = 128,
+
+  /** If true, disables the embedded Jetty server. */
+  val disable_jetty: Boolean = false,
+
+  /** WebSocket idle timeout in seconds. Defaults to -1 (no timeout). */
+  val websocket_idle_timeout_seconds: Long = -1,
+) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
   /** HTTPS port to listen on, or 0 for any available port. */
@@ -322,3 +342,64 @@ data class GracefulShutdownConfig @JvmOverloads constructor(
   val rejection_status_code: Int = HTTP_SERVICE_UNAVAILABLE
 
 )
+
+/**
+ * Configuration for request deadline tracking and enforcement.
+ *
+ * Request deadlines help prevent cascading failures by tracking how much time remains
+ * for a request chain to complete. Deadlines are propagated through service boundaries
+ * and can be enforced at various points in the request lifecycle.
+ *
+ * @see [RequestDeadlineInterceptor][misk.web.interceptors.RequestDeadlineInterceptor] for inbound deadline handling
+ * @see [DeadlinePropagationInterceptor][misk.client.DeadlinePropagationInterceptor] for outbound deadline propagation
+ */
+data class RequestDeadlinesConfig @JvmOverloads constructor(
+  /**
+   * Default timeout in milliseconds for requests that don't have an explicit deadline.
+   * 
+   * This value is used when:
+   * - No deadline headers are found in incoming requests, and
+   * - Actions don't have [@RequestDeadlineTimeout][misk.web.RequestDeadlineTimeout] annotation
+   *
+   * Defaults to 10s to match the
+   * [default readTimeout](https://github.com/square/okhttp/blob/master/okhttp/src/commonJvmAndroid/kotlin/okhttp3/OkHttpClient.kt#L622)
+   * on the OkHttpClient.
+   */
+  val global_timeout_ms: Long = 10_000,
+
+  /**
+   * Controls how aggressively deadlines are tracked and enforced.
+   *
+   * Default: [METRICS_ONLY] for safe rollout
+   */
+  val mode: RequestDeadlineMode = RequestDeadlineMode.METRICS_ONLY
+)
+
+enum class RequestDeadlineMode {
+  /**
+   * Only collect metrics on deadline violations without propagation or enforcement.
+   * Use this for safe rollout and observability without behavioral changes.
+   */
+  METRICS_ONLY,
+
+  /**
+   * Propagate deadlines to downstream services but don't enforce them locally.
+   * Useful for establishing deadline chains without risking service availability
+   */
+  PROPAGATE_ONLY,
+
+  /**
+   * Enforce deadlines on inbound requests only.
+   */
+  ENFORCE_INBOUND,
+
+  /**
+   * Enforce deadlines on outbound requests only.
+   */
+  ENFORCE_OUTBOUND,
+
+  /**
+   * Enforce deadlines on both inbound and outbound requests.
+   */
+  ENFORCE_ALL
+}

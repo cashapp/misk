@@ -21,7 +21,7 @@ import software.amazon.awssdk.services.sqs.model.MessageSystemAttributeName
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Clock
 import java.util.concurrent.CompletableFuture
 
@@ -132,7 +132,7 @@ class Subscriber(
           .build()
       ).await()
     } catch (e: Exception) {
-      logger.warn { "Failed to acknowledge job ${job.idempotenceKey} from queue ${job.queueName.value}"}
+      logger.warn(e) { "Failed to acknowledge job ${job.idempotenceKey} from queue ${job.queueName.value}"}
       sqsMetrics.jobsFailedToAcknowledge.labels(queueName.value).inc()
       return
     }
@@ -143,10 +143,12 @@ class Subscriber(
   private suspend fun deadLetterMessage(job: SqsJob) {
     val deadLetterQueueUrl = sqsQueueResolver.getQueueUrl(deadLetterQueueName)
     val startTime = clock.millis()
-    client.sendMessage(
+
+    val response = client.sendMessage(
       SendMessageRequest.builder()
         .queueUrl(deadLetterQueueUrl)
         .messageBody(job.body)
+        .messageAttributes(job.message.messageAttributes())
         .build()
     ).await()
     sqsMetrics.sqsSendTime.labels(deadLetterQueueName.value).observe((clock.millis() - startTime).toDouble())
@@ -175,7 +177,6 @@ class Subscriber(
 
       sqsMetrics.jobsReceived.labels(queueName.value).inc(response.messages().size.toDouble())
       response.messages().forEach { message ->
-        logger.info { "Receipt handler ${message.receiptHandle()}" }
         message.attributes()[MessageSystemAttributeName.SENT_TIMESTAMP]?.let {
           val sentTimestamp = it.toLong()
           val processingLag = clock.instant().minusMillis(sentTimestamp).toEpochMilli().toDouble()
@@ -202,7 +203,7 @@ class Subscriber(
   private fun fetchMessages(queueUrl: String): CompletableFuture<ReceiveMessageResponse> {
     val request = ReceiveMessageRequest.builder()
       .queueUrl(queueUrl)
-      .messageAttributeNames(MessageSystemAttributeName.ALL.name)
+      .messageAttributeNames(MessageSystemAttributeName.ALL.toString())
       .messageSystemAttributeNames(MessageSystemAttributeName.ALL)
       .maxNumberOfMessages(queueConfig.max_number_of_messages)
       .waitTimeSeconds(queueConfig.wait_timeout)

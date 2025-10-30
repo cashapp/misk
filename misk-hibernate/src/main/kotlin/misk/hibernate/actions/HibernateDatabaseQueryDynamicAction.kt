@@ -21,9 +21,10 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.database.DatabaseQueryMetadata
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.audit.AuditRequestResponse
 import misk.web.dashboard.AdminDashboardAccess
 import kotlin.reflect.KClass
 
@@ -40,6 +41,7 @@ internal class HibernateDatabaseQueryDynamicAction @Inject constructor(
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess
+  @AuditRequestResponse
   fun query(@RequestBody request: Request): Response {
     val caller = callerProvider.get()!!
     val queryClass = request.queryClass

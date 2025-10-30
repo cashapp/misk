@@ -6,13 +6,13 @@ import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.redis.testing.DockerRedisCluster
-import misk.testing.MiskExternalDependency
+import misk.redis.testing.RedisTestFlushModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import redis.clients.jedis.ConnectionPoolConfig
 import wisp.deployment.TESTING
 
-@MiskTest
+@MiskTest(startService = true)
 class RealRedisClusterTest : AbstractRedisClusterTest() {
   @Suppress("unused")
   @MiskTestModule
@@ -21,12 +21,9 @@ class RealRedisClusterTest : AbstractRedisClusterTest() {
       install(RedisClusterModule(DockerRedisCluster.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
+      install(RedisTestFlushModule())
     }
   }
-
-  @Suppress("unused")
-  @MiskExternalDependency
-  private val dockerRedisCluster = DockerRedisCluster
 
   @Inject override lateinit var redis: Redis
 }

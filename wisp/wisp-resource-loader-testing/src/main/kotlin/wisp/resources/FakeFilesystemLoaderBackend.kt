@@ -12,6 +12,10 @@ import okio.ByteString.Companion.encodeUtf8
  * newMapBinder<String, String>(ForFakeFiles::class).addBinding("/etc/foo.txt").toInstance("hello!")
  * ```
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  ReplaceWith(expression = "FakeFilesystemLoaderBackend","misk.resources.FakeFilesystemLoaderBackend")
+)
 class FakeFilesystemLoaderBackend(
     private val files: Map<String, String>
 ) : ResourceLoader.Backend() {

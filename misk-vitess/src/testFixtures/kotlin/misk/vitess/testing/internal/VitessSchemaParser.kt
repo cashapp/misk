@@ -1,5 +1,7 @@
 package misk.vitess.testing.internal
 
+import misk.vitess.testing.VitessTable
+import misk.vitess.testing.VitessTableType
 import misk.vitess.testing.VitessTestDbSchemaParseException
 import java.io.File
 import java.nio.file.Path

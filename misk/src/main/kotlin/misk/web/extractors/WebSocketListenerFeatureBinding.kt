@@ -18,7 +18,8 @@ internal class WebSocketListenerFeatureBinding : FeatureBinding {
     override fun create(
       action: Action,
       pathPattern: PathPattern,
-      claimer: Claimer
+      claimer: Claimer,
+      stringConverterFactories: List<StringConverter.Factory>
     ): FeatureBinding? {
       if (action.returnType.classifier == WebSocketListener::class) {
         claimer.claimReturnValue()

@@ -2,9 +2,9 @@ package misk.hibernate
 
 import jakarta.inject.Inject
 import misk.exceptions.UnauthorizedException
-import misk.hibernate.VitessTransacterExtensions.createInSeparateShard
-import misk.hibernate.VitessTransacterExtensions.save
-import misk.hibernate.VitessTransacterExtensions.shard
+import misk.hibernate.VitessTestExtensions.createInSeparateShard
+import misk.hibernate.VitessTestExtensions.save
+import misk.hibernate.VitessTestExtensions.shard
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueString
 import misk.testing.MiskExternalDependency
@@ -26,7 +26,7 @@ import kotlin.test.assertFailsWith
 abstract class TransacterTest {
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
-  @Inject lateinit var logCollector: wisp.logging.LogCollector
+  @Inject lateinit var logCollector: misk.logging.LogCollector
 
   @Test
   fun happyPath() {
@@ -39,14 +39,14 @@ abstract class TransacterTest {
     // Query that data.
     transacter.transaction { session ->
       val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .name("Ian Malcolm")
         .uniqueResult(session)!!
       assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
       assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
 
       val lauraDernMovies = queryFactory.newQuery<CharacterQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .actorName("Laura Dern")
         .listAsMovieNameAndReleaseDate(session)
       assertThat(lauraDernMovies).containsExactlyInAnyOrder(
@@ -55,7 +55,7 @@ abstract class TransacterTest {
       )
 
       val actorsInOldMovies = queryFactory.newQuery<CharacterQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .movieReleaseDateBefore(LocalDate.of(1980, 1, 1))
         .listAsActorAndReleaseDate(session)
       assertThat(actorsInOldMovies).containsExactlyInAnyOrder(
@@ -98,17 +98,35 @@ abstract class TransacterTest {
     // Delete some data.
     transacter.transaction { session ->
       val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .name("Ian Malcolm")
         .uniqueResult(session)!!
 
       session.delete(ianMalcolm)
 
       val afterDelete = queryFactory.newQuery<CharacterQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .name("Ian Malcolm")
         .uniqueResult(session)
       assertThat(afterDelete).isNull()
+    }
+
+    // Delete some data with a lock.
+    transacter.withLock("actorLock") {
+      transacter.transaction { session ->
+        val luxoJr = queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .name("Luxo Jr.")
+          .uniqueResult(session)!!
+
+        session.delete(luxoJr)
+
+        val afterDelete = queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .name("Luxo Jr.")
+          .uniqueResult(session)
+        assertThat(afterDelete).isNull()
+      }
     }
   }
 
@@ -174,113 +192,13 @@ abstract class TransacterTest {
   @Test
   fun `can do comparison query on ids`() {
     createTestData()
-
     transacter.replicaRead { session ->
-      val cb = session.hibernateSession.criteriaBuilder
-      val cr = cb.createQuery(DbCharacter::class.java)
-      val root = cr.from(DbCharacter::class.java)
-      val idProperty = root.get<Id<DbCharacter>>("id")
-      val characters = session.hibernateSession.createQuery(
-        cr.where(cb.greaterThan(idProperty, Id(0)))
-          .orderBy(cb.asc(idProperty))
-      ).resultList
+        val characters = queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .idMoreThan(Id(0))
+          .idAsc()
+          .list(session)
       assertThat(characters).hasSize(5)
-    }
-  }
-
-  @Test
-  fun `shard targeting`() {
-    // This test only makes sense with Vitess
-    if (!transacter.config().type.isVitess) {
-      return
-    }
-
-    val jp = transacter.save(
-      DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9))
-    )
-    val sw = transacter.createInSeparateShard(jp) {
-      DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
-    }
-
-    // Shard targeting works in replica reads
-    transacter.replicaRead { session ->
-      session.target(jp.shard(session)) {
-        assertThat(
-          queryFactory.newQuery<MovieQuery>().allowTableScan()
-            .name("Jurassic Park").uniqueResult(session)
-        ).isNotNull
-
-        assertThat(
-          queryFactory.newQuery<MovieQuery>().allowTableScan()
-            .name("Star Wars").uniqueResult(session)
-        ).isNull()
-      }
-
-      session.target(sw.shard(session)) {
-        assertThat(
-          queryFactory.newQuery<MovieQuery>().allowTableScan()
-            .name("Jurassic Park").uniqueResult(session)
-        ).isNull()
-
-        assertThat(
-          queryFactory.newQuery<MovieQuery>().allowTableScan()
-            .name("Star Wars").uniqueResult(session)
-        ).isNotNull
-      }
-    }
-
-    // Shard targeting works in fail safe reads
-    transacter.failSafeRead { session ->
-      session.target(jp.shard(session)) {
-        assertThat(
-          queryFactory.newQuery<MovieQuery>().allowTableScan()
-            .name("Jurassic Park").uniqueResult(session)
-        ).isNotNull
-
-        assertThat(
-          queryFactory.newQuery<MovieQuery>().allowTableScan()
-            .name("Star Wars").uniqueResult(session)
-        ).isNull()
-      }
-
-      session.target(sw.shard(session)) {
-        assertThat(
-          queryFactory.newQuery<MovieQuery>().allowTableScan()
-            .name("Jurassic Park").uniqueResult(session)
-        ).isNull()
-
-        assertThat(
-          queryFactory.newQuery<MovieQuery>().allowTableScan()
-            .name("Star Wars").uniqueResult(session)
-        ).isNotNull
-      }
-    }
-
-    // Shard targeting works in transactions
-    transacter.transaction { session ->
-      session.target(jp.shard(session)) {
-        assertThat(
-          queryFactory.newQuery<MovieQuery>().allowTableScan()
-            .name("Jurassic Park").uniqueResult(session)
-        ).isNotNull
-
-        assertThat(
-          queryFactory.newQuery<MovieQuery>().allowTableScan()
-            .name("Star Wars").uniqueResult(session)
-        ).isNull()
-      }
-
-      session.target(sw.shard(session)) {
-        assertThat(
-          queryFactory.newQuery<MovieQuery>().allowTableScan()
-            .name("Jurassic Park").uniqueResult(session)
-        ).isNull()
-
-        assertThat(
-          queryFactory.newQuery<MovieQuery>().allowTableScan()
-            .name("Star Wars").uniqueResult(session)
-        ).isNotNull
-      }
     }
   }
 
@@ -355,16 +273,17 @@ abstract class TransacterTest {
     assertFailsWith<UnauthorizedException> {
       transacter.transaction { session ->
         session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-        assertThat(
-          queryFactory.newQuery<MovieQuery>()
-            .allowFullScatter().allowTableScan().list(session)
-        ).isNotEmpty
+
+        val query = queryFactory.newQuery<MovieQuery>()
+          .allowTableScan()
+        assertThat(query.list(session)).isNotEmpty
         throw UnauthorizedException("boom!")
       }
     }
     transacter.transaction { session ->
       assertThat(
-        queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+        queryFactory.newQuery<MovieQuery>()
+          .allowTableScan()
           .list(session)
       ).isEmpty()
     }
@@ -408,7 +327,9 @@ abstract class TransacterTest {
     }
 
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<CharacterQuery>().allowTableScan().list(session)).hasSize(1)
+      assertThat(queryFactory.newQuery<CharacterQuery>()
+        .allowTableScan()
+        .list(session)).hasSize(1)
     }
   }
 
@@ -480,7 +401,8 @@ abstract class TransacterTest {
     transacter.transaction { session ->
       session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
       assertThat(
-        queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+        queryFactory.newQuery<MovieQuery>()
+          .allowTableScan()
           .list(session)
       ).isNotEmpty
 
@@ -489,7 +411,8 @@ abstract class TransacterTest {
     assertThat(callCount.get()).isEqualTo(2)
     transacter.transaction { session ->
       assertThat(
-        queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+        queryFactory.newQuery<MovieQuery>()
+          .allowTableScan()
           .list(session)
       ).hasSize(1)
     }
@@ -528,7 +451,8 @@ abstract class TransacterTest {
     }
     transacter.transaction { session ->
       assertThat(
-        queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+        queryFactory.newQuery<MovieQuery>()
+          .allowTableScan()
           .list(session)
       ).isEmpty()
     }
@@ -676,6 +600,39 @@ abstract class TransacterTest {
   }
 
   @Test
+  fun rollbackHooksCalledOnRollbackOnly() {
+    val rollbackHooksTriggered = mutableListOf<String>()
+
+    // Happy path.
+    transacter.transaction { session ->
+      session.onRollback { error ->
+        rollbackHooksTriggered.add("never")
+        error("this should never have happened")
+      }
+    }
+
+    assertThat(rollbackHooksTriggered).isEmpty()
+
+    // Rollback path.
+    assertThrows<IllegalStateException> {
+      transacter.transaction { session ->
+        session.onRollback { error ->
+          assertThat(error).hasMessage("bad things happened here")
+          assertThat(transacter.inTransaction).isFalse
+          rollbackHooksTriggered.add("first")
+        }
+        session.onRollback { error ->
+          assertThat(error).hasMessage("bad things happened here")
+          assertThat(transacter.inTransaction).isFalse
+          rollbackHooksTriggered.add("second")
+        }
+        error("bad things happened here")
+      }
+    }
+    assertThat(rollbackHooksTriggered).containsExactly("first", "second")
+  }
+
+  @Test
   fun errorInPostCommitHookDoesNotRollback() {
     val postCommitHooksTriggered = mutableListOf<String>()
     lateinit var swid: Id<DbMovie>
@@ -805,7 +762,8 @@ abstract class TransacterTest {
     assertThat(futureResults).hasSize(2)
 
     val movies = transacter.transaction { session ->
-      queryFactory.newQuery(MovieQuery::class).list(session)
+      queryFactory.newQuery(MovieQuery::class)
+        .list(session)
     }
     assertThat(movies.size).isEqualTo(1)
     assertThat(movies[0].release_date == LocalDate.of(1977, 5, 25))
@@ -823,7 +781,7 @@ class MySQLTransacterTest : TransacterTest() {
 @MiskTest(startService = true)
 class VitessMySQLTransacterTest : TransacterTest() {
   @MiskExternalDependency
-  private val dockerVitess = DockerVitess
+  private val dockerVitess = DockerVitess()
 
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)

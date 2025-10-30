@@ -1,8 +1,7 @@
 package misk.vitess.testing
 
-import misk.vitess.testing.internal.VitessClusterConfig
-import misk.vitess.testing.internal.VitessQueryExecutor
 import misk.vitess.testing.internal.VitessQueryExecutorException
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -15,30 +14,27 @@ class VitessTestDbTest {
   companion object {
     private lateinit var vitessTestDb: VitessTestDb
     private lateinit var vitessTestDbRunResult: VitessTestDbStartupResult
-    private lateinit var vitessQueryExecutor: VitessQueryExecutor
 
     @JvmStatic
     @BeforeAll
     fun setup() {
       vitessTestDb = VitessTestDb()
       vitessTestDbRunResult = vitessTestDb.run()
-      vitessQueryExecutor = VitessQueryExecutor(VitessClusterConfig(DefaultSettings.PORT))
+    }
+
+    @JvmStatic
+    @AfterAll
+    fun tearDown() {
+      val shutdownResult = vitessTestDb.shutdown()
+      assertEquals(shutdownResult.containerId, vitessTestDbRunResult.containerId)
+      assertEquals(shutdownResult.containerRemoved, true)
     }
   }
 
   @Test
   fun `test querying the database`() {
-    val results = vitessQueryExecutor.executeQuery("SHOW KEYSPACES;")
+    val results = vitessTestDb.executeQuery("SHOW KEYSPACES;")
     assertEquals(2, results.size)
-  }
-
-  @Test
-  fun `test truncate fails when database is not running`() {
-    val nonRunningDb = VitessTestDb(containerName = "non_running_vitess_test_db", port = 50003)
-
-    val exception = assertThrows<VitessTestDbTruncateException>(nonRunningDb::truncate)
-    assertEquals("Failed to truncate tables", exception.message)
-    assertTrue(exception.cause!!.message!!.contains("Failed to get vtgate connection on port 50003"))
   }
 
   @Test
@@ -50,7 +46,7 @@ class VitessTestDbTest {
     """
         .trimIndent()
 
-    val insertCustomersResultCount = vitessQueryExecutor.executeUpdate(insertCustomersSql)
+    val insertCustomersResultCount = vitessTestDb.executeUpdate(insertCustomersSql)
     assertEquals(1, insertCustomersResultCount)
 
     val insertGamesSql =
@@ -60,7 +56,7 @@ class VitessTestDbTest {
     """
         .trimIndent()
 
-    val insertGamesResultCount = vitessQueryExecutor.executeUpdate(insertGamesSql)
+    val insertGamesResultCount = vitessTestDb.executeUpdate(insertGamesSql)
     assertEquals(1, insertGamesResultCount)
 
     assertDoesNotThrow(vitessTestDb::truncate)
@@ -81,7 +77,7 @@ class VitessTestDbTest {
 
   @Test
   fun `test each shard has expected tablet types`() {
-    val results = vitessQueryExecutor.executeQuery("SHOW VITESS_REPLICATION_STATUS;")
+    val results = vitessTestDb.executeQuery("SHOW VITESS_REPLICATION_STATUS;")
     val shardReplicaMap = mutableMapOf<String, Int>()
     val shardRdonlyMap = mutableMapOf<String, Int>()
 
@@ -117,14 +113,13 @@ class VitessTestDbTest {
 
   @Test
   fun `test schema changes are auto-applied`() {
-    val vitessQueryExecutor = VitessQueryExecutor(VitessClusterConfig(27003))
-    val keyspaces = vitessQueryExecutor.getKeyspaces()
+    val keyspaces = vitessTestDb.getKeyspaces()
     assertArrayEquals(arrayOf("gameworld", "gameworld_sharded"), keyspaces.toTypedArray())
 
-    val unshardedTables = vitessQueryExecutor.getTables("gameworld").map { it.tableName }
+    val unshardedTables = vitessTestDb.getTables("gameworld").map { it.tableName }
     assertArrayEquals(arrayOf("customers_seq", "games_seq"), unshardedTables.toTypedArray())
 
-    val shardedTables = vitessQueryExecutor.getTables("gameworld_sharded").map { it.tableName }
+    val shardedTables = vitessTestDb.getTables("gameworld_sharded").map { it.tableName }
     assertArrayEquals(arrayOf("customers", "games"), shardedTables.toTypedArray())
   }
 
@@ -139,28 +134,29 @@ class VitessTestDbTest {
 
   @Test
   fun `test default timezone set to UTC`() {
-    val results = vitessQueryExecutor.executeQuery("SELECT @@global.time_zone;")
+    val results = vitessTestDb.executeQuery("SELECT @@global.time_zone;")
     val actualTimeZone = results[0]["@@global.time_zone"]
     assertEquals("+00:00", actualTimeZone)
   }
 
   @Test
   fun `test default MySql version`() {
-    val results = vitessQueryExecutor.executeQuery("SELECT @@global.version;")
-    val actualMysqlVersion = results[0]["@@global.version"]
+    // The version behavior was changed in v21+, using SELECT version() is more reliable.
+    val results = vitessTestDb.executeQuery("SELECT version();")
+    val actualMysqlVersion = results[0]["version()"]
     assertEquals("${DefaultSettings.MYSQL_VERSION}-Vitess", actualMysqlVersion)
   }
 
   @Test
   fun `test default SQL mode`() {
-    val results = vitessQueryExecutor.executeQuery("SELECT @@global.sql_mode;")
+    val results = vitessTestDb.executeQuery("SELECT @@global.sql_mode;")
     val actualSqlMode = results[0]["@@global.sql_mode"]
     assertEquals(DefaultSettings.SQL_MODE, actualSqlMode)
   }
 
   @Test
   fun `test default transaction isolation level`() {
-    val results = vitessQueryExecutor.executeQuery("SELECT @@global.transaction_ISOLATION;")
+    val results = vitessTestDb.executeQuery("SELECT @@global.transaction_ISOLATION;")
     val actualTransactionIsolationLevel = results[0]["@@global.transaction_ISOLATION"]
     assertEquals(DefaultSettings.TRANSACTION_ISOLATION_LEVEL.value, actualTransactionIsolationLevel)
   }
@@ -169,23 +165,32 @@ class VitessTestDbTest {
   fun `explicit exception thrown on query errors`() {
     val executeQueryException =
       assertThrows<VitessQueryExecutorException> {
-        vitessQueryExecutor.executeQuery("SELECT * FROM non_existent_table")
+        vitessTestDb.executeQuery("SELECT * FROM non_existent_table")
       }
     assertEquals("Failed to run executeQuery on query: SELECT * FROM non_existent_table", executeQueryException.message)
 
     val executeException =
       assertThrows<VitessQueryExecutorException> {
-        vitessQueryExecutor.execute("UPDATE non_existent_table SET column = value WHERE id = 1")
+        vitessTestDb.executeUpdate("UPDATE non_existent_table SET column = value WHERE id = 1")
       }
     assertEquals(
-      "Failed to run execute on query: UPDATE non_existent_table SET column = value WHERE id = 1",
+      "Failed to run executeUpdate on query: UPDATE non_existent_table SET column = value WHERE id = 1",
       executeException.message,
     )
   }
 
+  @Test
+  fun `port getters return valid host ports`() {
+    val vtgatePort = vitessTestDb.vtgatePort
+    val queryPlanDebugPort = vitessTestDb.queryPlanDebugPort
+
+    assertTrue(vtgatePort > 0, "vtgatePort should be a positive port number")
+    assertTrue(queryPlanDebugPort > 0, "queryPlanDebugPort should be a positive port number")
+  }
+
   private fun getRowCount(table: String): Int {
     val query = "SELECT COUNT(*) FROM $table;"
-    val results = vitessQueryExecutor.executeQuery(query)
+    val results = vitessTestDb.executeQuery(query)
     return (results[0]["count(*)"] as Long).toInt()
   }
 }

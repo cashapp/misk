@@ -5,7 +5,7 @@ import com.google.common.util.concurrent.ServiceManager
 import misk.concurrent.ExecutorServiceFactory
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.util.concurrent.atomic.AtomicInteger
 import jakarta.inject.Inject
 import com.google.inject.Provider

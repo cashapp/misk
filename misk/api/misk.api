@@ -299,6 +299,7 @@ public final class misk/MiskApplication {
 	public fun <init> ([Lcom/google/inject/Module;)V
 	public fun <init> ([Lmisk/MiskCommand;)V
 	public final fun run ([Ljava/lang/String;)V
+	public final fun start ()Lmisk/RunningMiskApplication;
 }
 
 public abstract class misk/MiskCommand : java/lang/Runnable {
@@ -318,6 +319,13 @@ public final class misk/MiskRealServiceModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public fun <init> (Lmisk/ServiceManagerConfig;)V
 	public synthetic fun <init> (Lmisk/ServiceManagerConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface class misk/RunningMiskApplication {
+	public abstract fun app ()Lmisk/MiskApplication;
+	public abstract fun awaitTerminated ()V
+	public abstract fun awaitTerminated (JLjava/util/concurrent/TimeUnit;)Z
+	public abstract fun stop ()V
 }
 
 public final class misk/client/BackwardsCompatibleClientsConfig {
@@ -450,6 +458,11 @@ public final class misk/client/ClientNetworkInterceptorsModule : misk/inject/KAb
 	public fun <init> ()V
 }
 
+public abstract interface class misk/client/EnvoyClientEndpointProvider {
+	public abstract fun unixSocket (Lmisk/client/HttpClientEnvoyConfig;)Ljava/io/File;
+	public abstract fun url (Lmisk/client/HttpClientEnvoyConfig;)Ljava/lang/String;
+}
+
 public final class misk/client/GrpcClientModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/client/GrpcClientModule$Companion;
 	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/String;)V
@@ -476,12 +489,16 @@ public final class misk/client/HttpClientConfig {
 	public fun <init> (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/lang/String;)V
 	public fun <init> (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;)V
 	public fun <init> (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;)V
-	public synthetic fun <init> (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public synthetic fun <init> (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/time/Duration;
 	public final fun component10 ()Lmisk/client/HttpClientSSLConfig;
 	public final fun component11 ()Ljava/lang/String;
 	public final fun component12 ()Ljava/util/List;
 	public final fun component13 ()Ljava/lang/Boolean;
+	public final fun component14 ()Ljava/lang/Boolean;
+	public final fun component15 ()Ljava/lang/Boolean;
 	public final fun component2 ()Ljava/time/Duration;
 	public final fun component3 ()Ljava/time/Duration;
 	public final fun component4 ()Ljava/time/Duration;
@@ -490,11 +507,13 @@ public final class misk/client/HttpClientConfig {
 	public final fun component7 ()Ljava/lang/Integer;
 	public final fun component8 ()Ljava/lang/Integer;
 	public final fun component9 ()Ljava/time/Duration;
-	public final fun copy (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;)Lmisk/client/HttpClientConfig;
-	public static synthetic fun copy$default (Lmisk/client/HttpClientConfig;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;ILjava/lang/Object;)Lmisk/client/HttpClientConfig;
+	public final fun copy (Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)Lmisk/client/HttpClientConfig;
+	public static synthetic fun copy$default (Lmisk/client/HttpClientConfig;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/time/Duration;Lmisk/client/HttpClientSSLConfig;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;ILjava/lang/Object;)Lmisk/client/HttpClientConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCallTimeout ()Ljava/time/Duration;
 	public final fun getConnectTimeout ()Ljava/time/Duration;
+	public final fun getFollowRedirects ()Ljava/lang/Boolean;
+	public final fun getFollowSslRedirects ()Ljava/lang/Boolean;
 	public final fun getKeepAliveDuration ()Ljava/time/Duration;
 	public final fun getMaxIdleConnections ()Ljava/lang/Integer;
 	public final fun getMaxRequests ()Ljava/lang/Integer;
@@ -508,15 +527,14 @@ public final class misk/client/HttpClientConfig {
 	public final fun getWriteTimeout ()Ljava/time/Duration;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public final fun toWispConfig ()Lwisp/client/HttpClientConfig;
 }
 
 public final class misk/client/HttpClientConfigUrlProvider {
-	public field envoyClientEndpointProvider Lwisp/client/EnvoyClientEndpointProvider;
+	public field envoyClientEndpointProvider Lmisk/client/EnvoyClientEndpointProvider;
 	public fun <init> ()V
-	public final fun getEnvoyClientEndpointProvider ()Lwisp/client/EnvoyClientEndpointProvider;
+	public final fun getEnvoyClientEndpointProvider ()Lmisk/client/EnvoyClientEndpointProvider;
 	public final fun getUrl (Lmisk/client/HttpClientEndpointConfig;)Ljava/lang/String;
-	public final fun setEnvoyClientEndpointProvider (Lwisp/client/EnvoyClientEndpointProvider;)V
+	public final fun setEnvoyClientEndpointProvider (Lmisk/client/EnvoyClientEndpointProvider;)V
 }
 
 public final class misk/client/HttpClientEndpointConfig {
@@ -546,7 +564,6 @@ public final class misk/client/HttpClientEndpointConfig {
 	public final fun getWriteTimeout ()Ljava/time/Duration;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public final fun toWispConfig ()Lwisp/client/HttpClientEndpointConfig;
 }
 
 public final class misk/client/HttpClientEnvoyConfig {
@@ -562,19 +579,22 @@ public final class misk/client/HttpClientEnvoyConfig {
 	public final fun getEnv ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public final fun toWispConfig ()Lwisp/client/HttpClientEnvoyConfig;
 }
 
 public final class misk/client/HttpClientFactory {
 	public static final field Companion Lmisk/client/HttpClientFactory$Companion;
 	public fun <init> (Lmisk/security/ssl/SslLoader;Lmisk/security/ssl/SslContextFactory;Lmisk/client/OkHttpClientCommonConfigurator;)V
+	public fun <init> (Lmisk/security/ssl/SslLoader;Lmisk/security/ssl/SslContextFactory;Lmisk/client/OkHttpClientCommonConfigurator;Lmisk/client/EnvoyClientEndpointProvider;Ljava/util/List;Ljava/net/ProxySelector;)V
+	public synthetic fun <init> (Lmisk/security/ssl/SslLoader;Lmisk/security/ssl/SslContextFactory;Lmisk/client/OkHttpClientCommonConfigurator;Lmisk/client/EnvoyClientEndpointProvider;Ljava/util/List;Ljava/net/ProxySelector;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun create (Lmisk/client/HttpClientEndpointConfig;)Lokhttp3/OkHttpClient;
 	public final fun create (Lmisk/client/HttpClientEndpointConfig;Ljava/lang/String;)Lokhttp3/OkHttpClient;
 	public static synthetic fun create$default (Lmisk/client/HttpClientFactory;Lmisk/client/HttpClientEndpointConfig;Ljava/lang/String;ILjava/lang/Object;)Lokhttp3/OkHttpClient;
-	public final fun getEnvoyClientEndpointProvider ()Lwisp/client/EnvoyClientEndpointProvider;
+	public final fun getEnvoyClientEndpointProvider ()Lmisk/client/EnvoyClientEndpointProvider;
 	public final fun getOkhttpInterceptors ()Lcom/google/inject/Provider;
-	public final fun setEnvoyClientEndpointProvider (Lwisp/client/EnvoyClientEndpointProvider;)V
+	public final fun getProxySelector ()Ljava/net/ProxySelector;
+	public final fun setEnvoyClientEndpointProvider (Lmisk/client/EnvoyClientEndpointProvider;)V
 	public final fun setOkhttpInterceptors (Lcom/google/inject/Provider;)V
+	public final fun setProxySelector (Ljava/net/ProxySelector;)V
 }
 
 public final class misk/client/HttpClientFactory$Companion {
@@ -597,10 +617,9 @@ public final class misk/client/HttpClientSSLConfig {
 	public final fun getTrust_store ()Lmisk/security/ssl/TrustStoreConfig;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public final fun toWispConfig ()Lwisp/client/HttpClientSSLConfig;
 }
 
-public final class misk/client/HttpClientsConfig : wisp/config/Config {
+public final class misk/client/HttpClientsConfig : misk/config/Config {
 	public static final field Companion Lmisk/client/HttpClientsConfig$Companion;
 	public fun <init> ()V
 	public fun <init> (Ljava/util/LinkedHashMap;)V
@@ -647,9 +666,17 @@ public final class misk/client/JettyPortPeerClientModule : misk/inject/KAbstract
 }
 
 public final class misk/client/OkHttpClientCommonConfigurator {
+	public static final field Companion Lmisk/client/OkHttpClientCommonConfigurator$Companion;
+	public static final field followRedirects Z
+	public static final field followSslRedirects Z
+	public static final field maxIdleConnections I
+	public static final field retryOnConnectionFailure Z
 	public fun <init> ()V
-	public final fun configure (Lokhttp3/OkHttpClient$Builder;Lwisp/client/HttpClientEndpointConfig;)Lokhttp3/OkHttpClient$Builder;
-	public final fun getDelegate ()Lwisp/client/OkHttpClientCommonConfigurator;
+	public final fun configure (Lokhttp3/OkHttpClient$Builder;Lmisk/client/HttpClientEndpointConfig;)Lokhttp3/OkHttpClient$Builder;
+}
+
+public final class misk/client/OkHttpClientCommonConfigurator$Companion {
+	public final fun getKeepAliveDuration ()Ljava/time/Duration;
 }
 
 public final class misk/client/PeerClientFactory {
@@ -697,6 +724,23 @@ public final class misk/client/TypedPeerHttpClientModule : misk/inject/KAbstract
 }
 
 public final class misk/client/TypedPeerHttpClientModule$Companion {
+}
+
+public final class misk/client/UnixDomainServerSocketFactory : javax/net/ServerSocketFactory {
+	public fun <init> (Ljava/io/File;)V
+	public fun createServerSocket ()Ljava/net/ServerSocket;
+	public fun createServerSocket (I)Ljava/net/ServerSocket;
+	public fun createServerSocket (II)Ljava/net/ServerSocket;
+	public fun createServerSocket (IILjava/net/InetAddress;)Ljava/net/ServerSocket;
+}
+
+public final class misk/client/UnixDomainSocketFactory : javax/net/SocketFactory {
+	public fun <init> (Ljava/io/File;)V
+	public fun createSocket ()Ljava/net/Socket;
+	public fun createSocket (Ljava/lang/String;I)Ljava/net/Socket;
+	public fun createSocket (Ljava/lang/String;ILjava/net/InetAddress;I)Ljava/net/Socket;
+	public fun createSocket (Ljava/net/InetAddress;I)Ljava/net/Socket;
+	public fun createSocket (Ljava/net/InetAddress;ILjava/net/InetAddress;I)Ljava/net/Socket;
 }
 
 public final class misk/concurrent/ExecutorServiceModule : misk/inject/KAbstractModule {
@@ -787,6 +831,17 @@ public final class misk/concurrent/ExplicitReleaseDelayQueue : java/util/concurr
 	public fun toArray ([Ljava/lang/Object;)[Ljava/lang/Object;
 }
 
+public final class misk/dev/DevApplicationKt {
+	public static final fun isRunningDevApplication ()Z
+	public static final fun runDevApplication (Lkotlin/reflect/KFunction;Ljava/util/List;)V
+	public static synthetic fun runDevApplication$default (Lkotlin/reflect/KFunction;Ljava/util/List;ILjava/lang/Object;)V
+	public static final fun setDevApplication ()V
+}
+
+public final class misk/dev/GradleKt {
+	public static final fun runGradleAsyncCompile (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Ljava/util/List;)V
+}
+
 public final class misk/environment/DeploymentModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public fun <init> (Lwisp/deployment/Deployment;)V
@@ -825,6 +880,13 @@ public final class misk/grpc/GrpcMessageSource : com/squareup/wire/MessageSource
 	public fun close ()V
 	public fun read ()Ljava/lang/Object;
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/grpc/GrpcTimeoutMarshaller {
+	public static final field INSTANCE Lmisk/grpc/GrpcTimeoutMarshaller;
+	public static final field TIMEOUT_KEY Ljava/lang/String;
+	public final fun parseAsciiString (Ljava/lang/String;)J
+	public final fun toAsciiString (J)Ljava/lang/String;
 }
 
 public final class misk/io/PathExtensionsKt {
@@ -866,59 +928,6 @@ public final class misk/monitoring/JvmMetrics {
 
 public final class misk/monitoring/MonitoringModule : misk/inject/KInstallOnceModule {
 	public fun <init> ()V
-}
-
-public final class misk/moshi/MoshiAdapterModule : misk/inject/KAbstractModule {
-	public static final field Companion Lmisk/moshi/MoshiAdapterModule$Companion;
-	public fun <init> (Ljava/lang/Object;)V
-	public fun <init> (Ljava/lang/Object;Z)V
-	public synthetic fun <init> (Ljava/lang/Object;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-}
-
-public final class misk/moshi/MoshiAdapterModule$Companion {
-}
-
-public final class misk/moshi/MoshiModule : misk/inject/KAbstractModule {
-	public static final field Companion Lmisk/moshi/MoshiModule$Companion;
-	public fun <init> ()V
-	public fun <init> (Z)V
-	public fun <init> (ZZ)V
-	public synthetic fun <init> (ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun provideMoshi (Ljava/util/List;Ljava/util/List;)Lcom/squareup/moshi/Moshi;
-}
-
-public final class misk/moshi/MoshiModule$Companion {
-	public final fun getDefaultMoshiAdapters ()Ljava/util/List;
-}
-
-public final class misk/moshi/adapters/BigDecimalAdapter {
-	public static final field INSTANCE Lmisk/moshi/adapters/BigDecimalAdapter;
-	public final fun decode (Ljava/lang/String;)Ljava/math/BigDecimal;
-	public final fun encode (Ljava/math/BigDecimal;)Ljava/lang/String;
-}
-
-public final class misk/moshi/okio/ByteStringAdapter {
-	public static final field INSTANCE Lmisk/moshi/okio/ByteStringAdapter;
-	public final fun fromJson (Ljava/lang/String;)Lokio/ByteString;
-	public final fun toJson (Lokio/ByteString;)Ljava/lang/String;
-}
-
-public final class misk/moshi/time/InstantAdapter {
-	public static final field INSTANCE Lmisk/moshi/time/InstantAdapter;
-	public final fun fromJson (Ljava/util/Date;)Ljava/time/Instant;
-	public final fun toJson (Ljava/time/Instant;)Ljava/util/Date;
-}
-
-public final class misk/moshi/time/LocalDateAdapter {
-	public static final field INSTANCE Lmisk/moshi/time/LocalDateAdapter;
-	public final fun fromJson (Ljava/util/Date;)Ljava/time/LocalDate;
-	public final fun toJson (Ljava/time/LocalDate;)Ljava/util/Date;
-}
-
-public final class misk/moshi/time/OffsetDateTimeAdapter {
-	public static final field INSTANCE Lmisk/moshi/time/OffsetDateTimeAdapter;
-	public final fun fromJson (Ljava/lang/String;)Ljava/time/OffsetDateTime;
-	public final fun toJson (Ljava/time/OffsetDateTime;)Ljava/lang/String;
 }
 
 public final class misk/okio/OkioExtensionsKt {
@@ -1192,13 +1201,40 @@ public final class misk/time/TimedKt {
 	public static final fun timed (Lkotlin/jvm/functions/Function0;)Lkotlin/Pair;
 }
 
+public final class misk/time/ValidateZoneRulesProviderService : com/google/common/util/concurrent/AbstractIdleService {
+	public static final field Companion Lmisk/time/ValidateZoneRulesProviderService$Companion;
+	public fun <init> ()V
+}
+
+public final class misk/time/ValidateZoneRulesProviderService$Companion {
+}
+
 public final class misk/tracing/TracerExtKt {
 	public static final fun trace (Lio/opentracing/Tracer;Ljava/lang/String;Ljava/util/Map;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public static synthetic fun trace$default (Lio/opentracing/Tracer;Ljava/lang/String;Ljava/util/Map;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun traceWithNewRootSpan (Lio/opentracing/Tracer;Ljava/lang/String;Ljava/util/Map;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-	public static synthetic fun traceWithNewRootSpan$default (Lio/opentracing/Tracer;Ljava/lang/String;Ljava/util/Map;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun traceWithNewRootSpan (Lio/opentracing/Tracer;Ljava/lang/String;Ljava/util/Map;ZLkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static synthetic fun traceWithNewRootSpan$default (Lio/opentracing/Tracer;Ljava/lang/String;Ljava/util/Map;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun traceWithSpan (Lio/opentracing/Tracer;Ljava/lang/String;Ljava/util/Map;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public static synthetic fun traceWithSpan$default (Lio/opentracing/Tracer;Ljava/lang/String;Ljava/util/Map;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun withNewScope (Lio/opentracing/Tracer;Lio/opentracing/Span;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public final class misk/web/BoundAction {
+	public fun <init> (Lmisk/scope/ActionScope;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;Lmisk/web/WebActionBinding;Ljava/util/List;Lmisk/web/ProtoDocumentationProvider;Lmisk/web/PathPattern;Lmisk/Action;)V
+	public final fun getAction ()Lmisk/Action;
+	public final fun getPathPattern ()Lmisk/web/PathPattern;
+	public final fun hasIdenticalRouting (Lmisk/web/BoundAction;)Z
+	public final fun match (Lmisk/web/DispatchMechanism;Lokhttp3/MediaType;Ljava/util/List;Lokhttp3/HttpUrl;)Lmisk/web/BoundActionMatch;
+	public final fun matchByUrl (Lokhttp3/HttpUrl;)Lmisk/web/BoundActionMatch;
+	public final fun scopeAndHandle (Ljavax/servlet/http/HttpServletRequest;Lmisk/web/HttpCall;Ljava/util/regex/Matcher;)V
+	public final fun scopeAndHandle (Lmisk/web/HttpCall;Ljava/util/regex/Matcher;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/BoundActionMatch : misk/web/RequestMatch {
+	public fun <init> (Lmisk/web/BoundAction;Ljava/util/regex/Matcher;Lmisk/web/mediatype/MediaRange;ZLokhttp3/MediaType;)V
+	public final fun getAction ()Lmisk/web/BoundAction;
+	public final fun getPathMatcher ()Ljava/util/regex/Matcher;
 }
 
 public final class misk/web/ConcurrencyLimiterConfig {
@@ -1279,7 +1315,11 @@ public final class misk/web/FeatureBinding$DefaultImpls {
 }
 
 public abstract interface class misk/web/FeatureBinding$Factory {
-	public abstract fun create (Lmisk/Action;Lmisk/web/PathPattern;Lmisk/web/FeatureBinding$Claimer;)Lmisk/web/FeatureBinding;
+	public abstract fun create (Lmisk/Action;Lmisk/web/PathPattern;Lmisk/web/FeatureBinding$Claimer;Ljava/util/List;)Lmisk/web/FeatureBinding;
+}
+
+public final class misk/web/FeatureBinding$Factory$DefaultImpls {
+	public static synthetic fun create$default (Lmisk/web/FeatureBinding$Factory;Lmisk/Action;Lmisk/web/PathPattern;Lmisk/web/FeatureBinding$Claimer;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/FeatureBinding;
 }
 
 public abstract interface class misk/web/FeatureBinding$Subject {
@@ -1324,6 +1364,7 @@ public abstract interface class misk/web/HttpCall : misk/api/HttpRequest {
 	public abstract fun getCookies ()Ljava/util/List;
 	public abstract fun getLinkLayerLocalAddress ()Lmisk/web/SocketAddress;
 	public abstract fun getNetworkStatusCode ()I
+	public abstract fun getRequestReceivedTimestamp ()J
 	public abstract fun getResponseHeaders ()Lokhttp3/Headers;
 	public abstract fun getStatusCode ()I
 	public abstract fun initWebSocketListener (Lmisk/web/actions/WebSocketListener;)V
@@ -1348,9 +1389,14 @@ public final class misk/web/HttpCall$DefaultImpls {
 	public static fun contentType (Lmisk/web/HttpCall;)Lokhttp3/MediaType;
 }
 
+public abstract interface annotation class misk/web/MiskServlet : java/lang/annotation/Annotation {
+}
+
 public final class misk/web/MiskWebFormBuilder {
 	public static final field Companion Lmisk/web/MiskWebFormBuilder$Companion;
 	public fun <init> ()V
+	public fun <init> (Lmisk/web/ProtoDocumentationProvider;)V
+	public synthetic fun <init> (Lmisk/web/ProtoDocumentationProvider;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun calculateTypes (Lkotlin/reflect/KType;)Ljava/util/Map;
 }
 
@@ -1366,19 +1412,16 @@ public final class misk/web/MiskWebFormBuilder$Companion {
 public final class misk/web/MiskWebFormBuilder$Field {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;)V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Z
 	public final fun component4 ()Ljava/util/List;
-	public final fun component5 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;)Lmisk/web/MiskWebFormBuilder$Field;
-	public static synthetic fun copy$default (Lmisk/web/MiskWebFormBuilder$Field;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/MiskWebFormBuilder$Field;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;)Lmisk/web/MiskWebFormBuilder$Field;
+	public static synthetic fun copy$default (Lmisk/web/MiskWebFormBuilder$Field;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;ILjava/lang/Object;)Lmisk/web/MiskWebFormBuilder$Field;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAnnotations ()Ljava/util/List;
 	public final fun getName ()Ljava/lang/String;
-	public final fun getProtobufType ()Ljava/lang/String;
 	public final fun getRepeated ()Z
 	public final fun getType ()Ljava/lang/String;
 	public fun hashCode ()I
@@ -1387,10 +1430,14 @@ public final class misk/web/MiskWebFormBuilder$Field {
 
 public final class misk/web/MiskWebFormBuilder$Type {
 	public fun <init> (Ljava/util/List;)V
+	public fun <init> (Ljava/util/List;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/List;
-	public final fun copy (Ljava/util/List;)Lmisk/web/MiskWebFormBuilder$Type;
-	public static synthetic fun copy$default (Lmisk/web/MiskWebFormBuilder$Type;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/MiskWebFormBuilder$Type;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Ljava/lang/String;)Lmisk/web/MiskWebFormBuilder$Type;
+	public static synthetic fun copy$default (Lmisk/web/MiskWebFormBuilder$Type;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/MiskWebFormBuilder$Type;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDocumentationUrl ()Ljava/lang/String;
 	public final fun getFields ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -1447,6 +1494,48 @@ public final class misk/web/PathPattern$Companion {
 	public final fun parse (Ljava/lang/String;)Lmisk/web/PathPattern;
 }
 
+public abstract interface class misk/web/ProtoDocumentationProvider {
+	public abstract fun get (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class misk/web/RequestDeadlineMode : java/lang/Enum {
+	public static final field ENFORCE_ALL Lmisk/web/RequestDeadlineMode;
+	public static final field ENFORCE_INBOUND Lmisk/web/RequestDeadlineMode;
+	public static final field ENFORCE_OUTBOUND Lmisk/web/RequestDeadlineMode;
+	public static final field METRICS_ONLY Lmisk/web/RequestDeadlineMode;
+	public static final field PROPAGATE_ONLY Lmisk/web/RequestDeadlineMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/web/RequestDeadlineMode;
+	public static fun values ()[Lmisk/web/RequestDeadlineMode;
+}
+
+public abstract interface annotation class misk/web/RequestDeadlineTimeout : java/lang/annotation/Annotation {
+	public abstract fun timeoutMs ()J
+}
+
+public final class misk/web/RequestDeadlinesConfig {
+	public fun <init> ()V
+	public fun <init> (J)V
+	public fun <init> (JLmisk/web/RequestDeadlineMode;)V
+	public synthetic fun <init> (JLmisk/web/RequestDeadlineMode;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()J
+	public final fun component2 ()Lmisk/web/RequestDeadlineMode;
+	public final fun copy (JLmisk/web/RequestDeadlineMode;)Lmisk/web/RequestDeadlinesConfig;
+	public static synthetic fun copy$default (Lmisk/web/RequestDeadlinesConfig;JLmisk/web/RequestDeadlineMode;ILjava/lang/Object;)Lmisk/web/RequestDeadlinesConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGlobal_timeout_ms ()J
+	public final fun getMode ()Lmisk/web/RequestDeadlineMode;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public class misk/web/RequestMatch : java/lang/Comparable {
+	public fun <init> (Lmisk/web/PathPattern;Lmisk/web/mediatype/MediaRange;ZLokhttp3/MediaType;)V
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public fun compareTo (Lmisk/web/RequestMatch;)I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/web/ResponseExtensionsKt {
 	public static final fun readUtf8 (Lmisk/web/Response;)Ljava/lang/String;
 	public static final fun toMisk (Lokhttp3/Response;)Lmisk/web/Response;
@@ -1468,11 +1557,36 @@ public final class misk/web/SocketAddress$Unix : misk/web/SocketAddress {
 	public final fun getPath ()Ljava/lang/String;
 }
 
+public abstract interface class misk/web/UrlMatcher {
+	public abstract fun hasBoundAction (Ljava/lang/String;)Z
+}
+
+public final class misk/web/WebActionBinding {
+	public fun <init> (Lmisk/Action;Ljava/util/Set;Ljava/util/Set;Lmisk/web/FeatureBinding;Ljava/util/List;Lmisk/web/FeatureBinding;Lmisk/web/FeatureBinding;)V
+	public final fun afterCall (Lmisk/web/actions/WebAction;Lmisk/web/HttpCall;Ljava/util/regex/Matcher;Ljava/lang/Object;)V
+	public final fun beforeCall (Lmisk/web/actions/WebAction;Lmisk/web/HttpCall;Ljava/util/regex/Matcher;)Ljava/util/List;
+}
+
+public final class misk/web/WebActionBinding$Factory {
+	public fun <init> (Ljava/util/List;Ljava/util/List;)V
+	public final fun create (Lmisk/Action;Lmisk/web/PathPattern;)Lmisk/web/WebActionBinding;
+}
+
+public final class misk/web/WebActionBinding$RealClaimer : misk/web/FeatureBinding$Claimer {
+	public fun <init> (Lmisk/Action;)V
+	public fun claimParameter (I)V
+	public fun claimParameter (Lkotlin/reflect/KParameter;)V
+	public fun claimRequestBody ()V
+	public fun claimResponseBody ()V
+	public fun claimReturnValue ()V
+	public final fun getAction ()Lmisk/Action;
+}
+
 public abstract interface class misk/web/WebActionSeedDataTransformerFactory {
 	public abstract fun create (Lmisk/web/PathPattern;Lmisk/Action;)Lmisk/scope/SeedDataTransformer;
 }
 
-public final class misk/web/WebConfig : wisp/config/Config {
+public final class misk/web/WebConfig : misk/config/Config {
 	public fun <init> (I)V
 	public fun <init> (IJ)V
 	public fun <init> (IJI)V
@@ -1502,19 +1616,24 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;I)V
 	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;)V
 	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;)V
-	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;)V
-	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;I)V
-	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;II)V
-	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZ)V
-	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZ)V
-	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;)V
-	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;)V
-	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)V
-	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Z)V
-	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZ)V
-	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZ)V
-	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;)V
-	public synthetic fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;I)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;II)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZ)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZ)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Z)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZ)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZ)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;I)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;IZ)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;IZJ)V
+	public synthetic fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;IZJIILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component10 ()Ljava/lang/Integer;
 	public final fun component11 ()Ljava/lang/Integer;
@@ -1538,26 +1657,31 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public final fun component28 ()Ljava/lang/Integer;
 	public final fun component29 ()Ljava/lang/Integer;
 	public final fun component3 ()I
-	public final fun component30 ()Ljava/lang/Long;
-	public final fun component31 ()I
+	public final fun component30 ()Ljava/lang/Integer;
+	public final fun component31 ()Ljava/lang/Long;
 	public final fun component32 ()I
-	public final fun component33 ()Z
+	public final fun component33 ()I
 	public final fun component34 ()Z
-	public final fun component35 ()Ljava/lang/Integer;
+	public final fun component35 ()Z
 	public final fun component36 ()Ljava/lang/Integer;
 	public final fun component37 ()Ljava/lang/Integer;
-	public final fun component38 ()Z
+	public final fun component38 ()Ljava/lang/Integer;
 	public final fun component39 ()Z
 	public final fun component4 ()Z
 	public final fun component40 ()Z
-	public final fun component41 ()Ljava/util/List;
+	public final fun component41 ()Z
+	public final fun component42 ()Ljava/util/List;
+	public final fun component43 ()Lmisk/web/RequestDeadlinesConfig;
+	public final fun component44 ()I
+	public final fun component45 ()Z
+	public final fun component46 ()J
 	public final fun component5 ()Lmisk/web/GracefulShutdownConfig;
 	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()Lmisk/web/WebSslConfig;
 	public final fun component8 ()Lmisk/web/WebUnixDomainSocketConfig;
 	public final fun component9 ()Z
-	public final fun copy (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;)Lmisk/web/WebConfig;
-	public static synthetic fun copy$default (Lmisk/web/WebConfig;IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;IILjava/lang/Object;)Lmisk/web/WebConfig;
+	public final fun copy (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;IZJ)Lmisk/web/WebConfig;
+	public static synthetic fun copy$default (Lmisk/web/WebConfig;IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;IZJIILjava/lang/Object;)Lmisk/web/WebConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAcceptors ()Ljava/lang/Integer;
 	public final fun getAction_exception_log_level ()Lmisk/web/exceptions/ActionExceptionLogLevelConfig;
@@ -1566,6 +1690,7 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public final fun getConcurrency_limiter_disabled ()Z
 	public final fun getConcurrency_limiter_log_level ()Lorg/slf4j/event/Level;
 	public final fun getCors ()Ljava/util/Map;
+	public final fun getDisable_jetty ()Z
 	public final fun getEnable_thread_pool_health_check ()Z
 	public final fun getEnable_thread_pool_queue_metrics ()Z
 	public final fun getGraceful_shutdown_config ()Lmisk/web/GracefulShutdownConfig;
@@ -1577,8 +1702,10 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public final fun getHttp2 ()Z
 	public final fun getHttp_header_cache_size ()Ljava/lang/Integer;
 	public final fun getHttp_request_header_size ()Ljava/lang/Integer;
+	public final fun getHttp_response_header_size ()Ljava/lang/Integer;
 	public final fun getIdle_timeout ()J
 	public final fun getInstall_default_not_found_action ()Z
+	public final fun getJetty_http2_max_events_per_second ()I
 	public final fun getJetty_initial_session_recv_window ()Ljava/lang/Integer;
 	public final fun getJetty_initial_stream_recv_window ()Ljava/lang/Integer;
 	public final fun getJetty_max_concurrent_streams ()Ljava/lang/Integer;
@@ -1594,12 +1721,14 @@ public final class misk/web/WebConfig : wisp/config/Config {
 	public final fun getQueue_size ()Ljava/lang/Integer;
 	public final fun getReadiness_max_age_ms ()I
 	public final fun getReadiness_refresh_interval_ms ()I
+	public final fun getRequest_deadlines ()Lmisk/web/RequestDeadlinesConfig;
 	public final fun getSelectors ()Ljava/lang/Integer;
 	public final fun getShutdown_sleep_ms ()I
 	public final fun getSsl ()Lmisk/web/WebSslConfig;
 	public final fun getUnix_domain_socket ()Lmisk/web/WebUnixDomainSocketConfig;
 	public final fun getUnix_domain_sockets ()Ljava/util/List;
 	public final fun getUse_virtual_threads ()Z
+	public final fun getWebsocket_idle_timeout_seconds ()J
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -1711,6 +1840,17 @@ public final class misk/web/actions/StatusAction$ServerStatus {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/web/actions/WebActionFactory {
+	public static final field Companion Lmisk/web/actions/WebActionFactory$Companion;
+	public fun <init> (Lcom/google/inject/Injector;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lmisk/web/WebActionBinding$Factory;Lmisk/scope/ActionScope;Ljava/util/List;Ljava/util/Optional;)V
+	public final fun newBoundAction (Lkotlin/reflect/KClass;)Ljava/util/List;
+	public final fun newBoundAction (Lkotlin/reflect/KClass;Ljava/lang/String;)Ljava/util/List;
+	public static synthetic fun newBoundAction$default (Lmisk/web/actions/WebActionFactory;Lkotlin/reflect/KClass;Ljava/lang/String;ILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class misk/web/actions/WebActionFactory$Companion {
+}
+
 public final class misk/web/actions/WebActionsKt {
 	public static final fun asChain (Lmisk/web/actions/WebAction;Lkotlin/reflect/KFunction;Ljava/util/List;Ljava/util/List;Lmisk/web/HttpCall;Lmisk/scope/ActionScope;)Lmisk/Chain;
 }
@@ -1736,7 +1876,7 @@ public final class misk/web/concurrencylimits/ConcurrencyLimitsModule : misk/inj
 	public final fun concurrencyLimiterFactory (Lcom/google/inject/Provider;Ljava/time/Clock;)Lmisk/web/concurrencylimits/ConcurrencyLimiterFactory;
 }
 
-public final class misk/web/exceptions/ActionExceptionLogLevelConfig : wisp/config/Config {
+public final class misk/web/exceptions/ActionExceptionLogLevelConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Lorg/slf4j/event/Level;)V
 	public fun <init> (Lorg/slf4j/event/Level;Lorg/slf4j/event/Level;)V
@@ -1753,7 +1893,7 @@ public final class misk/web/exceptions/ActionExceptionLogLevelConfig : wisp/conf
 }
 
 public final class misk/web/exceptions/ExceptionHandlingInterceptor : misk/web/NetworkInterceptor {
-	public fun <init> (Ljava/lang/String;Lmisk/web/exceptions/ExceptionMapperResolver;)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/web/exceptions/ExceptionMapperResolver;Lmisk/web/interceptors/hooks/RequestResponseLoggedCapture;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun intercept (Lmisk/web/NetworkChain;)V
 }
 
@@ -1767,12 +1907,14 @@ public final class misk/web/exceptions/ExceptionHandlingInterceptorKt {
 }
 
 public abstract interface class misk/web/exceptions/ExceptionMapper {
+	public abstract fun isError (Ljava/lang/Throwable;)Z
 	public abstract fun loggingLevel (Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
 	public abstract fun toGrpcResponse (Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
 	public abstract fun toResponse (Ljava/lang/Throwable;)Lmisk/web/Response;
 }
 
 public final class misk/web/exceptions/ExceptionMapper$DefaultImpls {
+	public static fun isError (Lmisk/web/exceptions/ExceptionMapper;Ljava/lang/Throwable;)Z
 	public static fun loggingLevel (Lmisk/web/exceptions/ExceptionMapper;Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
 	public static fun toGrpcResponse (Lmisk/web/exceptions/ExceptionMapper;Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
 }
@@ -1817,6 +1959,8 @@ public final class misk/web/exceptions/GrpcErrorResponse$Companion {
 
 public final class misk/web/exceptions/RequestBodyExceptionMapper : misk/web/exceptions/ExceptionMapper {
 	public static final field Companion Lmisk/web/exceptions/RequestBodyExceptionMapper$Companion;
+	public synthetic fun isError (Ljava/lang/Throwable;)Z
+	public fun isError (Lmisk/web/extractors/RequestBodyException;)Z
 	public synthetic fun loggingLevel (Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
 	public fun loggingLevel (Lmisk/web/extractors/RequestBodyException;)Lorg/slf4j/event/Level;
 	public synthetic fun toGrpcResponse (Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
@@ -1833,8 +1977,17 @@ public final class misk/web/extractors/RequestBodyException : java/io/IOExceptio
 	public fun <init> (Ljava/lang/Throwable;)V
 }
 
+public abstract interface class misk/web/extractors/StringConverter {
+	public abstract fun convert (Ljava/lang/String;)Ljava/lang/Object;
+}
+
+public abstract interface class misk/web/extractors/StringConverter$Factory {
+	public abstract fun create (Lkotlin/reflect/KType;)Lmisk/web/extractors/StringConverter;
+}
+
 public final class misk/web/extractors/StringConverterKt {
-	public static final fun converterFor (Lkotlin/reflect/KType;)Lkotlin/jvm/functions/Function1;
+	public static final fun converterFor (Lkotlin/reflect/KType;Ljava/util/List;)Lmisk/web/extractors/StringConverter;
+	public static synthetic fun converterFor$default (Lkotlin/reflect/KType;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/extractors/StringConverter;
 }
 
 public final class misk/web/formatter/ClassNameFormatter {
@@ -1855,20 +2008,26 @@ public final class misk/web/interceptors/ActionLoggingConfig {
 	public fun <init> (JJDD)V
 	public fun <init> (JJDDLjava/util/List;)V
 	public fun <init> (JJDDLjava/util/List;Lmisk/web/interceptors/RequestLoggingMode;)V
-	public synthetic fun <init> (JJDDLjava/util/List;Lmisk/web/interceptors/RequestLoggingMode;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (JJDDLjava/util/List;Lmisk/web/interceptors/RequestLoggingMode;Z)V
+	public fun <init> (JJDDLjava/util/List;Lmisk/web/interceptors/RequestLoggingMode;ZZ)V
+	public synthetic fun <init> (JJDDLjava/util/List;Lmisk/web/interceptors/RequestLoggingMode;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()J
 	public final fun component2 ()J
 	public final fun component3 ()D
 	public final fun component4 ()D
 	public final fun component5 ()Ljava/util/List;
 	public final fun component6 ()Lmisk/web/interceptors/RequestLoggingMode;
-	public final fun copy (JJDDLjava/util/List;Lmisk/web/interceptors/RequestLoggingMode;)Lmisk/web/interceptors/ActionLoggingConfig;
-	public static synthetic fun copy$default (Lmisk/web/interceptors/ActionLoggingConfig;JJDDLjava/util/List;Lmisk/web/interceptors/RequestLoggingMode;ILjava/lang/Object;)Lmisk/web/interceptors/ActionLoggingConfig;
+	public final fun component7 ()Z
+	public final fun component8 ()Z
+	public final fun copy (JJDDLjava/util/List;Lmisk/web/interceptors/RequestLoggingMode;ZZ)Lmisk/web/interceptors/ActionLoggingConfig;
+	public static synthetic fun copy$default (Lmisk/web/interceptors/ActionLoggingConfig;JJDDLjava/util/List;Lmisk/web/interceptors/RequestLoggingMode;ZZILjava/lang/Object;)Lmisk/web/interceptors/ActionLoggingConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBodySampling ()D
 	public final fun getErrorBodySampling ()D
 	public final fun getErrorRatePerSecond ()J
 	public final fun getExcludedEnvironments ()Ljava/util/List;
+	public final fun getIncludeRequestHeaders ()Z
+	public final fun getIncludeResponseHeaders ()Z
 	public final fun getRatePerSecond ()J
 	public final fun getRequestLoggingMode ()Lmisk/web/interceptors/RequestLoggingMode;
 	public fun hashCode ()I
@@ -1979,7 +2138,6 @@ public final class misk/web/interceptors/RequestLoggingConfig {
 
 public final class misk/web/interceptors/RequestLoggingInterceptor : misk/web/NetworkInterceptor {
 	public fun intercept (Lmisk/web/NetworkChain;)V
-	public final fun maybeLog (Lmisk/web/HttpCall;Lcom/google/common/base/Stopwatch;Ljava/lang/Throwable;)V
 }
 
 public final class misk/web/interceptors/RequestLoggingInterceptor$Factory : misk/web/NetworkInterceptor$Factory {
@@ -2012,6 +2170,7 @@ public final class misk/web/interceptors/RequestResponseBody {
 
 public final class misk/web/interceptors/ResponseBodyMarshallerFactory {
 	public final fun create (Lmisk/Action;)Lmisk/web/marshal/Marshaller;
+	public final fun create (Lokhttp3/MediaType;Lkotlin/reflect/KType;)Lmisk/web/marshal/Marshaller;
 }
 
 public final class misk/web/interceptors/WideOpenDevelopmentInterceptor : misk/web/NetworkInterceptor {
@@ -2022,6 +2181,24 @@ public final class misk/web/interceptors/WideOpenDevelopmentInterceptor : misk/w
 public final class misk/web/interceptors/WideOpenDevelopmentInterceptorFactory : misk/web/NetworkInterceptor$Factory {
 	public fun <init> (Lmisk/web/interceptors/WideOpenDevelopmentInterceptor;Lwisp/deployment/Deployment;)V
 	public fun create (Lmisk/Action;)Lmisk/web/NetworkInterceptor;
+}
+
+public final class misk/web/interceptors/hooks/AuditClientHook : misk/web/interceptors/hooks/RequestResponseHook {
+	public synthetic fun <init> (Lmisk/Action;Lmisk/audit/AuditClient;Lmisk/audit/AuditRequestResponse;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun handle (Lmisk/MiskCaller;Lmisk/web/HttpCall;Lmisk/web/interceptors/RequestResponseBody;Ljava/time/Duration;Ljava/lang/String;Ljava/lang/Throwable;)V
+}
+
+public final class misk/web/interceptors/hooks/AuditClientHook$Factory : misk/web/interceptors/hooks/RequestResponseHook$Factory {
+	public fun <init> (Lmisk/audit/AuditClient;)V
+	public fun create (Lmisk/Action;)Lmisk/web/interceptors/hooks/RequestResponseHook;
+}
+
+public abstract interface class misk/web/interceptors/hooks/RequestResponseHook {
+	public abstract fun handle (Lmisk/MiskCaller;Lmisk/web/HttpCall;Lmisk/web/interceptors/RequestResponseBody;Ljava/time/Duration;Ljava/lang/String;Ljava/lang/Throwable;)V
+}
+
+public abstract interface class misk/web/interceptors/hooks/RequestResponseHook$Factory {
+	public abstract fun create (Lmisk/Action;)Lmisk/web/interceptors/hooks/RequestResponseHook;
 }
 
 public final class misk/web/jetty/JettyService : com/google/common/util/concurrent/AbstractIdleService {
@@ -2056,6 +2233,16 @@ public final class misk/web/jetty/MeasuredThreadPoolExecutor : misk/web/jetty/Me
 	public fun maxPoolSize ()I
 	public fun poolSize ()I
 	public fun queueSize ()I
+}
+
+public final class misk/web/jetty/MeasuredWindowRateControl : org/eclipse/jetty/http2/parser/RateControl {
+	public synthetic fun <init> (ILmisk/metrics/v2/PeakGauge;Lio/prometheus/client/Counter;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun onEvent (Ljava/lang/Object;)Z
+}
+
+public final class misk/web/jetty/MeasuredWindowRateControl$Factory : org/eclipse/jetty/http2/parser/RateControl$Factory {
+	public fun <init> (Lmisk/metrics/v2/Metrics;Lmisk/web/WebConfig;)V
+	public fun newRateControl (Lorg/eclipse/jetty/io/EndPoint;)Lorg/eclipse/jetty/http2/parser/RateControl;
 }
 
 public final class misk/web/jetty/ThreadPoolQueueMetrics {
@@ -2286,7 +2473,7 @@ public final class misk/web/metadata/guice/GuiceMetadataProvider$Metadata {
 
 public final class misk/web/metadata/webaction/WebActionMetadata {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
-	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KFunction;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Lokhttp3/MediaType;Ljava/util/List;Ljava/util/List;Lkotlin/reflect/KType;Lkotlin/reflect/KType;Lkotlin/reflect/KType;Lmisk/web/PathPattern;Ljava/util/List;Ljava/util/List;Lmisk/web/DispatchMechanism;Ljava/util/Set;Ljava/util/Set;)V
+	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KFunction;Ljava/util/List;Ljava/lang/String;Ljava/util/List;Lokhttp3/MediaType;Ljava/util/List;Ljava/util/List;Lkotlin/reflect/KType;Lkotlin/reflect/KType;Lkotlin/reflect/KType;Lmisk/web/PathPattern;Ljava/util/List;Ljava/util/List;Lmisk/web/DispatchMechanism;Ljava/util/Set;Ljava/util/Set;Lmisk/web/ProtoDocumentationProvider;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component10 ()Ljava/lang/String;
 	public final fun component11 ()Ljava/lang/String;
@@ -2419,6 +2606,39 @@ public final class misk/web/proxy/WebProxyEntryKt {
 	public static synthetic fun WebProxyEntry$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/proxy/WebProxyEntry;
 }
 
+public final class misk/web/requestdeadlines/DeadlineExceededException : java/lang/RuntimeException {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/web/requestdeadlines/DeadlinePropagationModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/web/requestdeadlines/DeadlinePropagationModule$RequestDeadlineProvider : misk/scope/ActionScopedProvider {
+	public fun <init> (Ljava/time/Clock;Lmisk/scope/ActionScoped;)V
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lmisk/web/requestdeadlines/RequestDeadline;
+}
+
+public final class misk/web/requestdeadlines/RequestDeadline {
+	public fun <init> (Ljava/time/Clock;Ljava/time/Instant;)V
+	public final fun component1 ()Ljava/time/Clock;
+	public final fun component2 ()Ljava/time/Instant;
+	public final fun copy (Ljava/time/Clock;Ljava/time/Instant;)Lmisk/web/requestdeadlines/RequestDeadline;
+	public static synthetic fun copy$default (Lmisk/web/requestdeadlines/RequestDeadline;Ljava/time/Clock;Ljava/time/Instant;ILjava/lang/Object;)Lmisk/web/requestdeadlines/RequestDeadline;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun expired ()Z
+	public final fun expiredDuration ()Ljava/time/Duration;
+	public final fun getClock ()Ljava/time/Clock;
+	public final fun getDeadline ()Ljava/time/Instant;
+	public fun hashCode ()I
+	public final fun remaining ()Ljava/time/Duration;
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/web/resources/ResourceEntryFinder {
 	public fun <init> (Ljava/util/List;Ljava/util/List;)V
 	public final fun staticResource (Lokhttp3/HttpUrl;)Lmisk/web/dashboard/ValidWebEntry;
@@ -2443,5 +2663,63 @@ public final class misk/web/resources/StaticResourceEntry : misk/web/dashboard/V
 	public fun hashCode ()I
 	public final fun resourcePath (Ljava/lang/String;)Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/sse/ServerSentEvent {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/Long;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;)Lmisk/web/sse/ServerSentEvent;
+	public static synthetic fun copy$default (Lmisk/web/sse/ServerSentEvent;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/sse/ServerSentEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getComments ()Ljava/lang/String;
+	public final fun getData ()Ljava/lang/String;
+	public final fun getEvent ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getRetry ()Ljava/lang/Long;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/web/sse/ServerSentEventKt {
+	public static final field LAST_EVENT_ID_HEADER Ljava/lang/String;
+}
+
+public final class misk/web/sse/ServerSentEventMarshaller : misk/web/marshal/Marshaller {
+	public static final field INSTANCE Lmisk/web/sse/ServerSentEventMarshaller;
+	public fun contentType ()Lokhttp3/MediaType;
+	public fun responseBody (Ljava/lang/Object;)Lmisk/web/ResponseBody;
+	public fun responseBody (Ljava/lang/Object;Lmisk/web/HttpCall;)Lmisk/web/ResponseBody;
+}
+
+public final class misk/web/sse/ServerSentEventMarshaller$Factory : misk/web/marshal/Marshaller$Factory {
+	public fun <init> ()V
+	public fun create (Lokhttp3/MediaType;Lkotlin/reflect/KType;)Lmisk/web/marshal/Marshaller;
+}
+
+public final class misk/web/sse/ServerSentEventMarshallerKt {
+	public static final field COLON Ljava/lang/String;
+	public static final field END_OF_LINE Ljava/lang/String;
+	public static final field SPACE Ljava/lang/String;
+	public static final fun getEND_OF_LINE_VARIANTS ()Lkotlin/text/Regex;
+}
+
+public final class misk/web/sse/ServerSentEventUnmarshaller : misk/web/marshal/Unmarshaller {
+	public static final field INSTANCE Lmisk/web/sse/ServerSentEventUnmarshaller;
+	public fun unmarshal (Lokhttp3/Headers;Lokio/BufferedSource;)Ljava/lang/Object;
+}
+
+public final class misk/web/sse/ServerSentEventUnmarshaller$Factory : misk/web/marshal/Unmarshaller$Factory {
+	public fun <init> ()V
+	public fun create (Lokhttp3/MediaType;Lkotlin/reflect/KType;)Lmisk/web/marshal/Unmarshaller;
 }
 

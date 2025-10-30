@@ -1,6 +1,7 @@
 package misk.web.interceptors
 
 import io.prometheus.client.Histogram
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessControlModule
@@ -20,9 +21,10 @@ import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 import org.assertj.core.data.Offset
+import org.awaitility.Awaitility.await
+import org.junit.jupiter.api.Test
+import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.milliseconds
 
 @MiskTest(startService = true)
@@ -44,19 +46,22 @@ class ExclusiveTimingInterceptorTest {
     val response = invoke(200)
     assertThat(response.code).isEqualTo(200)
 
-    // Figure out how long each of the latency metrics was
-    val requestDuration = metricsInterceptorFactory.requestDuration
-    val exclusiveRequestDuration = exclusiveTimingInterceptorFactory.requestDurationHistogram
-    val difference =
-      requestDuration.labels(*labels(200)).get().sum -
-        exclusiveRequestDuration.labels(*labels(200)).get().sum
+    // Wait for metrics to be recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      // Figure out how long each of the latency metrics was
+      val requestDuration = metricsInterceptorFactory.requestDurationSummary!!
+      val exclusiveRequestDuration = exclusiveTimingInterceptorFactory.requestDurationHistogram
+      val difference =
+        requestDuration.labels(*labels(200)).get().sum -
+          exclusiveRequestDuration.labels(*labels(200)).get().sum
 
-    // Verify that the sleep time was excluded
-    // (but leave some room for small differences due to execution time.)
-    assertThat(difference).isCloseTo(
-      /* expected = */ ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble(),
-      /* offset = */ Offset.offset(ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble() / 2)
-    )
+      // Verify that the sleep time was excluded
+      // (but leave some room for small differences due to execution time.)
+      assertThat(difference).isCloseTo(
+        /* expected = */ ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble(),
+        /* offset = */ Offset.offset(ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble() / 2)
+      )
+    }
   }
 
   @Test
@@ -76,14 +81,17 @@ class ExclusiveTimingInterceptorTest {
 
     val metric = exclusiveTimingInterceptorFactory.requestDurationHistogram
 
-    // Make sure all the right metrics were generated
-    // Note: buckets.last() always contains the count of samples
-    assertThat(metric.labels(*labels(200)).get().count()).isEqualTo(2)
-    assertThat(metric.labels(*labels(202)).get().count()).isEqualTo(1)
-    assertThat(metric.labels(*labels(404)).get().count()).isEqualTo(1)
-    assertThat(metric.labels(*labels(403)).get().count()).isEqualTo(2)
-    assertThat(metric.labels(*labels(200, "my-peer")).get().count()).isEqualTo(4)
-    assertThat(metric.labels(*labels(200, "<user>")).get().count()).isEqualTo(1)
+    // Wait for metrics to be recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      // Make sure all the right metrics were generated
+      // Note: buckets.last() always contains the count of samples
+      assertThat(metric.labels(*labels(200)).get().count()).isEqualTo(2)
+      assertThat(metric.labels(*labels(202)).get().count()).isEqualTo(1)
+      assertThat(metric.labels(*labels(404)).get().count()).isEqualTo(1)
+      assertThat(metric.labels(*labels(403)).get().count()).isEqualTo(2)
+      assertThat(metric.labels(*labels(200, "my-peer")).get().count()).isEqualTo(4)
+      assertThat(metric.labels(*labels(200, "<user>")).get().count()).isEqualTo(1)
+    }
   }
 
   fun invoke(
@@ -105,7 +113,7 @@ class ExclusiveTimingInterceptorTest {
       assertThat(it.code).isEqualTo(desiredStatusCode)
     }
   }
-  
+
   private fun Histogram.Child.Value.count() = buckets.last().toInt()
 
   class TestModule : KAbstractModule() {

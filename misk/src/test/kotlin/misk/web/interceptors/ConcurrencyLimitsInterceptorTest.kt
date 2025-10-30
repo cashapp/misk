@@ -30,7 +30,7 @@ import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import java.time.Clock
 import java.time.Duration
 import java.time.temporal.ChronoUnit

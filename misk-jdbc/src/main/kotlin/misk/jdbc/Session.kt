@@ -25,4 +25,10 @@ interface Session {
    * A new transaction can be initiated as part of this hook.
    */
   fun onSessionClose(work: () -> Unit)
+
+  /**
+   * Registers a hook that fires if the session transaction is rolled back.
+   * This is called after the transaction has closed, so a new transaction can be initiated as part of this hook.
+   */
+  fun onRollback(work: (error: Throwable) -> Unit)
 }

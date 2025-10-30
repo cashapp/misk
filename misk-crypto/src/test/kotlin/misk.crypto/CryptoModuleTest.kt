@@ -31,7 +31,7 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.security.GeneralSecurityException

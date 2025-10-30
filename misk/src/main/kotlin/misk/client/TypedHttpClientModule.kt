@@ -159,9 +159,6 @@ class TypedClientFactory @Inject constructor() {
   private val callFactoryWrappers: Provider<List<CallFactoryWrapper>> = Provider { emptyList() }
 
   @Inject
-  private lateinit var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
-
-  @Inject
   private lateinit var moshi: Moshi
 
   @Inject(optional = true)
@@ -235,7 +232,7 @@ class TypedClientFactory @Inject constructor() {
 
     return kclass.cast(
       Proxy.newProxyInstance(
-        ClassLoader.getSystemClassLoader(),
+        kclass.java.classLoader,
         arrayOf(kclass.java),
         invocationHandler
       )

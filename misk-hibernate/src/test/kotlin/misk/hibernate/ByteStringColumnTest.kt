@@ -12,7 +12,7 @@ import okio.ByteString.Companion.decodeHex
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.config.Config
+import misk.config.Config
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
 import jakarta.inject.Qualifier
@@ -100,7 +100,7 @@ class ByteStringColumnTest {
       install(DeploymentModule(TESTING))
 
       val config = MiskConfig.load<RootConfig>("bytestringcolumn", TESTING)
-      install(HibernateTestingModule(ByteStringColumn::class, config.data_source))
+      install(HibernateTestingModule(ByteStringColumn::class))
       install(HibernateModule(ByteStringColumn::class, config.data_source))
       install(object : HibernateEntityModule(ByteStringColumn::class) {
         override fun configureHibernate() {

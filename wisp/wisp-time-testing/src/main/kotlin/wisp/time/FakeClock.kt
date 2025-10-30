@@ -10,6 +10,13 @@ import java.util.concurrent.atomic.AtomicLong
 import misk.testing.TestFixture
 
 /** Controllable clock for testing. */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "FakeClock()",
+    imports = ["misk.time.FakeClock"]
+  )
+)
 open class FakeClock @JvmOverloads constructor(
     epochMillis: Long = initialValue.toEpochMilli(),
     private val zone: ZoneId = ZoneId.of("UTC")

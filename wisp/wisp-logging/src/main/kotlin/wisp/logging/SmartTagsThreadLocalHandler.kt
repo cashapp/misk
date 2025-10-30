@@ -3,6 +3,13 @@ package wisp.logging
 import misk.annotation.ExperimentalMiskApi
 
 @ExperimentalMiskApi
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "SmartTagsThreadLocalHandler",
+    imports = ["misk.logging.SmartTagsThreadLocalHandler"]
+  )
+)
 object SmartTagsThreadLocalHandler {
   private val threadLocalMdcContext = ThreadLocal<ThreadLocalSmartTagsMdcContext>()
 
