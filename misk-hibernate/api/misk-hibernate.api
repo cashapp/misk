@@ -304,6 +304,7 @@ public abstract interface class misk/hibernate/Session : misk/jdbc/Session {
 	public abstract fun save (Lmisk/hibernate/DbEntity;)Lmisk/hibernate/Id;
 	public abstract fun shards ()Ljava/util/Set;
 	public abstract fun shards (Lmisk/vitess/Keyspace;)Ljava/util/Collection;
+	public abstract fun target (Lmisk/vitess/Destination;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public abstract fun target (Lmisk/vitess/Shard;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public abstract fun withoutChecks ([Lmisk/jdbc/Check;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
@@ -328,7 +329,6 @@ public final class misk/hibernate/Transacter$DefaultImpls {
 
 public final class misk/hibernate/TransacterKt {
 	public static final fun failSafeRead (Lmisk/hibernate/Transacter;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-	public static final fun failSafeRead (Lmisk/hibernate/Transacter;Lmisk/vitess/Shard;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public static final fun shards (Lmisk/hibernate/Transacter;)Ljava/util/Set;
 	public static final fun shards (Lmisk/hibernate/Transacter;Lmisk/vitess/Keyspace;)Ljava/util/Collection;
 	public static final fun transaction (Lmisk/hibernate/Transacter;Lmisk/vitess/Shard;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;

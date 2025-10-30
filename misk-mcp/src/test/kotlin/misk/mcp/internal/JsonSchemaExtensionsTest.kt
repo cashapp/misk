@@ -1,5 +1,8 @@
+@file:Suppress("unused", "PropertyName")
+
 package misk.mcp.internal
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -122,6 +125,114 @@ internal class JsonSchemaExtensionsTest {
   class NoConstructorClass {
     constructor(value: String) // Secondary constructor only
   }
+
+  // Test enums
+  enum class Status {
+    ACTIVE,
+    INACTIVE,
+    PENDING,
+    ARCHIVED
+  }
+
+  enum class Priority {
+    LOW,
+    MEDIUM,
+    HIGH,
+    URGENT
+  }
+
+  // Test data classes with enums
+  data class EnumObject(
+    val status: Status,
+    val priority: Priority
+  )
+
+  data class OptionalEnumObject(
+    val status: Status,
+    val priority: Priority?,
+    val defaultStatus: Status = Status.ACTIVE
+  )
+
+  data class DescribedEnumObject(
+    @Description("The current status of the object")
+    val status: Status,
+    @Description("The priority level")
+    val priority: Priority
+  )
+
+  data class EnumListObject(
+    val statuses: List<Status>,
+    val priorities: List<Priority>
+  )
+
+  data class EnumMapObject(
+    val statusMap: Map<String, Status>,
+    val priorityMap: Map<String, Priority>
+  )
+
+  data class ComplexEnumObject(
+    @Description("Primary status")
+    val primaryStatus: Status,
+    val secondaryStatuses: List<Status>,
+    val statusMapping: Map<String, Status>,
+    @Description("Optional priority")
+    val priority: Priority? = null
+  )
+
+  // Test enums with @SerialName annotation
+  enum class HttpMethod {
+    @SerialName("GET")
+    GET,
+    @SerialName("POST")
+    POST,
+    @SerialName("put")
+    PUT,
+    @SerialName("delete")
+    DELETE
+  }
+
+  enum class OrderStatus {
+    @SerialName("pending_payment")
+    PENDING_PAYMENT,
+    @SerialName("processing")
+    PROCESSING,
+    @SerialName("shipped")
+    SHIPPED,
+    @SerialName("delivered")
+    DELIVERED,
+    @SerialName("cancelled")
+    CANCELLED
+  }
+
+  // Mixed enum - some with SerialName, some without
+  enum class MixedEnum {
+    @SerialName("custom_value_1")
+    VALUE_ONE,
+    VALUE_TWO,  // No SerialName, should use enum constant name
+    @SerialName("custom_value_3")
+    VALUE_THREE
+  }
+
+  data class SerialNameEnumObject(
+    val method: HttpMethod,
+    val orderStatus: OrderStatus
+  )
+
+  data class MixedSerialNameEnumObject(
+    val mixedValue: MixedEnum,
+    @Description("HTTP method for the request")
+    val method: HttpMethod
+  )
+
+  data class SerialNameEnumListObject(
+    val methods: List<HttpMethod>,
+    val statuses: List<OrderStatus>
+  )
+
+  data class SerialNameEnumMapObject(
+    val methodMap: Map<String, HttpMethod>,
+    val statusMap: Map<String, OrderStatus>
+  )
 
   @Test
   fun `generateJsonSchema handles primitive types correctly`() {
@@ -477,5 +588,297 @@ internal class JsonSchemaExtensionsTest {
     assertEquals(JsonPrimitive("array"), tagsField["type"])
     assertFalse(tagsField.containsKey("description"))
     assertTrue(tagsField.containsKey("items"))
+  }
+
+  @Test
+  fun `generateJsonSchema handles enum types correctly`() {
+    val schema = EnumObject::class.generateJsonSchema()
+    val properties = schema["properties"] as JsonObject
+    val required = schema["required"] as JsonArray
+
+    // Verify status enum field
+    val statusField = properties["status"] as JsonObject
+    assertEquals(JsonPrimitive("string"), statusField["type"])
+    assertTrue(statusField.containsKey("enum"))
+    val statusEnum = statusField["enum"] as JsonArray
+    assertEquals(4, statusEnum.size)
+    val statusValues = statusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("ACTIVE", "INACTIVE", "PENDING", "ARCHIVED"), statusValues)
+
+    // Verify priority enum field
+    val priorityField = properties["priority"] as JsonObject
+    assertEquals(JsonPrimitive("string"), priorityField["type"])
+    assertTrue(priorityField.containsKey("enum"))
+    val priorityEnum = priorityField["enum"] as JsonArray
+    assertEquals(4, priorityEnum.size)
+    val priorityValues = priorityEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("LOW", "MEDIUM", "HIGH", "URGENT"), priorityValues)
+
+    // Verify all fields are required
+    val requiredFields = required.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("status", "priority"), requiredFields)
+  }
+
+  @Test
+  fun `generateJsonSchema handles optional and nullable enum fields correctly`() {
+    val schema = OptionalEnumObject::class.generateJsonSchema()
+    val properties = schema["properties"] as JsonObject
+    val required = schema["required"] as JsonArray
+
+    // Verify required enum field
+    val statusField = properties["status"] as JsonObject
+    assertEquals(JsonPrimitive("string"), statusField["type"])
+    assertTrue(statusField.containsKey("enum"))
+
+    // Verify nullable enum field
+    val priorityField = properties["priority"] as JsonObject
+    assertEquals(JsonPrimitive("string"), priorityField["type"])
+    assertTrue(priorityField.containsKey("enum"))
+
+    // Verify optional enum field with default value
+    val defaultStatusField = properties["defaultStatus"] as JsonObject
+    assertEquals(JsonPrimitive("string"), defaultStatusField["type"])
+    assertTrue(defaultStatusField.containsKey("enum"))
+
+    // Verify required fields - only status should be required
+    val requiredFields = required.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("status"), requiredFields)
+  }
+
+  @Test
+  fun `generateJsonSchema handles enum fields with Description annotation correctly`() {
+    val schema = DescribedEnumObject::class.generateJsonSchema()
+    val properties = schema["properties"] as JsonObject
+
+    // Verify status enum field with description
+    val statusField = properties["status"] as JsonObject
+    assertEquals(JsonPrimitive("string"), statusField["type"])
+    assertEquals(JsonPrimitive("The current status of the object"), statusField["description"])
+    assertTrue(statusField.containsKey("enum"))
+    val statusEnum = statusField["enum"] as JsonArray
+    val statusValues = statusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("ACTIVE", "INACTIVE", "PENDING", "ARCHIVED"), statusValues)
+
+    // Verify priority enum field with description
+    val priorityField = properties["priority"] as JsonObject
+    assertEquals(JsonPrimitive("string"), priorityField["type"])
+    assertEquals(JsonPrimitive("The priority level"), priorityField["description"])
+    assertTrue(priorityField.containsKey("enum"))
+    val priorityEnum = priorityField["enum"] as JsonArray
+    val priorityValues = priorityEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("LOW", "MEDIUM", "HIGH", "URGENT"), priorityValues)
+  }
+
+  @Test
+  fun `generateJsonSchema handles lists of enums correctly`() {
+    val schema = EnumListObject::class.generateJsonSchema()
+    val properties = schema["properties"] as JsonObject
+
+    // Verify list of status enums
+    val statusesField = properties["statuses"] as JsonObject
+    assertEquals(JsonPrimitive("array"), statusesField["type"])
+    assertTrue(statusesField.containsKey("items"))
+    val statusItems = statusesField["items"] as JsonObject
+    assertEquals(JsonPrimitive("string"), statusItems["type"])
+    assertTrue(statusItems.containsKey("enum"))
+    val statusEnum = statusItems["enum"] as JsonArray
+    val statusValues = statusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("ACTIVE", "INACTIVE", "PENDING", "ARCHIVED"), statusValues)
+
+    // Verify list of priority enums
+    val prioritiesField = properties["priorities"] as JsonObject
+    assertEquals(JsonPrimitive("array"), prioritiesField["type"])
+    assertTrue(prioritiesField.containsKey("items"))
+    val priorityItems = prioritiesField["items"] as JsonObject
+    assertEquals(JsonPrimitive("string"), priorityItems["type"])
+    assertTrue(priorityItems.containsKey("enum"))
+    val priorityEnum = priorityItems["enum"] as JsonArray
+    val priorityValues = priorityEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("LOW", "MEDIUM", "HIGH", "URGENT"), priorityValues)
+  }
+
+  @Test
+  fun `generateJsonSchema handles maps with enum values correctly`() {
+    val schema = EnumMapObject::class.generateJsonSchema()
+    val properties = schema["properties"] as JsonObject
+
+    // Verify map with status enum values
+    val statusMapField = properties["statusMap"] as JsonObject
+    assertEquals(JsonPrimitive("object"), statusMapField["type"])
+    assertTrue(statusMapField.containsKey("additionalProperties"))
+    val statusAdditionalProps = statusMapField["additionalProperties"] as JsonObject
+    assertEquals(JsonPrimitive("string"), statusAdditionalProps["type"])
+    assertTrue(statusAdditionalProps.containsKey("enum"))
+    val statusEnum = statusAdditionalProps["enum"] as JsonArray
+    val statusValues = statusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("ACTIVE", "INACTIVE", "PENDING", "ARCHIVED"), statusValues)
+
+    // Verify map with priority enum values
+    val priorityMapField = properties["priorityMap"] as JsonObject
+    assertEquals(JsonPrimitive("object"), priorityMapField["type"])
+    assertTrue(priorityMapField.containsKey("additionalProperties"))
+    val priorityAdditionalProps = priorityMapField["additionalProperties"] as JsonObject
+    assertEquals(JsonPrimitive("string"), priorityAdditionalProps["type"])
+    assertTrue(priorityAdditionalProps.containsKey("enum"))
+    val priorityEnum = priorityAdditionalProps["enum"] as JsonArray
+    val priorityValues = priorityEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("LOW", "MEDIUM", "HIGH", "URGENT"), priorityValues)
+  }
+
+  @Test
+  fun `generateJsonSchema handles complex objects with mixed enum usage correctly`() {
+    val schema = ComplexEnumObject::class.generateJsonSchema()
+    val properties = schema["properties"] as JsonObject
+    val required = schema["required"] as JsonArray
+
+    // Verify primary status enum with description
+    val primaryStatusField = properties["primaryStatus"] as JsonObject
+    assertEquals(JsonPrimitive("string"), primaryStatusField["type"])
+    assertEquals(JsonPrimitive("Primary status"), primaryStatusField["description"])
+    assertTrue(primaryStatusField.containsKey("enum"))
+    val primaryStatusEnum = primaryStatusField["enum"] as JsonArray
+    val primaryStatusValues = primaryStatusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("ACTIVE", "INACTIVE", "PENDING", "ARCHIVED"), primaryStatusValues)
+
+    // Verify list of status enums
+    val secondaryStatusesField = properties["secondaryStatuses"] as JsonObject
+    assertEquals(JsonPrimitive("array"), secondaryStatusesField["type"])
+    assertTrue(secondaryStatusesField.containsKey("items"))
+    val statusItems = secondaryStatusesField["items"] as JsonObject
+    assertEquals(JsonPrimitive("string"), statusItems["type"])
+    assertTrue(statusItems.containsKey("enum"))
+
+    // Verify map with status enum values
+    val statusMappingField = properties["statusMapping"] as JsonObject
+    assertEquals(JsonPrimitive("object"), statusMappingField["type"])
+    assertTrue(statusMappingField.containsKey("additionalProperties"))
+    val statusAdditionalProps = statusMappingField["additionalProperties"] as JsonObject
+    assertEquals(JsonPrimitive("string"), statusAdditionalProps["type"])
+    assertTrue(statusAdditionalProps.containsKey("enum"))
+
+    // Verify optional priority enum with description
+    val priorityField = properties["priority"] as JsonObject
+    assertEquals(JsonPrimitive("string"), priorityField["type"])
+    assertEquals(JsonPrimitive("Optional priority"), priorityField["description"])
+    assertTrue(priorityField.containsKey("enum"))
+    val priorityEnum = priorityField["enum"] as JsonArray
+    val priorityValues = priorityEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("LOW", "MEDIUM", "HIGH", "URGENT"), priorityValues)
+
+    // Verify required fields - priority should not be required (has default null)
+    val requiredFields = required.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("primaryStatus", "secondaryStatuses", "statusMapping"), requiredFields)
+  }
+
+  @Test
+  fun `generateJsonSchema handles enum with SerialName annotation correctly`() {
+    val schema = SerialNameEnumObject::class.generateJsonSchema()
+    val properties = schema["properties"] as JsonObject
+    val required = schema["required"] as JsonArray
+
+    // Verify HTTP method enum field uses @SerialName values
+    val methodField = properties["method"] as JsonObject
+    assertEquals(JsonPrimitive("string"), methodField["type"])
+    assertTrue(methodField.containsKey("enum"))
+    val methodEnum = methodField["enum"] as JsonArray
+    assertEquals(4, methodEnum.size)
+    val methodValues = methodEnum.map { (it as JsonPrimitive).content }.toSet()
+    // Should use SerialName values, not enum constant names
+    assertEquals(setOf("GET", "POST", "put", "delete"), methodValues)
+
+    // Verify order status enum field uses @SerialName values
+    val orderStatusField = properties["orderStatus"] as JsonObject
+    assertEquals(JsonPrimitive("string"), orderStatusField["type"])
+    assertTrue(orderStatusField.containsKey("enum"))
+    val orderStatusEnum = orderStatusField["enum"] as JsonArray
+    assertEquals(5, orderStatusEnum.size)
+    val orderStatusValues = orderStatusEnum.map { (it as JsonPrimitive).content }.toSet()
+    // Should use SerialName values (snake_case), not enum constant names
+    assertEquals(setOf("pending_payment", "processing", "shipped", "delivered", "cancelled"), orderStatusValues)
+
+    // Verify all fields are required
+    val requiredFields = required.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("method", "orderStatus"), requiredFields)
+  }
+
+  @Test
+  fun `generateJsonSchema handles mixed SerialName enum correctly`() {
+    val schema = MixedSerialNameEnumObject::class.generateJsonSchema()
+    val properties = schema["properties"] as JsonObject
+
+    // Verify mixed enum field - some with SerialName, some without
+    val mixedValueField = properties["mixedValue"] as JsonObject
+    assertEquals(JsonPrimitive("string"), mixedValueField["type"])
+    assertTrue(mixedValueField.containsKey("enum"))
+    val mixedEnum = mixedValueField["enum"] as JsonArray
+    assertEquals(3, mixedEnum.size)
+    val mixedValues = mixedEnum.map { (it as JsonPrimitive).content }.toSet()
+    // Should use SerialName where present, enum constant name where not
+    assertEquals(setOf("custom_value_1", "VALUE_TWO", "custom_value_3"), mixedValues)
+
+    // Verify method field with description and SerialName
+    val methodField = properties["method"] as JsonObject
+    assertEquals(JsonPrimitive("string"), methodField["type"])
+    assertEquals(JsonPrimitive("HTTP method for the request"), methodField["description"])
+    assertTrue(methodField.containsKey("enum"))
+    val methodEnum = methodField["enum"] as JsonArray
+    val methodValues = methodEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("GET", "POST", "put", "delete"), methodValues)
+  }
+
+  @Test
+  fun `generateJsonSchema handles lists of SerialName enums correctly`() {
+    val schema = SerialNameEnumListObject::class.generateJsonSchema()
+    val properties = schema["properties"] as JsonObject
+
+    // Verify list of HTTP method enums with SerialName
+    val methodsField = properties["methods"] as JsonObject
+    assertEquals(JsonPrimitive("array"), methodsField["type"])
+    assertTrue(methodsField.containsKey("items"))
+    val methodItems = methodsField["items"] as JsonObject
+    assertEquals(JsonPrimitive("string"), methodItems["type"])
+    assertTrue(methodItems.containsKey("enum"))
+    val methodEnum = methodItems["enum"] as JsonArray
+    val methodValues = methodEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("GET", "POST", "put", "delete"), methodValues)
+
+    // Verify list of order status enums with SerialName
+    val statusesField = properties["statuses"] as JsonObject
+    assertEquals(JsonPrimitive("array"), statusesField["type"])
+    assertTrue(statusesField.containsKey("items"))
+    val statusItems = statusesField["items"] as JsonObject
+    assertEquals(JsonPrimitive("string"), statusItems["type"])
+    assertTrue(statusItems.containsKey("enum"))
+    val statusEnum = statusItems["enum"] as JsonArray
+    val statusValues = statusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("pending_payment", "processing", "shipped", "delivered", "cancelled"), statusValues)
+  }
+
+  @Test
+  fun `generateJsonSchema handles maps with SerialName enum values correctly`() {
+    val schema = SerialNameEnumMapObject::class.generateJsonSchema()
+    val properties = schema["properties"] as JsonObject
+
+    // Verify map with HTTP method enum values using SerialName
+    val methodMapField = properties["methodMap"] as JsonObject
+    assertEquals(JsonPrimitive("object"), methodMapField["type"])
+    assertTrue(methodMapField.containsKey("additionalProperties"))
+    val methodAdditionalProps = methodMapField["additionalProperties"] as JsonObject
+    assertEquals(JsonPrimitive("string"), methodAdditionalProps["type"])
+    assertTrue(methodAdditionalProps.containsKey("enum"))
+    val methodEnum = methodAdditionalProps["enum"] as JsonArray
+    val methodValues = methodEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("GET", "POST", "put", "delete"), methodValues)
+
+    // Verify map with order status enum values using SerialName
+    val statusMapField = properties["statusMap"] as JsonObject
+    assertEquals(JsonPrimitive("object"), statusMapField["type"])
+    assertTrue(statusMapField.containsKey("additionalProperties"))
+    val statusAdditionalProps = statusMapField["additionalProperties"] as JsonObject
+    assertEquals(JsonPrimitive("string"), statusAdditionalProps["type"])
+    assertTrue(statusAdditionalProps.containsKey("enum"))
+    val statusEnum = statusAdditionalProps["enum"] as JsonArray
+    val statusValues = statusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("pending_payment", "processing", "shipped", "delivered", "cancelled"), statusValues)
   }
 }

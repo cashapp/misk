@@ -35,7 +35,7 @@ class MySqlScaleSafetyChecks(
     return try {
       DriverDataSource(
         config.buildJdbcUrl(TESTING),
-        config.type.driverClassName,
+        config.getDriverClassName(),
         Properties(),
         config.username,
         config.password

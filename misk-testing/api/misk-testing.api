@@ -291,6 +291,7 @@ public final class misk/testing/MockTracingBackendModule : misk/inject/KAbstract
 }
 
 public final class misk/testing/ParallelTestsKt {
+	public static final fun parallelTestIndex ()Ljava/lang/Integer;
 	public static final fun updateForParallelTests (Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 }
 
@@ -312,6 +313,16 @@ public final class misk/testing/TemporaryFolderModule : misk/inject/KAbstractMod
 public final class misk/testing/TemporaryFolderModule$DeleteTempFolder : org/junit/jupiter/api/extension/AfterEachCallback {
 	public fun <init> (Lmisk/testing/TemporaryFolder;)V
 	public fun afterEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+}
+
+public final class misk/testing/TestFixtureBindingValidator {
+	public static final field Companion Lmisk/testing/TestFixtureBindingValidator$Companion;
+	public fun <init> (Lcom/google/inject/Injector;)V
+	public final fun validate ()Ljava/util/List;
+	public final fun validateAndLog ()V
+}
+
+public final class misk/testing/TestFixtureBindingValidator$Companion {
 }
 
 public class misk/time/FakeClock : java/time/Clock, misk/testing/TestFixture {

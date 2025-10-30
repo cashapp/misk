@@ -114,6 +114,9 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(
 
   override fun lpop(key: String): ByteString? = runPipeline { lpop(key) }
 
+  override fun blpop(keys: Array<String>, timeoutSeconds: Double): Pair<String, ByteString>? =
+    runPipeline { blpop(keys, timeoutSeconds) }
+
   override fun rpop(key: String, count: Int): List<ByteString?> =
     runPipeline { rpop(key, count) }
 
@@ -190,6 +193,10 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(
 
   override fun flushAll() {
     unifiedJedis.flushAllWithClusterSupport(logger)
+  }
+
+  override fun flushDB() {
+    unifiedJedis.flushDB()
   }
 
   override fun zadd(

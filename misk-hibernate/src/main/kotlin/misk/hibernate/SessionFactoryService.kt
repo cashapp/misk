@@ -256,7 +256,7 @@ internal class SessionFactoryService(
       "float" -> Float::class
       "double" -> Double::class
       "materialized_clob" -> String::class
-      else -> Class.forName(name).kotlin
+      else -> Class.forName(name, false, Thread.currentThread().contextClassLoader).kotlin
     }
   }
 

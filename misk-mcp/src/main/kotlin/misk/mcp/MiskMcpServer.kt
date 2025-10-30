@@ -1,26 +1,20 @@
 package misk.mcp
 
+import com.google.inject.Provider
+import io.modelcontextprotocol.kotlin.sdk.CallToolRequest
+import io.modelcontextprotocol.kotlin.sdk.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.Implementation
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCNotification
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCRequest
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCResponse
-import io.modelcontextprotocol.kotlin.sdk.Method
 import io.modelcontextprotocol.kotlin.sdk.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.ToolAnnotations
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
 import misk.annotation.ExperimentalMiskApi
-import misk.exceptions.BadRequestException
-import misk.exceptions.NotFoundException
-import misk.exceptions.WebActionException
 import misk.logging.getLogger
-import misk.mcp.action.SESSION_ID_HEADER
 import misk.mcp.config.McpServerConfig
 import misk.mcp.config.asPrompts
 import misk.mcp.config.asResources
 import misk.mcp.config.asTools
-import misk.mcp.internal.MiskServerTransport
+import kotlin.time.TimeSource
 
 /**
  * Misk implementation of a Model Context Protocol (MCP) server.
@@ -40,6 +34,7 @@ import misk.mcp.internal.MiskServerTransport
  * - **Prompt Templates**: Provides registered [McpPrompt] templates for client use
  * - **Capability Negotiation**: The server automatically configures capabilities based on registered components
  * - **Session Management**: Manages multiple concurrent client sessions through SSE connections
+ * - **Metrics Integration**: Automatically wires up all registered tools to [McpMetrics] for monitoring tool execution latency and outcomes
  *
  * ## Client-to-Server Events
  *
@@ -71,7 +66,7 @@ import misk.mcp.internal.MiskServerTransport
  *     @RequestBody message: JSONRPCMessage,
  *     sendChannel: SendChannel<ServerSentEvent>
  *   ) {
- *     mcpStreamManager.withResponseChannel(sendChannel) {
+ *     mcpStreamManager.withSseChannel(sendChannel) {
  *       // 'this' is MiskMcpServer - handle the client message
  *       handleMessage(message)
  *     }
@@ -92,6 +87,7 @@ import misk.mcp.internal.MiskServerTransport
  * @param tools Set of tool implementations to register with the server
  * @param resources Set of resource implementations to register with the server
  * @param prompts Set of prompt implementations to register with the server
+ * @param instructionsProvider Optional provider for server instructions text
  *
  * @see misk.mcp.action.McpStreamManager For managing SSE streams and server lifecycle
  * @see McpTool For implementing executable tools
@@ -102,10 +98,11 @@ import misk.mcp.internal.MiskServerTransport
 class MiskMcpServer internal constructor(
   val name: String,
   val config: McpServerConfig,
-  private val mcpSessionHandler: McpSessionHandler?,
   tools: Set<McpTool<*>>,
   resources: Set<McpResource>,
   prompts: Set<McpPrompt>,
+  instructionsProvider: Provider<String>? = null,
+  private val mcpMetrics: McpMetrics,
 ) : Server(
   Implementation(
     name = name,
@@ -120,14 +117,12 @@ class MiskMcpServer internal constructor(
       resources = if (resources.isNotEmpty()) config.resources.asResources() else null,
       tools = if (tools.isNotEmpty()) config.tools.asTools() else null,
     ),
-  ),
+    enforceStrictCapabilities = config.enforce_strict_capabilities,
+    ),
+  instructionsProvider = instructionsProvider?.let { { it.get() } }
 ) {
 
   init {
-    onInitialized {
-      logger.debug { "MCP server $name initialized" }
-    }
-
     prompts.forEach { prompt ->
       addPrompt(
         name = prompt.name,
@@ -160,56 +155,41 @@ class MiskMcpServer internal constructor(
           idempotentHint = tool.idempotentHint,
           openWorldHint = tool.openWorldHint,
         ),
-        handler = tool::handler,
+        handler = metricReportingHandler(tool.name, tool::handler),
       )
     }
   }
 
-  @JvmOverloads
-  suspend fun handleMessage(message: JSONRPCMessage, sessionId: String? = null) {
-    val miskServerTransport = checkNotNull((transport as? MiskServerTransport)) {
-      "MiskMcpServer requires a connected MiskServerTransport to handle messages"
-    }
-    if (mcpSessionHandler != null) {
-      if (message is JSONRPCRequest) {
-        if (message.method == Method.Defined.Initialize.value) {
-          // On an initialization request, initialize a new session for the client and return
-          // in the SESSION_ID_HEADER response header
-          val sessionId = mcpSessionHandler.initialize()
-          miskServerTransport.stream.call.setResponseHeader(SESSION_ID_HEADER, sessionId)
-        } else {
-          // On non-initialization requests, validate that the session ID exists in the request
-          // and that it's a valid, active session
-          val sessionId = miskServerTransport.stream.call.requestHeaders[SESSION_ID_HEADER]
-            ?: throw BadRequestException("Missing required $SESSION_ID_HEADER header")
-          if (!mcpSessionHandler.isActive(sessionId)) {
-            throw NotFoundException("SessionID $SESSION_ID_HEADER does not exist")
-          }
+  private fun metricReportingHandler(
+    toolName: String,
+    handler: suspend (CallToolRequest) -> CallToolResult
+  ): suspend (CallToolRequest) -> CallToolResult {
+    return { request ->
+      val mark =  TimeSource.Monotonic.markNow()
+      var outcome = McpMetrics.ToolCallOutcome.Success
+      
+      try {
+        handler(request).also { result ->
+          outcome =
+            if (result.isError == true) McpMetrics.ToolCallOutcome.Error
+            else McpMetrics.ToolCallOutcome.Success
         }
+      } catch (ex: Exception) {
+        outcome = McpMetrics.ToolCallOutcome.Exception
+        throw ex
+      } finally {
+        val duration = mark.elapsedNow()
+        mcpMetrics.mcpToolHandlerLatency(duration, name, toolName, outcome)
       }
-    }
-
-    miskServerTransport.handleMessage(message, sessionId)
-
-    when (message) {
-      is JSONRPCNotification,
-      is JSONRPCResponse -> {
-        // Notifications and responses should return a 202 if handled successfully with no content
-        // Because we default to a SSE response and a server session, we need to end the session and directly
-        // return the result. If the handler fails to handle the response or notification, it should throw an
-        // error that should be translated to a JSON-RPC error response
-        throw AcceptedResponseException()
-      }
-
-      else -> Unit
     }
   }
+
+
 
   companion object {
     private val logger = getLogger<MiskMcpServer>()
   }
 }
 
-/** Represents a 202 Accepted response to indicate a notification or response was handled successfully */
-internal class AcceptedResponseException : WebActionException(202, "Accepted")
+
 

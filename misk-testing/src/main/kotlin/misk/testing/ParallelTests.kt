@@ -38,13 +38,14 @@ internal sealed interface PartitionedTest {
  *
  * This assumes that the environment variable `MAX_TEST_PARALLEL_FORKS` is set to the number of `maxParallelForks`.
  */
-fun <T> T.updateForParallelTests(update: (T, Int) -> T): T {
+fun <T> T.updateForParallelTests(update: (T, Int) -> T): T = parallelTestIndex()?.let { update(this, it) } ?: this
+
+fun parallelTestIndex(): Int? {
   return when (val partitionedTest = ParallelTests.isPartitioned()) {
     is PartitionedTest.Partitioned -> {
-      update(this, partitionedTest.partitionId)
+      partitionedTest.partitionId
     }
 
-    is PartitionedTest.NotPartitioned -> this
+    is PartitionedTest.NotPartitioned -> null
   }
 }
-

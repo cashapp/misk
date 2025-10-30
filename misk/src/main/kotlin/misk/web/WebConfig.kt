@@ -2,12 +2,12 @@ package misk.web
 
 import misk.annotation.ExperimentalMiskApi
 import misk.client.HTTP_SERVICE_UNAVAILABLE
+import misk.config.Config
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
 import misk.web.concurrencylimits.ConcurrencyLimiterStrategy
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.slf4j.event.Level
-import misk.config.Config
 
 data class WebConfig @JvmOverloads constructor(
   /** HTTP port to listen on, or 0 for any available port. */
@@ -153,6 +153,9 @@ data class WebConfig @JvmOverloads constructor(
   /** The maximum allowed size in bytes for the HTTP request line and HTTP request headers. */
   val http_request_header_size: Int? = 32768,
 
+  /** The maximum allowed size in bytes for the HTTP response headers. */
+  val http_response_header_size: Int? = null,
+
   /** The size of Jetty's header field cache, in terms of unique character branches. */
   val http_header_cache_size: Int? = null,
 
@@ -216,6 +219,12 @@ data class WebConfig @JvmOverloads constructor(
    * See https://jetty.org/docs/jetty/10/operations-guide/modules/standard.html#http2
    */
   val jetty_http2_max_events_per_second: Int = 128,
+
+  /** If true, disables the embedded Jetty server. */
+  val disable_jetty: Boolean = false,
+
+  /** WebSocket idle timeout in seconds. Defaults to -1 (no timeout). */
+  val websocket_idle_timeout_seconds: Long = -1,
 ) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
