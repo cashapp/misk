@@ -3,14 +3,25 @@ package misk.tokens
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.testing.FakeFixture
-import misk.tokens.TokenGenerator.Companion.CANONICALIZE_LENGTH_MAX
-import misk.tokens.TokenGenerator.Companion.CANONICALIZE_LENGTH_MIN
-import misk.tokens.TokenGenerator.Companion.canonicalize
+import misk.tokens.TokenGenerator2.Companion.CANONICALIZE_LENGTH_MAX
+import misk.tokens.TokenGenerator2.Companion.CANONICALIZE_LENGTH_MIN
+import misk.tokens.TokenGenerator2.Companion.canonicalize
 import java.util.Collections
 import java.util.concurrent.atomic.AtomicLong
 
 @Singleton
 class FakeTokenGenerator @Inject constructor() : FakeFixture(), TokenGenerator {
+  private val tokenGenerator = wisp.token.FakeTokenGenerator()
+
+  override fun reset() =
+    tokenGenerator.reset()
+
+  override fun generate(label: String?, length: Int) =
+    tokenGenerator.generate(label, length)
+}
+
+@Singleton
+class FakeTokenGenerator2 @Inject constructor() : FakeFixture(), TokenGenerator2 {
   internal val nextByLabel by resettable {
     Collections.synchronizedMap<String, AtomicLong>(
       mutableMapOf()

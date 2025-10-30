@@ -71,7 +71,7 @@ public final class misk/jobqueue/FakeJobHandlerModule$Companion {
 }
 
 public final class misk/jobqueue/FakeJobQueue : misk/testing/FakeFixture, misk/jobqueue/JobQueue, misk/jobqueue/TransactionalJobQueue {
-	public fun <init> (Ljava/time/Clock;Lcom/google/inject/Provider;Lcom/google/inject/Provider;Lmisk/tokens/TokenGenerator;)V
+	public fun <init> (Ljava/time/Clock;Lcom/google/inject/Provider;Lcom/google/inject/Provider;Lwisp/token/TokenGenerator;)V
 	public fun batchEnqueue (Lmisk/jobqueue/QueueName;Ljava/util/List;)V
 	public fun enqueue (Lmisk/hibernate/Session;Lmisk/hibernate/Gid;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
 	public fun enqueue (Lmisk/hibernate/Session;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
@@ -242,7 +242,7 @@ public final class misk/jobqueue/v2/FakeJob : java/lang/Comparable, misk/jobqueu
 }
 
 public final class misk/jobqueue/v2/FakeJobEnqueuer : misk/testing/FakeFixture, misk/jobqueue/v2/JobEnqueuer {
-	public fun <init> (Ljava/time/Clock;Lcom/google/inject/Provider;Lmisk/tokens/TokenGenerator;)V
+	public fun <init> (Ljava/time/Clock;Lcom/google/inject/Provider;Lwisp/token/TokenGenerator;)V
 	public fun batchEnqueue (Lmisk/jobqueue/QueueName;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun batchEnqueueAsync (Lmisk/jobqueue/QueueName;Ljava/util/List;)Ljava/util/concurrent/CompletableFuture;
 	public fun batchEnqueueBlocking (Lmisk/jobqueue/QueueName;Ljava/util/List;)Lmisk/jobqueue/v2/JobEnqueuer$BatchEnqueueResult;
