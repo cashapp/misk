@@ -38,7 +38,10 @@ open class AwsSqsJobQueueModule(
   override fun configure() {
     install(CommonModule(config, ::configureSyncClient, ::configureAsyncClient))
 
-    install(ServiceModule(keyOf<RepeatedTaskQueue>(ForSqsHandling::class)).dependsOn<ReadyService>())
+    // TODO remove explicit inline environment variable check once AsyncModule filtering in Guice is working
+    if (!System.getenv("DISABLE_ASYNC_TASKS").toBoolean()) {
+      install(ServiceModule(keyOf<RepeatedTaskQueue>(ForSqsHandling::class)).dependsOn<ReadyService>())
+    }
   }
 
   @OptIn(ExperimentalMiskApi::class)

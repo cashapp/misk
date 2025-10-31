@@ -20,7 +20,11 @@ open class SqsJobQueueModule @JvmOverloads constructor(
 ) : AsyncModule, KAbstractModule() {
   override fun configure() {
     install(CommonModule(config, configureClient))
-    install(ServiceModule<SqsJobConsumer>().dependsOn<ReadyService>())
+
+    // TODO remove explicit inline environment variable check once AsyncModule filtering in Guice is working
+    if (!System.getenv("DISABLE_ASYNC_TASKS").toBoolean()) {
+      install(ServiceModule<SqsJobConsumer>().dependsOn<ReadyService>())
+    }
   }
 
   @OptIn(ExperimentalMiskApi::class)
