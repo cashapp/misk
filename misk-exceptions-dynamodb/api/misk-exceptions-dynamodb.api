@@ -10,7 +10,7 @@ public final class misk/exceptions/dynamodb/ClientExecutionTimeoutExceptionMappe
 	public synthetic fun toResponse (Ljava/lang/Throwable;)Lmisk/web/Response;
 }
 
-public final class misk/exceptions/dynamodb/DynamoDbExceptionMapperModule : misk/inject/KAbstractModule {
+public final class misk/exceptions/dynamodb/DynamoDbExceptionMapperModule : misk/inject/KInstallOnceModule {
 	public fun <init> ()V
 }
 

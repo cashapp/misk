@@ -4,16 +4,19 @@ import app.cash.tempest2.testing.JvmDynamoDbServer
 import app.cash.tempest2.testing.TestTable
 import app.cash.tempest2.testing.internal.TestDynamoDbService
 import com.google.common.util.concurrent.AbstractService
-import com.google.inject.Provides
+import com.google.inject.Provider
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.ServiceModule
 import misk.aws2.dynamodb.DynamoDbService
 import misk.aws2.dynamodb.RequiredDynamoDbTable
 import misk.inject.KAbstractModule
+import misk.inject.asSingleton
+import misk.inject.keyOf
 import misk.testing.TestFixture
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
+import kotlin.reflect.KClass
 
 /**
  * Executes a DynamoDB service in-process per test. It clears the table content before each test
@@ -22,53 +25,87 @@ import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
  * Note that this may not be used alongside [DockerDynamoDbModule] and
  * `@MiskExternalDependency DockerDynamoDb`. DynamoDB may execute in Docker or in-process, but never
  * both.
+ *
+ * This module supports multiple installations with different qualifiers for testing
+ * multi-installation scenarios.
+ *
+ * When [qualifiers] is specified, the database will be bound to multiple qualified clients
+ * in addition to the unqualified client. This allows tests to access the same database
+ * through different qualifiers.
  */
-class InProcessDynamoDbModule(
+class InProcessDynamoDbModule private constructor(
+  private val qualifiers: List<KClass<out Annotation>>,
   private val tables: List<DynamoDbTable>,
 ) : KAbstractModule() {
-  constructor(vararg tables: DynamoDbTable) : this(tables.toList())
+
+  // Backward-compatible constructors (unqualified)
+  constructor(tables: List<DynamoDbTable>) : this(emptyList(), tables)
+  constructor(vararg tables: DynamoDbTable) : this(emptyList(), tables.toList())
+
+  // Constructor for single qualifier (backwards compatible)
+  constructor(qualifier: KClass<out Annotation>?, vararg tables: DynamoDbTable) : this(
+    qualifier?.let { listOf(it) } ?: emptyList(),
+    tables.toList()
+  )
+
+  // Constructor with multiple qualifiers
+  constructor(
+    qualifiers: List<KClass<out Annotation>>,
+    vararg tables: DynamoDbTable
+  ) : this(qualifiers, tables.toList())
 
   override fun configure() {
+    // Bind tables as unqualified
+    val tableMultibinder = newMultibinder<DynamoDbTable>()
     for (table in tables) {
-      multibind<DynamoDbTable>().toInstance(table)
+      tableMultibinder.addBinding().toInstance(table)
     }
-    bind<DynamoDbService>().to<InProcessDynamoDbService>()
+
+    bind(keyOf<List<RequiredDynamoDbTable>>()).toInstance(
+      tables.map { RequiredDynamoDbTable(it.tableName) }
+    )
+
+    // Create the database instance (unqualified)
+    bind(keyOf<TestDynamoDb>()).toProvider(Provider {
+      TestDynamoDb(
+        TestDynamoDbService.create(
+          serverFactory = JvmDynamoDbServer.Factory,
+          tables = tables.map { table ->
+            TestTable.create(table.tableName, table.tableClass) {
+              table.configureTable(it.toBuilder()).build()
+            }
+          },
+          port = null
+        )
+      )
+    }).asSingleton()
+
+    val testDynamoDbProvider = getProvider(keyOf<TestDynamoDb>())
+
+    // Bind unqualified clients
+    bind(keyOf<DynamoDbClient>()).toProvider(Provider {
+      testDynamoDbProvider.get().service.client.dynamoDb
+    }).asSingleton()
+
+    bind(keyOf<DynamoDbStreamsClient>()).toProvider(Provider {
+      testDynamoDbProvider.get().service.client.dynamoDbStreams
+    }).asSingleton()
+
+    bind(keyOf<DynamoDbService>()).to(keyOf<InProcessDynamoDbService>())
     install(ServiceModule<DynamoDbService>().dependsOn<TestDynamoDb>())
     install(ServiceModule<TestDynamoDb>())
-    multibind<TestFixture>().to<TestDynamoDb>()
-  }
+    multibind<TestFixture>().to(keyOf<TestDynamoDb>())
 
-  @Provides
-  @Singleton
-  fun provideRequiredTables(): List<RequiredDynamoDbTable> =
-    tables.map { RequiredDynamoDbTable(it.tableName) }
+    // Bind qualified clients to the same database instance
+    for (qualifier in qualifiers) {
+      bind(keyOf<DynamoDbClient>(qualifier)).toProvider(Provider {
+        testDynamoDbProvider.get().service.client.dynamoDb
+      }).asSingleton()
 
-  @Provides
-  @Singleton
-  fun providesTestDynamoDb(): TestDynamoDb {
-    return TestDynamoDb(
-      TestDynamoDbService.create(
-        serverFactory = JvmDynamoDbServer.Factory,
-        tables = tables.map { table ->
-          TestTable.create(table.tableName, table.tableClass) {
-            table.configureTable(it.toBuilder()).build()
-          }
-        },
-        port = null
-      )
-    )
-  }
-
-  @Provides
-  @Singleton
-  fun providesAmazonDynamoDB(testDynamoDb: TestDynamoDb): DynamoDbClient {
-    return testDynamoDb.service.client.dynamoDb
-  }
-
-  @Provides
-  @Singleton
-  fun providesAmazonDynamoDBStreams(testDynamoDb: TestDynamoDb): DynamoDbStreamsClient {
-    return testDynamoDb.service.client.dynamoDbStreams
+      bind(keyOf<DynamoDbStreamsClient>(qualifier)).toProvider(Provider {
+        testDynamoDbProvider.get().service.client.dynamoDbStreams
+      }).asSingleton()
+    }
   }
 
   /** This service does nothing; depending on Tempest's [TestDynamoDb] is sufficient. */
