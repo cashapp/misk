@@ -8,5 +8,3 @@ If you have a choice, prefer to use [wisp-feature](https://github.com/cashapp/mi
 
 - [misk-launchdarkly-core](https://github.com/cashapp/misk/tree/master/misk-launchdarkly-core) for an implementation of 
 `FeatureFlags` using [LaunchDarkly](https://launchdarkly.com/).
-- [misk-feature-testing](https://github.com/cashapp/misk/tree/master/misk-feature-testing) for a test implementation
-of `FeatureFlags`.

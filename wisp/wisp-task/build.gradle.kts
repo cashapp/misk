@@ -1,18 +1,19 @@
 plugins {
-    `java-library`
+  id("org.jetbrains.kotlin.jvm")
+  id("com.vanniktech.maven.publish")
 }
 
 dependencies {
     api(libs.kotlinRetry)
     api(libs.micrometerCore)
     api(project(":wisp:wisp-config"))
-    implementation(libs.kotlinxCoroutines)
-    implementation(libs.kotlinLogging)
+    implementation(libs.kotlinxCoroutinesCore)
+    implementation(libs.loggingApi)
     implementation(project(":wisp:wisp-logging"))
 
     testImplementation(libs.junitApi)
     testImplementation(libs.kotlinTest)
     testImplementation(libs.kotlinTest)
-    testImplementation(libs.micrometerPrometheus)
+    testImplementation(libs.micrometerRegistryPrometheus)
     testImplementation(libs.prometheusClient)
 }

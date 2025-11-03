@@ -1,10 +1,19 @@
+public abstract interface class misk/cron/CronCoordinator {
+	public abstract fun shouldRunTask (Ljava/lang/String;)Z
+}
+
+public final class misk/cron/CronDashboardTabModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
 public final class misk/cron/CronEntryModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/cron/CronEntryModule$Companion;
-	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/cron/CronPattern;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/cron/CronEntryModule$Companion {
-	public final fun create (Lkotlin/reflect/KClass;)Lmisk/cron/CronEntryModule;
+	public final fun create (Lkotlin/reflect/KClass;Lmisk/cron/CronPattern;)Lmisk/cron/CronEntryModule;
+	public static synthetic fun create$default (Lmisk/cron/CronEntryModule$Companion;Lkotlin/reflect/KClass;Lmisk/cron/CronPattern;ILjava/lang/Object;)Lmisk/cron/CronEntryModule;
 }
 
 public final class misk/cron/CronManager {
@@ -34,11 +43,27 @@ public final class misk/cron/CronManager$CronEntry {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/cron/CronModule : misk/inject/KInstallOnceModule {
+public final class misk/cron/CronManager$RunningCronEntry {
+	public fun <init> (Ljava/util/concurrent/CompletableFuture;Lmisk/cron/CronManager$CronEntry;)V
+	public final fun component1 ()Ljava/util/concurrent/CompletableFuture;
+	public final fun component2 ()Lmisk/cron/CronManager$CronEntry;
+	public final fun copy (Ljava/util/concurrent/CompletableFuture;Lmisk/cron/CronManager$CronEntry;)Lmisk/cron/CronManager$RunningCronEntry;
+	public static synthetic fun copy$default (Lmisk/cron/CronManager$RunningCronEntry;Ljava/util/concurrent/CompletableFuture;Lmisk/cron/CronManager$CronEntry;ILjava/lang/Object;)Lmisk/cron/CronManager$RunningCronEntry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCompletableFuture ()Ljava/util/concurrent/CompletableFuture;
+	public final fun getEntry ()Lmisk/cron/CronManager$CronEntry;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/cron/CronModule : misk/inject/KInstallOnceModule, misk/inject/AsyncModule {
 	public fun <init> (Ljava/time/ZoneId;)V
 	public fun <init> (Ljava/time/ZoneId;I)V
 	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;)V
-	public synthetic fun <init> (Ljava/time/ZoneId;ILjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;Z)V
+	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;ZZ)V
+	public synthetic fun <init> (Ljava/time/ZoneId;ILjava/util/List;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun moduleWhenAsyncDisabled ()Lmisk/inject/KAbstractModule;
 	public final fun provideTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;)Lmisk/tasks/RepeatedTaskQueue;
 }
 
@@ -50,6 +75,24 @@ public final class misk/cron/FakeCronModule : misk/inject/KAbstractModule {
 	public fun <init> (Ljava/time/ZoneId;)V
 	public fun <init> (Ljava/time/ZoneId;I)V
 	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;)V
-	public synthetic fun <init> (Ljava/time/ZoneId;ILjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;Z)V
+	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;ZZ)V
+	public synthetic fun <init> (Ljava/time/ZoneId;ILjava/util/List;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun cronCoordinator (Lwisp/lease/LeaseManager;)Lmisk/cron/CronCoordinator;
+}
+
+public final class misk/cron/MultipleLeaseCronCoordinator : misk/cron/CronCoordinator {
+	public fun <init> (Lwisp/lease/LeaseManager;)V
+	public fun shouldRunTask (Ljava/lang/String;)Z
+}
+
+public final class misk/cron/SingleLeaseCronCoordinator : misk/cron/CronCoordinator {
+	public static final field CRON_CLUSTER_LEASE_NAME Ljava/lang/String;
+	public static final field Companion Lmisk/cron/SingleLeaseCronCoordinator$Companion;
+	public fun <init> (Lwisp/lease/LeaseManager;)V
+	public fun shouldRunTask (Ljava/lang/String;)Z
+}
+
+public final class misk/cron/SingleLeaseCronCoordinator$Companion {
 }
 

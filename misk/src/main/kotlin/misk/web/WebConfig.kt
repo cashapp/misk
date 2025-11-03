@@ -1,11 +1,13 @@
 package misk.web
 
+import misk.annotation.ExperimentalMiskApi
+import misk.client.HTTP_SERVICE_UNAVAILABLE
+import misk.config.Config
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
 import misk.web.concurrencylimits.ConcurrencyLimiterStrategy
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.slf4j.event.Level
-import wisp.config.Config
 
 data class WebConfig @JvmOverloads constructor(
   /** HTTP port to listen on, or 0 for any available port. */
@@ -17,7 +19,9 @@ data class WebConfig @JvmOverloads constructor(
   val idle_timeout: Long = 0,
 
   /**
-   * If >= 0, use a dedicated jetty thread pool for health checking.
+   * If >= 0,
+   *  By default, use a dedicated jetty thread pool for health checking.
+   *  With health_dedicated_jetty_instance = true, use a dedicated jetty instance.
    *
    * A dedicated thread pool ensures that health checks are not queued or rejected when the service
    * is saturated and queueing requests. If health checks are rejected and/or queued, the health
@@ -26,6 +30,39 @@ data class WebConfig @JvmOverloads constructor(
    * queues and more health checks failures.
    */
   val health_port: Int = -1,
+
+  /**
+   * @ExperimentalMiskApi - this feature is still being verified in production.
+   *
+   * health_port must be >= 0,
+   *
+   * A dedicated jetty instance ensures the service readiness and liveness endpoints
+   * remain available during graceful shutdown to prevent the container from being forcefully
+   * terminated and graceful failover from readiness check failures via HTTP 503.
+   *
+   * A separate jetty instance allows the primary instance to allow in flight connections to
+   * complete before shutting down and then shut down supporting services orderly until all
+   * are stopped and the health instance can shut down safely.
+   */
+  @property:ExperimentalMiskApi
+  val health_dedicated_jetty_instance: Boolean = false,
+
+  /**
+   * @ExperimentalMiskApi - this feature is still being verified in production.
+   *
+   * health_port must be >= 0,
+   * health_dedicated_jetty_instance must be true
+   *
+   * An interceptor which delays service shutdown for in flight requests to complete and for no
+   * new incoming requests to have occurred during the idle time.  Once shutdown has commenced,
+   * incoming requests will be redirected to healthy pods by responding with 503 or the status
+   * code specified.
+   *
+   * This improves the ability for services to complete in-flight requests and safely terminate
+   * the underlying connection.
+   */
+  @property:ExperimentalMiskApi
+  val graceful_shutdown_config: GracefulShutdownConfig? = null,
 
   /** The network interface to bind to. Null or 0.0.0.0 to bind to all interfaces. */
   val host: String? = null,
@@ -77,9 +114,14 @@ data class WebConfig @JvmOverloads constructor(
   val close_connection_percent: Double = 0.0,
 
   /**
-   * If true responses which are larger than the minGzipSize will be compressed.
+   * If true non-gRPC responses which are larger than the minGzipSize will be compressed.
    */
   val gzip: Boolean = true,
+
+  /**
+   * If true gRPC responses which are larger than the minGzipSize will be compressed.
+   */
+  val grpcGzip: Boolean = false,
 
   /** The minimum size in bytes before the response body will be compressed. */
   val minGzipSize: Int = 1024,
@@ -110,6 +152,9 @@ data class WebConfig @JvmOverloads constructor(
 
   /** The maximum allowed size in bytes for the HTTP request line and HTTP request headers. */
   val http_request_header_size: Int? = 32768,
+
+  /** The maximum allowed size in bytes for the HTTP response headers. */
+  val http_response_header_size: Int? = null,
 
   /** The size of Jetty's header field cache, in terms of unique character branches. */
   val http_header_cache_size: Int? = null,
@@ -148,12 +193,39 @@ data class WebConfig @JvmOverloads constructor(
   /** The initial size of stream's flow control receive window. */
   val jetty_initial_stream_recv_window: Int? = null,
 
+  /**
+   * Whether to use direct ByteBuffers for reading.
+   */
+  val jetty_use_input_direct_byte_buffers: Boolean = true,
+
+  /**
+   * Whether to use direct ByteBuffers for writing.
+   */
+  val jetty_use_output_direct_byte_buffers: Boolean = true,
+
   /** Wires up health checks on whether Jetty's thread pool is low on threads. */
   val enable_thread_pool_health_check: Boolean = false,
 
   /** Configurations to enable Jetty to listen for traffic on a unix domain socket being proxied through a sidecar (e.g. envoy, istio) */
   val unix_domain_sockets: List<WebUnixDomainSocketConfig>? = null,
-  ) : Config
+
+  /** Config used by client and server interceptors installed by DeadlinePropagationModule
+   * Only applies if DeadlinePropagationModule is installed, ignored otherwise  */
+  val request_deadlines: RequestDeadlinesConfig = RequestDeadlinesConfig(),
+
+  /**
+   * Exposed configuration for Jetty's HTTP/2 frame rate limiter to avoid DDoS (CVE-2023-44487, CVE-2025-5115).
+   * -1 will effectively disable rate limiting but will still emit metrics on the rate limiter queue.
+   * See https://jetty.org/docs/jetty/10/operations-guide/modules/standard.html#http2
+   */
+  val jetty_http2_max_events_per_second: Int = 128,
+
+  /** If true, disables the embedded Jetty server. */
+  val disable_jetty: Boolean = false,
+
+  /** WebSocket idle timeout in seconds. Defaults to -1 (no timeout). */
+  val websocket_idle_timeout_seconds: Long = -1,
+) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
   /** HTTPS port to listen on, or 0 for any available port. */
@@ -243,3 +315,91 @@ data class ConcurrencyLimiterConfig @JvmOverloads constructor(
    */
   val log_level: Level = Level.ERROR,
 )
+
+data class GracefulShutdownConfig @JvmOverloads constructor(
+  /**
+   * true to explicitly disable graceful shutdown service/interceptor.
+   */
+  val disabled: Boolean = false,
+
+  /**
+   * Milliseconds no new incoming requests have come in before proceeding with shutdown.
+   */
+  val idle_timeout: Long = 2000,
+
+  /**
+   * The maximum amount of time to wait for no in-flight requests and the idle timeout to expire.
+   * If <= 0 the service will not limit the amount of time to wait for idle, however it might
+   * be forcibly killed by an external source, like kubernetes.
+   */
+  val max_graceful_wait: Long = 20_000,
+
+  /**
+   * The status code to use for rejecting incoming requests after shutdown has begun.
+   * If <= 0 the service will not reject incoming requests and wait until new requests have
+   * processed and the idle_timeout is reached.
+   */
+  val rejection_status_code: Int = HTTP_SERVICE_UNAVAILABLE
+
+)
+
+/**
+ * Configuration for request deadline tracking and enforcement.
+ *
+ * Request deadlines help prevent cascading failures by tracking how much time remains
+ * for a request chain to complete. Deadlines are propagated through service boundaries
+ * and can be enforced at various points in the request lifecycle.
+ *
+ * @see [RequestDeadlineInterceptor][misk.web.interceptors.RequestDeadlineInterceptor] for inbound deadline handling
+ * @see [DeadlinePropagationInterceptor][misk.client.DeadlinePropagationInterceptor] for outbound deadline propagation
+ */
+data class RequestDeadlinesConfig @JvmOverloads constructor(
+  /**
+   * Default timeout in milliseconds for requests that don't have an explicit deadline.
+   * 
+   * This value is used when:
+   * - No deadline headers are found in incoming requests, and
+   * - Actions don't have [@RequestDeadlineTimeout][misk.web.RequestDeadlineTimeout] annotation
+   *
+   * Defaults to 10s to match the
+   * [default readTimeout](https://github.com/square/okhttp/blob/master/okhttp/src/commonJvmAndroid/kotlin/okhttp3/OkHttpClient.kt#L622)
+   * on the OkHttpClient.
+   */
+  val global_timeout_ms: Long = 10_000,
+
+  /**
+   * Controls how aggressively deadlines are tracked and enforced.
+   *
+   * Default: [METRICS_ONLY] for safe rollout
+   */
+  val mode: RequestDeadlineMode = RequestDeadlineMode.METRICS_ONLY
+)
+
+enum class RequestDeadlineMode {
+  /**
+   * Only collect metrics on deadline violations without propagation or enforcement.
+   * Use this for safe rollout and observability without behavioral changes.
+   */
+  METRICS_ONLY,
+
+  /**
+   * Propagate deadlines to downstream services but don't enforce them locally.
+   * Useful for establishing deadline chains without risking service availability
+   */
+  PROPAGATE_ONLY,
+
+  /**
+   * Enforce deadlines on inbound requests only.
+   */
+  ENFORCE_INBOUND,
+
+  /**
+   * Enforce deadlines on outbound requests only.
+   */
+  ENFORCE_OUTBOUND,
+
+  /**
+   * Enforce deadlines on both inbound and outbound requests.
+   */
+  ENFORCE_ALL
+}

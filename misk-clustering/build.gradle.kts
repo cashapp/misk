@@ -1,38 +1,38 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
+  id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
   api(libs.guava)
   api(libs.jakartaInject)
-  api(libs.kotlinLogging)
-  api(project(":wisp:wisp-config"))
-  api(project(":wisp:wisp-lease-testing"))
+  api(libs.loggingApi)
+  api(project(":misk-config"))
   api(project(":misk-inject"))
-  implementation(libs.errorproneAnnotations)
+  implementation(libs.caffeine)
   implementation(libs.guice)
+  implementation(libs.hash4j)
   implementation(libs.kubernetesClient)
   implementation(libs.kubernetesClientApi)
   implementation(libs.okHttp)
-  implementation(project(":wisp:wisp-lease"))
-  implementation(project(":wisp:wisp-logging"))
-  implementation(project(":misk-core"))
+  api(project(":wisp:wisp-lease"))
+  implementation(project(":misk-logging"))
+  implementation(project(":misk-backoff"))
   implementation(project(":misk-lease"))
   implementation(project(":misk-service"))
+  api(project(":misk-testing-api"))
 
+  testImplementation(libs.apacheCommonsMath3)
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
   testImplementation(project(":misk-clustering"))
   testImplementation(project(":misk-testing"))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

@@ -12,7 +12,7 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import wisp.config.Config
+import misk.config.Config
 import wisp.deployment.TESTING
 import java.util.Arrays
 import java.util.Objects
@@ -248,18 +248,18 @@ class SecretColumnTest {
     override lateinit var id: Id<DbJerryGarciaSong>
 
     @Column(nullable = false)
-    var title: String
+    lateinit var title: String
 
     @Column(nullable = false)
     var length: Int = 0
 
     @Column(nullable = true)
     @SecretColumn(keyName = "albumKey", indexable = false)
-    var album: ByteArray?
+    var album: ByteArray? = null
 
     @Column(nullable = true)
     @SecretColumn(keyName = "reviewerKey")
-    var reviewer: ByteArray?
+    var reviewer: ByteArray? = null
 
     constructor(title: String, length: Int, album: ByteArray? = null, reviewer: ByteArray? = null) {
       this.title = title
@@ -277,16 +277,16 @@ class SecretColumnTest {
     override lateinit var id: Id<DbJerryGarciaSongRaw>
 
     @Column(nullable = false)
-    var title: String
+    lateinit var title: String
 
     @Column(nullable = false)
     var length: Int = 0
 
     @Column(nullable = true)
-    var album: ByteArray?
+    var album: ByteArray? = null
 
     @Column(nullable = true)
-    var reviewer: ByteArray?
+    var reviewer: ByteArray? = null
 
     constructor(title: String, length: Int, album: ByteArray? = null, reviewer: ByteArray? = null) {
       this.title = title
@@ -351,7 +351,7 @@ class SecretColumnTest {
 
       val config = MiskConfig.load<AppConfig>("encryptedcolumn", TESTING)
       install(CryptoTestModule(config.crypto))
-      install(HibernateTestingModule(JerryGarciaDb::class, config.data_source))
+      install(HibernateTestingModule(JerryGarciaDb::class))
       install(HibernateModule(JerryGarciaDb::class, config.data_source))
       install(object : HibernateEntityModule(JerryGarciaDb::class) {
         override fun configureHibernate() {

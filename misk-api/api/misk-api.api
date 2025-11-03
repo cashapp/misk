@@ -1,3 +1,6 @@
+public abstract interface annotation class misk/annotation/ExperimentalMiskApi : java/lang/annotation/Annotation {
+}
+
 public abstract interface class misk/api/HttpRequest {
 	public abstract fun getDispatchMechanism ()Lmisk/web/DispatchMechanism;
 	public abstract fun getRequestHeaders ()Lokhttp3/Headers;
@@ -47,13 +50,15 @@ public final class misk/client/NetworkInterceptorWrapper : okhttp3/Interceptor {
 public abstract interface class misk/logging/Mdc {
 	public abstract fun clear ()V
 	public abstract fun get (Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun getCopyOfContextMap ()Ljava/util/Map;
 	public abstract fun put (Ljava/lang/String;Ljava/lang/String;)V
+	public abstract fun setContextMap (Ljava/util/Map;)V
 }
 
 public abstract interface class misk/scope/ActionScoped {
 	public static final field Companion Lmisk/scope/ActionScoped$Companion;
 	public abstract fun get ()Ljava/lang/Object;
-	public abstract fun getIfInScope ()Ljava/lang/Object;
+	public fun getIfInScope ()Ljava/lang/Object;
 }
 
 public final class misk/scope/ActionScoped$Companion {
@@ -80,5 +85,8 @@ public final class misk/web/DispatchMechanism : java/lang/Enum {
 	public final fun getMethod ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/web/DispatchMechanism;
 	public static fun values ()[Lmisk/web/DispatchMechanism;
+}
+
+public abstract interface annotation class misk/web/dashboard/AdminDashboardAccess : java/lang/annotation/Annotation {
 }
 

@@ -1,28 +1,26 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
+  id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
-  `java-test-fixtures`
+  id("java-test-fixtures")
 }
 
 dependencies {
   api(libs.guava)
   api(libs.jakartaInject)
   api(libs.jedis)
-  api(project(":wisp:wisp-config"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
   api(project(":misk-metrics"))
-  implementation(libs.apacheCommonsPool2)
+  implementation(libs.apacheCommonsPool)
+  implementation(libs.apacheCommonsIo)
   implementation(libs.guice)
   implementation(libs.okio)
   implementation(libs.prometheusClient)
-  implementation(project(":wisp:wisp-logging"))
-  implementation(libs.kotlinLogging)
+  implementation(project(":misk-logging"))
+  implementation(libs.loggingApi)
   implementation(project(":wisp:wisp-deployment"))
   implementation(project(":misk-service"))
 
@@ -34,22 +32,45 @@ dependencies {
   testFixturesImplementation(libs.dockerApi)
   testFixturesImplementation(libs.guava)
   testFixturesImplementation(libs.guice)
-  testFixturesImplementation(libs.kotlinLogging)
+  testFixturesImplementation(libs.loggingApi)
   testFixturesImplementation(libs.okio)
-  testFixturesImplementation(project(":wisp:wisp-containers-testing"))
-  testFixturesImplementation(project(":wisp:wisp-logging"))
+  testFixturesImplementation(project(":misk-testing"))
+  testFixturesImplementation(project(":misk-logging"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
-  testImplementation(project(":wisp:wisp-time-testing"))
+  testImplementation(project(":misk-testing"))
   testImplementation(project(":misk"))
   testImplementation(project(":misk-redis"))
-  testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-redis")))
+
+  testImplementation(project(":misk-service"))
+  testImplementation(libs.dockerApi)
+  testImplementation(libs.guava)
+  testImplementation(libs.guice)
+  testImplementation(libs.loggingApi)
+  testImplementation(libs.okio)
+  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk-logging"))
+
+  testFixturesImplementation(libs.apacheCommonsPool)
+  testFixturesImplementation(libs.apacheCommonsIo)
+  testFixturesImplementation(libs.guice)
+  testFixturesImplementation(libs.okio)
+  testFixturesImplementation(libs.prometheusClient)
+  testFixturesImplementation(project(":misk-logging"))
+  testFixturesImplementation(libs.loggingApi)
+  testFixturesImplementation(project(":wisp:wisp-deployment"))
+  testFixturesImplementation(project(":misk-service"))
 }
 
-configure<MavenPublishBaseExtension> {
+tasks.withType<Test>().configureEach {
+  dependsOn(":startRedis")
+  dependsOn(":startRedisCluster")
+}
+
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

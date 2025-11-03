@@ -1,5 +1,6 @@
 package misk.redis
 
+import misk.redis.Redis.ScanResult
 import okio.ByteString
 import redis.clients.jedis.args.ListDirection
 import java.time.Duration
@@ -29,6 +30,8 @@ interface DeferredRedis {
   fun hgetAll(key: String): Supplier<Map<String, ByteString>?>
 
   fun hlen(key: String): Supplier<Long>
+
+  fun hkeys(key: String): Supplier<List<ByteString>>
 
   fun hmget(key: String, vararg fields: String): Supplier<List<ByteString?>>
 
@@ -79,15 +82,25 @@ interface DeferredRedis {
 
   fun lpop(key: String): Supplier<ByteString?>
 
+  fun blpop(keys: Array<String>, timeoutSeconds: Double): Supplier<Pair<String, ByteString>?>
+
   fun rpop(key: String, count: Int): Supplier<List<ByteString?>>
 
   fun rpop(key: String): Supplier<ByteString?>
 
   fun lrange(key: String, start: Long, stop: Long): Supplier<List<ByteString?>>
 
+  fun ltrim(key: String, start: Long, stop: Long): Supplier<Unit>
+
   fun lrem(key: String, count: Long, element: ByteString): Supplier<Long>
 
   fun rpoplpush(sourceKey: String, destinationKey: String): Supplier<ByteString?>
+
+  fun exists(key: String): Supplier<Boolean>
+
+  fun exists(vararg keys: String): Supplier<Long>
+
+  fun persist(key: String): Supplier<Boolean>
 
   fun expire(key: String, seconds: Long): Supplier<Boolean>
 
@@ -138,6 +151,8 @@ interface DeferredRedis {
     start: Redis.ZRangeRankMarker,
     stop: Redis.ZRangeRankMarker,
   ): Supplier<Long>
+
+  fun llen(key: String): Supplier<Long>
 
   fun zcard(key: String): Supplier<Long>
 

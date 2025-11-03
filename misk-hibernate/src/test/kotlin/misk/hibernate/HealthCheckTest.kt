@@ -4,19 +4,24 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Provider
 import jakarta.inject.Inject
 import misk.healthchecks.HealthCheck
-import misk.mockito.Mockito.mock
-import misk.mockito.Mockito.whenever
+import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.vitess.testing.utilities.DockerVitess
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.HibernateException
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
-import wisp.time.FakeClock
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import misk.time.FakeClock
 import java.time.Instant
 
 @MiskTest(startService = true)
 class HealthCheckTest {
+  @MiskExternalDependency
+  private val dockerVitess = DockerVitess()
+
   @MiskTestModule
   val module = MoviesTestModule()
 

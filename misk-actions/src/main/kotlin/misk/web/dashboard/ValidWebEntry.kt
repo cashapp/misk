@@ -17,7 +17,6 @@ open class ValidWebEntry @JvmOverloads constructor(
   companion object {
     /** Generate a valid slug from an Annotation class. */
     fun slugify(annotation: KClass<out Annotation>) = annotation.simpleName!!
-      .toString()
       .slugify()
 
     /** Generate a valid slug from an Annotation class. */
@@ -44,8 +43,12 @@ open class ValidWebEntry @JvmOverloads constructor(
 
     /** Valid URL path prefix must have correct form and not use any blocked prefixes. */
     private fun String.requireValidUrlPathPrefix() = apply {
-      // internal link url_path_prefix must start and end with '/'
-      require(this.startsWith("http") || this.matches(Regex("(/[^/]+)*/"))) {
+      require(this.startsWith("http") ||
+        // Internal link url_path_prefix must start and end with '/'
+        this.matches(Regex("(/[^/]+)*/")) ||
+        // Ignores any trailing query parameters for service local links like /_admin/metadata/?q=config but still enforces the trailing '/'
+        if (this.contains("?")) this.split("?").dropLast(1).joinToString("?").matches(Regex("(/[^/]+)*/")) else false
+      ) {
         "Invalid or unexpected [urlPathPrefix=$this]. " +
           "Must start with 'http' OR start and end with '/'."
       }

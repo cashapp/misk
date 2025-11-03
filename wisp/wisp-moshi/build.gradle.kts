@@ -1,8 +1,16 @@
 plugins {
-    `java-library`
+  id("org.jetbrains.kotlin.jvm")
+  id("com.vanniktech.maven.publish")
 }
 
 dependencies {
-    api(libs.moshi)
-    implementation(libs.moshiKotlin)
+  api(libs.moshiCore)
+  api(libs.guice6)
+  api(libs.jakartaInject)
+  api(libs.javaxInject)
+  implementation(libs.moshiKotlin)
+
+  testRuntimeOnly(libs.junitEngine)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinTest)
 }

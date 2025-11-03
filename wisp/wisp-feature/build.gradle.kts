@@ -1,8 +1,9 @@
 plugins {
-    `java-library`
+  id("org.jetbrains.kotlin.jvm")
+  id("com.vanniktech.maven.publish")
 }
 
 dependencies {
-    api(libs.moshi)
-    implementation(libs.kotlinLogging)
+    api(libs.moshiCore)
+    implementation(libs.loggingApi)
 }

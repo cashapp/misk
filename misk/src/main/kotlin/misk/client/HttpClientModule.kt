@@ -42,7 +42,7 @@ class HttpClientModule @JvmOverloads constructor(
     @Inject lateinit var httpClientsConfigProvider: Provider<HttpClientsConfig>
     @Inject lateinit var httpClientFactory: HttpClientFactory
 
-    override fun get() = httpClientFactory.create(httpClientsConfigProvider.get()[name])
+    override fun get() = httpClientFactory.create(httpClientsConfigProvider.get()[name], name)
   }
 
   private class ProtoMessageHttpClientProvider(

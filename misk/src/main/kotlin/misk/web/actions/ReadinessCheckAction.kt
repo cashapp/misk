@@ -12,7 +12,7 @@ import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 @Singleton
 class ReadinessCheckAction @Inject internal constructor(

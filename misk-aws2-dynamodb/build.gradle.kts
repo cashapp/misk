@@ -1,25 +1,24 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
+  id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
-  `java-test-fixtures`
+  id("java-test-fixtures")
 }
 
 dependencies {
   api(libs.aws2Dynamodb)
-  api(libs.awsAuth)
+  api(libs.aws2DynamodbEnhanced)
+  api(libs.aws2Auth)
   api(libs.awsSdkCore)
   api(libs.guava)
-  api(libs.guice)
+  api(libs.guice6)
   api(libs.jakartaInject)
   api(project(":misk-aws"))
   api(project(":misk-inject"))
-  implementation(libs.awsCore)
-  implementation(libs.awsRegions)
+  implementation(libs.aws2Core)
+  implementation(libs.aws2Regions)
   implementation(project(":misk-exceptions-dynamodb"))
   implementation(project(":misk-service"))
 
@@ -40,15 +39,20 @@ dependencies {
   testImplementation(libs.assertj)
   testImplementation(libs.aws2DynamodbEnhanced)
   testImplementation(libs.junitApi)
-  // Have to clamp until DynamoDBLocal supports later versions (dependency from tempest).
-  testRuntimeOnly("org.antlr:antlr4-runtime") {
-    version {
-      strictly("4.9.3")
-    }
-  }
+
+  testImplementation(libs.tempest2Testing)
+  testImplementation(libs.tempest2TestingDocker)
+  testImplementation(libs.tempest2TestingJvm)
+  testImplementation(project(":misk-core"))
+  testImplementation(project(":misk-service"))
+
+  testFixturesImplementation(libs.aws2Core)
+  testFixturesImplementation(libs.aws2Regions)
+  testFixturesImplementation(project(":misk-exceptions-dynamodb"))
+  testFixturesImplementation(project(":misk-service"))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

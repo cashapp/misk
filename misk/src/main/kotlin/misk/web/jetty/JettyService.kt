@@ -13,6 +13,7 @@ import misk.security.ssl.TlsProtocols
 import misk.web.WebConfig
 import misk.web.WebSslConfig
 import misk.web.WebUnixDomainSocketConfig
+import misk.web.jetty.JettyHealthService.Companion.jettyHealthServiceEnabled
 import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
@@ -43,10 +44,9 @@ import org.eclipse.jetty.util.JavaVersion
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.io.File
 import java.io.IOException
-import java.lang.RuntimeException
 import java.lang.Thread.sleep
 import java.net.InetAddress
 import java.nio.file.Files
@@ -68,6 +68,7 @@ class JettyService @Inject internal constructor(
   private val connectionMetricsCollector: JettyConnectionMetricsCollector,
   private val statisticsHandler: StatisticsHandler,
   private val gzipHandler: GzipHandler,
+  private val http2RateControlFactory: MeasuredWindowRateControl.Factory
 ) : AbstractIdleService() {
   private val server = Server(threadPool)
   val healthServerUrl: HttpUrl? get() = server.healthUrl
@@ -79,7 +80,7 @@ class JettyService @Inject internal constructor(
     val stopwatch = Stopwatch.createStarted()
     logger.info("Starting Jetty")
 
-    if (webConfig.health_port >= 0) {
+    if (!webConfig.jettyHealthServiceEnabled() && webConfig.health_port >= 0) {
       healthExecutor = ThreadPoolExecutor(
         // 2 threads for jetty acceptor and selector. 2 threads for k8s liveness/readiness.
         4,
@@ -116,16 +117,22 @@ class JettyService @Inject internal constructor(
     if (webConfig.http_request_header_size != null) {
       httpConfig.requestHeaderSize = webConfig.http_request_header_size
     }
+    if (webConfig.http_response_header_size != null) {
+      httpConfig.responseHeaderSize = webConfig.http_response_header_size
+    }
     if (webConfig.http_header_cache_size != null) {
       httpConfig.headerCacheSize = webConfig.http_header_cache_size
     }
     if (webConfig.jetty_output_buffer_size != null) {
       httpConfig.outputBufferSize = webConfig.jetty_output_buffer_size
     }
+    httpConfig.isUseInputDirectByteBuffers = webConfig.jetty_use_input_direct_byte_buffers
+    httpConfig.isUseOutputDirectByteBuffers = webConfig.jetty_use_output_direct_byte_buffers
     httpConnectionFactories += HttpConnectionFactory(httpConfig)
     if (webConfig.http2) {
       val http2 = HTTP2CServerConnectionFactory(httpConfig)
       http2.customize(webConfig)
+      http2.rateControlFactory = http2RateControlFactory
       httpConnectionFactories += http2
     }
 
@@ -210,6 +217,7 @@ class JettyService @Inject internal constructor(
       if (webConfig.http2) {
         val http2 = HTTP2ServerConnectionFactory(httpsConfig)
         http2.customize(webConfig)
+        http2.rateControlFactory = http2RateControlFactory
         httpsConnectionFactories += http2
       }
 
@@ -242,7 +250,7 @@ class JettyService @Inject internal constructor(
       server.addConnector(httpsConnector)
     }
 
-    var socketConfigs = newMutableList<WebUnixDomainSocketConfig>()
+    val socketConfigs = newMutableList<WebUnixDomainSocketConfig>()
     if (webConfig.unix_domain_socket != null) {
       socketConfigs.add(webConfig.unix_domain_socket)
     }
@@ -253,7 +261,9 @@ class JettyService @Inject internal constructor(
       val udsConnFactories = mutableListOf<ConnectionFactory>()
       udsConnFactories.add(HttpConnectionFactory(httpConfig))
       if (socketConfig.h2c == true) {
-        udsConnFactories.add(HTTP2CServerConnectionFactory(httpConfig))
+        val http2 = HTTP2CServerConnectionFactory(httpConfig)
+        http2.rateControlFactory = http2RateControlFactory
+        udsConnFactories.add(http2)
       }
 
       if (isJEP380Supported(socketConfig.path)) {
@@ -263,7 +273,7 @@ class JettyService @Inject internal constructor(
           null /* executor */,
           null /* scheduler */,
           null /* buffer pool */,
-          webConfig.acceptors ?: -1 ,
+          webConfig.acceptors ?: -1,
           webConfig.selectors ?: -1,
           *udsConnFactories.toTypedArray()
         )
@@ -272,9 +282,14 @@ class JettyService @Inject internal constructor(
         udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
         udsConnector.name = "uds"
 
+        // try to clean up any leftover socket files before connecting
+        if (socketFile.exists() && !socketFile.delete()) {
+          logger.warn("Could not delete file $socketFile")
+        }
+
         // set file permissions after socket creation so sidecars (e.g. envoy, istio) have access
         try {
-          udsConnector.start();
+          udsConnector.start()
           setFilePermissions(socketFile)
         } catch (e: Exception) {
           cleanAndThrow(udsConnector, e)
@@ -298,9 +313,10 @@ class JettyService @Inject internal constructor(
 
     // TODO(mmihic): Force security handler?
     val servletContextHandler = ServletContextHandler()
+    servletContextHandler.classLoader = Thread.currentThread().contextClassLoader
     servletContextHandler.addServlet(ServletHolder(webActionsServlet), "/*")
 
-    JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null);
+    JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null)
     server.addManaged(servletContextHandler)
 
     statisticsHandler.handler = servletContextHandler
@@ -368,7 +384,7 @@ class JettyService @Inject internal constructor(
     }
   }
 
-  internal fun stop() {
+  fun stop() {
     if (server.isRunning) {
       val stopwatch = Stopwatch.createStarted()
       logger.info("Stopping Jetty")
@@ -392,15 +408,22 @@ class JettyService @Inject internal constructor(
   }
 
   override fun shutDown() {
-    // We need jetty to shut down at the very end to keep outbound connections alive
-    // (due to sidecars). As such, we wait for `shutdown_sleep_ms` so that our
-    // in flight requests drain, but we don't shut down dependencies until after.
-    //
-    // The true jetty shutdown occurs in stop() above, called from MiskApplication.
-    //
-    // Ideally we could call jetty.awaitInflightRequests() but that's not available
-    // for us.
-    if (webConfig.shutdown_sleep_ms > 0) {
+    if (webConfig.jettyHealthServiceEnabled()) {
+      // We will keep the health instance alive so the server continues to report liveness
+      // until graceful shutdown is complete.  It is therefore safe to gracefully shut down the
+      // web service while we continue orderly graceful cleanup.
+      stop()
+    } else if (webConfig.shutdown_sleep_ms > 0) {
+      // We need jetty to shut down at the very end to keep outbound connections alive
+      // (due to sidecars). As such, we wait for `shutdown_sleep_ms` so that our
+      // in flight requests drain, but we don't shut down dependencies until after.
+      //
+      // The true jetty shutdown occurs in stop() above, called from MiskApplication.
+      //
+      // Ideally we could call jetty.awaitInflightRequests() but that's not available
+      // for us.
+      //
+      // Default is to shutdown jetty after all guava managed services are shutdown.
       sleep(webConfig.shutdown_sleep_ms.toLong())
     } else {
       stop()
@@ -436,7 +459,7 @@ private val Server.httpsUrl: HttpUrl?
       ?.toHttpUrl()
   }
 
-private fun NetworkConnector.toHttpUrl(): HttpUrl {
+internal fun NetworkConnector.toHttpUrl(): HttpUrl {
   val context = server.getChildHandlerByClass(ContextHandler::class.java)
   val protocol = defaultConnectionFactory.protocol
   val scheme = if (protocol.startsWith("SSL-") || protocol == "SSL") "https" else "http"
@@ -478,7 +501,7 @@ private fun AbstractHTTP2ServerConnectionFactory.customize(webConfig: WebConfig)
 internal fun isJEP380Supported(
   path: String,
   javaVersion: Int = JavaVersion.VERSION.major
-) : Boolean {
+): Boolean {
   return javaVersion >= 16 &&
     !Strings.isNullOrEmpty(path) &&
     !Pattern.compile("^@|\u0000").matcher(path).find()
@@ -488,17 +511,17 @@ private fun setFilePermissions(file: File) {
   try {
     Files.setPosixFilePermissions(file.toPath(), PosixFilePermissions.fromString("rw-rw-rw-"))
   } catch (e: IOException) {
-    throw RuntimeException(e);
+    throw RuntimeException(e)
   }
 }
 
-private fun cleanAndThrow(connector: Connector, exception: Exception){
-  var runtimeException = RuntimeException(exception);
-  if (connector.isStarted()){
+private fun cleanAndThrow(connector: Connector, exception: Exception) {
+  val runtimeException = RuntimeException(exception)
+  if (connector.isStarted()) {
     try {
-      connector.stop();
+      connector.stop()
     } catch (e: Exception) {
-      runtimeException.addSuppressed(e);
+      runtimeException.addSuppressed(e)
     }
   }
   throw runtimeException

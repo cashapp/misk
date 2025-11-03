@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import misk.vitess.VitessQueryHints
 import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.JoinType
 import javax.persistence.criteria.JoinType.LEFT
@@ -113,8 +114,13 @@ inline fun <T, reified Q : Query<T>> Q.allowTableScan(): Q {
   return this
 }
 
-inline fun <T, reified Q : Query<T>> Q.allowFullScatter(): Q {
-  this.disableCheck(Check.FULL_SCATTER)
+/**
+ * Query extension to allow scatter queries in Vitess by applying a query hint.
+ * For Vitess, this works when `no_scatter` is set at the vtgate, otherwise this serves as a no-op.
+ * For non-Vitess, this function will not work and should not be used.
+ */
+inline fun <T, reified Q : Query<T>> Q.allowScatter(): Q {
+  this.addQueryHint(VitessQueryHints.allowScatter())
   return this
 }
 
@@ -201,7 +207,10 @@ enum class Operator {
   IS_NOT_NULL,
 
   /** `a IS NULL` */
-  IS_NULL
+  IS_NULL,
+
+  /** `a LIKE b` */
+  LIKE
 }
 
 /**

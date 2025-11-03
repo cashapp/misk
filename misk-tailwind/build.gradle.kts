@@ -1,20 +1,18 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
+  id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
-  api(libs.kotlinxHtml)
+  api(libs.kotlinXHtml)
   api(project(":wisp:wisp-deployment"))
   implementation(project(":misk-hotwire"))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

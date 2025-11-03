@@ -16,12 +16,13 @@ import misk.inject.getInstance
 import misk.logging.LogCollectorModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import java.time.Duration
 import java.util.concurrent.BlockingDeque
 import java.util.concurrent.LinkedBlockingDeque
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.annotation.ExperimentalMiskApi
 
 internal class WarmupTest {
   private val events = LinkedBlockingDeque<String>()
@@ -50,6 +51,29 @@ internal class WarmupTest {
       .isEqualTo("Running warmup tasks: [LoggingWarmupTask]")
     assertThat(logCollector.takeMessage(minLevel = Level.INFO))
       .startsWith("Warmup task LoggingWarmupTask completed")
+  }
+
+  @Test
+  fun `suspending warmup task`() {
+    startUpAndShutDown(
+      ServiceModule<LoggingService>(),
+      WarmupModule<SuspendingLoggingWarmupTask>(),
+    )
+
+    assertThat(events).containsExactly(
+      "LoggingService startUp",
+      "SuspendingLoggingWarmupTask created on warmup-0",
+      "SuspendingLoggingWarmupTask warming on warmup-0 @coroutine#1",
+      "HealthChecks all passed",
+      "LoggingService shutDown",
+    )
+
+    assertThat(logCollector.takeMessage(minLevel = Level.INFO))
+      .isEqualTo("Starting ready service")
+    assertThat(logCollector.takeMessage(minLevel = Level.INFO))
+      .isEqualTo("Running warmup tasks: [SuspendingLoggingWarmupTask]")
+    assertThat(logCollector.takeMessage(minLevel = Level.INFO))
+      .startsWith("Warmup task SuspendingLoggingWarmupTask completed")
   }
 
   @Test
@@ -113,6 +137,19 @@ internal class WarmupTest {
     override fun execute() {
       events += "ThrowingWarmupTask about to crash on ${Thread.currentThread().name}"
       throw RuntimeException("boom")
+    }
+  }
+
+  @Singleton
+  class SuspendingLoggingWarmupTask @Inject constructor(
+    private val events: BlockingDeque<String>
+  ) : SuspendingWarmupTask() {
+    init {
+      events += "SuspendingLoggingWarmupTask created on ${Thread.currentThread().name}"
+    }
+
+    override suspend fun executeSuspending() {
+      events += "SuspendingLoggingWarmupTask warming on ${Thread.currentThread().name}"
     }
   }
 

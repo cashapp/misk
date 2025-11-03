@@ -2,12 +2,12 @@ name: Build
 
 on:
   pull_request:
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
   push:
     branches:
       - master
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
 
 env:
   ENVIRONMENT: TESTING
@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -36,22 +36,35 @@ jobs:
 
     services:
       mysql:
-        image: mysql:5.7
+        image: mysql:8.0
         ports:
           - 3306:3306
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      redis:
+        image: redis:7.2
+        ports:
+          - 6379:6379
+# TODO: fix and re-enable, this was failing in CI with `unknown flag: --loglevel`
+#        options: >-
+#          --loglevel debug
 
     strategy:
       matrix:
         cmd:
-          - gradle testShardHibernate -i --scan --no-parallel
-          - gradle testShardRedis -i --scan --no-parallel
-          - gradle testShardNonHibernate -i --scan --parallel
+          - gradle -i --scan --no-parallel testShardHibernate
+          - gradle -i --scan               testShardMiskAws
+          - gradle -i --scan               testShardMiskHibernate
+          - gradle -i --scan               testShardMiskJdbc
+          - gradle -i --scan               testShardSchemaMigratorGradlePlugin
+          - gradle -i --scan --no-parallel testShardRedis
+          - gradle -i --scan               testShardVitess
+          - gradle -i --scan               testShardVitessGradlePlugin
+          - gradle -i --scan               testShardNonHibernate
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -61,9 +74,10 @@ jobs:
 
       - name: Publish Test Report
         if: ${{ always() }}
-        uses: mikepenz/action-junit-report@v3
+        uses: mikepenz/action-junit-report@v5
         with:
           check_name: Test Report - ${{ matrix.cmd }}
+          job_name: Test - ${{ matrix.cmd }}
           report_paths: '**/build/test-results/test/TEST-*.xml'
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -73,13 +87,14 @@ jobs:
     needs: [js, jvm]
     runs-on: [ubuntu-latest]
     env:
-      ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
-      ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
-      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY }}
+      ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_CENTRAL_USERNAME }}
+      ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_CENTRAL_PASSWORD }}
+      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_SECRET_KEY }}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_SECRET_PASSPHRASE }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -95,14 +110,11 @@ jobs:
           cat gradle.properties
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Build Misk Web
-        run: |
-          npm install -g @misk/cli
-          miskweb ci-build -e
-
       - name: Publish the artifacts
         run: |
-          gradle clean publish --stacktrace
+          # disable caching since it breaks publishing to Maven Central
+          gradle publishMiskToMavenCentral --stacktrace --no-build-cache --no-configuration-cache --no-configure-on-demand
+          gradle publishWispToMavenCentral --stacktrace --no-build-cache --no-configuration-cache --no-configure-on-demand
 
       - name: Tag Misk repo
         uses: mathieudutour/github-tag-action@v6.1

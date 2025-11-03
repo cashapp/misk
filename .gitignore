@@ -21,6 +21,8 @@ lib
 dist
 .hash
 hooks.gradle
+.kotlin
+.claude
 
 **/site/
 docs/0.x/*
@@ -29,3 +31,5 @@ docs/changelog.md
 docs/contributing.md
 docs/releasing.md
 docs/wisp/**
+.goose
+local.settings.gradle.kts

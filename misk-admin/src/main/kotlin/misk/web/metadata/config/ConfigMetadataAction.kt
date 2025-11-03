@@ -1,29 +1,11 @@
 package misk.web.metadata.config
 
-import com.google.inject.Provider
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import misk.web.Get
-import misk.web.RequestContentType
-import misk.web.ResponseContentType
 import misk.web.actions.WebAction
-import misk.web.dashboard.AdminDashboardAccess
-import misk.web.mediatype.MediaTypes
 
 @Singleton
-class ConfigMetadataAction @Inject constructor(
-  private val metadataProvider: Provider<ConfigMetadata>
-) : WebAction {
-  @Get("/api/config/metadata")
-  @RequestContentType(MediaTypes.APPLICATION_JSON)
-  @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  @AdminDashboardAccess
-  fun getAll(): Response {
-    return Response(resources = metadataProvider.get().resources)
-  }
-
-  data class Response(val resources: Map<String, String?>)
-
+class ConfigMetadataAction @Inject constructor() : WebAction {
   enum class ConfigTabMode {
     /** Only show safe content which will not leak Misk secrets */
     SAFE,

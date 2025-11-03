@@ -1,7 +1,7 @@
 package misk
 
 import com.google.common.util.concurrent.AbstractIdleService
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 

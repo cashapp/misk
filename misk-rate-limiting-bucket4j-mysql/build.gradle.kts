@@ -1,12 +1,9 @@
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
+  id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
-  `java-test-fixtures`
 }
 
 dependencies {
@@ -18,10 +15,10 @@ dependencies {
   api(libs.micrometerCore)
 
   implementation(project(":misk-jdbc"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-logging"))
   implementation(libs.bucket4jCore)
   implementation(libs.bucket4jMySQL)
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
 
   testImplementation(project(":misk"))
   testImplementation(project(":misk-config"))
@@ -34,9 +31,10 @@ dependencies {
   testImplementation(testFixtures(project(":wisp:wisp-rate-limiting")))
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
+
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = JavadocJar.Dokka("dokkaGfm"))
   )

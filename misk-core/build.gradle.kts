@@ -1,42 +1,46 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
+  id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
-  api(libs.guava)
   api(libs.jakartaInject)
-  api(libs.kotlinLogging)
   api(libs.kotlinRetry)
   api(libs.okHttp)
-  api(libs.slf4jApi)
-  api(project(":wisp:wisp-config"))
-  api(project(":wisp:wisp-ssl"))
-  api(project(":wisp:wisp-token"))
+  api(project(":misk-backoff")) // TODO remove once all usages depend on misk-backoff directly
   api(project(":misk-config"))
-  api(project(":misk-inject"))
-  implementation(libs.guice)
+  api(project(":misk-logging")) // TODO remove once all usages depend on misk-logging directly
+  api(project(":misk-sampling")) // TODO remove once all usages depend on misk-sampling directly
+  api(project(":misk-tokens")) // TODO remove once all usages depend on misk-tokens directly
+  api(project(":wisp:wisp-ssl"))
+  implementation(libs.bouncyCastleProvider)
   implementation(libs.kotlinStdLibJdk8)
+  implementation(libs.okio)
   implementation(project(":wisp:wisp-resource-loader"))
-  implementation(project(":wisp:wisp-token-testing"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
-  testImplementation(libs.kotlinxCoroutines)
+  testImplementation(libs.kotlinxCoroutinesCore)
   testImplementation(libs.logbackClassic)
-  testImplementation(project(":wisp:wisp-logging"))
+  testImplementation(project(":misk-logging"))
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":misk-core"))
   testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk-testing-api"))
+
+  testImplementation(libs.kotestAssertions)
+  testImplementation(libs.kotestAssertionsShared)
+  testImplementation(libs.kotestCommon)
+  testImplementation(libs.kotestFrameworkEngine)
+  testRuntimeOnly(libs.junitEngine)
+  testRuntimeOnly(libs.kotestJunitRunnerJvm)
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

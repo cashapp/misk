@@ -50,15 +50,17 @@ private const val MAX_MAX_ROWS = 10_000
 private const val ROW_COUNT_ERROR_LIMIT = 3000
 private const val ROW_COUNT_WARNING_LIMIT = 2000
 
-class HibernateModule @JvmOverloads constructor(
+open class HibernateModule @JvmOverloads constructor(
   private val qualifier: KClass<out Annotation>,
   config: DataSourceConfig,
   private val readerQualifier: KClass<out Annotation>?,
   readerConfig: DataSourceConfig?,
   val databasePool: DatabasePool = RealDatabasePool,
   private val logLevelConfig: HibernateExceptionLogLevelConfig = HibernateExceptionLogLevelConfig(),
+  private val jdbcModuleAlreadySetup: Boolean = false,
+  private val installHealthChecks: Boolean = true,
+  private val installSchemaMigrator: Boolean = true,
 ) : KAbstractModule() {
-
   // Make sure Hibernate logs use slf4j. Otherwise, it will base its decision on the classpath and
   // prefer log4j: https://docs.jboss.org/hibernate/orm/4.3/topical/html/logging/Logging.html
   init {
@@ -88,6 +90,52 @@ class HibernateModule @JvmOverloads constructor(
     databasePool: DatabasePool = RealDatabasePool,
   ) : this(qualifier, cluster.writer, readerQualifier, cluster.reader, databasePool)
 
+  constructor(
+    qualifier: KClass<out Annotation>,
+    readerQualifier: KClass<out Annotation>,
+    cluster: DataSourceClusterConfig,
+    databasePool: DatabasePool = RealDatabasePool,
+    installHealthChecks: Boolean = true,
+  ) : this(
+    qualifier = qualifier,
+    config = cluster.writer,
+    readerQualifier = readerQualifier,
+    readerConfig = cluster.reader,
+    databasePool = databasePool,
+    installHealthChecks = installHealthChecks
+  )
+
+  constructor(
+    qualifier: KClass<out Annotation>,
+    readerQualifier: KClass<out Annotation>,
+    cluster: DataSourceClusterConfig,
+    databasePool: DatabasePool = RealDatabasePool,
+    installHealthChecks: Boolean = true,
+    installSchemaMigrator: Boolean = true,
+  ) : this(
+    qualifier = qualifier,
+    config = cluster.writer,
+    readerQualifier = readerQualifier,
+    readerConfig = cluster.reader,
+    databasePool = databasePool,
+    installHealthChecks = installHealthChecks,
+    installSchemaMigrator = installSchemaMigrator
+  )
+
+  constructor(
+    qualifier: KClass<out Annotation>,
+    config: DataSourceConfig,
+    databasePool: DatabasePool = RealDatabasePool,
+    jdbcModuleAlreadySetup: Boolean,
+  ) : this(
+    qualifier = qualifier,
+    config = config,
+    readerQualifier = null,
+    readerConfig = null,
+    databasePool = databasePool,
+    jdbcModuleAlreadySetup = jdbcModuleAlreadySetup
+  )
+
   override fun configure() {
     if (readerQualifier != null) {
       check(readerConfig != null) {
@@ -95,78 +143,57 @@ class HibernateModule @JvmOverloads constructor(
       }
     }
 
-    install(JdbcModule(qualifier, config, readerQualifier, readerConfig, databasePool))
+    if (!jdbcModuleAlreadySetup) {
+      install(
+        JdbcModule(
+          qualifier = qualifier,
+          config = config,
+          readerQualifier = readerQualifier,
+          readerConfig = readerConfig,
+          databasePool = databasePool,
+          installHealthCheck = installHealthChecks,
+          installSchemaMigrator = installSchemaMigrator
+        )
+      )
+    }
 
     bind<Query.Factory>().to<ReflectionQuery.Factory>()
     bind<QueryLimitsConfig>()
       .toInstance(QueryLimitsConfig(MAX_MAX_ROWS, ROW_COUNT_ERROR_LIMIT, ROW_COUNT_WARNING_LIMIT))
     bind<HibernateExceptionLogLevelConfig>().toInstance(logLevelConfig)
 
-    bindDataSource(qualifier, config, true)
-    if (readerQualifier != null && readerConfig != null) {
-      bindDataSource(readerQualifier, readerConfig, false)
+    bindDataSource(qualifier, true)
+    if (readerQualifier != null) {
+      bindDataSource(readerQualifier, false)
     }
 
     newMultibinder<DataSourceDecorator>(qualifier)
 
     val transacterKey = Transacter::class.toKey(qualifier)
-    val sessionFactoryServiceProvider = getProvider(keyOf<SessionFactoryService>(qualifier))
-    val readerSessionFactoryServiceProvider = if (readerQualifier != null) {
-      getProvider(keyOf<SessionFactoryService>(readerQualifier))
-    } else {
-      null
+
+    // Only install SchemaMigratorService module if schema migrator is enabled
+    if (installSchemaMigrator) {
+      install(
+        ServiceModule<SchemaMigratorService>(qualifier)
+          .dependsOn<DataSourceService>(qualifier)
+          .enhancedBy<ReadyService>()
+      )
     }
 
-    install(
-      ServiceModule<SchemaMigratorService>(qualifier)
-        .dependsOn<DataSourceService>(qualifier)
-        .enhancedBy<ReadyService>()
-    )
-
-    val transacterServiceProvider = getProvider(keyOf<TransacterService>(qualifier))
-
-    bind(transacterKey).toProvider(object : Provider<Transacter> {
-      @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
-      @Inject lateinit var injector: Injector
-      override fun get(): RealTransacter {
-        return RealTransacter(
-          qualifier = qualifier,
-          sessionFactoryService = sessionFactoryServiceProvider.get(),
-          readerSessionFactoryService = readerSessionFactoryServiceProvider?.get(),
-          config = config,
-          executorServiceFactory = executorServiceFactory,
-          hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral())
-            .map {
-              it.provider.get()
-            }.toSet()
-        )
-      }
-    }).asSingleton()
+    bind(transacterKey).toProvider(getTransacterProvider()).asSingleton()
 
     /**
-     * Reader transacter is only supported for MySQL for now. TiDB and Vitess replica read works
-     * a bit differently than MySQL.
+     * Reader transacter is supported for MySQL and Vitess.
+     * 
+     * For MySQL: Uses separate physical connection pools to reader replicas
+     * For Vitess: Uses the same VTGate endpoint but with database="@replica" which
+     *             routes queries to replica tablets instead of primary tablets
+     * 
+     * We don't support separate reader instances for TiDB and CockroachDB .
      */
-    if (readerQualifier != null && config.type == DataSourceType.MYSQL) {
+    if (readerQualifier != null && (config.type == DataSourceType.MYSQL || config.type == DataSourceType.VITESS_MYSQL)) {
       val readerTransacterKey = Transacter::class.toKey(readerQualifier)
-      bind(readerTransacterKey).toProvider(object : Provider<Transacter> {
-        @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
-        @Inject lateinit var injector: Injector
-        override fun get(): Transacter {
-          val sessionFactoryService = readerSessionFactoryServiceProvider!!.get()
-          return RealTransacter(
-            qualifier = readerQualifier,
-            sessionFactoryService = sessionFactoryService,
-            readerSessionFactoryService = sessionFactoryService,
-            config = config,
-            executorServiceFactory = executorServiceFactory,
-            hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral())
-              .map {
-                it.provider.get()
-              }.toSet()
-          ).readOnly()
-        }
-      }).asSingleton()
+      bind(readerTransacterKey).toProvider(getReaderTransacterProvider()).asSingleton()
     }
 
     // Install other modules.
@@ -191,9 +218,56 @@ class HibernateModule @JvmOverloads constructor(
     )
   }
 
+  protected open fun getTransacterProvider(): Provider<Transacter> {
+    val sessionFactoryServiceProvider = getSessionFactoryServiceProvider()
+    val readerSessionFactoryServiceProvider = getReaderSessionFactoryServiceProvider()
+    val executorServiceFactoryProvider = getProvider(keyOf<ExecutorServiceFactory>())
+    val injectorProvider = getProvider(keyOf<Injector>())
+
+    return Provider<Transacter> {
+      RealTransacter(
+        qualifier = qualifier,
+        sessionFactoryService = sessionFactoryServiceProvider!!.get(),
+        readerSessionFactoryService = readerSessionFactoryServiceProvider?.get(),
+        config = config,
+        executorServiceFactory = executorServiceFactoryProvider.get(),
+        hibernateEntities = injectorProvider.get().findBindingsByType(HibernateEntity::class.typeLiteral())
+          .map {
+            it.provider.get()
+          }.toSet()
+      )
+    }
+  }
+
+  protected open fun getReaderTransacterProvider(): Provider<Transacter> {
+    val sessionFactoryServiceProvider = getReaderSessionFactoryServiceProvider()
+    val executorServiceFactoryProvider = getProvider(keyOf<ExecutorServiceFactory>())
+    val injectorProvider = getProvider(keyOf<Injector>())
+
+    return Provider<Transacter> {
+      val realTransacter = RealTransacter(
+        qualifier = readerQualifier!!,
+        sessionFactoryService = sessionFactoryServiceProvider!!.get(),
+        readerSessionFactoryService = sessionFactoryServiceProvider.get(),
+        config = readerConfig ?: config,
+        executorServiceFactory = executorServiceFactoryProvider.get(),
+        hibernateEntities = injectorProvider.get().findBindingsByType(HibernateEntity::class.typeLiteral())
+          .map {
+            it.provider.get()
+          }.toSet(),
+      ).readOnly()
+      realTransacter
+    }
+  }
+
+  private fun getSessionFactoryServiceProvider(): Provider<SessionFactoryService>? =
+    getProvider(keyOf<SessionFactoryService>(qualifier))
+
+  private fun getReaderSessionFactoryServiceProvider() =
+    readerQualifier?.let { getProvider(keyOf<SessionFactoryService>(it)) }
+
   private fun bindDataSource(
     qualifier: KClass<out Annotation>,
-    config: DataSourceConfig,
     isWriter: Boolean,
   ) {
     // These items are configured on the writer qualifier only
@@ -220,12 +294,16 @@ class HibernateModule @JvmOverloads constructor(
     }.asSingleton()
 
     if (isWriter) {
-      install(
-        ServiceModule<TransacterService>(qualifier)
-          .enhancedBy<SchemaMigratorService>(qualifier)
-          .enhancedBy<ReadyService>()
-          .dependsOn<DataSourceService>(qualifier)
-      )
+      val transacterServiceModule = ServiceModule<TransacterService>(qualifier)
+        .dependsOn<DataSourceService>(qualifier)
+        .enhancedBy<ReadyService>()
+      
+      // Only enhance with SchemaMigratorService if it's installed
+      if (installSchemaMigrator) {
+        install(transacterServiceModule.enhancedBy<SchemaMigratorService>(qualifier))
+      } else {
+        install(transacterServiceModule)
+      }
     } else {
       install(
         ServiceModule<TransacterService>(qualifier)
@@ -234,14 +312,16 @@ class HibernateModule @JvmOverloads constructor(
       )
     }
 
-    val healthCheckKey = keyOf<HealthCheck>(qualifier)
-    bind(healthCheckKey)
-      .toProvider(object : Provider<HibernateHealthCheck> {
-        @Inject lateinit var clock: Clock
+    if (this.installHealthChecks) {
+      val healthCheckKey = keyOf<HealthCheck>(qualifier)
+      bind(healthCheckKey)
+        .toProvider(object : Provider<HibernateHealthCheck> {
+          @Inject lateinit var clock: Clock
 
-        override fun get() = HibernateHealthCheck(qualifier, sessionFactoryServiceProvider, clock)
-      })
-      .asSingleton()
-    multibind<HealthCheck>().to(healthCheckKey)
+          override fun get() = HibernateHealthCheck(qualifier, sessionFactoryServiceProvider, clock)
+        })
+        .asSingleton()
+      multibind<HealthCheck>().to(healthCheckKey)
+    }
   }
 }

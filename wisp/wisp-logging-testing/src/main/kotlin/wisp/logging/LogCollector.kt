@@ -2,6 +2,7 @@ package wisp.logging
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.spi.ILoggingEvent
+import misk.testing.TestFixture
 import kotlin.reflect.KClass
 
 /**
@@ -9,7 +10,7 @@ import kotlin.reflect.KClass
  *
  * Use the optional parameters of [takeMessages] to constrain which log messages are returned.
  */
-interface LogCollector {
+interface LogCollector: TestFixture {
     /**
      * Removes all currently-collected log messages and returns those that match the requested
      * criteria.

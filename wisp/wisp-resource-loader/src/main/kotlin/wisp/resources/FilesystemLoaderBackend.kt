@@ -13,6 +13,10 @@ import java.nio.file.*
  *
  * This uses the scheme `filesystem:`.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  ReplaceWith(expression = "FilesystemLoaderBackend","misk.resources.FilesystemLoaderBackend")
+)
 object FilesystemLoaderBackend : ResourceLoader.Backend() {
 
     private val logger = getLogger<FilesystemLoaderBackend>()
@@ -49,6 +53,10 @@ object FilesystemLoaderBackend : ResourceLoader.Backend() {
     }
 
     override fun exists(path: String) = File(path).exists()
+
+    override fun list(path: String): List<String> {
+      return File(path).listFiles()?.map { "$path/${it.name}" }?.toList().orEmpty()
+    }
 
     /**
      * For changes to the file that have been done externally, since this is a read-only

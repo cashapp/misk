@@ -9,12 +9,13 @@ import com.squareup.moshi.Moshi
 import misk.cloud.aws.AwsAccountId
 import misk.cloud.aws.AwsRegion
 import misk.jobqueue.QueueName
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.moshi.adapter
+import misk.containers.ContainerUtil
 
 @Singleton
 internal class QueueResolver @Inject internal constructor(
@@ -97,13 +98,8 @@ internal class QueueResolver @Inject internal constructor(
     }
   }
 
-  private fun isRunningInDocker() = File("/proc/1/cgroup")
-    .takeIf { it.exists() }?.useLines { lines ->
-      lines.any { it.contains("/docker") }
-    } ?: false
-
   private fun ensureUrlWithProperTarget(url: String): String {
-    if (isRunningInDocker())
+    if (ContainerUtil.isRunningInDocker)
       return url.replace("localhost", hostInternalTarget).replace("127.0.0.1", hostInternalTarget)
     else
       return url

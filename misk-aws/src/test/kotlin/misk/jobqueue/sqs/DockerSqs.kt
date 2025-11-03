@@ -12,10 +12,10 @@ import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Ports
 import misk.jobqueue.sqs.DockerSqs.clientPort
 import misk.testing.ExternalDependency
-import wisp.containers.Composer
-import wisp.containers.Container
-import wisp.containers.ContainerUtil
-import wisp.logging.getLogger
+import misk.containers.Composer
+import misk.containers.Container
+import misk.containers.ContainerUtil
+import misk.logging.getLogger
 
 /**
  * A test SQS Service. Tests can connect to the service at 127.0.0.1:[clientPort]
@@ -44,7 +44,7 @@ internal object DockerSqs : ExternalDependency {
       // NB(mmihic): Because the client port is embedded directly into the queue URLs, we have to use
       // the same external port as we do for the internal port
       val exposedClientPort = ExposedPort.tcp(clientPort)
-      withImage("softwaremill/elasticmq:1.4.2")
+      withImage("softwaremill/elasticmq:1.6.5")
         .withName("sqs")
         .withExposedPorts(exposedClientPort)
         .withHostConfig(

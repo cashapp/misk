@@ -4,9 +4,23 @@ import java.security.*
 import java.security.cert.X509Certificate
 import javax.net.ssl.TrustManagerFactory
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "CertificateAndKey(certificate, privateKey)",
+    imports = ["misk.security.ssl.CertificateAndKey"]
+  )
+)
 data class CertificateAndKey(val certificate: X509Certificate, val privateKey: PrivateKey)
 
 /** @return the certificate and key pair for the given alias */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "getCertificateAndKey(alias, passphrase)",
+    imports = ["misk.security.ssl.getCertificateAndKey"]
+  )
+)
 fun KeyStore.getCertificateAndKey(alias: String, passphrase: CharArray): CertificateAndKey? {
     try {
         if (!entryInstanceOf(alias, KeyStore.PrivateKeyEntry::class.java)) return null
@@ -23,12 +37,26 @@ fun KeyStore.getCertificateAndKey(alias: String, passphrase: CharArray): Certifi
 }
 
 /** @return the one and only [CertificateAndKey] in the keystore */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "getCertificateAndKey(passphrase)",
+    imports = ["misk.security.ssl.getCertificateAndKey"]
+  )
+)
 fun KeyStore.getCertificateAndKey(passphrase: CharArray) = getCertificateAndKey(
     onlyAlias,
     passphrase
 )
 
 /** @return the only alias in the keystore, if the keystore only has a single entry */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "onlyAlias",
+    imports = ["misk.security.ssl.onlyAlias"]
+  )
+)
 val KeyStore.onlyAlias: String
     get() {
         val aliases = aliases()
@@ -39,6 +67,13 @@ val KeyStore.onlyAlias: String
     }
 
 /** @return the [PrivateKey] with the given alias */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "getPrivateKey(alias, passphrase)",
+    imports = ["misk.security.ssl.getPrivateKey"]
+  )
+)
 fun KeyStore.getPrivateKey(alias: String, passphrase: CharArray): PrivateKey {
     try {
         return getKey(alias, passphrase) as? PrivateKey
@@ -51,16 +86,44 @@ fun KeyStore.getPrivateKey(alias: String, passphrase: CharArray): PrivateKey {
 }
 
 /** @return the one and only [PrivateKey] in the keystore */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "getPrivateKey(passphrase)",
+    imports = ["misk.security.ssl.getPrivateKey"]
+  )
+)
 fun KeyStore.getPrivateKey(passphrase: CharArray) = getPrivateKey(onlyAlias, passphrase)
 
 /** @return all aliases present in the keystore of a given entry type. */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "aliasesOfType(entryClass)",
+    imports = ["misk.security.ssl.aliasesOfType"]
+  )
+)
 fun KeyStore.aliasesOfType(entryClass: Class<out KeyStore.Entry>): List<String> {
     return aliases().asSequence().filter { entryInstanceOf(it, entryClass) }.toList()
 }
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "aliasesOfType()",
+    imports = ["misk.security.ssl.aliasesOfType"]
+  )
+)
 inline fun <reified T : KeyStore.Entry> KeyStore.aliasesOfType() = aliasesOfType(T::class.java)
 
 /** @return the [X509Certificate] chain with the provided alias */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "getX509CertificateChain(alias)",
+    imports = ["misk.security.ssl.getX509CertificateChain"]
+  )
+)
 fun KeyStore.getX509CertificateChain(alias: String): Array<X509Certificate> {
     require(alias.isNotBlank()) { "alias must not be empty or blank" }
 
@@ -73,9 +136,23 @@ fun KeyStore.getX509CertificateChain(alias: String): Array<X509Certificate> {
 }
 
 /** @return the one and only [X509Certificate] chain in the keystore */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "getX509CertificateChain()",
+    imports = ["misk.security.ssl.getX509CertificateChain"]
+  )
+)
 fun KeyStore.getX509CertificateChain() = getX509CertificateChain(onlyAlias)
 
 /** @return The [X509Certificate] with the provided alias */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "getX509Certificate(alias)",
+    imports = ["misk.security.ssl.getX509Certificate"]
+  )
+)
 fun KeyStore.getX509Certificate(alias: String): X509Certificate {
     require(alias.isNotBlank()) { "alias must not be empty or blank" }
 
@@ -87,6 +164,13 @@ fun KeyStore.getX509Certificate(alias: String): X509Certificate {
 }
 
 /** @return the one and only [X509Certificate] in the keystore */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "getX509Certificate()",
+    imports = ["misk.security.ssl.getX509Certificate"]
+  )
+)
 fun KeyStore.getX509Certificate() = getX509Certificate(onlyAlias)
 
 private val trustAlgorithm = TrustManagerFactory.getDefaultAlgorithm()

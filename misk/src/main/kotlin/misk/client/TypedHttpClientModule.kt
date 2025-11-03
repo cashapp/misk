@@ -159,9 +159,6 @@ class TypedClientFactory @Inject constructor() {
   private val callFactoryWrappers: Provider<List<CallFactoryWrapper>> = Provider { emptyList() }
 
   @Inject
-  private lateinit var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
-
-  @Inject
   private lateinit var moshi: Moshi
 
   @Inject(optional = true)
@@ -193,7 +190,7 @@ class TypedClientFactory @Inject constructor() {
     retrofitBuilderProvider: Provider<Retrofit.Builder>?
   ): T {
     val baseUrl = httpClientConfigUrlProvider.getUrl(endpointConfig)
-    val client = httpClientFactory.create(endpointConfig)
+    val client = httpClientFactory.create(endpointConfig, name)
 
     return typedClient(client, baseUrl, kclass, name, retrofitBuilderProvider)
   }
@@ -230,13 +227,12 @@ class TypedClientFactory @Inject constructor() {
       eventListenerFactory,
       tracer,
       moshi,
-      clientMetricsInterceptorFactory,
       callFactoryWrappers
     )
 
     return kclass.cast(
       Proxy.newProxyInstance(
-        ClassLoader.getSystemClassLoader(),
+        kclass.java.classLoader,
         arrayOf(kclass.java),
         invocationHandler
       )

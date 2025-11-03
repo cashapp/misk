@@ -5,6 +5,7 @@ import com.google.cloud.Tuple
 import com.google.cloud.storage.StorageException
 import com.google.cloud.storage.spi.v1.StorageRpc
 import com.google.common.io.ByteStreams.toByteArray
+import misk.testing.TestFixture
 import java.io.InputStream
 import java.io.OutputStream
 import java.math.BigInteger
@@ -17,11 +18,18 @@ import kotlin.concurrent.write
  * Implementation of [StorageRpc] that keeps all of its data purely in-memory, useful primarily
  * for tests. This implementation is fully thread safe.
  */
-class InMemoryStorageRpc : BaseCustomStorageRpc() {
+class InMemoryStorageRpc : BaseCustomStorageRpc(), TestFixture {
   private val content = mutableMapOf<String, ByteArray>()
   private val metadata = mutableMapOf<String, StorageObject>()
   private val pendingContent = mutableMapOf<String, ByteArray>()
   private val lock = ReentrantReadWriteLock()
+
+  override fun reset() {
+    content.clear()
+    metadata.clear()
+    pendingContent.clear()
+    lock.readLock().unlock()
+  }
 
   override fun create(
     obj: StorageObject,

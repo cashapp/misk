@@ -19,30 +19,27 @@ jooq-code-gen to it. There's an example of how to do this in this
    
 a. Add the below lines to your build.gradle.kts
 
-```
-buildscript {
-  dependencies {
-    classpath("org.flywaydb:flyway-gradle-plugin:7.15.0")
-    classpath(Dependencies.mysql)
-  }
-}
+```kotlin
 plugins {
-  id("org.flywaydb.flyway") version "7.15.0"
-  id("nu.studer.jooq") version "5.2"
+  alias(libs.plugins.miskSchemaMigrator)
+  alias(libs.plugins.jooq)
 }
-// We are using flyway here in order to run the migrations to create a schema. 
+
+val schema = "<your service name>" // change this to your service name
+val dbMigrations = "src/main/resources/db-migrations"
+// We are using the schema migrator plugin here in order to run the migrations to create a schema.
 // Ensure the migration directory is not called `migrations`. There's more details as to why below.
-flyway {
-  url = "jdbc:mysql://localhost:3500/misk-jooq-test-codegen"
-  user = "root"
+miskSchemaMigrator {
+  database = schema
+  username = "root"
   password = "root"
-  schemas = arrayOf("jooq")
-  locations = arrayOf("filesystem:${project.projectDir}/src/main/resources/db-migrations")
-  sqlMigrationPrefix = "v"
+  host = "localhost"
+  port = 3500
+  migrationsDir.set(layout.projectDirectory.dir(dbMigrations))
 }
+
 // More details about the jooq plugin here - https://github.com/etiennestuder/gradle-jooq-plugin
 jooq {
-  version.set("3.14.8")
   edition.set(nu.studer.gradle.jooq.JooqEdition.OSS)
 
   configurations {
@@ -51,7 +48,7 @@ jooq {
       jooqConfiguration.apply {
         jdbc.apply {
           driver = "com.mysql.cj.jdbc.Driver"
-          url = "jdbc:mysql://localhost:3500/misk-jooq-test-codegen" // change this to your service name
+          url = "jdbc:mysql://localhost:3500/$schema"
           user = "root"
           password = "root"
         }
@@ -59,8 +56,7 @@ jooq {
           name = "org.jooq.codegen.KotlinGenerator"
           database.apply {
             name = "org.jooq.meta.mysql.MySQLDatabase"
-            inputSchema = "jooq"
-            outputSchema = "jooq"
+            inputSchema = schema
             includes = ".*"
             excludes = "(.*?FLYWAY_SCHEMA_HISTORY)|(.*?schema_version)"
             recordVersionFields = "version"
@@ -68,29 +64,32 @@ jooq {
           generate.apply {
             isJavaTimeTypes = true
           }
-          target.apply {
-            packageName = "<your service package name>"
-            directory   = "${project.projectDir}/src/main/generated/kotlin"
-          }
+          target.packageName = "<your service package name>"
         }
       }
     }
   }
 }
-val generateJooq by project.tasks
-generateJooq.dependsOn("flywayMigrate")
 
-sourceSets.getByName("main").java.srcDirs
-  .add(File("${project.projectDir}/src/main/generated/kotlin"))
+// Needed to generate jooq test db classes
+tasks.withType<nu.studer.gradle.jooq.JooqGenerate>().configureEach {
+  dependsOn("migrateSchema")
+
+  // declare migration files as inputs on the jOOQ task and allow it to
+  // participate in build caching
+  inputs.files(fileTree(layout.projectDirectory.dir(dbMigrations)))
+    .withPropertyName("migrations")
+    .withPathSensitivity(PathSensitivity.RELATIVE)
+  allInputsDeclared.set(true)
+}
 ```
 
-b. Have a look at `jooq-test-regenerate.sh`. Copy that into the root of your project and modify the database 
+b. Have a look at `jooq-test-regenerate.sh`. Copy that into the root of your project and modify the database
 name and docker container name.
 
 c. Run `jooq-test-regenerate.sh` to have your model generated for you and ready to use.
 
 d. Make sure to run `jooq-test-regenerate.sh` every time you add a migration.
-
 
 ## Examples of how to use this module
 
@@ -147,16 +146,11 @@ ctx.select()
 
 ```
 
-
-
 ## Future 
 
-1. The generation tool uses flyway to generate the schema. I would like to use misk-jdbc's 
-   SchemaMigrationService built into a gradle plugin. That same plugin can also generate the 
-   jooq classes.  
-   Further, in order to use jooq we can't have migrations placed in a folder called `migrations`. 
+1. Further, in order to use jooq we can't have migrations placed in a folder called `migrations`.
    The issue is jooq.jar ships with a directory called `migrations` with the some 
    [migrations](https://github.com/jOOQ/jOOQ/tree/main/jOOQ/src/main/resources/migrations) 
    we don't care about in it. When the service starts up it finds this folder as well and tries 
    to run those migrations. Renaming misk service migrations to somethinq like `db-migrations` works. 
-   
+

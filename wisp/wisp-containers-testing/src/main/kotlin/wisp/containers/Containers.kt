@@ -8,12 +8,14 @@ import com.github.dockerjava.api.command.WaitContainerResultCallback
 import com.github.dockerjava.api.exception.NotFoundException
 import com.github.dockerjava.api.model.Frame
 import com.github.dockerjava.core.DefaultDockerClientConfig
+import misk.docker.withMiskDefaults
 import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import wisp.logging.getLogger
 import java.io.File
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
+import io.opentracing.util.GlobalTracer
 
 /**
  * A [Container] creates a Docker container for testing.
@@ -28,6 +30,10 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * See [Composer] for an example.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  ReplaceWith(expression = "Container","misk.containers.Container")
+)
 data class Container(
     val createCmd: CreateContainerCmd.() -> Unit,
     val beforeStartHook: (docker: DockerClient, id: String) -> Unit
@@ -65,6 +71,10 @@ data class Container(
  *     composer.start()
  * ```
  */
+@Deprecated(
+  "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  ReplaceWith(expression = "Composer","misk.containers.Composer")
+)
 class Composer(private val name: String, private vararg val containers: Container) {
 
     private val network = DockerNetwork(
@@ -78,57 +88,66 @@ class Composer(private val name: String, private vararg val containers: Containe
         if (!running.compareAndSet(false, true)) return
         Runtime.getRuntime().addShutdownHook(Thread { stop() })
 
-        network.start()
+        val span = GlobalTracer.get()
+          .buildSpan("${this.javaClass.canonicalName}.start")
+          .withTag("name", name)
+          .start()
 
-        for (container in containers) {
+        try {
+          network.start()
+
+          for (container in containers) {
             val name = container.name()
             val create = dockerClient.createContainerCmd("todo").apply(container.createCmd)
             require(create.image != "todo") {
-                "must provide an image for container ${create.name}"
+              "must provide an image for container ${create.name}"
             }
 
             dockerClient.listContainersCmd()
-                .withShowAll(true)
-                .withLabelFilter(mapOf("name" to name))
-                .exec()
-                .forEach {
-                    log.info { "removing previous $name container with id ${it.id}" }
-                    dockerClient.removeContainerCmd(it.id).exec()
-                }
+              .withShowAll(true)
+              .withLabelFilter(mapOf("name" to name))
+              .exec()
+              .forEach {
+                log.info { "removing previous $name container with id ${it.id}" }
+                dockerClient.removeContainerCmd(it.id).exec()
+              }
 
             log.info { "pulling ${create.image} for $name container" }
 
             val imageParts = create.image!!.split(":")
             dockerClient.pullImageCmd(imageParts[0])
-                .withTag(imageParts.getOrElse(1) { "latest" })
-                .exec(PullImageResultCallback()).awaitCompletion()
+              .withTag(imageParts.getOrElse(1) { "latest" })
+              .exec(PullImageResultCallback()).awaitCompletion()
 
             log.info { "starting $name container" }
 
             @Suppress("DEPRECATION") val id = create
-                .withNetworkMode(network.id())
-                .withLabels(mapOf("name" to name))
-                .withTty(true)
-                .exec()
-                .id
+              .withNetworkMode(network.id())
+              .withLabels(mapOf("name" to name))
+              .withTty(true)
+              .exec()
+              .id
             containerIds[name] = id
 
             container.beforeStartHook(dockerClient, id)
 
             dockerClient.startContainerCmd(id).exec()
             dockerClient.logContainerCmd(id)
-                .withStdErr(true)
-                .withStdOut(true)
-                .withFollowStream(true)
-                .withSince(0)
-                .exec(LogContainerResultCallback())
-                .awaitStarted()
+              .withStdErr(true)
+              .withStdOut(true)
+              .withFollowStream(true)
+              .withSince(0)
+              .exec(LogContainerResultCallback())
+              .awaitStarted()
 
             log.info { "started $name; container id=$id" }
+          }
+        } finally {
+          span.finish()
         }
     }
-
-    private fun Container.name(): String {
+  @Suppress("DEPRECATION")
+  private fun Container.name(): String {
         val create = dockerClient.createContainerCmd("todo").apply(createCmd)
         require(!create.name.isNullOrBlank()) {
             "must provide a name for the container"
@@ -177,8 +196,10 @@ class Composer(private val name: String, private vararg val containers: Containe
 
     companion object {
         private val log = getLogger<Composer>()
-        private val defaultDockerClientConfig =
-            DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+        private val defaultDockerClientConfig = DefaultDockerClientConfig
+          .createDefaultConfigBuilder()
+          .withMiskDefaults()
+          .build()
         private val httpClient = ApacheDockerHttpClient.Builder()
             .dockerHost(defaultDockerClientConfig.dockerHost)
             .sslConfig(defaultDockerClientConfig.sslConfig)
@@ -191,6 +212,10 @@ class Composer(private val name: String, private vararg val containers: Containe
     }
 }
 
+@Deprecated(
+  "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  ReplaceWith(expression = "ContainerUtil","misk.containers.ContainerUtil")
+)
 object ContainerUtil {
     val isRunningInDocker = File("/proc/1/cgroup")
         .takeIf { it.exists() }?.useLines { lines ->

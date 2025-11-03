@@ -1,10 +1,10 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import java.io.ByteArrayOutputStream
+import java.nio.charset.Charset
 
 plugins {
-  kotlin("jvm")
-  `java-library`
+  id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
   id("com.squareup.wire")
 }
@@ -12,8 +12,7 @@ plugins {
 dependencies {
   api(libs.guice)
   api(libs.jakartaInject)
-  api(libs.kotlinxHtml)
-  api(libs.moshi)
+  api(libs.kotlinXHtml)
   api(libs.okio)
   api(project(":wisp:wisp-deployment"))
   api(project(":misk"))
@@ -21,12 +20,19 @@ dependencies {
   api(project(":misk-actions"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
-  api(libs.kotlinxHtml)
+  api(project(":misk-service"))
+  api(libs.kotlinXHtml)
+  api(libs.moshiCore)
+
+  implementation(libs.guava)
+  implementation(libs.loggingApi)
   implementation(libs.okHttp)
   implementation(project(":misk-core"))
   implementation(project(":misk-hotwire"))
+  implementation(project(":misk-moshi"))
   implementation(project(":misk-tailwind"))
-  implementation(project(":wisp:wisp-config"))
+  implementation(project(":misk-logging"))
+  implementation(project(":wisp:wisp-moshi"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
@@ -35,25 +41,62 @@ dependencies {
   testImplementation(libs.wireRuntime)
   testImplementation(project(":misk-api"))
   testImplementation(project(":misk-action-scopes"))
+  testImplementation(project(":misk-service"))
   testImplementation(project(":misk-testing"))
 }
 
+val buildMiskWeb = tasks.register("buildMiskWeb", Exec::class.java) {
+  setWorkingDir(layout.projectDirectory)
+  commandLine("web/build.sh")
+  inputs.files(project.fileTree(layout.projectDirectory.dir("web")) {
+    exclude("tabs/database/node_modules/**")
+    exclude("tabs/database/lib/**")
+    exclude("tabs/database/tsconfig.json")
+    exclude("tabs/database/tslint.json")
+    exclude("tabs/database/webpack.config.js")
+  }).withPropertyName("webfiles").withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.files(project.file("../package-lock.json")).withPropertyName("packagelock").withPathSensitivity(PathSensitivity.RELATIVE) // for misk-cli install
+  outputs.dir(layout.buildDirectory.dir("web"))
+
+  outputs.cacheIf("all inputs/outputs are declared") { true }
+}
+
+val buildWebActions = tasks.register("buildWebActions", Exec::class.java) {
+  setWorkingDir(layout.projectDirectory)
+  commandLine("web-actions/build.sh")
+
+  inputs.files(project.fileTree(layout.projectDirectory.dir("web-actions")) {
+    include("src/**")
+    include("babel.config.json")
+    include("jest.config.js")
+    include("package.json")
+    include("tsconfig.json")
+    include("webpack.config.js")
+    include("build.sh")
+  }).withPropertyName("webfiles").withPathSensitivity(PathSensitivity.RELATIVE)
+  outputs.dir(layout.buildDirectory.dir("web-actions"))
+
+  outputs.cacheIf("all inputs/outputs are declared") { true }
+}
+
 sourceSets {
-  val main by getting {
-    resources.srcDir(listOf(
-      "web/tabs/config/lib",
-      "web/tabs/database/lib",
-      "web/tabs/web-actions/lib"
-    ))
-    resources.exclude("**/node_modules")
+  main {
+    resources.srcDir(buildMiskWeb)
+    resources.srcDir(buildWebActions)
   }
 }
 
-val generatedSourceDir = "$buildDir/generated/source/wire-test"
+val generatedSourceDir = layout.buildDirectory.dir("generated/source/wire-test").get().asFile.path
 
 wire {
   sourcePath {
     srcDir("src/test/proto/")
+  }
+  kotlin {
+    out = generatedSourceDir
+    includes = listOf(
+      "test.kt.*",
+    )
   }
   java {
     out = generatedSourceDir
@@ -65,10 +108,10 @@ afterEvaluate {
   val generatedSourceGlob = "$generatedSourceDir/**"
 
   sourceSets {
-    val main by getting {
+    main {
       java.setSrcDirs(java.srcDirs.filter { !it.path.contains(generatedSourceDir) })
     }
-    val test by getting {
+    test {
       java.srcDir(generatedSourceDir)
     }
   }
@@ -83,8 +126,9 @@ afterEvaluate {
   }
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )
 }
+

@@ -7,14 +7,14 @@ import com.amazonaws.services.sqs.model.SendMessageRequest
 import com.amazonaws.services.sqs.model.SendMessageResult
 import com.squareup.moshi.Moshi
 import misk.feature.testing.FakeFeatureFlags
-import misk.mockito.Mockito.mock
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.Mockito.verifyNoMoreInteractions
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 internal class FlaggedBufferedSqsClientTest {
   @Test fun `dynamically switches between underlying clients based on feature status`() {
@@ -29,10 +29,10 @@ internal class FlaggedBufferedSqsClientTest {
     val buffered = mock<AmazonSQS>()
     // stub the feature-flag gated methods for both clients
     listOf(unbuffered, buffered).forEach { client ->
-      `when`(client.sendMessage(any())).thenReturn(SendMessageResult())
-      `when`(client.sendMessage(anyString(), anyString())).thenReturn(SendMessageResult())
-      `when`(client.deleteMessage(any())).thenReturn(DeleteMessageResult())
-      `when`(client.deleteMessage(anyString(), anyString())).thenReturn(DeleteMessageResult())
+      whenever(client.sendMessage(any())).thenReturn(SendMessageResult())
+      whenever(client.sendMessage(anyString(), anyString())).thenReturn(SendMessageResult())
+      whenever(client.deleteMessage(any())).thenReturn(DeleteMessageResult())
+      whenever(client.deleteMessage(anyString(), anyString())).thenReturn(DeleteMessageResult())
     }
 
     val sendRequest = SendMessageRequest()

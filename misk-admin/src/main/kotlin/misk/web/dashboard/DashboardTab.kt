@@ -21,6 +21,7 @@ import kotlin.reflect.KClass
  * @property [menuUrl] Url to the tab, by default [url_path_prefix]
  * @property [capabilities] Set to show the tab only for authenticated capabilities, else shows always
  * @property [services] Set to show the tab only for authenticated services, else shows always
+ * @property [menuDisableTurboPreload] Disable Turbo link preload for the tab menu link in the navbar
  */
 data class DashboardTab @JvmOverloads constructor(
   override val slug: String,
@@ -33,6 +34,7 @@ data class DashboardTab @JvmOverloads constructor(
   override val services: Set<String> = setOf(),
   val accessAnnotationKClass: KClass<out Annotation>? = null,
   val dashboardAnnotationKClass: KClass<out Annotation>? = null,
+  val menuDisableTurboPreload: Boolean = false,
 ) : WebTab(slug, url_path_prefix, capabilities, services)
 
 /**
@@ -49,6 +51,7 @@ class DashboardTabProvider @JvmOverloads constructor(
   val services: Set<String> = setOf(),
   val accessAnnotationKClass: KClass<out Annotation>? = null,
   val dashboardAnnotationKClass: KClass<out Annotation>,
+  val menuDisableTurboPreload: Boolean = false,
 ) : Provider<DashboardTab>, ValidWebEntry(slug, url_path_prefix) {
   @Inject @AppName lateinit var appName: String
   @Inject lateinit var deployment: Deployment
@@ -67,6 +70,7 @@ class DashboardTabProvider @JvmOverloads constructor(
       services = accessAnnotationEntry?.services?.toSet() ?: services,
       accessAnnotationKClass = accessAnnotationKClass,
       dashboardAnnotationKClass = dashboardAnnotationKClass,
+      menuDisableTurboPreload = menuDisableTurboPreload,
     )
   }
 }
@@ -81,7 +85,8 @@ inline fun <reified DA : Annotation> DashboardTabProvider(
   menuUrl: String = url_path_prefix,
   category: String = "Admin",
   capabilities: Set<String> = setOf(),
-  services: Set<String> = setOf()
+  services: Set<String> = setOf(),
+  menuDisableTurboPreload: Boolean = false,
 ) = DashboardTabProvider(
   slug = slug,
   url_path_prefix = url_path_prefix,
@@ -92,6 +97,7 @@ inline fun <reified DA : Annotation> DashboardTabProvider(
   capabilities = capabilities,
   services = services,
   dashboardAnnotationKClass = DA::class,
+  menuDisableTurboPreload = menuDisableTurboPreload,
 )
 
 /**
@@ -103,6 +109,7 @@ inline fun <reified DA : Annotation, reified AA : Annotation> DashboardTabProvid
   name: String,
   menuUrl: String = url_path_prefix,
   category: String = "Admin",
+  menuDisableTurboPreload: Boolean = false,
 ) = DashboardTabProvider(
   slug = slug,
   url_path_prefix = url_path_prefix,
@@ -112,4 +119,5 @@ inline fun <reified DA : Annotation, reified AA : Annotation> DashboardTabProvid
   dashboard_slug = slugify<DA>(),
   accessAnnotationKClass = AA::class,
   dashboardAnnotationKClass = DA::class,
+  menuDisableTurboPreload = menuDisableTurboPreload,
 )

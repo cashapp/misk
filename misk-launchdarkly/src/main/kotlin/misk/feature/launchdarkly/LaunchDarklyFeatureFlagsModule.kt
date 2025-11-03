@@ -5,6 +5,8 @@ import com.google.inject.Provides
 import com.launchdarkly.sdk.server.Components
 import com.launchdarkly.sdk.server.LDClient
 import com.launchdarkly.sdk.server.LDConfig
+import com.launchdarkly.sdk.server.integrations.EventProcessorBuilder.DEFAULT_CAPACITY
+import com.launchdarkly.sdk.server.integrations.EventProcessorBuilder.DEFAULT_FLUSH_INTERVAL
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import com.squareup.moshi.Moshi
 import io.micrometer.core.instrument.MeterRegistry
@@ -20,7 +22,8 @@ import misk.inject.KAbstractModule
 import misk.resources.ResourceLoader
 import misk.security.ssl.SslContextFactory
 import misk.security.ssl.SslLoader
-import wisp.config.Config
+import misk.config.Config
+import misk.logging.getLogger
 import java.net.URI
 import java.time.Duration
 import javax.net.ssl.X509TrustManager
@@ -61,27 +64,50 @@ class LaunchDarklyModule @JvmOverloads constructor(
   ): LDClientInterface {
     // TODO: This shouldn't exist. We should not be exposing LDClientInterface and the only users of this are
     //   apps who're installing this module but not even using the misk or wisp LaunchDarklyFeatureFlags.
-    val baseUri = URI.create(config.base_uri)
-    val ldConfig = LDConfig.Builder()
-      // Set wait to 0 to not block here. Block in service initialization instead.
-      .startWait(Duration.ofMillis(0))
-      .dataSource(Components.streamingDataSource())
-      .events(Components.sendEvents())
-      .serviceEndpoints(Components.serviceEndpoints().relayProxy(baseUri))
+    try {
+      logger.debug("Starting LD client configuration...")
 
-    config.ssl?.let {
-      val trustStore = sslLoader.loadTrustStore(config.ssl.trust_store)!!
-      val trustManagers = sslContextFactory.loadTrustManagers(trustStore.keyStore)
-      val x509TrustManager = trustManagers.mapNotNull { it as? X509TrustManager }.firstOrNull()
-        ?: throw IllegalStateException("no x509 trust manager in ${it.trust_store}")
-      val sslContext = sslContextFactory.create(it.cert_store, it.trust_store)
-      ldConfig.http(
-        Components.httpConfiguration().sslSocketFactory(sslContext.socketFactory, x509TrustManager)
-      )
+      val ldConfig = LDConfig.Builder()
+        // Set wait to 0 to not block here. Block in service initialization instead.
+        .startWait(Duration.ofMillis(0))
+        .dataSource(Components.streamingDataSource())
+        .events(
+          Components.sendEvents()
+            .capacity(config.event_capacity)
+            .flushInterval(config.flush_interval)
+        )
+        .offline(config.offline)
+
+      logger.debug("Configuring service endpoints...")
+      if (config.use_relay_proxy) {
+        logger.debug("Using relay proxy: ${config.base_uri}")
+        ldConfig.serviceEndpoints(
+          Components.serviceEndpoints().relayProxy(URI.create(config.base_uri))
+        )
+      }
+
+      config.ssl?.let {
+        logger.debug("Configuring SSL context...")
+        val trustStore = sslLoader.loadTrustStore(config.ssl.trust_store)!!
+        val trustManagers = sslContextFactory.loadTrustManagers(trustStore.keyStore)
+        val x509TrustManager = trustManagers.mapNotNull { it as? X509TrustManager }.firstOrNull()
+          ?: throw IllegalStateException("no x509 trust manager in ${it.trust_store}")
+        val sslContext = sslContextFactory.create(it.cert_store, it.trust_store)
+        ldConfig.http(
+          Components.httpConfiguration().sslSocketFactory(sslContext.socketFactory, x509TrustManager)
+        )
+      }
+
+      // Construct LDClient lazily to avoid making network calls until LaunchDarklyFeatureFlags.startup() is called.
+      return LDClient(resourceLoader.requireUtf8(config.sdk_key).trim(), ldConfig.build())
+    } catch (e: Exception) {
+      logger.debug("Error while creating LaunchDarkly client: ${e.message}", e)
+      throw e
     }
+  }
 
-    // Construct LDClient lazily to avoid making network calls until LaunchDarklyFeatureFlags.startup() is called.
-    return LDClient(resourceLoader.requireUtf8(config.sdk_key).trim(), ldConfig.build())
+  companion object {
+    private val logger = getLogger<LaunchDarklyModule>()
   }
 }
 
@@ -89,5 +115,9 @@ data class LaunchDarklyConfig @JvmOverloads constructor(
   @Redact
   val sdk_key: String,
   val base_uri: String,
+  val use_relay_proxy: Boolean = true,
   val ssl: HttpClientSSLConfig? = null,
+  val event_capacity: Int = DEFAULT_CAPACITY,
+  val flush_interval: Duration = DEFAULT_FLUSH_INTERVAL,
+  val offline: Boolean = false,
 ) : Config

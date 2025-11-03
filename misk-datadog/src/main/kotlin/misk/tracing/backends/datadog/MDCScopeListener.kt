@@ -2,7 +2,7 @@ package com.squareup.cash.tracing.datadog
 
 import datadog.trace.api.CorrelationIdentifier
 import org.slf4j.MDC
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 /**
  * A scope listener that updates the MDC with the trace and span reference anytime a new scope is
@@ -29,6 +29,15 @@ class MDCScopeListener {
   }
 
   fun afterScopeClosed() {
+    if (true) {
+      // Dont remove MDC trace_ids on scope closed due to bugs in
+      // the balance of activated/closed calls.  The activated call is
+      // correct on scope changes, so it will properly keep the traceId
+      // up-to-date.
+      // https://github.com/DataDog/dd-trace-java/issues/7215#issuecomment-2841316047
+      return
+    }
+
     try {
       MDC.remove(MDC_TRACE_ID)
       MDC.remove(MDC_SPAN_ID)

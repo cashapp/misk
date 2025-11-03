@@ -7,6 +7,7 @@ package misk.jooq.testgen
 import kotlin.collections.List
 
 import misk.jooq.testgen.tables.Movie
+import misk.jooq.testgen.tables.RecordSignatureTest
 
 import org.jooq.Catalog
 import org.jooq.Table
@@ -18,22 +19,28 @@ import org.jooq.impl.SchemaImpl
  */
 @Suppress("UNCHECKED_CAST")
 open class Jooq : SchemaImpl("jooq", DefaultCatalog.DEFAULT_CATALOG) {
-    companion object {
+    public companion object {
 
         /**
          * The reference instance of <code>jooq</code>
          */
-        val JOOQ = Jooq()
+        val JOOQ: Jooq = Jooq()
     }
 
     /**
      * The table <code>jooq.movie</code>.
      */
-    val MOVIE get() = Movie.MOVIE
+    val MOVIE: Movie get() = Movie.MOVIE
+
+    /**
+     * The table <code>jooq.record_signature_test</code>.
+     */
+    val RECORD_SIGNATURE_TEST: RecordSignatureTest get() = RecordSignatureTest.RECORD_SIGNATURE_TEST
 
     override fun getCatalog(): Catalog = DefaultCatalog.DEFAULT_CATALOG
 
     override fun getTables(): List<Table<*>> = listOf(
-        Movie.MOVIE
+        Movie.MOVIE,
+        RecordSignatureTest.RECORD_SIGNATURE_TEST
     )
 }

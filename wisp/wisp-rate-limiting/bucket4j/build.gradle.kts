@@ -1,6 +1,6 @@
 plugins {
-  `java-library`
-  `java-test-fixtures`
+  id("org.jetbrains.kotlin.jvm")
+  id("com.vanniktech.maven.publish")
 }
 
 dependencies {

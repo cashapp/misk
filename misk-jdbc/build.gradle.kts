@@ -1,12 +1,10 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
+  id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
-  `java-test-fixtures`
+  id("java-test-fixtures")
 }
 
 dependencies {
@@ -16,44 +14,50 @@ dependencies {
   api(libs.guava)
   api(libs.guice)
   api(libs.jakartaInject)
-  api(libs.moshi)
-  api(libs.openTracingApi)
+  api(libs.moshiCore)
+  api(libs.openTracing)
   api(libs.prometheusClient)
   api(project(":misk-config"))
   api(project(":misk-core"))
   api(project(":misk-inject"))
-  api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-deployment"))
-  implementation(libs.dockerTransport)
   implementation(libs.dockerTransportHttpClient)
+  implementation(libs.dockerTransportCore)
   implementation(libs.hikariCp)
-  implementation(libs.kotlinLogging)
+  implementation(libs.loggingApi)
   implementation(libs.mysql)
-  implementation(libs.okio)
-  implementation(project(":misk"))
+  implementation(project(":misk-backoff"))
+  implementation(project(":misk-docker"))
+  implementation(project(":misk-logging"))
   implementation(project(":misk-service"))
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-testing"))
+  implementation(project(":misk-logging"))
   implementation(project(":wisp:wisp-moshi"))
+  implementation(libs.jsqlparser)
+  runtimeOnly(libs.aws2SecretManager)
   runtimeOnly(libs.hsqldb)
   runtimeOnly(libs.openTracingJdbc)
   runtimeOnly(libs.postgresql)
 
   testFixturesApi(libs.datasourceProxy)
   testFixturesApi(libs.jakartaInject)
-  testFixturesApi(libs.moshi)
+  testFixturesApi(libs.moshiCore)
   testFixturesApi(libs.okHttp)
   testFixturesApi(project(":misk-inject"))
   testFixturesApi(project(":misk-jdbc"))
+  testFixturesApi(project(":misk-testing-api"))
   testFixturesImplementation(libs.guice)
   testFixturesImplementation(libs.hikariCp)
-  testFixturesImplementation(libs.kotlinLogging)
+  testFixturesImplementation(libs.loggingApi)
   testFixturesImplementation(libs.okio)
-  testFixturesImplementation(project(":wisp:wisp-containers-testing"))
+  testFixturesImplementation(project(":misk-testing"))
   testFixturesImplementation(project(":wisp:wisp-deployment"))
   testFixturesImplementation(project(":wisp:wisp-logging"))
   testFixturesImplementation(project(":misk"))
   testFixturesImplementation(project(":misk-core"))
   testFixturesImplementation(project(":misk-service"))
+  testFixturesImplementation(project(":misk-testing"))
+  testFixturesImplementation(testFixtures(project(":misk-vitess")))
   testFixturesRuntimeOnly(libs.hsqldb)
 
   testImplementation(libs.assertj)
@@ -62,14 +66,46 @@ dependencies {
   testImplementation(libs.mockitoCore)
   testImplementation(libs.openTracingDatadog)
   testImplementation(libs.openTracingMock)
-  testImplementation(project(":wisp:wisp-containers-testing"))
+  testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-jdbc"))
   testImplementation(project(":misk-testing"))
   testImplementation(testFixtures(project(":misk-jdbc")))
+  testImplementation(libs.junitPioneer)
+
+  testImplementation(libs.guice)
+  testImplementation(libs.hikariCp)
+  testImplementation(libs.loggingApi)
+  testImplementation(libs.okio)
+  testImplementation(project(":misk-testing"))
+  testImplementation(project(":wisp:wisp-deployment"))
+  testImplementation(project(":misk-logging"))
+  testImplementation(project(":misk"))
+  testImplementation(project(":misk-core"))
+  testImplementation(project(":misk-service"))
+  testImplementation(testFixtures(project(":misk-vitess")))
+
+  testFixturesImplementation(libs.dockerTransportHttpClient)
+  testFixturesImplementation(libs.dockerTransportCore)
+  testFixturesImplementation(libs.hikariCp)
+  testFixturesImplementation(libs.loggingApi)
+  testFixturesImplementation(libs.mysql)
+  testFixturesImplementation(libs.okio)
+  testFixturesImplementation(project(":misk"))
+  testFixturesImplementation(project(":misk-backoff"))
+  testFixturesImplementation(project(":misk-service"))
+  testFixturesImplementation(project(":misk-logging"))
+  testFixturesImplementation(project(":wisp:wisp-moshi"))
+  testFixturesImplementation(libs.jsqlparser)
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )
+}
+
+// Allows us to set environment variables in tests using JUnit Pioneer
+tasks.test {
+  jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
+  jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
 }

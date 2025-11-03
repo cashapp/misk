@@ -4,6 +4,7 @@ import okio.BufferedSource
 import okio.buffer
 import okio.source
 import java.io.File
+import java.nio.file.Paths
 import java.util.jar.JarFile
 
 /**
@@ -11,6 +12,10 @@ import java.util.jar.JarFile
  *
  * This uses the scheme `classpath:`.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  ReplaceWith(expression = "ClasspathResourceLoaderBackend","misk.resources.ClasspathResourceLoaderBackend")
+)
 object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
 
     const val SCHEME = "classpath:"
@@ -66,17 +71,22 @@ object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
         //  * Unrelated paths like `META-INF/MANIFEST.MF`. Ignore these.
         //  * Equal paths like `wisp/resources/`. Ignore these; we're only collecting children.
         //  * Child file paths like `wisp/resources/child.txt`. We collect the `child.txt` substring.
-        //  * Child directory paths like `wisp/resources/nested/child.txt`. We collect the `nexted`
+        //  * Child directory paths like `wisp/resources/nested/child.txt`. We collect the `nested`
         //    substring for the child directory.
         val result = mutableSetOf<String>()
         JarFile(file).use { jarFile ->
             for (entry in jarFile.entries().asIterator()) {
                 if (!entry.name.startsWith(pathPrefix) || entry.name == pathPrefix) continue
 
-                var endIndex = entry.name.indexOf("/", pathPrefix.length)
-                if (endIndex == -1) endIndex = entry.name.length
+                // Verify that the normalized file path still has the correct prefix
+                // This is to fix a security vulnerability where a zip file may contain file entries such as "..\sneaky-file"
+                val childFilePath = File(entry.name).toPath().normalize()
+                val prefixFilePath = Paths.get(pathPrefix)
+                if (!childFilePath.startsWith(prefixFilePath)) continue
 
-                result += entry.name.substring(pathPrefix.length, endIndex)
+                if (childFilePath.nameCount > prefixFilePath.nameCount) {
+                    result += childFilePath.getName(prefixFilePath.nameCount).toString()
+                }
             }
         }
         return result

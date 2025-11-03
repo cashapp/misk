@@ -1,18 +1,17 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
+  id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
-  `java-test-fixtures`
+  id("java-test-fixtures")
 }
 
 dependencies {
+  api(libs.kotlinxCoroutinesCore)
+
   testFixturesApi(libs.guice)
   testFixturesApi(libs.jakartaInject)
-  testFixturesApi(project(":wisp:wisp-token"))
   testFixturesApi(project(":misk"))
   testFixturesApi(project(":misk-hibernate"))
   testFixturesApi(project(":misk-inject"))
@@ -20,25 +19,30 @@ dependencies {
   testFixturesApi(project(":misk-transactional-jobqueue"))
   testFixturesImplementation(project(":misk-core"))
   testFixturesImplementation(project(":misk-service"))
+  testFixturesImplementation(project(":misk-testing-api"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.guice)
   testImplementation(libs.jakartaInject)
   testImplementation(libs.junitApi)
-  testImplementation(libs.kotlinLogging)
+  testImplementation(libs.loggingApi)
   testImplementation(libs.kotlinTest)
+  testImplementation(libs.kotlinxCoroutinesTest)
   testImplementation(libs.logbackClassic)
-  testImplementation(libs.moshi)
-  testImplementation(project(":wisp:wisp-logging"))
+  testImplementation(libs.moshiCore)
+  testImplementation(project(":misk-logging"))
   testImplementation(project(":wisp:wisp-logging-testing"))
-  testImplementation(project(":wisp:wisp-time-testing"))
+  testImplementation(project(":misk-testing"))
   testImplementation(project(":misk"))
   testImplementation(project(":misk-inject"))
   testImplementation(project(":misk-jobqueue"))
-  testImplementation(project(":misk-testing"))
+
+  testImplementation(project(":misk-core"))
+  testImplementation(project(":misk-service"))
+  testImplementation(project(":misk-testing-api"))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

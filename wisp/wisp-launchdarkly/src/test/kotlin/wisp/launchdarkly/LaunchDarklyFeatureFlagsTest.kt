@@ -55,10 +55,9 @@ internal class LaunchDarklyFeatureFlagsTest {
         val user = userCaptor.value
 
         // User fields are package-private, so we fetch it with reflection magicks!
-        val customField = LDContext::class.java.getDeclaredField("attributes")
-        customField.isAccessible = true
-        @Suppress("unchecked_cast")
-        val customAttrs = customField.get(user) as Map<String, LDValue>
+        val attributesField = LDContext::class.java.getDeclaredField("attributes")
+        attributesField.isAccessible = true
+        val customAttrs = attributesField.get(user)
 
         val privateAttrsField = LDContext::class.java.getDeclaredField("privateAttributes")
         privateAttrsField.isAccessible = true
@@ -68,9 +67,11 @@ internal class LaunchDarklyFeatureFlagsTest {
         val platform = UserAttribute.forName("platform")
         val age = UserAttribute.forName("age")
 
-        assertThat(customAttrs.getValue("continent").stringValue()).isEqualTo("europa")
-        assertThat(customAttrs.getValue("platform").stringValue()).isEqualTo("lava")
-        assertThat(customAttrs.getValue("age").intValue()).isEqualTo(100000)
+        val getMethod = Class.forName("com.launchdarkly.sdk.AttributeMap").getDeclaredMethod("get", String::class.java)
+        getMethod.isAccessible = true
+        assertThat((getMethod.invoke(customAttrs, "continent") as LDValue).stringValue()).isEqualTo("europa")
+        assertThat((getMethod.invoke(customAttrs, "platform") as LDValue).stringValue()).isEqualTo("lava")
+        assertThat((getMethod.invoke(customAttrs, "age") as LDValue).intValue()).isEqualTo(100000)
         assertThat(privateAttrs.toSet().equals(setOf(continent, platform, age)))
     }
 
@@ -209,24 +210,21 @@ internal class LaunchDarklyFeatureFlagsTest {
             .stringVariationDetail(eq("key"), userCaptor.capture(), eq(""))
 
         val user = userCaptor.value
-        // NB: LDUser properties are package-local so we can't read them here.
+        // NB: LDContext properties are package-local so we can't read them here.
         // Create expected user and compare against actual.
-        val expected = LDContext.fromUser(LDUser.Builder("user")
-            .ip("127.0.0.1")
-            .email("email@value.com")
+        val expected = LDContext.builder("user")
             .name("name value")
-            .avatar("avatar value")
-            .firstName("firstName value")
-            .lastName("lastName value")
-            .country("US")
-            .privateCustom("secondary", "secondary value")
-            .privateCustom("custom1", "custom1 value")
-            .privateCustom("custom2", "custom2 value")
-            .build())
+            .set("ip", "127.0.0.1")
+            .set("email", "email@value.com")
+            .set("avatar", "avatar value")
+            .set("firstName", "firstName value")
+            .set("lastName", "lastName value")
+            .set("country", "US")
+            .set("secondary", "secondary value").privateAttributes("secondary")
+            .set("custom1", "custom1 value").privateAttributes("custom1")
+            .set("custom2", "custom2 value").privateAttributes("custom2")
+            .build()
 
-        // isEqualTo() would be more appropriate, since LDUser overrides equals(). However, failures would offer no
-        // meaningful output, given that LDUser does not override toString. Doing a field-by-field comparison is overkill
-        // for the test to pass but produces output that identifies the problematic attribute(s) when the test fails.
-        assertThat(user).usingRecursiveComparison().isEqualTo(expected)
+        assertThat(user).isEqualTo(expected)
     }
 }

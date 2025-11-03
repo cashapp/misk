@@ -10,15 +10,20 @@ import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.LazyInitializationException
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import wisp.logging.LogCollector
-import wisp.time.FakeClock
+import misk.logging.LogCollector
+import misk.time.FakeClock
 import java.time.Duration.ofSeconds
 import java.time.LocalDate
 import jakarta.inject.Inject
+import misk.testing.MiskExternalDependency
+import misk.vitess.testing.utilities.DockerVitess
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 class ReflectionQueryFactoryTest {
+  @MiskExternalDependency
+  private val dockerVitess = DockerVitess()
+
   @MiskTestModule
   val module = MoviesTestModule()
 
@@ -57,7 +62,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThan(m3.releaseDate)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactlyInAnyOrder(m1, m2)
@@ -65,7 +70,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThanOrEqualTo(m3.releaseDate)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactlyInAnyOrder(m1, m2, m3)
@@ -73,7 +78,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateEqualTo(m3.releaseDate)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactly(m3)
@@ -81,7 +86,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateGreaterThanOrEqualTo(m3.releaseDate)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactlyInAnyOrder(m3, m4, m5)
@@ -89,7 +94,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateGreaterThan(m3.releaseDate)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactlyInAnyOrder(m4, m5)
@@ -97,7 +102,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateNotEqualTo(m3.releaseDate)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactlyInAnyOrder(m1, m2, m4, m5)
@@ -127,7 +132,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThan(null)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .isEmpty()
@@ -135,7 +140,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThanOrEqualTo(null)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .isEmpty()
@@ -143,7 +148,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateEqualTo(null)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .isEmpty()
@@ -151,7 +156,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateGreaterThanOrEqualTo(null)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .isEmpty()
@@ -159,7 +164,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateGreaterThan(null)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .isEmpty()
@@ -167,7 +172,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateNotEqualTo(null)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .isEmpty()
@@ -190,7 +195,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateIsNull()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactlyInAnyOrder(m98, m99)
@@ -198,7 +203,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateIsNotNull()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactlyInAnyOrder(m1, m2)
@@ -219,7 +224,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateInVararg(m1.releaseDate, m3.releaseDate)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactlyInAnyOrder(m1, m3)
@@ -227,7 +232,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateInCollection(listOf(m1.releaseDate, m3.releaseDate))
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactlyInAnyOrder(m1, m3)
@@ -248,7 +253,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateNotInVararg(m1.releaseDate, m3.releaseDate)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactlyInAnyOrder(m2)
@@ -256,7 +261,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateNotInCollection(listOf(m1.releaseDate, m3.releaseDate))
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactlyInAnyOrder(m2)
@@ -275,7 +280,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateInVararg(m1.releaseDate, null)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactly(m1)
@@ -283,7 +288,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateInCollection(listOf(m1.releaseDate, null))
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactly(m1)
@@ -300,7 +305,6 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateInVararg()
-          .allowFullScatter()
           .listAsNameAndReleaseDate(session)
       )
         .isEmpty()
@@ -308,7 +312,6 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateInCollection(listOf())
-          .allowFullScatter()
           .listAsNameAndReleaseDate(session)
       )
         .isEmpty()
@@ -330,14 +333,14 @@ class ReflectionQueryFactoryTest {
 
       val queryObjectResult = queryFactory.newQuery<OperatorsMovieQuery>()
         .releaseDateLessThan(m3.releaseDate)
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .listAsNameAndReleaseDate(session)
 
       // Should contain the same items as running the query with a runtime constraint.
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .apply { dynamicAddConstraint("release_date", LT, m3.releaseDate) }
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactlyInAnyOrderElementsOf(queryObjectResult)
@@ -346,7 +349,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThan(m3.releaseDate)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .dynamicList(session, listOf("name", "release_date"))
           .map { NameAndReleaseDate(it[0] as String, it[1] as LocalDate) }
       )
@@ -356,7 +359,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThan(m3.releaseDate)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .dynamicList(session) { criteriaBuilder, queryRoot ->
             criteriaBuilder.tuple(
               queryRoot.get<DbMovie>("name"),
@@ -371,7 +374,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.dynamicQuery(DbMovie::class)
           .apply { dynamicAddConstraint("release_date", LT, m3.releaseDate) }
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .dynamicList(session, listOf("name", "release_date"))
           .map { NameAndReleaseDate(it[0] as String, it[1] as LocalDate) }
       )
@@ -395,7 +398,7 @@ class ReflectionQueryFactoryTest {
       // count(*)
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .dynamicUniqueResult(session) { criteriaBuilder, queryRoot ->
             criteriaBuilder.count(queryRoot)
           }!![0]
@@ -405,7 +408,7 @@ class ReflectionQueryFactoryTest {
       // count(name)
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .dynamicUniqueResult(session) { criteriaBuilder, queryRoot ->
             criteriaBuilder.count(queryRoot.get<DbMovie>("name"))
           }!![0]
@@ -415,7 +418,7 @@ class ReflectionQueryFactoryTest {
       // count(release_date)
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .dynamicUniqueResult(session) { criteriaBuilder, queryRoot ->
             criteriaBuilder.count(queryRoot.get<DbMovie>("release_date"))
           }!![0]
@@ -425,7 +428,7 @@ class ReflectionQueryFactoryTest {
       // min(release_date), max(release_date)
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .dynamicUniqueResult(session) { criteriaBuilder, queryRoot ->
             criteriaBuilder.tuple(
               criteriaBuilder.min(queryRoot.get("release_date")),
@@ -439,7 +442,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThan(m3.releaseDate)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .dynamicUniqueResult(session) { criteriaBuilder, queryRoot ->
             criteriaBuilder.max(queryRoot.get("release_date"))
           }
@@ -462,7 +465,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateEqualTo(m1.releaseDate)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .uniqueName(session)
       )
         .isEqualTo(m1.name)
@@ -470,7 +473,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThanOrEqualTo(m2.releaseDate)
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNames(session)
       )
         .containsExactlyInAnyOrder(m1.name, m2.name)
@@ -482,14 +485,14 @@ class ReflectionQueryFactoryTest {
     transacter.transaction { session ->
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .uniqueName(session)
       )
         .isNull()
 
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNames(session)
       )
         .isEmpty()
@@ -510,7 +513,8 @@ class ReflectionQueryFactoryTest {
     }
     transacter.transaction { session ->
       assertThat(
-        queryFactory.newQuery<OperatorsMovieQuery>().allowTableScan().allowFullScatter()
+        queryFactory.newQuery<OperatorsMovieQuery>()
+          .allowTableScan()
           .list(session)
       ).hasSize(18)
     }
@@ -525,7 +529,7 @@ class ReflectionQueryFactoryTest {
     transacter.transaction { session ->
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .list(session)
       ).hasSize(21)
     }
@@ -544,7 +548,7 @@ class ReflectionQueryFactoryTest {
     transacter.allowCowrites().transaction { session ->
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .list(session)
       ).hasSize(31)
     }
@@ -558,7 +562,7 @@ class ReflectionQueryFactoryTest {
     transacter.allowCowrites().transaction { session ->
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .apply { maxRows = 32 }
           .list(session)
       )
@@ -576,7 +580,7 @@ class ReflectionQueryFactoryTest {
       assertFailsWith<IllegalStateException> {
         transacter.transaction { session ->
           queryFactory.newQuery<OperatorsMovieQuery>()
-            .allowFullScatter().allowTableScan()
+            .allowTableScan()
             .list(session)
         }
       }
@@ -594,7 +598,7 @@ class ReflectionQueryFactoryTest {
     transacter.transaction { session ->
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .apply { maxRows = 4 }
           .listAsNames(session)
       )
@@ -625,7 +629,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .apply { maxRows = 2 }
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .list(session)
           .map { it.name }
       )
@@ -636,7 +640,7 @@ class ReflectionQueryFactoryTest {
     transacter.transaction { session ->
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .apply { maxRows = 2 }
           .listAsNames(session)
       )
@@ -658,7 +662,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .apply { maxRows = 1; firstResult = 1 }
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .releaseDateAsc()
           .list(session)
           .map { it.name }
@@ -670,7 +674,7 @@ class ReflectionQueryFactoryTest {
     transacter.transaction { session ->
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .releaseDateAsc()
           .apply { maxRows = 1; firstResult = 1 }
           .listAsNameAndReleaseDate(session)
@@ -684,7 +688,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .apply { maxRows = 1; firstResult = 1 }
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .releaseDateAsc()
           .uniqueResult(session)!!.name
       )
@@ -696,7 +700,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .apply { maxRows = 1; firstResult = 1 }
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .releaseDateAsc()
           .dynamicUniqueResult(session, listOf("name", "release_date"))!![0]
       )
@@ -717,7 +721,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .apply { firstResult = 1 }
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .list(session)
           .map { it.name }
       )
@@ -728,7 +732,7 @@ class ReflectionQueryFactoryTest {
     transacter.transaction { session ->
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .apply { firstResult = 1 }
           .listAsNames(session)
       )
@@ -749,7 +753,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .apply { firstResult = 3 }
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .list(session)
           .map { it.name }
       )
@@ -760,7 +764,7 @@ class ReflectionQueryFactoryTest {
     transacter.transaction { session ->
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .apply { firstResult = 3 }
           .listAsNames(session)
       )
@@ -781,7 +785,7 @@ class ReflectionQueryFactoryTest {
       assertFailsWith<IllegalStateException> {
         transacter.transaction { session ->
           queryFactory.newQuery<OperatorsMovieQuery>()
-            .allowFullScatter().allowTableScan()
+            .allowTableScan()
             .uniqueResult(session)
         }
       }
@@ -792,7 +796,7 @@ class ReflectionQueryFactoryTest {
       assertFailsWith<IllegalStateException> {
         transacter.transaction { session ->
           queryFactory.newQuery<OperatorsMovieQuery>()
-            .allowFullScatter().allowTableScan()
+            .allowTableScan()
             .uniqueName(session)
         }
       }
@@ -817,21 +821,21 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateAsc()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactly(m2, m3, m1)
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateDesc()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
         .containsExactly(m1, m3, m2)
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateDesc()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .list(session)
       )
         .containsExactly(jurassicPark, starWars, rocky)
@@ -854,7 +858,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .apply { dynamicAddOrder("release_date", false) }
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .list(session)
       )
         .containsExactly(jurassicPark, starWars, rocky)
@@ -862,7 +866,7 @@ class ReflectionQueryFactoryTest {
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
           .apply { dynamicAddOrder("created_at", true) }
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .list(session)
       )
         .containsExactly(jurassicPark, rocky, starWars)
@@ -887,7 +891,9 @@ class ReflectionQueryFactoryTest {
         .uniqueResult(session)
     }
 
-    assertThat(character?.actor?.name).isEqualTo(actorName)
+    assertThat(character).isNotNull()
+    assertThat(character!!.actor).isNotNull()
+    assertThat(character.actor!!.name).isEqualTo(actorName)
   }
 
   @Test
@@ -924,15 +930,16 @@ class ReflectionQueryFactoryTest {
       assertFailsWith<IllegalStateException> {
         transacter.transaction { session ->
           queryFactory.newQuery<OperatorsMovieQuery>()
-            .allowFullScatter().allowTableScan()
-            .releaseDateAsc().delete(session)
+            .allowTableScan()
+            .releaseDateAsc()
+            .delete(session)
         }
       }
     ).hasMessageContaining("orderBy shouldn't be used for a delete")
 
     transacter.allowCowrites().transaction { session ->
       val rocky = queryFactory.newQuery<OperatorsMovieQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .uniqueName(session)
       assertThat(rocky).isEqualTo("Rocky 1")
     }
@@ -948,7 +955,6 @@ class ReflectionQueryFactoryTest {
 
     transacter.transaction { session ->
       val deleted = queryFactory.newQuery<OperatorsMovieQuery>()
-        .allowFullScatter()
         .allowTableScan()
         .releaseDateLessThanOrEqualTo(LocalDate.of(1978, 1, 1))
         .delete(session)
@@ -958,7 +964,6 @@ class ReflectionQueryFactoryTest {
 
     transacter.transaction { session ->
       val jurassicPark = queryFactory.newQuery<OperatorsMovieQuery>()
-        .allowFullScatter()
         .allowTableScan()
         .uniqueName(session)
 
@@ -977,7 +982,7 @@ class ReflectionQueryFactoryTest {
     // count all entities
     val allCount = transacter.transaction { session ->
       queryFactory.newQuery<OperatorsMovieQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .count(session)
     }
     assertThat(allCount).isEqualTo(3)
@@ -985,7 +990,7 @@ class ReflectionQueryFactoryTest {
     // count with filter
     transacter.transaction { session ->
       val jurassicParkCount = queryFactory.newQuery<OperatorsMovieQuery>()
-        .allowFullScatter().allowTableScan()
+        .allowTableScan()
         .name("Jurassic Park")
         .count(session)
       assertThat(jurassicParkCount).isEqualTo(1)
@@ -995,7 +1000,7 @@ class ReflectionQueryFactoryTest {
     assertFailsWith<java.lang.IllegalStateException> {
       transacter.transaction { session ->
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .apply { maxRows = 2 }
           .count(session)
       }
@@ -1015,7 +1020,7 @@ class ReflectionQueryFactoryTest {
 
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
+          .allowTableScan()
           .or {
             option { name("Rocky 1") }
             option { name("Rocky 3") }
@@ -1099,6 +1104,48 @@ class ReflectionQueryFactoryTest {
   }
 
   @Test
+  fun likeOperator() {
+    transacter.allowCowrites().transaction { session ->
+      session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+      session.save(DbMovie("Jurassic Park: The Lost World", LocalDate.of(1997, 5, 19)))
+      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+      session.save(DbMovie("World Trade Center", LocalDate.of(2026, 2, 25)))
+    }
+
+    val jurassicCount = transacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+        .allowTableScan()
+        .nameLike("Jurassic%")
+        .count(session)
+    }
+    assertThat(jurassicCount).isEqualTo(2)
+
+    val jurassicMovies = transacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+        .allowTableScan()
+        .nameLike("Jurassic%")
+        .listAsNames(session)
+    }
+    assertThat(jurassicMovies).containsExactlyInAnyOrder("Jurassic Park", "Jurassic Park: The Lost World")
+
+    val worldMovies = transacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+        .allowTableScan()
+        .nameLike("%World")
+        .listAsNames(session)
+    }
+    assertThat(worldMovies).containsExactly("Jurassic Park: The Lost World")
+
+    val parkMovies = transacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+        .allowTableScan()
+        .nameLike("%Park%")
+        .listAsNames(session)
+    }
+    assertThat(parkMovies).containsExactlyInAnyOrder("Jurassic Park: The Lost World", "Jurassic Park")
+  }
+
+  @Test
   fun customConstraint() {
     transacter.allowCowrites().transaction { session ->
       session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
@@ -1108,7 +1155,6 @@ class ReflectionQueryFactoryTest {
 
     val jurassicCount = transacter.transaction { session ->
       queryFactory.newQuery<OperatorsMovieQuery>()
-        .allowFullScatter()
         .allowTableScan()
         .constraint { root -> like(root.get("name"), "Jurassic%") }
         .count(session)
@@ -1125,36 +1171,52 @@ class ReflectionQueryFactoryTest {
     }
 
     val original = queryFactory.newQuery<OperatorsMovieQuery>()
-      .allowFullScatter()
       .allowTableScan()
       .constraint { root -> like(root.get("name"), "Jurassic%") }
+      .apply {
+        maxRows = 10
+        firstResult = 0
+      }
 
     val clone = original.clone<OperatorsMovieQuery>()
+
+    // Check that fields are cloned correctly
+    assertThat(clone.maxRows).isEqualTo(original.maxRows)
+    assertThat(clone.firstResult).isEqualTo(original.firstResult)
 
     // Original and cloned queries should provide the same result
     assertThat(
       transacter.transaction { session ->
-        original.count(session)
+        original.listAsNames(session)
       }
-    ).isEqualTo(2)
+    ).containsExactlyInAnyOrder(
+      "Jurassic Park",
+      "Jurassic Park: The Lost World",
+    )
     assertThat(
       transacter.transaction { session ->
-        clone.count(session)
+        clone.listAsNames(session)
       }
-    ).isEqualTo(2)
+    ).containsExactlyInAnyOrder(
+      "Jurassic Park",
+      "Jurassic Park: The Lost World",
+    )
 
     // Modify the cloned query. The original query should be unchanged
     clone.constraint { root -> like(root.get("name"), "%World") }
     assertThat(
       transacter.transaction { session ->
-        original.count(session)
+        original.listAsNames(session)
       }
-    ).isEqualTo(2)
+    ).containsExactlyInAnyOrder(
+      "Jurassic Park",
+      "Jurassic Park: The Lost World",
+    )
     assertThat(
       transacter.transaction { session ->
-        clone.count(session)
+        clone.listAsNames(session)
       }
-    ).isEqualTo(1)
+    ).containsExactly("Jurassic Park: The Lost World")
   }
 
   @Test

@@ -16,6 +16,7 @@ import wisp.deployment.TESTING
 /** This module creates movies, actors, and characters tables for several Hibernate tests. */
 class MoviesTestModule(
   private val type: DataSourceType = DataSourceType.VITESS_MYSQL,
+  private val allowScatters: Boolean = true,
   private val scaleSafetyChecks: Boolean = false,
   private val entitiesModule: HibernateEntityModule = object :
     HibernateEntityModule(Movies::class) {
@@ -23,6 +24,7 @@ class MoviesTestModule(
       addEntities(DbMovie::class, DbActor::class, DbCharacter::class)
     }
   },
+  private val installHealthChecks: Boolean = true,
 ) : KAbstractModule() {
   override fun configure() {
     install(LogCollectorModule())
@@ -35,27 +37,48 @@ class MoviesTestModule(
     install(DeploymentModule(TESTING))
 
     val config = MiskConfig.load<MoviesConfig>("moviestestmodule", TESTING)
-    val dataSourceConfig = selectDataSourceConfig(config)
+    val writerConfig = selectDataSourceConfig(config)
+    val readerConfig = selectReaderDataSourceConfig(config)
     install(
       HibernateTestingModule(
         Movies::class,
-        dataSourceConfig,
         scaleSafetyChecks = scaleSafetyChecks
       )
     )
     install(
       HibernateModule(
-        Movies::class, MoviesReader::class,
-        DataSourceClusterConfig(writer = dataSourceConfig, reader = dataSourceConfig)
+        qualifier = Movies::class,
+        readerQualifier = MoviesReader::class,
+        cluster = DataSourceClusterConfig(writer = writerConfig, reader = readerConfig),
+        installHealthChecks = installHealthChecks
       )
     )
     install(entitiesModule)
   }
 
   internal fun selectDataSourceConfig(config: MoviesConfig): DataSourceConfig {
+    if (!allowScatters && type == DataSourceType.VITESS_MYSQL) {
+      return config.vitess_mysql_no_scatter_data_source
+    }
+
     return when (type) {
       DataSourceType.VITESS_MYSQL -> config.vitess_mysql_data_source
       DataSourceType.MYSQL -> config.mysql_data_source
+      DataSourceType.COCKROACHDB -> config.cockroachdb_data_source
+      DataSourceType.POSTGRESQL -> config.postgresql_data_source
+      DataSourceType.TIDB -> config.tidb_data_source
+      DataSourceType.HSQLDB -> throw RuntimeException("Not supported (yet?)")
+    }
+  }
+  
+  internal fun selectReaderDataSourceConfig(config: MoviesConfig): DataSourceConfig {
+    if (!allowScatters && type == DataSourceType.VITESS_MYSQL) {
+      return config.vitess_mysql_no_scatter_data_source
+    }
+
+    return when (type) {
+      DataSourceType.VITESS_MYSQL -> config.vitess_mysql_reader_data_source ?: config.vitess_mysql_data_source
+      DataSourceType.MYSQL -> config.mysql_data_source // For MySQL, can use same config
       DataSourceType.COCKROACHDB -> config.cockroachdb_data_source
       DataSourceType.POSTGRESQL -> config.postgresql_data_source
       DataSourceType.TIDB -> config.tidb_data_source

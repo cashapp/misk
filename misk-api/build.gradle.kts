@@ -1,11 +1,9 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  kotlin("jvm")
-  `java-library`
+  id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
 }
 
@@ -15,13 +13,13 @@ dependencies {
   compileOnly(libs.jetbrainsAnnotations)
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )
 }
 
-tasks.getting(KotlinCompile::class) {
+tasks.withType<KotlinCompile>().configureEach {
   compilerOptions {
     freeCompilerArgs.add("-Xjvm-default=all-compatibility")
   }

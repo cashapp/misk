@@ -18,7 +18,7 @@ import misk.cloud.gcp.storage.LocalStorageRpc
 import misk.cloud.gcp.storage.StorageConfig
 import misk.inject.KAbstractModule
 import wisp.deployment.Deployment
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.nio.file.Paths
 import jakarta.inject.Inject
 

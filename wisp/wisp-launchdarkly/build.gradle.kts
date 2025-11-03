@@ -1,17 +1,20 @@
 plugins {
-    `java-library`
+  id("org.jetbrains.kotlin.jvm")
+  id("com.vanniktech.maven.publish")
 }
 
 dependencies {
     api(libs.launchDarkly)
-    api(libs.kotlinLogging)
+    api(libs.loggingApi)
     api(libs.micrometerCore)
-    api(libs.moshi)
+    api(libs.moshiCore)
     api(project(":wisp:wisp-client"))
     api(project(":wisp:wisp-config"))
     api(project(":wisp:wisp-feature"))
     api(project(":wisp:wisp-resource-loader"))
     api(project(":wisp:wisp-ssl"))
+
+    implementation(libs.guava)
 
     testImplementation(libs.assertj)
     testImplementation(libs.junitApi)

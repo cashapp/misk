@@ -13,7 +13,7 @@ import misk.jobqueue.JobQueue.Companion.SQS_MAX_BATCH_ENQUEUE_JOB_SIZE
 import misk.jobqueue.QueueName
 import misk.moshi.adapter
 import misk.time.timed
-import wisp.tracing.traceWithSpan
+import misk.tracing.traceWithSpan
 import java.time.Duration
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -43,7 +43,7 @@ internal class SqsJobQueue @Inject internal constructor(
     attributes: Map<String, String>
   ) {
     executeWithTracingAndErrorHandling(queueName, 1) { span: Span, queue: ResolvedQueue ->
-      val (sendDuration, _) = queue.call { client ->
+      val (sendDuration) = queue.call { client ->
         val sendRequest = SendMessageRequest().apply {
           queueUrl = queue.url
           messageBody = body

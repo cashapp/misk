@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
-import wisp.config.Config
-import wisp.logging.getLogger
+import misk.config.Config
+import misk.logging.getLogger
 import java.net.URL
 import java.time.Duration
 
@@ -95,11 +95,7 @@ data class HttpClientsConfig @JvmOverloads constructor(
 data class HttpClientSSLConfig(
   val cert_store: CertStoreConfig?,
   val trust_store: TrustStoreConfig
-) {
-  fun toWispConfig(): wisp.client.HttpClientSSLConfig = wisp.client.HttpClientSSLConfig(
-    cert_store?.toWispConfig(), trust_store.toWispConfig()
-  )
-}
+)
 
 data class HttpClientConfig @JvmOverloads constructor(
   val connectTimeout: Duration? = null,
@@ -114,24 +110,10 @@ data class HttpClientConfig @JvmOverloads constructor(
   val ssl: HttpClientSSLConfig? = null,
   val unixSocketFile: String? = null,
   val protocols: List<String>? = null,
-  val retryOnConnectionFailure: Boolean? = null
-) {
-  fun toWispConfig() = wisp.client.HttpClientConfig(
-    connectTimeout,
-    writeTimeout,
-    readTimeout,
-    pingInterval,
-    callTimeout,
-    maxRequests,
-    maxRequestsPerHost,
-    maxIdleConnections,
-    keepAliveDuration,
-    ssl?.toWispConfig(),
-    unixSocketFile,
-    protocols,
-    retryOnConnectionFailure
-  )
-}
+  val retryOnConnectionFailure: Boolean? = null,
+  val followRedirects: Boolean? = null,
+  val followSslRedirects: Boolean? = null
+)
 
 fun HttpClientConfig.applyDefaults(other: HttpClientConfig) =
   HttpClientConfig(
@@ -147,7 +129,9 @@ fun HttpClientConfig.applyDefaults(other: HttpClientConfig) =
     ssl = this.ssl ?: other.ssl,
     unixSocketFile = this.unixSocketFile ?: other.unixSocketFile,
     protocols = this.protocols ?: other.protocols,
-    retryOnConnectionFailure = this.retryOnConnectionFailure ?: other.retryOnConnectionFailure
+    retryOnConnectionFailure = this.retryOnConnectionFailure ?: other.retryOnConnectionFailure,
+    followRedirects = this.followRedirects ?: other.followRedirects,
+    followSslRedirects = this.followSslRedirects ?: other.followSslRedirects
   )
 
 data class HttpClientEndpointConfig @JvmOverloads constructor(
@@ -228,10 +212,6 @@ data class HttpClientEndpointConfig @JvmOverloads constructor(
   )
   val ssl
     get() = clientConfig.ssl
-
-  fun toWispConfig() = wisp.client.HttpClientEndpointConfig(
-    url, envoy?.toWispConfig(), clientConfig.toWispConfig()
-  )
 }
 
 data class HttpClientEnvoyConfig @JvmOverloads constructor(
@@ -239,6 +219,4 @@ data class HttpClientEnvoyConfig @JvmOverloads constructor(
 
   /** Environment to target. If null, the same environment as the app is running in is assumed. */
   val env: String? = null
-) {
-  fun toWispConfig() = wisp.client.HttpClientEnvoyConfig(app, env)
-}
+)

@@ -18,7 +18,7 @@ class HelloWebPostAction @Inject constructor() : WebAction {
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun hello(@PathParam name: String, @RequestBody body: PostBody): HelloPostResponse {
-    return HelloPostResponse(body.greeting, name.toUpperCase())
+    return HelloPostResponse(body.greeting, name.uppercase())
   }
 }
 

@@ -12,8 +12,8 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.logging.LogCollector
-import wisp.logging.getLogger
+import misk.logging.LogCollector
+import misk.logging.getLogger
 import java.lang.Thread.sleep
 import java.time.ZoneId
 import jakarta.inject.Inject
@@ -33,7 +33,8 @@ class CronModuleTest {
       install(FakeClusterWeightModule())
       install(
         CronModule(ZoneId.of("America/Toronto"),
-          dependencies = listOf(DependentService::class.toKey())
+          dependencies = listOf(DependentService::class.toKey()),
+          installDashboardTab = false
         )
       )
       install(

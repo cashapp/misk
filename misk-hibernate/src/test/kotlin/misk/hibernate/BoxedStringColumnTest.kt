@@ -9,7 +9,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.config.Config
+import misk.config.Config
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
 import jakarta.inject.Qualifier
@@ -138,7 +138,7 @@ class BoxedStringColumnTest {
       install(DeploymentModule(TESTING))
 
       val config = MiskConfig.load<RootConfig>("boxedstring", TESTING)
-      install(HibernateTestingModule(TokenColumn::class, config.data_source))
+      install(HibernateTestingModule(TokenColumn::class))
       install(HibernateModule(TokenColumn::class, config.data_source))
       install(object : HibernateEntityModule(TokenColumn::class) {
         override fun configureHibernate() {

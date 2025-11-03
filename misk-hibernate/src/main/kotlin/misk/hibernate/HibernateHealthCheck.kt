@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Provider
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.sql.Timestamp
 import java.time.Clock
 import java.time.Duration
@@ -29,7 +29,7 @@ internal class HibernateHealthCheck(
     val databaseInstant = try {
       val sessionFactory = sessionFactoryService.get().sessionFactory
       sessionFactory.openSession().use { session ->
-        session.createNativeQuery("SELECT NOW()").uniqueResult() as Timestamp
+        session.createNativeQuery("SELECT SYSDATE()").uniqueResult() as Timestamp
       }.toInstant()
     } catch (e: Exception) {
       logger.error(e) { "error performing hibernate health check" }

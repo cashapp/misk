@@ -60,16 +60,6 @@ public final class misk/clustering/Cluster$Snapshot {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/clustering/ClusterHashRing : misk/clustering/ClusterResourceMapper {
-	public fun <init> (Ljava/util/Collection;)V
-	public fun <init> (Ljava/util/Collection;Lcom/google/common/hash/HashFunction;)V
-	public fun <init> (Ljava/util/Collection;Lcom/google/common/hash/HashFunction;I)V
-	public synthetic fun <init> (Ljava/util/Collection;Lcom/google/common/hash/HashFunction;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun equals (Ljava/lang/Object;)Z
-	public fun get (Ljava/lang/String;)Lmisk/clustering/Cluster$Member;
-	public fun hashCode ()I
-}
-
 public abstract interface class misk/clustering/ClusterResourceMapper {
 	public abstract fun get (Ljava/lang/String;)Lmisk/clustering/Cluster$Member;
 }
@@ -96,9 +86,25 @@ public final class misk/clustering/DefaultCluster$Companion {
 	public final fun getLog ()Lmu/KLogger;
 }
 
+public final class misk/clustering/HashRingClusterResourceMapper : misk/clustering/ClusterResourceMapper {
+	public fun <init> (Ljava/util/Set;)V
+	public fun <init> (Ljava/util/Set;Lcom/google/common/hash/HashFunction;)V
+	public fun <init> (Ljava/util/Set;Lcom/google/common/hash/HashFunction;I)V
+	public synthetic fun <init> (Ljava/util/Set;Lcom/google/common/hash/HashFunction;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun get (Ljava/lang/String;)Lmisk/clustering/Cluster$Member;
+	public fun hashCode ()I
+}
+
 public final class misk/clustering/NoMembersAvailableException : java/lang/Exception {
 	public fun <init> (Ljava/lang/String;)V
 	public final fun getResourceId ()Ljava/lang/String;
+}
+
+public final class misk/clustering/RendezvousClusterResourceMapper : misk/clustering/ClusterResourceMapper {
+	public fun <init> (Ljava/util/Set;)V
+	public fun get (Ljava/lang/String;)Lmisk/clustering/Cluster$Member;
+	public final fun getMembers ()Ljava/util/Set;
 }
 
 public final class misk/clustering/fake/ExplicitClusterResourceMapper : misk/clustering/ClusterResourceMapper {
@@ -145,8 +151,28 @@ public final class misk/clustering/fake/FakeClusterModule : misk/inject/KAbstrac
 	public fun <init> ()V
 }
 
-public final class misk/clustering/fake/lease/FakeLeaseManager : wisp/lease/FakeLeaseManager {
+public final class misk/clustering/fake/lease/FakeLease : wisp/lease/Lease {
+	public fun <init> (Ljava/lang/String;Lmisk/clustering/fake/lease/FakeLeaseManager;)V
+	public fun acquire ()Z
+	public fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
+	public fun checkHeld ()Z
+	public fun checkHeldElsewhere ()Z
+	public fun getName ()Ljava/lang/String;
+	public final fun notifyAfterAcquire ()V
+	public final fun notifyBeforeRelease ()V
+	public fun release ()Z
+	public fun release (Z)Z
+	public fun shouldHold ()Z
+}
+
+public final class misk/clustering/fake/lease/FakeLeaseManager : misk/testing/FakeFixture, wisp/lease/LeaseManager {
 	public fun <init> ()V
+	public final fun isLeaseHeld (Ljava/lang/String;)Z
+	public final fun isLeaseHeldElsewhere (Ljava/lang/String;)Z
+	public final fun markLeaseHeld (Ljava/lang/String;)V
+	public final fun markLeaseHeldElsewhere (Ljava/lang/String;)V
+	public fun releaseAll ()V
+	public fun requestLease (Ljava/lang/String;)Lwisp/lease/Lease;
 }
 
 public final class misk/clustering/fake/lease/FakeLeaseModule : misk/inject/KAbstractModule {
@@ -157,7 +183,7 @@ public final class misk/clustering/kubernetes/KubernetesClusterModule : misk/inj
 	public fun <init> (Lmisk/clustering/kubernetes/KubernetesConfig;)V
 }
 
-public final class misk/clustering/kubernetes/KubernetesConfig : wisp/config/Config {
+public final class misk/clustering/kubernetes/KubernetesConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
@@ -188,6 +214,27 @@ public final class misk/clustering/kubernetes/KubernetesConfig : wisp/config/Con
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/clustering/lease/ClusterAwareLease : wisp/lease/Lease {
+	public fun <init> (Ljava/lang/String;Lmisk/clustering/weights/ClusterWeightProvider;)V
+	public fun acquire ()Z
+	public fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
+	public fun checkHeld ()Z
+	public fun checkHeldElsewhere ()Z
+	public fun getName ()Ljava/lang/String;
+	public fun release ()Z
+	public fun release (Z)Z
+	public fun shouldHold ()Z
+}
+
+public final class misk/clustering/lease/ClusterAwareLeaseManager : wisp/lease/LeaseManager {
+	public fun releaseAll ()V
+	public fun requestLease (Ljava/lang/String;)Lwisp/lease/Lease;
+}
+
+public final class misk/clustering/lease/ClusterAwareLeaseModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
 public final class misk/clustering/weights/ActiveClusterWeight : misk/clustering/weights/ClusterWeightProvider {
 	public fun <init> ()V
 	public fun get ()I
@@ -204,7 +251,7 @@ public abstract interface class misk/clustering/weights/ClusterWeightProvider {
 public abstract interface class misk/clustering/weights/ClusterWeightService : com/google/common/util/concurrent/Service {
 }
 
-public final class misk/clustering/weights/FakeClusterWeight : misk/clustering/weights/ClusterWeightProvider {
+public final class misk/clustering/weights/FakeClusterWeight : misk/testing/FakeFixture, misk/clustering/weights/ClusterWeightProvider {
 	public fun <init> ()V
 	public fun get ()I
 	public final fun setClusterWeight (I)V

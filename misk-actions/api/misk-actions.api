@@ -132,9 +132,6 @@ public class misk/exceptions/WebActionException : java/lang/RuntimeException {
 	public final fun isServerError ()Z
 }
 
-public abstract interface annotation class misk/security/authz/AllowAnyService : java/lang/annotation/Annotation {
-}
-
 public abstract interface annotation class misk/security/authz/Authenticated : java/lang/annotation/Annotation {
 	public abstract fun allowAnyService ()Z
 	public abstract fun allowAnyUser ()Z
@@ -200,6 +197,17 @@ public abstract interface annotation class misk/web/RequestBody : java/lang/anno
 
 public abstract interface annotation class misk/web/RequestContentType : java/lang/annotation/Annotation {
 	public abstract fun value ()[Ljava/lang/String;
+}
+
+public abstract interface annotation class misk/web/RequestCookie : java/lang/annotation/Annotation {
+	public abstract fun value ()Ljava/lang/String;
+}
+
+public abstract interface annotation class misk/web/RequestCookies : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class misk/web/RequestHeader : java/lang/annotation/Annotation {
+	public abstract fun value ()Ljava/lang/String;
 }
 
 public abstract interface annotation class misk/web/RequestHeaders : java/lang/annotation/Annotation {
@@ -303,6 +311,8 @@ public abstract interface annotation class misk/web/interceptors/LogRequestRespo
 	public abstract fun errorBodySampling ()D
 	public abstract fun errorRatePerSecond ()J
 	public abstract fun excludedEnvironments ()[Ljava/lang/String;
+	public abstract fun includeRequestHeaders ()Z
+	public abstract fun includeResponseHeaders ()Z
 	public abstract fun ratePerSecond ()J
 	public abstract fun requestLoggingMode ()Lmisk/web/interceptors/RequestLoggingMode;
 }

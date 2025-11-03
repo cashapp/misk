@@ -1,11 +1,14 @@
 plugins {
-    `java-library`
+  id("org.jetbrains.kotlin.jvm")
+  id("com.vanniktech.maven.publish")
 }
 
 dependencies {
-    api(libs.kotlinLogging)
+    api(libs.loggingApi)
     api(libs.slf4jApi)
     api(project(":wisp:wisp-sampling"))
+  
+    implementation(project(":misk-api"))
 
     testImplementation(libs.assertj)
     testImplementation(libs.junitApi)

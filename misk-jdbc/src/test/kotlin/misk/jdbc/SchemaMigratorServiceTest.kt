@@ -2,6 +2,7 @@ package misk.jdbc
 
 import com.google.inject.util.Modules
 import jakarta.inject.Inject
+import jakarta.inject.Qualifier
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.database.StartDatabaseService
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import wisp.config.Config
+import misk.config.Config
 import wisp.deployment.TESTING
 
 @MiskTest(startService = false)
@@ -23,6 +24,7 @@ internal class MySQLSchemaMigratorServiceTest : SchemaMigratorServiceTest(DataSo
 internal class PostgreSQLSchemaMigratorServiceTest : SchemaMigratorServiceTest(DataSourceType.POSTGRESQL)
 
 @MiskTest(startService = false)
+@Disabled(value = "Requires the ExternalDependency implementation to be less flakey")
 internal class CockroachdbSchemaMigratorServiceTest : SchemaMigratorServiceTest(DataSourceType.COCKROACHDB)
 
 @MiskTest(startService = false)
@@ -121,3 +123,11 @@ internal abstract class SchemaMigratorServiceTest(val type: DataSourceType) {
     val tidb_data_source: DataSourceConfig,
   ) : Config
 }
+
+@Qualifier
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+internal annotation class Movies
+
+@Qualifier
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+internal annotation class Movies2

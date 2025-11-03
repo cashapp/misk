@@ -1,8 +1,6 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-  kotlin("jvm")
-  application
+  id("org.jetbrains.kotlin.jvm")
+  id("application")
 }
 
 val applicationMainClass = "com.squareup.chat.ChatServiceKt"
@@ -12,7 +10,6 @@ application {
 
 dependencies {
   implementation(libs.jakartaInject)
-  implementation(project(":wisp:wisp-config"))
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
   implementation(project(":misk-clustering"))
@@ -20,6 +17,7 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-redis"))
+  implementation(project(":misk-service"))
   implementation(libs.guice)
   implementation(libs.jedis)
   implementation(libs.logbackClassic)
@@ -34,16 +32,13 @@ dependencies {
   testImplementation(project(":misk-testing"))
 }
 
-val jar by tasks.getting(Jar::class) {
+tasks.jar {
   manifest {
-    attributes("Main-Class" to "com.squareup.chat.ChatServiceKt")
+    attributes("Main-Class" to applicationMainClass)
   }
-  classifier = "unshaded"
+  archiveClassifier.set("unshaded")
 }
 
-val compileKotlin by tasks.getting(KotlinCompile::class) {
-  kotlinOptions {
-    // TODO(alec): Enable again once Environment enum is deleted
-    allWarningsAsErrors = false
-  }
+tasks.withType<Test>().configureEach {
+  dependsOn(":startRedis")
 }

@@ -1,5 +1,5 @@
 plugins {
-  kotlin("jvm")
+  id("org.jetbrains.kotlin.jvm")
   id("app.cash.sqldelight")
 }
 
@@ -14,12 +14,12 @@ sqldelight {
       dialect(libs.sqldelightMysqlDialect)
       srcDirs("src/main/sqldelight", "src/main/resources/migrations")
       deriveSchemaFromMigrations.set(true)
-      migrationOutputDirectory.set(file("$buildDir/resources/main/sqldelighttest"))
+      migrationOutputDirectory.set(layout.buildDirectory.dir("resources/main/sqldelighttest"))
       verifyMigrations.set(true)
     }
   }
 }
 
-val compileKotlin by tasks.getting {
+tasks.compileKotlin {
   dependsOn("generateMainMoviesDatabaseMigrations")
 }

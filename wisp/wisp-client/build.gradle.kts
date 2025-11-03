@@ -1,9 +1,10 @@
 plugins {
-    `java-library`
+  id("org.jetbrains.kotlin.jvm")
+  id("com.vanniktech.maven.publish")
 }
 
 sourceSets {
-    val main by getting {
+    main {
         java.srcDir("src/main/kotlin/")
     }
 }

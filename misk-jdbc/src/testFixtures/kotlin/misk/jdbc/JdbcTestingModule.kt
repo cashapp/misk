@@ -1,17 +1,14 @@
 package misk.jdbc
 
-import com.squareup.moshi.Moshi
+import com.google.inject.Provider
 import misk.ReadyService
 import misk.ServiceModule
-import misk.database.StartDatabaseService
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.inject.toKey
+import misk.testing.TestFixture
 import misk.time.ForceUtcTimeZoneService
-import misk.vitess.VitessScaleSafetyChecks
-import okhttp3.OkHttpClient
-import com.google.inject.Provider
 import kotlin.reflect.KClass
 
 /**
@@ -45,7 +42,14 @@ class JdbcTestingModule(
         .dependsOn<SchemaMigratorService>(qualifier)
         .enhancedBy<ReadyService>()
     )
-    bind(truncateTablesServiceKey).toProvider(Provider {
+    multibind<TestFixture>().toProvider {
+      JdbcTestFixture(
+        qualifier = qualifier,
+        dataSourceService = dataSourceServiceProvider.get(),
+        transacterProvider = transacterProvider
+      )
+    }.asSingleton()
+    bind(truncateTablesServiceKey).toProvider {
       TruncateTablesService(
         qualifier = qualifier,
         dataSourceService = dataSourceServiceProvider.get(),
@@ -53,7 +57,7 @@ class JdbcTestingModule(
         startUpStatements = startUpStatements,
         shutDownStatements = shutDownStatements
       )
-    }).asSingleton()
+    }.asSingleton()
 
     if (scaleSafetyChecks) bindScaleSafetyChecks()
   }
@@ -61,22 +65,7 @@ class JdbcTestingModule(
   private fun bindScaleSafetyChecks() {
     val configKey = DataSourceConfig::class.toKey(qualifier)
     val configProvider = getProvider(configKey)
-    val moshiProvider = getProvider(Moshi::class.java)
 
-    val startVitessServiceKey = StartDatabaseService::class.toKey(qualifier)
-    val startVitessServiceProvider = getProvider(startVitessServiceKey)
-    val vitessScaleSafetyChecksKey = VitessScaleSafetyChecks::class.toKey(qualifier)
-
-    bind(vitessScaleSafetyChecksKey).toProvider(Provider {
-      VitessScaleSafetyChecks(
-        config = configProvider.get(),
-        moshi = moshiProvider.get(),
-        okHttpClient = OkHttpClient(),
-        startDatabaseService = startVitessServiceProvider.get(),
-      )
-    }).asSingleton()
-
-    multibind<DataSourceDecorator>(qualifier).to(vitessScaleSafetyChecksKey)
     val mySqlScaleSafetyChecks = MySqlScaleSafetyChecks::class.toKey(qualifier)
     bind(mySqlScaleSafetyChecks).toProvider(Provider {
       MySqlScaleSafetyChecks(
@@ -87,3 +76,9 @@ class JdbcTestingModule(
     multibind<DataSourceDecorator>(qualifier).to(mySqlScaleSafetyChecks)
   }
 }
+
+inline fun <reified T : Annotation> JdbcTestingModule(
+  startUpStatements: List<String> = listOf(),
+  shutDownStatements: List<String> = listOf(),
+  scaleSafetyChecks: Boolean = false
+) = JdbcTestingModule(T::class, startUpStatements, shutDownStatements, scaleSafetyChecks)

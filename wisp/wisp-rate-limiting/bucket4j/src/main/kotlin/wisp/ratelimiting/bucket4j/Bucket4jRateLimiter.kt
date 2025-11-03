@@ -4,10 +4,12 @@ import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.BucketConfiguration
 import io.github.bucket4j.ConsumptionProbe
 import io.github.bucket4j.EstimationProbe
+import io.github.bucket4j.TokensInheritanceStrategy
 import io.github.bucket4j.distributed.BucketProxy
 import io.github.bucket4j.distributed.proxy.ProxyManager
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Metrics
+import wisp.ratelimiting.RateLimitBucketRefillStrategy
 import wisp.ratelimiting.RateLimitConfiguration
 import wisp.ratelimiting.RateLimiter
 import wisp.ratelimiting.RateLimiterMetrics
@@ -106,14 +108,27 @@ class Bucket4jRateLimiter @JvmOverloads constructor(
       .addLimit(configuration.toBandwidth())
       .build()
 
-    return bucketProxy.builder().build(key, bucketConfig)
+    return bucketProxy.builder().apply {
+      configuration.version?.let {
+        this.withImplicitConfigurationReplacement(it, TokensInheritanceStrategy.PROPORTIONALLY)
+      }
+    }.build(key, bucketConfig)
   }
 
   private fun RateLimitConfiguration.toBandwidth(): Bandwidth {
-    return Bandwidth.builder()
-      .capacity(capacity)
-      .refillIntervally(refillAmount, refillPeriod)
-      .initialTokens(capacity)
-      .build()
+    return if (refillStrategy == RateLimitBucketRefillStrategy.GREEDY) {
+      Bandwidth.builder()
+        .capacity(capacity)
+        .refillGreedy(refillAmount, refillPeriod)
+        .initialTokens(capacity)
+        .build()
+    }
+    else {
+      Bandwidth.builder()
+        .capacity(capacity)
+        .refillIntervally(refillAmount, refillPeriod)
+        .initialTokens(capacity)
+        .build()
+    }
   }
 }

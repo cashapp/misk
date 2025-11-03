@@ -6,10 +6,20 @@ public final class wisp/resources/ClasspathResourceLoaderBackend : wisp/resource
 	public fun open (Ljava/lang/String;)Lokio/BufferedSource;
 }
 
+public final class wisp/resources/EnvironmentResourceLoaderBackend : wisp/resources/ResourceLoader$Backend {
+	public static final field INSTANCE Lwisp/resources/EnvironmentResourceLoaderBackend;
+	public static final field SCHEME Ljava/lang/String;
+	public fun checkPath (Ljava/lang/String;)V
+	public fun exists (Ljava/lang/String;)Z
+	public fun list (Ljava/lang/String;)Ljava/util/List;
+	public fun open (Ljava/lang/String;)Lokio/BufferedSource;
+}
+
 public final class wisp/resources/FilesystemLoaderBackend : wisp/resources/ResourceLoader$Backend {
 	public static final field INSTANCE Lwisp/resources/FilesystemLoaderBackend;
 	public static final field SCHEME Ljava/lang/String;
 	public fun exists (Ljava/lang/String;)Z
+	public fun list (Ljava/lang/String;)Ljava/util/List;
 	public fun open (Ljava/lang/String;)Lokio/BufferedSource;
 	public fun unwatch (Ljava/lang/String;)V
 	public fun watch (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
@@ -31,15 +41,41 @@ public final class wisp/resources/MemoryResourceLoaderBackend : wisp/resources/R
 public final class wisp/resources/MemoryResourceLoaderBackend$Companion {
 }
 
+public final class wisp/resources/OnePasswordResourceLoaderBackend : wisp/resources/ResourceLoader$Backend {
+	public static final field INSTANCE Lwisp/resources/OnePasswordResourceLoaderBackend;
+	public static final field SCHEME Ljava/lang/String;
+	public fun checkPath (Ljava/lang/String;)V
+	public fun exists (Ljava/lang/String;)Z
+	public fun list (Ljava/lang/String;)Ljava/util/List;
+	public fun open (Ljava/lang/String;)Lokio/BufferedSource;
+}
+
+public final class wisp/resources/OnePasswordResourcePath {
+	public static final field Companion Lwisp/resources/OnePasswordResourcePath$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun asCliArgs ()Ljava/util/List;
+	public final fun asCliArgs (Ljava/lang/String;)Ljava/util/List;
+	public static synthetic fun asCliArgs$default (Lwisp/resources/OnePasswordResourcePath;Ljava/lang/String;ILjava/lang/Object;)Ljava/util/List;
+	public final fun getAccount ()Ljava/lang/String;
+	public final fun getSecretReference ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class wisp/resources/OnePasswordResourcePath$Companion {
+	public final fun fromPath (Ljava/lang/String;)Lwisp/resources/OnePasswordResourcePath;
+}
+
 public class wisp/resources/ResourceLoader {
 	public static final field Companion Lwisp/resources/ResourceLoader$Companion;
 	public fun <init> (Ljava/util/Map;)V
+	public final fun bytes (Ljava/lang/String;)Lokio/ByteString;
 	public final fun copyTo (Ljava/lang/String;Ljava/nio/file/Path;)V
 	public final fun exists (Ljava/lang/String;)Z
 	public final fun list (Ljava/lang/String;)Ljava/util/List;
 	public final fun open (Ljava/lang/String;)Lokio/BufferedSource;
 	public final fun put (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun put (Ljava/lang/String;Lokio/ByteString;)V
+	public final fun requireBytes (Ljava/lang/String;)Lokio/ByteString;
 	public final fun requireUtf8 (Ljava/lang/String;)Ljava/lang/String;
 	public final fun unwatch (Ljava/lang/String;)V
 	public final fun utf8 (Ljava/lang/String;)Ljava/lang/String;
@@ -50,6 +86,7 @@ public class wisp/resources/ResourceLoader {
 public abstract class wisp/resources/ResourceLoader$Backend {
 	public fun <init> ()V
 	public fun all ()Ljava/util/Set;
+	public fun checkPath (Ljava/lang/String;)V
 	public abstract fun exists (Ljava/lang/String;)Z
 	public fun list (Ljava/lang/String;)Ljava/util/List;
 	public abstract fun open (Ljava/lang/String;)Lokio/BufferedSource;

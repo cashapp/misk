@@ -12,6 +12,7 @@ import kotlinx.html.main
 import kotlinx.html.nav
 import kotlinx.html.role
 import kotlinx.html.span
+import kotlinx.html.title
 import kotlinx.html.ul
 import kotlinx.html.unsafe
 import misk.tailwind.Link
@@ -30,6 +31,7 @@ fun TagConsumer<*>.Navbar(
   deployment: Deployment,
   homeHref: String,
   menuSections: List<MenuSection> = listOf(),
+  sortedMenuLinks: Boolean = true,
   content: TagConsumer<*>.() -> Unit = {}
 ) {
   div("bg-gray-900") {
@@ -110,7 +112,7 @@ fun TagConsumer<*>.Navbar(
 //                )
 //              }
 //            }
-            NavMenu(menuSections)
+            NavMenu(menuSections, sortedMenuLinks)
           }
         }
       }
@@ -129,12 +131,12 @@ fun TagConsumer<*>.Navbar(
             }
           }
         }
-        NavMenu(menuSections)
+        NavMenu(menuSections, sortedMenuLinks)
       }
     }
     div("xl:pl-72") {
       // +"""<!-- Sticky search header -->"""
-      div("sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b-4 ${deployment.asBorderColor()} bg-gray-900 px-6 shadow-sm sm:px-6 lg:px-6") {
+      div("fixed w-full z-40 flex h-16 shrink-0 items-center gap-x-6 border-b-4 ${deployment.asBorderColor()} bg-gray-900 px-6 shadow-sm sm:px-6 lg:px-6") {
         if (menuSections.isNotEmpty()) {
           button(classes = "-m-2.5 p-2.5 text-white xl:hidden") {
             attributes["data-action"] = "toggle#toggle"
@@ -162,7 +164,7 @@ fun TagConsumer<*>.Navbar(
         }
       }
       main("h-full bg-white") {
-        div {
+        div("pt-16") {
           content()
         }
       }
@@ -186,7 +188,7 @@ private fun Deployment.asBorderColor() = when {
   else -> "border-b-blue-500"
 }
 
-private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>) {
+private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>, sortedMenuLinks: Boolean) {
   if (menuSections.isNotEmpty()) {
     nav("flex flex-1 flex-col") {
       menuSections.mapIndexed { index, section ->
@@ -197,7 +199,12 @@ private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>) {
             role = "list"
 
             li {
-              section.links.map { link ->
+              val sectionLinks = if (sortedMenuLinks) {
+                section.links.sortedBy { it.label }
+              } else {
+                section.links
+              }
+              sectionLinks.map { link ->
                 ul("-mx-2 py-1") {
                   role = "list"
                   li {
@@ -214,6 +221,7 @@ private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>) {
                     } ?: let {
                       a(classes = "$isSelectedStyles group flex justify-between gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold") {
                         href = link.href
+                        link.hoverText?.let { title = it }
 
                         if (link.dataTurbo == true) {
                           attributes["data-turbo-preload"] = ""

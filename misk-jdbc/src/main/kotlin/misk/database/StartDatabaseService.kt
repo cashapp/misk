@@ -8,6 +8,7 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
 import com.google.common.util.concurrent.AbstractIdleService
+import misk.docker.withMiskDefaults
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.resources.ResourceLoader
@@ -36,8 +37,6 @@ fun runCommand(command: String): Int {
 }
 
 /**
- * All Vitess clusters used by the app/test are tracked in a global cache as a [DockerVitessCluster].
- *
  * On startup, the service will look for a cluster in the cache, and if not found, look for it in
  * Docker by container name, or as a last resort start the container itself.
  *
@@ -89,7 +88,10 @@ class StartDatabaseService(
   private fun shouldStartServer() = deployment.isTest || deployment.isLocalDevelopment
 
   private val defaultDockerClientConfig =
-    DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+    DefaultDockerClientConfig
+      .createDefaultConfigBuilder()
+      .withMiskDefaults()
+      .build()
   private val httpClient = ApacheDockerHttpClient.Builder()
     .dockerHost(defaultDockerClientConfig.dockerHost)
     .sslConfig(defaultDockerClientConfig.sslConfig)
@@ -103,15 +105,6 @@ class StartDatabaseService(
 
   private fun createDatabaseServer(config: CacheKey): DatabaseServer? =
     when (config.config.type) {
-      DataSourceType.VITESS_MYSQL -> {
-        DockerVitessCluster(
-          name = config.name,
-          config = config.config,
-          resourceLoader = ResourceLoader.SYSTEM,
-          moshi = moshi,
-          docker = docker
-        )
-      }
       DataSourceType.COCKROACHDB -> {
         DockerCockroachCluster(
           name = config.name,

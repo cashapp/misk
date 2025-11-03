@@ -7,6 +7,13 @@ import retrofit2.Response
 import java.io.IOException
 import java.io.UncheckedIOException
 import jakarta.inject.Inject
+import misk.slack.webapi.helpers.GetChatPermalinkResponse
+import misk.slack.webapi.helpers.InviteRequest
+import misk.slack.webapi.helpers.InviteResponse
+import misk.slack.webapi.helpers.SetConversationTopicRequest
+import misk.slack.webapi.helpers.SetConversationTopicResponse
+import misk.slack.webapi.helpers.UserGroupRequest
+import misk.slack.webapi.helpers.UserGroupResponse
 
 class RealSlackClient @Inject constructor(
   private val slackApi: SlackApi,
@@ -23,6 +30,22 @@ class RealSlackClient @Inject constructor(
     return callSlack { slackApi.getUserByEmail(email).execute() }
   }
 
+  fun inviteToConversation(request: InviteRequest): InviteResponse {
+    return callSlack { slackApi.inviteToConversation(request).execute() }
+  }
+
+  fun setConversationTopic(request: SetConversationTopicRequest): SetConversationTopicResponse {
+    return callSlack { slackApi.setConversationTopic(request).execute() }
+  }
+
+  fun updateUserGroup(request: UserGroupRequest): UserGroupResponse {
+    return callSlack { slackApi.updateUserGroup(request).execute() }
+  }
+
+  fun getChatPermalink(channel: String, message_timestamp: String): GetChatPermalinkResponse {
+    return callSlack { slackApi.getChatPermalink(channel, message_timestamp).execute() }
+  }
+
   private fun <T> callSlack(callable: () -> Response<T>): T {
     try {
       val response = callable()
@@ -32,4 +55,3 @@ class RealSlackClient @Inject constructor(
     }
   }
 }
-

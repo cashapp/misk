@@ -12,8 +12,8 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.logging.LogCollector
-import wisp.logging.getLogger
+import misk.logging.LogCollector
+import misk.logging.getLogger
 import java.lang.Thread.sleep
 import java.time.ZoneId
 import jakarta.inject.Inject
@@ -56,8 +56,8 @@ class FakeCronModuleTest {
   @Singleton
   private class DependentService @Inject constructor() : AbstractIdleService() {
     override fun startUp() {
-      logger.info { "DependentService started" }
       sleep(1000)
+      logger.info { "DependentService started" }
     }
 
     override fun shutDown() {}

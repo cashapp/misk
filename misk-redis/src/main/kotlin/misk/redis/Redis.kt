@@ -111,6 +111,14 @@ interface Redis {
   fun hlen(key: String): Long
 
   /**
+   * Returns all field names in the hash stored for the given key.
+   *
+   * @param key the key
+   * @return a List<ByteString> of the field names stored for the given key
+   */
+  fun hkeys(key: String): List<ByteString>
+
+  /**
    * Retrieve the values associated to the specified fields.
    *
    * If some specified fields do not exist, nil values are returned. Non-existing keys are
@@ -147,6 +155,21 @@ interface Redis {
    * Like [hrandFieldWithValues] but only returns the fields of the hash stored at [key].
    */
   fun hrandField(key: String, count: Long): List<String>
+
+  /**
+   * Performs a batched iteration of matching keys.
+   * If no pattern is provided, all keys will be scanned through.
+   *
+   * @param cursor The scan cursor. This should first be "0". Then subsequent cursor values will
+   *               be taken from the returned ScanResults.
+   * @param matchPattern A glob-like match pattern to filter keys by. If this is not provided,
+   *                     then all keys will be scanned.
+   * @param count A hinted desired batch size to be returned in each ScanResult. Note that this is
+   *              just a hint and there are no guarantees on the actual size of each ScanResult.
+   * @return A ScanResult containing the next cursor and the current batch of keys. If the
+   *         returned cursor is "0", then there are no more keys left in the iteration.
+   */
+  fun scan(cursor: String, matchPattern: String? = null, count: Int? = null): ScanResult
 
   /**
    * Sets the [ByteString] value for the given key.
@@ -332,6 +355,17 @@ interface Redis {
   fun lpop(key: String): ByteString?
 
   /**
+   * Blocking version of [lpop]. Pops an element from the first non-empty list in [keys],
+   * checking keys in the provided order. If all lists are empty, blocks the connection until
+   * an [lpush] or [rpush] operation occurs on one of the keys, or until [timeoutSeconds] expires.
+   *
+   * @param keys the keys to check for elements, in order
+   * @param timeoutSeconds the maximum number of seconds to block. 0 blocks indefinitely.
+   * @return a pair of the key name and the element that was popped, or null if timeout occurred
+   */
+  fun blpop(keys: Array<String>, timeoutSeconds: Double): Pair<String, ByteString>?
+
+  /**
    * Removes and returns the last [count] elements of the list stored at [key].
    *
    * Only available on Redis 6.2.0 and higher.
@@ -353,6 +387,14 @@ interface Redis {
    * For example, -1 is the last element of the list, -2 the penultimate, and so on.
    */
   fun lrange(key: String, start: Long, stop: Long): List<ByteString?>
+
+  /**
+   * Trim the list at [key] to the specified range of elements.
+   *
+   * The offset [start] and [stop] are zero-based indexes. These offsets can also be
+   * negative numbers indicating offsets starting at the end of the list.
+   */
+  fun ltrim(key: String, start: Long, stop: Long)
 
   /**
    * Removes the first count occurrences of elements equal to element from the list stored at key.
@@ -388,6 +430,29 @@ interface Redis {
    * code.
    */
   fun rpoplpush(sourceKey: String, destinationKey: String): ByteString?
+
+  /**
+   * Returns if [key] exists.
+   *
+   * @return true if [key] exists. false if [key] does not exist.
+   */
+  fun exists(key: String): Boolean
+
+  /**
+   * Returns if [key] exists.
+   *
+   * @return the number of keys that exist. 0 if none of the keys exist.
+   */
+  fun exists(vararg key: String): Long
+
+  /**
+   * Remove the existing timeout on key, turning the key from volatile (a key with an expire set)
+   * to persistent (a key that will never expire as no timeout is associated).
+   *
+   * @return true if the timeout has been removed. false if the key does not exist or does not have
+   * an associated timeout.
+   */
+  fun persist(key: String): Boolean
 
   /**
    * Set a timeout on key. After the timeout has expired, the key will automatically be deleted. A
@@ -503,6 +568,11 @@ interface Redis {
   fun flushAll()
 
   /**
+   * Flushes the current database only.
+   */
+  fun flushDB()
+
+  /**
    * Adds the specified [member] with the specified [score] to the sorted set at the [key].
    * If a specified [member] is already a member of the sorted set, the [score] is updated and the
    * element reinserted at the right position to ensure the correct ordering.
@@ -603,6 +673,14 @@ interface Redis {
   ): Long
 
   /**
+   * Returns the length of the list stored at [key].
+   *
+   * @param key the key of the list
+   * @return the length of the list
+   */
+  fun llen(key: String): Long
+
+  /**
    * Returns the sorted set cardinality (number of elements) of the sorted set stored at [key]
    */
   fun zcard(
@@ -651,6 +729,11 @@ interface Redis {
     val included: Boolean
   )
 
+  data class ScanResult(
+    val cursor: String,
+    val keys: List<String>
+  )
+
   data class ZRangeRankMarker(
     val longValue: Long
   ) : ZRangeMarker(longValue, true)
@@ -669,7 +752,7 @@ interface Redis {
    * By default the range is included. Set [isIncluded] to false in order to exclude the start or
    * stop.
    */
-  data class ZRangeScoreMarker(
+  data class ZRangeScoreMarker @JvmOverloads constructor(
     val doubleValue: Double,
     val isIncluded: Boolean = true,
   ) : ZRangeMarker(doubleValue, isIncluded) {

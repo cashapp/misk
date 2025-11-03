@@ -1,9 +1,9 @@
 package misk.jooq.listeners
 
 import org.jooq.ExecuteContext
-import org.jooq.impl.DefaultExecuteListener
+import org.jooq.ExecuteListener
 
-class AvoidUsingSelectStarListener : DefaultExecuteListener() {
+class AvoidUsingSelectStarListener : ExecuteListener {
 
   /**
    * This catches any query that has a select * from or select table.* from.

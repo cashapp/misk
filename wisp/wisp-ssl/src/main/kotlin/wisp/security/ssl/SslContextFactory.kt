@@ -5,6 +5,13 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.TrustManagerFactory
 
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "SslContextFactory(sslLoader)",
+    imports = ["misk.security.ssl.SslContextFactory"]
+  )
+)
 open class SslContextFactory constructor(private val sslLoader: SslLoader) {
     /** @return A new [SSLContext] for the given certstore and optional truststore config */
     @JvmOverloads

@@ -5,11 +5,11 @@ import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
 import wisp.deployment.Deployment
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Duration
-import java.util.*
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.backoff.RetryConfig
 
 private val logger = getLogger<PingDatabaseService>()
 
@@ -26,12 +26,15 @@ class PingDatabaseService @Inject constructor(
     val jdbcUrl = config.buildJdbcUrl(deployment)
     val dataSource = createDataSource(jdbcUrl)
 
-    retry(10, ExponentialBackoff(Duration.ofMillis(20), Duration.ofMillis(1000))) {
+    val retryConfig = RetryConfig.Builder(
+      10, ExponentialBackoff(Duration.ofMillis(20), Duration.ofMillis(1000))
+    )
+    retry(retryConfig.build()) {
       try {
         connectToDataSource(dataSource)
       } catch (e: Exception) {
-        if (config.type == DataSourceType.VITESS_MYSQL && config.database == "@master") {
-          logger.warn("ping master database unsuccessful, trying to ping the replica")
+        if (config.type == DataSourceType.VITESS_MYSQL && config.database == "@primary") {
+          logger.warn("ping primary database unsuccessful, trying to ping the replica")
           val replicaDataSource = createDataSource(config.asReplica().buildJdbcUrl(deployment))
 
           connectToDataSource(replicaDataSource)
@@ -61,7 +64,9 @@ class PingDatabaseService @Inject constructor(
 
   private fun createDataSource(jdbcUrl: String): DriverDataSource {
     return DriverDataSource(
-            jdbcUrl, config.type.driverClassName, Properties(), config.username, config.password)
+      jdbcUrl, config.getDriverClassName(), config.getDataSourceProperties(),
+      config.username, config.password
+    )
   }
 
   /** Kotlin thinks getConnection() is a val but it's really a function. */

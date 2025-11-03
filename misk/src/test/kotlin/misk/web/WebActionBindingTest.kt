@@ -3,6 +3,7 @@ package misk.web
 import misk.Action
 import misk.asAction
 import misk.web.actions.WebAction
+import misk.web.extractors.StringConverter
 import okio.BufferedSink
 import okio.BufferedSource
 import org.assertj.core.api.Assertions.assertThat
@@ -19,13 +20,14 @@ internal class WebActionBindingTest {
     claimParameterValues = mutableMapOf(0 to "zero", 1 to "one")
   )
   private val webActionBindingFactory = WebActionBinding.Factory(
-    listOf(
+    featureBindingFactories = listOf(
       defaultFactory,
       requestBodyFactory,
       responseBodyFactory,
       returnValueFactory,
-      parametersFactory
-    )
+      parametersFactory,
+    ),
+    stringConverterFactories = listOf(),
   )
   private val pathPattern = PathPattern.parse("/")
   private val voidApiCallAction = TestAction::voidApiCall.asAction(DispatchMechanism.POST)
@@ -213,7 +215,8 @@ internal class WebActionBindingTest {
     override fun create(
       action: Action,
       pathPattern: PathPattern,
-      claimer: FeatureBinding.Claimer
+      claimer: FeatureBinding.Claimer,
+      stringConverterFactories: List<StringConverter.Factory>
     ): FeatureBinding? {
       if (claimRequestBody) claimer.claimRequestBody()
       for (index in claimParameterValues.keys) {

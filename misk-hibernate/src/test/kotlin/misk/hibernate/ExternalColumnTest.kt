@@ -9,7 +9,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.config.Config
+import misk.config.Config
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
 import jakarta.inject.Qualifier
@@ -58,7 +58,7 @@ class ExternalColumnTest {
       install(DeploymentModule(TESTING))
 
       val config = MiskConfig.load<RootConfig>("externalcolumn", TESTING)
-      install(HibernateTestingModule(ExternalColumnDb::class, config.data_source))
+      install(HibernateTestingModule(ExternalColumnDb::class))
       install(HibernateModule(ExternalColumnDb::class, config.data_source))
       install(object : HibernateEntityModule(ExternalColumnDb::class) {
         override fun configureHibernate() {

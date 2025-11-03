@@ -22,7 +22,8 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import jakarta.inject.Inject
 import misk.security.authz.AccessInterceptor
-import wisp.logging.LogCollector
+import misk.web.toResponseBody
+import misk.logging.LogCollector
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
@@ -64,8 +65,7 @@ class AuthenticationTest {
         user = "sandy",
         capabilities = "guest"
       )
-    )
-      .isEqualTo("unauthorized")
+    ).isEqualTo("unauthorized")
   }
 
   @ParameterizedTest
@@ -78,8 +78,7 @@ class AuthenticationTest {
         user = "sandy",
         capabilities = cap
       )
-    )
-      .isEqualTo("$caller authorized with custom capability")
+    ).isEqualTo("$caller authorized with custom capability")
   }
 
   @Test fun testEmptyAuthenticatedWithUser() {
@@ -90,8 +89,7 @@ class AuthenticationTest {
         user = "sandy",
         capabilities = "nothingfancy"
       )
-    )
-      .isEqualTo("$caller authorized with empty Authenticated")
+    ).isEqualTo("unauthorized")
   }
 
   @ParameterizedTest
@@ -103,8 +101,7 @@ class AuthenticationTest {
         path = "/empty_authorized_access",
         service = service
       )
-    )
-      .isEqualTo("$caller authorized with empty Authenticated")
+    ).isEqualTo("unauthorized")
   }
 
   @Test fun testEmptyAuthenticatedUnauthenticated() {
@@ -112,8 +109,7 @@ class AuthenticationTest {
       executeRequest(
         path = "/empty_authorized_access"
       )
-    )
-      .isEqualTo("unauthenticated")
+    ).isEqualTo("unauthenticated")
   }
 
   @Test fun testEmptyAuthenticatedPlusCustomUnauthenticated() {
@@ -121,8 +117,7 @@ class AuthenticationTest {
       executeRequest(
         path = "/empty_authorized_and_custom_capability_access"
       )
-    )
-      .isEqualTo("unauthenticated")
+    ).isEqualTo("unauthenticated")
   }
 
   @Test fun testEmptyAuthenticatedPlusCustomWithWrongCapability() {
@@ -132,8 +127,7 @@ class AuthenticationTest {
         user = "sandy",
         capabilities = "nothingfancy"
       )
-    )
-      .isEqualTo("unauthorized")
+    ).isEqualTo("unauthorized")
   }
 
   @Test fun testEmptyAuthenticatedPlusCustomAsService() {
@@ -142,8 +136,7 @@ class AuthenticationTest {
         path = "/empty_authorized_and_custom_capability_access",
         service = "widgeteer",
       )
-    )
-      .isEqualTo("unauthorized")
+    ).isEqualTo("unauthorized")
   }
 
   @Test fun checkAccessInterceptorFactoryLogs() {
@@ -152,7 +145,7 @@ class AuthenticationTest {
 
     assertThat(logCollector.takeEvents(AccessInterceptor::class).map { it.message }).containsExactlyInAnyOrder(
       "Conflicting auth annotations on EmptyAuthenticatedWithCustomAnnototationAccessAction::get(), @Authenticated won't have any effect due to @CustomCapabilityAccess",
-      "EmptyAuthenticatedAccessAction::get() has an empty set of allowed services and capabilities. This method of allowing all services and users is deprecated, use explicit boolean parameters allowAnyService or allowAnyUser instead."
+      "EmptyAuthenticatedAccessAction::get() has an empty set of allowed services and capabilities. Access will be denied. This method of allowing all services and users has been removed, use explicit boolean parameters allowAnyService or allowAnyUser instead."
     )
   }
 
@@ -164,8 +157,7 @@ class AuthenticationTest {
         user = "sandy",
         capabilities = "admin"
       )
-    )
-      .isEqualTo("$caller authorized with CustomCapabilityAccess")
+    ).isEqualTo("$caller authorized with CustomCapabilityAccess")
   }
 
   @ParameterizedTest
@@ -176,8 +168,7 @@ class AuthenticationTest {
         path = "/allow_any_service_access",
         service = service
       )
-    )
-      .isEqualTo("unauthorized")
+    ).isEqualTo("unauthorized")
   }
 
   @Test fun testAllowAnyServiceNotExcluded() {
@@ -188,8 +179,7 @@ class AuthenticationTest {
         path = "/allow_any_service_access",
         service = service
       )
-    )
-      .isEqualTo("$caller authorized as any service")
+    ).isEqualTo("$caller authorized as any service")
   }
 
   @Test fun testAllowAnyServiceWithUser() {
@@ -198,8 +188,7 @@ class AuthenticationTest {
         path = "/allow_any_service_access",
         user = "sandy"
       )
-    )
-      .isEqualTo("unauthorized")
+    ).isEqualTo("unauthorized")
   }
 
   @Test fun testAllowAnyServiceWithAuthenticatedAsExcludedButExplicityAllowedService() {
@@ -210,8 +199,7 @@ class AuthenticationTest {
         path = "/allow_any_service_plus_authenticated",
         service = service
       )
-    )
-      .isEqualTo("$caller authorized as any service")
+    ).isEqualTo("$caller authorized as any service")
   }
 
   @Test fun testAllowAnyServiceWithAuthenticatedAsExcludedService() {
@@ -221,8 +209,7 @@ class AuthenticationTest {
         path = "/allow_any_service_plus_authenticated",
         service = service
       )
-    )
-      .isEqualTo("unauthorized")
+    ).isEqualTo("unauthorized")
   }
 
   @Test fun testAllowAnyServiceWithAuthenticatedAsAllowedUser() {
@@ -233,8 +220,7 @@ class AuthenticationTest {
         user = caller.user,
         capabilities = caller.capabilities.first()
       )
-    )
-      .isEqualTo("$caller authorized as any service")
+    ).isEqualTo("$caller authorized as any service")
   }
 
   @Test fun testAllowAnyServiceWithAuthenticatedAsNotAllowedUser() {
@@ -245,8 +231,7 @@ class AuthenticationTest {
         user = caller.user,
         capabilities = caller.capabilities.first()
       )
-    )
-      .isEqualTo("unauthorized")
+    ).isEqualTo("unauthorized")
   }
 
   @Test fun testAllowAnyUser() {
@@ -256,8 +241,7 @@ class AuthenticationTest {
         path = "/allow_any_user_access",
         user = caller.user
       )
-    )
-      .isEqualTo("$caller authorized as any user")
+    ).isEqualTo("$caller authorized as any user")
   }
 
   @Test fun testAllowAnyUserDenyServiceOnly() {
@@ -267,8 +251,7 @@ class AuthenticationTest {
         path = "/allow_any_user_access",
         user = caller.user
       )
-    )
-      .isEqualTo("unauthenticated")
+    ).isEqualTo("unauthenticated")
   }
 
   private class MixesUnauthenticatedWithOtherAnnotations @Inject constructor() : WebAction {
@@ -286,9 +269,37 @@ class AuthenticationTest {
         TestWebActionModule(),
         WebActionModule.create<MixesUnauthenticatedWithOtherAnnotations>())
     }
-    assertThat(exception.cause!!.message).contains(
-      "MixesUnauthenticatedWithOtherAnnotations::get() is annotated with @misk.security.authz.Unauthenticated, but also annotated with the following access annotations: @misk.security.authz.Authenticated. This is a contradiction."
+    assertThat(exception.message).contains(
+      "MixesUnauthenticatedWithOtherAnnotations::get() is annotated with @Unauthenticated, but also annotated with the following access annotations: @Authenticated. This is a contradiction."
     )
+  }
+
+  @Test
+  fun `stacking @Authenticated with other access annotations is an error`() {
+    val unauthService = MiskCaller(service = "test")
+    assertThat(
+      executeRequest(
+        path = "/auth-and-custom-capability",
+        service = unauthService.service
+      )
+    ).isEqualTo("unauthorized")
+
+    val authService = MiskCaller(service = "dingo")
+    assertThat(
+      executeRequest(
+        path = "/auth-and-custom-capability",
+        service = authService.service
+      )
+    ).isEqualTo("$authService authorized with custom capability")
+
+    val caller = MiskCaller(user = "bob", capabilities = setOf("admin"))
+    assertThat(
+      executeRequest(
+        path = "/auth-and-custom-capability",
+        user = caller.user,
+        capabilities = caller.capabilities.first()
+      )
+    ).isEqualTo("$caller authorized with custom capability")
   }
 
   /** Executes a request and returns the response body as a string. */
@@ -297,7 +308,7 @@ class AuthenticationTest {
     service: String? = null,
     user: String? = null,
     capabilities: String? = null
-  ): String? {
+  ): String {
     val client = createOkHttpClient()
 
     val baseUrl = jetty.httpServerUrl

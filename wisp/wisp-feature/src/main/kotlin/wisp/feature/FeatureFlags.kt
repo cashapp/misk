@@ -5,6 +5,13 @@ import java.util.concurrent.Executor
 /**
  * Interface for evaluating feature flags.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "FeatureFlags()",
+    imports = ["misk.feature.FeatureFlags"]
+  )
+)
 interface FeatureFlags : StrongFeatureFlags, LegacyFeatureFlags
 
 interface StrongFeatureFlags {
@@ -340,6 +347,13 @@ inline fun <reified T> FeatureFlags.trackJson(
 /**
  * Typed feature string.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "Feature(name)",
+    imports = ["misk.feature.Feature"]
+  )
+)
 open class Feature(val name: String) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -362,6 +376,13 @@ open class Feature(val name: String) {
 /**
  * Extra attributes to be used for evaluating features.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "Attributes(text, number, anonymous)",
+    imports = ["misk.feature.Attributes"]
+  )
+)
 open class Attributes @JvmOverloads constructor(
     val text: Map<String, String> = mapOf(),
     // NB: LaunchDarkly uses typed Gson attributes. We could leak that through, but that could make
@@ -372,16 +393,16 @@ open class Attributes @JvmOverloads constructor(
     // including the user in analytics.
     val anonymous: Boolean = false
 ) {
-    fun with(name: String, value: String): Attributes =
+    open fun with(name: String, value: String): Attributes =
         copy(text = text.plus(name to value))
 
-    fun with(name: String, value: Number): Attributes {
+    open fun with(name: String, value: Number): Attributes {
         val number = number ?: mapOf()
         return copy(number = number.plus(name to value))
     }
 
     @JvmOverloads
-    fun copy(
+    open fun copy(
         text: Map<String, String> = this.text,
         number: Map<String, Number>? = this.number,
         anonymous: Boolean = this.anonymous

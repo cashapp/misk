@@ -16,7 +16,7 @@ class MyClass {
 }
 
 fun `test that logs are captured`() {
-  val logCollector = WispQueuedLogCollector()
+  val logCollector = QueuedLogCollector()
   
   // Usually put this in a Before block.
   logCollector.startUp()

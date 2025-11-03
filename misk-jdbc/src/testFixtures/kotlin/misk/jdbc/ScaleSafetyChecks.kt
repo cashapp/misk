@@ -1,6 +1,7 @@
 package misk.jdbc
 
 import misk.backoff.FlatBackoff
+import misk.backoff.RetryConfig
 import misk.backoff.retry
 import mu.KotlinLogging
 import java.sql.Connection
@@ -28,9 +29,10 @@ object ScaleSafetyChecks {
     val explanations = connection.createStatement().use { statement ->
       try {
         database?.let { statement.execute("USE `$it`") }
-        retry(5, FlatBackoff(Duration.ofMillis(100))) {
+        val retryConfig = RetryConfig.Builder(5, FlatBackoff(Duration.ofMillis(100)))
+        retry(retryConfig.build()) {
           statement.executeQuery("EXPLAIN ${query.replace("\n", " ")}")
-              .map { Explanation.fromResultSet(it) }
+            .map { Explanation.fromResultSet(it) }
         }
       } catch (e: SQLSyntaxErrorException) {
         // TODO(jontirsen): This happens during multi threaded tests, let's ignore it for

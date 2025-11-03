@@ -1,9 +1,15 @@
 package misk.grpc
 
+import ch.qos.logback.classic.Level
 import com.google.inject.Guice
 import com.google.inject.util.Modules
 import com.squareup.wire.GrpcException
 import com.squareup.wire.GrpcStatus
+import jakarta.inject.Inject
+import jakarta.inject.Named
+import java.net.HttpURLConnection.HTTP_BAD_REQUEST
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.runBlocking
@@ -16,6 +22,7 @@ import misk.logging.LogCollectorModule
 import misk.metrics.FakeMetrics
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.interceptors.RequestLoggingInterceptor
 import okhttp3.HttpUrl
 import org.assertj.core.api.Assertions.assertThat
@@ -32,11 +39,7 @@ import routeguide.Feature
 import routeguide.Point
 import routeguide.RouteGuideClient
 import routeguide.RouteNote
-import wisp.logging.LogCollector
-import java.net.HttpURLConnection.HTTP_BAD_REQUEST
-import jakarta.inject.Inject
-import jakarta.inject.Named
-import kotlin.test.assertFailsWith
+import misk.logging.LogCollector
 
 @MiskTest(startService = true)
 class MiskClientMiskServerTest {
@@ -78,13 +81,15 @@ class MiskClientMiskServerTest {
     }
 
     // Confirm interceptors were invoked.
-    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
-      "GetFeatureGrpcAction principal=unknown time=0.000 ns code=200 " +
-        "request=[Point{latitude=43, longitude=-80}] " +
-        "requestHeaders={accept-encoding=[gzip], content-type=[application/grpc]} " +
-        "response=Feature{name=maple tree, location=Point{latitude=43, longitude=-80}} " +
-        "responseHeaders={}"
-    )
+    val logs = logCollector.takeMessages(RequestLoggingInterceptor::class)
+    assertEquals(1, logs.size)
+    assertThat(logs[0])
+      .contains("GetFeatureGrpcAction principal=unknown time=0.000 ns code=200")
+      .contains("request=Point{latitude=43, longitude=-80}")
+      // There could be additional headers (e.g. tests are run with tracing or javaagent)
+      .contains("requestHeaders={accept-encoding=[gzip], content-type=[application/grpc]")
+      .contains("response=Feature{name=maple tree, location=Point{latitude=43, longitude=-80}}")
+      .contains("responseHeaders={}")
     assertThat(callCounter.counter("default.GetFeature").get()).isEqualTo(1)
     assertThat(callCounter.counter("default.RouteChat").get()).isEqualTo(0)
   }
@@ -101,13 +106,15 @@ class MiskClientMiskServerTest {
     }
 
     // Confirm interceptors were invoked.
-    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
-      "RouteChatGrpcAction principal=unknown time=0.000 ns code=200 " +
-        "request=[GrpcMessageSource, GrpcMessageSink] " +
-        "requestHeaders={accept-encoding=[gzip], content-type=[application/grpc]} " +
-        "response=kotlin.Unit " +
-        "responseHeaders={content-type=[application/grpc]}"
-    )
+    val logs = logCollector.takeMessages(RequestLoggingInterceptor::class)
+    assertEquals(1, logs.size)
+    assertThat(logs[0])
+      .contains("RouteChatGrpcAction principal=unknown time=0.000 ns code=200")
+      .contains("request=[GrpcMessageSource, GrpcMessageSink]")
+      // There could be additional headers (e.g. tests are run with tracing or javaagent)
+      .contains("requestHeaders={accept-encoding=[gzip], content-type=[application/grpc]")
+      .contains("response=kotlin.Unit")
+      .contains("responseHeaders={content-type=[application/grpc]}")
     assertThat(callCounter.counter("default.GetFeature").get()).isEqualTo(0)
     assertThat(callCounter.counter("default.RouteChat").get()).isEqualTo(1)
   }
@@ -143,6 +150,15 @@ class MiskClientMiskServerTest {
       // is only thrown if a properly constructed gRPC error is received.
       assertResponseCount(200, 0)
       assertResponseCount(500, 1)
+
+      // Confirm only RequestLoggingInterceptor logs exceptions
+      val requestLoggingInterceptorLogs = logCollector.takeMessages(RequestLoggingInterceptor::class, Level.ERROR)
+      assertEquals(1, requestLoggingInterceptorLogs.size)
+      assertThat(requestLoggingInterceptorLogs[0])
+        .contains("GetFeatureGrpcAction principal=unknown time=0.000 ns failed request=Point{latitude=-1, longitude=500}")
+
+      val exceptionLoggingInterceptorLogs = logCollector.takeMessages(ExceptionHandlingInterceptor::class)
+      assertThat(exceptionLoggingInterceptorLogs).isEmpty()
     }
   }
 
@@ -166,6 +182,15 @@ class MiskClientMiskServerTest {
       // is only thrown if a properly constructed gRPC error is received.
       assertResponseCount(200, 0)
       assertResponseCount(404, 1)
+
+      // Confirm only RequestLoggingInterceptor logs exceptions
+      val requestLoggingInterceptorLogs = logCollector.takeMessages(RequestLoggingInterceptor::class, Level.WARN)
+      assertEquals(1, requestLoggingInterceptorLogs.size)
+      assertThat(requestLoggingInterceptorLogs[0])
+        .contains("GetFeatureGrpcAction principal=unknown time=0.000 ns failed request=Point{latitude=-1, longitude=404}")
+
+      val exceptionLoggingInterceptorLogs = logCollector.takeMessages(ExceptionHandlingInterceptor::class)
+      assertThat(exceptionLoggingInterceptorLogs).isEmpty()
     }
   }
 

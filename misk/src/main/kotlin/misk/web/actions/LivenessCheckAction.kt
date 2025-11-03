@@ -11,7 +11,7 @@ import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 @Singleton
 class LivenessCheckAction @Inject internal constructor(
@@ -24,8 +24,7 @@ class LivenessCheckAction @Inject internal constructor(
   @AvailableWhenDegraded
   fun livenessCheck(): Response<String> {
     val serviceManager = serviceManagerProvider.get()
-    val failedServices = serviceManager.servicesByState().get(State.FAILED) +
-      serviceManager.servicesByState().get(State.TERMINATED)
+    val failedServices = serviceManager.servicesByState().get(State.FAILED)
 
     if (failedServices.isEmpty()) {
       return Response("", statusCode = 200)

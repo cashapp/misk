@@ -7,12 +7,20 @@ import java.time.Period
 import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
+import misk.testing.TestFixture
 
 /** Controllable clock for testing. */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "FakeClock()",
+    imports = ["misk.time.FakeClock"]
+  )
+)
 open class FakeClock @JvmOverloads constructor(
-    epochMillis: Long = Instant.parse("2018-01-01T00:00:00Z").toEpochMilli(),
+    epochMillis: Long = initialValue.toEpochMilli(),
     private val zone: ZoneId = ZoneId.of("UTC")
-) : Clock() {
+) : Clock(), TestFixture {
     private val millis: AtomicLong = AtomicLong(epochMillis)
 
     override fun getZone(): ZoneId = zone
@@ -39,4 +47,12 @@ open class FakeClock @JvmOverloads constructor(
 
     /** Set the clock to the specified [Instant]. */
     fun setNow(instant: Instant) = millis.set(instant.toEpochMilli())
+
+    override fun reset() {
+      setNow(initialValue)
+    }
+
+    companion object {
+        private val initialValue = Instant.parse("2018-01-01T00:00:00Z")
+    }
 }

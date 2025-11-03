@@ -7,11 +7,15 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
 import org.junit.jupiter.api.Test
-import wisp.time.FakeClock
+import misk.time.FakeClock
 import java.time.Duration
 import jakarta.inject.Inject
+import org.junit.jupiter.api.assertThrows
 import kotlin.random.Random
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -159,4 +163,86 @@ class FakeRedisTest: AbstractRedisTest() {
     assertNull(redis[key], "Key did not expire")
   }
 
+  @Test fun `scan for all keys with default options`() {
+    val expectedKeys = mutableSetOf<String>()
+    for (i in 1..100) {
+      expectedKeys.add(i.toString())
+      if (i <= 25) {
+        redis[i.toString()] = i.toString().encodeUtf8()
+      } else if (i <= 50) {
+        redis.hset(i.toString(), i.toString(), i.toString().encodeUtf8())
+      } else if (i <= 75) {
+        redis.lpush(i.toString(), i.toString().encodeUtf8())
+      } else {
+        redis.zadd(i.toString(), mapOf(i.toString() to i.toDouble()))
+      }
+    }
+
+    val scanResult = redis.scan("0")
+
+    assertEquals(expectedKeys, scanResult.keys.toSet())
+    assertEquals("0", scanResult.cursor)
+  }
+
+  @Test fun `scan for keys matching a pattern`() {
+    redis["test_tag:hello"] = "a".encodeUtf8()
+    redis["different_tag:1"] = "b".encodeUtf8()
+    redis["test_tag:2"] = "c".encodeUtf8()
+    redis["bad_test_tag:3"] = "d".encodeUtf8()
+
+    val scanResult = redis.scan("0", matchPattern = "test_tag:*")
+
+    val expectedKeys = listOf("test_tag:hello", "test_tag:2")
+
+    assertTrue(scanResult.keys.containsAll(expectedKeys) &&
+      expectedKeys.containsAll(scanResult.keys))
+    assertEquals(expectedKeys.size, scanResult.keys.size)
+  }
+
+  @Test
+  fun `ltrim with positive indices`() {
+    val key = "mylist"
+    redis.lpush(key, "one".encodeUtf8(), "two".encodeUtf8(), "three".encodeUtf8())
+
+    // Trim list to retain elements from index 1 to end
+    redis.ltrim(key, 1, -1)
+    assertEquals(listOf("two", "one"), redis.lrange(key, 0, -1).map { it?.utf8() })
+  }
+
+  @Test
+  fun `ltrim with negative indices`() {
+    val key = "myotherlist"
+    redis.lpush(key, "one".encodeUtf8(), "two".encodeUtf8(), "three".encodeUtf8(), "four".encodeUtf8())
+
+    // Trim list to retain last 2 elements
+    redis.ltrim(key, -2, -1)
+    assertEquals(listOf("two", "one"), redis.lrange(key, 0, -1).map { it?.utf8() })
+  }
+
+
+  @Test fun `cannot set same key multiple times with different data types`() {
+    val key = "mykey"
+    val value = "value".encodeUtf8()
+    redis[key] = value
+
+    assertEquals(value, redis[key])
+
+    assertFails {
+      redis.hset(key, "field", value)
+    }.also { exception ->
+      assertContains(exception.message!!, "WRONGTYPE")
+    }
+
+    assertFails {
+      redis.lpush(key, value)
+    }.also { exception ->
+      assertContains(exception.message!!, "WRONGTYPE")
+    }
+
+    assertFails {
+      redis.zadd(key, mapOf(value.toString() to 1.0))
+    }.also { exception ->
+      assertContains(exception.message!!, "WRONGTYPE")
+    }
+  }
 }

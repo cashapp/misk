@@ -6,10 +6,12 @@ import org.jooq.DSLContext
 import java.lang.UnsupportedOperationException
 import java.sql.Connection
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ConcurrentMap
 
 class JooqSession(val ctx: DSLContext) : Session {
   private val hooks: ConcurrentMap<HookType, List<() -> Unit>> = ConcurrentHashMap()
+  private val rollbackHooks: ConcurrentLinkedQueue<(error: Throwable) -> Unit> = ConcurrentLinkedQueue()
 
   override fun <T> useConnection(work: (Connection) -> T): T {
     return ctx.connectionResult(work)
@@ -25,6 +27,10 @@ class JooqSession(val ctx: DSLContext) : Session {
 
   override fun onSessionClose(work: () -> Unit) {
     hooks.add(HookType.SESSION_CLOSE, work)
+  }
+
+  override fun onRollback(work: (error: Throwable) -> Unit) {
+    rollbackHooks.add(work)
   }
 
   fun executePreCommitHooks() {
@@ -45,6 +51,10 @@ class JooqSession(val ctx: DSLContext) : Session {
 
   fun executeSessionCloseHooks() {
     hooks[HookType.SESSION_CLOSE]?.forEach { it() }
+  }
+
+  fun executeRollbackHooks(error: Throwable) {
+    rollbackHooks.forEach { it(error) }
   }
 
   fun ConcurrentMap<HookType, List<() -> Unit>>.add(hookType: HookType, work: () -> Unit) {

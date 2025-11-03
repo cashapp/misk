@@ -1,10 +1,8 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
+  id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
 }
 
@@ -16,36 +14,46 @@ dependencies {
   api(libs.jakartaInject)
   api(libs.jettyServletApi)
   api(libs.junitApi)
-  api(libs.kotlinLogging)
-  api(libs.moshi)
+  api(libs.loggingApi)
+  api(libs.moshiCore)
   api(libs.okHttp)
+  api(libs.okHttpMockWebServer3)
   api(libs.openTracingMock)
   api(libs.servletApi)
-  api(project(":wisp:wisp-time-testing"))
+  api(libs.logbackClassic)
   api(project(":misk"))
   api(project(":misk-actions"))
   api(project(":misk-api"))
   api(project(":misk-core"))
   api(project(":misk-inject"))
+  api(project(":misk-sampling"))
+  api(project(":misk-testing-api"))
+  implementation(libs.dockerCore)
+  implementation(libs.dockerTransportHttpClient)
+  implementation(libs.dockerTransportCore)
   implementation(libs.guavaTestLib)
   implementation(libs.guiceTestLib)
-  implementation(libs.logbackClassic)
   implementation(libs.mockitoCore)
+  implementation(libs.mockk)
   implementation(libs.okio)
-  implementation(libs.openTracingApi)
+  implementation(libs.openTracing)
+  implementation(libs.openTracingUtil)
   implementation(libs.slf4jApi)
-  implementation(project(":wisp:wisp-containers-testing"))
-  implementation(project(":wisp:wisp-deployment"))
-  implementation(project(":wisp:wisp-logging"))
-  implementation(project(":wisp:wisp-logging-testing"))
+  implementation(libs.logbackCore)
   implementation(project(":misk-action-scopes"))
   implementation(project(":misk-config"))
+  implementation(project(":misk-docker"))
+  implementation(project(":misk-logging"))
   implementation(project(":misk-service"))
+  implementation(project(":misk-tokens"))
+  implementation(project(":wisp:wisp-deployment"))
+  implementation(testFixtures(project(":misk-metrics")))
 
   testImplementation(libs.kotlinTest)
+  testImplementation(libs.mockitoKotlin)
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

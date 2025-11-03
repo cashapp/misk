@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
@@ -23,16 +24,17 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
+import com.fasterxml.jackson.module.kotlin.KotlinInvalidNullException
 import com.google.common.base.Joiner
 import misk.resources.ResourceLoader
 import org.apache.commons.lang3.StringUtils
-import wisp.config.Config
 import wisp.deployment.Deployment
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.io.File
 import java.io.FilenameFilter
 import java.util.Locale
+import kotlin.reflect.KClass
+import kotlin.time.ExperimentalTime
 
 object MiskConfig {
   private val logger = getLogger<MiskConfig>()
@@ -61,7 +63,7 @@ object MiskConfig {
       deployment,
       overrideResources,
       overrideValues,
-      resourceLoader
+      resourceLoader,
     )
   }
 
@@ -94,7 +96,7 @@ object MiskConfig {
       overrideResources,
       overrideValues,
       resourceLoader,
-      failOnUnknownProperties = false
+      failOnUnknownProperties = false,
     )
   }
 
@@ -108,11 +110,34 @@ object MiskConfig {
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM,
     failOnUnknownProperties: Boolean
   ): T {
+    return load(
+      configClass,
+      appName,
+      deployment,
+      overrideResources,
+      overrideValues,
+      resourceLoader,
+      failOnUnknownProperties,
+      deserializerModifier = null,
+    );
+  }
+
+  @JvmStatic
+  fun <T : Config> load(
+    configClass: Class<out Config>,
+    appName: String,
+    deployment: Deployment,
+    overrideResources: List<String> = listOf(),
+    overrideValues: JsonNode? = null,
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM,
+    failOnUnknownProperties: Boolean,
+    deserializerModifier: BeanDeserializerModifier? = null
+  ): T {
     check(!Secret::class.java.isAssignableFrom(configClass)) {
       "Top level service config cannot be a Secret<*>"
     }
 
-    val mapper = newObjectMapper(resourceLoader, false)
+    val mapper = newObjectMapper(resourceLoader, false, deserializerModifier)
 
     val configYamls = loadConfigYamlMap(appName, deployment, overrideResources, resourceLoader)
     check(configYamls.values.any { it != null }) {
@@ -130,7 +155,7 @@ object MiskConfig {
       configFile,
       appName,
       configEnvironmentName,
-      failOnUnknownProperties
+      failOnUnknownProperties,
     )
   }
 
@@ -150,7 +175,7 @@ object MiskConfig {
     } catch (e: UnrecognizedPropertyException) {
       if (failOnUnknownProperties) {
         throw IllegalStateException(
-          "failed to load configuration for $appName $configEnvironmentName: ${e.message}", e
+          "failed to load configuration for $appName $configEnvironmentName: ${e.message}", e,
         )
       }
 
@@ -169,15 +194,15 @@ object MiskConfig {
         configFile,
         appName,
         configEnvironmentName,
-        false
+        false,
       )
-    } catch (e: MissingKotlinParameterException) {
+    } catch (e: KotlinInvalidNullException) {
       throwMissingPropertyException(e, configClass, configFile, jsonNode)
     } catch (e: MismatchedInputException) {
       throwMissingPropertyException(e, configClass, configFile, jsonNode)
     } catch (e: Exception) {
       throw IllegalStateException(
-        "failed to load configuration for $appName $configEnvironmentName: ${e.message}", e
+        "failed to load configuration for $appName $configEnvironmentName: ${e.message}", e,
       )
     }
   }
@@ -193,7 +218,7 @@ object MiskConfig {
       "could not find '${path}' of '${configClass.simpleName}'" +
         " in $configFile or in any of the combined logical config " +
         similarProperties(path, jsonNode),
-      e
+      e,
     )
   }
 
@@ -230,16 +255,18 @@ object MiskConfig {
   }
 
   fun <T : Config> toRedactedYaml(config: T, resourceLoader: ResourceLoader): String {
-    return newObjectMapper(resourceLoader, true).writeValueAsString(config)
+    val serializingMapper = newObjectMapper(resourceLoader, true, null)
+    return serializingMapper.writeValueAsString(config)
   }
 
   private fun newObjectMapper(
     resourceLoader: ResourceLoader,
-    redactSecrets: Boolean
+    redactSecrets: Boolean,
+    deserializerModifier: BeanDeserializerModifier?
   ): ObjectMapper {
     val mapper = ObjectMapper(YAMLFactory()).registerModules(
       KotlinModule.Builder().build(),
-      JavaTimeModule()
+      JavaTimeModule(),
     )
 
     // Fail on null ints/doubles.
@@ -252,6 +279,18 @@ object MiskConfig {
     } else {
       mapper.registerModule(SecretJacksonModule(resourceLoader, mapper))
     }
+
+    // The ResourceAwareDeserializer lets string and other primitive types be loaded by reference using resource loader
+    //   paths (classpath, filesystem, environment...) without using the Secret type.
+    // This is useful for non-sensitive data or using environment variables to pass data into non-Secret types in
+    //   existing config or framework provided config classes.
+    mapper.registerModule(ResourceAwareJacksonModule(resourceLoader, mapper))
+
+    // The deserializerModifier can be null if this mapper is serializing only.
+    deserializerModifier?.let {
+      mapper.registerModule(DeserializerModifierModule(it))
+    }
+
     return mapper
   }
 
@@ -274,7 +313,7 @@ object MiskConfig {
     configYamls: Map<String, String?>,
     overrideValues: JsonNode?
   ): JsonNode {
-    val mapper = ObjectMapper(YAMLFactory()).registerModules(KotlinModule(), JavaTimeModule())
+    val mapper = ObjectMapper(YAMLFactory()).registerModules(KotlinModule.Builder().build(), JavaTimeModule())
     var result = mapper.createObjectNode()
 
     for ((key, value) in configYamls) {
@@ -317,14 +356,120 @@ object MiskConfig {
   private fun embeddedConfigFileNames(appName: String, deployment: Deployment) =
     listOf(
       "common",
-      deployment.mapToEnvironmentName().toLowerCase(Locale.US)
+      deployment.mapToEnvironmentName().lowercase(Locale.US),
     ).map { "$appName-$it.yaml" }
 
   class SecretJacksonModule(val resourceLoader: ResourceLoader, val mapper: ObjectMapper) :
     SimpleModule() {
     override fun setupModule(context: SetupContext?) {
       addDeserializer(Secret::class.java, SecretDeserializer(resourceLoader, mapper))
+
       super.setupModule(context)
+    }
+  }
+
+  class DeserializerModifierModule(val deserializerModifier: BeanDeserializerModifier) :
+    SimpleModule() {
+    override fun setupModule(context: SetupContext?) {
+      setDeserializerModifier(deserializerModifier)
+      super.setupModule(context)
+    }
+  }
+
+  private class ResourceAwareJacksonModule(val resourceLoader: ResourceLoader, val mapper: ObjectMapper) :
+    SimpleModule() {
+    override fun setupModule(context: SetupContext?) {
+      addDeserializer(String::class.java, ResourceAwareDeserializer<String>(resourceLoader, mapper))
+      addDeserializer(Int::class.java, ResourceAwareDeserializer<Int>(resourceLoader, mapper))
+      addDeserializer(Integer::class.java, ResourceAwareDeserializer<Integer>(resourceLoader, mapper))
+      addDeserializer(Long::class.java, ResourceAwareDeserializer<Long>(resourceLoader, mapper))
+      addDeserializer(java.lang.Long::class.java, ResourceAwareDeserializer<java.lang.Long>(resourceLoader, mapper))
+      addDeserializer(Float::class.java, ResourceAwareDeserializer<Float>(resourceLoader, mapper))
+      addDeserializer(java.lang.Float::class.java, ResourceAwareDeserializer<java.lang.Float>(resourceLoader, mapper))
+      addDeserializer(Boolean::class.java, ResourceAwareDeserializer<Boolean>(resourceLoader, mapper))
+      addDeserializer(
+        java.lang.Boolean::class.java,
+        ResourceAwareDeserializer<java.lang.Boolean>(resourceLoader, mapper),
+      )
+
+      super.setupModule(context)
+    }
+  }
+
+  private inline fun <reified T : Any> ResourceAwareDeserializer(
+    resourceLoader: ResourceLoader,
+    mapper: ObjectMapper
+  ): ResourceAwareDeserializer<T> = ResourceAwareDeserializer(T::class, resourceLoader, mapper)
+
+  private class ResourceAwareDeserializer<T : Any>(
+    val typeClass: KClass<out T>,
+    val resourceLoader: ResourceLoader,
+    val mapper: ObjectMapper,
+    val type: JavaType? = null
+  ) : JsonDeserializer<T>(),
+    ContextualDeserializer {
+    override fun deserialize(
+      jsonParser: JsonParser,
+      deserializationContext: DeserializationContext
+    ): T? {
+      if (type == null) {
+        // This only happens if ObjectMapper does not call createContextual for this property.
+        throw JsonMappingException.from(
+          jsonParser,
+          "Attempting to deserialize an object with no type",
+        )
+      }
+
+      val valueAsType = jsonParser.valueAsTypeOrNull(type)
+      val maybeReferenceWithMarkers = jsonParser.valueAsString
+
+      // If the string starts with a known scheme, treat it as a resource reference.
+      return resourceLoader.schemes.firstOrNull {
+        // Only try to load as a resource if it uses YAML variable syntax like "${environment:MY_ENV_VAR}" or "${filesystem:/path/to/file}".
+        // Do not try to load if it is a reference without boundary markers since the caller does not want it inlined & loaded.
+        maybeReferenceWithMarkers.startsWith("\${$it")
+      }?.let { schema ->
+        val content = maybeReferenceWithMarkers.removePrefix("\${").removeSuffix("}")
+        
+        // Parse the content more carefully to handle default values that contain colons (like URLs)
+        // Expected formats: "scheme:path" or "scheme:path:-defaultValue"
+        val firstColonIndex = content.indexOf(':')
+        require(firstColonIndex > 0) {
+          "Resource references for non-Secret fields must be in the form of \${scheme:path} or \${scheme:path:-defaultValue}"
+        }
+        
+        val scheme = content.substring(0, firstColonIndex)
+        val remainder = content.substring(firstColonIndex + 1)
+        
+        // Check if there's a default value (indicated by ":-")
+        val defaultSeparator = ":-"
+        val defaultIndex = remainder.indexOf(defaultSeparator)
+        
+        val (path, default) = if (defaultIndex >= 0) {
+          // Has default value: "path:-defaultValue"
+          val pathPart = remainder.substring(0, defaultIndex)
+          val defaultPart = remainder.substring(defaultIndex + defaultSeparator.length)
+          Pair(pathPart, defaultPart)
+        } else {
+          // No default value: just "path"
+          Pair(remainder, null)
+        }
+        
+        require(scheme.isNotEmpty() && path.isNotEmpty() && !path.startsWith(":")) {
+          "Resource references for non-Secret fields must be in the form of \${scheme:path} or \${scheme:path:-defaultValue}"
+        }
+        
+        val maybeReference = "$scheme:$path"
+
+        resourceLoader.loadResource(maybeReference, type, mapper, default) as? T?
+      } ?: valueAsType as? T? // Not a resource reference, return the type as is.
+    }
+
+    override fun createContextual(
+      ctxt: DeserializationContext?,
+      property: BeanProperty?
+    ): JsonDeserializer<*>? {
+      return ResourceAwareDeserializer(typeClass, resourceLoader, mapper, mapper.constructType(typeClass.java))
     }
   }
 
@@ -350,46 +495,11 @@ object MiskConfig {
         // This only happens if ObjectMapper does not call createContextual for this property.
         throw JsonMappingException.from(
           jsonParser,
-          "Attempting to deserialize an object with no type"
+          "Attempting to deserialize an object with no type",
         )
       }
-      val reference = deserializationContext.readValue(jsonParser, String::class.java) as String
-      return RealSecret(loadSecret(reference, type), reference)
-    }
-
-    private fun loadSecret(reference: String, type: JavaType): Any {
-      val source = requireNotNull(resourceLoader.utf8(reference)) {
-        "No secret found at: $reference."
-      }
-      val referenceFileExtension = Regex(".*\\.([^.]+)$").find(reference)?.groupValues?.get(1) ?: ""
-      return when (referenceFileExtension) {
-        "yaml" -> {
-          mapper.readValue(source, type) as Any
-        }
-
-        "txt" -> {
-          check(type.rawClass.isAssignableFrom(String::class.java)) {
-            "Secrets with the .txt extension map to Secret<String> fields in Config classes."
-          }
-          source
-        }
-
-        else -> {
-          // Ignore extension if we're requesting a string or a bytearray
-          if (type.rawClass == String::class.java) {
-            return source
-          } else if (type.isArrayType && type.contentType.rawClass == Byte::class.java) {
-            return source.toByteArray()
-          }
-
-          check(referenceFileExtension.isNotBlank()) {
-            "Secret [$reference] needs a file extension for parsing."
-          }
-          throw IllegalStateException(
-            "Unknown file extension \"$referenceFileExtension\" for secret [$reference]."
-          )
-        }
-      }
+      val reference = jsonParser.valueAsString
+      return RealSecret(resourceLoader.loadResource(reference, type, mapper), reference)
     }
   }
 
@@ -421,7 +531,6 @@ object MiskConfig {
     ) {
       if ((value as? RealSecret<*>)?.reference?.isNotBlank() == true) {
         gen.writeString("${value.reference} -> ████████")
-
       } else {
         gen.writeString("████████")
       }
@@ -440,6 +549,70 @@ object MiskConfig {
     internal val reference: String = ""
   ) : Secret<T> {
     override fun toString(): String = "RealSecret(value=████████, reference=$reference)"
+  }
+
+  private fun JsonParser.valueAsTypeOrNull(type: JavaType): Any? = when (type.rawClass) {
+    String::class.java -> valueAsString
+    Int::class.java, java.lang.Integer::class.java -> valueAsInt
+    Double::class.java, java.lang.Double::class.java -> valueAsDouble
+    Float::class.java, java.lang.Float::class.java -> valueAsDouble.toFloat()
+    Long::class.java, java.lang.Long::class.java -> valueAsLong
+    Byte::class.java, java.lang.Byte::class.java -> valueAsInt.toByte()
+    Boolean::class.java, java.lang.Boolean::class.java -> valueAsBoolean
+    else -> null
+  }
+
+
+  private fun String.toTypeOrNull(type: JavaType): Any? = when (type.rawClass) {
+    String::class.java -> this
+    Int::class.java -> this.toInt()
+    java.lang.Integer::class.java -> this.toInt()
+    Double::class.java -> this.toDouble()
+    java.lang.Double::class.java -> this.toDouble()
+    Float::class.java -> this.toFloat()
+    java.lang.Float::class.java -> this.toFloat()
+    Long::class.java -> this.toLong()
+    java.lang.Long::class.java -> this.toLong()
+    Byte::class.java -> this.toByte()
+    java.lang.Byte::class.java -> this.toByte()
+    ByteArray::class.java -> this.toByteArray()
+    Boolean::class.java -> this.toBoolean()
+    java.lang.Boolean::class.java -> this.toBoolean()
+    else -> null
+  }
+
+  @OptIn(ExperimentalTime::class)
+  private fun ResourceLoader.loadResource(reference: String, type: JavaType, mapper: ObjectMapper, default: String? = null): Any? {
+    val resourceLoader = this
+    val source = requireNotNull(resourceLoader.utf8(reference) ?: default) {
+      "No resource found at: $reference."
+    }
+
+    val referenceFileExtension = Regex(".*\\.([^.]+)$").find(reference)?.groupValues?.get(1) ?: ""
+    return when (referenceFileExtension) {
+      "yaml" -> {
+        mapper.readValue(source, type) as Any
+      }
+
+      "txt" -> {
+        check(type.rawClass.isAssignableFrom(String::class.java)) {
+          "Secrets with the .txt extension map to Secret<String> fields in Config classes."
+        }
+        source
+      }
+
+      else -> {
+        // Ignore extension if we're requesting a string or a bytearray
+        return source.toTypeOrNull(type) ?: let {
+          check(referenceFileExtension.isNotBlank()) {
+            "Resource [$reference] needs a file extension for parsing ${type.rawClass}."
+          }
+          throw IllegalStateException(
+            "Unknown file extension \"$referenceFileExtension\" for resource [$reference].",
+          )
+        }
+      }
+    }
   }
 }
 

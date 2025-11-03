@@ -1,0 +1,75 @@
+{
+  "sharded": true,
+  "vindexes": {
+    "character_name_lookup": {
+      "type": "lookup",
+      "params": {
+        "autocommit": "true",
+        "from": "name",
+        "ignore_nulls": "true",
+        "table": "character_name_lookup",
+        "to": "keyspace_id"
+      },
+      "owner": "characters"
+    },
+    "hash": {
+      "type": "hash"
+    },
+    "unicode_loose_xxhash": {
+      "type": "unicode_loose_xxhash"
+    }
+  },
+  "tables": {
+    "actors": {
+      "column_vindexes": [
+        {
+          "column": "id",
+          "name": "hash"
+        }
+      ],
+      "auto_increment": {
+        "column": "id",
+        "sequence": "movies.actors_seq"
+      }
+    },
+    "character_name_lookup": {
+      "column_vindexes": [
+        {
+          "column": "name",
+          "name": "unicode_loose_xxhash"
+        }
+      ]
+    },
+    "characters": {
+      "column_vindexes": [
+        {
+          "column": "movie_id",
+          "name": "hash"
+        },
+        {
+          "column": "name",
+          "name": "character_name_lookup"
+        }
+      ],
+      "auto_increment": {
+        "column": "id",
+        "sequence": "movies.characters_seq"
+      }
+    },
+    "movies": {
+      "column_vindexes": [
+        {
+          "column": "id",
+          "name": "hash"
+        }
+      ],
+      "auto_increment": {
+        "column": "id",
+        "sequence": "movies.movies_seq"
+      }
+    },
+    "schema_version": {
+      "type": "reference"
+    }
+  }
+}

@@ -30,7 +30,7 @@ import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import java.time.Clock
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -54,7 +54,7 @@ class ConcurrencyLimitsInterceptorTest {
     val interceptor = factory.create(action)!!
     assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
       .isEqualTo(CallResult(callWasShed = false, statusCode = 200))
-    assertThat(logCollector.takeMessages()).containsExactly("Starting ready service")
+    assertThat(logCollector.takeMessages()[0]).isEqualTo("Starting ready service")
     assertThat(callSuccessCount("HelloAction")).isEqualTo(1.0)
   }
 

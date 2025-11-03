@@ -17,10 +17,15 @@ import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.jooq.exception.DataAccessException
 import org.junit.jupiter.api.Test
-import wisp.time.FakeClock
+import misk.time.FakeClock
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
+import misk.jooq.JooqTransacter.TransacterOptions
+import misk.jooq.testgen.tables.records.MovieRecord
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.assertThrows
 
 @MiskTest(startService = true)
 internal class JooqTransacterTest {
@@ -254,6 +259,37 @@ internal class JooqTransacterTest {
     assertThat(numberOfRecords).isEqualTo(1)
   }
 
+  @Test
+  fun `rollback hooks are called on rollback only`() {
+    val rollbackHooksTriggered = mutableListOf<String>()
+
+    // Happy path.
+    transacter.transaction { session ->
+      session.onRollback { error ->
+        rollbackHooksTriggered.add("never")
+        error("this should never have happened")
+      }
+    }
+
+    assertThat(rollbackHooksTriggered).isEmpty()
+
+    // Rollback path.
+    assertThrows<IllegalStateException> {
+      transacter.transaction { session ->
+        session.onRollback { error ->
+          assertThat(error).hasMessage("bad things happened here")
+          rollbackHooksTriggered.add("first")
+        }
+        session.onRollback { error ->
+          assertThat(error).hasMessage("bad things happened here")
+          rollbackHooksTriggered.add("second")
+        }
+        error("bad things happened here")
+      }
+    }
+    assertThat(rollbackHooksTriggered).containsExactly("first", "second")
+  }
+
   @Test fun `session close hooks always execute regardless of exceptions thrown from anywhere`() {
     var sessionCloseHook1Called = false
     assertThatExceptionOfType(PostCommitHookFailedException::class.java).isThrownBy {
@@ -284,7 +320,7 @@ internal class JooqTransacterTest {
     assertThat(sessionCloseHook2Called).isTrue
   }
 
-  @Test fun `make sure read and write transacters connect to different dbs`(){
+  @Test fun `make sure read and write transacters connect to different dbs`() {
     transacter.transaction(noRetriesOptions) {
       transacter.transaction(noRetriesOptions) { (ctx) ->
         ctx.newRecord(MOVIE).apply {
@@ -334,4 +370,107 @@ internal class JooqTransacterTest {
     }
   }
 
+  @Nested
+  inner class IsolationLevelTests {
+
+    @Nested
+    inner class CheckIsolationLevel {
+      @Test fun `check isolation level is set to repeatable read by default`() {
+        transacter.transaction { (ctx) ->
+          ctx.connection {
+            assertThat(it.transactionIsolation).isEqualTo(TransactionIsolationLevel.REPEATABLE_READ.value)
+          }
+        }
+      }
+
+      @Test fun `check isolation level is set to read committed when explicitly set`() {
+        transacter.transaction(
+          options = TransacterOptions(isolationLevel = TransactionIsolationLevel.READ_COMMITTED)
+        ) { (ctx) ->
+          ctx.connection {
+            assertThat(it.transactionIsolation).isEqualTo(TransactionIsolationLevel.READ_COMMITTED.value)
+          }
+        }
+      }
+    }
+
+    @Nested
+    inner class EnsureIsolationLevelsWorkCorrectly {
+      lateinit var savedMovieRecord: MovieRecord
+      @BeforeEach
+      fun insertRecord() {
+        savedMovieRecord = transacter.transaction { (ctx) ->
+          ctx.newRecord(MOVIE).apply {
+            this.genre = Genre.COMEDY.name
+            this.name = "Dumb and dumber"
+          }.also { it.store() }
+        }
+      }
+
+      @Test fun `should see the same record as previously read - repeatable read`() {
+        transacter.transaction(
+          options = TransacterOptions(
+            isolationLevel = TransactionIsolationLevel.REPEATABLE_READ // this is default
+          )
+        ) { (ctx) ->
+          var movie = ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id)).fetchOne()!!
+          assertThat(movie.genre).isEqualTo(Genre.COMEDY.name)
+
+          transacter.transaction { (ctx) ->
+            ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id))
+              .fetchOne()
+              ?.apply { this.genre = Genre.HORROR.name }
+              ?.also { it.store() }
+          }
+
+          movie = ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id)).fetchOne()!!
+          assertThat(movie.genre).isEqualTo(Genre.COMEDY.name)
+        }
+      }
+
+      @Test fun `should see the updated record - read committed`() {
+        transacter.transaction(
+          options = TransacterOptions(
+            isolationLevel = TransactionIsolationLevel.READ_COMMITTED
+          )
+        ) { (ctx) ->
+          var movie = ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id)).fetchOne()!!
+          assertThat(movie.genre).isEqualTo(Genre.COMEDY.name)
+
+          transacter.transaction { (ctx) ->
+            ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id))
+              .fetchOne()
+              ?.apply { this.genre = Genre.HORROR.name }
+              ?.also { it.store() }
+          }
+
+          movie = ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id)).fetchOne()!!
+          assertThat(movie.genre).isEqualTo(Genre.HORROR.name)
+        }
+      }
+
+      @Test fun `should see the updated record - read uncommitted`() {
+        transacter.transaction(
+          options = TransacterOptions(
+            isolationLevel = TransactionIsolationLevel.READ_UNCOMMITTED
+          )
+        ) { (ctx) ->
+          var movie = ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id)).fetchOne()!!
+          assertThat(movie.genre).isEqualTo(Genre.COMEDY.name)
+          val context1 = ctx
+
+          transacter.transaction { (ctx) ->
+            ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id))
+              .fetchOne()
+              ?.apply { this.genre = Genre.HORROR.name }
+              ?.also { it.store() }
+
+            // txn is still un-committed here
+            movie = context1.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovieRecord.id)).fetchOne()!!
+            assertThat(movie.genre).isEqualTo(Genre.HORROR.name)
+          }
+        }
+      }
+    }
+  }
 }

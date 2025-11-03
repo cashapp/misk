@@ -1,10 +1,8 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
+  id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
 }
 
@@ -14,14 +12,16 @@ dependencies {
   implementation(libs.jakartaInject)
   implementation(libs.kotlinReflect)
   implementation(libs.kotlinStdLibJdk8)
+  implementation(project(":misk-api"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinTest)
   testImplementation(project(":misk-inject"))
   testImplementation(project(":misk-testing"))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

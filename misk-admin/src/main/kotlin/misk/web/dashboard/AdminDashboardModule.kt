@@ -3,7 +3,13 @@ package misk.web.dashboard
 import jakarta.inject.Qualifier
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
+import misk.web.dev.DevModule
+import misk.web.metadata.config.ConfigDashboardTabModule
 import misk.web.metadata.config.ConfigMetadataAction
+import misk.web.metadata.database.DatabaseDashboardTabModule
+import misk.web.metadata.guice.GuiceDashboardTabModule
+import misk.web.metadata.servicegraph.ServiceGraphDashboardTabModule
+import misk.web.metadata.webaction.WebActionsDashboardTabModule
 import misk.web.v2.NavbarModule
 
 /**
@@ -27,9 +33,15 @@ class AdminDashboardModule @JvmOverloads constructor(
     install(BaseDashboardModule(isDevelopment))
     install(NavbarModule())
 
+    if (System.getProperty("misk.dev.running") == "true") {
+      install(DevModule())
+    }
+
     // Default container admin tabs
     install(ConfigDashboardTabModule(isDevelopment, configTabMode))
     install(DatabaseDashboardTabModule(isDevelopment))
+    install(GuiceDashboardTabModule())
+    install(ServiceGraphDashboardTabModule())
     install(WebActionsDashboardTabModule(isDevelopment))
   }
 }

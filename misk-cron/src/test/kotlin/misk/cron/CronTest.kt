@@ -10,13 +10,14 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.time.FakeClock
+import misk.time.FakeClock
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.backoff.RetryConfig
 
 @MiskTest(startService = true)
 class CronTest {
@@ -29,6 +30,8 @@ class CronTest {
       install(CronEntryModule.create<MinuteCron>())
       install(CronEntryModule.create<HourCron>())
       install(CronEntryModule.create<ThrowsExceptionCron>())
+      // Override ConfigurableHourCron's schedule to every minute.
+      install(CronEntryModule.create<ConfigurableHourCron>(cronPattern = CronPattern("* * * * *")))
     }
   }
 
@@ -40,6 +43,7 @@ class CronTest {
   @Inject private lateinit var minuteCron: MinuteCron
   @Inject private lateinit var hourCron: HourCron
   @Inject private lateinit var throwsExceptionCron: ThrowsExceptionCron
+  @Inject private lateinit var configurableHourCron: ConfigurableHourCron
 
   private lateinit var lastRun: Instant
 
@@ -58,15 +62,20 @@ class CronTest {
     assertThat(minuteCron.counter).isEqualTo(0)
     assertThat(hourCron.counter).isEqualTo(0)
     assertThat(throwsExceptionCron.counter).isEqualTo(0)
+    assertThat(configurableHourCron.counter).isEqualTo(0)
 
     // Advance one hour in one minute intervals.
     repeat(60) {
       clock.add(Duration.ofMinutes(1))
       runCrons()
     }
+
     assertThat(minuteCron.counter).isEqualTo(60)
     assertThat(throwsExceptionCron.counter).isEqualTo(4)
     assertThat(hourCron.counter).isEqualTo(1)
+    // configurableHourCron has @CronPattern configured to hourly, but is overridden
+    // to every minute by CronEntryModule::create().
+    assertThat(configurableHourCron.counter).isEqualTo(60)
   }
 
   @Test
@@ -86,10 +95,11 @@ class CronTest {
     assertThat(minuteCron.counter).isEqualTo(1)
   }
 
-  private fun waitForNextPendingTask(): DelayedTask =
-    retry(5, FlatBackoff(Duration.ofMillis(200))) {
+  private fun waitForNextPendingTask(): DelayedTask {
+    return retry(RetryConfig.Builder(5, FlatBackoff(Duration.ofMillis(200))).build()) {
       pendingTasks.peekPending()!!
     }
+  }
 }
 
 @Singleton
@@ -105,6 +115,16 @@ class MinuteCron @Inject constructor() : Runnable {
 @Singleton
 @CronPattern("0 * * * *")
 class HourCron @Inject constructor() : Runnable {
+  var counter = 0
+
+  override fun run() {
+    counter++
+  }
+}
+
+@Singleton
+@CronPattern("0 * * * *") // Default cron schedule of hourly.
+class ConfigurableHourCron @Inject constructor() : Runnable {
   var counter = 0
 
   override fun run() {

@@ -1,10 +1,11 @@
 package misk.jdbc
 
 import misk.config.Redact
-import wisp.config.Config
+import misk.config.Config
+import misk.containers.ContainerUtil
 import wisp.deployment.Deployment
-import java.io.File
 import java.time.Duration
+import java.util.Properties
 
 /** Defines a type of datasource */
 enum class DataSourceType(
@@ -14,7 +15,7 @@ enum class DataSourceType(
 ) {
   MYSQL(
     driverClassName = "io.opentracing.contrib.jdbc.TracingDriver",
-    hibernateDialect = "org.hibernate.dialect.MySQL57Dialect",
+    hibernateDialect = "org.hibernate.dialect.MySQL8Dialect",
     isVitess = false
   ),
   HSQLDB(
@@ -24,7 +25,7 @@ enum class DataSourceType(
   ),
   VITESS_MYSQL(
     driverClassName = MYSQL.driverClassName,
-    hibernateDialect = "misk.hibernate.VitessDialect",
+    hibernateDialect = "misk.hibernate.vitess.VitessDialect",
     isVitess = true
   ),
   COCKROACHDB(
@@ -39,9 +40,25 @@ enum class DataSourceType(
   ),
   TIDB(
     driverClassName = "io.opentracing.contrib.jdbc.TracingDriver",
-    hibernateDialect = "org.hibernate.dialect.MySQL57Dialect",
+    hibernateDialect = "org.hibernate.dialect.MySQL8Dialect",
     isVitess = false
   ),
+}
+
+enum class MigrationsFormat {
+  /**
+   * Traditional migrations format where each migration file represents DB schema change
+   */
+  TRADITIONAL,
+  /**
+   * Declarative migrations format where each migration file represents a DB table
+   */
+  DECLARATIVE,
+  /**
+   * Externally managed migrations where schema migrations are handled outside of the application.
+   * When this format is used, SchemaMigratorService will not be installed.
+   */
+  EXTERNALLY_MANAGED
 }
 
 /** Configuration element for an individual datasource */
@@ -59,6 +76,7 @@ data class DataSourceConfig @JvmOverloads constructor(
   val connection_idle_timeout: Duration? = null,
   val connection_max_lifetime: Duration = Duration.ofMinutes(1),
   val query_timeout: Duration? = Duration.ofMinutes(1),
+  val keepalive_time: Duration = Duration.ofSeconds(0),
   val migrations_resource: String? = null,
   val migrations_resources: List<String>? = null,
   /**
@@ -66,9 +84,10 @@ data class DataSourceConfig @JvmOverloads constructor(
    */
   val migrations_resources_exclusion: List<String>? = null,
   /**
-   * Regular expression migration files names should match.
+   * Regular expression *traditional* migration files names should match.
    * Any migration filename that doesn't match the given regular expression will cause an exception,
    * unless it was explicitly mentioned in [migrations_resources_exclusion].
+   * Declarative schema migrator will enforce the opposite - all migration files should not match the given regular expression.
    */
   val migrations_resources_regex: String = "(^|.*/)v(\\d+)__[^/]+\\.sql",
   val vitess_schema_resource_root: String? = null,
@@ -113,22 +132,62 @@ data class DataSourceConfig @JvmOverloads constructor(
 
     Full details: https://github.com/cashapp/misk/pull/3094#issue-2080624417
   */
-  val mysql_enforce_writable_connections: Boolean = false
+  val mysql_enforce_writable_connections: Boolean = false,
+  val migrations_format: MigrationsFormat = MigrationsFormat.TRADITIONAL,
+  val declarative_schema_config: DeclarativeSchemaConfig? = null,
+  val mysql_use_aws_secret_for_credentials: Boolean = false,
+  val mysql_aws_secret_name: String? = null,
 ) {
+  init {
+    if (migrations_format == MigrationsFormat.DECLARATIVE) {
+      require(type == DataSourceType.MYSQL) {
+        "Declarative migrations are only supported for MySQL"
+      }
+    } else if (migrations_format == MigrationsFormat.TRADITIONAL) {
+      require(declarative_schema_config == null) {
+        "declarative_schmea_config.excluded_tables is only supported for declarative migrations"
+      }
+    }
+  }
+  fun getDriverClassName(): String {
+    return if (mysql_use_aws_secret_for_credentials) {
+      "com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver"
+    } else {
+      type.driverClassName
+    }
+  }
+
+  fun getDataSourceProperties() : Properties {
+    // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
+    val properties = Properties()
+
+    properties["cachePrepStmts"] = "true"
+    properties["prepStmtCacheSize"] = "250"
+    properties["prepStmtCacheSqlLimit"] = "2048"
+    if (type == DataSourceType.MYSQL || type == DataSourceType.VITESS_MYSQL || type == DataSourceType.TIDB) {
+      properties["useServerPrepStmts"] = "true"
+    }
+    if (mysql_use_aws_secret_for_credentials) {
+      properties["user"] = mysql_aws_secret_name
+    }
+    properties["useLocalSessionState"] = "true"
+    properties["rewriteBatchedStatements"] = "true"
+    properties["cacheResultSetMetadata"] = "true"
+    properties["cacheServerConfiguration"] = "true"
+    properties["elideSetAutoCommits"] = "true"
+    properties["maintainTimeStats"] = "false"
+    properties["characterEncoding"] = "UTF-8"
+
+    return properties
+  }
+
   fun withDefaults(): DataSourceConfig {
-    val isRunningInDocker = File("/proc/1/cgroup")
-      .takeIf { it.exists() }?.useLines { lines ->
-        lines.any { it.contains("/docker") }
-      } ?: false
-    val server_hostname = if (isRunningInDocker)
-        "host.docker.internal"
-      else
-        "127.0.0.1"
+    val server_hostname = ContainerUtil.dockerTargetOrLocalIp()
     return when (type) {
       DataSourceType.MYSQL -> {
         copy(
           port = port ?: 3306,
-          host = host ?: System.getenv("MYSQL_HOST") ?: "127.0.0.1",
+          host = host ?: System.getenv("MYSQL_HOST") ?: server_hostname,
           database = database ?: ""
         )
       }
@@ -142,8 +201,8 @@ data class DataSourceConfig @JvmOverloads constructor(
       DataSourceType.VITESS_MYSQL -> {
         copy(
           port = port ?: 27003,
-          host = host ?: server_hostname,
-          database = database ?: "@master"
+          host = host ?: System.getenv("VITESS_HOST") ?: server_hostname,
+          database = database ?: "@primary"
         )
       }
       DataSourceType.HSQLDB -> {
@@ -193,10 +252,7 @@ data class DataSourceConfig @JvmOverloads constructor(
         }
 
         if (type == DataSourceType.VITESS_MYSQL) {
-          // TODO(jontirsen): Try turning on server side prepared statements again when this issue
-          //  has been fixed: https://github.com/vitessio/vitess/issues/5075
-          queryParams += "&useServerPrepStmts=false"
-          queryParams += "&useUnicode=true"
+          queryParams += "&useServerPrepStmts=true"
           // If we leave this as the default (true) the logs get spammed with the following errors:
           // "Ignored inapplicable SET {sql_mode } = strict_trans_tables"
           // Since Vitess always uses strict_trans_tables this makes no difference here except it
@@ -262,7 +318,12 @@ data class DataSourceConfig @JvmOverloads constructor(
           queryParams += "&$key=$value"
         }
 
-        "jdbc:tracing:mysql://${config.host}:${config.port}/${config.database}$queryParams"
+        if(mysql_use_aws_secret_for_credentials) {
+          "jdbc-secretsmanager:mysql://${config.host}:${config.port}/${config.database}$queryParams"
+        }
+        else {
+          "jdbc:tracing:mysql://${config.host}:${config.port}/${config.database}$queryParams"
+        }
       }
       DataSourceType.HSQLDB -> {
         "jdbc:hsqldb:mem:${database!!};sql.syntax_mys=true"
@@ -311,6 +372,7 @@ data class DataSourceConfig @JvmOverloads constructor(
       this.connection_idle_timeout,
       this.connection_max_lifetime,
       this.query_timeout,
+      this.keepalive_time,
       this.migrations_resource,
       this.migrations_resources,
       this.migrations_resources_exclusion,
@@ -326,13 +388,13 @@ data class DataSourceConfig @JvmOverloads constructor(
       this.enabledTlsProtocols,
       this.show_sql,
       this.generate_hibernate_stats,
+      migrations_format = this.migrations_format
     )
   }
 
   fun canRecoverOnReplica() = this.type in listOf(
     DataSourceType.COCKROACHDB,
     DataSourceType.TIDB,
-    DataSourceType.VITESS_MYSQL
   )
 
 }
@@ -348,3 +410,10 @@ class DataSourceClustersConfig : LinkedHashMap<String, DataSourceClusterConfig>,
   constructor() : super()
   constructor(m: Map<String, DataSourceClusterConfig>) : super(m)
 }
+
+data class DeclarativeSchemaConfig @JvmOverloads constructor(
+  /**
+   * List of tables to exclude from schema validation
+   */
+  val excluded_tables: List<String> = listOf(),
+)

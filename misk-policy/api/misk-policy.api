@@ -2,7 +2,7 @@ public final class misk/policy/opa/FakeOpaModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 }
 
-public final class misk/policy/opa/FakeOpaPolicyEngine : misk/policy/opa/OpaPolicyEngine {
+public final class misk/policy/opa/FakeOpaPolicyEngine : misk/testing/FakeFixture, misk/policy/opa/OpaPolicyEngine {
 	public fun <init> ()V
 	public final fun addOverride (Ljava/lang/String;Lmisk/policy/opa/OpaResponse;)V
 	public final fun addOverrideForInput (Ljava/lang/String;Ljava/lang/String;Lmisk/policy/opa/OpaResponse;)V

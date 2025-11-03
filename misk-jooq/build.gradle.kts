@@ -1,62 +1,60 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
+  id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
-  
-  // Needed to generate jooq test db classes
-  id("org.flywaydb.flyway") version "9.14.1"
-  id("nu.studer.jooq") version "8.2"
+  id("nu.studer.jooq")
+  id("com.squareup.misk.schema-migrator")
 }
 
 dependencies {
   api(libs.guava)
   api(libs.guice)
   api(libs.jooq)
-  api(libs.kotlinLogging)
+  api(libs.loggingApi)
   api(project(":misk-core"))
   api(project(":misk-inject"))
   api(project(":misk-jdbc"))
   implementation(libs.jakartaInject)
-  implementation(libs.kotlinRetry)
-  implementation(libs.kotlinxCoroutines)
-  implementation(project(":wisp:wisp-logging"))
+  implementation(project(":misk-backoff"))
+  implementation(project(":misk-logging"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinTest)
   testImplementation(project(":wisp:wisp-deployment"))
-  testImplementation(project(":wisp:wisp-time-testing"))
+  testImplementation(project(":misk-testing"))
   testImplementation(project(":misk"))
   testImplementation(testFixtures(project(":misk-jdbc")))
-  testImplementation(project(":misk-testing"))
 
   // Needed to generate jooq test db classes
   jooqGenerator(libs.mysql)
 }
 
-// Needed to generate jooq test db classes
-buildscript {
-  dependencies {
-    classpath("org.flywaydb:flyway-gradle-plugin:9.14.1")
-    classpath(libs.mysql)
-  }
+val dbMigrations = "src/test/resources/db-migrations"
+
+val mysqlHost = System.getenv("MYSQL_HOST_DOCKER") ?: "localhost"
+val mysqlPort = System.getenv("MYSQL_PORT") ?: "3500"
+
+val mysqlDb = mapOf(
+  "url" to "jdbc:mysql://$mysqlHost:$mysqlPort/",
+  "schema" to "jooq",
+  "user" to "root",
+  "password" to "root"
+)
+
+miskSchemaMigrator {
+  database = mysqlDb["schema"]
+  host = mysqlHost
+  port = mysqlPort.toInt()
+  username = mysqlDb["user"]
+  password = mysqlDb["password"]
+  migrationsDir.set(layout.projectDirectory.dir(dbMigrations))
 }
 
 // Needed to generate jooq test db classes
-flyway {
-  url = "jdbc:mysql://localhost:3500/misk-jooq-test-codegen"
-  user = "root"
-  password = "root"
-  schemas = arrayOf("jooq")
-  locations = arrayOf("filesystem:${project.projectDir}/src/test/resources/db-migrations")
-  sqlMigrationPrefix = "v"
-}
-// Needed to generate jooq test db classes
 jooq {
-  version.set("3.18.2")
   edition.set(nu.studer.gradle.jooq.JooqEdition.OSS)
 
   configurations {
@@ -65,9 +63,9 @@ jooq {
       jooqConfiguration.apply {
         jdbc.apply {
           driver = "com.mysql.cj.jdbc.Driver"
-          url = "jdbc:mysql://localhost:3500/misk-jooq-test-codegen"
-          user = "root"
-          password = "root"
+          url = "jdbc:mysql://$mysqlHost:$mysqlPort/${mysqlDb["schema"]}"
+          user = mysqlDb["user"]
+          password = mysqlDb["password"]
         }
         generator.apply {
           name = "org.jooq.codegen.KotlinGenerator"
@@ -76,7 +74,7 @@ jooq {
             inputSchema = "jooq"
             outputSchema = "jooq"
             includes = ".*"
-            excludes = "(.*?FLYWAY_SCHEMA_HISTORY)|(.*?schema_version)"
+            excludes = "(.*?schema_version)"
             recordVersionFields = "version"
           }
           generate.apply {
@@ -91,17 +89,29 @@ jooq {
     }
   }
 }
+
 // Needed to generate jooq test db classes
-val generateJooq by project.tasks
-generateJooq.dependsOn("flywayMigrate")
+tasks.withType<nu.studer.gradle.jooq.JooqGenerate>().configureEach {
+  dependsOn("migrateSchema")
+
+  // declare migration files as inputs on the jOOQ task and allow it to
+  // participate in build caching
+  inputs.files(fileTree(layout.projectDirectory.dir(dbMigrations)))
+    .withPropertyName("migrations")
+    .withPathSensitivity(PathSensitivity.RELATIVE)
+  allInputsDeclared.set(true)
+}
 
 // Needed to generate jooq test db classes
 // If you are using this as an example for your service, remember to add the generated code to your
 // main source set instead of your tests as it is done below.
-sourceSets.getByName("test").java.srcDirs
-  .add(File("${project.projectDir}/src/test/generated/kotlin"))
+sourceSets {
+  test {
+    java.srcDirs(layout.projectDirectory.dir("src/test/generated/kotlin"))
+  }
+}
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

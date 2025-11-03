@@ -1,13 +1,10 @@
 import com.google.protobuf.gradle.*
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
+  id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
-
   id("com.google.protobuf")
   id("com.squareup.wire")
 }
@@ -52,16 +49,6 @@ wire {
   }
 }
 
-sourceSets {
-  val main by getting {
-    java.srcDir("build/generated/source/proto/main/grpc")
-    java.srcDir("build/generated/source/proto/main/java")
-    java.srcDir("build/generated/source/wire")
-  }
-
-  // TODO(jwilson): we do this to make IntelliJ happy but the Wire Gradle plugin should do that.
-}
-
 dependencies {
   api(libs.grpcApi)
   api(libs.grpcStub)
@@ -76,9 +63,9 @@ dependencies {
   api(project(":misk-api"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
+  compileOnly(libs.javaxAnnotation)
   implementation(libs.grpcNetty)
   implementation(libs.grpcProtobuf)
-  implementation(libs.javaxAnnotation)
   implementation(libs.nettyHandler)
   implementation(libs.wireGrpcClient)
   implementation(libs.wireRuntime)
@@ -93,11 +80,11 @@ dependencies {
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.logbackClassic)
-  testImplementation(libs.protoGoogleCommon)
+  testImplementation(libs.googleCommonProtos)
   testImplementation(project(":wisp:wisp-logging-testing"))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

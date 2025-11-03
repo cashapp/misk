@@ -1,17 +1,15 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
+  id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
-  `java-test-fixtures`
+  id("java-test-fixtures")
 }
 
 dependencies {
   api(libs.awsDynamodb)
-  api(libs.awsJavaSdkCore)
+  api(libs.awsCore)
   api(libs.guava)
   api(libs.guice)
   api(libs.jakartaInject)
@@ -37,9 +35,20 @@ dependencies {
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
+
+  testImplementation(libs.kotlinReflect)
+  testImplementation(libs.tempestTesting)
+  testImplementation(libs.tempestTestingDocker)
+  testImplementation(libs.tempestTestingJvm)
+  testImplementation(project(":misk-core"))
+  testImplementation(project(":misk-service"))
+
+  testFixturesImplementation(libs.kotlinReflect)
+  testFixturesImplementation(project(":misk-exceptions-dynamodb"))
+  testFixturesImplementation(project(":misk-service"))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

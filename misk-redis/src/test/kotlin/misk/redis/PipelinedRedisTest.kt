@@ -1,13 +1,13 @@
 package misk.redis
 
 import com.google.inject.Module
-import com.google.inject.Provider
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.redis.testing.DockerRedis
+import misk.redis.testing.RedisTestFlushModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import redis.clients.jedis.ConnectionPoolConfig
@@ -23,9 +23,10 @@ class PipelinedRedisTest : AbstractRedisTest() {
   @MiskTestModule
   private val module: Module = object : KAbstractModule() {
     override fun configure() {
-      install(RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false))
+      install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
       install(MiskTestingServiceModule())
       install(DeploymentModule(TESTING))
+      install(RedisTestFlushModule())
 
       val jedisProvider = getProvider(UnifiedJedis::class.java)
       bind<Redis>().annotatedWith<AlwaysPipelined>().toProvider {

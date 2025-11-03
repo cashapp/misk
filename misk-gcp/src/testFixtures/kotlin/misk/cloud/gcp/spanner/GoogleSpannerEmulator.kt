@@ -5,6 +5,7 @@ import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Ports
 import com.github.dockerjava.core.DefaultDockerClientConfig
+import misk.docker.withMiskDefaults
 import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.core.command.LogContainerResultCallback
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
@@ -25,17 +26,17 @@ import com.google.cloud.spanner.Statement
 import com.google.common.util.concurrent.AbstractIdleService
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import wisp.containers.Composer
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.testing.TestFixture
 
 @Singleton
 class GoogleSpannerEmulator @Inject constructor(
   val config: SpannerConfig,
-): AbstractIdleService()  {
+): AbstractIdleService(), TestFixture  {
   private val server: SpannerServer
   private val client: Spanner
 
@@ -82,7 +83,10 @@ class GoogleSpannerEmulator @Inject constructor(
   companion object {
     val logger = KotlinLogging.logger {}
     val defaultDockerClientConfig =
-      DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+      DefaultDockerClientConfig
+      .createDefaultConfigBuilder()
+      .withMiskDefaults()
+      .build()
     val httpClient = ApacheDockerHttpClient.Builder()
       .dockerHost(defaultDockerClientConfig.dockerHost)
       .sslConfig(defaultDockerClientConfig.sslConfig)
@@ -158,6 +162,7 @@ class GoogleSpannerEmulator @Inject constructor(
       } else if (runningContainer.image != image) {
         logger.info("Docker image does not match expected image. Force removing and restarting Docker container")
         docker.killContainerCmd(runningContainer.id)
+        docker.removeContainerCmd(runningContainer.id)
       } else {
         logger.info("Using existing Spanner container named $containerName")
         stopContainerOnExit = false
@@ -242,6 +247,8 @@ class GoogleSpannerEmulator @Inject constructor(
         "\n\tdocker kill $CONTAINER_NAME"
     )
   }
+
+  override fun reset() = clearTables()
 
   fun clearTables() {
     val dataClient = client.getDatabaseClient(

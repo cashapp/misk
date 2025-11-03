@@ -99,6 +99,8 @@ public abstract class misk/hibernate/HibernateEntityModule : misk/inject/KAbstra
 	protected final fun addEntities ([Lkotlin/reflect/KClass;)V
 	protected final fun addEntity (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
 	public static synthetic fun addEntity$default (Lmisk/hibernate/HibernateEntityModule;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILjava/lang/Object;)V
+	protected final fun addHibernateEntities ([Lkotlin/reflect/KClass;)V
+	protected final fun addHibernateEntity (Lkotlin/reflect/KClass;)V
 	protected final fun bindListener (Lorg/hibernate/event/spi/EventType;Lmisk/hibernate/BindPolicy;)Lcom/google/inject/binder/LinkedBindingBuilder;
 	public static synthetic fun bindListener$default (Lmisk/hibernate/HibernateEntityModule;Lorg/hibernate/event/spi/EventType;Lmisk/hibernate/BindPolicy;ILjava/lang/Object;)Lcom/google/inject/binder/LinkedBindingBuilder;
 	protected fun configure ()V
@@ -106,7 +108,7 @@ public abstract class misk/hibernate/HibernateEntityModule : misk/inject/KAbstra
 	protected final fun installHibernateAdminDashboardWebActions ()V
 }
 
-public final class misk/hibernate/HibernateExceptionLogLevelConfig : wisp/config/Config {
+public final class misk/hibernate/HibernateExceptionLogLevelConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Lorg/slf4j/event/Level;)V
 	public synthetic fun <init> (Lorg/slf4j/event/Level;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -119,20 +121,32 @@ public final class misk/hibernate/HibernateExceptionLogLevelConfig : wisp/config
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/hibernate/HibernateModule : misk/inject/KAbstractModule {
+public class misk/hibernate/HibernateModule : misk/inject/KAbstractModule {
 	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Lmisk/jdbc/DatabasePool;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Lmisk/jdbc/DatabasePool;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Lmisk/jdbc/DatabasePool;Z)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Lmisk/jdbc/DatabasePool;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Lmisk/jdbc/DatabasePool;ZZ)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Lmisk/jdbc/DatabasePool;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Lmisk/hibernate/HibernateExceptionLogLevelConfig;)V
-	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Lmisk/hibernate/HibernateExceptionLogLevelConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Lmisk/hibernate/HibernateExceptionLogLevelConfig;Z)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Lmisk/hibernate/HibernateExceptionLogLevelConfig;ZZ)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Lmisk/hibernate/HibernateExceptionLogLevelConfig;ZZZ)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Lmisk/hibernate/HibernateExceptionLogLevelConfig;ZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Lmisk/hibernate/HibernateExceptionLogLevelConfig;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Lmisk/hibernate/HibernateExceptionLogLevelConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Z)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	protected fun configure ()V
 	public final fun getConfig ()Lmisk/jdbc/DataSourceConfig;
 	public final fun getDatabasePool ()Lmisk/jdbc/DatabasePool;
 	public final fun getReaderConfig ()Lmisk/jdbc/DataSourceConfig;
+	protected fun getReaderTransacterProvider ()Lcom/google/inject/Provider;
+	protected fun getTransacterProvider ()Lcom/google/inject/Provider;
 }
 
 public final class misk/hibernate/Id : java/io/Serializable, java/lang/Comparable {
@@ -178,6 +192,7 @@ public final class misk/hibernate/Operator : java/lang/Enum {
 	public static final field IS_NOT_NULL Lmisk/hibernate/Operator;
 	public static final field IS_NULL Lmisk/hibernate/Operator;
 	public static final field LE Lmisk/hibernate/Operator;
+	public static final field LIKE Lmisk/hibernate/Operator;
 	public static final field LT Lmisk/hibernate/Operator;
 	public static final field NE Lmisk/hibernate/Operator;
 	public static final field NOT_IN Lmisk/hibernate/Operator;
@@ -289,6 +304,7 @@ public abstract interface class misk/hibernate/Session : misk/jdbc/Session {
 	public abstract fun save (Lmisk/hibernate/DbEntity;)Lmisk/hibernate/Id;
 	public abstract fun shards ()Ljava/util/Set;
 	public abstract fun shards (Lmisk/vitess/Keyspace;)Ljava/util/Collection;
+	public abstract fun target (Lmisk/vitess/Destination;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public abstract fun target (Lmisk/vitess/Shard;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public abstract fun withoutChecks ([Lmisk/jdbc/Check;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
@@ -304,6 +320,7 @@ public abstract interface class misk/hibernate/Transacter {
 	public abstract fun replicaRead (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public abstract fun retries (I)Lmisk/hibernate/Transacter;
 	public abstract fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public abstract fun withLock (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
 public final class misk/hibernate/Transacter$DefaultImpls {
@@ -312,7 +329,6 @@ public final class misk/hibernate/Transacter$DefaultImpls {
 
 public final class misk/hibernate/TransacterKt {
 	public static final fun failSafeRead (Lmisk/hibernate/Transacter;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-	public static final fun failSafeRead (Lmisk/hibernate/Transacter;Lmisk/vitess/Shard;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public static final fun shards (Lmisk/hibernate/Transacter;)Ljava/util/Set;
 	public static final fun shards (Lmisk/hibernate/Transacter;Lmisk/vitess/Keyspace;)Ljava/util/Collection;
 	public static final fun transaction (Lmisk/hibernate/Transacter;Lmisk/vitess/Shard;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
@@ -370,12 +386,6 @@ public final class misk/hibernate/ValidationReport {
 	public final fun getTables ()Ljava/util/Set;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/hibernate/VitessDialect : org/hibernate/dialect/MySQL57Dialect {
-	public fun <init> ()V
-	public fun buildSQLExceptionConversionDelegate ()Lorg/hibernate/exception/spi/SQLExceptionConversionDelegate;
-	public fun useInputStreamToInsertBlob ()Z
 }
 
 public abstract interface annotation class misk/hibernate/annotation/Keyspace : java/lang/annotation/Annotation {
@@ -499,5 +509,79 @@ public final class misk/hibernate/pagination/PagerKt {
 public abstract interface class misk/hibernate/pagination/Paginator {
 	public abstract fun applyOffset (Lmisk/hibernate/Query;Lmisk/hibernate/pagination/Offset;)V
 	public abstract fun getOffset (Ljava/lang/Object;)Lmisk/hibernate/pagination/Offset;
+}
+
+public final class misk/hibernate/testing/TransacterFaultInjector : misk/testing/FakeFixture, org/hibernate/event/spi/DeleteEventListener, org/hibernate/event/spi/SaveOrUpdateEventListener {
+	public fun <init> ()V
+	public final fun enqueueNoThrow ()V
+	public final fun enqueueNoThrow (I)V
+	public static synthetic fun enqueueNoThrow$default (Lmisk/hibernate/testing/TransacterFaultInjector;IILjava/lang/Object;)V
+	public final fun enqueueThrow (Ljava/lang/Exception;)V
+	public final fun enqueueThrow (Ljava/lang/Exception;I)V
+	public static synthetic fun enqueueThrow$default (Lmisk/hibernate/testing/TransacterFaultInjector;Ljava/lang/Exception;IILjava/lang/Object;)V
+	public fun onDelete (Lorg/hibernate/event/spi/DeleteEvent;)V
+	public fun onDelete (Lorg/hibernate/event/spi/DeleteEvent;Ljava/util/Set;)V
+	public fun onSaveOrUpdate (Lorg/hibernate/event/spi/SaveOrUpdateEvent;)V
+}
+
+public final class misk/hibernate/testing/TransacterFaultInjectorModule : misk/hibernate/HibernateEntityModule {
+	public fun <init> (Lkotlin/reflect/KClass;)V
+	public fun configureHibernate ()V
+}
+
+public final class misk/hibernate/vitess/PoolWaiterCountExhaustedException : org/hibernate/JDBCException {
+	public fun <init> (Ljava/sql/SQLException;)V
+}
+
+public final class misk/hibernate/vitess/ScatterQueryException : org/hibernate/JDBCException {
+	public fun <init> (Ljava/sql/SQLException;)V
+}
+
+public final class misk/hibernate/vitess/VitessDialect : org/hibernate/dialect/MySQL8Dialect {
+	public fun <init> ()V
+	public fun buildSQLExceptionConversionDelegate ()Lorg/hibernate/exception/spi/SQLExceptionConversionDelegate;
+	public fun getQueryHintString (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public fun useInputStreamToInsertBlob ()Z
+}
+
+public final class misk/hibernate/vitess/VitessExceptionDetector {
+	public static final field INSTANCE Lmisk/hibernate/vitess/VitessExceptionDetector;
+	public final fun isWaiterPoolExhausted (Ljava/lang/Throwable;)Z
+}
+
+public final class misk/hibernate/vitess/VitessQueryHintHandler : org/hibernate/dialect/hint/QueryHintHandler {
+	public static final field Companion Lmisk/hibernate/vitess/VitessQueryHintHandler$Companion;
+	public fun <init> ()V
+	public fun addQueryHints (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class misk/hibernate/vitess/VitessQueryHintHandler$Companion {
+	public final fun getQueryStringWithHints (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class misk/hibernate/vitess/VitessShardException : org/hibernate/JDBCException {
+	public fun <init> (Lmisk/hibernate/vitess/VitessShardExceptionData;)V
+	public final fun getExceptionData ()Lmisk/hibernate/vitess/VitessShardExceptionData;
+}
+
+public final class misk/hibernate/vitess/VitessShardExceptionData {
+	public fun <init> (Lmisk/vitess/Shard;Ljava/lang/String;ZZLjava/lang/Throwable;)V
+	public final fun getCauseException ()Ljava/lang/Throwable;
+	public final fun getExceptionMessage ()Ljava/lang/String;
+	public final fun getShard ()Lmisk/vitess/Shard;
+	public final fun isPrimary ()Z
+	public final fun isShardHealthError ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/hibernate/vitess/VitessShardExceptionParser {
+	public static final field Companion Lmisk/hibernate/vitess/VitessShardExceptionParser$Companion;
+	public fun <init> ()V
+	public final fun configureStackDepth (I)V
+	public final fun parseShardInfo (Ljava/lang/Exception;)Ljava/util/Optional;
+}
+
+public final class misk/hibernate/vitess/VitessShardExceptionParser$Companion {
+	public final fun getLogger ()Lmu/KLogger;
 }
 

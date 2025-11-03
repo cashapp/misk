@@ -10,7 +10,7 @@ import com.zaxxer.hikari.util.DriverDataSource
 import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Singleton
 import wisp.deployment.Deployment
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.time.Duration
 import java.util.Properties
 import javax.sql.DataSource
@@ -29,7 +29,7 @@ class DataSourceService @JvmOverloads constructor(
   private val deployment: Deployment,
   private val dataSourceDecorators: Set<DataSourceDecorator>,
   private val databasePool: DatabasePool,
-  private val collectorRegistry: CollectorRegistry? = null,
+  private val collectorRegistry: CollectorRegistry? = null
 ) : AbstractIdleService(), DataSourceConnector, Provider<DataSource> {
   private lateinit var config: DataSourceConfig
 
@@ -51,12 +51,12 @@ class DataSourceService @JvmOverloads constructor(
     try {
       createDataSource(baseConfig)
     } catch (e: Exception) {
-      logger.error(e) { "Fail to start the data source, trying to do it with replica" }
       if (!baseConfig.canRecoverOnReplica()) {
+        logger.error(e) { "Failed to start the data source." }
         throw e
       }
+      logger.error(e) { "Failed to start the data source, trying to do it with replica." }
       createDataSource(baseConfig.asReplica())
-
     }
     logger.info("Started @${qualifier.simpleName} connection pool in $stopwatch")
   }
@@ -66,7 +66,7 @@ class DataSourceService @JvmOverloads constructor(
     config = databasePool.takeDatabase(baseConfig)
 
     val hikariConfig = HikariConfig()
-    hikariConfig.driverClassName = config.type.driverClassName
+    hikariConfig.driverClassName = config.getDriverClassName()
     hikariConfig.jdbcUrl = config.buildJdbcUrl(deployment)
     if (config.username != null) {
       hikariConfig.username = config.username
@@ -82,6 +82,7 @@ class DataSourceService @JvmOverloads constructor(
     hikariConfig.idleTimeout = config.connection_idle_timeout?.toMillis()
       ?: config.connection_max_lifetime.minus(DEFAULT_CONNECTION_IDLE_TIMEOUT_OFFSET).toMillis()
     hikariConfig.maxLifetime = config.connection_max_lifetime.toMillis()
+    hikariConfig.keepaliveTime = config.keepalive_time.toMillis()
 
     if (config.type != DataSourceType.VITESS_MYSQL) {
       // Our Hibernate settings expect autocommit to be disabled, see
@@ -94,26 +95,17 @@ class DataSourceService @JvmOverloads constructor(
         hikariConfig.minimumIdle = 5
       }
 
-      if (config.type == DataSourceType.MYSQL) {
-        hikariConfig.connectionInitSql = "SET time_zone = '+00:00'"
+      when (config.type) {
+        DataSourceType.MYSQL -> {
+          hikariConfig.connectionInitSql = "SET time_zone = '+00:00'"
+        }
+        DataSourceType.VITESS_MYSQL -> {
+          hikariConfig.exceptionOverride  = VitessExceptionHandler(collectorRegistry)
+        }
+        else -> {}
       }
 
-      // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
-      hikariConfig.dataSourceProperties["cachePrepStmts"] = "true"
-      hikariConfig.dataSourceProperties["prepStmtCacheSize"] = "250"
-      hikariConfig.dataSourceProperties["prepStmtCacheSqlLimit"] = "2048"
-      if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.TIDB) {
-        // TODO(jontirsen): Try turning on server side prepared statements again when this issue
-        //  has been fixed: https://github.com/vitessio/vitess/issues/5075
-        hikariConfig.dataSourceProperties["useServerPrepStmts"] = "true"
-      }
-      hikariConfig.dataSourceProperties["useLocalSessionState"] = "true"
-      hikariConfig.dataSourceProperties["rewriteBatchedStatements"] = "true"
-      hikariConfig.dataSourceProperties["cacheResultSetMetadata"] = "true"
-      hikariConfig.dataSourceProperties["cacheServerConfiguration"] = "true"
-      hikariConfig.dataSourceProperties["elideSetAutoCommits"] = "true"
-      hikariConfig.dataSourceProperties["maintainTimeStats"] = "false"
-      hikariConfig.dataSourceProperties["characterEncoding"] = "UTF-8"
+      hikariConfig.dataSourceProperties = config.getDataSourceProperties()
     }
 
     // TODO(sahilm): The same mitigation _might_ be applicable to the DataSourceTypes VITESS_MYSQL and TIDB

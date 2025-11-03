@@ -16,7 +16,7 @@ import misk.time.FakeClockModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import wisp.time.FakeClock
+import misk.time.FakeClock
 import java.time.Duration
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.PriorityBlockingQueue
@@ -26,6 +26,7 @@ import java.util.concurrent.locks.ReentrantLock
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import jakarta.inject.Singleton
+import misk.backoff.RetryConfig
 import kotlin.concurrent.withLock
 import kotlin.test.assertEquals
 
@@ -625,8 +626,10 @@ internal class RepeatedTaskQueueTest {
     }
   }
 
-  private fun waitForNextPendingTask(): DelayedTask =
-    retry(5, FlatBackoff(Duration.ofMillis(200))) {
+  private fun waitForNextPendingTask(): DelayedTask {
+    val retryConfig = RetryConfig.Builder(5, FlatBackoff(Duration.ofMillis(200)))
+    return retry(retryConfig.build()) {
       pendingTasks.peekPending()!!
     }
+  }
 }

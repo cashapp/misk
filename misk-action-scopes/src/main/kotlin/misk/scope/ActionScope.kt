@@ -29,6 +29,10 @@ class ActionScope @Inject internal constructor(
   /**
    * Wraps a [kotlinx.coroutines.runBlocking] to propagate the current action scope.
    */
+  @Deprecated(
+    message = "don't use runBlocking explicitly",
+    replaceWith = ReplaceWith("use suspending invocation")
+  )
   fun <T> runBlocking(block: suspend CoroutineScope.() -> T): T {
     return if (inScope()) {
       kotlinx.coroutines.runBlocking(asContextElement(), block)
@@ -42,6 +46,10 @@ class ActionScope @Inject internal constructor(
   /**
    * Wraps a [kotlinx.coroutines.runBlocking] to propagate the current action scope.
    */
+  @Deprecated(
+    message = "don't use runBlocking explicitly",
+    replaceWith = ReplaceWith("use suspending invocation")
+  )
   fun <T> runBlocking(context: CoroutineContext, block: suspend CoroutineScope.() -> T): T {
     return if (inScope()) {
       kotlinx.coroutines.runBlocking(context + asContextElement(), block)
@@ -95,7 +103,11 @@ class ActionScope @Inject internal constructor(
   }
 
   /** Creates a new scope on the current thread with the provided seed data */
-  fun create(seedData: Map<Key<*>, Any?>): Instance {
+  @JvmOverloads
+ fun create(
+    seedData: Map<Key<*>, Any?>,
+    providerOverrides: Map<Key<*>, ActionScopedProvider<*>> = emptyMap(),
+  ): Instance {
     check(!inScope()) {
       "cannot create an ActionScope.Instance on a thread that is already running in an action scope"
     }
@@ -106,7 +118,11 @@ class ActionScope @Inject internal constructor(
       SynchronizedLazy(providerFor(key))
     }
 
-    return Instance(lazyValues + immediateValues, this)
+    val lazyOverrides = providerOverrides.mapValues { (_, provider) ->
+      SynchronizedLazy(provider)
+    }
+
+    return Instance(lazyValues + lazyOverrides + immediateValues, this)
   }
 
   /** Starts the scope on a thread with the provided instance */

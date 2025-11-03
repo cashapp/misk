@@ -5,7 +5,7 @@ package misk.jdbc
  * interacting with various database-related resources [T]
  * based on their role in the underlying database topology.
  *
- * Database clusters are often composed of a Read/Write master
+ * Database clusters are often composed of a Read/Write primary
  * instance and a set of Read-Only replica instances.
  *
  * Misk defers management of these replicas to the underlying

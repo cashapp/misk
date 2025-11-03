@@ -1,16 +1,16 @@
 package misk.jobqueue.sqs
 
-import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import misk.ReadyService
 import misk.ServiceModule
+import misk.annotation.ExperimentalMiskApi
+import misk.inject.AsyncModule
 import misk.inject.KAbstractModule
 import misk.inject.toKey
+import misk.jobqueue.BatchJobHandler
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 
 /**
@@ -22,20 +22,38 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
   private val handler: KClass<T>,
   private val installRetryQueue: Boolean,
   private val dependsOn: List<Key<out Service>>,
-) : KAbstractModule() {
+) : AsyncModule, KAbstractModule() {
   override fun configure() {
-    newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
+    install(CommonModule(queueName, handler, installRetryQueue))
 
-    if (installRetryQueue) {
-      newMapBinder<QueueName, JobHandler>().addBinding(queueName.retryQueue).to(handler.java)
+    // TODO remove explicit inline environment variable check once AsyncModule filtering in Guice is working
+    if (!System.getenv("DISABLE_ASYNC_TASKS").toBoolean()) {
+      install(
+        ServiceModule(
+          key = AwsSqsJobHandlerSubscriptionService::class.toKey(),
+          dependsOn = dependsOn
+        ).dependsOn<ReadyService>()
+      )
     }
+  }
 
-    install(
-      ServiceModule(
-        key = AwsSqsJobHandlerSubscriptionService::class.toKey(),
-        dependsOn = dependsOn
-      ).dependsOn<ReadyService>()
-    )
+  @OptIn(ExperimentalMiskApi::class)
+  override fun moduleWhenAsyncDisabled(): KAbstractModule = CommonModule(queueName, handler, installRetryQueue)
+
+  private class CommonModule<T : JobHandler>(
+    private val queueName: QueueName,
+    private val handler: KClass<T>,
+    private val installRetryQueue: Boolean,
+  ) : KAbstractModule() {
+    override fun configure() {
+
+      newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
+      newMapBinder<QueueName, BatchJobHandler>()
+
+      if (installRetryQueue) {
+        newMapBinder<QueueName, JobHandler>().addBinding(queueName.retryQueue).to(handler.java)
+      }
+    }
   }
 
   companion object {
@@ -46,7 +64,8 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
       dependsOn: List<Key<out Service>> = emptyList(),
     ): AwsSqsJobHandlerModule<T> = create(queueName, T::class, installRetryQueue, dependsOn)
 
-    @JvmStatic @JvmOverloads
+    @JvmStatic
+    @JvmOverloads
     fun <T : JobHandler> create(
       queueName: QueueName,
       handlerClass: Class<T>,
@@ -67,28 +86,6 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
       dependsOn: List<Key<out Service>> = emptyList(),
     ): AwsSqsJobHandlerModule<T> {
       return AwsSqsJobHandlerModule(queueName, handlerClass, installRetryQueue, dependsOn)
-    }
-  }
-}
-
-@Singleton
-internal class AwsSqsJobHandlerSubscriptionService @Inject constructor(
-  private val attributeImporter: AwsSqsQueueAttributeImporter,
-  private val consumer: SqsJobConsumer,
-  private val consumerMapping: Map<QueueName, JobHandler>,
-  private val externalQueues: Map<QueueName, AwsSqsQueueConfig>,
-  private val config: AwsSqsJobQueueConfig
-) : AbstractIdleService() {
-  override fun startUp() {
-    consumerMapping.forEach { consumer.subscribe(it.key, it.value) }
-    externalQueues.forEach { attributeImporter.import(it.key) }
-  }
-
-  override fun shutDown() {
-    if (config.safe_shutdown) {
-      consumerMapping.forEach { consumer.unsubscribe(it.key) }
-      attributeImporter.shutDown()
-      consumer.shutDown()
     }
   }
 }

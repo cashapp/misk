@@ -10,17 +10,19 @@ import com.github.dockerjava.api.model.PortBinding
 import com.github.dockerjava.api.model.Ports
 import com.github.dockerjava.api.model.Volume
 import com.github.dockerjava.core.DefaultDockerClientConfig
+import misk.docker.withMiskDefaults
 import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.core.async.ResultCallbackTemplate
 import com.github.dockerjava.core.command.PullImageResultCallback
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import com.google.common.util.concurrent.AbstractIdleService
 import misk.backoff.ExponentialBackoff
+import misk.backoff.RetryConfig
 import misk.backoff.retry
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.Buffer
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.io.File
 import java.io.IOException
 import java.time.Duration
@@ -32,7 +34,10 @@ class LocalOpaService(
 ) : AbstractIdleService() {
   private var containerId: String = ""
   private val defaultDockerClientConfig =
-    DefaultDockerClientConfig.createDefaultConfigBuilder().build()
+    DefaultDockerClientConfig
+      .createDefaultConfigBuilder()
+      .withMiskDefaults()
+      .build()
   private val httpClient = ApacheDockerHttpClient.Builder()
     .dockerHost(defaultDockerClientConfig.dockerHost)
     .sslConfig(defaultDockerClientConfig.sslConfig)
@@ -124,13 +129,13 @@ class LocalOpaService(
       throw Exception("OPA is not running")
     }
     try {
-      retry(
+      val retryConfig = RetryConfig.Builder(
         5, ExponentialBackoff(
         Duration.ofSeconds(1),
         Duration.ofSeconds(5)
       )
       )
-      {
+      retry(retryConfig.build()) {
         val client = OkHttpClient()
         val request = Request.Builder()
           .url("http://localhost:$OPA_EXPOSED_PORT/health")

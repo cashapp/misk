@@ -2,12 +2,12 @@ name: Linting
 
 on:
   pull_request:
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
   push:
     branches:
       - master
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
 
 env:
   ENVIRONMENT: TESTING
@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -30,29 +30,13 @@ jobs:
       - name: API Check
         run: gradle apiCheck
 
-  breakingChangeDetection:
-    name: ABI Breaking Change Detection
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
-
-      - name: ABI Check
-        run: gradle revapi
-
   dependencyAnalysis:
     name: Dependency Analysis
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV

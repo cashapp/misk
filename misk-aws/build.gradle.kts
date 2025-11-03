@@ -1,39 +1,38 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
-  `java-library`
+  id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
-  api(libs.awsJavaSdkCore)
+  api(libs.awsCore)
   api(libs.awsS3)
   api(libs.awsSqs)
   api(libs.guava)
   api(libs.guice)
   api(libs.jakartaInject)
   api(project(":wisp:wisp-aws-environment"))
-  api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-lease"))
   api(project(":misk"))
   api(project(":misk-config"))
   api(project(":misk-feature"))
   api(project(":misk-inject"))
   api(project(":misk-jobqueue"))
-  implementation(libs.kotlinLogging)
-  implementation(libs.moshi)
-  implementation(libs.openTracingApi)
+  api(project(":wisp:wisp-deployment"))
+  implementation(libs.loggingApi)
+  implementation(libs.moshiCore)
+  implementation(libs.openTracing)
   implementation(libs.openTracingDatadog)
   implementation(libs.prometheusClient)
   implementation(libs.slf4jApi)
   implementation(libs.tracingDatadog)
-  implementation(project(":wisp:wisp-deployment"))
-  implementation(project(":wisp:wisp-logging"))
-  implementation(project(":wisp:wisp-tracing"))
-  implementation(project(":misk-core"))
+  implementation(project(":misk-api"))
+  implementation(project(":misk-moshi"))
+  implementation(project(":misk-testing"))
+  implementation(project(":misk-logging"))
+  implementation(project(":misk-backoff"))
   implementation(project(":misk-hibernate"))
   implementation(project(":misk-metrics"))
   implementation(project(":misk-service"))
@@ -45,16 +44,16 @@ dependencies {
   testImplementation(libs.junitParams)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.mockitoCore)
-  testImplementation(project(":wisp:wisp-containers-testing"))
+  testImplementation(libs.mockitoKotlin)
+  testImplementation(project(":misk-testing"))
   testImplementation(project(":wisp:wisp-feature-testing"))
-  testImplementation(project(":wisp:wisp-time-testing"))
+  testImplementation(project(":misk-testing"))
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":misk-clustering"))
-  testImplementation(project(":misk-feature-testing"))
-  testImplementation(project(":misk-testing"))
+  testImplementation(testFixtures(project(":misk-feature")))
 }
 
-configure<MavenPublishBaseExtension> {
+mavenPublishing {
   configure(
     KotlinJvm(javadocJar = Dokka("dokkaGfm"))
   )

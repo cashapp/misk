@@ -5,13 +5,14 @@ import misk.web.DispatchMechanism
 import misk.web.MiskWebFormBuilder
 import misk.web.NetworkInterceptor
 import misk.web.PathPattern
+import misk.web.ProtoDocumentationProvider
+import misk.web.actions.javaMethod
 import misk.web.formatter.ClassNameFormatter
 import misk.web.mediatype.MediaRange
 import okhttp3.MediaType
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
-import kotlin.reflect.jvm.javaMethod
 
 /** Metadata front end model for Web Action Misk-Web Tab */
 data class WebActionMetadata(
@@ -29,6 +30,7 @@ data class WebActionMetadata(
   val responseType: String,
   val types: Map<String, MiskWebFormBuilder.Type>,
   val responseTypes: Map<String, MiskWebFormBuilder.Type>,
+  val returnTypes: Map<String, MiskWebFormBuilder.Type>,
   val pathPattern: String,
   val applicationInterceptors: List<String>,
   val networkInterceptors: List<String>,
@@ -53,7 +55,8 @@ data class WebActionMetadata(
     networkInterceptors: List<NetworkInterceptor>,
     dispatchMechanism: DispatchMechanism,
     allowedServices: Set<String>,
-    allowedCapabilities: Set<String>
+    allowedCapabilities: Set<String>,
+    documentationProvider: ProtoDocumentationProvider?
   ) : this(
     name = name,
     function = function.toString(),
@@ -73,8 +76,9 @@ data class WebActionMetadata(
     requestType = requestType.toString(),
     returnType = returnType.toString(),
     responseType = responseType.toString(),
-    types = MiskWebFormBuilder().calculateTypes(requestType),
-    responseTypes = MiskWebFormBuilder().calculateTypes(responseType),
+    types = MiskWebFormBuilder(documentationProvider).calculateTypes(requestType),
+    returnTypes = MiskWebFormBuilder(documentationProvider).calculateTypes(returnType),
+    responseTypes = MiskWebFormBuilder(documentationProvider).calculateTypes(responseType),
     pathPattern = pathPattern.toString(),
     applicationInterceptors = applicationInterceptors.map {
       ClassNameFormatter.format(it::class)

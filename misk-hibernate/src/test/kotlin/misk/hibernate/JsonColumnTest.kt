@@ -9,7 +9,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.config.Config
+import misk.config.Config
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
 import jakarta.inject.Qualifier
@@ -54,7 +54,7 @@ class JsonColumnTest {
       install(DeploymentModule(TESTING))
 
       val config = MiskConfig.load<RootConfig>("jsoncolumn", TESTING)
-      install(HibernateTestingModule(WillFerrellDb::class, config.data_source))
+      install(HibernateTestingModule(WillFerrellDb::class))
       install(HibernateModule(WillFerrellDb::class, config.data_source))
       install(object : HibernateEntityModule(WillFerrellDb::class) {
         override fun configureHibernate() {
@@ -118,15 +118,15 @@ class JsonColumnTest {
     override lateinit var id: Id<DbWillFerrellMovie>
 
     @Column(nullable = false)
-    var name: String
+    lateinit var name: String
 
     @Column(nullable = false)
     @JsonColumn
-    var cameos: List<String>
+    lateinit var cameos: List<String>
 
     @Column
     @JsonColumn
-    var setting: Setting?
+    var setting: Setting? = null
 
     constructor(name: String, cameos: List<String>, setting: Setting? = null) {
       this.name = name
@@ -143,15 +143,15 @@ class JsonColumnTest {
     override lateinit var id: Id<DbWillFerrellMovieLegacy>
 
     @Column(nullable = false)
-    var name: String
+    lateinit var name: String
 
     @Column(nullable = false)
     @JsonColumn
-    var cameos: List<String>
+    lateinit var cameos: List<String>
 
     @Column
     @JsonColumn
-    var setting: SettingLegacy?
+    var setting: SettingLegacy? = null
 
     constructor(name: String, cameos: List<String>, setting: SettingLegacy? = null) {
       this.name = name

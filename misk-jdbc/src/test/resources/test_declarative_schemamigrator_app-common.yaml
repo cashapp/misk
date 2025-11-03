@@ -1,0 +1,15 @@
+mysql_data_source:
+  type: MYSQL
+  username: root
+  password: ""
+  database: schemamigrator
+  migrations_resources_exclusion:
+    - all-migrations.sql
+    - jooq-migrations.sql
+  migrations_resources:
+    - memory:/migrations/sql
+    - memory:/migrations/library
+  migrations_format: DECLARATIVE
+  declarative_schema_config:
+    excluded_tables:
+      - excluded_table

@@ -1,5 +1,7 @@
 public final class misk/MiskTestingServiceModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
+	public fun <init> (Z)V
+	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/cloud/fake/security/keys/FakeKeyManagementModule : misk/inject/KAbstractModule {
@@ -48,7 +50,7 @@ public final class misk/concurrent/FakeScheduledExecutorService$ScheduledFutureT
 	public final fun setExecuteAt (J)V
 }
 
-public final class misk/concurrent/FakeSleeper : misk/concurrent/Sleeper {
+public final class misk/concurrent/FakeSleeper : misk/testing/FakeFixture, misk/concurrent/Sleeper {
 	public fun <init> (Ljava/time/Clock;)V
 	public final fun lastSleepDuration ()Ljava/time/Duration;
 	public fun sleep (Ljava/time/Duration;)V
@@ -61,18 +63,25 @@ public final class misk/concurrent/FakeSleeperModule : misk/inject/KAbstractModu
 	public fun <init> ()V
 }
 
-public final class misk/concurrent/FakeTicker : com/google/common/base/Ticker, misk/concurrent/Sleeper {
+public final class misk/concurrent/FakeTicker : com/google/common/base/Ticker, misk/concurrent/Sleeper, misk/testing/TestFixture {
 	public fun <init> ()V
 	public final fun getNowMs ()J
 	public fun read ()J
+	public fun reset ()V
 	public fun sleep (Ljava/time/Duration;)V
 	public final fun sleepMs (J)V
 }
 
 public final class misk/containers/Composer {
+	public static final field Companion Lmisk/containers/Composer$Companion;
 	public fun <init> (Ljava/lang/String;[Lmisk/containers/Container;)V
+	public final fun getRunning ()Ljava/util/concurrent/atomic/AtomicBoolean;
 	public final fun start ()V
 	public final fun stop ()V
+}
+
+public final class misk/containers/Composer$Companion {
+	public final fun getDockerClient ()Lcom/github/dockerjava/api/DockerClient;
 }
 
 public final class misk/containers/Container {
@@ -89,6 +98,35 @@ public final class misk/containers/Container {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/containers/ContainerUtil {
+	public static final field INSTANCE Lmisk/containers/ContainerUtil;
+	public final fun dockerTargetOrLocalHost ()Ljava/lang/String;
+	public final fun dockerTargetOrLocalIp ()Ljava/lang/String;
+	public final fun isRunningInDocker ()Z
+}
+
+public abstract interface class misk/logging/LogCollector : misk/testing/TestFixture {
+	public abstract fun takeEvent (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Lch/qos/logback/classic/spi/ILoggingEvent;
+	public abstract fun takeEvent (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Lch/qos/logback/classic/spi/ILoggingEvent;
+	public abstract fun takeEvents (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Ljava/util/List;
+	public abstract fun takeEvents (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Ljava/util/List;
+	public abstract fun takeMessage (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Ljava/lang/String;
+	public abstract fun takeMessage (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Ljava/lang/String;
+	public abstract fun takeMessages (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Ljava/util/List;
+	public abstract fun takeMessages (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Ljava/util/List;
+}
+
+public final class misk/logging/LogCollector$DefaultImpls {
+	public static synthetic fun takeEvent$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ILjava/lang/Object;)Lch/qos/logback/classic/spi/ILoggingEvent;
+	public static synthetic fun takeEvent$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ZILjava/lang/Object;)Lch/qos/logback/classic/spi/ILoggingEvent;
+	public static synthetic fun takeEvents$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ILjava/lang/Object;)Ljava/util/List;
+	public static synthetic fun takeEvents$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ZILjava/lang/Object;)Ljava/util/List;
+	public static synthetic fun takeMessage$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ILjava/lang/Object;)Ljava/lang/String;
+	public static synthetic fun takeMessage$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ZILjava/lang/Object;)Ljava/lang/String;
+	public static synthetic fun takeMessages$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ILjava/lang/Object;)Ljava/util/List;
+	public static synthetic fun takeMessages$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ZILjava/lang/Object;)Ljava/util/List;
+}
+
 public final class misk/logging/LogCollectorModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 }
@@ -96,8 +134,41 @@ public final class misk/logging/LogCollectorModule : misk/inject/KAbstractModule
 public abstract interface class misk/logging/LogCollectorService : com/google/common/util/concurrent/Service {
 }
 
-public final class misk/mockito/Mockito {
-	public static final field INSTANCE Lmisk/mockito/Mockito;
+public final class misk/logging/QueuedLogCollector : com/google/common/util/concurrent/AbstractIdleService, misk/logging/LogCollector, misk/logging/LogCollectorService {
+	public fun <init> ()V
+	public fun reset ()V
+	public fun shutDown ()V
+	public fun startUp ()V
+	public fun takeEvent (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Lch/qos/logback/classic/spi/ILoggingEvent;
+	public fun takeEvent (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Lch/qos/logback/classic/spi/ILoggingEvent;
+	public fun takeEvents (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Ljava/util/List;
+	public fun takeEvents (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Ljava/util/List;
+	public fun takeMessage (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Ljava/lang/String;
+	public fun takeMessage (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Ljava/lang/String;
+	public fun takeMessages (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Ljava/util/List;
+	public fun takeMessages (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Ljava/util/List;
+}
+
+public final class misk/mockito/MockitoTestFixture : misk/testing/TestFixture {
+	public fun <init> (Lcom/google/inject/Provider;)V
+	public fun reset ()V
+}
+
+public class misk/mockk/MockkTestFixture : misk/testing/FakeFixture {
+	public fun <init> (Ljava/lang/Object;)V
+	public fun <init> (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun initMock ()V
+	public fun reset ()V
+}
+
+public final class misk/mockwebserver/MockWebServerTestFixture : misk/testing/TestFixture {
+	public fun <init> (Lmockwebserver3/MockWebServer;)V
+	public final fun enqueue (Lmockwebserver3/MockResponse;)V
+	public final fun getRequestCount ()I
+	public fun reset ()V
+	public final fun takeRequest ()Lmockwebserver3/RecordedRequest;
+	public final fun url ()Lokhttp3/HttpUrl;
 }
 
 public final class misk/random/FakeRandom : misk/random/Random {
@@ -111,6 +182,7 @@ public final class misk/random/FakeRandom : misk/random/Random {
 	public fun nextDouble ()D
 	public fun nextFloat ()F
 	public fun nextInt ()I
+	public fun nextInt (I)I
 	public fun nextLong ()J
 	public final fun setNextBoolean (Ljava/lang/Boolean;)V
 	public final fun setNextDouble (Ljava/lang/Double;)V
@@ -152,8 +224,10 @@ public final class misk/services/FakeServiceModule : misk/inject/KAbstractModule
 	public fun <init> ()V
 }
 
-public final class misk/testing/ConcurrentMockTracer : io/opentracing/mock/MockTracer {
+public class misk/testing/ConcurrentMockTracer : io/opentracing/mock/MockTracer, misk/testing/TestFixture {
 	public fun <init> ()V
+	protected fun onSpanFinished (Lio/opentracing/mock/MockSpan;)V
+	public fun reset ()V
 	public final fun take ()Lio/opentracing/mock/MockSpan;
 	public final fun take (Ljava/lang/String;)Lio/opentracing/mock/MockSpan;
 }
@@ -216,6 +290,11 @@ public final class misk/testing/MockTracingBackendModule : misk/inject/KAbstract
 	public fun <init> ()V
 }
 
+public final class misk/testing/ParallelTestsKt {
+	public static final fun parallelTestIndex ()Ljava/lang/Integer;
+	public static final fun updateForParallelTests (Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
+}
+
 public final class misk/testing/TemporaryFolder {
 	public fun <init> (Ljava/nio/file/Path;)V
 	public final fun delete ()V
@@ -236,12 +315,40 @@ public final class misk/testing/TemporaryFolderModule$DeleteTempFolder : org/jun
 	public fun afterEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
 }
 
-public final class misk/time/FakeClock : wisp/time/FakeClock {
+public final class misk/testing/TestFixtureBindingValidator {
+	public static final field Companion Lmisk/testing/TestFixtureBindingValidator$Companion;
+	public fun <init> (Lcom/google/inject/Injector;)V
+	public final fun validate ()Ljava/util/List;
+	public final fun validateAndLog ()V
+}
+
+public final class misk/testing/TestFixtureBindingValidator$Companion {
+}
+
+public class misk/time/FakeClock : java/time/Clock, misk/testing/TestFixture {
+	public static final field Companion Lmisk/time/FakeClock$Companion;
 	public fun <init> ()V
+	public fun <init> (J)V
+	public fun <init> (JLjava/time/ZoneId;)V
+	public synthetic fun <init> (JLjava/time/ZoneId;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun add (JLjava/util/concurrent/TimeUnit;)J
+	public final fun add (Ljava/time/Duration;)J
+	public final fun add (Ljava/time/Period;)J
+	public fun getZone ()Ljava/time/ZoneId;
+	public fun instant ()Ljava/time/Instant;
+	public fun reset ()V
+	public final fun setNow (Ljava/time/Instant;)V
+	public fun withZone (Ljava/time/ZoneId;)Ljava/time/Clock;
+}
+
+public final class misk/time/FakeClock$Companion {
 }
 
 public final class misk/time/FakeClockModule : misk/inject/KInstallOnceModule {
 	public fun <init> ()V
+	public final fun provideClock (Lmisk/time/FakeClock;)Ljava/time/Clock;
+	public final fun provideFakeClock ()Lmisk/time/FakeClock;
+	public final fun provideTestFixture (Lmisk/time/FakeClock;)Lmisk/testing/TestFixture;
 }
 
 public final class misk/time/FakeTickerModule : misk/inject/KAbstractModule {
@@ -294,6 +401,7 @@ public final class misk/web/FakeHttpCall : misk/web/HttpCall {
 	public fun getNetworkStatusCode ()I
 	public final fun getRequestBody ()Lokio/BufferedSource;
 	public fun getRequestHeaders ()Lokhttp3/Headers;
+	public fun getRequestReceivedTimestamp ()J
 	public final fun getResponseBody ()Lokio/BufferedSink;
 	public fun getResponseHeaders ()Lokhttp3/Headers;
 	public final fun getSendTrailers ()Z

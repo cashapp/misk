@@ -1,6 +1,7 @@
 package misk.redis
 
 import io.prometheus.client.CollectorRegistry
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
@@ -11,14 +12,14 @@ import misk.redis.RedisClientMetrics.Companion.MAX_IDLE_CONNECTIONS
 import misk.redis.RedisClientMetrics.Companion.MAX_TOTAL_CONNECTIONS
 import misk.redis.RedisClientMetrics.Companion.OPERATION_TIME
 import misk.redis.testing.DockerRedis
+import misk.redis.testing.RedisTestFlushModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.deployment.TESTING
-import jakarta.inject.Inject
 import redis.clients.jedis.ConnectionPoolConfig
+import wisp.deployment.TESTING
 
 @MiskTest
 class RedisClientMetricsTest {
@@ -27,7 +28,8 @@ class RedisClientMetricsTest {
     override fun configure() {
       install(DeploymentModule(TESTING))
       install(MiskTestingServiceModule())
-      install(RedisModule(DockerRedis.config, ConnectionPoolConfig(), useSsl = false))
+      install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
+      install(RedisTestFlushModule())
     }
   }
 

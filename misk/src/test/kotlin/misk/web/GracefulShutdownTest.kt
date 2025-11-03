@@ -18,7 +18,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.junit.jupiter.api.Test
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import java.io.IOException
 import java.time.Duration
 import java.util.concurrent.CountDownLatch

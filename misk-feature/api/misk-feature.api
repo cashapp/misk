@@ -4,6 +4,12 @@ public final class misk/feature/Attributes : wisp/feature/Attributes {
 	public fun <init> (Ljava/util/Map;Ljava/util/Map;)V
 	public fun <init> (Ljava/util/Map;Ljava/util/Map;Z)V
 	public synthetic fun <init> (Ljava/util/Map;Ljava/util/Map;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun copy (Ljava/util/Map;Ljava/util/Map;Z)Lmisk/feature/Attributes;
+	public synthetic fun copy (Ljava/util/Map;Ljava/util/Map;Z)Lwisp/feature/Attributes;
+	public fun with (Ljava/lang/String;Ljava/lang/Number;)Lmisk/feature/Attributes;
+	public synthetic fun with (Ljava/lang/String;Ljava/lang/Number;)Lwisp/feature/Attributes;
+	public fun with (Ljava/lang/String;Ljava/lang/String;)Lmisk/feature/Attributes;
+	public synthetic fun with (Ljava/lang/String;Ljava/lang/String;)Lwisp/feature/Attributes;
 }
 
 public abstract interface class misk/feature/DynamicConfig {
@@ -12,6 +18,7 @@ public abstract interface class misk/feature/DynamicConfig {
 	public abstract fun getEnum (Lmisk/feature/Feature;Ljava/lang/Class;)Ljava/lang/Enum;
 	public abstract fun getInt (Lmisk/feature/Feature;)I
 	public abstract fun getJson (Lmisk/feature/Feature;Ljava/lang/Class;)Ljava/lang/Object;
+	public abstract fun getJsonString (Lmisk/feature/Feature;)Ljava/lang/String;
 	public abstract fun getString (Lmisk/feature/Feature;)Ljava/lang/String;
 	public abstract fun trackBoolean (Lmisk/feature/Feature;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
 	public abstract fun trackDouble (Lmisk/feature/Feature;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
@@ -42,6 +49,8 @@ public abstract interface class misk/feature/FeatureFlags {
 	public abstract fun getInt (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)I
 	public abstract fun getJson (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;
 	public abstract fun getJson (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lmisk/feature/Attributes;)Ljava/lang/Object;
+	public abstract fun getJsonString (Lmisk/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun getJsonString (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)Ljava/lang/String;
 	public abstract fun getString (Lmisk/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
 	public abstract fun getString (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)Ljava/lang/String;
 	public abstract fun trackBoolean (Lmisk/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
@@ -69,6 +78,8 @@ public final class misk/feature/FeatureFlags$DefaultImpls {
 	public static synthetic fun getInt$default (Lmisk/feature/FeatureFlags;Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;ILjava/lang/Object;)I
 	public static fun getJson (Lmisk/feature/FeatureFlags;Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;
 	public static synthetic fun getJson$default (Lmisk/feature/FeatureFlags;Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lmisk/feature/Attributes;ILjava/lang/Object;)Ljava/lang/Object;
+	public static fun getJsonString (Lmisk/feature/FeatureFlags;Lmisk/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
+	public static synthetic fun getJsonString$default (Lmisk/feature/FeatureFlags;Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;ILjava/lang/Object;)Ljava/lang/String;
 	public static fun getString (Lmisk/feature/FeatureFlags;Lmisk/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
 	public static synthetic fun getString$default (Lmisk/feature/FeatureFlags;Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;ILjava/lang/Object;)Ljava/lang/String;
 	public static fun trackBoolean (Lmisk/feature/FeatureFlags;Lmisk/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lmisk/feature/TrackerReference;
@@ -98,7 +109,9 @@ public final class misk/feature/TrackerReferenceKt {
 public final class misk/feature/testing/FakeFeatureFlags : com/google/common/util/concurrent/AbstractIdleService, misk/feature/DynamicConfig, misk/feature/FeatureFlags, misk/feature/FeatureService {
 	public static final field Companion Lmisk/feature/testing/FakeFeatureFlags$Companion;
 	public static final field KEY Ljava/lang/String;
+	public fun <init> ()V
 	public fun <init> (Lwisp/feature/testing/FakeFeatureFlags;)V
+	public synthetic fun <init> (Lwisp/feature/testing/FakeFeatureFlags;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun get (Lwisp/feature/BooleanFeatureFlag;)Z
 	public fun get (Lwisp/feature/DoubleFeatureFlag;)D
 	public fun get (Lwisp/feature/EnumFeatureFlag;)Ljava/lang/Enum;
@@ -121,6 +134,9 @@ public final class misk/feature/testing/FakeFeatureFlags : com/google/common/uti
 	public fun getJson (Lmisk/feature/Feature;Ljava/lang/Class;)Ljava/lang/Object;
 	public fun getJson (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;
 	public fun getJson (Lmisk/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lmisk/feature/Attributes;)Ljava/lang/Object;
+	public fun getJsonString (Lmisk/feature/Feature;)Ljava/lang/String;
+	public fun getJsonString (Lmisk/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
+	public fun getJsonString (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)Ljava/lang/String;
 	public fun getString (Lmisk/feature/Feature;)Ljava/lang/String;
 	public fun getString (Lmisk/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
 	public fun getString (Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;)Ljava/lang/String;

@@ -1,11 +1,56 @@
-plugins {
-  `gradle-enterprise`
+import org.gradle.plugins.ide.idea.model.IdeaModel
+
+pluginManagement {
+  repositories {
+    mavenCentral()
+    gradlePluginPortal()
+  }
 }
 
-gradleEnterprise {
+plugins {
+  id("com.gradle.develocity") version "4.1.1"
+}
+
+develocity {
   buildScan {
-    termsOfServiceUrl = "https://gradle.com/terms-of-service"
-    termsOfServiceAgree = "yes"
+    publishing {
+      termsOfUseUrl = "https://gradle.com/terms-of-service"
+      termsOfUseAgree = "yes"
+    }
+  }
+}
+
+dependencyResolutionManagement {
+  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+  repositories {
+    mavenCentral()
+    maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
+  }
+}
+
+gradle.lifecycle.beforeProject {
+  val g = when {
+    // The root "misk" project isn't a code-containing project (it's not a module). It doesn't need
+    // a group, and in fact giving it a group confuses gradle when we `includeBuild("misk")`
+    // elsewhere, because doing that makes `misk/` and `misk/misk/` _identical_ in GA
+    // (group-artifact) terms.
+    path == ":" -> null
+    path.startsWith(":wisp") -> "app.cash.wisp"
+    else -> "com.squareup.misk"
+  }
+
+  // In the case of the root project, we let it be the default value
+  if (g != null) {
+    group = g
+  }
+
+  version = findProperty("VERSION_NAME") as? String ?: "0.0-SNAPSHOT"
+
+  apply(plugin = "idea")
+
+  configure<IdeaModel> {
+    module.isDownloadSources = false
+    module.isDownloadJavadoc = false
   }
 }
 
@@ -40,9 +85,13 @@ include(":misk-action-scopes")
 include(":misk-actions")
 include(":misk-admin")
 include(":misk-api")
+include(":misk-audit-client")
 include(":misk-aws")
 include(":misk-aws-dynamodb")
 include(":misk-aws2-dynamodb")
+include(":misk-aws2-s3")
+include(":misk-aws2-sqs")
+include(":misk-backoff")
 include(":misk-bom")
 include(":misk-clustering")
 include(":misk-clustering-dynamodb")
@@ -51,12 +100,11 @@ include(":misk-core")
 include(":misk-cron")
 include(":misk-crypto")
 include(":misk-datadog")
+include(":misk-docker")
 include(":misk-events")
 include(":misk-events-core")
-include(":misk-events-testing")
 include(":misk-exceptions-dynamodb")
 include(":misk-feature")
-include(":misk-feature-testing")
 include(":misk-gcp")
 include(":misk-grpc-reflect")
 include(":misk-grpc-tests")
@@ -71,22 +119,41 @@ include(":misk-jooq")
 include(":misk-launchdarkly")
 include(":misk-launchdarkly-core")
 include(":misk-lease")
+include(":misk-lease-mysql")
+include(":misk-logging")
+include(":misk-mcp")
 include(":misk-metrics")
 include(":misk-metrics-digester")
+include(":misk-moshi")
 include(":misk-policy")
 include(":misk-prometheus")
 include(":misk-proto")
 include(":misk-rate-limiting-bucket4j-dynamodb-v1")
+include(":misk-rate-limiting-bucket4j-dynamodb-v2")
 include(":misk-rate-limiting-bucket4j-mysql")
 include(":misk-rate-limiting-bucket4j-redis")
 include(":misk-redis")
+include(":misk-redis-lettuce")
+include(":misk-sampling")
+include(":misk-schema-migrator-gradle-plugin")
 include(":misk-service")
 include(":misk-slack")
 include(":misk-sqldelight")
 include(":misk-sqldelight-testing")
 include(":misk-tailwind")
 include(":misk-testing")
+include(":misk-testing-api")
+include(":misk-tokens")
 include(":misk-transactional-jobqueue")
 include(":misk-warmup")
+include(":misk-vitess")
+include(":misk-vitess-database-gradle-plugin")
 include(":samples:exemplar")
 include(":samples:exemplarchat")
+
+val localSettings = file("local.settings.gradle.kts")
+if (localSettings.exists()) {
+  logger.lifecycle("Applying local settings at ${localSettings.absolutePath}")
+  apply(from = localSettings)
+}
+

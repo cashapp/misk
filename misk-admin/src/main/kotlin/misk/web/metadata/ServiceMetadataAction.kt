@@ -14,6 +14,7 @@ import jakarta.inject.Singleton
 /**
  * Service Metadata used for front end dashboards including App Name and Misk.Deployment name
  */
+// TODO replace this with a MetadataModule binding instead of separate web action
 @Singleton
 class ServiceMetadataAction @Inject constructor(
   private val optionalBinder: OptionalBinder,
@@ -26,7 +27,7 @@ class ServiceMetadataAction @Inject constructor(
     // Misk-web expects an UPPERCASE environment. Since this action could get a serviceMetadata
     // object from anywhere, it must be transformed here.
     val metadata = with(optionalBinder.serviceMetadata) {
-      copy(environment = this.environment.toUpperCase())
+      copy(environment = this.environment.uppercase())
     }
     return Response(serviceMetadata = metadata)
   }

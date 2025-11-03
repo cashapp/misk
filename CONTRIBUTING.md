@@ -23,7 +23,7 @@ misk-hibernate tests expect a mysql server running on `localhost:3306` with no p
 the root user. You might stand up a server with a docker image, e.g.
 
 ```shell
-docker run -d --rm --name "mysql-57" -p 3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=true -e MYSQL_LOG_CONSOLE=true mysql:5.7 --sql-mode=""
+docker run -d --rm --name "mysql-80" -p 3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=true -e MYSQL_LOG_CONSOLE=true mysql:8.0 --sql-mode=""
 ```
 
 Misk may download these Docker images as part of its tests. Because tests can time out, pre-downloading these can help resolve timeouts.
@@ -44,7 +44,7 @@ vitess/base
 
 **Note:** Remember to document breaking changes in [CHANGELOG.md](CHANGELOG.md).
 
-We integrate both [Kotlin Binary Compatibility Validator][2] and [Revapi][3] into our build 
+We integrate [Kotlin Binary Compatibility Validator][2] into our build 
 pipeline to automatically detect breaking changes that could affect existing clients.
 
 ### [Kotlin Binary Compatibility Validator][2]
@@ -58,22 +58,7 @@ that downstream apps do not immediately run into backwards-compatibility issues.
 
 This runs as part of `gradle check` task, or you can call directly with `gradle apiCheck`.
 
-### [Revapi][3]
-Similarly, revapi detects binary compatibility changes by analyzing API differences. Unlike the 
-binary-compatibility-validator, this does not complain when adding new methods or when 
-introducing new arguments with default values that is accompanied by `@JvmOverloads`.
-
-To accept a break identified by revapi, run the command suggested by the plugin:
-```shell
-gradle revapiAcceptBreak --justification "{why this is ok}" \
---code "{revapi check code}" \
---old "{optional revapi description of old element}" \
---new "{optional revapi description of new element}"
-```
-This will add an entry in [.plantir/revapi.yml](.palantir/revapi.yml) to ignore future breaks of the same type.
-
  [1]: https://spreadsheets.google.com/spreadsheet/viewform?formkey=dDViT2xzUHAwRkI3X3k5Z0lQM091OGc6MQ&ndplr=1
  [2]: https://github.com/Kotlin/binary-compatibility-validator
- [3]: https://github.com/palantir/gradle-revapi
 
 

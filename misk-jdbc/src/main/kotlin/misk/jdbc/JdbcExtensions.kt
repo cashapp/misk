@@ -10,6 +10,14 @@ fun <T> ResultSet.map(function: (ResultSet) -> T): List<T> {
   return result
 }
 
+fun <T : Any> ResultSet.mapNotNull(function: (ResultSet) -> T?): List<T> {
+  val result = mutableListOf<T>()
+  while (this.next()) {
+    function(this)?.let { result.add(it) }
+  }
+  return result
+}
+
 fun <T> ResultSet.maybeResult(function: (ResultSet) -> T): T? = map(function).firstOrNull()
 
 fun <T> ResultSet.uniqueResult(function: (ResultSet) -> T): T = map(function).first()

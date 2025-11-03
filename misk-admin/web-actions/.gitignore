@@ -1,0 +1,15 @@
+.git
+.DS_Store
+cachedUrls
+logs
+*.log
+npm-debug.log*
+coverage
+node_modules
+.npm
+build
+dist
+lib
+.hash
+.old_build_files
+*.js.map

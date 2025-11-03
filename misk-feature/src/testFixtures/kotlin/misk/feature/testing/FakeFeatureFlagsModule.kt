@@ -44,6 +44,7 @@ class FakeFeatureFlagsModule(
 
     newMultibinder<FakeFeatureFlagsOverride>()
     overrides.forEach { install(it) }
+    install(FakeFeatureFlagsTestFixtureModule())
 
     val key = FakeFeatureFlags::class.toKey(qualifier)
     val overridesType =

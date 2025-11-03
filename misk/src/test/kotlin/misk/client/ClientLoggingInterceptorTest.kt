@@ -18,7 +18,7 @@ import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
-import wisp.logging.LogCollector
+import misk.logging.LogCollector
 import java.time.Duration
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -38,7 +38,7 @@ internal class ClientLoggingInterceptorTest {
     assertThat(client.ping("test", AppRequest(200)).execute().code()).isEqualTo(200)
 
     assertThat(logCollector.takeMessage(ClientLoggingInterceptor::class))
-      .matches("Outgoing request: .*, headers=\\{X-b3-traceid=test}")
+      .matches("Outgoing request: .*, headers=\\{X-b3-traceid=test.*")
   }
 
   class TestModule : KAbstractModule() {

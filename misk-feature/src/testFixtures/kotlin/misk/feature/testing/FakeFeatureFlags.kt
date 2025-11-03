@@ -23,7 +23,8 @@ import jakarta.inject.Singleton
  */
 @Singleton
 class FakeFeatureFlags @Inject constructor(
-  val delegate: wisp.feature.testing.FakeFeatureFlags
+  // TODO remove default parameter once callsites are migrated
+  val delegate: wisp.feature.testing.FakeFeatureFlags = wisp.feature.testing.FakeFeatureFlags()
 ) : AbstractIdleService(),
   FeatureFlags,
   FeatureService,
@@ -72,6 +73,10 @@ class FakeFeatureFlags @Inject constructor(
     return delegate.getJson(feature, key, clazz, attributes)
   }
 
+  override fun getJsonString(feature: Feature, key: String, attributes: Attributes): String {
+    return delegate.getJsonString(feature, key, attributes)
+  }
+
   override fun getBoolean(feature: Feature) = delegate.getBoolean(feature, KEY)
   override fun getDouble(feature: Feature) = delegate.getDouble(feature, KEY)
   override fun getInt(feature: Feature) = delegate.getInt(feature, KEY)
@@ -87,6 +92,8 @@ class FakeFeatureFlags @Inject constructor(
     KEY,
     clazz
   )
+
+  override fun getJsonString(feature: Feature): String = delegate.getJsonString(feature, KEY)
 
   override fun trackBoolean(
     feature: Feature,

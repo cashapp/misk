@@ -78,6 +78,24 @@ interface Metrics {
     .register(getRegistry())
 
   /**
+   * providedGauge creates and registers a new `Gauge` prometheus type that gets its value from
+   * a registered value provider
+   *
+   * @param name the name of the metric which will be supplied to prometheus.
+   *  Must be unique across all metric types.
+   * @param help human-readable help text that will be supplied to prometheus.
+   * @param labelNames the names (a.k.a. keys) of all the labels that will be used for this metric.
+   */
+  fun providedGauge(
+    name: String,
+    help: String = "",
+    labelNames: List<String> = listOf()
+  ) = ProvidedGauge
+    .builder(name, help)
+    .labelNames(*labelNames.toTypedArray())
+    .register(getRegistry())
+
+  /**
    * histogram creates a new `Histogram` prometheus type with the supplied parameters.
    *
    * NOTE: `misk.metrics.v2.Metrics` is NOT backward compatible with `misk.metrics.Metrics`.

@@ -4,14 +4,17 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.UnsynchronizedAppenderBase
+import misk.testing.FakeFixture
 import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 
-class WispQueuedLogCollector : LogCollector {
-    private val queue = LinkedBlockingDeque<ILoggingEvent>()
+@Deprecated(  "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  ReplaceWith(expression = "RealLogCollector","misk.logging.RealLogCollector"))
+class WispQueuedLogCollector : LogCollector, FakeFixture() {
+    private val queue by resettable { LinkedBlockingDeque<ILoggingEvent>() }
 
     private var wasStarted = false
 
@@ -132,7 +135,6 @@ class WispQueuedLogCollector : LogCollector {
         for (i in 1..5) {
             if (queue.isEmpty()) sleep(100) else continue
         }
-        require(queue.isNotEmpty()) { "no events to take!" }
         val event = queue.find { matchLog(it, loggerClass, minLevel, pattern) }
             ?: error("no matching events for (logger=$loggerClass, minLevel=$minLevel, pattern=$pattern)")
         queue.remove(event)

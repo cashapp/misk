@@ -9,6 +9,7 @@ import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
 import misk.backoff.ExponentialBackoff
+import misk.backoff.RetryConfig
 import misk.backoff.retry
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
@@ -186,12 +187,13 @@ class DockerCockroachCluster(
 
   private fun waitUntilHealthy() {
     try {
-      retry(
+      val retryConfig = RetryConfig.Builder(
         20, ExponentialBackoff(
         Duration.ofSeconds(1),
         Duration.ofSeconds(5)
       )
-      ) {
+      )
+      retry(retryConfig.build()) {
         cluster.openConnection().use { c ->
           val result =
             c.createStatement().executeQuery("SELECT 1").uniqueInt()

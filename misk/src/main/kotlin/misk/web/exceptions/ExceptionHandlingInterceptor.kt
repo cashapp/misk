@@ -5,6 +5,7 @@ import com.squareup.wire.GrpcStatus
 import com.squareup.wire.ProtoAdapter
 import jakarta.inject.Inject
 import misk.Action
+import misk.annotation.ExperimentalMiskApi
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
 import misk.grpc.GrpcMessageSink
@@ -15,17 +16,18 @@ import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Response
 import misk.web.ResponseBody
+import misk.web.interceptors.hooks.RequestResponseLoggedCapture
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
-import okhttp3.Headers.Companion.toHeaders
+import okhttp3.Headers.Companion.headersOf
 import okio.Buffer
 import okio.BufferedSink
 import okio.ByteString
-import wisp.logging.Tag
-import wisp.logging.TaggedLogger
-import wisp.logging.error
-import wisp.logging.getLogger
-import wisp.logging.log
+import misk.logging.SmartTagsThreadLocalHandler
+import misk.logging.Tag
+import misk.logging.error
+import misk.logging.getLogger
+import misk.logging.log
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException
 import java.net.HttpURLConnection
@@ -40,17 +42,19 @@ import java.util.Base64
  *
  * TODO(isabel): Set the response body in a ThreadLocal to log in [RequestLoggingInterceptor]
  */
-class ExceptionHandlingInterceptor(
+class ExceptionHandlingInterceptor private constructor(
   private val actionName: String,
-  private val mapperResolver: ExceptionMapperResolver
+  private val mapperResolver: ExceptionMapperResolver,
+  private val requestResponseLoggedCapture: RequestResponseLoggedCapture,
 ) : NetworkInterceptor {
 
+  @OptIn(ExperimentalMiskApi::class)
   override fun intercept(chain: NetworkChain) {
     try {
       chain.proceed(chain.httpCall)
     } catch (th: Throwable) {
       try {
-        val mdcTags = TaggedLogger.popThreadLocalMdcContext()
+        val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
 
         if (chain.httpCall.dispatchMechanism == DispatchMechanism.GRPC) {
           // This response object is only used for determining the status code. toGrpcResponse
@@ -58,7 +62,7 @@ class ExceptionHandlingInterceptor(
           val response = toResponse(th, suppressLog = true, mdcTags)
           sendGrpcFailure(chain.httpCall, response.statusCode, toGrpcResponse(th, mdcTags))
         } else {
-          val response = toResponse(th, suppressLog = false, mdcTags)
+          val response = toResponse(th, suppressLog = requestResponseLoggedCapture.isLogged(), mdcTags)
           chain.httpCall.statusCode = response.statusCode
           sendHttpFailure(chain.httpCall, response)
         }
@@ -98,10 +102,14 @@ class ExceptionHandlingInterceptor(
     httpCall.setResponseTrailer("grpc-status-details-bin", response.toEncodedStatusProto)
     httpCall.setResponseTrailer("grpc-message", response.message ?: response.status.name)
     httpCall.takeResponseBody()?.use { responseBody: BufferedSink ->
-      GrpcMessageSink(responseBody, ProtoAdapter.BYTES, grpcEncoding = "identity")
-        .use { messageSink ->
-          messageSink.write(ByteString.EMPTY)
-        }
+      GrpcMessageSink(
+        sink = responseBody,
+        minMessageToCompress = 0,
+        messageAdapter = ProtoAdapter.BYTES,
+        grpcEncoding = "identity"
+      ).use { messageSink ->
+        messageSink.write(ByteString.EMPTY)
+      }
     }
   }
 
@@ -111,33 +119,40 @@ class ExceptionHandlingInterceptor(
     return buffer.readUtf8()
   }
 
-  private fun toResponse(th: Throwable, suppressLog: Boolean, mdcTags: Set<Tag>): Response<*> {
-    // If the exception is a reflection wrapper, unwrap first.
-    when (th) {
-      is InvocationTargetException -> return toResponse(th.targetException, suppressLog, mdcTags)
-      is UncheckedExecutionException -> return toResponse(th.cause!!, suppressLog, mdcTags)
-    }
+  private fun toResponse(th: Throwable, suppressLog: Boolean, mdcTags: Set<Tag>): Response<*> =
+    unwrappedToResponse(th.unwrap(), suppressLog, mdcTags)
 
+  private fun unwrappedToResponse(th: Throwable, suppressLog: Boolean, mdcTags: Set<Tag>): Response<*> =
     // Prefer the mapper's response, if one exists.
-    val mapper = mapperResolver.mapperFor(th)
-    if (mapper != null) {
-      if (!suppressLog) {
-        log.log(mapper.loggingLevel(th), th, *mdcTags.toTypedArray()) { "exception dispatching to $actionName" }
+    mapperResolver.mapperFor(th)?.let {
+      if (!suppressLog && it.isError(th)) {
+        log.log(
+          level = it.loggingLevel(th),
+          th = th,
+          tags = mdcTags.toTypedArray(),
+        ) { "exception dispatching to $actionName" }
       }
-      return mapper.toResponse(th)
+
+      it.toResponse(th)
     }
-
     // Fall back to a default mapping.
-    return toInternalServerError(th, mdcTags)
-  }
+      ?: toInternalServerError(th, suppressLog, mdcTags)
 
-  private fun toGrpcResponse(th: Throwable, mdcTags: Set<Tag>): GrpcErrorResponse = when (th) {
+
+  private fun toGrpcResponse(th: Throwable, mdcTags: Set<Tag>): GrpcErrorResponse =
+    unwrappedToGrpcResponse(th.unwrap(), mdcTags)
+
+  private fun unwrappedToGrpcResponse(th: Throwable, mdcTags: Set<Tag>): GrpcErrorResponse = when (th) {
     is UnauthenticatedException -> GrpcErrorResponse(GrpcStatus.UNAUTHENTICATED, th.message)
     is UnauthorizedException -> GrpcErrorResponse(GrpcStatus.PERMISSION_DENIED, th.message)
-    is InvocationTargetException -> toGrpcResponse(th.targetException, mdcTags)
-    is UncheckedExecutionException -> toGrpcResponse(th.cause!!, mdcTags)
     else -> mapperResolver.mapperFor(th)?.let {
-      log.log(it.loggingLevel(th), th, *mdcTags.toTypedArray()) { "exception dispatching to $actionName" }
+      if (!requestResponseLoggedCapture.isLogged()) {
+        log.log(
+          level = it.loggingLevel(th),
+          th = th,
+          tags = mdcTags.toTypedArray(),
+        ) { "exception dispatching to $actionName" }
+      }
       val grpcResponse = it.toGrpcResponse(th)
       if (grpcResponse == null) {
         val httpResponse = toResponse(th, suppressLog = true, mdcTags)
@@ -148,15 +163,19 @@ class ExceptionHandlingInterceptor(
     } ?: GrpcErrorResponse.INTERNAL_SERVER_ERROR
   }
 
-  private fun toInternalServerError(th: Throwable, mdcTags: Set<Tag>): Response<*> {
-    log.error(th, *mdcTags.toTypedArray()) { "unexpected error dispatching to $actionName" }
+  private fun toInternalServerError(th: Throwable, suppressLog: Boolean, mdcTags: Set<Tag>): Response<*> {
+    if (!suppressLog) {
+      log.error(th = th, tags = mdcTags.toTypedArray()) { "unexpected error dispatching to $actionName" }
+    }
     return INTERNAL_SERVER_ERROR_RESPONSE
   }
 
   class Factory @Inject internal constructor(
-    private val mapperResolver: ExceptionMapperResolver
+    private val mapperResolver: ExceptionMapperResolver,
+    private val requestResponseLoggedCapture: RequestResponseLoggedCapture,
   ) : NetworkInterceptor.Factory {
-    override fun create(action: Action) = ExceptionHandlingInterceptor(action.name, mapperResolver)
+    override fun create(action: Action) =
+      ExceptionHandlingInterceptor(action.name, mapperResolver, requestResponseLoggedCapture)
   }
 
   private companion object {
@@ -164,7 +183,7 @@ class ExceptionHandlingInterceptor(
 
     val INTERNAL_SERVER_ERROR_RESPONSE = Response(
       "internal server error".toResponseBody(),
-      listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
+      headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
       HttpURLConnection.HTTP_INTERNAL_ERROR
     )
   }
@@ -173,7 +192,7 @@ class ExceptionHandlingInterceptor(
 /** https://grpc.github.io/grpc/core/md_doc_http-grpc-status-mapping.html */
 fun toGrpcStatus(statusCode: Int): GrpcStatus {
   return when (statusCode) {
-    400 -> GrpcStatus.INTERNAL
+    400 -> GrpcStatus.INVALID_ARGUMENT
     401 -> GrpcStatus.UNAUTHENTICATED
     403 -> GrpcStatus.PERMISSION_DENIED
     404 -> GrpcStatus.NOT_FOUND
@@ -183,6 +202,20 @@ fun toGrpcStatus(statusCode: Int): GrpcStatus {
     503 -> GrpcStatus.UNAVAILABLE
     504 -> GrpcStatus.UNAVAILABLE
     else -> GrpcStatus.UNKNOWN
+  }
+}
+
+/**
+ * Unwrap [InvocationTargetException] and [UncheckedExecutionException] to find the root cause.
+ */
+internal fun Throwable.unwrap(): Throwable {
+  var th = this
+  while (true) {
+    th = when (th) {
+      is InvocationTargetException -> th.targetException
+      is UncheckedExecutionException -> th.cause!!
+      else -> return th
+    }
   }
 }
 

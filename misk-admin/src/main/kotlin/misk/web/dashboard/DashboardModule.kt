@@ -59,6 +59,7 @@ class DashboardModule @JvmOverloads constructor(
       label: String,
       url: String,
       category: String = "",
+      menuDisableTurboPreload: Boolean = false,
     ): DashboardModule {
       // Create a unique hash for the link that will not conflict with any other link
       val hash = (label + url + category).encodeUtf8().sha256().hex().take(24)
@@ -71,6 +72,7 @@ class DashboardModule @JvmOverloads constructor(
         dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,
         dashboardAnnotationKClass = DA::class,
+        menuDisableTurboPreload = menuDisableTurboPreload,
       )
       return DashboardModule(
         dashboardTabProvider = dashboardTabProvider,
@@ -87,6 +89,7 @@ class DashboardModule @JvmOverloads constructor(
       noinline label: (appName: String, deployment: Deployment) -> String,
       noinline url: (appName: String, deployment: Deployment) -> String,
       category: String = "",
+      menuDisableTurboPreload: Boolean = false,
     ): DashboardModule {
       // Create a unique hash for the link that will not conflict with any other link
       val hash = (label.toString() + url.toString() + category).encodeUtf8().sha256().hex().take(24)
@@ -99,6 +102,7 @@ class DashboardModule @JvmOverloads constructor(
         dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,
         dashboardAnnotationKClass = DA::class,
+        menuDisableTurboPreload = menuDisableTurboPreload
       )
       return DashboardModule(
         dashboardTabProvider = dashboardTabProvider,
@@ -118,6 +122,7 @@ class DashboardModule @JvmOverloads constructor(
       menuLabel: String,
       menuUrl: String = urlPathPrefix,
       menuCategory: String = "Admin",
+      menuDisableTurboPreload: Boolean = false,
     ): DashboardModule {
       val dashboardTabLoader = DashboardTabLoader.HotwireTab(
         urlPathPrefix = urlPathPrefix,
@@ -131,6 +136,7 @@ class DashboardModule @JvmOverloads constructor(
         dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,
         dashboardAnnotationKClass = DA::class,
+        menuDisableTurboPreload = menuDisableTurboPreload,
       )
       return DashboardModule(
         dashboardTabProvider = dashboardTabProvider,
@@ -146,8 +152,12 @@ class DashboardModule @JvmOverloads constructor(
      *   (HTML, CSS...) for the tab from a resource provider (classpath, filesystem, web proxy...).
      * @param iframePath: complete path including file and extension if necessary which is set as the
      *   iframe src attribute in the generated HTML.
-     * @param name: tab name which appears in the dashboard menu, usually titlecase
-     * @param category: menu category which the tab appears under
+     * @param menuLabel: tab name which appears in the dashboard menu, usually titlecase
+     * @param menuCategory: menu category which the tab appears under
+     * @param menuUrl: menu link url if different from [urlPathPrefix]
+     * @param isDevelopment: true if this deployment is in development environment
+     * @param developmentWebProxyUrl: url to a local resource server which will be used to resolve requests to
+     *  [resourcePathPrefix] in development environments.
      */
     inline fun <reified DA : Annotation, reified AA : Annotation> createIFrameTab(
       slug: String,
@@ -157,6 +167,9 @@ class DashboardModule @JvmOverloads constructor(
       menuLabel: String,
       menuUrl: String = urlPathPrefix,
       menuCategory: String = "Admin",
+      isDevelopment: Boolean = false,
+      developmentWebProxyUrl: String? = null,
+      menuDisableTurboPreload: Boolean = false,
     ): DashboardModule {
       val dashboardTabLoader = DashboardTabLoader.IframeTab(
         urlPathPrefix = urlPathPrefix,
@@ -171,10 +184,13 @@ class DashboardModule @JvmOverloads constructor(
         dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,
         dashboardAnnotationKClass = DA::class,
+        menuDisableTurboPreload = menuDisableTurboPreload,
       )
       val webTabResourceModule = WebTabResourceModule(
+        isDevelopment = isDevelopment,
         slug = slug,
         url_path_prefix = resourcePathPrefix,
+        web_proxy_url = developmentWebProxyUrl
       )
       return DashboardModule(
         dashboardTabProvider = dashboardTabProvider,
@@ -202,6 +218,7 @@ class DashboardModule @JvmOverloads constructor(
       menuLabel: String,
       menuUrl: String = urlPathPrefix,
       menuCategory: String = "Admin",
+      menuDisableTurboPreload: Boolean = false,
     ): DashboardModule {
       val dashboardTabLoader = DashboardTabLoader.IframeTab(
         urlPathPrefix = urlPathPrefix,
@@ -216,6 +233,7 @@ class DashboardModule @JvmOverloads constructor(
         dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,
         dashboardAnnotationKClass = DA::class,
+        menuDisableTurboPreload = menuDisableTurboPreload,
       )
       val webTabResourceModule = WebTabResourceModule(
         isDevelopment = isDevelopment,
@@ -249,6 +267,7 @@ class DashboardModule @JvmOverloads constructor(
       menuLabel: String,
       menuUrl: String = urlPathPrefix,
       menuCategory: String = "Admin",
+      menuDisableTurboPreload: Boolean = false,
     ): DashboardModule {
       val dashboardTabProvider = DashboardTabProvider(
         slug = slug,
@@ -259,6 +278,7 @@ class DashboardModule @JvmOverloads constructor(
         dashboard_slug = slugify<DA>(),
         accessAnnotationKClass = AA::class,
         dashboardAnnotationKClass = DA::class,
+        menuDisableTurboPreload = menuDisableTurboPreload,
       )
       val webTabResourceModule = WebTabResourceModule(
         isDevelopment = isDevelopment,

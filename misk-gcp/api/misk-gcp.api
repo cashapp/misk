@@ -24,7 +24,7 @@ public final class misk/cloud/gcp/TransportConfig {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/cloud/gcp/datastore/DatastoreConfig : wisp/config/Config {
+public final class misk/cloud/gcp/datastore/DatastoreConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Lmisk/cloud/gcp/TransportConfig;)V
 	public synthetic fun <init> (Lmisk/cloud/gcp/TransportConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -55,8 +55,9 @@ public final class misk/cloud/gcp/datastore/FakeDatastoreModule : misk/inject/KA
 public final class misk/cloud/gcp/datastore/FakeDatastoreModule$Companion {
 }
 
-public final class misk/cloud/gcp/datastore/FakeDatastoreModule$FakeDatastoreService : com/google/common/util/concurrent/AbstractIdleService {
+public final class misk/cloud/gcp/datastore/FakeDatastoreModule$FakeDatastoreService : com/google/common/util/concurrent/AbstractIdleService, misk/testing/TestFixture {
 	public fun <init> (Lcom/google/cloud/datastore/testing/LocalDatastoreHelper;)V
+	public fun reset ()V
 }
 
 public final class misk/cloud/gcp/datastore/Keys {
@@ -65,7 +66,7 @@ public final class misk/cloud/gcp/datastore/Keys {
 	public final fun newKey (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/google/cloud/datastore/Key;
 }
 
-public final class misk/cloud/gcp/logging/StackDriverLoggingConfig : wisp/config/Config {
+public final class misk/cloud/gcp/logging/StackDriverLoggingConfig : misk/config/Config {
 	public fun <init> (Lch/qos/logback/classic/Level;Lch/qos/logback/classic/Level;Ljava/lang/String;)V
 	public fun <init> (Lch/qos/logback/classic/Level;Lch/qos/logback/classic/Level;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Lch/qos/logback/classic/Level;Lch/qos/logback/classic/Level;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -107,7 +108,7 @@ public final class misk/cloud/gcp/security/keys/GcpKeyManagementModule : misk/in
 	public final fun providesKms (Ljava/lang/String;)Lcom/google/api/services/cloudkms/v1/CloudKMS;
 }
 
-public final class misk/cloud/gcp/security/keys/GcpKmsConfig : wisp/config/Config {
+public final class misk/cloud/gcp/security/keys/GcpKmsConfig : misk/config/Config {
 	public fun <init> (Ljava/lang/String;Ljava/util/Map;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/util/Map;
@@ -120,7 +121,7 @@ public final class misk/cloud/gcp/security/keys/GcpKmsConfig : wisp/config/Confi
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/cloud/gcp/spanner/GoogleSpannerEmulator : com/google/common/util/concurrent/AbstractIdleService {
+public final class misk/cloud/gcp/spanner/GoogleSpannerEmulator : com/google/common/util/concurrent/AbstractIdleService, misk/testing/TestFixture {
 	public static final field CONTAINER_NAME Ljava/lang/String;
 	public static final field Companion Lmisk/cloud/gcp/spanner/GoogleSpannerEmulator$Companion;
 	public static final field IMAGE_NAME Ljava/lang/String;
@@ -129,6 +130,7 @@ public final class misk/cloud/gcp/spanner/GoogleSpannerEmulator : com/google/com
 	public final fun getConfig ()Lmisk/cloud/gcp/spanner/SpannerConfig;
 	public final fun pullImage (Ljava/lang/String;)V
 	public static synthetic fun pullImage$default (Lmisk/cloud/gcp/spanner/GoogleSpannerEmulator;Ljava/lang/String;ILjava/lang/Object;)V
+	public fun reset ()V
 }
 
 public final class misk/cloud/gcp/spanner/GoogleSpannerEmulator$Companion {
@@ -158,7 +160,7 @@ public final class misk/cloud/gcp/spanner/GoogleSpannerService : com/google/comm
 public final class misk/cloud/gcp/spanner/GoogleSpannerService$Companion {
 }
 
-public final class misk/cloud/gcp/spanner/SpannerConfig : wisp/config/Config {
+public final class misk/cloud/gcp/spanner/SpannerConfig : misk/config/Config {
 	public fun <init> (Lcom/google/auth/Credentials;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Lcom/google/auth/Credentials;Ljava/lang/String;Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Lcom/google/auth/Credentials;Ljava/lang/String;Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;)V
@@ -264,6 +266,7 @@ public abstract class misk/cloud/gcp/storage/BaseCustomStorageRpc : com/google/c
 	public fun patchAcl (Lcom/google/api/services/storage/model/BucketAccessControl;Ljava/util/Map;)Lcom/google/api/services/storage/model/BucketAccessControl;
 	public fun patchAcl (Lcom/google/api/services/storage/model/ObjectAccessControl;)Lcom/google/api/services/storage/model/ObjectAccessControl;
 	public fun patchDefaultAcl (Lcom/google/api/services/storage/model/ObjectAccessControl;)Lcom/google/api/services/storage/model/ObjectAccessControl;
+	public fun queryCompletedResumableUpload (Ljava/lang/String;J)Lcom/google/api/services/storage/model/StorageObject;
 	public fun read (Lcom/google/api/services/storage/model/StorageObject;Ljava/util/Map;JI)Lcom/google/cloud/Tuple;
 	public fun setIamPolicy (Ljava/lang/String;Lcom/google/api/services/storage/model/Policy;Ljava/util/Map;)Lcom/google/api/services/storage/model/Policy;
 	public fun testIamPermissions (Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lcom/google/api/services/storage/model/TestIamPermissionsResponse;
@@ -276,7 +279,7 @@ public final class misk/cloud/gcp/storage/FakeStorageModule : misk/inject/KAbstr
 	public final fun provideStorage ()Lcom/google/cloud/storage/Storage;
 }
 
-public final class misk/cloud/gcp/storage/InMemoryStorageRpc : misk/cloud/gcp/storage/BaseCustomStorageRpc {
+public final class misk/cloud/gcp/storage/InMemoryStorageRpc : misk/cloud/gcp/storage/BaseCustomStorageRpc, misk/testing/TestFixture {
 	public fun <init> ()V
 	public fun create (Lcom/google/api/services/storage/model/StorageObject;Ljava/io/InputStream;Ljava/util/Map;)Lcom/google/api/services/storage/model/StorageObject;
 	public fun delete (Lcom/google/api/services/storage/model/StorageObject;Ljava/util/Map;)Z
@@ -286,6 +289,7 @@ public final class misk/cloud/gcp/storage/InMemoryStorageRpc : misk/cloud/gcp/st
 	public fun open (Lcom/google/api/services/storage/model/StorageObject;Ljava/util/Map;)Ljava/lang/String;
 	public fun openRewrite (Lcom/google/cloud/storage/spi/v1/StorageRpc$RewriteRequest;)Lcom/google/cloud/storage/spi/v1/StorageRpc$RewriteResponse;
 	public fun read (Lcom/google/api/services/storage/model/StorageObject;Ljava/util/Map;JLjava/io/OutputStream;)J
+	public fun reset ()V
 	public fun write (Ljava/lang/String;[BIJIZ)V
 }
 
@@ -323,7 +327,7 @@ public final class misk/cloud/gcp/storage/LocalStorageRpcKt {
 	public static final fun withLock (Ljava/nio/channels/FileChannel;ZLkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
-public final class misk/cloud/gcp/storage/StorageConfig : wisp/config/Config {
+public final class misk/cloud/gcp/storage/StorageConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Z)V
 	public fun <init> (ZLmisk/cloud/gcp/storage/LocalStorageConfig;)V

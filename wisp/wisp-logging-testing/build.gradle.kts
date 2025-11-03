@@ -1,14 +1,16 @@
 plugins {
-    `java-library`
+  id("org.jetbrains.kotlin.jvm")
+  id("com.vanniktech.maven.publish")
 }
 
 dependencies {
-    api(libs.logbackClassic)
-    api(libs.assertj)
-    implementation(libs.logbackCore)
-    implementation(libs.slf4jApi)
+  api(project(":misk-testing-api"))
+  api(libs.logbackClassic)
+  implementation(libs.logbackCore)
+  implementation(libs.slf4jApi)
 
-    testImplementation(libs.junitApi)
-    testImplementation(libs.kotlinTest)
-    testImplementation(project(":wisp:wisp-logging"))
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinTest)
+  testImplementation(project(":wisp:wisp-logging"))
 }

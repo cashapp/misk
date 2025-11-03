@@ -1,6 +1,6 @@
 package misk.slack
 
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import jakarta.inject.Inject
 
 class RealSlackClient @Inject constructor(

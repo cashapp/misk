@@ -21,8 +21,9 @@ import misk.web.dashboard.DashboardModule
 import misk.web.metadata.config.ConfigMetadataAction
 import misk.web.resources.StaticResourceAction
 import misk.web.resources.StaticResourceEntry
+import wisp.deployment.Deployment
 
-class ExemplarDashboardModule : KAbstractModule() {
+class ExemplarDashboardModule(private val deployment: Deployment) : KAbstractModule() {
   override fun configure() {
     // Favicon.ico and any other shared static assets available at /static/*
     multibind<StaticResourceEntry>()
@@ -94,6 +95,44 @@ class ExemplarDashboardModule : KAbstractModule() {
       label = { appName, deployment -> "Internal Tool" },
       url = { appName, deployment -> "https://internal-tool.cash.app/?app=$appName&deployment=$deployment" },
       category = "Internal"
+    ))
+
+    // Custom Admin Dashboard Tab at /_admin/... which doesn't exist and shows graceful failure 404
+    install(WebActionModule.create<AlphaIndexAction>())
+
+    // Tests 404 error message for misconfigured tabs
+    install(
+      DashboardModule.createIFrameTab<AdminDashboard, AdminDashboardAccess>(
+        slug = "not-found",
+        urlPathPrefix = "/_admin/not-found-iframe/",
+        iframePath = "/path/to/not-found-iframe/index.html",
+        menuLabel = "Not Found IFrame",
+        menuCategory = "Admin Tools"
+      )
+    )
+    install(
+      DashboardModule.createMiskWebTab<AdminDashboard, AdminDashboardAccess>(
+        isDevelopment = deployment.isLocalDevelopment,
+        slug = "not-found-misk-web",
+        urlPathPrefix = "/_admin/not-found-misk-web/",
+        developmentWebProxyUrl = "http://localhost:3000/",
+        menuLabel = "Not Found Misk-Web",
+        menuCategory = "Admin Tools"
+      )
+    )
+    install(
+      DashboardModule.createIFrameTab<AdminDashboard, AdminDashboardAccess>(
+        slug = "not-found-react",
+        urlPathPrefix = "/_admin/not-found-react/",
+        iframePath = "/_tab/not-found-react/index.html",
+        menuLabel = "Not Found React",
+        menuCategory = "Admin Tools"
+      )
+    )
+    install(DashboardModule.createMenuLink<AdminDashboard, AdminDashboardAccess>(
+      label = "Not Found Link",
+      url = "/_admin/not-found-link/",
+      category = "Admin Tools"
     ))
   }
 }

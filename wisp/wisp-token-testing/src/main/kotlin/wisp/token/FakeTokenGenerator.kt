@@ -1,13 +1,26 @@
 package wisp.token
 
+import misk.testing.FakeFixture
 import wisp.token.TokenGenerator.Companion.CANONICALIZE_LENGTH_MAX
 import wisp.token.TokenGenerator.Companion.CANONICALIZE_LENGTH_MIN
 import wisp.token.TokenGenerator.Companion.canonicalize
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
+import jakarta.inject.Inject
 
-class FakeTokenGenerator : TokenGenerator {
-    internal val nextByLabel = Collections.synchronizedMap<String, AtomicLong>(mutableMapOf())
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "FakeTokenGenerator()",
+    imports = ["misk.tokens.FakeTokenGenerator"]
+  )
+)
+class FakeTokenGenerator @Inject constructor(): FakeFixture(), TokenGenerator {
+    internal val nextByLabel by resettable {
+      Collections.synchronizedMap<String, AtomicLong>(
+        mutableMapOf()
+      )
+    }
 
     override fun generate(label: String?, length: Int): String {
         require(length in CANONICALIZE_LENGTH_MIN..CANONICALIZE_LENGTH_MAX) {

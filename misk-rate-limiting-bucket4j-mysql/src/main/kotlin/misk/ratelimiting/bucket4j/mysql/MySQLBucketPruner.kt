@@ -1,7 +1,7 @@
 package misk.ratelimiting.bucket4j.mysql
 
 import io.micrometer.core.instrument.MeterRegistry
-import wisp.logging.getLogger
+import misk.logging.getLogger
 import wisp.ratelimiting.RateLimitPrunerMetrics
 import wisp.ratelimiting.bucket4j.Bucket4jPruner
 import wisp.ratelimiting.bucket4j.ClockTimeMeter

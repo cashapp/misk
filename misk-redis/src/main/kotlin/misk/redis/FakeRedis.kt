@@ -15,6 +15,7 @@ import misk.redis.Redis.ZRangeLimit
 import misk.redis.Redis.ZRangeMarker
 import misk.redis.Redis.ZRangeRankMarker
 import misk.redis.Redis.ZRangeType
+import org.apache.commons.io.FilenameUtils
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -43,10 +44,11 @@ class FakeRedis : Redis {
 
   @Synchronized
   override fun del(key: String): Boolean {
-    if (!keyValueStore.containsKey(key)) {
-      return false
-    }
-    return keyValueStore.remove(key) != null
+    var deleted = false
+    if (keyValueStore.remove(key) != null) deleted = true
+    if (hKeyValueStore.remove(key) != null) deleted = true
+    if (lKeyValueStore.remove(key) != null) deleted = true
+    return deleted
   }
 
   @Synchronized
@@ -131,6 +133,19 @@ class FakeRedis : Redis {
   override fun hlen(key: String): Long = hKeyValueStore[key]?.data?.size?.toLong() ?: 0L
 
   @Synchronized
+  override fun hkeys(key: String): List<ByteString> {
+    val value = hKeyValueStore[key] ?: return emptyList()
+
+    // Check if the key has expired
+    if (clock.instant() >= value.expiryInstant) {
+      hKeyValueStore.remove(key)
+      return emptyList()
+    }
+
+    return value.data.keys().toList().map { it.encode(Charsets.UTF_8) }
+  }
+
+  @Synchronized
   override fun hmget(key: String, vararg fields: String): List<ByteString?> {
     return hgetAll(key)?.filter { fields.contains(it.key) }?.values?.toList() ?: emptyList()
   }
@@ -154,6 +169,19 @@ class FakeRedis : Redis {
   private fun randomFields(key: String, count: Long): List<Pair<String, ByteString>>? {
     checkHrandFieldCount(count)
     return hgetAll(key)?.toList()?.shuffled(random)?.take(count.toInt())
+  }
+
+  // Cursor and count are ignored for fake implementation. All matches are always
+  // returned without pagination.
+  @Synchronized
+  override fun scan(cursor: String, matchPattern: String?, count: Int?): Redis.ScanResult {
+    val matchingKeys = mutableListOf<String>()
+    keyValueStore.keys.forEach { key ->
+      if (matchPattern == null || FilenameUtils.wildcardMatch(key, matchPattern)) {
+        matchingKeys.add(key)
+      }
+    }
+    return Redis.ScanResult("0", matchingKeys)
   }
 
   @Synchronized
@@ -287,6 +315,20 @@ class FakeRedis : Redis {
   override fun lpop(key: String): ByteString? = lpop(key, count = 1).firstOrNull()
 
   @Synchronized
+  override fun blpop(keys: Array<String>, timeoutSeconds: Double): Pair<String, ByteString>? {
+    // For the fake implementation, we'll check each key in order and return the first non-empty list
+    for (key in keys) {
+      val element = lpop(key)
+      if (element != null) {
+        return Pair(key, element)
+      }
+    }
+    // In a real implementation, this would block until timeout or an element is available
+    // For the fake, we just return null immediately
+    return null
+  }
+
+  @Synchronized
   override fun rpop(key: String, count: Int): List<ByteString?> {
     val value = lKeyValueStore[key] ?: Value(emptyList(), clock.instant())
     if (clock.instant() >= value.expiryInstant) {
@@ -297,6 +339,11 @@ class FakeRedis : Redis {
     }
     lKeyValueStore[key] = value.copy(data = value.data.dropLast(count))
     return result
+  }
+
+  @Synchronized
+  override fun llen(key: String): Long {
+    return lKeyValueStore[key]?.data?.size?.toLong() ?: 0L
   }
 
   @Synchronized
@@ -316,6 +363,20 @@ class FakeRedis : Redis {
   }
 
   @Synchronized
+  override fun ltrim(key: String, start: Long, stop: Long) {
+    val list = lKeyValueStore[key]?.data ?: return
+
+    val trimmedList = if (stop >= 0 && start >= 0) {
+      list.subList(start.toInt(), min(list.size, stop.toInt() + 1))
+    } else {
+      val positiveStart = if (start < 0) list.size + start else start
+      val positiveStop = if (stop < 0) list.size + stop else stop
+      list.subList(positiveStart.toInt(), min(list.size, positiveStop.toInt() + 1))
+    }
+
+    lKeyValueStore[key] = Value(data = trimmedList, expiryInstant = Instant.MAX)
+  }
+
   override fun lrem(key: String, count: Long, element: ByteString): Long {
     val value = lKeyValueStore[key] ?: return 0L
     if (clock.instant() >= value.expiryInstant) {
@@ -349,6 +410,40 @@ class FakeRedis : Redis {
     from = ListDirection.RIGHT,
     to = ListDirection.LEFT
   )
+
+  @Synchronized
+  override fun exists(key: String): Boolean {
+    val value = keyValueStore[key]
+    val hValue = hKeyValueStore[key]
+    val lValue = lKeyValueStore[key]
+    val lValueSize = lValue?.data?.size ?: 0
+
+    return (value != null && clock.instant() < value.expiryInstant) ||
+      (hValue != null && clock.instant() < hValue.expiryInstant) ||
+      (lValue != null && lValueSize > 0 && clock.instant() < lValue.expiryInstant)
+  }
+
+  @Synchronized
+  override fun exists(vararg key: String): Long {
+    return key.sumOf {
+      if (exists(it)) 1L else 0L
+    }
+  }
+
+  @Synchronized
+  override fun persist(key: String): Boolean {
+    val value = keyValueStore[key]
+    val hValue = hKeyValueStore[key]
+    val lValue = lKeyValueStore[key]
+
+    when {
+      value != null -> value.expiryInstant = Instant.MAX
+      hValue != null -> hValue.expiryInstant = Instant.MAX
+      lValue != null -> lValue.expiryInstant = Instant.MAX
+      else -> return false
+    }
+    return true
+  }
 
   @Synchronized
   override fun expire(key: String, seconds: Long): Boolean {
@@ -419,6 +514,10 @@ class FakeRedis : Redis {
     keyValueStore.clear()
     hKeyValueStore.clear()
     lKeyValueStore.clear()
+  }
+
+  override fun flushDB() {
+    flushAll()
   }
 
   override fun zadd(

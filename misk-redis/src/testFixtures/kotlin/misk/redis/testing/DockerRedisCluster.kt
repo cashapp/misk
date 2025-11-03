@@ -13,10 +13,10 @@ import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.exceptions.JedisClusterException
 import redis.clients.jedis.util.JedisClusterCRC16
-import wisp.containers.Composer
-import wisp.containers.Container
-import wisp.containers.ContainerUtil
-import wisp.logging.getLogger
+import misk.containers.Composer
+import misk.containers.Container
+import misk.containers.ContainerUtil
+import misk.logging.getLogger
 import java.lang.Thread.sleep
 import java.time.Duration
 
@@ -24,25 +24,25 @@ import java.time.Duration
  * To use this in tests:
  *
  * 1. Install a `RedisClusterModule` instead of a `FakeRedisModule`.
- *    Make sure to supply the [DockerRedisCluster.config] as the [RedisClusterConfig].
+ *    Make sure to supply the [DockerRedisCluster.replicationGroupConfig] as the [RedisClusterReplicationGroupConfig].
  * 2. Add `@MiskExternalDependency private val dockerRedis: DockerRedisCluster` to your test class.
  */
 object DockerRedisCluster : ExternalDependency {
   private val REDIS_CLUSTER_PORTS = listOf(7000, 7001, 7002, 7003, 7004, 7005)
   private const val initialPort = 7000
-  private val hostname = if (ContainerUtil.isRunningInDocker) "host.docker.internal" else "localhost"
+  private val hostname = ContainerUtil.dockerTargetOrLocalHost()
   private val logger = getLogger<DockerRedisCluster>()
   private const val redisVersion = "7.0.10"
 
   private val jedis by lazy { JedisCluster(HostAndPort(hostname, initialPort)) }
 
   private val redisNodeConfig = RedisNodeConfig(hostname, initialPort)
-  private val groupConfig = RedisClusterReplicationGroupConfig(
+  val replicationGroupConfig = RedisClusterReplicationGroupConfig(
     configuration_endpoint = redisNodeConfig,
     redis_auth_password = "",
     timeout_ms = 1_000,
   )
-  val config = RedisClusterConfig(mapOf("test-group" to groupConfig))
+  val config = RedisClusterConfig(mapOf("test-group" to replicationGroupConfig))
 
   private const val containerName = "misk-redis-cluster-testing"
   private val composer = Composer(
