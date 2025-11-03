@@ -30,6 +30,18 @@ internal class MiskWebSocketServerTransport(
 
   override val streamId: String = UUID.randomUUID().toString()
 
+  init {
+    // Set the Sec-WebSocket-Protocol response header to confirm we accept the "mcp" subprotocol
+    // This must be done before the WebSocket upgrade completes, which happens before start() is called
+    val subprotocol = call.requestHeaders[SEC_WEBSOCKET_PROTOCOL_HEADER]
+
+    require(subprotocol == MCP_SUBPROTOCOL) {
+      "Invalid subprotocol: $subprotocol, expected $MCP_SUBPROTOCOL"
+    }
+    call.setResponseHeader(SEC_WEBSOCKET_PROTOCOL_HEADER, MCP_SUBPROTOCOL)
+
+  }
+
   override suspend fun start() {
 
     if (!initialized.compareAndSet(expectedValue = false, newValue = true)) {
@@ -38,8 +50,6 @@ internal class MiskWebSocketServerTransport(
         | If using Server class, note that connect() calls start() automatically.
         | """.trimMargin())
     }
-
-    call.verifySubprotocol()
   }
 
   override suspend fun send(message: JSONRPCMessage) {
@@ -65,13 +75,6 @@ internal class MiskWebSocketServerTransport(
     } catch (e: Exception) {
       _onError.invoke(e)
       throw e
-    }
-  }
-
-  private fun HttpCall.verifySubprotocol(){
-    val subprotocol = requestHeaders[SEC_WEBSOCKET_PROTOCOL_HEADER]
-    require(subprotocol == MCP_SUBPROTOCOL){
-      "Invalid subprotocol: $subprotocol, expected $MCP_SUBPROTOCOL"
     }
   }
 

@@ -54,7 +54,10 @@ public final class misk/aws2/sqs/jobqueue/SqsJobConsumer$Companion {
 }
 
 public final class misk/aws2/sqs/jobqueue/SqsJobEnqueuer : misk/jobqueue/v2/JobEnqueuer {
-	public fun <init> (Lmisk/aws2/sqs/jobqueue/SqsClientFactory;Lmisk/aws2/sqs/jobqueue/config/SqsConfig;Lmisk/aws2/sqs/jobqueue/SqsQueueResolver;Lmisk/tokens/TokenGenerator;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Lcom/squareup/moshi/Moshi;Lio/opentracing/Tracer;Ljava/time/Clock;)V
+	public fun <init> (Lmisk/aws2/sqs/jobqueue/SqsClientFactory;Lmisk/aws2/sqs/jobqueue/config/SqsConfig;Lmisk/aws2/sqs/jobqueue/SqsQueueResolver;Lwisp/token/TokenGenerator;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Lcom/squareup/moshi/Moshi;Lio/opentracing/Tracer;Ljava/time/Clock;)V
+	public fun batchEnqueue (Lmisk/jobqueue/QueueName;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun batchEnqueueAsync (Lmisk/jobqueue/QueueName;Ljava/util/List;)Ljava/util/concurrent/CompletableFuture;
+	public fun batchEnqueueBlocking (Lmisk/jobqueue/QueueName;Ljava/util/List;)Lmisk/jobqueue/v2/JobEnqueuer$BatchEnqueueResult;
 	public fun enqueue (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun enqueueAsync (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)Ljava/util/concurrent/CompletableFuture;
 	public fun enqueueBlocking (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
@@ -79,17 +82,21 @@ public class misk/aws2/sqs/jobqueue/SqsJobQueueModule : misk/inject/KAbstractMod
 }
 
 public final class misk/aws2/sqs/jobqueue/SqsMetrics {
+	public final fun getBatchEnqueueSize ()Lio/prometheus/client/Histogram;
 	public final fun getChannelReceiveLag ()Lio/prometheus/client/Histogram;
 	public final fun getHandlerDispatchTime ()Lio/prometheus/client/Histogram;
 	public final fun getHandlerFailures ()Lio/prometheus/client/Counter;
+	public final fun getJobBatchEnqueueFailures ()Lio/prometheus/client/Counter;
 	public final fun getJobEnqueueFailures ()Lio/prometheus/client/Counter;
 	public final fun getJobsAcknowledged ()Lio/prometheus/client/Counter;
+	public final fun getJobsBatchEnqueued ()Lio/prometheus/client/Counter;
 	public final fun getJobsDeadLettered ()Lio/prometheus/client/Counter;
 	public final fun getJobsEnqueued ()Lio/prometheus/client/Counter;
 	public final fun getJobsFailedToAcknowledge ()Lio/prometheus/client/Counter;
 	public final fun getJobsReceived ()Lio/prometheus/client/Counter;
 	public final fun getQueueFirstProcessingLag ()Lio/prometheus/client/Histogram;
 	public final fun getQueueProcessingLag ()Lio/prometheus/client/Histogram;
+	public final fun getSqsBatchSendTime ()Lio/prometheus/client/Histogram;
 	public final fun getSqsDeleteTime ()Lio/prometheus/client/Histogram;
 	public final fun getSqsReceiveTime ()Lio/prometheus/client/Histogram;
 	public final fun getSqsSendTime ()Lio/prometheus/client/Histogram;

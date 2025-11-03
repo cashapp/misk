@@ -25,6 +25,7 @@ dependencies {
   implementation(project(":wisp:wisp-lease"))
   implementation(project(":misk-logging"))
   implementation(project(":wisp:wisp-rate-limiting"))
+  implementation(project(":wisp:wisp-token"))
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
   implementation(project(":misk-admin"))
