@@ -38,8 +38,8 @@ To expose MCP functionality through HTTP endpoints, you need to create web actio
 
 ### Transport Options
 
-#### Server-Sent Events (SSE) Transport
-Uses HTTP POST requests with SSE responses for real-time communication:
+#### StreamableHTTP Transport
+Uses HTTP POST requests with Server-Sent Events (SSE) for streaming responses:
 - **`@McpPost`** (Required): Handles incoming MCP requests from clients
 - **`@McpGet`** (Optional): Enables out-of-band server-to-client notifications
 - **`@McpDelete`** (Optional): Allows clients to explicitly delete an existing stateful session
@@ -48,7 +48,7 @@ Uses HTTP POST requests with SSE responses for real-time communication:
 Uses persistent WebSocket connections for full bidirectional communication:
 - **`@McpWebSocket`** (Required): Handles all MCP communication over WebSocket
 
-### SSE Transport Example
+### StreamableHTTP Transport Example
 
 ```kotlin
 @ExperimentalMiskApi
@@ -105,9 +105,9 @@ class MyMcpWebSocketAction @Inject constructor(
 
 ### Transport Comparison
 
-| Feature | SSE Transport | WebSocket Transport |
-|---------|---------------|-------------------|
-| **Connection Type** | HTTP POST + SSE | Persistent WebSocket |
+| Feature | StreamableHTTP Transport | WebSocket Transport |
+|---------|--------------------------|-------------------|
+| **Connection Type** | HTTP POST + SSE streaming | Persistent WebSocket |
 | **Communication** | Client→Server (POST)<br/>Server→Client (SSE) | Full bidirectional |
 | **Complexity** | Multiple endpoints | Single endpoint |
 | **Session Management** | Optional via headers | Built-in connection state |
@@ -116,7 +116,7 @@ class MyMcpWebSocketAction @Inject constructor(
 
 ### Choosing a Transport
 
-**Use SSE Transport when:**
+**Use StreamableHTTP Transport when:**
 - Building traditional web applications
 - Need maximum client compatibility
 - Implementing request-response patterns
