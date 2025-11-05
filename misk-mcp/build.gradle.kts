@@ -20,7 +20,7 @@ dependencies {
   api(project(":misk"))
   api(project(":misk-config"))
 
-  
+  implementation(platform(libs.ktorBom))
   implementation(libs.kotlinReflect)
   implementation(libs.kotlinxCoroutinesCore)
   implementation(libs.kotlinxSerializationCore)
@@ -43,6 +43,7 @@ dependencies {
 
   testFixturesApi(libs.mcpKotlinSdkClient)
   testFixturesImplementation(libs.kotlinxSerializationJson)
+  testFixturesImplementation(platform(libs.ktorBom))
   testFixturesImplementation(libs.ktorClientContentNegotiation)
   testFixturesImplementation(libs.ktorClientCore)
   testFixturesImplementation(libs.ktorClientEncoding)
