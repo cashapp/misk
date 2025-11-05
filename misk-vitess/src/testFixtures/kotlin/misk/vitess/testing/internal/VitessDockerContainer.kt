@@ -53,6 +53,7 @@ internal class VitessDockerContainer(
   private val inMemoryStorageSize: String,
   private val keepAlive: Boolean,
   private val lintSchema: Boolean,
+  private val mysqlMaxConnections: Int,
   private val mysqlVersion: String,
   private val schemaDir: String,
   private val sqlMode: String,
@@ -69,6 +70,7 @@ internal class VitessDockerContainer(
     const val IN_MEMORY_STORAGE_SIZE_ENV = "IN_MEMORY_STORAGE_SIZE"
     const val KEEP_ALIVE_ENV = "KEEP_ALIVE"
     const val KEYSPACES_ENV = "KEYSPACES"
+    const val MYSQL_MAX_CONNECTIONS_ENV = "MYSQL_MAX_CONNECTIONS"
     const val MYSQL_VERSION_ENV = "MYSQL_VERSION"
     const val PORT_ENV = "PORT"
     const val SQL_MODE_ENV = "SQL_MODE"
@@ -364,6 +366,7 @@ internal class VitessDockerContainer(
         ENABLE_SCATTERS_ENV to ("$enableScatters" to "enableScatters"),
         IN_MEMORY_STORAGE_SIZE_ENV to (inMemoryStorageSize to "inMemoryStorageSize"),
         KEYSPACES_ENV to (getKeyspacesArgString(keyspaces) to "keyspaces"),
+        MYSQL_MAX_CONNECTIONS_ENV to ("$mysqlMaxConnections" to "mysqlMaxConnections"),
         MYSQL_VERSION_ENV to (mysqlVersion to "mysqlVersion"),
         PORT_ENV to ("${userPort}" to "port"),
         SQL_MODE_ENV to (sqlMode to "sqlMode"),
@@ -699,6 +702,7 @@ internal class VitessDockerContainer(
           "$IN_MEMORY_STORAGE_SIZE_ENV=$inMemoryStorageSize",
           "$KEEP_ALIVE_ENV=$keepAlive",
           "$KEYSPACES_ENV=${getKeyspacesArgString(keyspaces)}",
+          "$MYSQL_MAX_CONNECTIONS_ENV=$mysqlMaxConnections",
           "$MYSQL_VERSION_ENV=$mysqlVersion",
           "$PORT_ENV=${vitessPortConfig.vtgatePort.hostPort}",
           "$SQL_MODE_ENV=$sqlMode",

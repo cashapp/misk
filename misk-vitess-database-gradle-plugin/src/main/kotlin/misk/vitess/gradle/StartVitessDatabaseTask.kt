@@ -40,6 +40,9 @@ abstract class StartVitessDatabaseTask: DefaultTask() {
   abstract val lintSchema: Property<Boolean>
 
   @get:Input
+  abstract val mysqlMaxConnections: Property<Int>
+
+  @get:Input
   abstract val mysqlVersion: Property<String>
 
   @get:Input
@@ -75,6 +78,7 @@ abstract class StartVitessDatabaseTask: DefaultTask() {
       inMemoryStorageSize = inMemoryStorageSize.get(),
       keepAlive = keepAlive.get(),
       lintSchema = lintSchema.get(),
+      mysqlMaxConnections = mysqlMaxConnections.get(),
       mysqlVersion = mysqlVersion.get(),
       port = port.get(),
       schemaDir = schemaDir.get(),

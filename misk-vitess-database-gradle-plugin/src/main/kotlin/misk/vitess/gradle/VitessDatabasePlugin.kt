@@ -16,6 +16,7 @@ class VitessDatabasePlugin: Plugin<Project> {
       it.inMemoryStorageSize.convention(DefaultSettings.IN_MEMORY_STORAGE_SIZE)
       it.keepAlive.convention(DefaultSettings.KEEP_ALIVE)
       it.lintSchema.convention(DefaultSettings.LINT_SCHEMA)
+      it.mysqlMaxConnections.convention(DefaultSettings.MYSQL_MAX_CONNECTIONS)
       it.mysqlVersion.convention(DefaultSettings.MYSQL_VERSION)
       it.port.convention(DefaultSettings.PORT)
       it.schemaDir.convention("filesystem:${project.layout.projectDirectory.dir("src/main/resources/vitess/schema").asFile.absolutePath}")

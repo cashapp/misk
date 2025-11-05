@@ -18,6 +18,7 @@ object DefaultSettings {
   const val IN_MEMORY_STORAGE_SIZE = "1024M"
   const val KEEP_ALIVE = true
   const val LINT_SCHEMA = false
+  const val MYSQL_MAX_CONNECTIONS = 1000
   const val MYSQL_VERSION = "8.0.42"
   const val PORT = 27003
   const val SCHEMA_DIR = "classpath:/vitess/schema"

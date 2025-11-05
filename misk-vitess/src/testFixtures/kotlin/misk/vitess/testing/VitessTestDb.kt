@@ -54,6 +54,7 @@ class VitessTestDb(
   private var inMemoryStorageSize: String = DefaultSettings.IN_MEMORY_STORAGE_SIZE,
   private var keepAlive: Boolean = DefaultSettings.KEEP_ALIVE,
   private var lintSchema: Boolean = DefaultSettings.LINT_SCHEMA,
+  private var mysqlMaxConnections: Int = DefaultSettings.MYSQL_MAX_CONNECTIONS,
   private var mysqlVersion: String = DefaultSettings.MYSQL_VERSION,
   private var port: Int = DefaultSettings.PORT,
   private var schemaDir: String = DefaultSettings.SCHEMA_DIR,
@@ -77,6 +78,7 @@ class VitessTestDb(
     private var inMemoryStorageSize: String = DefaultSettings.IN_MEMORY_STORAGE_SIZE
     private var keepAlive: Boolean = DefaultSettings.KEEP_ALIVE
     private var lintSchema: Boolean = DefaultSettings.LINT_SCHEMA
+    private var mysqlMaxConnections: Int = DefaultSettings.MYSQL_MAX_CONNECTIONS
     private var mysqlVersion: String = DefaultSettings.MYSQL_VERSION
     private var port: Int = DefaultSettings.PORT
     private var schemaDir: String = DefaultSettings.SCHEMA_DIR
@@ -107,6 +109,8 @@ class VitessTestDb(
     fun keepAlive(keepAlive: Boolean) = apply { this.keepAlive = keepAlive }
 
     fun lintSchema(lintSchema: Boolean) = apply { this.lintSchema = lintSchema }
+
+    fun mysqlMaxConnections(mysqlMaxConnections: Int) = apply { this.mysqlMaxConnections = mysqlMaxConnections }
 
     fun mysqlVersion(mysqlVersion: String) = apply { this.mysqlVersion = mysqlVersion }
 
@@ -139,6 +143,7 @@ class VitessTestDb(
         inMemoryStorageSize,
         keepAlive,
         lintSchema,
+        mysqlMaxConnections,
         mysqlVersion,
         port,
         schemaDir,
@@ -351,6 +356,7 @@ class VitessTestDb(
       inMemoryStorageSize = inMemoryStorageSize,
       keepAlive = keepAlive,
       lintSchema = lintSchema,
+      mysqlMaxConnections = mysqlMaxConnections,
       mysqlVersion = mysqlVersion,
       schemaDir = schemaDir,
       sqlMode = sqlMode,
