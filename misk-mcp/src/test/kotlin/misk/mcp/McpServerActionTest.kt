@@ -61,7 +61,6 @@ import misk.web.sse.ServerSentEvent
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -464,7 +463,8 @@ internal abstract class McpServerActionTest {
 
   @Test
   fun `test exception metrics`(): Unit = runBlocking {
-    assertThrows<IllegalStateException> { mcpClient.callThrowingTool() }
+    val result = mcpClient.callThrowingTool()
+    assertEquals(true, result?.isError)
 
     assertEquals(
       expected = 1.0,
