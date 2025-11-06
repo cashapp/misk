@@ -83,7 +83,7 @@ class FakeCronModule @JvmOverloads constructor(
   private val dependencies: List<Key<out Service>> = listOf(),
   private val installDashboardTab: Boolean = false,
   private val useMultipleLeases: Boolean = false,
-) : KAbstractModule() {
+) : KInstallOnceModule() {
   override fun configure() {
     bind<ZoneId>().annotatedWith<ForMiskCron>().toInstance(zoneId)
     install(
