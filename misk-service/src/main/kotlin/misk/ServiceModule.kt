@@ -2,9 +2,9 @@ package misk
 
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
+import kotlin.reflect.KClass
 import misk.inject.KAbstractModule
 import misk.inject.toKey
-import kotlin.reflect.KClass
 
 /**
  * # Misk Services
@@ -13,22 +13,19 @@ import kotlin.reflect.KClass
  *
  * ### Dependencies
  *
- * Suppose we have a `DatabaseService` and a `MovieService`, with the `MovieService` depending on
- * the `DatabaseService`.
+ * Suppose we have a `DatabaseService` and a `MovieService`, with the `MovieService` depending on the `DatabaseService`.
  *
  * ```
  * DatabaseService
  *   depended on by MovieService
  * ```
  *
- * When you install a service via this module, start-up and shut-down of its dependencies are
- * handled automatically, so that a service can only run when the services it depends on are
- * running. In the example above, the `MovieService` doesn't enter the `STARTING` state until the
- * `DatabaseService` has entered the `RUNNING` state. Conversely, the `MovieService` must enter the
- * `TERMINATED` state before the DatabaseService enters the `STOPPING` state.
+ * When you install a service via this module, start-up and shut-down of its dependencies are handled automatically, so
+ * that a service can only run when the services it depends on are running. In the example above, the `MovieService`
+ * doesn't enter the `STARTING` state until the `DatabaseService` has entered the `RUNNING` state. Conversely, the
+ * `MovieService` must enter the `TERMINATED` state before the DatabaseService enters the `STOPPING` state.
  *
- * Dependencies can have their own dependencies, so there's an entire graph to manage of what starts
- * and stops when.
+ * Dependencies can have their own dependencies, so there's an entire graph to manage of what starts and stops when.
  *
  * ### Enhancements
  *
@@ -37,8 +34,8 @@ import kotlin.reflect.KClass
  * For example, a `DatabaseService` may manage a generic connection to a MySQL database, and the
  * `SchemaMigrationService` may create tables specific to the application.
  *
- * We treat such enhancements as implementation details of the enhanced service: they depend on the
- * service, but downstream dependencies like the `MovieService` don't need to know that they exist.
+ * We treat such enhancements as implementation details of the enhanced service: they depend on the service, but
+ * downstream dependencies like the `MovieService` don't need to know that they exist.
  *
  * ```
  * DatabaseService
@@ -46,15 +43,14 @@ import kotlin.reflect.KClass
  *   depended on by MovieService
  * ```
  *
- * In the above service graph we start the `DatabaseService` first, the `SchemaMigrationService`
- * second, and finally the `MovieService`. The `MovieService` doesn't need to express a dependency
- * on the `SchemaMigrationService`, that happens automatically for enhancements.
+ * In the above service graph we start the `DatabaseService` first, the `SchemaMigrationService` second, and finally the
+ * `MovieService`. The `MovieService` doesn't need to express a dependency on the `SchemaMigrationService`, that happens
+ * automatically for enhancements.
  *
  * ### What does this look like?
  *
- * Instead of using the regular service multi-bindings you might be used to, in the `configure`
- * block of a Guice [KAbstractModule], you would set up the above relationship as follows:
- *
+ * Instead of using the regular service multi-bindings you might be used to, in the `configure` block of a Guice
+ * [KAbstractModule], you would set up the above relationship as follows:
  * ```
  * override fun configure() {
  *   install(ServiceModule<SchemaMigrationService())
@@ -67,12 +63,11 @@ import kotlin.reflect.KClass
  *
  * ### How does this work?
  *
- * Bindings are hooked up for a [ServiceManager] provider, which decorates the service with its
- * dependencies and enhancements to defer its start up and shut down until its dependent services
- * are ready.
+ * Bindings are hooked up for a [ServiceManager] provider, which decorates the service with its dependencies and
+ * enhancements to defer its start up and shut down until its dependent services are ready.
  *
- * This service will stall in the `STARTING` state until all upstream services are `RUNNING`.
- * Symmetrically it stalls in the `STOPPING` state until all dependent services are `TERMINATED`.
+ * This service will stall in the `STARTING` state until all upstream services are `RUNNING`. Symmetrically it stalls in
+ * the `STOPPING` state until all dependent services are `TERMINATED`.
  */
 @Suppress("AnnotatePublicApisWithJvmOverloads")
 class ServiceModule(
@@ -87,34 +82,23 @@ class ServiceModule(
     key: Key<out Service>,
     dependsOn: List<Key<out Service>> = listOf(),
     enhancedBy: List<Key<out Service>> = listOf(),
-    @Suppress("UNUSED_PARAMETER") enhances: Key<out Service>? = null
-  ) : this(
-    key = key,
-    dependsOn = dependsOn,
-    enhancedBy = enhancedBy,
-  )
+    @Suppress("UNUSED_PARAMETER") enhances: Key<out Service>? = null,
+  ) : this(key = key, dependsOn = dependsOn, enhancedBy = enhancedBy)
 
   override fun configure() {
     multibind<ServiceEntry>().toInstance(ServiceEntry(key))
 
     for (dependsOnKey in dependsOn) {
-      multibind<DependencyEdge>().toInstance(
-        DependencyEdge(dependent = key, dependsOn = dependsOnKey)
-      )
+      multibind<DependencyEdge>().toInstance(DependencyEdge(dependent = key, dependsOn = dependsOnKey))
     }
     for (enhancedByKey in enhancedBy) {
-      multibind<EnhancementEdge>().toInstance(
-        EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey)
-      )
+      multibind<EnhancementEdge>().toInstance(EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey))
     }
   }
 
-  fun dependsOn(upstream: Key<out Service>) = ServiceModule(
-    key, dependsOn + upstream, enhancedBy
-  )
+  fun dependsOn(upstream: Key<out Service>) = ServiceModule(key, dependsOn + upstream, enhancedBy)
 
-  fun enhancedBy(enhancement: Key<out Service>) =
-    ServiceModule(key, dependsOn, enhancedBy + enhancement)
+  fun enhancedBy(enhancement: Key<out Service>) = ServiceModule(key, dependsOn, enhancedBy + enhancement)
 
   @JvmOverloads
   inline fun <reified T : Service> dependsOn(qualifier: KClass<out Annotation>? = null) =
@@ -129,7 +113,6 @@ class ServiceModule(
  * Returns a [ServiceModule] and hooks up service dependencies and enhancements.
  *
  * Here's how:
- *
  * ```
  * Guice.createInjector(object : KAbstractModule() {
  *   override fun configure() {
@@ -141,7 +124,6 @@ class ServiceModule(
  * ```
  *
  * Dependencies and services may be optionally annotated:
- *
  * ```
  * Guice.createInjector(object : KAbstractModule() {
  *   override fun configure() {
@@ -156,5 +138,7 @@ inline fun <reified T : Service> ServiceModule(qualifier: KClass<out Annotation>
   ServiceModule(T::class.toKey(qualifier))
 
 internal data class EnhancementEdge(val toBeEnhanced: Key<*>, val enhancement: Key<*>)
+
 internal data class DependencyEdge(val dependent: Key<*>, val dependsOn: Key<*>)
+
 internal data class ServiceEntry(val key: Key<out Service>)
