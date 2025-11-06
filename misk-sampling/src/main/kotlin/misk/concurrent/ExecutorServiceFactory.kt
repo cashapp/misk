@@ -1,6 +1,7 @@
 package misk.concurrent
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder
+import io.micrometer.core.instrument.MeterRegistry
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
@@ -20,6 +21,11 @@ interface ExecutorServiceFactory {
 
   /** Returns an executor service that uses [Executors.newFixedThreadPool]. */
   fun fixed(nameFormat: String, threadCount: Int): ExecutorService
+
+  /** Returns an executor service that uses [Executors.newFixedThreadPool].
+   * Also emits metrics to monitor the status of the executor service */
+  fun fixedWithMetrics(nameFormat: String, threadCount: Int, meterRegistry: MeterRegistry, metricPrefix: String,
+    executorServiceName: String): ExecutorService
 
   /** Returns an executor service that uses [Executors.newCachedThreadPool]. */
   fun unbounded(nameFormat: String): ExecutorService

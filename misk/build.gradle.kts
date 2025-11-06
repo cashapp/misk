@@ -58,6 +58,7 @@ dependencies {
   implementation(libs.kotlinxCoroutinesCore)
   implementation(libs.kotlinxCoroutinesSlf4j)
   implementation(libs.loggingApi)
+  implementation(libs.micrometerCore)
   implementation(libs.okio)
   implementation(libs.openTracingConcurrent)
   implementation(libs.openTracingOkHttp)
