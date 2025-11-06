@@ -1,5 +1,6 @@
 package misk.concurrent
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.opentracing.mock.MockTracer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -95,5 +96,72 @@ internal class RealExecutorServiceFactoryTest {
 
     // ...let the executor service finally shut down.
     latch.countDown()
+  }
+
+  @Test fun fixedWithMetricsCreatesExecutorWithMetrics() {
+    val meterRegistry = SimpleMeterRegistry()
+    val factory = RealExecutorServiceFactory(FakeClock())
+    val log = mutableListOf<String>()
+    
+    val executorService = factory.fixedWithMetrics(
+      nameFormat = "metrics-test-%d",
+      threadCount = 2,
+      meterRegistry = meterRegistry,
+      metricPrefix = "executor",
+      executorServiceName = "test-executor"
+    )
+
+    factory.startAsync().awaitRunning()
+
+    executorService.execute {
+      log += "task 1"
+    }
+    executorService.execute {
+      log += "task 2"
+    }
+
+    factory.stopAsync().awaitTerminated()
+
+    assertThat(log).containsExactly("task 1", "task 2")
+    assertThat(executorService.isTerminated).isTrue()
+    
+    val meters = meterRegistry.meters.filter { it.id.name.startsWith("executor") }
+    assertThat(meters).isNotEmpty
+
+    val executorNameTags = meters.flatMap { it.id.tags }
+      .filter { it.key == "executor_name" }
+    assertThat(executorNameTags).isNotEmpty
+    assertThat(executorNameTags.first().value).isEqualTo("test-executor")
+  }
+
+  @Test fun fixedWithMetricsWithTracingEnabled() {
+    val tracer = MockTracer()
+    val meterRegistry = SimpleMeterRegistry()
+    val log = mutableListOf<String>()
+    val factory = RealExecutorServiceFactory(FakeClock())
+    factory.tracer = tracer
+    
+    val executorService = factory.fixedWithMetrics(
+      nameFormat = "traced-metrics-%d",
+      threadCount = 2,
+      meterRegistry = meterRegistry,
+      metricPrefix = "traced.executor",
+      executorServiceName = "traced-executor"
+    )
+
+    factory.startAsync().awaitRunning()
+
+    executorService.execute {
+      log += "traced task"
+    }
+
+    factory.stopAsync().awaitTerminated()
+
+    assertThat(log).containsExactly("traced task")
+    assertThat(tracer.finishedSpans()).hasSize(1)
+    assertThat(tracer.finishedSpans().first().operationName()).isEqualTo("execute")
+    
+    val meters = meterRegistry.meters.filter { it.id.name.startsWith("traced.executor") }
+    assertThat(meters).isNotEmpty
   }
 }

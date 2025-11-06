@@ -10,6 +10,7 @@ dependencies {
   api(libs.guava)
   api(libs.jakartaInject)
   implementation(libs.kotlinStdLibJdk8)
+  implementation(libs.micrometerCore)
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
