@@ -76,7 +76,7 @@ abstract class KAbstractModule : AbstractModule() {
     qualifier: BindingQualifier? = null
   ): Multibinder<T> = newMultibinder(T::class, qualifier)
 
-  protected inline fun <reified T : Any, reified A: Annotation> newMultibinder(
+  protected inline fun <reified T : Any, reified A : Annotation> newMultibinder(
   ): Multibinder<T> = newMultibinder(T::class, A::class)
 
   protected fun <T : Any> newMultibinder(
@@ -108,7 +108,7 @@ abstract class KAbstractModule : AbstractModule() {
 
     return when (qualifier) {
       is InstanceQualifier -> Multibinder.newSetBinder(binder(), type, qualifier.annotation)
-      is TypeClassifier ->  Multibinder.newSetBinder(binder(), type, qualifier.type.java)
+      is TypeClassifier -> Multibinder.newSetBinder(binder(), type, qualifier.type.java)
       null -> Multibinder.newSetBinder(binder(), type)
     }
   }
@@ -143,13 +143,13 @@ abstract class KAbstractModule : AbstractModule() {
     keyType: TypeLiteral<K>,
     valueType: TypeLiteral<V>,
     annotation: KClass<out Annotation>?
-  ): MapBinder<K, V>  = newMapBinder(keyType, valueType, annotation?.qualifier)
+  ): MapBinder<K, V> = newMapBinder(keyType, valueType, annotation?.qualifier)
 
   protected fun <K : Any, V : Any> newMapBinder(
     keyType: TypeLiteral<K>,
     valueType: TypeLiteral<V>,
     annotation: Annotation?
-  ): MapBinder<K, V>  = newMapBinder(keyType, valueType, annotation?.qualifier)
+  ): MapBinder<K, V> = newMapBinder(keyType, valueType, annotation?.qualifier)
 
   protected fun <K : Any, V : Any> newMapBinder(
     keyType: TypeLiteral<K>,
@@ -190,7 +190,7 @@ abstract class KAbstractModule : AbstractModule() {
   protected fun <T : Any> bindOptional(baseSwitchType: KClass<T>): OptionalBinder<T> =
     OptionalBinder.newOptionalBinder(binder(), baseSwitchType.java)
 
-  protected inline fun <reified T: Any> bindOptional(): OptionalBinder<T> = bindOptional(T::class)
+  protected inline fun <reified T : Any> bindOptional(): OptionalBinder<T> = bindOptional(T::class)
 
   protected fun <T : Any> bindOptionalDefault(key: Key<T>): LinkedBindingBuilder<T> =
     OptionalBinder.newOptionalBinder(binder(), key)
@@ -200,7 +200,7 @@ abstract class KAbstractModule : AbstractModule() {
     OptionalBinder.newOptionalBinder(binder(), baseSwitchType.java)
       .setDefault()
 
-  protected inline fun <reified T: Any> bindOptionalDefault(): LinkedBindingBuilder<T> = bindOptionalDefault(T::class)
+  protected inline fun <reified T : Any> bindOptionalDefault(): LinkedBindingBuilder<T> = bindOptionalDefault(T::class)
 
   protected fun <T : Any> bindOptionalBinding(key: Key<T>): LinkedBindingBuilder<T> =
     OptionalBinder.newOptionalBinder(binder(), key)
@@ -210,5 +210,5 @@ abstract class KAbstractModule : AbstractModule() {
     OptionalBinder.newOptionalBinder(binder(), baseSwitchType.java)
       .setBinding()
 
-  protected inline fun <reified T: Any> bindOptionalBinding(): LinkedBindingBuilder<T> = bindOptionalBinding(T::class)
+  protected inline fun <reified T : Any> bindOptionalBinding(): LinkedBindingBuilder<T> = bindOptionalBinding(T::class)
 }

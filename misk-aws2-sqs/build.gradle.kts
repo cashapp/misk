@@ -8,6 +8,7 @@ plugins {
 }
 
 dependencies {
+  api(libs.aws2Auth)
   api(libs.aws2Sqs)
   api(libs.guava)
   api(libs.guice6)
@@ -16,18 +17,16 @@ dependencies {
   api(libs.moshiCore)
   api(libs.openTracing)
   api(libs.prometheusClient)
+  api(project(":misk-aws"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
   api(project(":misk-jobqueue"))
   api(project(":misk-testing-api"))
   api(project(":wisp:wisp-token"))
-  implementation(libs.aws2Auth)
   implementation(libs.aws2Core)
   implementation(libs.aws2Regions)
   implementation(libs.loggingApi)
   implementation(libs.openTracingDatadog)
-  implementation(project(":misk-api"))
-  implementation(project(":misk-aws"))
   implementation(project(":misk-metrics"))
   implementation(project(":misk-moshi"))
   implementation(project(":misk-service"))

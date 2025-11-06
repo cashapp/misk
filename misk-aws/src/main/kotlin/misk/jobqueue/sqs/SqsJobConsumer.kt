@@ -14,6 +14,7 @@ import jakarta.inject.Singleton
 import misk.annotation.ExperimentalMiskApi
 import misk.feature.Feature
 import misk.feature.FeatureFlags
+import misk.inject.AsyncSwitch
 import misk.jobqueue.BatchJobHandler
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobHandler
@@ -53,7 +54,8 @@ internal class SqsJobConsumer @Inject internal constructor(
   private val serviceManagerProvider: Provider<ServiceManager>,
   private val tracer: Tracer,
   private val clock: Clock,
-  awsSqsJobQueueConfig: AwsSqsJobQueueConfig
+  awsSqsJobQueueConfig: AwsSqsJobQueueConfig,
+  private val asyncSwitch: AsyncSwitch,
 ) : JobConsumer {
   private val receiverPolicy = awsSqsJobQueueConfig.aws_sqs_job_receiver_policy
 
@@ -129,7 +131,13 @@ internal class SqsJobConsumer @Inject internal constructor(
           "shutting down receiver for ${queue.queueName}"
         }
         return Status.NO_RESCHEDULE
+      } else if (asyncSwitch.isDisabled("sqs")) {
+        log.info {
+          "Async tasks are disabled on this node. Skipping."
+        }
+        return Status.NO_WORK
       }
+
       val size = sqsConsumerAllocator.computeSqsConsumersForPod(queue.name, receiverPolicy)
       val futures = List(size) {
         CompletableFuture.supplyAsync({ receive() }, receivingThreads)
