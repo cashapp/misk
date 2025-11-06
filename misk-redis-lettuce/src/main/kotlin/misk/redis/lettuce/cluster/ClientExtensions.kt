@@ -12,8 +12,11 @@ import io.lettuce.core.cluster.RedisClusterClient
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection
 import io.lettuce.core.codec.RedisCodec
 import io.lettuce.core.codec.StringCodec
+import io.lettuce.core.internal.HostAndPort
 import io.lettuce.core.resource.ClientResources
 import io.lettuce.core.resource.DefaultClientResources
+import io.lettuce.core.resource.MappingSocketAddressResolver
+import io.lettuce.core.resource.SocketAddressResolver
 import kotlinx.coroutines.future.await
 import misk.redis.lettuce.suspendingUse
 
@@ -47,17 +50,28 @@ import misk.redis.lettuce.suspendingUse
  * @param redisURI Redis connection URI for cluster discovery
  * @param clientResources Client resources configuration (defaults to [DefaultClientResources.create])
  * @param clientOptions Cluster-specific client options (defaults to [ClusterClientOptions.create])
+ * @param socketAddressResolver Optional socket address resolver for host remapping
  * @return Configured [RedisClusterClient] instance
  */
 fun redisClusterClient(
   redisURI: RedisURI,
   clientResources: ClientResources = DefaultClientResources.create(),
-  clientOptions: ClusterClientOptions = ClusterClientOptions.create()
-): RedisClusterClient =
-  RedisClusterClient.create(clientResources, redisURI)
+  clientOptions: ClusterClientOptions = ClusterClientOptions.create(),
+  socketAddressResolver: SocketAddressResolver? = null
+): RedisClusterClient {
+  val effectiveClientResources = if (socketAddressResolver != null) {
+    clientResources.mutate()
+      .socketAddressResolver(socketAddressResolver)
+      .build()
+  } else {
+    clientResources
+  }
+
+  return RedisClusterClient.create(effectiveClientResources, redisURI)
     .apply {
       setOptions(clientOptions)
     }
+}
 
 /**
  * Executes a block with a Redis Cluster connection and automatically closes it afterward.
@@ -71,7 +85,7 @@ fun redisClusterClient(
  * client.withConnection(JsonCodec()) {
  *   // Commands are automatically routed to correct nodes
  *   set("user:123", userJson)
- *   
+ *
  *   // Cluster-specific operations
  *   val topology = clusterNodes()
  *   val slot = clusterKeyslot("user:123")
@@ -182,13 +196,13 @@ inline fun <T> RedisClusterClient.withConnectionBlocking(
  *     enableAllAdaptiveRefreshTriggers()
  *     enablePeriodicRefresh(Duration.ofMinutes(1))
  *   }
- *   
+ *
  *   // Configure timeouts
  *   timeoutOptions {
  *     timeoutCommands(true)
  *     fixedTimeout(Duration.ofSeconds(5))
  *   }
- *   
+ *
  *   // Configure SSL
  *   sslOptions {
  *     keystore(myKeyStore)
@@ -327,10 +341,10 @@ inline fun clusterTopologyRefreshOptions(
  *   clusterTopologyRefreshOptions {
  *     // Refresh on connection failures
  *     enableAllAdaptiveRefreshTriggers()
- *     
+ *
  *     // Also refresh periodically
  *     enablePeriodicRefresh(Duration.ofMinutes(1))
- *     
+ *
  *     // Cleanup and optimization
  *     closeStaleConnections(true)
  *     dynamicRefreshSources(true)
@@ -349,3 +363,28 @@ inline fun ClusterClientOptions.Builder.clusterTopologyRefreshOptions(
       builder
     )
   )
+
+/**
+ * Creates a [SocketAddressResolver] that remaps all hosts to the specified hostname.
+ *
+ * This function creates a [MappingSocketAddressResolver] that will intercept all
+ * socket address resolutions and remap the hostname to the specified value while
+ * preserving the original port. This is useful for cluster deployments where you
+ * want to route all connections through a load balancer or proxy.
+ *
+ * Example:
+ * ```kotlin
+ * val resolver = createHostRemappingResolver("redis-proxy.example.com")
+ * val client = redisClusterClient(
+ *   redisUri = configUri,
+ *   socketAddressResolver = resolver
+ * )
+ * ```
+ *
+ * @param targetHostname The hostname to remap all addresses to
+ * @return Configured [SocketAddressResolver] that remaps hosts
+ */
+fun createHostRemappingResolver(targetHostname: String): SocketAddressResolver =
+  MappingSocketAddressResolver.create { hostAndPort: HostAndPort ->
+      HostAndPort.of(targetHostname, hostAndPort.port)
+  }

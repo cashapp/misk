@@ -131,6 +131,7 @@ class RedisClusterConfig @JvmOverloads constructor(
  * @property use_ssl Whether to use SSL/TLS for Redis connections (default: true)
  * @property timeout_ms Connection and operation timeout in milliseconds (default: 10000ms)
  * @property connection_pool Connection pool settings for this cluster (default: pooling disabled)
+ * @property enable_host_remapping When true, remaps all cluster node hosts to configuration_endpoint hostname (default: false)
  */
 data class RedisClusterGroupConfig @JvmOverloads constructor(
   val client_name: String? = null,
@@ -140,6 +141,7 @@ data class RedisClusterGroupConfig @JvmOverloads constructor(
   val timeout_ms: Int = DEFAULT_TIMEOUT_MS,
   val connection_pool: RedisConnectionPoolConfig = RedisConnectionPoolConfig(),
   val function_code_file_path: String? = null,
+  val enable_host_remapping: Boolean = false,
 )
 
 /**
