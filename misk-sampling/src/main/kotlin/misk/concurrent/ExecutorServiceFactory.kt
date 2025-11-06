@@ -22,7 +22,8 @@ interface ExecutorServiceFactory {
   /** Returns an executor service that uses [Executors.newFixedThreadPool]. */
   fun fixed(nameFormat: String, threadCount: Int): ExecutorService
 
-  /** Returns an executor service that uses [Executors.newFixedThreadPool]. */
+  /** Returns an executor service that uses [Executors.newFixedThreadPool].
+   * Also emits metrics to monitor the status of the executor service */
   fun fixedWithMetrics(nameFormat: String, threadCount: Int, meterRegistry: MeterRegistry, metricPrefix: String,
     executorServiceName: String): ExecutorService
 
