@@ -12,7 +12,7 @@ import kotlinx.coroutines.withContext
 import misk.annotation.ExperimentalMiskApi
 import misk.logging.getLogger
 import misk.mcp.MiskMcpServer
-import misk.mcp.internal.McpJson
+import misk.mcp.decode
 import misk.mcp.internal.McpServerSession
 import misk.mcp.internal.MiskServerTransport
 import misk.mcp.internal.MiskStreamableHttpServerTransport
@@ -249,7 +249,7 @@ class McpStreamManager internal constructor(
     
     override fun onMessage(webSocket: WebSocket, text: String) {
       logger.debug { "Received message: $text" }
-      val message: JSONRPCMessage = McpJson.decodeFromString(text)
+      val message: JSONRPCMessage = text.decode()
       coroutineScope.launch { serverSession.handleMessage(message) }
     }
 

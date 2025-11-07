@@ -5,15 +5,16 @@ import io.modelcontextprotocol.kotlin.sdk.CallToolRequest
 import io.modelcontextprotocol.kotlin.sdk.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.Implementation
 import io.modelcontextprotocol.kotlin.sdk.ServerCapabilities
+import io.modelcontextprotocol.kotlin.sdk.Tool
 import io.modelcontextprotocol.kotlin.sdk.ToolAnnotations
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
 import misk.annotation.ExperimentalMiskApi
-import misk.logging.getLogger
 import misk.mcp.config.McpServerConfig
 import misk.mcp.config.asPrompts
 import misk.mcp.config.asResources
 import misk.mcp.config.asTools
+import misk.mcp.internal.build
 import kotlin.time.TimeSource
 
 /**
@@ -144,17 +145,18 @@ class MiskMcpServer internal constructor(
 
     tools.forEach { tool ->
       addTool(
-        name = tool.name,
-        description = tool.description,
-        inputSchema = tool.inputSchema,
-        outputSchema = tool.outputSchema,
-        toolAnnotations = ToolAnnotations(
-          title = tool.title,
-          readOnlyHint = tool.readOnlyHint,
-          destructiveHint = tool.destructiveHint,
-          idempotentHint = tool.idempotentHint,
-          openWorldHint = tool.openWorldHint,
-        ),
+        tool = Tool.build(tool.name, tool.inputSchema) {
+          description = tool.description
+          tool.outputSchema?.let { outputSchema = it }
+          annotations = ToolAnnotations.build {
+            title = tool.title
+            readOnlyHint = tool.readOnlyHint
+            destructiveHint = tool.destructiveHint
+            idempotentHint = tool.idempotentHint
+            openWorldHint = tool.openWorldHint
+          }
+          tool._meta?.let { _meta = it }
+        },
         handler = metricReportingHandler(tool.name, tool::handler),
       )
     }
@@ -182,12 +184,6 @@ class MiskMcpServer internal constructor(
         mcpMetrics.mcpToolHandlerLatency(duration, name, toolName, outcome)
       }
     }
-  }
-
-
-
-  companion object {
-    private val logger = getLogger<MiskMcpServer>()
   }
 }
 

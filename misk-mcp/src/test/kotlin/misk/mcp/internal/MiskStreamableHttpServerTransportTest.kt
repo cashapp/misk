@@ -10,17 +10,12 @@ import io.modelcontextprotocol.kotlin.sdk.JSONRPCRequest
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCResponse
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.put
 import misk.annotation.ExperimentalMiskApi
 import misk.exceptions.BadRequestException
 import misk.exceptions.NotFoundException
 import misk.mcp.InMemoryMcpSessionHandler
+import misk.mcp.McpJson
 import misk.mcp.McpSessionHandler
-import misk.mcp.McpTool
 import misk.mcp.action.SESSION_ID_HEADER
 import misk.web.HttpCall
 import misk.web.sse.ServerSentEvent
@@ -36,10 +31,9 @@ class MiskStreamableHttpServerTransportTest {
   private val httpCall = mockk<HttpCall>(relaxed = true)
   private val mcpSessionHandler = InMemoryMcpSessionHandler()
   private val sendChannel = mockk<SendChannel<ServerSentEvent>>(relaxed = true)
-  private val mcpTools = emptySet<McpTool<*>>()
 
-  private fun buildTransport(sessionHandler: McpSessionHandler? = null, tools: Set<McpTool<*>> = mcpTools) =
-    MiskStreamableHttpServerTransport(httpCall, sessionHandler, sendChannel, tools)
+  private fun buildTransport(sessionHandler: McpSessionHandler? = null) =
+    MiskStreamableHttpServerTransport(httpCall, sessionHandler, sendChannel)
 
   private val testRequest = McpJson.decodeFromString<JSONRPCRequest>(
     """
@@ -87,28 +81,6 @@ class MiskStreamableHttpServerTransportTest {
         "id": "test-123",
         "result": {
           "tools": []
-        }
-      }
-    """.trimIndent(),
-  )
-
-  private val listToolsResponse = McpJson.decodeFromString<JSONRPCResponse>(
-    """
-      {
-        "jsonrpc": "2.0",
-        "id": "test-123",
-        "result": {
-          "tools": [
-            {
-              "name": "test-tool",
-              "description": "A test tool",
-              "inputSchema": {
-                "type": "object",
-                "properties": {},
-                "required": []
-              }
-            }
-          ]
         }
       }
     """.trimIndent(),
@@ -401,56 +373,5 @@ class MiskStreamableHttpServerTransportTest {
     assertTrue(sessionId1 != sessionId2)
     assertTrue(mcpSessionHandler.isActive(sessionId1))
     assertTrue(mcpSessionHandler.isActive(sessionId2))
-  }
-
-  @Test
-  fun `send() includes tool metadata in ListToolsResult response`() = runTest {
-    // Create a mock tool with metadata
-    val testMetadata = buildJsonObject {
-      put("category", "test")
-      put("version", "1.0")
-    }
-
-    val testTool = object : McpTool<Unit>() {
-      override val name = "test-tool"
-      override val description = "A test tool"
-      override val metadata = testMetadata
-
-      override suspend fun handle(input: Unit) = throw NotImplementedError("Not used in test")
-    }
-
-    val tools = setOf(testTool)
-    val transport = buildTransport(tools = tools)
-    transport.start()
-
-    // Send the predefined ListToolsResult response through the transport
-    transport.send(listToolsResponse)
-
-    // Verify the SSE was sent with metadata included
-    val eventSlot = slot<ServerSentEvent>()
-    coVerify { sendChannel.send(capture(eventSlot)) }
-
-    val sentEvent = eventSlot.captured
-    assertEquals("message", sentEvent.event)
-
-    // Parse the JSON data to verify metadata was added
-    val sentData = McpJson.parseToJsonElement(sentEvent.data!!).jsonObject
-    val result = sentData["result"]!!.jsonObject
-    val toolsArray = result["tools"]!!.jsonArray
-    val tool = toolsArray[0].jsonObject
-
-    // Verify the metadata was added as _meta
-    val metaField = tool["_meta"]
-    assertNotNull(metaField, "Tool should have _meta field with metadata")
-    assertEquals(testMetadata, metaField)
-
-    // Verify all other fields remain unchanged from the original response
-    assertEquals("test-tool", tool["name"]?.jsonPrimitive?.content)
-    assertEquals("A test tool", tool["description"]?.jsonPrimitive?.content)
-    assertNotNull(tool["inputSchema"], "inputSchema should be preserved")
-
-    // Verify the structure is preserved (only _meta was added)
-    val expectedKeys = setOf("name", "description", "inputSchema", "_meta")
-    assertEquals(expectedKeys, tool.keys)
   }
 }
