@@ -16,6 +16,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import jakarta.inject.Inject
+import java.time.Duration
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -114,6 +115,22 @@ internal class MoshiModuleTest {
     val jsonAdapter = moshi.adapter<OffsetDateTime>()
     assertThat(jsonAdapter.toJson(value)).isEqualTo(json)
     assertThat(jsonAdapter.fromJson(json)).isEqualTo(value)
+  }
+
+  @Test
+  fun `Duration adapter converts from and to json`() {
+    val json = "\"PT5M\""
+    val value = Duration.ofMinutes(5)
+    val jsonAdapter = moshi.adapter<Duration>()
+    assertThat(jsonAdapter.toJson(value)).isEqualTo(json)
+    assertThat(jsonAdapter.fromJson(json)).isEqualTo(value)
+  }
+
+  @Test
+  fun `Duration adapter handles null values`() {
+    val jsonAdapter = moshi.adapter<Duration?>()
+    assertThat(jsonAdapter.toJson(null)).isEqualTo("null")
+    assertThat(jsonAdapter.fromJson("null")).isNull()
   }
 
   class TestModule : KAbstractModule() {

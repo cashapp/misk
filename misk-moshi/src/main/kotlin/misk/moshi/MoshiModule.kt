@@ -6,6 +6,7 @@ import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
 import misk.inject.KAbstractModule
 import misk.moshi.adapters.BigDecimalAdapter
 import misk.moshi.okio.ByteStringAdapter
+import misk.moshi.time.DurationAdapter
 import misk.moshi.time.InstantAdapter
 import misk.moshi.time.LocalDateAdapter
 import wisp.moshi.buildMoshi
@@ -58,6 +59,7 @@ class MoshiModule @JvmOverloads constructor(
   companion object {
     val defaultMoshiAdapters = listOf(
       ByteStringAdapter,
+      DurationAdapter,
       InstantAdapter,
       BigDecimalAdapter,
       LocalDateAdapter,
