@@ -5,22 +5,18 @@ import com.google.common.util.concurrent.AbstractService
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
-import com.google.inject.Key
-import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.Scopes
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlin.test.assertFailsWith
 import misk.inject.AsyncSwitch
+import misk.inject.ConditionalProvider
 import misk.inject.KAbstractModule
-import misk.inject.Switch
 import misk.inject.getInstance
 import misk.inject.keyOf
-import misk.inject.toKey
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import kotlin.reflect.KClass
 
 internal class ServiceManagerModuleTest {
   @Singleton
@@ -121,78 +117,6 @@ internal class ServiceManagerModuleTest {
       )
   }
 
-  inline fun <reified S : Switch, reified O : Any, reified T : Any, reified E : T, reified D : T>ConditionalProvider(
-    id: String,
-    noinline transformer: (T) -> O = { it as O },
-    ) = ConditionalProvider(id, S::class, O::class, T::class, E::class, D::class, transformer)
-
-  class ConditionalProvider<S : Switch, O : Any, T : Any, E : T, D : T>(
-    val id: String,
-    val switchType: KClass<out S>, val outputType: KClass<out O>, val type: KClass<out T>, val enabledType: KClass<out E>, val disabledType: KClass<out D>,
-    val transformer: (T) -> O = { it as O },
-  ) : Provider<O> {
-    @Inject lateinit var switch: S
-    @Inject lateinit var enabled: E
-    @Inject lateinit var disabled: D
-
-    override fun get(): O? {
-      return if (switch.isEnabled(id)) {
-        transformer(enabled)
-      } else {
-        transformer(disabled)
-      }
-    }
-  }
-
-  class NoOpService : AbstractIdleService() {
-    override fun startUp() {}
-
-    override fun shutDown() {}
-  }
-
-  inline fun <reified S : Switch, reified O : Any, reified T : Any, reified E : T, reified D : T>ConditionalServiceModule(
-    id: String,
-    noinline transformer: (T) -> O = { it as O },
-  ) = ConditionalProvider(id, S::class, O::class, T::class, E::class, D::class, transformer)
-
-
-  class ConditionalServiceModule(
-    val id: String,
-    val switch: KClass<out Switch>,
-    val key: Key<out Service>,
-    val disabledKey: Key<out Service>,
-    val dependsOn: List<Key<out Service>> = listOf(),
-    val enhancedBy: List<Key<out Service>> = listOf(),
-  ) : KAbstractModule() {
-    override fun configure() {
-//      multibind<ServiceEntry>()
-//        .toProvider(
-//          ConditionalProvider<AsyncSwitch, ServiceEntry, Service, SingletonService1, NoOpService>(
-//            "sqs",
-//          ) {
-//            ServiceEntry(it::class.toKey())
-//          }
-//        )
-
-      multibind<ServiceEntry>()
-        .toProvider(
-          ConditionalProvider(
-            id,
-            switch, ServiceEntry::class, Key::class, key.typeLiteral.javaClass.kotlin, disabledKey.typeLiteral.javaClass.kotlin,
-          ) {
-            ServiceEntry(it as Key<out Service>)
-          }
-        )
-
-      for (dependsOnKey in dependsOn) {
-        multibind<DependencyEdge>().toInstance(DependencyEdge(dependent = key, dependsOn = dependsOnKey))
-      }
-      for (enhancedByKey in enhancedBy) {
-        multibind<EnhancementEdge>().toInstance(EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey))
-      }
-    }
-  }
-
   @Test
   fun detectsNonSingletonServiceEntries() {
     assertThat(
@@ -203,8 +127,6 @@ internal class ServiceManagerModuleTest {
                 object : KAbstractModule() {
                   override fun configure() {
                     // Should be recognized as singletons
-                    multibind<ServiceEntry>().toProvider(ConditionalProvider<AsyncSwitch>("sqs", Service::class, Sqs))
-
                     install(ServiceModule<SingletonService1>())
                     install(ServiceModule<SingletonService2>())
                     install(ServiceModule<SingletonService3>())
