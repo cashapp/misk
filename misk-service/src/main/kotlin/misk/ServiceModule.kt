@@ -1,10 +1,16 @@
 package misk
 
+import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import kotlin.reflect.KClass
+import misk.inject.AlwaysOnSwitch
+import misk.inject.ConditionalProvider
+import misk.inject.ConditionalProvider2
 import misk.inject.KAbstractModule
+import misk.inject.Switch
 import misk.inject.toKey
+import misk.inject.typeLiteral
 
 /**
  * # Misk Services
@@ -69,11 +75,15 @@ import misk.inject.toKey
  * This service will stall in the `STARTING` state until all upstream services are `RUNNING`. Symmetrically it stalls in
  * the `STOPPING` state until all dependent services are `TERMINATED`.
  */
-@Suppress("AnnotatePublicApisWithJvmOverloads")
-class ServiceModule(
+class ServiceModule
+@JvmOverloads
+constructor(
   val key: Key<out Service>,
   val dependsOn: List<Key<out Service>> = listOf(),
   val enhancedBy: List<Key<out Service>> = listOf(),
+  val switchKey: String = "default",
+  val switchType: KClass<out Switch>? = AlwaysOnSwitch::class,
+  val disabledKey: Key<out Service> = key.ofType(NoOpService::class.typeLiteral()),
 ) : KAbstractModule() {
 
   // This constructor exists for binary-compatibility with older callers.
@@ -83,22 +93,74 @@ class ServiceModule(
     dependsOn: List<Key<out Service>> = listOf(),
     enhancedBy: List<Key<out Service>> = listOf(),
     @Suppress("UNUSED_PARAMETER") enhances: Key<out Service>? = null,
-  ) : this(key = key, dependsOn = dependsOn, enhancedBy = enhancedBy)
+  ) : this(key = key, dependsOn = dependsOn, enhancedBy = enhancedBy, switchKey = "default")
 
   override fun configure() {
-    multibind<ServiceEntry>().toInstance(ServiceEntry(key))
+    if (switchType != null) {
+      multibind<ServiceEntry>()
+        .toProvider(
+          ConditionalProvider2(
+            switchKey,
+            switchType,
+            ServiceEntry::class,
+            Key::class,
+            key,
+            disabledKey,
+          ) {
+            ServiceEntry(it as Key<out Service>)
+          }
+        )
+    } else {
+      multibind<ServiceEntry>().toInstance(ServiceEntry(key))
+    }
 
     for (dependsOnKey in dependsOn) {
-      multibind<DependencyEdge>().toInstance(DependencyEdge(dependent = key, dependsOn = dependsOnKey))
+      if (switchType != null) {
+        multibind<DependencyEdge>()
+          .toProvider(
+            ConditionalProvider2(
+              switchKey,
+              switchType,
+              DependencyEdge::class,
+              Key::class,
+              key,
+              disabledKey,
+            ) {
+              DependencyEdge(dependent = it, dependsOn = dependsOnKey)
+            }
+          )
+      } else {
+        multibind<DependencyEdge>().toInstance(DependencyEdge(dependent = key, dependsOn = dependsOnKey))
+      }
     }
     for (enhancedByKey in enhancedBy) {
-      multibind<EnhancementEdge>().toInstance(EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey))
+      if (switchType != null) {
+        multibind<EnhancementEdge>()
+          .toProvider(
+            ConditionalProvider2(
+              switchKey,
+              switchType,
+              EnhancementEdge::class,
+              Key::class,
+              key,
+              disabledKey,
+            ) {
+              EnhancementEdge(toBeEnhanced = it, enhancement = enhancedByKey)
+            }
+          )
+      } else {
+        multibind<EnhancementEdge>().toInstance(EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey))
+      }
     }
   }
 
   fun dependsOn(upstream: Key<out Service>) = ServiceModule(key, dependsOn + upstream, enhancedBy)
 
+  fun dependsOn(upstream: List<Key<out Service>>) = ServiceModule(key, dependsOn + upstream, enhancedBy)
+
   fun enhancedBy(enhancement: Key<out Service>) = ServiceModule(key, dependsOn, enhancedBy + enhancement)
+
+  fun enhancedBy(enhancement: List<Key<out Service>>) = ServiceModule(key, dependsOn, enhancedBy + enhancement)
 
   @JvmOverloads
   inline fun <reified T : Service> dependsOn(qualifier: KClass<out Annotation>? = null) =
@@ -137,8 +199,33 @@ class ServiceModule(
 inline fun <reified T : Service> ServiceModule(qualifier: KClass<out Annotation>? = null) =
   ServiceModule(T::class.toKey(qualifier))
 
+inline fun <reified T : Service> ServiceModule(
+  qualifier: KClass<out Annotation>? = null,
+  switchKey: String = "default",
+  switchType: KClass<out Switch> = AlwaysOnSwitch::class,
+) = ServiceModule(key = T::class.toKey(qualifier), switchKey = switchKey, switchType = switchType)
+
+inline fun <reified T : Service, reified S : Switch> ServiceModule(
+  switchKey: String = "default",
+) = ServiceModule(key = T::class.toKey(), switchKey = switchKey, switchType = S::class)
+
+inline fun <reified T : Service, reified S : Switch> ServiceModule(
+  qualifier: KClass<out Annotation>? = null,
+  switchKey: String = "default",
+) = ServiceModule(key = T::class.toKey(qualifier), switchKey = switchKey, switchType = S::class)
+
+inline fun <reified T : Service, reified Q : Annotation, reified S : Switch> ServiceModule(
+  switchKey: String = "default"
+) = ServiceModule(key = T::class.toKey(Q::class), switchKey = switchKey, switchType = S::class)
+
 internal data class EnhancementEdge(val toBeEnhanced: Key<*>, val enhancement: Key<*>)
 
 internal data class DependencyEdge(val dependent: Key<*>, val dependsOn: Key<*>)
 
 internal data class ServiceEntry(val key: Key<out Service>)
+
+class NoOpService : AbstractIdleService() {
+  override fun startUp() {}
+
+  override fun shutDown() {}
+}

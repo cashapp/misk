@@ -13,6 +13,7 @@ dependencies {
   implementation(libs.kotlinReflect)
   implementation(libs.kotlinStdLibJdk8)
   implementation(project(":misk-api"))
+  implementation(project(":misk-logging"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)

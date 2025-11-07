@@ -5,6 +5,7 @@ import com.google.inject.Key
 import kotlin.reflect.KClass
 import misk.ReadyService
 import misk.ServiceModule
+import misk.inject.AsyncSwitch
 import misk.inject.KAbstractModule
 import misk.inject.toKey
 import misk.jobqueue.BatchJobHandler
@@ -28,7 +29,8 @@ private constructor(
     // TODO remove explicit inline environment variable check once AsyncModule filtering in Guice is working
     if (!System.getenv("DISABLE_ASYNC_TASKS").toBoolean()) {
       install(
-        ServiceModule(key = AwsSqsJobHandlerSubscriptionService::class.toKey(), dependsOn = dependsOn)
+        ServiceModule<AwsSqsJobHandlerSubscriptionService, AsyncSwitch>()
+          .dependsOn(dependsOn)
           .dependsOn<ReadyService>()
       )
     }
