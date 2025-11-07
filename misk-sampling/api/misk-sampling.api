@@ -1,5 +1,6 @@
 public abstract interface class misk/concurrent/ExecutorServiceFactory {
 	public abstract fun fixed (Ljava/lang/String;I)Ljava/util/concurrent/ExecutorService;
+	public abstract fun fixedWithMetrics (Ljava/lang/String;ILio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;Ljava/lang/String;)Ljava/util/concurrent/ExecutorService;
 	public abstract fun scheduled (Ljava/lang/String;I)Ljava/util/concurrent/ScheduledExecutorService;
 	public abstract fun single (Ljava/lang/String;)Ljava/util/concurrent/ExecutorService;
 	public abstract fun unbounded (Ljava/lang/String;)Ljava/util/concurrent/ExecutorService;
