@@ -148,7 +148,7 @@ internal class WebActionBindingTest {
   }
 
   @Test
-  internal fun deleteCanClaimRequestBody() {
+  internal fun claimDeleteRequestBody() {
     val binding = webActionBindingFactory.create(
       TestAction::fakeApiCall.asAction(DispatchMechanism.DELETE), pathPattern
     )
