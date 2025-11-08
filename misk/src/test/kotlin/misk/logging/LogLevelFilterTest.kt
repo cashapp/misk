@@ -195,4 +195,4 @@ class LogLevelFilterTest {
     assertEquals(FilterReply.NEUTRAL, filter.decide(null, dynamodbv3Logger, Level.TRACE, null, null, null))
     assertEquals(FilterReply.NEUTRAL, filter.decide(null, hibernateUtilLogger, Level.DEBUG, null, null, null))
   }
-}q
+}
