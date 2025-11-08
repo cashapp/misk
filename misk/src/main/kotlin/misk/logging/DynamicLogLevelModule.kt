@@ -19,7 +19,7 @@ import misk.tasks.RepeatedTaskQueueFactory
  * ### 1. Install the module
  *
  * ```kotlin
- * install(DynamicLogLevelModule(DynamicLoggingConfig(enabled=true, featureFlag="dynamic-log-level")))
+ * install(DynamicLogLevelModule(DynamicLoggingConfig(enabled=true, feature_flag_name="dynamic-log-level")))
  * ```
  *
  * ### 2. Set the feature flag

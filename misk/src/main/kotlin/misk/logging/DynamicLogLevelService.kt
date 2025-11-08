@@ -50,7 +50,5 @@ constructor(
 
   companion object {
     private val logger = getLogger<DynamicLogLevelService>()
-    const val UNSET = "UNSET"
-    const val POD_NAME = "MY_POD_NAME"
   }
 }

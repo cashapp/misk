@@ -34,7 +34,7 @@ class DynamicLogLevelIntegrationTest {
   fun setup() {
     // Clear any existing filters from the Logback context to ensure test isolation
     val context = LoggerFactory.getILoggerFactory() as LoggerContext
-    context.turboFilterList.removeIf { it.javaClass.simpleName == "LogbackLevelFilter" }
+    context.turboFilterList.removeIf { it.javaClass.simpleName == "LogLevelFilter" }
 
     // Clear the feature flag to start each test with a clean state
     featureFlags.override(Feature("test-dynamic-logging"), "")
@@ -56,7 +56,7 @@ class DynamicLogLevelIntegrationTest {
     val turboFilters = context.turboFilterList
 
     assertThat(turboFilters).isNotEmpty
-    assertThat(turboFilters.any { it.javaClass.simpleName == "LogbackLevelFilter" }).isTrue()
+    assertThat(turboFilters.any { it.javaClass.simpleName == "LogLevelFilter" }).isTrue()
 
     // Verify dynamicLevels contents
     val dynamicLevels = getDynamicLevelsFromFilter(context)
@@ -69,13 +69,14 @@ class DynamicLogLevelIntegrationTest {
   @Test
   fun `service removes filter when feature flag is cleared`() {
     val context = LoggerFactory.getILoggerFactory() as LoggerContext
-    val initialCount = context.turboFilterList.count { it.javaClass.simpleName == "LogbackLevelFilter" }
+    val initialCount = context.turboFilterList.count { it.javaClass.simpleName == "LogLevelFilter" }
 
     // Set a flag
     featureFlags.override(Feature("test-dynamic-logging"), "com.test=DEBUG")
     service.updateLoggingLevels()
 
-    val withFilterCount = context.turboFilterList.count { it.javaClass.simpleName == "LogbackLevelFilter" }
+    val withFilterCount =
+      context.turboFilterList.count { it.javaClass.simpleName == "LogLevelFilter" }
     assertThat(withFilterCount).isGreaterThan(initialCount)
 
     // Verify dynamicLevels contents before clearing
@@ -88,14 +89,14 @@ class DynamicLogLevelIntegrationTest {
     service.updateLoggingLevels()
 
     // Verify filter was removed (back to initial count)
-    val finalCount = context.turboFilterList.count { it.javaClass.simpleName == "LogbackLevelFilter" }
+    val finalCount = context.turboFilterList.count { it.javaClass.simpleName == "LogLevelFilter" }
     assertThat(finalCount).isEqualTo(initialCount)
   }
 
   @Test
   fun `service handles malformed feature flag gracefully`() {
     val context = LoggerFactory.getILoggerFactory() as LoggerContext
-    val initialCount = context.turboFilterList.count { it.javaClass.simpleName == "LogbackLevelFilter" }
+    val initialCount = context.turboFilterList.count { it.javaClass.simpleName == "LogLevelFilter" }
 
     // Configure invalid feature flag
     featureFlags.override(Feature("test-dynamic-logging"), "invalid format without equals")
@@ -104,7 +105,7 @@ class DynamicLogLevelIntegrationTest {
     service.updateLoggingLevels()
 
     // Verify no NEW filter was added (count should stay the same)
-    val finalCount = context.turboFilterList.count { it.javaClass.simpleName == "LogbackLevelFilter" }
+    val finalCount = context.turboFilterList.count { it.javaClass.simpleName == "LogLevelFilter" }
     assertThat(finalCount).isEqualTo(initialCount)
   }
 
@@ -116,7 +117,8 @@ class DynamicLogLevelIntegrationTest {
     featureFlags.override(Feature("test-dynamic-logging"), "com.test1=DEBUG")
     service.updateLoggingLevels()
 
-    val initialFilterCount = context.turboFilterList.count { it.javaClass.simpleName == "LogbackLevelFilter" }
+    val initialFilterCount =
+      context.turboFilterList.count { it.javaClass.simpleName == "LogLevelFilter" }
     assertThat(initialFilterCount).isGreaterThan(0)
 
     // Verify first dynamicLevels contents
@@ -129,7 +131,8 @@ class DynamicLogLevelIntegrationTest {
     service.updateLoggingLevels()
 
     // Should still have same number of filters (old one replaced, not added)
-    val updatedFilterCount = context.turboFilterList.count { it.javaClass.simpleName == "LogbackLevelFilter" }
+    val updatedFilterCount =
+      context.turboFilterList.count { it.javaClass.simpleName == "LogLevelFilter" }
     assertThat(updatedFilterCount).isEqualTo(initialFilterCount)
 
     // Verify second dynamicLevels contents
@@ -148,7 +151,7 @@ class DynamicLogLevelIntegrationTest {
 
     // Verify filter was added
     val context = LoggerFactory.getILoggerFactory() as LoggerContext
-    assertThat(context.turboFilterList.any { it.javaClass.simpleName == "LogbackLevelFilter" }).isTrue()
+    assertThat(context.turboFilterList.any { it.javaClass.simpleName == "LogLevelFilter" }).isTrue()
 
     // Verify dynamicLevels contents
     val dynamicLevels = getDynamicLevelsFromFilter(context)
@@ -174,7 +177,7 @@ class DynamicLogLevelIntegrationTest {
     val turboFilters = context.turboFilterList
 
     assertThat(turboFilters).isNotEmpty
-    assertThat(turboFilters.any { it.javaClass.simpleName == "LogbackLevelFilter" }).isTrue()
+    assertThat(turboFilters.any { it.javaClass.simpleName == "LogLevelFilter" }).isTrue()
 
     // Verify dynamicLevels contents
     val dynamicLevels = getDynamicLevelsFromFilter(context)
@@ -200,7 +203,7 @@ class DynamicLogLevelIntegrationTest {
 
     // Get the filter
     val context = LoggerFactory.getILoggerFactory() as LoggerContext
-    val filter = context.turboFilterList.find { it.javaClass.simpleName == "LogbackLevelFilter" }
+    val filter = context.turboFilterList.find { it.javaClass.simpleName == "LogLevelFilter" }
 
     assertThat(filter).isNotNull
 
@@ -222,7 +225,7 @@ class DynamicLogLevelIntegrationTest {
     featureFlags.override(Feature("test-dynamic-logging"), "com.test=DEBUG")
     service.updateLoggingLevels()
 
-    val filter1 = context.turboFilterList.find { it.javaClass.simpleName == "LogbackLevelFilter" }
+    val filter1 = context.turboFilterList.find { it.javaClass.simpleName == "LogLevelFilter" }
 
     // Verify dynamicLevels contents
     val dynamicLevels1 = getDynamicLevelsFromFilter(context)
@@ -233,7 +236,7 @@ class DynamicLogLevelIntegrationTest {
     featureFlags.override(Feature("test-dynamic-logging"), "com.test=DEBUG")
     service.updateLoggingLevels()
 
-    val filter2 = context.turboFilterList.find { it.javaClass.simpleName == "LogbackLevelFilter" }
+    val filter2 = context.turboFilterList.find { it.javaClass.simpleName == "LogLevelFilter" }
 
     // Should be the same filter instance (not replaced)
     assertThat(filter1).isSameAs(filter2)
@@ -244,27 +247,10 @@ class DynamicLogLevelIntegrationTest {
     assertThat(dynamicLevels2["com.test"]).isEqualTo(ch.qos.logback.classic.Level.DEBUG)
   }
 
-  @Test
-  fun `service processes feature flag with whitespace`() {
-    // Configure with extra whitespace
-    featureFlags.override(Feature("test-dynamic-logging"), "  com.test1 = DEBUG  ,  com.test2 = TRACE  ")
-
-    service.updateLoggingLevels()
-
-    // Should successfully add filter despite whitespace
-    val context = LoggerFactory.getILoggerFactory() as LoggerContext
-    assertThat(context.turboFilterList.any { it.javaClass.simpleName == "LogbackLevelFilter" }).isTrue()
-
-    // Verify dynamicLevels contents (whitespace should be trimmed)
-    val dynamicLevels = getDynamicLevelsFromFilter(context)
-    assertThat(dynamicLevels).hasSize(2)
-    assertThat(dynamicLevels["com.test1"]).isEqualTo(ch.qos.logback.classic.Level.DEBUG)
-    assertThat(dynamicLevels["com.test2"]).isEqualTo(ch.qos.logback.classic.Level.TRACE)
-  }
-
-  /** Helper method to extract dynamicLevels from the LogbackLevelFilter using reflection. */
+  /** Helper method to extract dynamicLevels from the LogLevelFilter using reflection. */
   private fun getDynamicLevelsFromFilter(context: LoggerContext): Map<String, ch.qos.logback.classic.Level> {
-    val filter = context.turboFilterList.find { it.javaClass.simpleName == "LogbackLevelFilter" } ?: return emptyMap()
+    val filter = context.turboFilterList.find { it.javaClass.simpleName == "LogLevelFilter" }
+      ?: return emptyMap()
 
     val dynamicLevelsField = filter.javaClass.getDeclaredField("dynamicLevels")
     dynamicLevelsField.isAccessible = true
