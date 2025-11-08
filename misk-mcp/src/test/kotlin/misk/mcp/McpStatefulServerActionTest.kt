@@ -10,7 +10,6 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.decodeFromJsonElement
 import misk.MiskTestingServiceModule
 import misk.annotation.ExperimentalMiskApi
 import misk.inject.KAbstractModule
@@ -21,7 +20,6 @@ import misk.mcp.action.SESSION_ID_HEADER
 import misk.mcp.action.handleMessage
 import misk.mcp.config.McpConfig
 import misk.mcp.config.McpServerConfig
-import misk.mcp.internal.McpJson
 import misk.mcp.testing.asMcpStreamableHttpClient
 import misk.mcp.tools.SessionIdentifierOutput
 import misk.mcp.tools.SessionIdentifierTool
@@ -155,9 +153,7 @@ internal class McpStatefulServerActionTest {
     assertNotNull(response.structuredContent)
 
     // Parse the structured result
-    val structuredResult = McpJson.decodeFromJsonElement<SessionIdentifierOutput>(
-      response.structuredContent!!,
-    )
+    val structuredResult = assertNotNull(response.structuredContent).decode<SessionIdentifierOutput>()
 
     val sessionIdFromTool = structuredResult.sessionId
     assertTrue(sessionIdFromTool.isNotBlank())

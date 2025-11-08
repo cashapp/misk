@@ -9,6 +9,7 @@ import io.modelcontextprotocol.kotlin.sdk.JSONRPCNotification
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCRequest
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCResponse
 import kotlinx.coroutines.test.runTest
+import misk.mcp.McpJson
 import misk.web.HttpCall
 import misk.web.actions.WebSocket
 import kotlin.test.Test
@@ -474,7 +475,7 @@ class MiskWebSocketServerTransportTest {
     every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns "mcp"
     
     // Create transport - this triggers the init block
-    val transport = buildTransport()
+    @Suppress("unused") val transport = buildTransport()
     
     // Verify that the response header was set during initialization
     verify { httpCall.setResponseHeader("Sec-WebSocket-Protocol", "mcp") }

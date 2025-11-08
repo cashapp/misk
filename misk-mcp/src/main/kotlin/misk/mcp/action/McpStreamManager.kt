@@ -12,7 +12,7 @@ import kotlinx.coroutines.withContext
 import misk.annotation.ExperimentalMiskApi
 import misk.logging.getLogger
 import misk.mcp.MiskMcpServer
-import misk.mcp.internal.McpJson
+import misk.mcp.decode
 import misk.mcp.internal.McpServerSession
 import misk.mcp.internal.MiskServerTransport
 import misk.mcp.internal.MiskStreamableHttpServerTransport
@@ -205,7 +205,7 @@ class McpStreamManager internal constructor(
     }
 
 
-    val session = mcpServer.connect(transport).initialize()
+    val session = mcpServer.createSession(transport).initialize()
 
     try {
       withContext(McpServerSession(session)) {
@@ -237,7 +237,7 @@ class McpStreamManager internal constructor(
     private val webSocketTransport = webSocketsServerTransportFactory.create(webSocket).also {
       logger.debug { "New Websocket connection established with streamId: ${it.streamId}" }
     }
-    private val serverSession = runBlocking { mcpServer.connect(webSocketTransport) }.initialize()
+    private val serverSession = runBlocking { mcpServer.createSession(webSocketTransport) }.initialize()
 
     // Because there may be requests/responses sent inline over the websocket,
     // we need to move the handling to a different thread so that websocket handling
@@ -249,7 +249,7 @@ class McpStreamManager internal constructor(
     
     override fun onMessage(webSocket: WebSocket, text: String) {
       logger.debug { "Received message: $text" }
-      val message: JSONRPCMessage = McpJson.decodeFromString(text)
+      val message: JSONRPCMessage = text.decode()
       coroutineScope.launch { serverSession.handleMessage(message) }
     }
 
