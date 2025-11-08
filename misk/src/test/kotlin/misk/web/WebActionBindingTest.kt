@@ -148,14 +148,13 @@ internal class WebActionBindingTest {
   }
 
   @Test
-  internal fun claimDeleteRequestBody() {
-    val e = assertFailsWith<IllegalStateException> {
-      webActionBindingFactory.create(
-        TestAction::fakeApiCall.asAction(DispatchMechanism.DELETE), pathPattern
-      )
-    }
-    assertThat(e).hasMessage("cannot claim request body of DELETE")
+  internal fun deleteCanClaimRequestBody() {
+    val binding = webActionBindingFactory.create(
+      TestAction::fakeApiCall.asAction(DispatchMechanism.DELETE), pathPattern
+    )
+    assertThat(binding).isNotNull()
   }
+
 
   @Test
   internal fun claimReturnValueOnActionThatReturnsUnit() {
