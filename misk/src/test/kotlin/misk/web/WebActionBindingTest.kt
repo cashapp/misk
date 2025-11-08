@@ -155,7 +155,6 @@ internal class WebActionBindingTest {
     assertThat(binding).isNotNull()
   }
 
-
   @Test
   internal fun claimReturnValueOnActionThatReturnsUnit() {
     val e = assertFailsWith<IllegalStateException> {
