@@ -899,6 +899,56 @@ public final class misk/jvm/JvmManagementFactoryModule : misk/inject/KInstallOnc
 	public final fun provideRuntimeMxBean ()Ljava/lang/management/RuntimeMXBean;
 }
 
+public abstract interface annotation class misk/logging/DynamicLogLevel : java/lang/annotation/Annotation {
+}
+
+public final class misk/logging/DynamicLogLevelController {
+	public fun <init> ()V
+	public final fun refresh (Ljava/lang/String;)V
+}
+
+public final class misk/logging/DynamicLogLevelModule : misk/inject/KAbstractModule {
+	public fun <init> (Lmisk/logging/DynamicLoggingConfig;)V
+	public final fun getConfig ()Lmisk/logging/DynamicLoggingConfig;
+	public final fun repeatedTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;)Lmisk/tasks/RepeatedTaskQueue;
+}
+
+public final class misk/logging/DynamicLogLevelService : com/google/common/util/concurrent/AbstractIdleService {
+	public static final field Companion Lmisk/logging/DynamicLogLevelService$Companion;
+	public fun <init> (Lmisk/feature/FeatureFlags;Lmisk/logging/DynamicLoggingConfig;Lmisk/tasks/RepeatedTaskQueue;)V
+	public final fun updateLoggingLevels ()V
+}
+
+public final class misk/logging/DynamicLogLevelService$Companion {
+}
+
+public final class misk/logging/DynamicLogParser {
+	public static final field INSTANCE Lmisk/logging/DynamicLogParser;
+	public final fun parseLoggerToLevelPairs (Ljava/lang/String;)Ljava/util/Map;
+}
+
+public final class misk/logging/DynamicLoggingConfig : misk/config/Config {
+	public fun <init> ()V
+	public fun <init> (Z)V
+	public fun <init> (ZLjava/lang/String;)V
+	public synthetic fun <init> (ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (ZLjava/lang/String;)Lmisk/logging/DynamicLoggingConfig;
+	public static synthetic fun copy$default (Lmisk/logging/DynamicLoggingConfig;ZLjava/lang/String;ILjava/lang/Object;)Lmisk/logging/DynamicLoggingConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnabled ()Z
+	public final fun getFeature_flag_name ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/logging/LogLevelFilter : ch/qos/logback/classic/turbo/TurboFilter {
+	public fun <init> (Ljava/util/Map;)V
+	public fun decide (Lorg/slf4j/Marker;Lch/qos/logback/classic/Logger;Lch/qos/logback/classic/Level;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/Throwable;)Lch/qos/logback/core/spi/FilterReply;
+	public final fun getDynamicLevels ()Ljava/util/Map;
+}
+
 public final class misk/logging/MdcModule : misk/inject/KInstallOnceModule {
 	public fun <init> ()V
 }
