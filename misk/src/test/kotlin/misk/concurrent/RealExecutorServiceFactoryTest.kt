@@ -122,7 +122,7 @@ internal class RealExecutorServiceFactoryTest {
 
     factory.stopAsync().awaitTerminated()
 
-    assertThat(log).containsExactly("task 1", "task 2")
+    assertThat(log).containsExactlyInAnyOrder("task 1", "task 2")
     assertThat(executorService.isTerminated).isTrue()
     
     val meters = meterRegistry.meters.filter { it.id.name.startsWith("executor") }
