@@ -19,6 +19,7 @@ import misk.concurrent.ExecutorServiceModule
 import misk.config.AppName
 import misk.feature.FeatureFlags
 import misk.inject.AsyncSwitch
+import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobQueue
@@ -79,7 +80,8 @@ open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbs
       .map { QueueName(it.key) to it.value }
       .forEach { (queueName, config) -> externalQueueConfigBinder.addBinding(queueName).toInstance(config) }
 
-    install(ServiceModule<RepeatedTaskQueue, ForSqsHandling, AsyncSwitch>("sqs").dependsOn<ReadyService>())
+    install(DefaultAsyncSwitchModule())
+    install(ServiceModule<RepeatedTaskQueue, ForSqsHandling>().conditionalOn<AsyncSwitch>("sqs").dependsOn<ReadyService>())
   }
 
   open fun <BuilderT : AwsClientBuilder<BuilderT, ClientT>, ClientT> configureClient(builder: BuilderT) {}

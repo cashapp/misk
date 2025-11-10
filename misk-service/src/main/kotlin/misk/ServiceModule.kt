@@ -3,14 +3,13 @@ package misk
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
-import kotlin.reflect.KClass
 import misk.inject.AlwaysOnSwitch
 import misk.inject.ConditionalProvider
-import misk.inject.ConditionalProvider2
 import misk.inject.KAbstractModule
 import misk.inject.Switch
 import misk.inject.toKey
 import misk.inject.typeLiteral
+import kotlin.reflect.KClass
 
 /**
  * # Misk Services
@@ -99,7 +98,7 @@ constructor(
     if (switchType != null) {
       multibind<ServiceEntry>()
         .toProvider(
-          ConditionalProvider2(
+          ConditionalProvider(
             switchKey,
             switchType,
             ServiceEntry::class,
@@ -111,6 +110,7 @@ constructor(
           }
         )
     } else {
+      // TODO remove this branch and rely solely on ConditionalProvider after further testing in all cases
       multibind<ServiceEntry>().toInstance(ServiceEntry(key))
     }
 
@@ -118,7 +118,7 @@ constructor(
       if (switchType != null) {
         multibind<DependencyEdge>()
           .toProvider(
-            ConditionalProvider2(
+            ConditionalProvider(
               switchKey,
               switchType,
               DependencyEdge::class,
@@ -130,6 +130,7 @@ constructor(
             }
           )
       } else {
+        // TODO remove this branch and rely solely on ConditionalProvider after further testing in all cases
         multibind<DependencyEdge>().toInstance(DependencyEdge(dependent = key, dependsOn = dependsOnKey))
       }
     }
@@ -137,7 +138,7 @@ constructor(
       if (switchType != null) {
         multibind<EnhancementEdge>()
           .toProvider(
-            ConditionalProvider2(
+            ConditionalProvider(
               switchKey,
               switchType,
               EnhancementEdge::class,
@@ -149,10 +150,14 @@ constructor(
             }
           )
       } else {
+        // TODO remove this branch and rely solely on ConditionalProvider after further testing in all cases
         multibind<EnhancementEdge>().toInstance(EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey))
       }
     }
   }
+
+  fun conditionalOn(switchKey: String, switchType: KClass<out Switch>) =
+    ServiceModule(key, dependsOn, enhancedBy, switchKey, switchType)
 
   fun dependsOn(upstream: Key<out Service>) = ServiceModule(key, dependsOn + upstream, enhancedBy)
 
@@ -161,6 +166,10 @@ constructor(
   fun enhancedBy(enhancement: Key<out Service>) = ServiceModule(key, dependsOn, enhancedBy + enhancement)
 
   fun enhancedBy(enhancement: List<Key<out Service>>) = ServiceModule(key, dependsOn, enhancedBy + enhancement)
+
+  @JvmOverloads
+  inline fun <reified T : Switch> conditionalOn(switchKey: String = "default") =
+    conditionalOn(switchKey, T::class)
 
   @JvmOverloads
   inline fun <reified T : Service> dependsOn(qualifier: KClass<out Annotation>? = null) =
@@ -199,24 +208,8 @@ constructor(
 inline fun <reified T : Service> ServiceModule(qualifier: KClass<out Annotation>? = null) =
   ServiceModule(T::class.toKey(qualifier))
 
-inline fun <reified T : Service> ServiceModule(
-  qualifier: KClass<out Annotation>? = null,
-  switchKey: String = "default",
-  switchType: KClass<out Switch> = AlwaysOnSwitch::class,
-) = ServiceModule(key = T::class.toKey(qualifier), switchKey = switchKey, switchType = switchType)
-
-inline fun <reified T : Service, reified S : Switch> ServiceModule(
-  switchKey: String = "default",
-) = ServiceModule(key = T::class.toKey(), switchKey = switchKey, switchType = S::class)
-
-inline fun <reified T : Service, reified S : Switch> ServiceModule(
-  qualifier: KClass<out Annotation>? = null,
-  switchKey: String = "default",
-) = ServiceModule(key = T::class.toKey(qualifier), switchKey = switchKey, switchType = S::class)
-
-inline fun <reified T : Service, reified Q : Annotation, reified S : Switch> ServiceModule(
-  switchKey: String = "default"
-) = ServiceModule(key = T::class.toKey(Q::class), switchKey = switchKey, switchType = S::class)
+inline fun <reified T : Service, reified Q : Annotation> ServiceModule(
+) = ServiceModule(T::class.toKey(Q::class))
 
 internal data class EnhancementEdge(val toBeEnhanced: Key<*>, val enhancement: Key<*>)
 

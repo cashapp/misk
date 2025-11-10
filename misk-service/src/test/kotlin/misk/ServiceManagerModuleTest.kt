@@ -10,8 +10,6 @@ import com.google.inject.Scopes
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlin.test.assertFailsWith
-import misk.inject.AsyncSwitch
-import misk.inject.ConditionalProvider
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.keyOf
