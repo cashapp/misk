@@ -120,8 +120,7 @@ class WebActionBinding @Inject constructor(
     override fun claimRequestBody() {
       check(requestBody == null) { "already claimed by $requestBody" }
       check(
-        action.dispatchMechanism != DispatchMechanism.GET &&
-          action.dispatchMechanism != DispatchMechanism.DELETE
+        action.dispatchMechanism != DispatchMechanism.GET
       ) {
         "cannot claim request body of ${action.dispatchMechanism.name}"
       }
