@@ -9,6 +9,7 @@ import misk.ReadyService
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceModule
 import misk.inject.AsyncSwitch
+import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
 import misk.inject.KInstallOnceModule
 import misk.inject.toKey
@@ -48,8 +49,9 @@ constructor(
       )
     )
 
-    install(ServiceModule<RepeatedTaskQueue, ForMiskCron, AsyncSwitch>("cron").dependsOn<ReadyService>())
-    install(ServiceModule<CronTask, AsyncSwitch>("cron").dependsOn(dependencies).dependsOn<ReadyService>())
+    install(DefaultAsyncSwitchModule())
+    install(ServiceModule<RepeatedTaskQueue, ForMiskCron>().conditionalOn<AsyncSwitch>("cron").dependsOn<ReadyService>())
+    install(ServiceModule<CronTask>().conditionalOn<AsyncSwitch>("cron").dependsOn(dependencies).dependsOn<ReadyService>())
   }
 
   @Provides
@@ -70,8 +72,8 @@ constructor(
 ) : KAbstractModule() {
   override fun configure() {
     bind<ZoneId>().annotatedWith<ForMiskCron>().toInstance(zoneId)
-    install(ExecutorServiceModule.withFixedThreadPool(ForMiskCron::class, "misk-cron-cronjob-%d", threadPoolSize))
-    install(ServiceModule(key = CronService::class.toKey(), dependsOn = dependencies).dependsOn<ReadyService>())
+    install(ExecutorServiceModule.withFixedThreadPool<ForMiskCron>("misk-cron-cronjob-%d", threadPoolSize))
+    install(ServiceModule<CronService>().dependsOn(dependencies).dependsOn<ReadyService>())
 
     if (installDashboardTab) {
       // Don't install by default since it adds extra dependencies to downstream tests

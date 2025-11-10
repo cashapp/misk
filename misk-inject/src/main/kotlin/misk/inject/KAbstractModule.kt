@@ -45,6 +45,12 @@ abstract class KAbstractModule : AbstractModule() {
     return to(T::class.java)
   }
 
+  protected inline fun <reified T : Any> bindConditionally(noinline predicate: () -> Boolean) = if (predicate()) {
+    KotlinAnnotatedBindingBuilder<T>(binder().bind<T>(T::class.java))
+  } else {
+    null
+  }
+
   protected inline fun <reified T : Any> requireBinding() {
     requireBinding(T::class.java)
   }
@@ -57,8 +63,20 @@ abstract class KAbstractModule : AbstractModule() {
     annotation: KClass<out Annotation>? = null
   ): LinkedBindingBuilder<T> = newMultibinder<T>(annotation).addBinding()
 
+//  protected inline fun <reified T : Any> multibindConditionally(noinline predicate: () -> Boolean) = if (predicate()) {
+//    newMultibinder<T>().addBinding()
+//  } else {
+//    null
+//  }
+
   protected inline fun <reified T : Any, reified A : Annotation> multibind():
     LinkedBindingBuilder<T> = newMultibinder<T>(A::class).addBinding()
+
+  protected inline fun <reified T : Any, reified A : Annotation> multibindConditionally(noinline predicate: () -> Boolean) = if (predicate()) {
+    newMultibinder<T>(A::class).addBinding()
+  } else {
+    null
+  }
 
   protected inline fun <reified T : Any> newMultibinder(
     annotation: KClass<out Annotation>? = null
