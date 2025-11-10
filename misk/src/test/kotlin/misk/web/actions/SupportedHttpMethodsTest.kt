@@ -90,6 +90,19 @@ class SupportedHttpMethodsTest {
     assertThat(response.isSuccessful).isTrue()
   }
 
+  @Test
+  fun deleteWithRequestBody() {
+    val request = Request.Builder()
+      .delete("delete body".toRequestBody(MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE))
+      .url(jettyService.httpServerUrl.newBuilder().encodedPath("/resources/id").build())
+      .build()
+
+    val response = httpClient.newCall(request).execute()
+    assertThat(response.isSuccessful).isTrue()
+
+    assertThat(response.body.string()).isEqualTo("deleted")
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebServerTestingModule())
@@ -124,6 +137,6 @@ class SupportedHttpMethodsTest {
 
   internal class DeleteAction @Inject constructor() : WebAction {
     @Delete("/resources/id")
-    fun delete() = Response("")
+    fun delete() = "deleted"
   }
 }

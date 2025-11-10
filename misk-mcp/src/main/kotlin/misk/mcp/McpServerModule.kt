@@ -3,12 +3,10 @@
 package misk.mcp
 
 import com.google.inject.Provider
-import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.OptionalBinder
 import jakarta.inject.Inject
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.serialization.json.Json
 import misk.annotation.ExperimentalMiskApi
 import misk.inject.KAbstractModule
 import misk.inject.KInstallOnceModule
@@ -20,9 +18,7 @@ import misk.inject.toKey
 import misk.inject.typeLiteral
 import misk.mcp.action.McpStreamManager
 import misk.mcp.config.McpConfig
-import misk.mcp.internal.McpJson
 import misk.mcp.internal.McpJsonRpcMessageUnmarshaller
-import misk.mcp.internal.MiskMcp
 import misk.mcp.internal.MiskStreamableHttpServerTransport
 import misk.mcp.internal.MiskWebSocketServerTransport
 import misk.scope.ActionScoped
@@ -109,7 +105,6 @@ class McpServerModule private constructor(
                 call = httpCall.get(),
                 mcpSessionHandler = mcpSessionHandlerProvider.get().getOrNull(),
                 sendChannel = sendChannel,
-                mcpTools = toolsProvider.get(),
               )
           }
       }
@@ -217,12 +212,5 @@ class McpServerModule private constructor(
       newMultibinder<McpResource>()
       newMultibinder<McpTool<*>>()
     }
-
-    /**
-     * Binds the kotlin-sdk JSON RPC message deserializer
-     */
-    @MiskMcp
-    @Provides
-    fun providesMcpJson(): Json = McpJson
   }
 }
