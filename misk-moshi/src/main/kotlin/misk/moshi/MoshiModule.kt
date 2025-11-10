@@ -59,7 +59,6 @@ class MoshiModule @JvmOverloads constructor(
   companion object {
     val defaultMoshiAdapters = listOf(
       ByteStringAdapter,
-      DurationAdapter,
       InstantAdapter,
       BigDecimalAdapter,
       LocalDateAdapter,
