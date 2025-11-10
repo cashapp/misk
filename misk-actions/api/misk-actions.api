@@ -306,6 +306,9 @@ public final class misk/web/dashboard/ValidWebEntry$Companion {
 	public final fun slugify (Lkotlin/reflect/KClass;)Ljava/lang/String;
 }
 
+public abstract interface annotation class misk/web/interceptors/LogNetworkInterceptorChain : java/lang/annotation/Annotation {
+}
+
 public abstract interface annotation class misk/web/interceptors/LogRequestResponse : java/lang/annotation/Annotation {
 	public abstract fun bodySampling ()D
 	public abstract fun errorBodySampling ()D
