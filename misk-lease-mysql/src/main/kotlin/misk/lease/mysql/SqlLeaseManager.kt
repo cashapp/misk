@@ -2,6 +2,7 @@ package misk.lease.mysql
 
 import wisp.lease.Lease
 import wisp.lease.LeaseManager
+import wisp.lease.PersistentLeaseManager
 import misk.logging.getLogger
 import java.sql.SQLException
 import java.time.Clock
@@ -17,7 +18,7 @@ import misk.annotation.ExperimentalMiskApi
 internal class SqlLeaseManager @Inject constructor(
   private val clock: Clock,
   private val database: LeaseDatabase,
-) : LeaseManager {
+) : PersistentLeaseManager {
 
   /**
    * Requests a lease for the given name .
