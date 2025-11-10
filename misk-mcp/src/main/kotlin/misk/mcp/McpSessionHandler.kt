@@ -1,17 +1,17 @@
 package misk.mcp
 
 /**
- * Handles MCP (Model Context Protocol) session lifecycle management for StreamableHttp transport.
+ * Handles MCP (Model Context Protocol) session lifecycle management for StreamableHTTP transport.
  *
- * This interface provides session management capabilities for MCP servers using StreamableHttp
- * transport (SSE-based communication via `@McpPost`, `@McpGet`, and `@McpDelete` endpoints).
+ * This interface provides session management capabilities for MCP servers using StreamableHTTP
+ * transport (StreamableHTTP-based communication via `@McpPost`, `@McpGet`, and `@McpDelete` endpoints).
  * When installed via [McpSessionHandlerModule], the framework automatically integrates with
  * the session lifecycle and returns the session ID in the "Mcp-Session-Id" response header.
  *
  * ## Transport Compatibility
  *
- * **StreamableHttp Transport Only**: This session handler is designed exclusively for
- * StreamableHttp transport using Server-Sent Events. It is not used with WebSocket
+ * **StreamableHTTP Transport Only**: This session handler is designed exclusively for
+ * StreamableHTTP transport using Server-Sent Events. It is not used with WebSocket
  * transport (`@McpWebSocket`), which maintains connection state through the persistent
  * WebSocket connection itself.
  *
@@ -43,9 +43,9 @@ package misk.mcp
  * <https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#session-management>
  *
  * @see McpSessionHandlerModule for installation instructions
- * @see misk.mcp.action.McpPost for StreamableHttp request handling
- * @see misk.mcp.action.McpGet for StreamableHttp event streaming
- * @see misk.mcp.action.McpDelete for StreamableHttp session termination
+ * @see misk.mcp.action.McpPost for StreamableHTTP request handling
+ * @see misk.mcp.action.McpGet for StreamableHTTP event streaming
+ * @see misk.mcp.action.McpDelete for StreamableHTTP session termination
  */
 interface McpSessionHandler {
   /**

@@ -96,6 +96,10 @@ public final class misk/feature/FeatureFlags$DefaultImpls {
 	public static synthetic fun trackString$default (Lmisk/feature/FeatureFlags;Lmisk/feature/Feature;Ljava/lang/String;Lmisk/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lmisk/feature/TrackerReference;
 }
 
+public final class misk/feature/FeatureFlagsKt {
+	public static final fun toMisk (Lwisp/feature/FeatureFlags;)Lmisk/feature/FeatureFlags;
+}
+
 public abstract interface class misk/feature/FeatureService : com/google/common/util/concurrent/Service {
 }
 

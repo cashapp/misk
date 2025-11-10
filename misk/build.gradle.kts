@@ -42,6 +42,9 @@ dependencies {
   api(project(":misk-sampling"))
   api(project(":misk-service"))
   api(project(":wisp:wisp-deployment"))
+  api(libs.logbackClassic)
+  api(libs.logbackCore)
+  api(project(":misk-feature"))
   implementation(libs.jCommander)
   implementation(libs.jettyAlpnServer)
   implementation(libs.jettyHttp)
@@ -86,7 +89,6 @@ dependencies {
   testImplementation(libs.kotlinTest)
   testImplementation(libs.kotlinxCoroutinesCore)
   testImplementation(libs.kotlinxCoroutinesTest)
-  testImplementation(libs.logbackClassic)
   testImplementation(libs.mockitoCore)
   testImplementation(libs.okHttpMockWebServer)
   testImplementation(libs.okHttpSse)
@@ -96,6 +98,7 @@ dependencies {
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":wisp:wisp-tracing"))
   testImplementation(testFixtures(project(":misk-audit-client")))
+  testImplementation(testFixtures(project(":misk-feature")))
   testImplementation(testFixtures(project(":misk-metrics")))
 }
 
