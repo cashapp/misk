@@ -2,7 +2,12 @@ package misk.tokens
 
 import java.util.Arrays
 
-interface TokenGenerator {
+// TODO: Replace all TokenGenerator references with TokenGenerator2 then replace TokenGenerator
+//  with typealias then replace all TokenGenerator2 with TokenGenerator again. Yay dependencies.
+
+typealias TokenGenerator = wisp.token.TokenGenerator
+
+interface TokenGenerator2 {
   fun generate(label: String? = null, length: Int = 25): String
 
   companion object {

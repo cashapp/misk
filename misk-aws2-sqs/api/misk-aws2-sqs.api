@@ -54,7 +54,7 @@ public final class misk/aws2/sqs/jobqueue/SqsJobConsumer$Companion {
 }
 
 public final class misk/aws2/sqs/jobqueue/SqsJobEnqueuer : misk/jobqueue/v2/JobEnqueuer {
-	public fun <init> (Lmisk/aws2/sqs/jobqueue/SqsClientFactory;Lmisk/aws2/sqs/jobqueue/config/SqsConfig;Lmisk/aws2/sqs/jobqueue/SqsQueueResolver;Lmisk/tokens/TokenGenerator;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Lcom/squareup/moshi/Moshi;Lio/opentracing/Tracer;Ljava/time/Clock;)V
+	public fun <init> (Lmisk/aws2/sqs/jobqueue/SqsClientFactory;Lmisk/aws2/sqs/jobqueue/config/SqsConfig;Lmisk/aws2/sqs/jobqueue/SqsQueueResolver;Lwisp/token/TokenGenerator;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Lcom/squareup/moshi/Moshi;Lio/opentracing/Tracer;Ljava/time/Clock;)V
 	public fun batchEnqueue (Lmisk/jobqueue/QueueName;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun batchEnqueueAsync (Lmisk/jobqueue/QueueName;Ljava/util/List;)Ljava/util/concurrent/CompletableFuture;
 	public fun batchEnqueueBlocking (Lmisk/jobqueue/QueueName;Ljava/util/List;)Lmisk/jobqueue/v2/JobEnqueuer$BatchEnqueueResult;

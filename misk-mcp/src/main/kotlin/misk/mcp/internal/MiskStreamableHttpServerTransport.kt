@@ -4,25 +4,17 @@ import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCNotification
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCRequest
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCResponse
-import io.modelcontextprotocol.kotlin.sdk.ListToolsResult
 import io.modelcontextprotocol.kotlin.sdk.Method
 import jakarta.inject.Inject
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.encodeToJsonElement
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.buildJsonArray
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
 import misk.annotation.ExperimentalMiskApi
 import misk.exceptions.BadRequestException
 import misk.exceptions.NotFoundException
 import misk.exceptions.WebActionException
 import misk.logging.getLogger
 import misk.mcp.McpSessionHandler
-import misk.mcp.McpTool
 import misk.mcp.action.SESSION_ID_HEADER
+import misk.mcp.encodeToString
 import misk.web.HttpCall
 import misk.web.sse.ServerSentEvent
 import java.util.UUID
@@ -42,12 +34,10 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
  * @param sendChannel Channel for sending SSE events to the client
  */
 @OptIn(ExperimentalAtomicApi::class, ExperimentalMiskApi::class)
-internal class MiskStreamableHttpServerTransport
-@Inject constructor(
+internal class MiskStreamableHttpServerTransport @Inject constructor(
   override val call: HttpCall,
   private val mcpSessionHandler: McpSessionHandler?,
   private val sendChannel: SendChannel<ServerSentEvent>,
-  private val mcpTools: Set<McpTool<*>>,
 ) : MiskServerTransport() {
 
   private val initialized: AtomicBoolean = AtomicBoolean(false)
@@ -69,77 +59,13 @@ internal class MiskStreamableHttpServerTransport
       error("Not connected")
     }
 
-    val jsonObject: JsonObject = McpJson.encodeToJsonElement(message).jsonObject
-
-    val jsonObjectWithMetadata = if (message is JSONRPCResponse && message.result is ListToolsResult) {
-      transformJsonObjectWithToolMetadata(jsonObject)
-    } else {
-      jsonObject
-    }
-
     val event = ServerSentEvent(
       event = "message",
-      data = McpJson.encodeToString(jsonObjectWithMetadata)
+      data = message.encodeToString()
     )
 
     logger.trace { "Sending SSE: $event" }
     sendChannel.send(event)
-  }
-
-  private fun transformJsonObjectWithToolMetadata(jsonObject: JsonObject): JsonObject {
-    // Extract tools from the result.tools array
-    val result = jsonObject["result"] as? JsonObject ?: return jsonObject
-    val toolsArray = result["tools"] ?: return jsonObject
-
-    if (!toolsArray.jsonArray.isEmpty()) {
-      val transformedTools = toolsArray.jsonArray.map { toolElement ->
-        val toolObject = toolElement.jsonObject
-        val toolName = toolObject["name"]?.jsonPrimitive?.content
-
-        // Find the matching McpTool by name
-        val matchingTool = mcpTools.find { it.name == toolName }
-
-        if (matchingTool != null) {
-          // Add metadata from the McpTool to the tool JSON
-          buildJsonObject {
-            // Copy all existing properties
-            toolObject.forEach { (key, value) ->
-              put(key, value)
-            }
-
-            // Add metadata if available
-            matchingTool.metadata?.let { metadata ->
-              put("_meta", metadata)
-            }
-          }
-        } else {
-          toolElement
-        }
-      }
-
-      // Rebuild the JSON object with the transformed tools
-      return buildJsonObject {
-        jsonObject.forEach { (key, value) ->
-          if (key == "result") {
-            put(key, buildJsonObject {
-              result.forEach { (resultKey, resultValue) ->
-                if (resultKey == "tools") {
-                  put(resultKey, buildJsonArray {
-                    transformedTools.forEach { add(it) }
-                  })
-                } else {
-                  put(resultKey, resultValue)
-                }
-              }
-            })
-          } else {
-            put(key, value)
-          }
-        }
-      }
-    }
-
-    return jsonObject
   }
 
   override suspend fun close() {

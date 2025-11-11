@@ -12,7 +12,6 @@ dependencies {
 
   testFixturesApi(libs.guice)
   testFixturesApi(libs.jakartaInject)
-  testFixturesApi(project(":wisp:wisp-token"))
   testFixturesApi(project(":misk"))
   testFixturesApi(project(":misk-hibernate"))
   testFixturesApi(project(":misk-inject"))

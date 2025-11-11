@@ -26,12 +26,15 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
   override fun configure() {
     install(CommonModule(queueName, handler, installRetryQueue))
 
-    install(
-      ServiceModule(
-        key = AwsSqsJobHandlerSubscriptionService::class.toKey(),
-        dependsOn = dependsOn
-      ).dependsOn<ReadyService>()
-    )
+    // TODO remove explicit inline environment variable check once AsyncModule filtering in Guice is working
+    if (!System.getenv("DISABLE_ASYNC_TASKS").toBoolean()) {
+      install(
+        ServiceModule(
+          key = AwsSqsJobHandlerSubscriptionService::class.toKey(),
+          dependsOn = dependsOn
+        ).dependsOn<ReadyService>()
+      )
+    }
   }
 
   @OptIn(ExperimentalMiskApi::class)
