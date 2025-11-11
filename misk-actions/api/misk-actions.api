@@ -307,6 +307,8 @@ public final class misk/web/dashboard/ValidWebEntry$Companion {
 }
 
 public abstract interface annotation class misk/web/interceptors/LogNetworkInterceptorChain : java/lang/annotation/Annotation {
+	public abstract fun logAfter ()Z
+	public abstract fun logBefore ()Z
 }
 
 public abstract interface annotation class misk/web/interceptors/LogRequestResponse : java/lang/annotation/Annotation {

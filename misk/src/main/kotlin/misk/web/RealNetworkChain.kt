@@ -28,14 +28,14 @@ internal class RealNetworkChain(
 
   private fun logCallingInterceptor(interceptor: NetworkInterceptor) {
     val loggingAnnotation = webAction::class.findAnnotation<LogNetworkInterceptorChain>()
-    if (loggingAnnotation != null) {
+    if (loggingAnnotation != null && loggingAnnotation.logBefore) {
       logger.info("Interceptor about to process: {}", interceptor)
     }
   }
 
   private fun logInterceptorReturned(interceptor: NetworkInterceptor) {
     val loggingAnnotation = webAction::class.findAnnotation<LogNetworkInterceptorChain>()
-    if (loggingAnnotation != null) {
+    if (loggingAnnotation != null && loggingAnnotation.logAfter) {
       logger.info("Interceptor finished processing: {}", interceptor)
     }
   }

@@ -39,6 +39,30 @@ class LogNetworkInterceptorChainTest {
     }
   }
 
+  @LogNetworkInterceptorChain(logAfter = false)
+  internal class OnlyBeforeAnnotatedAction @Inject constructor() : WebAction {
+    @Get("/before-annotated")
+    fun call(): Response<String> {
+      return Response("success")
+    }
+  }
+
+  @LogNetworkInterceptorChain(logBefore = false)
+  internal class OnlyAfterAnnotatedAction @Inject constructor() : WebAction {
+    @Get("/after-annotated")
+    fun call(): Response<String> {
+      return Response("success")
+    }
+  }
+
+  @LogNetworkInterceptorChain(logBefore = false, logAfter = false)
+  internal class DisabledAnnotatedAction @Inject constructor() : WebAction {
+    @Get("/neither-annotated")
+    fun call(): Response<String> {
+      return Response("success")
+    }
+  }
+
   internal class NotAnnotatedAction @Inject constructor() : WebAction {
     @Get("/not-annotated")
     fun call(): Response<String> {
@@ -48,7 +72,8 @@ class LogNetworkInterceptorChainTest {
 
   @Test
   fun `NotAnnotatedAction does not add extra logs`() {
-    get("/not-annotated")
+    val response = get("/not-annotated")
+    assertThat(response.code).isEqualTo(200)
 
     val logs = logCollector.takeEvents(RealNetworkChain::class)
 
@@ -57,11 +82,13 @@ class LogNetworkInterceptorChainTest {
 
   @Test
   fun `AnnotatedAction adds entry and exit logs`() {
-    get("/annotated", failState = "true")
+    val response = get("/annotated")
+    assertThat(response.code).isEqualTo(200)
 
     val logs = logCollector.takeEvents(RealNetworkChain::class)
 
     assertThat(logs).isNotEmpty()
+    assertThat(logs.size % 2).isEqualTo(0)
     (0 until (logs.size / 2)).forEach { i ->
       val first = logs[i]
       val last = logs[logs.size - 1 - i]
@@ -77,7 +104,7 @@ class LogNetworkInterceptorChainTest {
 
   @Test
   fun `An AnnotatedAction with a failing intercept still logs`() {
-    val result = get("/annotated")
+    val result = get("/annotated", failState = "true")
     assertThat(result.code).isEqualTo(400)
 
     val logs = logCollector.takeEvents(RealNetworkChain::class)
@@ -93,7 +120,51 @@ class LogNetworkInterceptorChainTest {
     }
   }
 
-  private fun get(path: String, failState: String = "true"): okhttp3.Response {
+  @Test
+  fun `The after logs can be disabled`() {
+    val response = get("/before-annotated")
+    assertThat(response.code).isEqualTo(200)
+
+    val logs = logCollector.takeEvents(RealNetworkChain::class)
+
+    assertThat(logs).isNotEmpty()
+    (0 until logs.size).forEach { i ->
+      val log = logs[i]
+      val interceptorName = log.argumentArray.last().toString()
+
+      assertThat(log.formattedMessage).startsWith("Interceptor about to process: ")
+      assertThat(log.formattedMessage).endsWith(interceptorName)
+    }
+  }
+
+  @Test
+  fun `The before logs can be disabled`() {
+    val response = get("/after-annotated")
+    assertThat(response.code).isEqualTo(200)
+
+    val logs = logCollector.takeEvents(RealNetworkChain::class)
+
+    assertThat(logs).isNotEmpty()
+    (0 until logs.size).forEach { i ->
+      val log = logs[i]
+      val interceptorName = log.argumentArray.last().toString()
+
+      assertThat(log.formattedMessage).startsWith("Interceptor finished processing: ")
+      assertThat(log.formattedMessage).endsWith(interceptorName)
+    }
+  }
+
+  @Test
+  fun `Both logs can be disabled, weird, but allowed`() {
+    val response = get("/neither-annotated")
+    assertThat(response.code).isEqualTo(200)
+
+    val logs = logCollector.takeEvents(RealNetworkChain::class)
+
+    assertThat(logs).isEmpty()
+  }
+
+  private fun get(path: String, failState: String = "false"): okhttp3.Response {
     val httpClient = OkHttpClient()
     val request = okhttp3.Request.Builder()
       .get()
@@ -110,6 +181,9 @@ class LogNetworkInterceptorChainTest {
       install(LogCollectorModule())
       install(WebActionModule.create<AnnotatedAction>())
       install(WebActionModule.create<NotAnnotatedAction>())
+      install(WebActionModule.create<OnlyBeforeAnnotatedAction>())
+      install(WebActionModule.create<OnlyAfterAnnotatedAction>())
+      install(WebActionModule.create<DisabledAnnotatedAction>())
       multibind<NetworkInterceptor.Factory>().to<FailableNetworkInterceptor.Factory>()
     }
   }
