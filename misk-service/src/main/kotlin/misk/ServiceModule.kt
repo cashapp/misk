@@ -3,10 +3,12 @@ package misk
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
+import jakarta.inject.Singleton
 import misk.inject.AlwaysOnSwitch
 import misk.inject.ConditionalProvider
 import misk.inject.KAbstractModule
 import misk.inject.Switch
+import misk.inject.asSingleton
 import misk.inject.toKey
 import misk.inject.typeLiteral
 import kotlin.reflect.KClass
@@ -108,7 +110,7 @@ constructor(
           ) {
             ServiceEntry(it as Key<out Service>)
           }
-        )
+        ).asSingleton()
     } else {
       // TODO remove this branch and rely solely on ConditionalProvider after further testing in all cases
       multibind<ServiceEntry>().toInstance(ServiceEntry(key))
@@ -128,7 +130,7 @@ constructor(
             ) {
               DependencyEdge(dependent = it, dependsOn = dependsOnKey)
             }
-          )
+          ).asSingleton()
       } else {
         // TODO remove this branch and rely solely on ConditionalProvider after further testing in all cases
         multibind<DependencyEdge>().toInstance(DependencyEdge(dependent = key, dependsOn = dependsOnKey))
@@ -148,7 +150,7 @@ constructor(
             ) {
               EnhancementEdge(toBeEnhanced = it, enhancement = enhancedByKey)
             }
-          )
+          ).asSingleton()
       } else {
         // TODO remove this branch and rely solely on ConditionalProvider after further testing in all cases
         multibind<EnhancementEdge>().toInstance(EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey))
@@ -217,6 +219,7 @@ internal data class DependencyEdge(val dependent: Key<*>, val dependsOn: Key<*>)
 
 internal data class ServiceEntry(val key: Key<out Service>)
 
+@Singleton
 class NoOpService : AbstractIdleService() {
   override fun startUp() {}
 
