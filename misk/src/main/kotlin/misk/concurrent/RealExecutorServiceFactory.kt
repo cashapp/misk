@@ -3,6 +3,9 @@ package misk.concurrent
 import com.google.common.util.concurrent.AbstractService
 import com.google.common.util.concurrent.Service.State
 import com.google.inject.Inject
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.Tag
+import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics
 import io.opentracing.Tracer
 import io.opentracing.contrib.concurrent.TracedExecutorService
 import io.opentracing.contrib.concurrent.TracedScheduledExecutorService
@@ -100,6 +103,26 @@ internal class RealExecutorServiceFactory @Inject constructor(
     val threadFactory = threadFactory(nameFormat)
     return maybeTrace(Executors.newFixedThreadPool(threadCount, threadFactory))
       .also { executors[nameFormat] = it }
+  }
+
+  override fun fixedWithMetrics(
+    nameFormat: String,
+    threadCount: Int,
+    meterRegistry: MeterRegistry,
+    metricPrefix: String,
+    executorServiceName: String): ExecutorService {
+    checkCreate()
+    val threadFactory = threadFactory(nameFormat)
+    val executorService = Executors.newFixedThreadPool(threadCount, threadFactory)
+    return maybeTrace(
+      ExecutorServiceMetrics.monitor(
+        meterRegistry,
+        executorService,
+        executorServiceName,
+        metricPrefix,
+        Tag.of("executor_name", executorServiceName)
+      )
+    ).also { executors[nameFormat] = it }
   }
 
   override fun unbounded(nameFormat: String): ExecutorService {

@@ -2,6 +2,7 @@ name: Build docs site (& deploy if on master to gh-pages)
 
 on:
   pull_request:
+  merge_group:
   push:
     branches:
       - master
