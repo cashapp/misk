@@ -85,14 +85,11 @@ class ConditionalProvider<S : Switch, Output : Any, Input : Any>(
   val disabledInstance: Input,
   val transformer: (Input) -> Output = { it as Output },
 ) : Provider<Output> {
-  @com.google.inject.Inject(optional = true)
-  var switch: S? = null
-
-  @Inject
-  lateinit var injector: Injector
+  @Inject lateinit var injector: Injector
 
   override fun get(): Output? {
-    val resolved = switch ?: AlwaysOnSwitch()
+    val switch = injector.getInstance(switchType.java)
+    val resolved = switch
 //    {
 //      logger.warn("Switch $switchType not found for $switchKey, defaulting to always enabled.")
 //      AlwaysOnSwitch()
