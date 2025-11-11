@@ -12,7 +12,10 @@ import misk.jobqueue.v2.JobConsumer
 import misk.jobqueue.v2.JobEnqueuer
 import misk.testing.TestFixture
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.SqsAsyncClientBuilder
+import java.util.concurrent.ConcurrentHashMap
 
 open class SqsJobQueueModule @JvmOverloads constructor(
   private val config: SqsConfig,
@@ -59,7 +62,18 @@ open class SqsJobQueueModule @JvmOverloads constructor(
     fun sqsClientClientFactory(
       credentialsProvider: AwsCredentialsProvider,
     ): SqsClientFactory {
-      return SqsClientFactory(credentialsProvider, configureClient)
+      return SqsClientFactory { region ->
+        val clients = ConcurrentHashMap<String, SqsAsyncClient>()
+
+        clients.computeIfAbsent(region) {
+          val builder = SqsAsyncClient.builder()
+            .credentialsProvider(credentialsProvider)
+            .region(Region.of(region))
+
+          builder.configureClient()
+          builder.build()
+        }
+      }
     }
   }
 }
