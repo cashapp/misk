@@ -98,6 +98,7 @@ import kotlin.time.TimeSource
 @ExperimentalMiskApi
 class MiskMcpServer internal constructor(
   val name: String,
+  val version: String,
   val config: McpServerConfig,
   tools: Set<McpTool<*>>,
   resources: Set<McpResource>,
@@ -107,7 +108,7 @@ class MiskMcpServer internal constructor(
 ) : Server(
   Implementation(
     name = name,
-    version = config.version,
+    version = version,
   ),
   ServerOptions(
     capabilities = ServerCapabilities(

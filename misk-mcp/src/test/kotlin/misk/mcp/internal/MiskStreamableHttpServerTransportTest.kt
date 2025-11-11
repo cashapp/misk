@@ -13,7 +13,7 @@ import kotlinx.coroutines.test.runTest
 import misk.annotation.ExperimentalMiskApi
 import misk.exceptions.BadRequestException
 import misk.exceptions.NotFoundException
-import misk.mcp.InMemoryMcpSessionHandler
+import misk.mcp.testing.InMemoryMcpSessionHandler
 import misk.mcp.McpJson
 import misk.mcp.McpSessionHandler
 import misk.mcp.action.SESSION_ID_HEADER
