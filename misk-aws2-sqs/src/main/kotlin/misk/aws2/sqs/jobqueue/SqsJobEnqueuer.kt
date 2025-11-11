@@ -16,6 +16,9 @@ import misk.moshi.adapter
 import misk.tokens.TokenGenerator
 import software.amazon.awssdk.services.sqs.model.MessageAttributeValue
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchResponse
 import java.time.Clock
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
@@ -60,19 +63,92 @@ class SqsJobEnqueuer @Inject constructor(
         .messageAttributes(attrs)
         .build()
 
-      val startTime = clock.millis()
+      val startTimeMs = clock.millis()
       try {
         val region = sqsConfig.getQueueConfig(queueName).region!!
         val client = sqsClientFactory.get(region)
         val response = client.sendMessage(request)
         sqsMetrics.jobsEnqueued.labels(queueName.value).inc()
         response.whenComplete { _, _ ->
-          sqsMetrics.sqsSendTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
+          sqsMetrics.sqsSendTime.labels(queueName.value).observe((clock.millis() - startTimeMs).toDouble())
           span.finish()
           scope.close()
         }.thenApply { true }
       } catch (e: Exception) {
         sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc()
+        throw e
+      }
+    }
+  }
+
+  /**
+   * Batch enqueue jobs and return a CompletableFuture.
+   * Maximum batch size is 10 messages.
+   *
+   * @return CompletableFuture<BatchEnqueueResult> with detailed success/failure breakdown
+   */
+  override fun batchEnqueueAsync(
+    queueName: QueueName,
+    jobs: List<JobEnqueuer.JobRequest>,
+  ): CompletableFuture<JobEnqueuer.BatchEnqueueResult> {
+    require(jobs.size <= JobEnqueuer.SQS_MAX_BATCH_ENQUEUE_JOB_SIZE) {
+      "a maximum of 10 jobs can be batched (got ${jobs.size})"
+    }
+
+    // Track batch size distribution
+    sqsMetrics.batchEnqueueSize.labels(queueName.value).observe(jobs.size.toDouble())
+
+    return tracer.withSpanAsync("batch-enqueue-job-${queueName.value}") { span, scope ->
+      val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
+
+      // Check attribute size for each job (max 9 attributes per message + 1 reserved for metadata)
+      jobs.forEach { job ->
+        require(job.attributes.size <= 9) {
+          "a maximum of 9 attributes are supported per job (got ${job.attributes.size})"
+        }
+      }
+
+      val messageEntries = jobs.map { job ->
+        val resolvedIdempotencyKey = job.idempotencyKey ?: tokenGenerator.generate()
+
+        val attrs = job.attributes.map {
+          it.key to MessageAttributeValue.builder().dataType("String").stringValue(it.value).build()
+        }.toMap().toMutableMap()
+        attrs[SqsJob.JOBQUEUE_METADATA_ATTR] =
+          createMetadataMessageAttributeValue(queueName, resolvedIdempotencyKey, span)
+
+        SendMessageBatchRequestEntry.builder()
+          .id(resolvedIdempotencyKey)
+          .messageBody(job.body)
+          .apply {
+            job.deliveryDelay?.let { delay ->
+              delaySeconds(delay.toSeconds().toInt())
+            }
+          }
+          .messageAttributes(attrs)
+          .build()
+      }
+
+      val request = SendMessageBatchRequest.builder()
+        .queueUrl(queueUrl)
+        .entries(messageEntries)
+        .build()
+
+      val startTimeMs = clock.millis()
+      try {
+        val region = sqsConfig.getQueueConfig(queueName).region!!
+        val client = sqsClientFactory.get(region)
+        val response = client.sendMessageBatch(request)
+
+        response.whenComplete { _, _ ->
+          sqsMetrics.sqsBatchSendTime.labels(queueName.value).observe((clock.millis() - startTimeMs).toDouble())
+          span.finish()
+          scope.close()
+        }.thenApply { result ->
+          processBatchResponse(result, queueName)
+        }
+      } catch (e: Exception) {
+        sqsMetrics.jobBatchEnqueueFailures.labels(queueName.value).inc(jobs.size.toDouble())
         throw e
       }
     }
@@ -87,6 +163,40 @@ class SqsJobEnqueuer @Inject constructor(
       Tags.ERROR.set(span, true)
       throw t
     }
+  }
+
+  private fun processBatchResponse(
+    response: SendMessageBatchResponse,
+    queueName: QueueName
+  ): JobEnqueuer.BatchEnqueueResult {
+    val successful = response.successful().map { it.id() }
+    val invalid = mutableListOf<String>()
+    val retriable = mutableListOf<String>()
+
+    // Categorize failures by error type
+    response.failed().forEach { failure ->
+      if (failure.senderFault()) {
+        invalid.add(failure.id())      // Client error - don't retry
+      } else {
+        retriable.add(failure.id())    // Server error - can retry
+      }
+    }
+
+    val result = JobEnqueuer.BatchEnqueueResult(
+      isFullySuccessful = invalid.isEmpty() && retriable.isEmpty(),
+      successfulIds = successful,
+      invalidIds = invalid,
+      retriableIds = retriable
+    )
+
+    // Update metrics
+    sqsMetrics.jobsBatchEnqueued.labels(queueName.value).inc(result.successfulIds.size.toDouble())
+    if (!result.isFullySuccessful) {
+      sqsMetrics.jobBatchEnqueueFailures.labels(queueName.value).inc(
+        (result.invalidIds.size + result.retriableIds.size).toDouble())
+    }
+
+    return result
   }
 
   private fun createMetadataMessageAttributeValue(

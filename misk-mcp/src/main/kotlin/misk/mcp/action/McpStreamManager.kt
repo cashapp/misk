@@ -12,7 +12,7 @@ import kotlinx.coroutines.withContext
 import misk.annotation.ExperimentalMiskApi
 import misk.logging.getLogger
 import misk.mcp.MiskMcpServer
-import misk.mcp.internal.McpJson
+import misk.mcp.decode
 import misk.mcp.internal.McpServerSession
 import misk.mcp.internal.MiskServerTransport
 import misk.mcp.internal.MiskStreamableHttpServerTransport
@@ -25,7 +25,7 @@ import misk.web.sse.ServerSentEvent
 
 
 /**
- * Manages MCP (Model Context Protocol) server connections for both SSE and WebSocket transports.
+ * Manages MCP (Model Context Protocol) server connections for both StreamableHTTP and WebSocket transports.
  *
  * This class provides the bridge between Misk web actions and MCP server instances, handling
  * the lifecycle of client connections and ensuring proper setup and teardown of MCP server
@@ -33,10 +33,10 @@ import misk.web.sse.ServerSentEvent
  *
  * ## Supported Transport Types
  *
- * ### Server-Sent Events (SSE) via HTTP
+ * ### StreamableHTTP Transport
  * - Used with [McpPost] annotated actions
  * - Supports streamable HTTP transport for real-time communication
- * - Client sends JSON-RPC messages via POST, server responds via SSE stream
+ * - Client sends JSON-RPC messages via POST, server responds via Server-Sent Events (SSE) stream
  *
  * ### WebSocket
  * - Used with [McpWebSocket] annotated actions  
@@ -45,15 +45,15 @@ import misk.web.sse.ServerSentEvent
  *
  * ## Connection Lifecycle
  *
- * 1. **Connection Establishment**: Client initiates connection (SSE or WebSocket) to `/mcp` endpoint
+ * 1. **Connection Establishment**: Client initiates connection (StreamableHTTP or WebSocket) to `/mcp` endpoint
  * 2. **Transport Creation**: Appropriate transport ([MiskStreamableHttpServerTransport] or [MiskWebSocketServerTransport]) is created
  * 3. **Server Initialization**: [MiskMcpServer] instance is created and connected to transport
  * 4. **Message Handling**: Client messages are processed through the MCP server
  * 5. **Connection Cleanup**: Transport and server resources are properly closed when connection ends
  *
- * ## SSE Usage in Web Actions
+ * ## StreamableHTTP Usage in Web Actions
  *
- * Use [withSseChannel] in web actions that handle MCP client requests via Server-Sent Events:
+ * Use [withSseChannel] in web actions that handle MCP client requests via StreamableHTTP transport:
  *
  * ```kotlin
  * @Singleton
@@ -92,7 +92,7 @@ import misk.web.sse.ServerSentEvent
  * }
  * ```
  *
- * ## Advanced SSE Usage Examples
+ * ## Advanced StreamableHTTP Usage Examples
  *
  * ### Stateful Stream Handling
  * ```kotlin
@@ -140,7 +140,7 @@ import misk.web.sse.ServerSentEvent
  * Within the [withSseChannel] block, the context provides:
  * - **this**: [MiskMcpServer] instance for handling MCP protocol messages
  * - **transport**: Access to the underlying transport with `streamId`
- * - **sendChannel**: Direct access to SSE response channel (passed as parameter)
+ * - **sendChannel**: Direct access to Server-Sent Events (SSE) response channel (passed as parameter)
  *
  * For WebSocket connections, the [withWebSocket] method returns a [WebSocketListener] that
  * automatically handles message routing to the MCP server instance.
@@ -155,9 +155,9 @@ import misk.web.sse.ServerSentEvent
  * The [withResponseChannel] method is deprecated in favor of [withSseChannel] for clarity.
  *
  * @see MiskMcpServer For the MCP server implementation
- * @see McpPost For SSE-based web action annotation
+ * @see McpPost For StreamableHTTP-based web action annotation
  * @see McpWebSocket For WebSocket-based web action annotation
- * @see MiskStreamableHttpServerTransport For SSE transport implementation
+ * @see MiskStreamableHttpServerTransport For StreamableHTTP transport implementation
  * @see MiskWebSocketServerTransport For WebSocket transport implementation
  */
 @ExperimentalMiskApi
@@ -176,7 +176,7 @@ class McpStreamManager internal constructor(
   ) = withSseChannel(sendChannel,block)
 
   /**
-   * Handles MCP communication over Server-Sent Events transport.
+   * Handles MCP communication over StreamableHTTP transport using Server-Sent Events.
    *
    * Use in [McpPost] annotated web actions to process MCP JSON-RPC messages:
    *
@@ -192,7 +192,7 @@ class McpStreamManager internal constructor(
    * }
    * ```
    *
-   * @param sendChannel SSE channel for sending responses to the client
+   * @param sendChannel Server-Sent Events (SSE) channel for sending responses to the client
    * @param block Function executed with [MiskMcpServer] as receiver context
    */
   suspend fun withSseChannel(
@@ -201,11 +201,11 @@ class McpStreamManager internal constructor(
   ) {
 
     val transport = streamableHttpServerTransportFactory.create(sendChannel).also {
-      logger.debug { "New SSE connection established with streamId: ${it.streamId}" }
+      logger.debug { "New StreamableHTTP connection established with streamId: ${it.streamId}" }
     }
 
 
-    val session = mcpServer.connect(transport).initialize()
+    val session = mcpServer.createSession(transport).initialize()
 
     try {
       withContext(McpServerSession(session)) {
@@ -237,7 +237,7 @@ class McpStreamManager internal constructor(
     private val webSocketTransport = webSocketsServerTransportFactory.create(webSocket).also {
       logger.debug { "New Websocket connection established with streamId: ${it.streamId}" }
     }
-    private val serverSession = runBlocking { mcpServer.connect(webSocketTransport) }.initialize()
+    private val serverSession = runBlocking { mcpServer.createSession(webSocketTransport) }.initialize()
 
     // Because there may be requests/responses sent inline over the websocket,
     // we need to move the handling to a different thread so that websocket handling
@@ -248,16 +248,19 @@ class McpStreamManager internal constructor(
     )
     
     override fun onMessage(webSocket: WebSocket, text: String) {
-      val message: JSONRPCMessage = McpJson.decodeFromString(text)
+      logger.debug { "Received message: $text" }
+      val message: JSONRPCMessage = text.decode()
       coroutineScope.launch { serverSession.handleMessage(message) }
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String?) {
+      logger.info { "Websocket connection closing with code: $code, reason: $reason" }
       coroutineScope.cancel("closing")
       runBlocking(McpServerSession(serverSession)) { webSocketTransport.close() }
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable) {
+      logger.info { "WebSocket failure, closing: $t" }
       coroutineScope.cancel("failure", t)
       runBlocking(McpServerSession(serverSession)) { webSocketTransport.close() }
     }

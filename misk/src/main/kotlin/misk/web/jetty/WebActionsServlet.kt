@@ -2,6 +2,7 @@ package misk.web.jetty
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.logging.getLogger
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
 import misk.web.ServletHttpCall
@@ -30,7 +31,6 @@ import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
 import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse
 import org.eclipse.jetty.websocket.server.JettyWebSocketServlet
 import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory
-import misk.logging.getLogger
 import java.net.HttpURLConnection
 import java.net.ProtocolException
 import javax.servlet.http.HttpServletRequest
@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServletResponse
 internal class WebActionsServlet @Inject constructor(
   webActionFactory: WebActionFactory,
   webActionEntries: List<WebActionEntry>,
-  config: WebConfig,
+  private val webConfig: WebConfig,
 ) : JettyWebSocketServlet() {
 
   companion object {
@@ -69,9 +69,10 @@ internal class WebActionsServlet @Inject constructor(
     }
     // Check http2 is enabled if any gRPC actions are bound.
     if (boundActions.any { it.action.dispatchMechanism == DispatchMechanism.GRPC }) {
-      val isHttp2Enabled = config.http2
-        || config.unix_domain_socket?.h2c ?: false
-        || config.unix_domain_sockets?.any { it.h2c ?: false } ?: false
+      val isHttp2Enabled =
+        webConfig.http2 || webConfig.unix_domain_socket?.h2c ?: false || webConfig.unix_domain_sockets?.any {
+          it.h2c ?: false
+        } ?: false
       if (!isHttp2Enabled) {
         log.warn {
           "HTTP/2 must be enabled either via a unix domain socket or HTTP listener if any " +
@@ -204,6 +205,8 @@ internal class WebActionsServlet @Inject constructor(
 
   override fun configure(factory: JettyWebSocketServletFactory) {
     factory.setCreator(JettyWebSocket.Creator(boundActions))
+    // Set idle timeout for WebSocket connections from config
+    factory.idleTimeout = java.time.Duration.ofSeconds(webConfig.websocket_idle_timeout_seconds)
   }
 }
 

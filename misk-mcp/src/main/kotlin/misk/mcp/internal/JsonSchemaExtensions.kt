@@ -1,5 +1,6 @@
 package misk.mcp.internal
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -102,7 +103,14 @@ private fun KType.generateJsonSchema(level: Int, description: String? = null): J
             put("description", JsonPrimitive(it))
           }
           // Get all enum constants and add them to the schema
-          val enumValues = kClass.java.enumConstants.map { (it as Enum<*>).name }
+          // Check for @SerialName annotation, fallback to enum constant name
+          val enumValues = kClass.java.enumConstants.map { enumConstant ->
+            val enumValue = enumConstant as Enum<*>
+            // Get the field for this enum constant to check for @SerialName
+            runCatching { kClass.java.getField(enumValue.name) }.getOrNull()
+              ?.getAnnotation(SerialName::class.java)?.value
+              ?: enumValue.name
+          }
           put("enum", JsonArray(enumValues.map { JsonPrimitive(it) }))
         }
       } else {

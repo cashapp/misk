@@ -13,14 +13,17 @@ dependencies {
   api(libs.jakartaInject)
   api(libs.kotlinxSerializationJson)
   api(libs.mcpKotlinSdkCore)
-  api(libs.mcpKotlinSdkServer)
+  api(libs.mcpKotlinSdkServer){
+    exclude(group = "io.ktor", module = "ktor-server-core")
+    exclude(group = "io.ktor", module = "ktor-server-sse")
+  }
+
   api(project(":misk-actions"))
   api(project(":misk-api"))
   api(project(":misk-inject"))
   api(project(":misk"))
   api(project(":misk-config"))
 
-  
   implementation(libs.kotlinReflect)
   implementation(libs.kotlinxCoroutinesCore)
   implementation(libs.kotlinxSerializationCore)
@@ -43,11 +46,13 @@ dependencies {
 
   testFixturesApi(libs.mcpKotlinSdkClient)
   testFixturesImplementation(libs.kotlinxSerializationJson)
-  testFixturesImplementation(libs.ktorClientContentNegotiation)
-  testFixturesImplementation(libs.ktorClientCore)
-  testFixturesImplementation(libs.ktorClientEncoding)
-  testFixturesImplementation(libs.ktorClientLogging)
-  testFixturesImplementation(libs.ktorClientOkhttp)
+  testFixturesApi(libs.ktorClientContentNegotiation)
+  testFixturesApi(libs.ktorClientCore)
+  testFixturesApi(libs.ktorClientEncoding)
+  testFixturesApi(libs.ktorClientLogging)
+  testFixturesApi(libs.ktorClientOkhttp)
+  testFixturesApi(libs.ktorSerializationKotlinxJson)
+
   testFixturesImplementation(libs.ktorSerializationKotlinxJson)
 }
 

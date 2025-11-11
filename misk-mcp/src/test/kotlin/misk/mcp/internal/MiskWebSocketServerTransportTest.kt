@@ -9,6 +9,7 @@ import io.modelcontextprotocol.kotlin.sdk.JSONRPCNotification
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCRequest
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCResponse
 import kotlinx.coroutines.test.runTest
+import misk.mcp.McpJson
 import misk.web.HttpCall
 import misk.web.actions.WebSocket
 import kotlin.test.Test
@@ -21,7 +22,12 @@ class MiskWebSocketServerTransportTest {
   private val httpCall = mockk<HttpCall>(relaxed = true)
   private val webSocket = mockk<WebSocket>(relaxed = true)
   
-  private fun buildTransport() = MiskWebSocketServerTransport(httpCall, webSocket)
+  private fun buildTransport(): MiskWebSocketServerTransport {
+    // By default, set up the mock to return "mcp" for the subprotocol header
+    // Individual tests can override this by setting up their own mock before calling buildTransport()
+    every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns "mcp"
+    return MiskWebSocketServerTransport(httpCall, webSocket)
+  }
 
   private val testRequest = McpJson.decodeFromString<JSONRPCRequest>(
     """
@@ -80,26 +86,22 @@ class MiskWebSocketServerTransportTest {
   }
 
   @Test
-  fun `start() throws error when subprotocol is invalid`() = runTest {
-    val transport = buildTransport()
-    
-    // Mock invalid subprotocol header
+  fun `init throws error when subprotocol is invalid`() = runTest {
+    // Mock invalid subprotocol header BEFORE calling buildTransport
     every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns "invalid"
     
     assertFailsWith<IllegalArgumentException> {
-      transport.start()
+      MiskWebSocketServerTransport(httpCall, webSocket)
     }
   }
 
   @Test
-  fun `start() throws error when subprotocol is missing`() = runTest {
-    val transport = buildTransport()
-    
-    // Mock missing subprotocol header
+  fun `init throws error when subprotocol is missing`() = runTest {
+    // Mock missing subprotocol header BEFORE calling buildTransport
     every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns null
     
     assertFailsWith<IllegalArgumentException> {
-      transport.start()
+      MiskWebSocketServerTransport(httpCall, webSocket)
     }
   }
 
@@ -316,24 +318,21 @@ class MiskWebSocketServerTransportTest {
 
   @Test
   fun `subprotocol validation with exact match`() = runTest {
-    val transport = buildTransport()
-    
     // Test exact match
     every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns "mcp"
+    val transport = buildTransport()
     transport.start() // Should succeed
     
-    // Test case sensitivity
-    val transport2 = buildTransport()
+    // Test case sensitivity - should fail during construction
     every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns "MCP"
     assertFailsWith<IllegalArgumentException> {
-      transport2.start()
+      MiskWebSocketServerTransport(httpCall, webSocket)
     }
     
-    // Test with extra whitespace
-    val transport3 = buildTransport()
+    // Test with extra whitespace - should fail during construction
     every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns " mcp "
     assertFailsWith<IllegalArgumentException> {
-      transport3.start()
+      MiskWebSocketServerTransport(httpCall, webSocket)
     }
   }
 
@@ -468,5 +467,45 @@ class MiskWebSocketServerTransportTest {
   fun `constants are properly defined`() {
     assertEquals("Sec-WebSocket-Protocol", MiskWebSocketServerTransport.SEC_WEBSOCKET_PROTOCOL_HEADER)
     assertEquals("mcp", MiskWebSocketServerTransport.MCP_SUBPROTOCOL)
+  }
+
+  @Test
+  fun `init sets Sec-WebSocket-Protocol response header when mcp subprotocol is requested`() = runTest {
+    // Mock valid subprotocol in request
+    every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns "mcp"
+    
+    // Create transport - this triggers the init block
+    @Suppress("unused") val transport = buildTransport()
+    
+    // Verify that the response header was set during initialization
+    verify { httpCall.setResponseHeader("Sec-WebSocket-Protocol", "mcp") }
+  }
+
+  @Test
+  fun `init does not set Sec-WebSocket-Protocol response header when subprotocol is missing`() = runTest {
+    // Mock missing subprotocol in request
+    every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns null
+    
+    // Attempt to create transport - this should fail during init
+    assertFailsWith<IllegalArgumentException> {
+      MiskWebSocketServerTransport(httpCall, webSocket)
+    }
+    
+    // Verify that the response header was NOT set before the exception was thrown
+    verify(exactly = 0) { httpCall.setResponseHeader("Sec-WebSocket-Protocol", any()) }
+  }
+
+  @Test
+  fun `init does not set Sec-WebSocket-Protocol response header when subprotocol is invalid`() = runTest {
+    // Mock invalid subprotocol in request
+    every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns "invalid"
+    
+    // Attempt to create transport - this should fail during init
+    assertFailsWith<IllegalArgumentException> {
+      MiskWebSocketServerTransport(httpCall, webSocket)
+    }
+    
+    // Verify that the response header was NOT set before the exception was thrown
+    verify(exactly = 0) { httpCall.setResponseHeader("Sec-WebSocket-Protocol", any()) }
   }
 }

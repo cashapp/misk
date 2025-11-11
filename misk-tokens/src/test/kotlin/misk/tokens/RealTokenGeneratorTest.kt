@@ -7,14 +7,14 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldMatch
 
 class RealTokenGeneratorTest : FreeSpec({
-  val tokenGenerator: TokenGenerator = RealTokenGenerator()
+  val tokenGenerator: TokenGenerator2 = RealTokenGenerator2()
 
   "Happy Path" {
     val token0 = tokenGenerator.generate()
     val token1 = tokenGenerator.generate()
 
-    token0 shouldMatch "[${TokenGenerator.alphabet}]{25}"
-    token1 shouldMatch "[${TokenGenerator.alphabet}]{25}"
+    token0 shouldMatch "[${TokenGenerator2.alphabet}]{25}"
+    token1 shouldMatch "[${TokenGenerator2.alphabet}]{25}"
     token0 shouldNotBe token1
   }
 
@@ -23,9 +23,9 @@ class RealTokenGeneratorTest : FreeSpec({
   }
 
   "Custom Length" {
-    tokenGenerator.generate(length = 4) shouldMatch "[${TokenGenerator.alphabet}]{4}"
-    tokenGenerator.generate(length = 12) shouldMatch "[${TokenGenerator.alphabet}]{12}"
-    tokenGenerator.generate(length = 25) shouldMatch "[${TokenGenerator.alphabet}]{25}"
+    tokenGenerator.generate(length = 4) shouldMatch "[${TokenGenerator2.alphabet}]{4}"
+    tokenGenerator.generate(length = 12) shouldMatch "[${TokenGenerator2.alphabet}]{12}"
+    tokenGenerator.generate(length = 25) shouldMatch "[${TokenGenerator2.alphabet}]{25}"
   }
 
   "Length Out Of Bounds" {
@@ -38,29 +38,29 @@ class RealTokenGeneratorTest : FreeSpec({
   }
 
   "Canonicalize" {
-    TokenGenerator.canonicalize("iIlLoO") shouldBe "111100"
-    TokenGenerator.canonicalize("Pterodactyl") shouldBe "pter0dacty1"
-    TokenGenerator.canonicalize("Veloci Raptor") shouldBe "ve10c1rapt0r"
+    TokenGenerator2.canonicalize("iIlLoO") shouldBe "111100"
+    TokenGenerator2.canonicalize("Pterodactyl") shouldBe "pter0dacty1"
+    TokenGenerator2.canonicalize("Veloci Raptor") shouldBe "ve10c1rapt0r"
   }
 
   "Canonicalize Unexpected Characters" {
     shouldThrow<IllegalArgumentException> {
-      TokenGenerator.canonicalize("Dinosaur") // u.
+      TokenGenerator2.canonicalize("Dinosaur") // u.
     }
     shouldThrow<IllegalArgumentException> {
-      TokenGenerator.canonicalize("Veloci_Raptor") // _.
+      TokenGenerator2.canonicalize("Veloci_Raptor") // _.
     }
     shouldThrow<IllegalArgumentException> {
-      TokenGenerator.canonicalize("Velociräptor") // ä.
+      TokenGenerator2.canonicalize("Velociräptor") // ä.
     }
   }
 
   "Canonicalize Unexpected Length" {
     shouldThrow<IllegalArgumentException> {
-      TokenGenerator.canonicalize("a b c") // 3 characters after stripping spaces.
+      TokenGenerator2.canonicalize("a b c") // 3 characters after stripping spaces.
     }
     shouldThrow<IllegalArgumentException> {
-      TokenGenerator.canonicalize("12345678901234567890123456") // 26 characters.
+      TokenGenerator2.canonicalize("12345678901234567890123456") // 26 characters.
     }
   }
 })

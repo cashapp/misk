@@ -1,5 +1,8 @@
+@file:Suppress("unused", "PropertyName")
+
 package misk.mcp.internal
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -174,6 +177,61 @@ internal class JsonSchemaExtensionsTest {
     val statusMapping: Map<String, Status>,
     @Description("Optional priority")
     val priority: Priority? = null
+  )
+
+  // Test enums with @SerialName annotation
+  enum class HttpMethod {
+    @SerialName("GET")
+    GET,
+    @SerialName("POST")
+    POST,
+    @SerialName("put")
+    PUT,
+    @SerialName("delete")
+    DELETE
+  }
+
+  enum class OrderStatus {
+    @SerialName("pending_payment")
+    PENDING_PAYMENT,
+    @SerialName("processing")
+    PROCESSING,
+    @SerialName("shipped")
+    SHIPPED,
+    @SerialName("delivered")
+    DELIVERED,
+    @SerialName("cancelled")
+    CANCELLED
+  }
+
+  // Mixed enum - some with SerialName, some without
+  enum class MixedEnum {
+    @SerialName("custom_value_1")
+    VALUE_ONE,
+    VALUE_TWO,  // No SerialName, should use enum constant name
+    @SerialName("custom_value_3")
+    VALUE_THREE
+  }
+
+  data class SerialNameEnumObject(
+    val method: HttpMethod,
+    val orderStatus: OrderStatus
+  )
+
+  data class MixedSerialNameEnumObject(
+    val mixedValue: MixedEnum,
+    @Description("HTTP method for the request")
+    val method: HttpMethod
+  )
+
+  data class SerialNameEnumListObject(
+    val methods: List<HttpMethod>,
+    val statuses: List<OrderStatus>
+  )
+
+  data class SerialNameEnumMapObject(
+    val methodMap: Map<String, HttpMethod>,
+    val statusMap: Map<String, OrderStatus>
   )
 
   @Test
@@ -710,5 +768,117 @@ internal class JsonSchemaExtensionsTest {
     // Verify required fields - priority should not be required (has default null)
     val requiredFields = required.map { (it as JsonPrimitive).content }.toSet()
     assertEquals(setOf("primaryStatus", "secondaryStatuses", "statusMapping"), requiredFields)
+  }
+
+  @Test
+  fun `generateJsonSchema handles enum with SerialName annotation correctly`() {
+    val schema = SerialNameEnumObject::class.generateJsonSchema()
+    val properties = schema["properties"] as JsonObject
+    val required = schema["required"] as JsonArray
+
+    // Verify HTTP method enum field uses @SerialName values
+    val methodField = properties["method"] as JsonObject
+    assertEquals(JsonPrimitive("string"), methodField["type"])
+    assertTrue(methodField.containsKey("enum"))
+    val methodEnum = methodField["enum"] as JsonArray
+    assertEquals(4, methodEnum.size)
+    val methodValues = methodEnum.map { (it as JsonPrimitive).content }.toSet()
+    // Should use SerialName values, not enum constant names
+    assertEquals(setOf("GET", "POST", "put", "delete"), methodValues)
+
+    // Verify order status enum field uses @SerialName values
+    val orderStatusField = properties["orderStatus"] as JsonObject
+    assertEquals(JsonPrimitive("string"), orderStatusField["type"])
+    assertTrue(orderStatusField.containsKey("enum"))
+    val orderStatusEnum = orderStatusField["enum"] as JsonArray
+    assertEquals(5, orderStatusEnum.size)
+    val orderStatusValues = orderStatusEnum.map { (it as JsonPrimitive).content }.toSet()
+    // Should use SerialName values (snake_case), not enum constant names
+    assertEquals(setOf("pending_payment", "processing", "shipped", "delivered", "cancelled"), orderStatusValues)
+
+    // Verify all fields are required
+    val requiredFields = required.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("method", "orderStatus"), requiredFields)
+  }
+
+  @Test
+  fun `generateJsonSchema handles mixed SerialName enum correctly`() {
+    val schema = MixedSerialNameEnumObject::class.generateJsonSchema()
+    val properties = schema["properties"] as JsonObject
+
+    // Verify mixed enum field - some with SerialName, some without
+    val mixedValueField = properties["mixedValue"] as JsonObject
+    assertEquals(JsonPrimitive("string"), mixedValueField["type"])
+    assertTrue(mixedValueField.containsKey("enum"))
+    val mixedEnum = mixedValueField["enum"] as JsonArray
+    assertEquals(3, mixedEnum.size)
+    val mixedValues = mixedEnum.map { (it as JsonPrimitive).content }.toSet()
+    // Should use SerialName where present, enum constant name where not
+    assertEquals(setOf("custom_value_1", "VALUE_TWO", "custom_value_3"), mixedValues)
+
+    // Verify method field with description and SerialName
+    val methodField = properties["method"] as JsonObject
+    assertEquals(JsonPrimitive("string"), methodField["type"])
+    assertEquals(JsonPrimitive("HTTP method for the request"), methodField["description"])
+    assertTrue(methodField.containsKey("enum"))
+    val methodEnum = methodField["enum"] as JsonArray
+    val methodValues = methodEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("GET", "POST", "put", "delete"), methodValues)
+  }
+
+  @Test
+  fun `generateJsonSchema handles lists of SerialName enums correctly`() {
+    val schema = SerialNameEnumListObject::class.generateJsonSchema()
+    val properties = schema["properties"] as JsonObject
+
+    // Verify list of HTTP method enums with SerialName
+    val methodsField = properties["methods"] as JsonObject
+    assertEquals(JsonPrimitive("array"), methodsField["type"])
+    assertTrue(methodsField.containsKey("items"))
+    val methodItems = methodsField["items"] as JsonObject
+    assertEquals(JsonPrimitive("string"), methodItems["type"])
+    assertTrue(methodItems.containsKey("enum"))
+    val methodEnum = methodItems["enum"] as JsonArray
+    val methodValues = methodEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("GET", "POST", "put", "delete"), methodValues)
+
+    // Verify list of order status enums with SerialName
+    val statusesField = properties["statuses"] as JsonObject
+    assertEquals(JsonPrimitive("array"), statusesField["type"])
+    assertTrue(statusesField.containsKey("items"))
+    val statusItems = statusesField["items"] as JsonObject
+    assertEquals(JsonPrimitive("string"), statusItems["type"])
+    assertTrue(statusItems.containsKey("enum"))
+    val statusEnum = statusItems["enum"] as JsonArray
+    val statusValues = statusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("pending_payment", "processing", "shipped", "delivered", "cancelled"), statusValues)
+  }
+
+  @Test
+  fun `generateJsonSchema handles maps with SerialName enum values correctly`() {
+    val schema = SerialNameEnumMapObject::class.generateJsonSchema()
+    val properties = schema["properties"] as JsonObject
+
+    // Verify map with HTTP method enum values using SerialName
+    val methodMapField = properties["methodMap"] as JsonObject
+    assertEquals(JsonPrimitive("object"), methodMapField["type"])
+    assertTrue(methodMapField.containsKey("additionalProperties"))
+    val methodAdditionalProps = methodMapField["additionalProperties"] as JsonObject
+    assertEquals(JsonPrimitive("string"), methodAdditionalProps["type"])
+    assertTrue(methodAdditionalProps.containsKey("enum"))
+    val methodEnum = methodAdditionalProps["enum"] as JsonArray
+    val methodValues = methodEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("GET", "POST", "put", "delete"), methodValues)
+
+    // Verify map with order status enum values using SerialName
+    val statusMapField = properties["statusMap"] as JsonObject
+    assertEquals(JsonPrimitive("object"), statusMapField["type"])
+    assertTrue(statusMapField.containsKey("additionalProperties"))
+    val statusAdditionalProps = statusMapField["additionalProperties"] as JsonObject
+    assertEquals(JsonPrimitive("string"), statusAdditionalProps["type"])
+    assertTrue(statusAdditionalProps.containsKey("enum"))
+    val statusEnum = statusAdditionalProps["enum"] as JsonArray
+    val statusValues = statusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("pending_payment", "processing", "shipped", "delivered", "cancelled"), statusValues)
   }
 }

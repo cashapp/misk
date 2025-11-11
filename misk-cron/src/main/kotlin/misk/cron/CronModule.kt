@@ -46,17 +46,21 @@ class CronModule @JvmOverloads constructor(
         useMultipleLeases = useMultipleLeases,
       ),
     )
-    install(ServiceModule<RepeatedTaskQueue>(ForMiskCron::class).dependsOn<ReadyService>())
-    install(
-      ServiceModule(
-        key = CronTask::class.toKey(),
-        dependsOn = dependencies,
-      ).dependsOn<ReadyService>(),
-    )
+
+    // TODO remove explicit inline environment variable check once AsyncModule filtering in Guice is working
+    if (!System.getenv("DISABLE_ASYNC_TASKS").toBoolean()) {
+      install(ServiceModule<RepeatedTaskQueue>(ForMiskCron::class).dependsOn<ReadyService>())
+      install(
+        ServiceModule(
+          key = CronTask::class.toKey(),
+          dependsOn = dependencies,
+        ).dependsOn<ReadyService>(),
+      )
+    }
   }
 
   @OptIn(ExperimentalMiskApi::class)
-  override fun moduleWhenAsyncDisabled(): KAbstractModule? {
+  override fun moduleWhenAsyncDisabled(): KAbstractModule {
     return FakeCronModule(
       zoneId = zoneId,
       threadPoolSize = threadPoolSize,
@@ -79,7 +83,7 @@ class FakeCronModule @JvmOverloads constructor(
   private val dependencies: List<Key<out Service>> = listOf(),
   private val installDashboardTab: Boolean = false,
   private val useMultipleLeases: Boolean = false,
-) : KAbstractModule() {
+) : KInstallOnceModule() {
   override fun configure() {
     bind<ZoneId>().annotatedWith<ForMiskCron>().toInstance(zoneId)
     install(

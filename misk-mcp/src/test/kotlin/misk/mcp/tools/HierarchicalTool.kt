@@ -7,7 +7,6 @@ import jakarta.inject.Inject
 import kotlinx.serialization.Serializable
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.Description
-import misk.mcp.McpTool
 import misk.mcp.StructuredMcpTool
 
 @Serializable

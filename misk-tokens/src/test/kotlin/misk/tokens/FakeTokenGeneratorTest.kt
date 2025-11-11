@@ -7,10 +7,10 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlin.concurrent.thread
 
 class FakeTokenGeneratorTest : FreeSpec({
-  lateinit var tokenGenerator: TokenGenerator
+  lateinit var tokenGenerator: TokenGenerator2
 
   beforeTest {
-    tokenGenerator = FakeTokenGenerator()
+    tokenGenerator = FakeTokenGenerator2()
   }
 
   "Happy Path" {
@@ -63,7 +63,7 @@ class FakeTokenGeneratorTest : FreeSpec({
 
   "Custom Length With Large Suffix" {
     // Fast-forward the next token suffix.
-    (tokenGenerator as FakeTokenGenerator).nextByLabel["payment"] = AtomicLong(12345L)
+    (tokenGenerator as FakeTokenGenerator2).nextByLabel["payment"] = AtomicLong(12345L)
 
     tokenGenerator.generate(label = "payment", length = 4) shouldBe "2345"
     tokenGenerator.generate(label = "payment", length = 7) shouldBe "pa12346"

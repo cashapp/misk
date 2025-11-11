@@ -6,27 +6,27 @@ import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
 
 /**
- * Marks a web action method as an MCP (Model Context Protocol) HTTP GET endpoint for StreamableHttp transport.
+ * Marks a web action method as an MCP (Model Context Protocol) HTTP GET endpoint for StreamableHTTP transport.
  *
  * This annotation creates endpoints that allow clients to listen for messages sent from the MCP server
- * using StreamableHttp transport (Server-Sent Events). The endpoint establishes an SSE connection
+ * using StreamableHTTP transport (Server-Sent Events). The endpoint establishes a Server-Sent Events (SSE) connection
  * for real-time server-to-client communication.
  *
  * ## Transport Compatibility
  *
- * **StreamableHttp Transport Only**: This annotation is designed exclusively for StreamableHttp
+ * **StreamableHTTP Transport Only**: This annotation is designed exclusively for StreamableHTTP
  * transport using Server-Sent Events. For WebSocket-based MCP communication, use `@McpWebSocket`
  * instead, which handles all communication over a persistent WebSocket connection.
  *
  * ## Purpose
  * Implements the MCP specification requirement for "listening for messages from the server"
- * by providing an SSE endpoint where clients can receive server-initiated events and notifications.
+ * by providing a Server-Sent Events (SSE) endpoint where clients can receive server-initiated events and notifications.
  *
  * ## Configuration
  *
  * The annotation automatically configures:
  * - **Endpoint**: `GET /mcp`
- * - **Response Content-Type**: `text/event-stream` (for SSE responses)
+ * - **Response Content-Type**: `text/event-stream` (for Server-Sent Events (SSE) responses)
  * - **No Request Body**: GET requests don't accept request bodies
  *
  * ## Session Support
@@ -47,7 +47,7 @@ import misk.web.mediatype.MediaTypes
  * ## Method Signature Requirements
  *
  * Methods annotated with `@McpGet` should typically have:
- * - `sendChannel: SendChannel<ServerSentEvent>` - For SSE responses
+ * - `sendChannel: SendChannel<ServerSentEvent>` - For Server-Sent Events (SSE) responses
  * - `suspend` modifier for coroutine support
  * - Optional `@RequestHeaders headers: Headers` for session ID extraction
  *
