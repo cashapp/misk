@@ -1,6 +1,7 @@
 package misk.aws2.sqs.jobqueue
 
 import com.google.inject.Provides
+import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.annotation.ExperimentalMiskApi
@@ -12,10 +13,7 @@ import misk.jobqueue.v2.JobConsumer
 import misk.jobqueue.v2.JobEnqueuer
 import misk.testing.TestFixture
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.SqsAsyncClientBuilder
-import java.util.concurrent.ConcurrentHashMap
 
 open class SqsJobQueueModule @JvmOverloads constructor(
   private val config: SqsConfig,
@@ -58,22 +56,9 @@ open class SqsJobQueueModule @JvmOverloads constructor(
       }
     }
 
-    @Provides
-    fun sqsClientClientFactory(
+    @Provides @Singleton
+    fun sqsClientFactory(
       credentialsProvider: AwsCredentialsProvider,
-    ): SqsClientFactory {
-      return SqsClientFactory { region ->
-        val clients = ConcurrentHashMap<String, SqsAsyncClient>()
-
-        clients.computeIfAbsent(region) {
-          val builder = SqsAsyncClient.builder()
-            .credentialsProvider(credentialsProvider)
-            .region(Region.of(region))
-
-          builder.configureClient()
-          builder.build()
-        }
-      }
-    }
+    ): SqsClientFactory = RealSqsClientFactory(credentialsProvider, configureClient)
   }
 }
