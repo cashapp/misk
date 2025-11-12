@@ -23,14 +23,27 @@ import kotlin.time.Duration.Companion.milliseconds
 class MiskApplication private constructor(
   private val injectorGenerator: () -> Injector,
   commands: List<MiskCommand> = listOf(),
+  otelConfig: misk.otel.OpenTelemetryConfig? = null,
 ) {
+  init {
+    otelConfig?.let { config ->
+      misk.otel.setupOpenTelemetry(
+        serviceName = config.service_name,
+        serviceVersion = config.service_version,
+        otlpEndpoint = config.otlp_endpoint,
+        metricExportInterval = config.metric_export_interval,
+        additionalAttributes = config.additional_attributes
+      )
+    }
+  }
 
-  constructor(vararg modules: Module) : this({ Guice.createInjector(modules.toList()) })
-  constructor(vararg commands: MiskCommand) : this({ Guice.createInjector() }, commands.toList())
+  constructor(vararg modules: Module) : this({ Guice.createInjector(withOtelModule(modules.toList())) })
+  constructor(vararg commands: MiskCommand) : this({ Guice.createInjector(withOtelModule(emptyList())) }, commands.toList())
   constructor(
     modules: List<Module>,
     commands: List<MiskCommand> = listOf(),
-  ) : this({ Guice.createInjector(modules) }, commands)
+    otelConfig: misk.otel.OpenTelemetryConfig? = null,
+  ) : this({ Guice.createInjector(withOtelModule(modules)) }, commands, otelConfig)
 
   constructor(injector: Injector) : this({ injector })
 
@@ -203,6 +216,10 @@ class MiskApplication private constructor(
 
   private companion object {
     val log = getLogger<MiskApplication>()
+
+    fun withOtelModule(modules: List<Module>): List<Module> {
+      return modules + misk.otel.OpenTelemetryModule()
+    }
   }
 
   internal class CliException(message: String) : RuntimeException(message)

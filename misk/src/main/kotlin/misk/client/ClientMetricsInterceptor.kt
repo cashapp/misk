@@ -4,6 +4,10 @@ import com.google.common.base.Stopwatch
 import com.google.common.base.Ticker
 import com.squareup.wire.GrpcMethod
 import com.squareup.wire.GrpcStatus
+import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.api.metrics.DoubleHistogram
+import io.opentelemetry.api.metrics.Meter
 import io.prometheus.client.Histogram
 import io.prometheus.client.Summary
 import jakarta.inject.Inject
@@ -22,6 +26,7 @@ class ClientMetricsInterceptor private constructor(
   val clientName: String,
   private val requestDurationSummary: Summary?,
   private val requestDurationHistogram: Histogram,
+  private val otelRequestDuration: DoubleHistogram,
 ) : Interceptor {
 
   override fun intercept(chain: Interceptor.Chain): Response {
@@ -50,6 +55,13 @@ class ClientMetricsInterceptor private constructor(
       val elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS).toDouble()
       requestDurationSummary?.labels(actionName, "timeout")?.observe(elapsedMillis)
       requestDurationHistogram.labels(actionName, "timeout").observe(elapsedMillis)
+      otelRequestDuration.record(
+        elapsedMillis / 1000.0,
+        Attributes.of(
+          AttributeKey.stringKey("http.route"), actionName,
+          AttributeKey.stringKey("error.type"), "timeout"
+        )
+      )
       throw e
     } catch (e: Exception) {
       // Something else happened while the connection was in progress and we didn't receive
@@ -57,6 +69,13 @@ class ClientMetricsInterceptor private constructor(
       val elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS).toDouble()
       requestDurationSummary?.labels(actionName, "incomplete-response")?.observe(elapsedMillis)
       requestDurationHistogram.labels(actionName, "incomplete-response").observe(elapsedMillis)
+      otelRequestDuration.record(
+        elapsedMillis / 1000.0,
+        Attributes.of(
+          AttributeKey.stringKey("http.route"), actionName,
+          AttributeKey.stringKey("error.type"), "incomplete_response"
+        )
+      )
       throw e
     }
   }
@@ -91,6 +110,15 @@ class ClientMetricsInterceptor private constructor(
     val code = grpcStatusToHttpCode(grpcStatus) ?: response.code
     requestDurationSummary?.labels(actionName, "$code")?.observe(elapsedMillis)
     requestDurationHistogram.labels(actionName, "$code").observe(elapsedMillis)
+
+    otelRequestDuration.record(
+      elapsedMillis / 1000.0,
+      Attributes.of(
+        AttributeKey.stringKey("http.route"), actionName,
+        AttributeKey.stringKey("http.response.status_code"), code.toString(),
+        AttributeKey.stringKey("server.address"), clientName
+      )
+    )
   }
 
   private fun grpcStatusToHttpCode(grpcStatus: Int?): Int? {
@@ -128,6 +156,7 @@ class ClientMetricsInterceptor private constructor(
   class Factory @Inject internal constructor(
     m: Metrics,
     config: PrometheusConfig,
+    private val meter: Meter,
   ) {
     internal val requestDurationSummary = when (config.disable_default_summary_metrics) {
       true -> null
@@ -145,10 +174,18 @@ class ClientMetricsInterceptor private constructor(
       labelNames = listOf("action", "code")
     )
 
+    internal val otelRequestDuration = meter
+      .histogramBuilder("http.client.request.duration")
+      .setDescription("Duration of HTTP client requests")
+      .setUnit("s")
+      .setExplicitBucketBoundariesAdvice(listOf(0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 7.5, 10.0))
+      .build()
+
     fun create(clientName: String) = ClientMetricsInterceptor(
       clientName,
       requestDurationSummary,
-      requestDurationHistogram
+      requestDurationHistogram,
+      otelRequestDuration
     )
   }
 

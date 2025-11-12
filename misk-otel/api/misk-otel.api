@@ -1,0 +1,9 @@
+public final class misk/otel/OpenTelemetryModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/otel/OpenTelemetrySetupKt {
+	public static final fun setupOpenTelemetry (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Lio/opentelemetry/api/common/Attributes;)V
+	public static synthetic fun setupOpenTelemetry$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Lio/opentelemetry/api/common/Attributes;ILjava/lang/Object;)V
+}
+

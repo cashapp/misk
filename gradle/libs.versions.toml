@@ -23,6 +23,7 @@ micrometer = "1.12.13"
 netty = "4.2.6.Final"
 okHttp = "5.1.0"
 okio = "3.16.0"
+opentelemetry = "1.56.0"
 prometheus = "0.16.0"
 protobuf = "3.25.8"
 retrofit = "3.0.0"
@@ -216,6 +217,14 @@ postgresql = { module = "org.postgresql:postgresql", version = "42.7.8" }
 prometheusClient = { module = "io.prometheus:simpleclient", version.ref = "prometheus" }
 prometheusClientBom = { module = "io.prometheus:simpleclient_bom", version.ref = "prometheus" }
 prometheusClientCommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus" }
+opentelemetryApi = { module = "io.opentelemetry:opentelemetry-api", version.ref = "opentelemetry" }
+opentelemetryBom = { module = "io.opentelemetry:opentelemetry-bom", version.ref = "opentelemetry" }
+opentelemetrySdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "opentelemetry" }
+opentelemetrySdkMetrics = { module = "io.opentelemetry:opentelemetry-sdk-metrics", version.ref = "opentelemetry" }
+opentelemetryExporterOtlp = { module = "io.opentelemetry:opentelemetry-exporter-otlp", version.ref = "opentelemetry" }
+opentelemetrySemconv = { module = "io.opentelemetry.semconv:opentelemetry-semconv", version = "1.37.0" }
+opentelemetryInstrumentationRuntimeMetricsJava8 = { module = "io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry-java8", version = "2.11.0-alpha" }
+opentelemetryInstrumentationRuntimeMetricsJava17 = { module = "io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry-java17", version = "2.20.1-alpha" }
 prometheusHotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus" }
 prometheusHttpserver = { module = "io.prometheus:simpleclient_httpserver", version.ref = "prometheus" }
 protobufJava = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }

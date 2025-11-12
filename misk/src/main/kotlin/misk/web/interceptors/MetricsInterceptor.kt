@@ -1,5 +1,9 @@
 package misk.web.interceptors
 
+import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.api.metrics.DoubleHistogram
+import io.opentelemetry.api.metrics.Meter
 import io.prometheus.client.Histogram
 import io.prometheus.client.Summary
 import jakarta.inject.Inject
@@ -17,6 +21,7 @@ internal class MetricsInterceptor internal constructor(
   private val actionName: String,
   private val requestDurationSummary: Summary?,
   private val requestDurationHistogram: Histogram,
+  private val otelRequestDuration: DoubleHistogram,
   private val caller: ActionScoped<MiskCaller?>
 ) : NetworkInterceptor {
   override fun intercept(chain: NetworkChain) {
@@ -36,6 +41,16 @@ internal class MetricsInterceptor internal constructor(
     requestDurationHistogram
       .labels(actionName, callingPrincipal, statusCode.toString())
       .observe(elapsedTimeMillis)
+
+    otelRequestDuration.record(
+      elapsedTime.toNanos() / 1_000_000_000.0,
+      Attributes.of(
+        AttributeKey.stringKey("http.route"), actionName,
+        AttributeKey.stringKey("http.response.status_code"), statusCode.toString(),
+        AttributeKey.stringKey("client.service.name"), callingPrincipal
+      )
+    )
+
     return result
   }
 
@@ -44,6 +59,7 @@ internal class MetricsInterceptor internal constructor(
     m: Metrics,
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
     config: PrometheusConfig,
+    private val meter: Meter,
   ) : NetworkInterceptor.Factory {
     internal val requestDurationSummary = when (config.disable_default_summary_metrics) {
       true -> null
@@ -61,10 +77,18 @@ internal class MetricsInterceptor internal constructor(
       labelNames = listOf("action", "caller", "code")
     )
 
+    internal val otelRequestDuration = meter
+      .histogramBuilder("http.server.request.duration")
+      .setDescription("Duration of HTTP server requests")
+      .setUnit("s")
+      .setExplicitBucketBoundariesAdvice(listOf(0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 7.5, 10.0))
+      .build()
+
     override fun create(action: Action) = MetricsInterceptor(
       action.name,
       requestDurationSummary,
       requestDurationHistogram,
+      otelRequestDuration,
       caller,
     )
   }
