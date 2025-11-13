@@ -1,7 +1,8 @@
-package misk.mcp
+package misk.mcp.testing
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.mcp.McpSessionHandler
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
