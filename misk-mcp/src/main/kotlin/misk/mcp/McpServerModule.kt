@@ -11,7 +11,6 @@ import misk.annotation.ExperimentalMiskApi
 import misk.inject.BindingQualifier
 import misk.inject.KAbstractModule
 import misk.inject.KInstallOnceModule
-import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.inject.parameterizedType
 import misk.inject.qualifier
@@ -220,7 +219,7 @@ class McpServerModule private constructor(
         instructionsProvider = instructionsProvider,
         mcpMetrics = mcpMetricsProvider.get(),
       )
-    }.asSingleton()
+    }
     val mcpServerProvider = getProvider(serverKey)
 
     // Create a qualified binding for the McpStreamManager

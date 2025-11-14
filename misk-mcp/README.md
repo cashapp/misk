@@ -52,7 +52,6 @@ Uses persistent WebSocket connections for full bidirectional communication:
 
 ```kotlin
 @ExperimentalMiskApi
-@Singleton
 class MyMcpSseAction @Inject constructor(
   private val mcpStreamManager: McpStreamManager
 ) : WebAction {
@@ -91,7 +90,6 @@ class MyMcpSseAction @Inject constructor(
 
 ```kotlin
 @ExperimentalMiskApi
-@Singleton
 class MyMcpWebSocketAction @Inject constructor(
   private val mcpStreamManager: McpStreamManager
 ) : WebAction {
@@ -374,6 +372,91 @@ mcp:
 - **version**: Server version reported to clients (semantic versioning recommended)
 - **resources.subscribe**: Enable resource update notifications (default: false)
 - **list_changed**: Whether dynamic registration is supported (default: false, not currently implemented)
+
+## WebAction Scoping Best Practices
+
+MCP WebActions can be scoped as either **unscoped** (no annotation) or **`@Singleton`**. The choice affects how `McpStreamManager` and `MiskMcpServer` instances are created.
+
+### Recommended: Unscoped WebActions (Default)
+
+**Unscoped WebActions are the preferred pattern** because they create fresh `McpStreamManager` and `MiskMcpServer` instances per request, allowing for request-specific behavior.
+
+```kotlin
+@ExperimentalMiskApi
+class MyMcpAction @Inject constructor(
+  private val mcpStreamManager: McpStreamManager  // ✅ Fresh instance per request
+) : WebAction {
+  
+  @McpPost
+  suspend fun handleMcpRequest(
+    @RequestBody message: JSONRPCMessage,
+    sendChannel: SendChannel<ServerSentEvent>
+  ) {
+    mcpStreamManager.withSseChannel(sendChannel) {
+      handleMessage(message)
+    }
+  }
+}
+```
+
+**Benefits of unscoped WebActions:**
+- Fresh server instance per request
+- Tool/resource/prompt metadata can be request-specific
+- Supports dynamic tool descriptions based on user context
+- Simpler mental model - no need for providers
+
+**Use unscoped WebActions when:**
+- Tool descriptions vary by user permissions or roles
+- Resource availability changes based on request context
+- You have multi-tenant scenarios with different tool sets
+- You want the flexibility for future dynamic behavior (recommended default)
+
+### Alternative: Singleton WebActions with Provider
+
+If you need a singleton WebAction (e.g., for expensive initialization), **you must inject `Provider<McpStreamManager>`** instead of `McpStreamManager` directly:
+
+```kotlin
+@ExperimentalMiskApi
+@Singleton
+class MyMcpAction @Inject constructor(
+  private val mcpStreamManagerProvider: Provider<McpStreamManager>  // ✅ Use Provider
+) : WebAction {
+  
+  @McpPost
+  suspend fun handleMcpRequest(
+    @RequestBody message: JSONRPCMessage,
+    sendChannel: SendChannel<ServerSentEvent>
+  ) {
+    // Get a fresh instance per request
+    mcpStreamManagerProvider.get().withSseChannel(sendChannel) {
+      handleMessage(message)
+    }
+  }
+}
+```
+
+**Important:** If you inject `McpStreamManager` directly into a `@Singleton` WebAction (without using `Provider`), you effectively create a singleton `MiskMcpServer` that is reused across all requests. While this works, it prevents request-specific tool metadata and should only be done if all your tool/resource/prompt descriptions are completely static.
+
+```kotlin
+@ExperimentalMiskApi
+@Singleton
+class MyMcpAction @Inject constructor(
+  private val mcpStreamManager: McpStreamManager  // ⚠️ Effectively singleton server
+) : WebAction {
+  // This creates ONE MiskMcpServer instance for the lifetime of the application
+  // Only use this pattern if ALL tool descriptions are static
+}
+```
+
+### Comparison
+
+| Pattern                                    | Server Lifecycle | Use Case |
+|--------------------------------------------|------------------|----------|
+| **Unscoped WebAction + Direct Injection** (Recommended)      | Fresh per request | Dynamic tool metadata, flexible, default choice |
+| **Singleton WebAction + Provider**         | Fresh per request | Expensive WebAction initialization, still supports dynamic metadata |
+| **Singleton WebAction + Direct Injection** | Singleton (one instance) | All tool/resource/prompt descriptions are completely static |
+
+**Default recommendation:** Use unscoped WebActions for the best balance of flexibility and simplicity.
 
 ## Implementing MCP Components
 
