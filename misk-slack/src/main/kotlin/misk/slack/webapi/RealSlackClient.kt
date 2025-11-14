@@ -1,5 +1,7 @@
 package misk.slack.webapi
 
+import misk.slack.webapi.helpers.AddReactionRequest
+import misk.slack.webapi.helpers.AddReactionResponse
 import misk.slack.webapi.helpers.PostMessageRequest
 import misk.slack.webapi.helpers.GetUserResponse
 import misk.slack.webapi.helpers.PostMessageResponse
@@ -40,6 +42,10 @@ class RealSlackClient @Inject constructor(
 
   fun updateUserGroup(request: UserGroupRequest): UserGroupResponse {
     return callSlack { slackApi.updateUserGroup(request).execute() }
+  }
+
+  fun addReaction(request: AddReactionRequest): AddReactionResponse {
+    return callSlack { slackApi.addReaction(request).execute() }
   }
 
   fun getChatPermalink(channel: String, message_timestamp: String): GetChatPermalinkResponse {

@@ -8,6 +8,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.slack.webapi.helpers.AddReactionResponse
 import misk.slack.webapi.helpers.GetChatPermalinkResponse
 import misk.slack.webapi.helpers.InviteResponse
 import misk.slack.webapi.helpers.SetConversationTopicResponse
@@ -28,6 +29,7 @@ class MockSlackServer @Inject constructor(
   private val topicJsonAdapter = moshi.adapter(SetConversationTopicResponse::class.java)
   private val inviteJsonAdapter = moshi.adapter(InviteResponse::class.java)
   private val usergroupJsonAdapter = moshi.adapter(UserGroupResponse::class.java)
+  private val reactionJsonAdapter = moshi.adapter(AddReactionResponse::class.java)
 
   override fun startUp() {
     server.start()
@@ -83,6 +85,14 @@ class MockSlackServer @Inject constructor(
     server.enqueue(
       MockResponse()
         .setBody(usergroupJsonAdapter.toJson(usergroup))
+    )
+  }
+
+  /** [SlackApi.addReaction] returns this */
+  fun enqueueReactionResponse(reactionResponse: AddReactionResponse) {
+    server.enqueue(
+      MockResponse()
+        .setBody(reactionJsonAdapter.toJson(reactionResponse))
     )
   }
 }

@@ -689,3 +689,14 @@ data class TopicPurpose constructor(
   val creator: String,
   val last_set: Long
 )
+
+data class AddReactionRequest constructor(
+  val name: String,
+  val channel: String,
+  val timestamp: String,
+)
+
+data class AddReactionResponse @JvmOverloads constructor(
+  val ok: Boolean,
+  val error: String? = null,
+)
