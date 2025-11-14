@@ -1,6 +1,7 @@
 package misk.aws2.sqs.jobqueue
 
 import com.google.inject.Provides
+import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.annotation.ExperimentalMiskApi
@@ -55,11 +56,9 @@ open class SqsJobQueueModule @JvmOverloads constructor(
       }
     }
 
-    @Provides
-    fun sqsClientClientFactory(
+    @Provides @Singleton
+    fun sqsClientFactory(
       credentialsProvider: AwsCredentialsProvider,
-    ): SqsClientFactory {
-      return SqsClientFactory(credentialsProvider, configureClient)
-    }
+    ): SqsClientFactory = RealSqsClientFactory(credentialsProvider, configureClient)
   }
 }
