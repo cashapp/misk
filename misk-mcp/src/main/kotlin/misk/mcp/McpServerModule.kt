@@ -230,46 +230,50 @@ private constructor(
 
   companion object {
     /**
-     * Creates an [McpServerModule] for the given [McpConfig] with an optional group annotation.
+     * Creates an [McpServerModule] without any group annotation.
+     *
+     * Use this when you only need a single MCP server and don't need to organize
+     * tools, resources, and prompts into separate groups.
+     *
+     * Example:
+     * ```kotlin
+     * install(McpServerModule.create("my_server", config.mcp))
+     * ```
+     *
+     * @param name The name of the MCP server configuration to use from the config
+     * @param config The MCP configuration containing server settings
+     * @param version Optional version string (defaults to version from config)
+     * @param instructionsProvider Optional provider for server instructions/documentation
+     * @return A configured McpServerModule instance with no group annotation
+     */
+    @JvmName("createWithNoGroup")
+    fun create(
+      name: String,
+      config: McpConfig,
+      version: String? = null,
+      instructionsProvider: Provider<String>? = null
+    ) = McpServerModule(name, version, config, instructionsProvider, null)
+
+    /**
+     * Creates an [McpServerModule] with an optional group annotation class.
      *
      * This is the base factory method that accepts a [KClass] for the group annotation. Use the reified generic
      * versions for more convenient type-safe creation.
      *
      * @param name The name of the MCP server configuration to use from the config
      * @param config The MCP configuration containing server settings
-     * @param instructionsProvider Optional provider for server instructions/documentation
-     * @param groupAnnotation Optional annotation class for grouping tools, resources, and prompts
+     * @param groupAnnotationClass Optional annotation class for grouping tools, resources, and prompts
      * @param version Optional version string (defaults to version from config)
+     * @param instructionsProvider Optional provider for server instructions/documentation
      * @return A configured McpServerModule instance
      */
     fun create(
       name: String,
       config: McpConfig,
-      instructionsProvider: Provider<String>? = null,
-      groupAnnotation: KClass<out Annotation>? = null,
+      groupAnnotationClass: KClass<out Annotation>?,
       version: String? = null,
-    ) = McpServerModule(name, version, config, instructionsProvider, groupAnnotation?.qualifier)
-
-    /**
-     * Creates an [McpServerModule] with an annotation instance for dynamic grouping.
-     *
-     * Use this when you need to create group annotations dynamically at runtime rather than using compile-time
-     * annotation classes.
-     *
-     * @param name The name of the MCP server configuration to use from the config
-     * @param config The MCP configuration containing server settings
-     * @param groupAnnotation Annotation instance for grouping tools, resources, and prompts
-     * @param instructionsProvider Optional provider for server instructions/documentation
-     * @param version Optional version string (defaults to version from config)
-     * @return A configured McpServerModule instance
-     */
-    fun create(
-      name: String,
-      config: McpConfig,
-      groupAnnotation: Annotation,
       instructionsProvider: Provider<String>? = null,
-      version: String? = null,
-    ) = McpServerModule(name, version, config, instructionsProvider, groupAnnotation.qualifier)
+    ) = McpServerModule(name, version, config, instructionsProvider, groupAnnotationClass?.qualifier)
 
     /**
      * Creates an [McpServerModule] with a reified group annotation type.
@@ -285,37 +289,42 @@ private constructor(
      * @param GA The annotation type for grouping (e.g., @AdminMcp, @PublicMcp)
      * @param name The name of the MCP server configuration to use from the config
      * @param config The MCP configuration containing server settings
+     * @param version Optional version string (defaults to version from config)
      * @param instructionsProvider Optional provider for server instructions/documentation
      * @return A configured McpServerModule instance with the specified group annotation
      */
     inline fun <reified GA : Annotation> create(
       name: String,
       config: McpConfig,
-      instructionsProvider: Provider<String>? = null,
-    ) = create(name, config, instructionsProvider, GA::class)
+      version: String? = null,
+      instructionsProvider: Provider<String>? = null
+    ) = create(name, config, GA::class, version, instructionsProvider)
 
     /**
-     * Creates an [McpServerModule] without any group annotation.
+     * Creates an [McpServerModule] with an annotation instance for dynamic grouping.
      *
-     * Use this when you only need a single MCP server and don't need to organize tools, resources, and prompts into
-     * separate groups.
-     *
-     * Example:
-     * ```kotlin
-     * install(McpServerModule.create("my_server", config.mcp))
-     * ```
+     * Use this when you need to create group annotations dynamically at runtime
+     * rather than using compile-time annotation classes.
      *
      * @param name The name of the MCP server configuration to use from the config
      * @param config The MCP configuration containing server settings
+     * @param groupAnnotation Annotation instance for grouping tools, resources, and prompts
+     * @param version Optional version string (defaults to version from config)
      * @param instructionsProvider Optional provider for server instructions/documentation
-     * @return A configured McpServerModule instance with no group annotation
+     * @return A configured McpServerModule instance
      */
-    @JvmName("createWithNoGroup")
-    fun create(name: String, config: McpConfig, instructionsProvider: Provider<String>? = null) =
-      create(name, config, instructionsProvider, null)
+    fun create(
+      name: String,
+      config: McpConfig,
+      groupAnnotation: Annotation?,
+      version: String? = null,
+      instructionsProvider: Provider<String>? = null,
+    ) = McpServerModule(name, version, config, instructionsProvider, groupAnnotation?.qualifier)
+
+
   }
 
-  private class CommonModule() : KInstallOnceModule() {
+  private class CommonModule : KInstallOnceModule() {
     override fun configure() {
       // Install the Unmarshaller for MCP JSON RPC messages. This uses the kotlin-sdk provided deserializer
       multibind<Unmarshaller.Factory>().to<McpJsonRpcMessageUnmarshaller.Factory>()
