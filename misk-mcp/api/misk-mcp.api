@@ -367,6 +367,7 @@ public final class misk/mcp/testing/resources/WebSearchResource : misk/mcp/McpRe
 public abstract class misk/mcp/testing/tools/AbstractEchoTool : misk/mcp/StructuredMcpTool {
 	public fun <init> ()V
 	public fun buildGreeting (Ljava/lang/String;)Ljava/lang/String;
+	public fun getName ()Ljava/lang/String;
 	public synthetic fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun handle (Lmisk/mcp/testing/tools/EchoToolInput;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -459,7 +460,6 @@ public final class misk/mcp/testing/tools/CalculatorToolOutput$Companion {
 public final class misk/mcp/testing/tools/EchoTool : misk/mcp/testing/tools/AbstractEchoTool {
 	public fun <init> ()V
 	public fun getDescription ()Ljava/lang/String;
-	public fun getName ()Ljava/lang/String;
 }
 
 public final class misk/mcp/testing/tools/EchoToolInput {
@@ -518,7 +518,6 @@ public final class misk/mcp/testing/tools/EchoToolV2 : misk/mcp/testing/tools/Ab
 	public fun <init> ()V
 	public fun buildGreeting (Ljava/lang/String;)Ljava/lang/String;
 	public fun getDescription ()Ljava/lang/String;
-	public fun getName ()Ljava/lang/String;
 }
 
 public final class misk/mcp/testing/tools/GetNicknameRequest {
