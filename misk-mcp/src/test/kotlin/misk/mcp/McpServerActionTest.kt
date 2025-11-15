@@ -434,6 +434,7 @@ internal abstract class McpServerActionTest {
       actual = registry.summaryCount(
         "mcp_tool_handler_latency",
         "server_name" to "mcp-server-action-test-server",
+        "server_version" to "1.0.0",
         "tool_name" to "calculator",
         "tool_outcome" to "Success",
       )
@@ -452,6 +453,7 @@ internal abstract class McpServerActionTest {
         registry.summaryCount(
         "mcp_tool_handler_latency",
         "server_name" to "mcp-server-action-test-server",
+        "server_version" to "1.0.0",
         "tool_name" to "calculator",
         "tool_outcome" to "Error",
       )
@@ -468,6 +470,7 @@ internal abstract class McpServerActionTest {
       actual = registry.summaryCount(
         "mcp_tool_handler_latency",
         "server_name" to "mcp-server-action-test-server",
+        "server_version" to "1.0.0",
         "tool_name" to "throwing",
         "tool_outcome" to "Exception",
       )

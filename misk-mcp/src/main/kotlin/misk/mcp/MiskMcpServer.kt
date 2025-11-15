@@ -182,7 +182,7 @@ class MiskMcpServer internal constructor(
         throw ex
       } finally {
         val duration = mark.elapsedNow()
-        mcpMetrics.mcpToolHandlerLatency(duration, name, toolName, outcome)
+        mcpMetrics.mcpToolHandlerLatency(duration, name, version, toolName, outcome)
       }
     }
   }

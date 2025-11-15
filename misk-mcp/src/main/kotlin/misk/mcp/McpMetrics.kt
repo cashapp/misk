@@ -21,6 +21,7 @@ import kotlin.time.Duration
  *
  * **Labels:**
  * - `server_name`: The name of the MCP server instance (from [MiskMcpServer.name])
+ * - `server_version`: The version of the MCP server instance (from [MiskMcpServer.version])
  * - `tool_name`: The name of the executed tool (from [McpTool.name])
  * - `tool_outcome`: The execution outcome - one of [ToolCallOutcome] values
  *
@@ -74,7 +75,7 @@ internal class McpMetrics @Inject internal constructor(metrics: Metrics) {
   private val mcpToolHandlerLatency = metrics.histogram(
     "mcp_tool_handler_latency",
     "how long a tool's handler() method took",
-    listOf("server_name", "tool_name", "tool_outcome")
+    listOf("server_name", "server_version", "tool_name", "tool_outcome")
   )
   
   /**
@@ -85,12 +86,19 @@ internal class McpMetrics @Inject internal constructor(metrics: Metrics) {
    *
    * @param duration The time taken to execute the tool handler
    * @param serverName The name of the MCP server instance
+   * @param version The version of the MCP server instance
    * @param toolName The name of the executed tool
    * @param outcome The execution outcome (Success, Error, or Exception)
    */
-  fun mcpToolHandlerLatency(duration: Duration, serverName: String, toolName: String, outcome: ToolCallOutcome) {
+  fun mcpToolHandlerLatency(
+    duration: Duration,
+    serverName: String,
+    version: String,
+    toolName: String,
+    outcome: ToolCallOutcome
+  ) {
     mcpToolHandlerLatency
-      .labels(serverName, toolName, outcome.name)
+      .labels(serverName, version, toolName, outcome.name)
       .observe(duration.inWholeMilliseconds.toDouble())
   }
   
