@@ -16,6 +16,7 @@ import misk.redis.lettuce.FunctionCodeLoader
 import misk.redis.lettuce.metrics.RedisClientMetrics
 import misk.redis2.metrics.RedisClientMetricsCommandLatencyRecorder
 import kotlin.reflect.KClass
+import misk.redis.lettuce.cluster.createHostRemappingResolver
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
@@ -61,6 +62,12 @@ internal class RedisClusterModule<K : Any, V : Any> internal constructor(
       val redisClientMetricsProvider = getProvider(RedisClientMetrics::class.java)
 
       bind(clusterClientKey).toProvider {
+        val socketAddressResolver = if (clusterGroupConfig.enable_host_remapping) {
+          createHostRemappingResolver(clusterGroupConfig.configuration_endpoint.hostname)
+        } else {
+          null
+        }
+
         redisClusterClient(
             with(clusterGroupConfig.configuration_endpoint) {
               redisUri {
@@ -88,6 +95,7 @@ internal class RedisClusterModule<K : Any, V : Any> internal constructor(
                   ),
               )
             },
+            socketAddressResolver = socketAddressResolver,
         )
       }.asSingleton()
 
