@@ -119,7 +119,7 @@ abstract class KAbstractModule : AbstractModule() {
   protected fun <K : Any, V : Any> newMapBinder(
     keyType: KClass<K>,
     valueType: KClass<V>,
-    annotation: KClass<out Annotation>? = null
+    annotation: KClass<out Annotation>?
   ): MapBinder<K, V> = newMapBinder(keyType.typeLiteral(), valueType.typeLiteral(), annotation?.qualifier)
 
   protected inline fun <reified K : Any, reified V : Any> newMapBinder(
@@ -131,6 +131,24 @@ abstract class KAbstractModule : AbstractModule() {
     valueType: KClass<V>,
     annotation: Annotation?
   ): MapBinder<K, V> = newMapBinder(keyType.typeLiteral(), valueType.typeLiteral(), annotation?.qualifier)
+
+  protected fun <K : Any, V : Any> newMapBinder(
+    keyType: KClass<K>,
+    valueType: KClass<V>,
+    qualifier: BindingQualifier? = null
+  ): MapBinder<K, V> = newMapBinder(keyType.typeLiteral(), valueType.typeLiteral(), qualifier)
+
+  protected fun <K : Any, V : Any> newMapBinder(
+    keyType: TypeLiteral<K>,
+    valueType: TypeLiteral<V>,
+    annotation: KClass<out Annotation>?
+  ): MapBinder<K, V>  = newMapBinder(keyType, valueType, annotation?.qualifier)
+
+  protected fun <K : Any, V : Any> newMapBinder(
+    keyType: TypeLiteral<K>,
+    valueType: TypeLiteral<V>,
+    annotation: Annotation?
+  ): MapBinder<K, V>  = newMapBinder(keyType, valueType, annotation?.qualifier)
 
   protected fun <K : Any, V : Any> newMapBinder(
     keyType: TypeLiteral<K>,

@@ -73,11 +73,14 @@ public final class misk/inject/GuiceKt {
 public abstract class misk/inject/KAbstractModule : com/google/inject/AbstractModule {
 	public fun <init> ()V
 	protected fun binder ()Lcom/google/inject/Binder;
+	protected final fun newMapBinder (Lcom/google/inject/TypeLiteral;Lcom/google/inject/TypeLiteral;Ljava/lang/annotation/Annotation;)Lcom/google/inject/multibindings/MapBinder;
+	protected final fun newMapBinder (Lcom/google/inject/TypeLiteral;Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;)Lcom/google/inject/multibindings/MapBinder;
 	protected final fun newMapBinder (Lcom/google/inject/TypeLiteral;Lcom/google/inject/TypeLiteral;Lmisk/inject/BindingQualifier;)Lcom/google/inject/multibindings/MapBinder;
 	protected final fun newMapBinder (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)Lcom/google/inject/multibindings/MapBinder;
 	protected final fun newMapBinder (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lcom/google/inject/multibindings/MapBinder;
+	protected final fun newMapBinder (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/inject/BindingQualifier;)Lcom/google/inject/multibindings/MapBinder;
 	public static synthetic fun newMapBinder$default (Lmisk/inject/KAbstractModule;Lcom/google/inject/TypeLiteral;Lcom/google/inject/TypeLiteral;Lmisk/inject/BindingQualifier;ILjava/lang/Object;)Lcom/google/inject/multibindings/MapBinder;
-	public static synthetic fun newMapBinder$default (Lmisk/inject/KAbstractModule;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lcom/google/inject/multibindings/MapBinder;
+	public static synthetic fun newMapBinder$default (Lmisk/inject/KAbstractModule;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/inject/BindingQualifier;ILjava/lang/Object;)Lcom/google/inject/multibindings/MapBinder;
 	protected final fun newMultibinder (Lcom/google/inject/TypeLiteral;Lmisk/inject/BindingQualifier;)Lcom/google/inject/multibindings/Multibinder;
 	protected final fun newMultibinder (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lcom/google/inject/multibindings/Multibinder;
 	protected final fun newMultibinder (Lkotlin/reflect/KClass;Lmisk/inject/BindingQualifier;)Lcom/google/inject/multibindings/Multibinder;
