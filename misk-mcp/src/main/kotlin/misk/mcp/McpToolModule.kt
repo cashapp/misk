@@ -3,7 +3,6 @@ package misk.mcp
 import misk.annotation.ExperimentalMiskApi
 import misk.inject.BindingQualifier
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
 import misk.inject.qualifier
 import kotlin.reflect.KClass
 
@@ -87,7 +86,6 @@ class McpToolModule<T : McpTool<*>> private constructor(
     // Bind the MCP tool to the named server's tool set
     multibind<McpTool<*>>(qualifier)
       .to(toolClass.java)
-      .asSingleton()
   }
 
   companion object {

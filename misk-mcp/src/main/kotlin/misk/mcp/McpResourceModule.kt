@@ -3,7 +3,6 @@ package misk.mcp
 import misk.annotation.ExperimentalMiskApi
 import misk.inject.BindingQualifier
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
 import misk.inject.qualifier
 import kotlin.reflect.KClass
 
@@ -87,7 +86,6 @@ class McpResourceModule<R : McpResource> private constructor(
     // Bind the MCP resource to the named server's resource set
     multibind<McpResource>(qualifier)
       .to(resourceClass.java)
-      .asSingleton()
   }
 
   companion object {

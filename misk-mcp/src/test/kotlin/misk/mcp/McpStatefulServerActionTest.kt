@@ -61,7 +61,6 @@ internal class McpStatefulServerActionTest {
 
   @OptIn(ExperimentalMiskApi::class)
   @Suppress("unused")
-  @Singleton
   class McpStatefulServerActionTestPostAction @Inject constructor(private val mcpStreamManager: McpStreamManager) :
     WebAction {
     @McpPost
@@ -72,7 +71,6 @@ internal class McpStatefulServerActionTest {
 
   @OptIn(ExperimentalMiskApi::class)
   @Suppress("unused")
-  @Singleton
   class McpStatefulServerActionTestDeleteAction @Inject constructor(
     private val mcpSessionHandler: McpSessionHandler
   ) : WebAction {

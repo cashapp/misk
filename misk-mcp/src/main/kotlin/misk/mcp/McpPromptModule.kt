@@ -3,7 +3,6 @@ package misk.mcp
 import misk.annotation.ExperimentalMiskApi
 import misk.inject.BindingQualifier
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
 import misk.inject.qualifier
 import kotlin.reflect.KClass
 
@@ -87,7 +86,6 @@ class McpPromptModule<P : McpPrompt> private constructor(
     // Bind the MCP prompt to the named server's prompt set
     multibind<McpPrompt>(qualifier)
       .to(promptClass.java)
-      .asSingleton()
   }
 
   companion object {

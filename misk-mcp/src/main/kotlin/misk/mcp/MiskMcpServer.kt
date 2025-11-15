@@ -57,7 +57,6 @@ import kotlin.time.TimeSource
  * [misk.mcp.action.McpStreamManager]:
  *
  * ```kotlin
- * @Singleton
  * class MyMcpWebAction @Inject constructor(
  *   private val mcpStreamManager: McpStreamManager
  * ) : WebAction {
