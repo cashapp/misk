@@ -1,16 +1,17 @@
 @file:Suppress("PropertyName", "LocalVariableName")
 
-package misk.mcp.tools
+package misk.mcp.testing.tools
 
 import io.modelcontextprotocol.kotlin.sdk.client.Client
 import jakarta.inject.Inject
 import kotlinx.serialization.Serializable
 import misk.annotation.ExperimentalMiskApi
+import misk.mcp.Description
 import misk.mcp.McpTool
 
 @Serializable
 data class ThrowingToolInput (
-  @misk.mcp.Description("dummy parameter, can't have empty parameter list")
+  @Description("dummy parameter, can't have empty parameter list")
   val dummy: String
 )
 

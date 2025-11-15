@@ -18,9 +18,6 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.encodeToJsonElement
 import misk.MiskTestingServiceModule
 import misk.annotation.ExperimentalMiskApi
 import misk.inject.KAbstractModule
@@ -30,24 +27,24 @@ import misk.mcp.action.McpWebSocket
 import misk.mcp.action.handleMessage
 import misk.mcp.config.McpConfig
 import misk.mcp.config.McpServerConfig
-import misk.mcp.internal.McpJson
-import misk.mcp.prompts.KotlinDeveloperPrompt
-import misk.mcp.resources.WebSearchResource
+import misk.mcp.testing.prompts.KotlinDeveloperPrompt
+import misk.mcp.testing.resources.WebSearchResource
 import misk.mcp.testing.asMcpStreamableHttpClient
 import misk.mcp.testing.asMcpWebSocketClient
-import misk.mcp.tools.CalculatorTool
-import misk.mcp.tools.CalculatorToolInput.Operation
-import misk.mcp.tools.CalculatorToolOutput
-import misk.mcp.tools.GetNicknameRequest
-import misk.mcp.tools.HierarchicalTool
-import misk.mcp.tools.HierarchicalToolOutput
-import misk.mcp.tools.KotlinSdkTool
-import misk.mcp.tools.NicknameElicitationTool
-import misk.mcp.tools.ThrowingTool
-import misk.mcp.tools.callCalculatorTool
-import misk.mcp.tools.callHierarchicalTool
-import misk.mcp.tools.callNicknameTool
-import misk.mcp.tools.callThrowingTool
+import misk.mcp.testing.tools.CalculatorTool
+import misk.mcp.testing.tools.CalculatorToolInput.Operation
+import misk.mcp.testing.tools.CalculatorToolOutput
+import misk.mcp.testing.tools.GetNicknameRequest
+import misk.mcp.testing.tools.HierarchicalTool
+import misk.mcp.testing.tools.HierarchicalToolOutput
+import misk.mcp.testing.tools.KotlinSdkTool
+import misk.mcp.testing.tools.NicknameElicitationTool
+import misk.mcp.testing.tools.ThrowingTool
+import misk.mcp.testing.tools.VersionMetadata
+import misk.mcp.testing.tools.callCalculatorTool
+import misk.mcp.testing.tools.callHierarchicalTool
+import misk.mcp.testing.tools.callNicknameTool
+import misk.mcp.testing.tools.callThrowingTool
 import misk.metrics.summaryCount
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -61,7 +58,6 @@ import misk.web.sse.ServerSentEvent
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -136,7 +132,7 @@ internal abstract class McpServerActionTest {
       mcpClient.setElicitationHandler {
         CreateElicitationResult(
           action = CreateElicitationResult.Action.accept,
-          content = McpJson.encodeToJsonElement(GetNicknameRequest(nickName)) as JsonObject,
+          content = GetNicknameRequest(nickName).encode(),
         )
       }
 
@@ -279,16 +275,16 @@ internal abstract class McpServerActionTest {
       actual = kotlinSdkTool.inputSchema.type,
       message = "Expected input schema type to be 'object'",
     )
+
+    // Check kotlin-sdk-tool meta
+    assertEquals("1.2.3", kotlinSdkTool._meta.decode<VersionMetadata>().version)
   }
 
   @Test
   fun `test add two integers`() = runBlocking {
     val response = mcpClient.callCalculatorTool(5, 3, Operation.ADD)
-
-    val structuredResult = McpJson.decodeFromJsonElement<CalculatorToolOutput>(
-      assertNotNull(response?.structuredContent),
-    )
-
+    assertNotNull(response)
+    val structuredResult = assertNotNull(response.structuredContent).decode<CalculatorToolOutput>()
 
     assertEquals(
       expected = 8,
@@ -464,7 +460,8 @@ internal abstract class McpServerActionTest {
 
   @Test
   fun `test exception metrics`(): Unit = runBlocking {
-    assertThrows<IllegalStateException> { mcpClient.callThrowingTool() }
+    val result = mcpClient.callThrowingTool()
+    assertEquals(true, result?.isError)
 
     assertEquals(
       expected = 1.0,
@@ -480,10 +477,9 @@ internal abstract class McpServerActionTest {
   @Test
   fun `test hierarchical tool`(): Unit = runBlocking {
     val response = mcpClient.callHierarchicalTool()
+    assertNotNull(response)
 
-    val structuredResult = McpJson.decodeFromJsonElement<HierarchicalToolOutput>(
-      assertNotNull(response?.structuredContent),
-    )
+    val structuredResult = assertNotNull(response.structuredContent).decode<HierarchicalToolOutput>()
 
     assertThat(structuredResult).isEqualTo(HierarchicalToolOutput("test"))
   }

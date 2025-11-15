@@ -76,6 +76,18 @@ class McpSessionHandlerModule<T: McpSessionHandler>(
   }
 
   companion object {
+    /**
+     * Creates an [McpSessionHandlerModule] with an optional group annotation class.
+     *
+     * This is the base factory method that accepts a [KClass] for both the session handler
+     * and the group annotation. Use the reified generic version for more convenient
+     * type-safe creation.
+     *
+     * @param T The type of [McpSessionHandler] implementation to register
+     * @param mcpSessionHandlerClass The [KClass] of the session handler implementation
+     * @param groupAnnotationClass Optional annotation class for grouping this handler with a specific MCP server
+     * @return A configured McpSessionHandlerModule instance
+     */
     fun <T: McpSessionHandler> create(
       mcpSessionHandlerClass: KClass<T>,
       groupAnnotationClass: KClass<out Annotation>? = null
@@ -84,6 +96,26 @@ class McpSessionHandlerModule<T: McpSessionHandler>(
       groupAnnotationClass = groupAnnotationClass
     )
 
+    /**
+     * Creates an [McpSessionHandlerModule] with a reified session handler type.
+     *
+     * This is the recommended way to register session handlers. The handler type is
+     * specified using reified generics for compile-time type safety.
+     *
+     * Example without grouping:
+     * ```kotlin
+     * install(McpSessionHandlerModule.create<MySessionHandler>())
+     * ```
+     *
+     * Example with grouping:
+     * ```kotlin
+     * install(McpSessionHandlerModule.create<MySessionHandler>(AdminMcp::class))
+     * ```
+     *
+     * @param T The type of [McpSessionHandler] implementation to register
+     * @param groupAnnotationClass Optional annotation class for grouping this handler with a specific MCP server
+     * @return A configured McpSessionHandlerModule instance
+     */
     inline fun <reified T: McpSessionHandler> create(
       groupAnnotationClass: KClass<out Annotation>? = null
     ) = McpSessionHandlerModule(

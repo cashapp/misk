@@ -2,6 +2,7 @@ package misk.mcp.internal
 
 import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
 import misk.logging.getLogger
+import misk.mcp.McpJson
 import misk.web.HttpCall
 import misk.web.actions.WebSocket
 import java.util.UUID

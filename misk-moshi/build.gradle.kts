@@ -19,6 +19,7 @@ dependencies {
 
   testImplementation(project(":misk-testing"))
   testImplementation(libs.assertj)
+  testImplementation(libs.moshiKotlin)
   testRuntimeOnly(libs.junitEngine)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)

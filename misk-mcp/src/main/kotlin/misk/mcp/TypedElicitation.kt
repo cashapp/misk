@@ -2,16 +2,13 @@ package misk.mcp
 
 import io.modelcontextprotocol.kotlin.sdk.CreateElicitationRequest.RequestedSchema
 import io.modelcontextprotocol.kotlin.sdk.CreateElicitationResult
-import io.modelcontextprotocol.kotlin.sdk.shared.RequestOptions
 import io.modelcontextprotocol.kotlin.sdk.server.ServerSession
+import io.modelcontextprotocol.kotlin.sdk.shared.RequestOptions
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonPrimitive
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.action.currentServerSession
-import misk.mcp.internal.McpJson
 import misk.mcp.internal.generateJsonSchema
 
 /**
@@ -65,7 +62,7 @@ suspend inline fun <reified T : Any> createTypedElicitation(
   .let { result ->
     TypedCreateElicitationResult(
       action = result.action,
-      content = (result.content as? JsonElement)?.let { McpJson.decodeFromJsonElement<T>(it) },
+      content = result.content?.decode<T>(),
       _meta = result._meta,
     )
   }

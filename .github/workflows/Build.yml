@@ -2,6 +2,7 @@ name: Build
 
 on:
   pull_request:
+  merge_group:
   push:
     branches:
       - master
@@ -74,7 +75,7 @@ jobs:
 
       - name: Publish Test Report
         if: ${{ always() }}
-        uses: mikepenz/action-junit-report@v5
+        uses: mikepenz/action-junit-report@v6
         with:
           check_name: Test Report - ${{ matrix.cmd }}
           job_name: Test - ${{ matrix.cmd }}

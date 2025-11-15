@@ -4,6 +4,7 @@ package misk.mcp
 
 import io.modelcontextprotocol.kotlin.sdk.CallToolRequest
 import io.modelcontextprotocol.kotlin.sdk.CallToolResult
+import io.modelcontextprotocol.kotlin.sdk.EmptyJsonObject
 import io.modelcontextprotocol.kotlin.sdk.PromptMessageContent
 import io.modelcontextprotocol.kotlin.sdk.TextContent
 import io.modelcontextprotocol.kotlin.sdk.Tool
@@ -14,7 +15,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.serializer
 import misk.annotation.ExperimentalMiskApi
-import misk.mcp.internal.McpJson
 import misk.mcp.internal.generateJsonSchema
 import kotlin.reflect.KClass
 import kotlin.reflect.full.allSupertypes
@@ -203,12 +203,9 @@ abstract class McpTool<I : Any> {
   open val openWorldHint: Boolean = true
 
   /**
-   * Metadata included in the tool descriptor. Not officially part of the MCP spec, but relied
-   * upon by some clients (e.g., OpenAI Apps SDK).
-   *
-   * This field type is expected to have a breaking change in the near future.
+   * Tool metadata that will be included in the tool definition.
    */
-  open val metadata: JsonObject? = null
+  open val _meta: JsonObject? = null
 
   internal val inputSchema: Tool.Input by lazy {
     val schema = inputClass.generateJsonSchema()
@@ -228,7 +225,7 @@ abstract class McpTool<I : Any> {
   internal suspend fun handler(request: CallToolRequest): CallToolResult {
     // Parse the input arguments from the request
     val parsedInput = try {
-      McpJson.decodeFromJsonElement(inputClass.serializer(), request.arguments)
+      request.arguments.decode(inputClass.serializer())
     } catch (e: SerializationException) {
       return ToolResult(
         TextContent(
@@ -268,18 +265,30 @@ abstract class McpTool<I : Any> {
   protected fun ToolResult(
     vararg results: PromptMessageContent,
     isError: Boolean = false,
-    _meta: JsonObject = JsonObject(emptyMap()),
+    _meta: JsonObject = EmptyJsonObject
   ): ToolResult = ToolResult(results.toList(), isError, _meta)
+
+  protected inline fun <reified T : Any> ToolResult(
+    vararg results: PromptMessageContent,
+    isError: Boolean = false,
+    _meta: T? = null,
+  ): ToolResult = ToolResult(results.toList(), isError, _meta.encode())
 
   protected fun ToolResult(
     result: List<PromptMessageContent>,
     isError: Boolean = false,
-    _meta: JsonObject = JsonObject(emptyMap()),
+    _meta: JsonObject = EmptyJsonObject
   ): ToolResult = PromptToolResult(
     result = result,
     isError = isError,
     _meta = _meta,
   )
+
+  protected inline fun <reified T : Any> ToolResult(
+    results: List<PromptMessageContent>,
+    isError: Boolean = false,
+    _meta: T? = null,
+  ): ToolResult = ToolResult(results, isError, _meta.encode())
 
   protected open fun ToolResult.toCallToolResult() = when (this) {
     is PromptToolResult -> CallToolResult(
@@ -287,11 +296,11 @@ abstract class McpTool<I : Any> {
       isError = isError,
       _meta = _meta,
     )
-
     else -> {
       throw IllegalArgumentException("${this::class.simpleName} is not supported by this tool: $name")
     }
   }
+
 
   abstract suspend fun handle(input: I): ToolResult
 
@@ -520,12 +529,18 @@ abstract class StructuredMcpTool<I : Any, O : Any> : McpTool<I>() {
   protected fun ToolResult(
     result: O,
     isError: Boolean = false,
-    _meta: JsonObject = JsonObject(emptyMap()),
+    _meta: JsonObject = EmptyJsonObject
   ): ToolResult = StructuredToolResult(
     result = result,
     isError = isError,
     _meta = _meta,
   )
+
+  protected inline fun <reified T : Any> ToolResult(
+    result: O,
+    isError: Boolean = false,
+    _meta: T? = null,
+  ): ToolResult = ToolResult(result, isError, _meta.encode())
 
   @OptIn(InternalSerializationApi::class)
   override fun ToolResult.toCallToolResult(): CallToolResult {
@@ -538,7 +553,8 @@ abstract class StructuredMcpTool<I : Any, O : Any> : McpTool<I>() {
 
       is StructuredToolResult<*> -> {
         @Suppress("UNCHECKED_CAST")
-        val serializedOutput = McpJson.encodeToJsonElement(outputClass.serializer(), result as O) as JsonObject
+        val typeResult = result as O
+        val serializedOutput: JsonObject = typeResult.encode(outputClass.serializer())
         CallToolResult(
           // For backwards compatibility
           // See: [https://modelcontextprotocol.io/specification/2025-06-18/server/tools#structured-content]
