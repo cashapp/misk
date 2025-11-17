@@ -186,14 +186,14 @@ class SqsJobEnqueuer @Inject constructor(
   private fun processBatchResponse(
     response: SendMessageBatchResponse,
     queueName: QueueName,
-    preValidationInvalidIds: List<String>
+    preFilteredInvalidIds: List<String>
   ): JobEnqueuer.BatchEnqueueResult {
     val successful = response.successful().map { it.id() }
     val invalid = mutableListOf<String>()
     val retriable = mutableListOf<String>()
 
-    // Add pre-validation invalid job IDs (jobs with too many attributes)
-    invalid.addAll(preValidationInvalidIds)
+    // Add previously filtered invalid job IDs (jobs with too many attributes)
+    invalid.addAll(preFilteredInvalidIds)
 
     // Categorize failures by error type
     response.failed().forEach { failure ->
