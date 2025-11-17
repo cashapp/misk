@@ -71,7 +71,6 @@ internal abstract class McpServerActionTest {
   class McpStreamableHttpServerActionTest : McpServerActionTest() {
     @OptIn(ExperimentalMiskApi::class)
     @Suppress("unused")
-    @Singleton
     class McpServerActionTestPostAction @Inject constructor(private val mcpStreamManager: McpStreamManager) :
       WebAction {
       @McpPost
@@ -101,7 +100,6 @@ internal abstract class McpServerActionTest {
   class McpWebSocketServerActionTest : McpServerActionTest() {
     @OptIn(ExperimentalMiskApi::class)
     @Suppress("unused")
-    @Singleton
     class McpWebSocketServerActionTestAction @Inject constructor(
       private val mcpStreamManager: McpStreamManager
     ) : WebAction {
