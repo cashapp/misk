@@ -101,16 +101,34 @@ class SqsJobEnqueuer @Inject constructor(
     return tracer.withSpanAsync("batch-enqueue-job-${queueName.value}") { span, scope ->
       val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
 
-      // Check attribute size for each job (max 9 attributes per message + 1 reserved for metadata)
+      // Separate valid and invalid jobs based on attribute count (max 9 attributes per message + 1 reserved for metadata)
+      val validJobsWithKeys = mutableListOf<Pair<JobEnqueuer.JobRequest, String>>()
+      val invalidJobIds = mutableListOf<String>()
+
       jobs.forEach { job ->
-        require(job.attributes.size <= 9) {
-          "a maximum of 9 attributes are supported per job (got ${job.attributes.size})"
+        val resolvedIdempotencyKey = job.idempotencyKey ?: tokenGenerator.generate()
+        if (job.attributes.size <= 9) {
+          validJobsWithKeys.add(job to resolvedIdempotencyKey)
+        } else {
+          invalidJobIds.add(resolvedIdempotencyKey)
         }
       }
 
-      val messageEntries = jobs.map { job ->
-        val resolvedIdempotencyKey = job.idempotencyKey ?: tokenGenerator.generate()
+      // If all jobs are invalid, return immediately with failure result
+      if (validJobsWithKeys.isEmpty()) {
+        span.finish()
+        scope.close()
+        return@withSpanAsync CompletableFuture.completedFuture(
+          JobEnqueuer.BatchEnqueueResult(
+            isFullySuccessful = false,
+            successfulIds = emptyList(),
+            invalidIds = invalidJobIds,
+            retriableIds = emptyList()
+          )
+        )
+      }
 
+      val messageEntries = validJobsWithKeys.map { (job, resolvedIdempotencyKey) ->
         val attrs = job.attributes.map {
           it.key to MessageAttributeValue.builder().dataType("String").stringValue(it.value).build()
         }.toMap().toMutableMap()
@@ -145,7 +163,7 @@ class SqsJobEnqueuer @Inject constructor(
           span.finish()
           scope.close()
         }.thenApply { result ->
-          processBatchResponse(result, queueName)
+          processBatchResponse(result, queueName, invalidJobIds)
         }
       } catch (e: Exception) {
         sqsMetrics.jobBatchEnqueueFailures.labels(queueName.value).inc(jobs.size.toDouble())
@@ -167,11 +185,15 @@ class SqsJobEnqueuer @Inject constructor(
 
   private fun processBatchResponse(
     response: SendMessageBatchResponse,
-    queueName: QueueName
+    queueName: QueueName,
+    preValidationInvalidIds: List<String>
   ): JobEnqueuer.BatchEnqueueResult {
     val successful = response.successful().map { it.id() }
     val invalid = mutableListOf<String>()
     val retriable = mutableListOf<String>()
+
+    // Add pre-validation invalid job IDs (jobs with too many attributes)
+    invalid.addAll(preValidationInvalidIds)
 
     // Categorize failures by error type
     response.failed().forEach { failure ->
