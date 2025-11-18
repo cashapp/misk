@@ -263,37 +263,89 @@ class SubscriptionTest {
   }
 
   @Test
-  fun `batch enqueue with too many attributes per job fails`() = runTest {
+  fun `batch enqueue with too many attributes per job handles gracefully`() = runTest {
     val queueName = QueueName("test-queue-1")
     val handler = handlers[queueName] as ExampleHandler
 
-    // Reset counter for 1 job (we'll successfully enqueue one job at the end)
+    // Reset counter for 1 job (only the valid job will be processed)
     handler.resetCounter(1)
 
     // Create a job with 10 attributes (exceeds limit of 9)
     val tooManyAttributes = (1..10).associate { "attr_$it" to "value_$it" }
-
-    val jobWithTooManyAttributes = JobEnqueuer.JobRequest(
-      body = "test_message",
-      idempotencyKey = "test_key",
-      attributes = tooManyAttributes
-    )
-
-    assertFailsWith<IllegalArgumentException> {
-      jobEnqueuer.batchEnqueue(queueName, listOf(jobWithTooManyAttributes))
-    }
-
-    // Verify that 9 attributes works
     val validAttributes = (1..9).associate { "attr_$it" to "value_$it" }
-    val validJob = JobEnqueuer.JobRequest(
-      body = "valid_message",
-      idempotencyKey = "valid_key",
-      attributes = validAttributes
+
+    val jobs = listOf(
+      JobEnqueuer.JobRequest(
+        body = "invalid_message",
+        idempotencyKey = "invalid_key",
+        attributes = tooManyAttributes
+      ),
+      JobEnqueuer.JobRequest(
+        body = "valid_message",
+        idempotencyKey = "valid_key",
+        attributes = validAttributes
+      )
     )
 
-    val result = jobEnqueuer.batchEnqueue(queueName, listOf(validJob))
-    assertTrue(result.isFullySuccessful)
+    // Should not throw an exception, but handle invalid jobs gracefully
+    val result = jobEnqueuer.batchEnqueue(queueName, jobs)
+
+    // Should not be fully successful due to the invalid job
+    assertEquals(false, result.isFullySuccessful)
     assertEquals(1, result.successfulIds.size)
+    assertEquals(1, result.invalidIds.size)
+    assertEquals(0, result.retriableIds.size)
+
+    // Verify the correct job IDs are in the right categories
+    assertEquals(listOf("valid_key"), result.successfulIds)
+    assertEquals(listOf("invalid_key"), result.invalidIds)
+
+    // Wait for the valid job to be processed
+    val latch = handler.counter
+    latch.await()
+    assertEquals(0, latch.count)
+
+    val jobs_processed = handler.jobs
+    assertEquals(1, jobs_processed.size)
+  }
+
+  @Test
+  fun `batch enqueue with all invalid jobs returns immediately`() = runTest {
+    val queueName = QueueName("test-queue-1")
+    val handler = handlers[queueName] as ExampleHandler
+
+    // No jobs should be processed
+    handler.resetCounter(0)
+
+    // Create jobs with too many attributes
+    val tooManyAttributes = (1..10).associate { "attr_$it" to "value_$it" }
+
+    val allInvalidJobs = listOf(
+      JobEnqueuer.JobRequest(
+        body = "invalid_message_1",
+        idempotencyKey = "invalid_key_1",
+        attributes = tooManyAttributes
+      ),
+      JobEnqueuer.JobRequest(
+        body = "invalid_message_2",
+        idempotencyKey = "invalid_key_2",
+        attributes = tooManyAttributes
+      )
+    )
+
+    val result = jobEnqueuer.batchEnqueue(queueName, allInvalidJobs)
+
+    // Should not be successful, all jobs invalid
+    assertEquals(false, result.isFullySuccessful)
+    assertEquals(0, result.successfulIds.size)
+    assertEquals(2, result.invalidIds.size)
+    assertEquals(0, result.retriableIds.size)
+
+    // Verify the invalid job IDs
+    assertEquals(setOf("invalid_key_1", "invalid_key_2"), result.invalidIds.toSet())
+
+    // No jobs should be processed
+    assertEquals(0, handler.jobs.size)
   }
 }
 
