@@ -51,6 +51,7 @@ public final class misk/aws2/sqs/jobqueue/SqsJobConsumer$Companion {
 }
 
 public final class misk/aws2/sqs/jobqueue/SqsJobEnqueuer : misk/jobqueue/v2/JobEnqueuer {
+	public static final field Companion Lmisk/aws2/sqs/jobqueue/SqsJobEnqueuer$Companion;
 	public fun <init> (Lmisk/aws2/sqs/jobqueue/SqsClientFactory;Lmisk/aws2/sqs/jobqueue/config/SqsConfig;Lmisk/aws2/sqs/jobqueue/SqsQueueResolver;Lwisp/token/TokenGenerator;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Lcom/squareup/moshi/Moshi;Lio/opentracing/Tracer;Ljava/time/Clock;)V
 	public fun batchEnqueue (Lmisk/jobqueue/QueueName;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun batchEnqueueAsync (Lmisk/jobqueue/QueueName;Ljava/util/List;)Ljava/util/concurrent/CompletableFuture;
@@ -58,6 +59,9 @@ public final class misk/aws2/sqs/jobqueue/SqsJobEnqueuer : misk/jobqueue/v2/JobE
 	public fun enqueue (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun enqueueAsync (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)Ljava/util/concurrent/CompletableFuture;
 	public fun enqueueBlocking (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
+}
+
+public final class misk/aws2/sqs/jobqueue/SqsJobEnqueuer$Companion {
 }
 
 public final class misk/aws2/sqs/jobqueue/SqsJobHandlerModule : misk/inject/KAbstractModule, misk/inject/AsyncModule {
