@@ -34,6 +34,11 @@ class SqsJobEnqueuer @Inject constructor(
   private val tracer: Tracer,
   private val clock: Clock,
 ) : JobEnqueuer {
+
+  companion object {
+    // SQS allows max 10 message attributes per message, 1 is reserved for job queue metadata
+    private const val MAX_CUSTOM_ATTRIBUTES_PER_MESSAGE = 9
+  }
   /**
    * Enqueue the job and return a CompletableFuture.
    *
@@ -101,13 +106,13 @@ class SqsJobEnqueuer @Inject constructor(
     return tracer.withSpanAsync("batch-enqueue-job-${queueName.value}") { span, scope ->
       val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
 
-      // Separate valid and invalid jobs based on attribute count (max 9 attributes per message + 1 reserved for metadata)
+      // Pre-filter invalid jobs based on attribute count
       val validJobsWithKeys = mutableListOf<Pair<JobEnqueuer.JobRequest, String>>()
       val invalidJobIds = mutableListOf<String>()
 
       jobs.forEach { job ->
         val resolvedIdempotencyKey = job.idempotencyKey ?: tokenGenerator.generate()
-        if (job.attributes.size <= 9) {
+        if (job.attributes.size <= MAX_CUSTOM_ATTRIBUTES_PER_MESSAGE) {
           validJobsWithKeys.add(job to resolvedIdempotencyKey)
         } else {
           invalidJobIds.add(resolvedIdempotencyKey)
