@@ -3,8 +3,10 @@ package misk.clustering.fake.lease
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.testing.FakeFixture
+import wisp.lease.LeaderLeaseManager
 import wisp.lease.Lease
 import wisp.lease.LeaseManager
+import wisp.lease.LoadBalancedLeaseManager
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -12,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
  * default a lease is considered held, but it can be explicitly marked as not held if desired
  */
 @Singleton
-class FakeLeaseManager @Inject constructor() : LeaseManager, FakeFixture() {
+open class FakeLeaseManager @Inject constructor() : LeaseManager, FakeFixture() {
   private val leasesHeldElsewhere by resettable { ConcurrentHashMap<String, Int>() }
   private val leases by resettable { ConcurrentHashMap<String, FakeLease>() }
 
@@ -42,3 +44,9 @@ class FakeLeaseManager @Inject constructor() : LeaseManager, FakeFixture() {
     leasesHeldElsewhere[name] = 1
   }
 }
+
+@Singleton
+class FakeLeaderLeaseManager @Inject constructor() : FakeLeaseManager(), LeaderLeaseManager {}
+
+@Singleton
+class FakeLoadBalancedLeaseManager @Inject constructor() : FakeLeaseManager(), LoadBalancedLeaseManager {}
