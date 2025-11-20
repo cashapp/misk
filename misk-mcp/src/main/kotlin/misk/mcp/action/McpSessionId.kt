@@ -24,7 +24,7 @@ const val SESSION_ID_HEADER = "Mcp-Session-Id"
  * ```kotlin
  * @Singleton
  * class SessionAwareTool @Inject constructor(
- *   private val sessionId: Provider<McpSessionId>,
+ *   private val sessionId: McpSessionId,
  *   private val dataService: DataService
  * ) : McpTool {
  *   override val name = "get_session_data"
