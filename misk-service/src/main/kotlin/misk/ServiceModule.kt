@@ -4,7 +4,6 @@ import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import jakarta.inject.Singleton
-import misk.inject.AlwaysOnSwitch
 import misk.inject.ConditionalProvider
 import misk.inject.KAbstractModule
 import misk.inject.Switch
@@ -83,7 +82,7 @@ constructor(
   val dependsOn: List<Key<out Service>> = listOf(),
   val enhancedBy: List<Key<out Service>> = listOf(),
   val switchKey: String = "default",
-  val switchType: KClass<out Switch>? = AlwaysOnSwitch::class,
+  val switchType: KClass<out Switch>? = null,
   val disabledKey: Key<out Service> = key.ofType(NoOpService::class.typeLiteral()),
 ) : KAbstractModule() {
 

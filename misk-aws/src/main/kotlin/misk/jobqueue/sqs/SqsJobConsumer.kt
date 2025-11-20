@@ -131,7 +131,7 @@ internal class SqsJobConsumer @Inject internal constructor(
           "shutting down receiver for ${queue.queueName}"
         }
         return Status.NO_RESCHEDULE
-      } else if (!asyncSwitch.isEnabled("sqs")) {
+      } else if (asyncSwitch.isDisabled("sqs")) {
         return Status.NO_WORK
       }
 

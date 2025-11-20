@@ -7,11 +7,11 @@ import misk.annotation.ExperimentalMiskApi
 import kotlin.reflect.KClass
 
 /**
- * This class should be extended by modules that want to contribute tasks to which involve async processing.
- * For example, background jobs, job queues, eventing, message pub/sub.
+ * This class should be extended by modules that want to contribute tasks to which involve async processing. For
+ * example, background jobs, job queues, eventing, message pub/sub.
  *
- * At service build time, these modules can be optionally filtered out before the Guice injector is created,
- * in cases where async processing is not desired, such as in separated main and jobs deployments.
+ * At service build time, these modules can be optionally filtered out before the Guice injector is created, in cases
+ * where async processing is not desired, such as in separated main and jobs deployments.
  */
 @Deprecated("Use AsyncSwitch directly or conditionalOn ServiceModule or ConditionalProvider.")
 interface AsyncModule {
@@ -20,61 +20,54 @@ interface AsyncModule {
   fun moduleWhenAsyncDisabled(): KAbstractModule? = null
 }
 
-/**
- * A simple abstraction which can be used to enable or disable parts of the dependency injection graph.
- */
+/** A simple abstraction which can be used to enable or disable parts of the dependency injection graph. */
 interface Switch {
   fun isEnabled(key: String): Boolean
+
+  fun isDisabled(key: String): Boolean = !isEnabled(key)
+
+  fun <T> ifEnabled(key: String, block: () -> T) =
+    if (isEnabled(key)) {
+      block()
+    } else Unit
+
+  fun <T> ifDisabled(key: String, block: () -> T) =
+    if (isDisabled(key)) {
+      block()
+    } else Unit
 }
 
-/**
- * Default switch which always enables async processing within the application pod.
- */
-class AlwaysOnSwitch : Switch {
-  override fun isEnabled(key: String) = true
-}
-
-/**
- * Holder interface for a switch which enables async processing within the application pod.
- */
+/** Holder interface for a switch which enables async processing within the application pod. */
 interface AsyncSwitch : Switch
 
-/**
- * Default switch which always enables async processing within the application pod.
- */
-class AlwaysOnAsyncSwitch : AsyncSwitch {
+/** Default switch which always enables async processing within the application pod. */
+object AlwaysEnabledSwitch : Switch, AsyncSwitch {
   override fun isEnabled(key: String) = true
 }
 
-/**
- * Module which configures a default [AsyncSwitch] to be always enabled if no other [AsyncSwitch] is bound.
- */
+/** Module which configures a default [AsyncSwitch] to be always enabled if no other [AsyncSwitch] is bound. */
 class DefaultAsyncSwitchModule : KInstallOnceModule() {
   override fun configure() {
-    bind<AsyncSwitch>().toProvider(DefaultProvider()).asSingleton()
-  }
-
-  class DefaultProvider : Provider<AsyncSwitch> {
-    @Inject(optional = true) var asyncSwitch: AsyncSwitch? = null
-
-    override fun get(): AsyncSwitch {
-      return asyncSwitch ?: AlwaysOnAsyncSwitch()
-    }
+    bindOptionalDefault<AsyncSwitch>().to<AlwaysEnabledSwitch>()
   }
 }
 
-inline fun <reified S : Switch, reified Output : Any, reified Input : Any, reified Enabled : Input, reified Disabled : Input> ConditionalProvider(
-  id: String,
-  noinline transformer: (Input) -> Output = { it as Output },
-) = ConditionalProvider(
-  switchKey = id,
-  switchType = S::class,
-  outputType = Output::class,
-  type = Input::class,
-  enabledInstance = Enabled::class,
-  disabledInstance = Disabled::class,
-  transformer = transformer as (Any) -> Output
-)
+inline fun <
+  reified S : Switch,
+  reified Output : Any,
+  reified Input : Any,
+  reified Enabled : Input,
+  reified Disabled : Input,
+  > ConditionalProvider(switchKey: String, noinline transformer: (Input) -> Output = { it as Output }) =
+  ConditionalProvider(
+    switchKey = switchKey,
+    switchType = S::class,
+    outputType = Output::class,
+    type = Input::class,
+    enabledInstance = Enabled::class,
+    disabledInstance = Disabled::class,
+    transformer = transformer as (Any) -> Output,
+  )
 
 class ConditionalProvider<S : Switch, Output : Any, Input : Any>(
   val switchKey: String,
@@ -85,33 +78,27 @@ class ConditionalProvider<S : Switch, Output : Any, Input : Any>(
   val disabledInstance: Input,
   val transformer: (Input) -> Output = { it as Output },
 ) : Provider<Output> {
-  @Inject lateinit var injector: Injector
+  @Inject
+  lateinit var injector: Injector
 
   override fun get(): Output? {
     val switch = injector.getInstance(switchType.java)
-    val resolved = switch
-//    {
-//      logger.warn("Switch $switchType not found for $switchKey, defaulting to always enabled.")
-//      AlwaysOnSwitch()
-//    }
-
-    return if (resolved.isEnabled(switchKey)) {
+    return if (switch.isEnabled(switchKey)) {
       transformer(enabledInstance)
     } else {
       transformer(disabledInstance)
     }
   }
-
-//  companion object {
-//    private val logger = misk.logging.getLogger<ConditionalProvider<*, *, *, *, *>>()
-//  }
 }
 
-
-inline fun <reified S : Switch, reified Output : Any, reified Input : Any, reified Enabled : Input, reified Disabled : Input> ConditionalTypedProvider(
-  id: String,
-  noinline transformer: (Input) -> Output = { it as Output },
-) = ConditionalTypedProvider(id, S::class, Output::class, Input::class, Enabled::class, Disabled::class, transformer)
+inline fun <
+  reified S : Switch,
+  reified Output : Any,
+  reified Input : Any,
+  reified Enabled : Input,
+  reified Disabled : Input,
+  > ConditionalTypedProvider(switchKey: String, noinline transformer: (Input) -> Output = { it as Output }) =
+  ConditionalTypedProvider(switchKey, S::class, Output::class, Input::class, Enabled::class, Disabled::class, transformer)
 
 class ConditionalTypedProvider<S : Switch, Output : Any, Input : Any, Enabled : Input, Disabled : Input>(
   val switchKey: String,
@@ -122,20 +109,15 @@ class ConditionalTypedProvider<S : Switch, Output : Any, Input : Any, Enabled : 
   val disabledType: KClass<out Disabled>,
   val transformer: (Input) -> Output = { it as Output },
 ) : Provider<Output> {
-  @com.google.inject.Inject(optional = true)
-  var switch: S? = null
-
   @Inject
   lateinit var injector: Injector
-//  @Inject lateinit var enabled: Enabled
-//  @Inject lateinit var disabled: Disabled
 
   override fun get(): Output? {
-    val resolved = switch ?: AlwaysOnSwitch()
-//    {
-//      logger.warn("Switch $switchType not found for $switchKey, defaulting to always enabled.")
-//      AlwaysOnSwitch()
-//    }
+    val resolved = try {
+      injector.getInstance(switchType.java)
+    } catch (e: Exception) {
+      AlwaysOnSwitch()
+    }
 
     val enabled = injector.getInstance(enabledType.java)
     val disabled = injector.getInstance(disabledType.java)
@@ -146,9 +128,4 @@ class ConditionalTypedProvider<S : Switch, Output : Any, Input : Any, Enabled : 
       transformer(disabled)
     }
   }
-
-//  companion object {
-//    private val logger = misk.logging.getLogger<ConditionalProvider<*, *, *, *, *>>()
-//  }
 }
-

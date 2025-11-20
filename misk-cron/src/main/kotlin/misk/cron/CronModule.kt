@@ -50,7 +50,7 @@ constructor(
     )
 
     install(DefaultAsyncSwitchModule())
-    install(ServiceModule<RepeatedTaskQueue, ForMiskCron>().conditionalOn<AsyncSwitch>("cron").dependsOn<ReadyService>())
+    install(ServiceModule<RepeatedTaskQueue, ForMiskCron>().dependsOn<ReadyService>())
     install(ServiceModule<CronTask>().conditionalOn<AsyncSwitch>("cron").dependsOn(dependencies).dependsOn<ReadyService>())
   }
 

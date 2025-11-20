@@ -9,8 +9,7 @@ import com.google.inject.Provides
 import com.google.inject.Scopes
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import misk.inject.AlwaysOnAsyncSwitch
-import misk.inject.AlwaysOnSwitch
+import misk.inject.AlwaysEnabledSwitch
 import misk.inject.AsyncSwitch
 import misk.inject.DefaultAsyncSwitchModule
 import kotlin.test.assertFailsWith
@@ -286,7 +285,7 @@ internal class ServiceManagerModuleTest {
       }
     )
     val asyncSwitch = injector.getInstance<AsyncSwitch>()
-    assertTrue(asyncSwitch is AlwaysOnAsyncSwitch)
+    assertTrue(asyncSwitch is AlwaysEnabledSwitch)
     val logCollector = injector.getInstance<LogCollector>()
     val serviceManager = injector.getInstance<ServiceManager>()
     serviceManager.startAsync()
@@ -305,7 +304,7 @@ internal class ServiceManagerModuleTest {
       LogCollectorModule(),
       object : KAbstractModule() {
         override fun configure() {
-          install(ServiceModule<ConditionalService>().conditionalOn<AlwaysOnSwitch>("test"))
+          install(ServiceModule<ConditionalService>().conditionalOn<AlwaysEnabledSwitch>("test"))
         }
       }
     )
