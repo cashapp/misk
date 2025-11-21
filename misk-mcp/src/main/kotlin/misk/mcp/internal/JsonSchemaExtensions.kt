@@ -34,7 +34,6 @@ import kotlin.reflect.KClass
  */
 @PublishedApi
 internal fun <T : Any> KClass<T>.generateJsonSchema(level: Int = 1, description: String? = null): JsonObject {
-    println("generating JSON schema for ${this.qualifiedName}")
     val serializer =
         serializerOrNull() ?: throw IllegalArgumentException("No serializer found for class ${this.qualifiedName}")
     return serializer.descriptor.generateJsonSchema(level, description)
