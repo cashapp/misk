@@ -1,9 +1,8 @@
-@file:OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
+@file:OptIn( ExperimentalSerializationApi::class)
 
 package misk.mcp.internal
 
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.descriptors.PolymorphicKind
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor
