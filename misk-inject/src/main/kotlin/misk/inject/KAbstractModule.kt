@@ -184,31 +184,31 @@ abstract class KAbstractModule : AbstractModule() {
 
   private fun <T : Any> TypeLiteral<T>.subtype(): Type = Types.subtypeOf(type)
 
-  fun <T : Any> bindOptional(key: Key<T>): OptionalBinder<T> =
+  protected fun <T : Any> bindOptional(key: Key<T>): OptionalBinder<T> =
     OptionalBinder.newOptionalBinder(binder(), key)
 
-  fun <T : Any> bindOptional(baseSwitchType: KClass<T>): OptionalBinder<T> =
+  protected fun <T : Any> bindOptional(baseSwitchType: KClass<T>): OptionalBinder<T> =
     OptionalBinder.newOptionalBinder(binder(), baseSwitchType.java)
 
-  inline fun <reified T: Any> bindOptional(): OptionalBinder<T> = bindOptional(T::class)
+  protected inline fun <reified T: Any> bindOptional(): OptionalBinder<T> = bindOptional(T::class)
 
-  fun <T : Any> bindOptionalDefault(key: Key<T>): LinkedBindingBuilder<T> =
+  protected fun <T : Any> bindOptionalDefault(key: Key<T>): LinkedBindingBuilder<T> =
     OptionalBinder.newOptionalBinder(binder(), key)
       .setDefault()
 
-  fun <T : Any> bindOptionalDefault(baseSwitchType: KClass<T>): LinkedBindingBuilder<T> =
+  protected fun <T : Any> bindOptionalDefault(baseSwitchType: KClass<T>): LinkedBindingBuilder<T> =
     OptionalBinder.newOptionalBinder(binder(), baseSwitchType.java)
       .setDefault()
 
-  inline fun <reified T: Any> bindOptionalDefault(): LinkedBindingBuilder<T> = bindOptionalDefault(T::class)
+  protected inline fun <reified T: Any> bindOptionalDefault(): LinkedBindingBuilder<T> = bindOptionalDefault(T::class)
 
-  fun <T : Any> bindOptionalBinding(key: Key<T>): LinkedBindingBuilder<T> =
+  protected fun <T : Any> bindOptionalBinding(key: Key<T>): LinkedBindingBuilder<T> =
     OptionalBinder.newOptionalBinder(binder(), key)
       .setBinding()
 
-  fun <T : Any> bindOptionalBinding(baseSwitchType: KClass<T>): LinkedBindingBuilder<T> =
+  protected fun <T : Any> bindOptionalBinding(baseSwitchType: KClass<T>): LinkedBindingBuilder<T> =
     OptionalBinder.newOptionalBinder(binder(), baseSwitchType.java)
       .setBinding()
 
-  inline fun <reified T: Any> bindOptionalBinding(): LinkedBindingBuilder<T> = bindOptionalBinding(T::class)
+  protected inline fun <reified T: Any> bindOptionalBinding(): LinkedBindingBuilder<T> = bindOptionalBinding(T::class)
 }
