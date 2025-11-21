@@ -313,7 +313,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles primitive types correctly`() {
-    val schema = PrimitiveObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<PrimitiveObject>()
 
     // Verify top-level structure
     assertEquals(JsonPrimitive("object"), schema["type"])
@@ -361,7 +361,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles nullable and optional fields correctly`() {
-    val schema = NullableOptionalObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<NullableOptionalObject>()
 
     val properties = schema["properties"] as JsonObject
     val required = schema["required"] as JsonArray
@@ -391,7 +391,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles embedded objects correctly`() {
-    val schema = Person::class.generateJsonSchema()
+    val schema = generateJsonSchema<Person>()
 
     val properties = schema["properties"] as JsonObject
     val required = schema["required"] as JsonArray
@@ -426,7 +426,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles deeply nested objects correctly`() {
-    val schema = Company::class.generateJsonSchema()
+    val schema = generateJsonSchema<Company>()
 
     val properties = schema["properties"] as JsonObject
     val required = schema["required"] as JsonArray
@@ -474,7 +474,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles complex mixed object without arrays correctly`() {
-    val schema = SimpleComplexObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<SimpleComplexObject>()
 
     val properties = schema["properties"] as JsonObject
     val required = schema["required"] as JsonArray
@@ -507,13 +507,13 @@ internal class JsonSchemaExtensionsTest {
   @Test
   fun `generateJsonSchema fails gracefully for class without a serial descriptor`() {
     assertFailsWith<IllegalArgumentException> {
-      NoSerializerClass::class.generateJsonSchema()
+      generateJsonSchema<NoSerializerClass>()
     }
   }
 
   @Test
   fun `generateJsonSchema handles single field object correctly`() {
-    val schema = SingleFieldObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<SingleFieldObject>()
 
     val properties = schema["properties"] as JsonObject
     val required = schema["required"] as JsonArray
@@ -527,7 +527,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema preserves field names correctly`() {
-    val schema = FieldNamesObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<FieldNamesObject>()
     val properties = schema["properties"] as JsonObject
 
     assertTrue(properties.containsKey("camelCase"))
@@ -539,7 +539,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles Description annotation correctly`() {
-    val schema = DescribedObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<DescribedObject>()
     val properties = schema["properties"] as JsonObject
 
     // Verify fields with descriptions have description property
@@ -567,7 +567,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles embedded maps correctly`() {
-    val schema = MapObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<MapObject>()
     val properties = schema["properties"] as JsonObject
     val required = schema["required"] as JsonArray
 
@@ -614,7 +614,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles nested maps correctly`() {
-    val schema = NestedMapObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<NestedMapObject>()
     val properties = schema["properties"] as JsonObject
 
     // Verify map of maps
@@ -652,7 +652,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles mixed maps and objects with descriptions`() {
-    val schema = MixedDescribedObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<MixedDescribedObject>()
     val properties = schema["properties"] as JsonObject
 
     // Verify described primitive field
@@ -691,7 +691,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles enum types correctly`() {
-    val schema = EnumObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<EnumObject>()
     val properties = schema["properties"] as JsonObject
     val required = schema["required"] as JsonArray
 
@@ -720,7 +720,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles optional and nullable enum fields correctly`() {
-    val schema = OptionalEnumObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<OptionalEnumObject>()
     val properties = schema["properties"] as JsonObject
     val required = schema["required"] as JsonArray
 
@@ -746,7 +746,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles enum fields with Description annotation correctly`() {
-    val schema = DescribedEnumObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<DescribedEnumObject>()
     val properties = schema["properties"] as JsonObject
 
     // Verify status enum field with description
@@ -770,7 +770,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles lists of enums correctly`() {
-    val schema = EnumListObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<EnumListObject>()
     val properties = schema["properties"] as JsonObject
 
     // Verify list of status enums
@@ -798,7 +798,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles maps with enum values correctly`() {
-    val schema = EnumMapObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<EnumMapObject>()
     val properties = schema["properties"] as JsonObject
 
     // Verify map with status enum values
@@ -826,7 +826,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles complex objects with mixed enum usage correctly`() {
-    val schema = ComplexEnumObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<ComplexEnumObject>()
     val properties = schema["properties"] as JsonObject
     val required = schema["required"] as JsonArray
 
@@ -871,7 +871,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles enum with SerialName annotation correctly`() {
-    val schema = SerialNameEnumObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<SerialNameEnumObject>()
     val properties = schema["properties"] as JsonObject
     val required = schema["required"] as JsonArray
 
@@ -902,7 +902,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles mixed SerialName enum correctly`() {
-    val schema = MixedSerialNameEnumObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<MixedSerialNameEnumObject>()
     val properties = schema["properties"] as JsonObject
 
     // Verify mixed enum field - some with SerialName, some without
@@ -927,7 +927,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles lists of SerialName enums correctly`() {
-    val schema = SerialNameEnumListObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<SerialNameEnumListObject>()
     val properties = schema["properties"] as JsonObject
 
     // Verify list of HTTP method enums with SerialName
@@ -955,7 +955,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles custom serializer correctly`() {
-    val schema = CustomSerializerObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<CustomSerializerObject>()
 
     // Verify that this custom serializer object is treated as a string based on the descriptor, and not as an object
     assertEquals(JsonPrimitive("string"), schema["type"])
@@ -963,7 +963,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles maps with SerialName enum values correctly`() {
-    val schema = SerialNameEnumMapObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<SerialNameEnumMapObject>()
     val properties = schema["properties"] as JsonObject
 
     // Verify map with HTTP method enum values using SerialName
@@ -991,7 +991,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `complex JSON types are handled correctly`() {
-    val schema = ComplexJsonTypes::class.generateJsonSchema()
+    val schema = generateJsonSchema<ComplexJsonTypes>()
     val properties = schema["properties"] as JsonObject
 
     // Verify jsonObject field
@@ -1011,7 +1011,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema handles recursive objects correctly`() {
-    val schema = RecursiveObject::class.generateJsonSchema()
+    val schema = generateJsonSchema<RecursiveObject>()
     val properties = schema["properties"] as JsonObject
     val required = schema["required"] as JsonArray
 
