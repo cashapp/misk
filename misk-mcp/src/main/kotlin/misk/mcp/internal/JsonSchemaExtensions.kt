@@ -4,7 +4,6 @@ package misk.mcp.internal
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.descriptors.PolymorphicKind
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -33,109 +32,107 @@ import kotlin.reflect.KClass
  */
 @PublishedApi
 internal fun <T : Any> KClass<T>.generateJsonSchema(description: String? = null): JsonObject {
-    val serializer =
-        serializerOrNull() ?: throw IllegalArgumentException("No serializer found for class ${this.qualifiedName}")
-    return serializer.descriptor.generateJsonSchema(description)
+  val serializer =
+    serializerOrNull() ?: throw IllegalArgumentException("No serializer found for class ${this.qualifiedName}")
+  return serializer.descriptor.generateJsonSchema(description)
 }
 
-private fun SerialDescriptor.generateJsonSchema(description: String? = null): JsonObject = buildJsonObject {
-    put("type", JsonPrimitive(kind.toJsonType()))
-    description?.let {
-        put("description", JsonPrimitive(it))
-    }
-    // JsonObjects and Elements have infinite serial descriptor depth. Prevent recursing into them.
-    if (this@generateJsonSchema in setOf(JsonObject.serializer().descriptor, JsonElement.serializer().descriptor)) {
-        put("additionalProperties", JsonPrimitive(true))
-        return@buildJsonObject
-    }
-    when (kind) {
-        PrimitiveKind.BOOLEAN,
-        PrimitiveKind.BYTE,
-        PrimitiveKind.CHAR,
-        PrimitiveKind.DOUBLE,
-        PrimitiveKind.FLOAT,
-        PrimitiveKind.INT,
-        PrimitiveKind.LONG,
-        PrimitiveKind.SHORT,
-        PrimitiveKind.STRING -> {}
-
-        SerialKind.ENUM -> {
-            val enumValues = (0 until elementsCount).map { index ->
-                val enumName = getElementName(index)
-                // Check for @SerialName annotation
-                val serialNameAnnotation =
-                    getElementDescriptor(index).annotations.filterIsInstance<SerialName>().firstOrNull()
-                serialNameAnnotation?.value ?: enumName
-            }
-            put("enum", JsonArray(enumValues.map { JsonPrimitive(it) }))
-        }
-
-        StructureKind.LIST -> {
-            val elementDescriptor = getElementDescriptor(0)
-            val elementDescription = getElementAnnotations(0).description()
-            put("items", elementDescriptor.generateJsonSchema( elementDescription))
-        }
-
-        StructureKind.MAP -> {
-            description?.let {
-                put("description", JsonPrimitive(it))
-            }
-            val valueDescriptor = getElementDescriptor(1)
-            val valueDescription = getElementAnnotations(1).description()
-            put("additionalProperties", valueDescriptor.generateJsonSchema( valueDescription))
-        }
-        PolymorphicKind.OPEN,
-        PolymorphicKind.SEALED,
-        StructureKind.CLASS,
-        StructureKind.OBJECT -> {
-            val properties = mutableMapOf<String, JsonObject>()
-            val required = mutableListOf<String>()
-
-            elementDescriptors.forEachIndexed { index, paramDescriptor ->
-                val name = getElementName(index)
-                val description = getElementAnnotations(index).description()
-                properties[name] = paramDescriptor.generateJsonSchema( description)
-
-                if (!isElementOptional(index) && !paramDescriptor.isNullable) {
-                    required.add(name)
-                }
-            }
-
-            put("properties", JsonObject(properties))
-            put("required", JsonArray(required.map { JsonPrimitive(it) }))
-        }
-
-        SerialKind.CONTEXTUAL -> {
-            put("additionalProperties", JsonPrimitive(true))
-        }
-    }
-}
-
-private fun List<Annotation>.description(): String? =
-    filterIsInstance<Description>().firstOrNull()?.value
-
-private fun SerialKind.toJsonType(): String = when (this) {
+private fun SerialDescriptor.generateJsonSchema(
+  description: String? = null,
+  accumulatedObjectDescriptors: Set<SerialDescriptor> = emptySet(),
+): JsonObject = buildJsonObject {
+  put("type", JsonPrimitive(kind.toJsonType()))
+  description?.let {
+    put("description", JsonPrimitive(it))
+  }
+  when (kind) {
+    PrimitiveKind.BOOLEAN,
+    PrimitiveKind.BYTE,
+    PrimitiveKind.CHAR,
+    PrimitiveKind.DOUBLE,
+    PrimitiveKind.FLOAT,
     PrimitiveKind.INT,
     PrimitiveKind.LONG,
-    PrimitiveKind.BYTE,
-    PrimitiveKind.SHORT -> "integer"
+    PrimitiveKind.SHORT,
+    PrimitiveKind.STRING -> {
+    }
 
-    PrimitiveKind.FLOAT,
-    PrimitiveKind.DOUBLE -> "number"
+    SerialKind.ENUM -> {
+      val enumValues = (0 until elementsCount).map { index ->
+        getElementName(index)
+      }
+      put("enum", JsonArray(enumValues.map { JsonPrimitive(it) }))
+    }
 
-    PrimitiveKind.BOOLEAN -> "boolean"
+    StructureKind.LIST -> {
+      val elementDescriptor = getElementDescriptor(0)
+      val elementDescription = getElementAnnotations(0).description()
+      put("items", elementDescriptor.generateJsonSchema(elementDescription, accumulatedObjectDescriptors))
+    }
 
-    PrimitiveKind.CHAR,
-    PrimitiveKind.STRING,
-    SerialKind.ENUM -> "string"
-
-    StructureKind.LIST -> "array"
+    StructureKind.MAP -> {
+      description?.let {
+        put("description", JsonPrimitive(it))
+      }
+      val valueDescriptor = getElementDescriptor(1)
+      val valueDescription = getElementAnnotations(1).description()
+      put("additionalProperties", valueDescriptor.generateJsonSchema(valueDescription, accumulatedObjectDescriptors.plus(this@generateJsonSchema)))
+    }
 
     PolymorphicKind.OPEN,
     PolymorphicKind.SEALED,
-    SerialKind.CONTEXTUAL,
     StructureKind.CLASS,
-    StructureKind.MAP,
-    StructureKind.OBJECT -> "object"
+    StructureKind.OBJECT -> {
+      if (this@generateJsonSchema in accumulatedObjectDescriptors) {
+        // Prevent infinite recursion for recursive data structures
+        return@buildJsonObject
+      }
+      val properties = mutableMapOf<String, JsonObject>()
+      val required = mutableListOf<String>()
+
+      elementDescriptors.forEachIndexed { index, paramDescriptor ->
+        val name = getElementName(index)
+        val description = getElementAnnotations(index).description()
+        properties[name] = paramDescriptor.generateJsonSchema(description, accumulatedObjectDescriptors.plus(this@generateJsonSchema))
+
+        if (!isElementOptional(index) && !paramDescriptor.isNullable) {
+          required.add(name)
+        }
+      }
+
+      put("properties", JsonObject(properties))
+      put("required", JsonArray(required.map { JsonPrimitive(it) }))
+    }
+
+    SerialKind.CONTEXTUAL -> {}
+  }
+}
+
+private fun List<Annotation>.description(): String? =
+  filterIsInstance<Description>().firstOrNull()?.value
+
+private fun SerialKind.toJsonType(): String = when (this) {
+  PrimitiveKind.INT,
+  PrimitiveKind.LONG,
+  PrimitiveKind.BYTE,
+  PrimitiveKind.SHORT -> "integer"
+
+  PrimitiveKind.FLOAT,
+  PrimitiveKind.DOUBLE -> "number"
+
+  PrimitiveKind.BOOLEAN -> "boolean"
+
+  PrimitiveKind.CHAR,
+  PrimitiveKind.STRING,
+  SerialKind.ENUM -> "string"
+
+  StructureKind.LIST -> "array"
+
+  PolymorphicKind.OPEN,
+  PolymorphicKind.SEALED,
+  SerialKind.CONTEXTUAL,
+  StructureKind.CLASS,
+  StructureKind.MAP,
+  StructureKind.OBJECT -> "object"
 }
 

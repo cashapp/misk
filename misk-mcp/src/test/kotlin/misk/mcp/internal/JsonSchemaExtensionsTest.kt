@@ -213,10 +213,13 @@ internal class JsonSchemaExtensionsTest {
   enum class HttpMethod {
     @SerialName("GET")
     GET,
+
     @SerialName("POST")
     POST,
+
     @SerialName("put")
     PUT,
+
     @SerialName("delete")
     DELETE
   }
@@ -225,12 +228,16 @@ internal class JsonSchemaExtensionsTest {
   enum class OrderStatus {
     @SerialName("pending_payment")
     PENDING_PAYMENT,
+
     @SerialName("processing")
     PROCESSING,
+
     @SerialName("shipped")
     SHIPPED,
+
     @SerialName("delivered")
     DELIVERED,
+
     @SerialName("cancelled")
     CANCELLED
   }
@@ -241,6 +248,7 @@ internal class JsonSchemaExtensionsTest {
     @SerialName("custom_value_1")
     VALUE_ONE,
     VALUE_TWO,  // No SerialName, should use enum constant name
+
     @SerialName("custom_value_3")
     VALUE_THREE
   }
@@ -274,19 +282,19 @@ internal class JsonSchemaExtensionsTest {
   class CustomSerializerObject
 
   object CustomSerializer : KSerializer<CustomSerializerObject> {
-      override val descriptor: SerialDescriptor
-          get() = PrimitiveSerialDescriptor(CustomSerializerObject::class.qualifiedName!!, PrimitiveKind.STRING)
+    override val descriptor: SerialDescriptor
+      get() = PrimitiveSerialDescriptor(CustomSerializerObject::class.qualifiedName!!, PrimitiveKind.STRING)
 
-      override fun serialize(
-          encoder: Encoder,
-          value: CustomSerializerObject
-      ) {
-          encoder.encodeString("CustomSerializerObject")
-      }
+    override fun serialize(
+      encoder: Encoder,
+      value: CustomSerializerObject
+    ) {
+      encoder.encodeString("CustomSerializerObject")
+    }
 
-      override fun deserialize(decoder: Decoder): CustomSerializerObject {
-          return CustomSerializerObject()
-      }
+    override fun deserialize(decoder: Decoder): CustomSerializerObject {
+      return CustomSerializerObject()
+    }
   }
 
   @Serializable
@@ -294,6 +302,13 @@ internal class JsonSchemaExtensionsTest {
     val jsonObject: JsonObject,
     val jsonElement: JsonElement,
     val jsonArray: JsonArray,
+  )
+
+  @Serializable
+  data class RecursiveObject(
+    val recursiveEmbeddedObject: RecursiveObject?,
+    val recursiveList: List<RecursiveObject>,
+    val recursiveObject: Map<String, RecursiveObject>,
   )
 
   @Test
@@ -389,7 +404,7 @@ internal class JsonSchemaExtensionsTest {
     val addressField = properties["address"] as JsonObject
     assertEquals(JsonPrimitive("object"), addressField["type"])
     assertTrue(addressField.containsKey("properties"))
-    
+
     // Verify nested object has required field
     assertTrue(addressField.containsKey("required"))
     val addressRequired = addressField["required"] as JsonArray
@@ -992,5 +1007,67 @@ internal class JsonSchemaExtensionsTest {
     val jsonArrayField = properties["jsonArray"] as JsonObject
     assertEquals(JsonPrimitive("array"), jsonArrayField["type"])
     assertTrue(jsonArrayField.containsKey("items"))
+  }
+
+  @Test
+  fun `generateJsonSchema handles recursive objects correctly`() {
+    val schema = RecursiveObject::class.generateJsonSchema()
+    val properties = schema["properties"] as JsonObject
+    val required = schema["required"] as JsonArray
+
+    // Verify top-level structure
+    assertEquals(JsonPrimitive("object"), schema["type"])
+    assertEquals(3, properties.size)
+
+    // Verify recursiveEmbeddedObject field (nullable, should not be required)
+    val recursiveEmbeddedObjectField = properties["recursiveEmbeddedObject"] as JsonObject
+    assertEquals(JsonPrimitive("object"), recursiveEmbeddedObjectField["type"])
+
+    // The first level should have properties, but recursive references within should be prevented
+    assertTrue(recursiveEmbeddedObjectField.containsKey("properties"))
+    val embeddedProperties = recursiveEmbeddedObjectField["properties"] as JsonObject
+    assertEquals(3, embeddedProperties.size) // recursiveEmbeddedObject, recursiveList, recursiveObject
+
+    // Verify that the nested recursiveEmbeddedObject does NOT have properties (recursion prevented)
+    val nestedRecursiveEmbedded = embeddedProperties["recursiveEmbeddedObject"] as JsonObject
+    assertEquals(JsonPrimitive("object"), nestedRecursiveEmbedded["type"])
+    assertFalse(nestedRecursiveEmbedded.containsKey("properties"), "Nested recursive object should not have properties")
+
+    // Verify that the nested recursiveList items do NOT have properties (recursion prevented)
+    val nestedRecursiveList = embeddedProperties["recursiveList"] as JsonObject
+    assertEquals(JsonPrimitive("array"), nestedRecursiveList["type"])
+    val nestedListItems = nestedRecursiveList["items"] as JsonObject
+    assertEquals(JsonPrimitive("object"), nestedListItems["type"])
+    assertFalse(nestedListItems.containsKey("properties"), "Nested recursive list items should not have properties")
+
+    // Verify that the nested recursiveObject map values do NOT have properties (recursion prevented)
+    val nestedRecursiveMap = embeddedProperties["recursiveObject"] as JsonObject
+    assertEquals(JsonPrimitive("object"), nestedRecursiveMap["type"])
+    val nestedMapAdditionalProps = nestedRecursiveMap["additionalProperties"] as JsonObject
+    assertEquals(JsonPrimitive("object"), nestedMapAdditionalProps["type"])
+    assertFalse(nestedMapAdditionalProps.containsKey("properties"), "Nested recursive map values should not have properties")
+
+    // Verify recursiveList field at top level
+    val recursiveListField = properties["recursiveList"] as JsonObject
+    assertEquals(JsonPrimitive("array"), recursiveListField["type"])
+    assertTrue(recursiveListField.containsKey("items"))
+    val listItems = recursiveListField["items"] as JsonObject
+    assertEquals(JsonPrimitive("object"), listItems["type"])
+    // Top-level list items should NOT have properties due to recursion prevention
+    assertFalse(listItems.containsKey("properties"), "Top-level recursive list items should not have properties")
+
+    // Verify recursiveObject field (map) at top level
+    val recursiveObjectMapField = properties["recursiveObject"] as JsonObject
+    assertEquals(JsonPrimitive("object"), recursiveObjectMapField["type"])
+    assertTrue(recursiveObjectMapField.containsKey("additionalProperties"))
+    val mapAdditionalProps = recursiveObjectMapField["additionalProperties"] as JsonObject
+    assertEquals(JsonPrimitive("object"), mapAdditionalProps["type"])
+    // Top-level map values should NOT have properties due to recursion prevention
+    assertFalse(mapAdditionalProps.containsKey("properties"), "Top-level recursive map values should not have properties")
+
+    // Verify required fields - only recursiveList and recursiveObject should be required
+    // (recursiveEmbeddedObject is nullable)
+    val requiredFields = required.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("recursiveList", "recursiveObject"), requiredFields)
   }
 }
