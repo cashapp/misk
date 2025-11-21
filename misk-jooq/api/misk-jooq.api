@@ -4,6 +4,13 @@ public final class misk/jooq/IsolationLevelAwareConnectionProvider : org/jooq/Co
 	public fun release (Ljava/sql/Connection;)V
 }
 
+public final class misk/jooq/JooqExceptionClassifier : misk/jdbc/DefaultExceptionClassifier {
+	public fun <init> ()V
+	public fun <init> (Lmisk/jdbc/DataSourceType;)V
+	public synthetic fun <init> (Lmisk/jdbc/DataSourceType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun isRetryable (Ljava/lang/Throwable;)Z
+}
+
 public final class misk/jooq/JooqExtensionsKt {
 	public static final fun fetchOneOrNull (Lorg/jooq/ResultQuery;)Lorg/jooq/Record;
 	public static final fun getOrThrow (Ljava/lang/Object;)Ljava/lang/Object;
