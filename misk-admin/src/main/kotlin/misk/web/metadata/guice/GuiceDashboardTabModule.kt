@@ -1,6 +1,5 @@
 package misk.web.metadata.guice
 
-import com.google.inject.multibindings.OptionalBinder
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
 import misk.web.dashboard.AdminDashboard
@@ -16,7 +15,6 @@ class GuiceDashboardTabModule: KAbstractModule() {
       menuCategory = "Container Admin",
       menuLabel = "Guice",
     ))
-    OptionalBinder.newOptionalBinder(binder(), GuiceSourceUrlProvider::class.java)
-      .setDefault().to(GitHubSourceUrlProvider::class.java)
+    bindOptionalDefault<GuiceSourceUrlProvider>().to<GitHubSourceUrlProvider>()
   }
 }

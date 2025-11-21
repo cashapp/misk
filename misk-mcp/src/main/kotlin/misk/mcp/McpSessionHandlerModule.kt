@@ -70,9 +70,7 @@ class McpSessionHandlerModule<T: McpSessionHandler>(
 ) : KAbstractModule() {
   override fun configure() {
     val mcpSessionHandlerKey = keyOf<McpSessionHandler>(groupAnnotationClass)
-    OptionalBinder.newOptionalBinder(binder(), mcpSessionHandlerKey)
-      .setBinding()
-      .to(mcpSessionHandlerClass.java)
+    bindOptionalBinding(mcpSessionHandlerKey).to(mcpSessionHandlerClass.java)
   }
 
   companion object {
