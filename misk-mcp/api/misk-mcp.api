@@ -2,6 +2,11 @@ public abstract interface annotation class misk/mcp/Description : java/lang/anno
 	public abstract fun value ()Ljava/lang/String;
 }
 
+public synthetic class misk/mcp/Description$Impl : misk/mcp/Description {
+	public fun <init> (Ljava/lang/String;)V
+	public final synthetic fun value ()Ljava/lang/String;
+}
+
 public final class misk/mcp/JsonKt {
 	public static final fun decode (Ljava/lang/String;Lkotlinx/serialization/DeserializationStrategy;)Ljava/lang/Object;
 	public static final fun decode (Lkotlinx/serialization/json/JsonObject;Lkotlinx/serialization/DeserializationStrategy;)Ljava/lang/Object;
@@ -296,8 +301,8 @@ public final class misk/mcp/config/McpToolConfig : misk/config/Config {
 }
 
 public final class misk/mcp/internal/JsonSchemaExtensionsKt {
-	public static final fun generateJsonSchema (Lkotlin/reflect/KClass;ILjava/lang/String;)Lkotlinx/serialization/json/JsonObject;
-	public static synthetic fun generateJsonSchema$default (Lkotlin/reflect/KClass;ILjava/lang/String;ILjava/lang/Object;)Lkotlinx/serialization/json/JsonObject;
+	public static final fun generateJsonSchema (Lkotlin/reflect/KClass;Ljava/lang/String;)Lkotlinx/serialization/json/JsonObject;
+	public static synthetic fun generateJsonSchema$default (Lkotlin/reflect/KClass;Ljava/lang/String;ILjava/lang/Object;)Lkotlinx/serialization/json/JsonObject;
 }
 
 public final class misk/mcp/internal/McpServerSession : kotlin/coroutines/AbstractCoroutineContextElement {
