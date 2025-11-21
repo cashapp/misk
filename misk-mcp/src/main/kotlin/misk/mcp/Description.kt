@@ -1,5 +1,7 @@
 package misk.mcp
 
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialInfo
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.VALUE_PARAMETER
 
@@ -86,6 +88,8 @@ import kotlin.annotation.AnnotationTarget.VALUE_PARAMETER
  * @see misk.mcp.internal.generateJsonSchema
  * @since 1.0.0
  */
-@Target(VALUE_PARAMETER)
+@OptIn(ExperimentalSerializationApi::class)
+@Target(AnnotationTarget.PROPERTY)
 @Retention(RUNTIME)
+@SerialInfo
 annotation class Description(val value: String)
