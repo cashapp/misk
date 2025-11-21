@@ -33,7 +33,7 @@ import kotlin.reflect.KClass
 @PublishedApi
 internal fun <T : Any> KClass<T>.generateJsonSchema(description: String? = null): JsonObject {
   val serializer =
-    serializerOrNull() ?: throw IllegalArgumentException("No serializer found for class ${this.qualifiedName}")
+    serializerOrNull() ?: throw IllegalArgumentException("No serializer found for class ${this.qualifiedName}. Did you add a @Serializable annotation?")
   return serializer.descriptor.generateJsonSchema(description)
 }
 
