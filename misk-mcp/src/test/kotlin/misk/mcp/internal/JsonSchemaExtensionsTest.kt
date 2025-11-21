@@ -389,8 +389,13 @@ internal class JsonSchemaExtensionsTest {
     val addressField = properties["address"] as JsonObject
     assertEquals(JsonPrimitive("object"), addressField["type"])
     assertTrue(addressField.containsKey("properties"))
-    // Note: Nested objects don't have "required" field due to level check in implementation
-    assertFalse(addressField.containsKey("required"))
+    
+    // Verify nested object has required field
+    assertTrue(addressField.containsKey("required"))
+    val addressRequired = addressField["required"] as JsonArray
+    // Verify nested required fields are correct
+    val addressRequiredFields = addressRequired.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("street", "city", "zipCode"), addressRequiredFields)
 
     val addressProperties = addressField["properties"] as JsonObject
 
@@ -409,6 +414,7 @@ internal class JsonSchemaExtensionsTest {
     val schema = Company::class.generateJsonSchema()
 
     val properties = schema["properties"] as JsonObject
+    val required = schema["required"] as JsonArray
 
     // Verify company name
     assertEquals(JsonPrimitive("string"), (properties["name"] as JsonObject)["type"])
@@ -416,10 +422,18 @@ internal class JsonSchemaExtensionsTest {
     // Verify address field (embedded object)
     val addressField = properties["address"] as JsonObject
     assertEquals(JsonPrimitive("object"), addressField["type"])
+    assertTrue(addressField.containsKey("required"))
+    val addressRequired = addressField["required"] as JsonArray
+    val addressRequiredFields = addressRequired.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("street", "city", "zipCode"), addressRequiredFields)
 
     // Verify CEO field (embedded object with nested object)
     val ceoField = properties["ceo"] as JsonObject
     assertEquals(JsonPrimitive("object"), ceoField["type"])
+    assertTrue(ceoField.containsKey("required"))
+    val ceoRequired = ceoField["required"] as JsonArray
+    val ceoRequiredFields = ceoRequired.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("name", "age", "address"), ceoRequiredFields)
 
     val ceoProperties = ceoField["properties"] as JsonObject
     assertEquals(JsonPrimitive("string"), (ceoProperties["name"] as JsonObject)["type"])
@@ -428,11 +442,19 @@ internal class JsonSchemaExtensionsTest {
     // Verify CEO's address (nested object within nested object)
     val ceoAddressField = ceoProperties["address"] as JsonObject
     assertEquals(JsonPrimitive("object"), ceoAddressField["type"])
+    assertTrue(ceoAddressField.containsKey("required"))
+    val ceoAddressRequired = ceoAddressField["required"] as JsonArray
+    val ceoAddressRequiredFields = ceoAddressRequired.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("street", "city", "zipCode"), ceoAddressRequiredFields)
 
     val ceoAddressProperties = ceoAddressField["properties"] as JsonObject
     assertEquals(JsonPrimitive("string"), (ceoAddressProperties["street"] as JsonObject)["type"])
     assertEquals(JsonPrimitive("string"), (ceoAddressProperties["city"] as JsonObject)["type"])
     assertEquals(JsonPrimitive("integer"), (ceoAddressProperties["zipCode"] as JsonObject)["type"])
+
+    // Verify top-level required fields
+    val topLevelRequiredFields = required.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("name", "address", "ceo"), topLevelRequiredFields)
   }
 
   @Test
