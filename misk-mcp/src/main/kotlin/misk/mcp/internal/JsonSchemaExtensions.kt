@@ -1,9 +1,8 @@
-@file:OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
+@file:OptIn( ExperimentalSerializationApi::class)
 
 package misk.mcp.internal
 
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.descriptors.PolymorphicKind
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -11,32 +10,58 @@ import kotlinx.serialization.descriptors.SerialKind
 import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.descriptors.elementDescriptors
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.serializerOrNull
 import misk.mcp.Description
-import kotlin.reflect.KClass
+import misk.mcp.serializer
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 /**
- * Generates a JSON schema for a data class, including properties, types, and required fields.
+ * Generates a JSON schema for a serializable Kotlin type, including properties, types, and required fields.
  * Processes @Description annotations and handles nested objects with configurable recursion depth.
  *
  * This function introspects the serial descriptor of the class to build a JSON schema representation.
  * It handles nested objects, collections, maps, and primitive types.
  *
+ * @receiver the [KType] to generate a JSON schema for
  * @param description Optional description to include in the root schema object
  * @return JsonObject representing the generated JSON schema with type, properties, and required fields
- * @throws IllegalArgumentException if the class has no primary constructor
+ * @throws IllegalArgumentException if the class has no serializer
  */
 @PublishedApi
-internal fun <T : Any> KClass<T>.generateJsonSchema(description: String? = null): JsonObject {
-  val serializer =
-    serializerOrNull() ?: throw IllegalArgumentException("No serializer found for class ${this.qualifiedName}. Did you add a @Serializable annotation?")
-  return serializer.descriptor.generateJsonSchema(description)
-}
+internal fun KType.generateJsonSchema(description: String? = null): JsonObject =
+  serializer().descriptor.generateJsonSchema(description)
 
+/**
+ * Generates a JSON schema for a reified serializable Kotlin type.
+ *
+ * This is a convenience function that converts the reified type [T] to a [KType] and delegates
+ * to [KType.generateJsonSchema] for schema generation.
+ *
+ * @param T the reified type to generate a schema for
+ * @param description Optional description to include in the root schema object
+ * @return JsonObject representing the generated JSON schema with type, properties, and required fields
+ * @throws IllegalArgumentException if the class has no serializer
+ * @see KType.generateJsonSchema
+ */
+@PublishedApi
+internal inline fun <reified T : Any> generateJsonSchema(description: String? = null): JsonObject =
+  typeOf<T>().generateJsonSchema(description)
+
+/**
+ * Generates a JSON Schema representation for this [SerialDescriptor].
+ *
+ * Handles various Kotlin types including primitives, enums, lists, maps, and complex objects.
+ * Supports recursive data structures by tracking visited descriptors to prevent infinite loops.
+ * Includes support for the [Description] annotation on properties.
+ *
+ * @receiver the [SerialDescriptor] to generate a schema for
+ * @param description optional description to include in the schema
+ * @param accumulatedObjectDescriptors set of already visited descriptors to prevent infinite recursion
+ * @return a [JsonObject] containing the JSON Schema representation
+ */
 private fun SerialDescriptor.generateJsonSchema(
   description: String? = null,
   accumulatedObjectDescriptors: Set<SerialDescriptor> = emptySet(),
