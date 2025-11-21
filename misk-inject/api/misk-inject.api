@@ -72,6 +72,12 @@ public final class misk/inject/GuiceKt {
 
 public abstract class misk/inject/KAbstractModule : com/google/inject/AbstractModule {
 	public fun <init> ()V
+	protected final fun bindOptional (Lcom/google/inject/Key;)Lcom/google/inject/multibindings/OptionalBinder;
+	protected final fun bindOptional (Lkotlin/reflect/KClass;)Lcom/google/inject/multibindings/OptionalBinder;
+	protected final fun bindOptionalBinding (Lcom/google/inject/Key;)Lcom/google/inject/binder/LinkedBindingBuilder;
+	protected final fun bindOptionalBinding (Lkotlin/reflect/KClass;)Lcom/google/inject/binder/LinkedBindingBuilder;
+	protected final fun bindOptionalDefault (Lcom/google/inject/Key;)Lcom/google/inject/binder/LinkedBindingBuilder;
+	protected final fun bindOptionalDefault (Lkotlin/reflect/KClass;)Lcom/google/inject/binder/LinkedBindingBuilder;
 	protected fun binder ()Lcom/google/inject/Binder;
 	protected final fun newMapBinder (Lcom/google/inject/TypeLiteral;Lcom/google/inject/TypeLiteral;Ljava/lang/annotation/Annotation;)Lcom/google/inject/multibindings/MapBinder;
 	protected final fun newMapBinder (Lcom/google/inject/TypeLiteral;Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;)Lcom/google/inject/multibindings/MapBinder;
