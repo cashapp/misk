@@ -10,6 +10,7 @@ import com.google.inject.binder.LinkedBindingBuilder
 import com.google.inject.binder.ScopedBindingBuilder
 import com.google.inject.multibindings.MapBinder
 import com.google.inject.multibindings.Multibinder
+import com.google.inject.multibindings.OptionalBinder
 import com.google.inject.util.Types
 import misk.inject.BindingQualifier.InstanceQualifier
 import misk.inject.BindingQualifier.TypeClassifier
@@ -182,4 +183,32 @@ abstract class KAbstractModule : AbstractModule() {
     Types.mapOf(keyType, valueType).typeLiteral() as TypeLiteral<Map<K, V>>
 
   private fun <T : Any> TypeLiteral<T>.subtype(): Type = Types.subtypeOf(type)
+
+  protected fun <T : Any> bindOptional(key: Key<T>): OptionalBinder<T> =
+    OptionalBinder.newOptionalBinder(binder(), key)
+
+  protected fun <T : Any> bindOptional(baseSwitchType: KClass<T>): OptionalBinder<T> =
+    OptionalBinder.newOptionalBinder(binder(), baseSwitchType.java)
+
+  protected inline fun <reified T: Any> bindOptional(): OptionalBinder<T> = bindOptional(T::class)
+
+  protected fun <T : Any> bindOptionalDefault(key: Key<T>): LinkedBindingBuilder<T> =
+    OptionalBinder.newOptionalBinder(binder(), key)
+      .setDefault()
+
+  protected fun <T : Any> bindOptionalDefault(baseSwitchType: KClass<T>): LinkedBindingBuilder<T> =
+    OptionalBinder.newOptionalBinder(binder(), baseSwitchType.java)
+      .setDefault()
+
+  protected inline fun <reified T: Any> bindOptionalDefault(): LinkedBindingBuilder<T> = bindOptionalDefault(T::class)
+
+  protected fun <T : Any> bindOptionalBinding(key: Key<T>): LinkedBindingBuilder<T> =
+    OptionalBinder.newOptionalBinder(binder(), key)
+      .setBinding()
+
+  protected fun <T : Any> bindOptionalBinding(baseSwitchType: KClass<T>): LinkedBindingBuilder<T> =
+    OptionalBinder.newOptionalBinder(binder(), baseSwitchType.java)
+      .setBinding()
+
+  protected inline fun <reified T: Any> bindOptionalBinding(): LinkedBindingBuilder<T> = bindOptionalBinding(T::class)
 }

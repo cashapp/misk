@@ -1,139 +1,138 @@
+@file:OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
+
 package misk.mcp.internal
 
-import kotlinx.serialization.SerialName
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.descriptors.PolymorphicKind
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.SerialKind
+import kotlinx.serialization.descriptors.StructureKind
+import kotlinx.serialization.descriptors.elementDescriptors
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.serializerOrNull
 import misk.mcp.Description
 import kotlin.reflect.KClass
-import kotlin.reflect.KClassifier
-import kotlin.reflect.KType
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.primaryConstructor
 
 /**
  * Generates a JSON schema for a data class, including properties, types, and required fields.
  * Processes @Description annotations and handles nested objects with configurable recursion depth.
- * 
- * This function introspects the primary constructor parameters of a Kotlin data class and
- * generates a corresponding JSON schema that can be used for validation or documentation.
+ *
+ * This function introspects the serial descriptor of the class to build a JSON schema representation.
  * It handles nested objects, collections, maps, and primitive types.
- * 
- * @param level The recursion depth for nested object schema generation (default: 1)
+ *
  * @param description Optional description to include in the root schema object
  * @return JsonObject representing the generated JSON schema with type, properties, and required fields
  * @throws IllegalArgumentException if the class has no primary constructor
  */
 @PublishedApi
-internal fun <T : Any> KClass<T>.generateJsonSchema(level: Int = 1, description: String? = null): JsonObject {
-  val ctor = primaryConstructor ?: throw IllegalArgumentException("No primary constructor")
-  val properties = mutableMapOf<String, JsonObject>()
-  val required = mutableListOf<String>()
+internal fun <T : Any> KClass<T>.generateJsonSchema(description: String? = null): JsonObject {
+  val serializer =
+    serializerOrNull() ?: throw IllegalArgumentException("No serializer found for class ${this.qualifiedName}. Did you add a @Serializable annotation?")
+  return serializer.descriptor.generateJsonSchema(description)
+}
 
-  for (param in ctor.parameters) {
-    val name = param.name ?: continue
-    val description = param.findAnnotation<Description>()?.value
-    properties[name] = param.type.generateJsonSchema(level, description)
-
-    if (!param.isOptional && !param.type.isMarkedNullable) {
-      required.add(name)
-    }
+private fun SerialDescriptor.generateJsonSchema(
+  description: String? = null,
+  accumulatedObjectDescriptors: Set<SerialDescriptor> = emptySet(),
+): JsonObject = buildJsonObject {
+  put("type", JsonPrimitive(kind.toJsonType()))
+  description?.let {
+    put("description", JsonPrimitive(it))
   }
-
-  return buildJsonObject {
-    put("type", JsonPrimitive("object"))
-    description?.let {
-      put("description", JsonPrimitive(it))
+  when (kind) {
+    PrimitiveKind.BOOLEAN,
+    PrimitiveKind.BYTE,
+    PrimitiveKind.CHAR,
+    PrimitiveKind.DOUBLE,
+    PrimitiveKind.FLOAT,
+    PrimitiveKind.INT,
+    PrimitiveKind.LONG,
+    PrimitiveKind.SHORT,
+    PrimitiveKind.STRING -> {
     }
-    put("properties", JsonObject(properties))
-    if (level == 1) {
+
+    SerialKind.ENUM -> {
+      val enumValues = (0 until elementsCount).map { index ->
+        getElementName(index)
+      }
+      put("enum", JsonArray(enumValues.map { JsonPrimitive(it) }))
+    }
+
+    StructureKind.LIST -> {
+      val elementDescriptor = getElementDescriptor(0)
+      val elementDescription = getElementAnnotations(0).description()
+      put("items", elementDescriptor.generateJsonSchema(elementDescription, accumulatedObjectDescriptors))
+    }
+
+    StructureKind.MAP -> {
+      description?.let {
+        put("description", JsonPrimitive(it))
+      }
+      val valueDescriptor = getElementDescriptor(1)
+      val valueDescription = getElementAnnotations(1).description()
+      put("additionalProperties", valueDescriptor.generateJsonSchema(valueDescription, accumulatedObjectDescriptors.plus(this@generateJsonSchema)))
+    }
+
+    PolymorphicKind.OPEN,
+    PolymorphicKind.SEALED,
+    StructureKind.CLASS,
+    StructureKind.OBJECT -> {
+      if (this@generateJsonSchema in accumulatedObjectDescriptors) {
+        // Prevent infinite recursion for recursive data structures
+        return@buildJsonObject
+      }
+      val properties = mutableMapOf<String, JsonObject>()
+      val required = mutableListOf<String>()
+
+      elementDescriptors.forEachIndexed { index, paramDescriptor ->
+        val name = getElementName(index)
+        val description = getElementAnnotations(index).description()
+        properties[name] = paramDescriptor.generateJsonSchema(description, accumulatedObjectDescriptors.plus(this@generateJsonSchema))
+
+        if (!isElementOptional(index) && !paramDescriptor.isNullable) {
+          required.add(name)
+        }
+      }
+
+      put("properties", JsonObject(properties))
       put("required", JsonArray(required.map { JsonPrimitive(it) }))
     }
+
+    SerialKind.CONTEXTUAL -> {}
   }
 }
 
-/**
- * Generates JSON schema for a Kotlin type, handling primitives, collections, maps, enums, and nested objects.
- * 
- * @param level The current recursion depth for nested object processing
- * @param description Optional description to include in the schema
- * @return JsonObject representing the JSON schema for this type
- */
-private fun KType.generateJsonSchema(level: Int, description: String? = null): JsonObject {
-  return when (classifier) {
-    Int::class, Long::class,
-    Float::class, Double::class,
-    String::class, Boolean::class -> buildJsonObject {
-      put("type", JsonPrimitive(classifier.jsonType))
-      description?.let {
-        put("description", JsonPrimitive(it))
-      }
-    }
+private fun List<Annotation>.description(): String? =
+  filterIsInstance<Description>().firstOrNull()?.value
 
-    List::class, Set::class -> buildJsonObject {
-      put("type", JsonPrimitive(classifier.jsonType))
-      description?.let {
-        put("description", JsonPrimitive(it))
-      }
-      val collectionType = checkNotNull(arguments.firstOrNull()?.type) {
-        "Collection type argument is required for $classifier"
-      }
-      put("items", collectionType.generateJsonSchema(level + 1))
-    }
+private fun SerialKind.toJsonType(): String = when (this) {
+  PrimitiveKind.INT,
+  PrimitiveKind.LONG,
+  PrimitiveKind.BYTE,
+  PrimitiveKind.SHORT -> "integer"
 
-    Map::class -> buildJsonObject {
-      put("type", JsonPrimitive(classifier.jsonType))
-      description?.let {
-        put("description", JsonPrimitive(it))
-      }
-      val collectionType = checkNotNull(arguments.getOrNull(1)?.type) {
-        "Collection type argument is required for $classifier"
-      }
-      put("additionalProperties", collectionType.generateJsonSchema(level + 1))
-    }
+  PrimitiveKind.FLOAT,
+  PrimitiveKind.DOUBLE -> "number"
 
-    else -> {
-      val kClass = classifier as KClass<*>
-      // Check if the class is an enum
-      if (kClass.java.isEnum) {
-        buildJsonObject {
-          put("type", JsonPrimitive("string"))
-          description?.let {
-            put("description", JsonPrimitive(it))
-          }
-          // Get all enum constants and add them to the schema
-          // Check for @SerialName annotation, fallback to enum constant name
-          val enumValues = kClass.java.enumConstants.map { enumConstant ->
-            val enumValue = enumConstant as Enum<*>
-            // Get the field for this enum constant to check for @SerialName
-            runCatching { kClass.java.getField(enumValue.name) }.getOrNull()
-              ?.getAnnotation(SerialName::class.java)?.value
-              ?: enumValue.name
-          }
-          put("enum", JsonArray(enumValues.map { JsonPrimitive(it) }))
-        }
-      } else {
-        kClass.generateJsonSchema(level + 1, description)
-      }
-    }
-  }
+  PrimitiveKind.BOOLEAN -> "boolean"
+
+  PrimitiveKind.CHAR,
+  PrimitiveKind.STRING,
+  SerialKind.ENUM -> "string"
+
+  StructureKind.LIST -> "array"
+
+  PolymorphicKind.OPEN,
+  PolymorphicKind.SEALED,
+  SerialKind.CONTEXTUAL,
+  StructureKind.CLASS,
+  StructureKind.MAP,
+  StructureKind.OBJECT -> "object"
 }
 
-/**
- * Maps Kotlin types to their corresponding JSON schema type strings.
- * 
- * @return The JSON schema type string for the given Kotlin classifier
- * @throws IllegalArgumentException if the classifier is null
- */
-private val KClassifier?.jsonType: String
-  get() = when (this) {
-    Int::class, Long::class -> "integer"
-    Float::class, Double::class -> "number"
-    String::class -> "string"
-    Boolean::class -> "boolean"
-    List::class, Set::class -> "array"
-    Map::class -> "object"
-    null -> throw IllegalArgumentException("KClassifier cannot be null when generating JSON schema")
-    else -> "object"
-  }

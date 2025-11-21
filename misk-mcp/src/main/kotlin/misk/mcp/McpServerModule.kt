@@ -153,7 +153,7 @@ class McpServerModule private constructor(
       ?: throw IllegalArgumentException("No MCP server configuration found for [name=$name] in [config=$config]")
 
     // bind the Optional McpSessionHandler and get the optional provider
-    OptionalBinder.newOptionalBinder(binder(), keyOf<McpSessionHandler>(qualifier))
+    bindOptional(keyOf<McpSessionHandler>(qualifier))
     val mcpSessionHandlerProvider: Provider<Optional<McpSessionHandler>> = binder().run {
       @Suppress("UNCHECKED_CAST")
       val optionalType = parameterizedType<Optional<*>>(McpSessionHandler::class.java)
