@@ -142,7 +142,7 @@ internal class JsonSchemaExtensionsTest {
     val field123: String
   )
 
-  // Test class without primary constructor
+  // Test class without serializer
   class NoSerializerClass {
     constructor(value: String) // Secondary constructor only
   }
