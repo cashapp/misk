@@ -1001,7 +1001,7 @@ internal class JsonSchemaExtensionsTest {
 
     // Verify jsonElement field
     val jsonElementField = properties["jsonElement"] as JsonObject
-    assertEquals(JsonPrimitive("object"), jsonElementField["type"])
+    assertTrue(jsonElementField.containsKey("anyOf"))
 
     // Verify jsonArray field
     val jsonArrayField = properties["jsonArray"] as JsonObject
