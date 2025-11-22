@@ -60,15 +60,9 @@ class JsonSchemaExtensionsIntegrationTest {
         SampleData.Banana(length = 7, ripeness = "Ripe"),
       ),
     )
-    val fruitDescriptor = SampleData.Fruit.serializer().descriptor
-    val jsonObjectDescriptor = JsonObject.serializer().descriptor
-    println(fruitDescriptor)
-    println(jsonObjectDescriptor)
-
     val schemaJsonString = McpJson.encodeToString(generateJsonSchema<SampleData>())
     val schema = SCHEMA_REGISTRY.getSchema(schemaJsonString)
     val sampleDataSerialized = McpJson.encodeToString(sampleData)
-    println(schema)
 
     val errors = schema.validate(sampleDataSerialized, InputFormat.JSON)
     if (errors.isNotEmpty()) {
