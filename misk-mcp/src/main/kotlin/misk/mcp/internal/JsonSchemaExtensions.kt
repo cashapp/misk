@@ -134,7 +134,7 @@ private fun SerialDescriptor.generateJsonSchema(
     PolymorphicKind.SEALED -> {
       put("anyOf", buildJsonArray {
         // Auto-generated sealed descriptors have a "type" and "value" field, where "value" contains the actual subtype descriptors.
-        // In other cases (e.g. JsonObject), the subtype descriptors are directly under the sealed descriptor.
+        // Custom serialized sealed descriptors (e.g. for JsonElement), the subtype descriptors are directly under the sealed descriptor.
         val memberDescriptors = if (elementsCount > 1 && getElementName(1) == "value" && getElementDescriptor(1).kind == SerialKind.CONTEXTUAL) {
           getElementDescriptor(1).elementDescriptors
         } else elementDescriptors
