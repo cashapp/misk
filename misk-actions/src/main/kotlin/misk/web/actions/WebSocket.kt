@@ -39,14 +39,14 @@ interface WebSocket {
    * Returns the size in bytes of all messages enqueued to be transmitted to the server. This
    * doesn't include framing overhead. It also doesn't include any bytes buffered by the operating
    * system or network intermediaries. This method returns 0 if no messages are waiting
-   * in the queue. If may return a nonzero value after the web socket has been canceled; this
+   * in the queue. It may return a nonzero value after the web socket has been canceled; this
    * indicates that enqueued messages were not transmitted.
    */
   fun queueSize(): Long
 
   /**
-   * Attempts to enqueue {@code text} to be UTF-8 encoded and sent as a the data of a text (type
-   * {@code 0x1}) message.
+   * Attempts to enqueue {@code bytes} to be sent as the data of a binary (type {@code 0x2})
+   * message.
    *
    * <p>This method returns true if the message was enqueued. Messages that would overflow the
    * outgoing message buffer will be rejected and trigger a {@linkplain #close graceful shutdown} of
@@ -58,8 +58,8 @@ interface WebSocket {
   fun send(bytes: ByteString): Boolean
 
   /**
-   * Attempts to enqueue {@code bytes} to be sent as a the data of a binary (type {@code 0x2})
-   * message.
+   * Attempts to enqueue {@code text} to be UTF-8 encoded and sent as the data of a text (type
+   * {@code 0x1}) message.
    *
    * <p>This method returns true if the message was enqueued. Messages that would overflow the
    * outgoing message buffer will be rejected and trigger a {@linkplain #close graceful shutdown} of
