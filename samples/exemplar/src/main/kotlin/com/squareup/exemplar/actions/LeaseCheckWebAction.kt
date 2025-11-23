@@ -22,7 +22,7 @@ class LeaseCheckWebAction @Inject constructor(
   ): LeaseCheckResponse {
     // By default lease will be held for 1 minute
     val lease = leaseManager.requestLease(name)
-    val held = lease.checkHeld()
+    val held = lease.isHeld()
 
     return LeaseCheckResponse(
       name = name,

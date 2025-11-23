@@ -162,6 +162,7 @@ public final class misk/clustering/fake/lease/FakeLease : wisp/lease/Lease {
 	public fun checkHeld ()Z
 	public fun checkHeldElsewhere ()Z
 	public fun getName ()Ljava/lang/String;
+	public fun isHeld ()Z
 	public final fun notifyAfterAcquire ()V
 	public final fun notifyBeforeRelease ()V
 	public fun release ()Z
@@ -229,6 +230,7 @@ public final class misk/clustering/lease/ClusterAwareLease : wisp/lease/Lease {
 	public fun checkHeld ()Z
 	public fun checkHeldElsewhere ()Z
 	public fun getName ()Ljava/lang/String;
+	public fun isHeld ()Z
 	public fun release ()Z
 	public fun release (Z)Z
 	public fun shouldHold ()Z
