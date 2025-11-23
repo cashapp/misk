@@ -89,20 +89,22 @@ internal class SqlLeaseManager @Inject constructor(
 
     override fun shouldHold(): Boolean = true
 
-    /**
-     * Returns true if this process holds the lease.
-     */
-    override fun checkHeld(): Boolean {
+    override fun isHeld(): Boolean {
       if (heldVersion == NOT_HELD) return false
-      
+
       // We hold the lease until it expires
       return clock.instant() <= heldUntil
     }
 
     /**
+     * Returns true if this process holds the lease.
+     */
+    override fun checkHeld(): Boolean = isHeld()
+
+    /**
      * Returns true if the lease is held by another process.
      */
-    override fun checkHeldElsewhere(): Boolean = !checkHeld()
+    override fun checkHeldElsewhere(): Boolean = !isHeld()
 
     /**
      * Attempts to acquire the lease.
@@ -110,7 +112,7 @@ internal class SqlLeaseManager @Inject constructor(
      */
     override fun acquire(): Boolean {
       val lease = requestLease(name)
-      if (lease.checkHeld()) {
+      if (lease.isHeld()) {
         notifyAfterAcquire()
         return true
       }
