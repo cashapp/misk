@@ -12,7 +12,7 @@ class SingleLeaseCronCoordinator @Inject constructor(
 ) : CronCoordinator {
   override fun shouldRunTask(taskName: String): Boolean {
     val lease = leaseManager.requestLease(CRON_CLUSTER_LEASE_NAME)
-    return lease.checkHeld() || lease.acquire()
+    return lease.isHeld() || lease.acquire()
   }
 
   companion object {
@@ -25,6 +25,6 @@ class MultipleLeaseCronCoordinator @Inject constructor(
 ) : CronCoordinator {
   override fun shouldRunTask(taskName: String): Boolean {
     val taskLease = leaseManager.requestLease("misk.cron.task.$taskName")
-    return taskLease.checkHeld() || taskLease.acquire()
+    return taskLease.isHeld() || taskLease.acquire()
   }
 }

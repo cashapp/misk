@@ -36,10 +36,12 @@ internal class ClusterAwareLeaseTest {
 
     // This should work for other lease managers as well.
     assertTrue(lease1.acquire())
+    assertTrue(lease1.isHeld())
     assertTrue(lease1.checkHeld())
 
     // This will be false for any lease managers other than the ClusterAwareLeaseManager
     // because lease hasn't been acquired yet.
+    assertTrue(lease2.isHeld())
     assertTrue(lease2.checkHeld())
     assertTrue(lease2.acquire())
   }
@@ -52,6 +54,7 @@ internal class ClusterAwareLeaseTest {
 
     // Both should be false for ClusterAwareLeaseManager
     assertFalse(lease.acquire())
+    assertFalse(lease.isHeld())
     assertFalse(lease.checkHeld())
   }
 }
