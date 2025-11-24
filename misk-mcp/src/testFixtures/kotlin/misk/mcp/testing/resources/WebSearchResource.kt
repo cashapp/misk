@@ -1,8 +1,8 @@
 package misk.mcp.testing.resources
 
-import io.modelcontextprotocol.kotlin.sdk.ReadResourceRequest
-import io.modelcontextprotocol.kotlin.sdk.ReadResourceResult
-import io.modelcontextprotocol.kotlin.sdk.TextResourceContents
+import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceRequest
+import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceResult
+import io.modelcontextprotocol.kotlin.sdk.types.TextResourceContents
 import jakarta.inject.Inject
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.McpResource

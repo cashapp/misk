@@ -1,9 +1,9 @@
 package misk.mcp
 
-import io.modelcontextprotocol.kotlin.sdk.CreateElicitationRequest.RequestedSchema
-import io.modelcontextprotocol.kotlin.sdk.CreateElicitationResult
 import io.modelcontextprotocol.kotlin.sdk.server.ServerSession
 import io.modelcontextprotocol.kotlin.sdk.shared.RequestOptions
+import io.modelcontextprotocol.kotlin.sdk.types.ElicitRequestParams
+import io.modelcontextprotocol.kotlin.sdk.types.ElicitResult
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -14,7 +14,7 @@ import misk.mcp.internal.generateJsonSchema
 /**
  * Type-safe result wrapper for MCP elicitation responses.
  *
- * Provides a strongly-typed alternative to the raw [CreateElicitationResult] from the MCP Kotlin SDK.
+ * Provides a strongly-typed alternative to the raw [ElicitResult] from the MCP Kotlin SDK.
  * Automatically deserializes the response content to the specified type [T].
  *
  * @param T The expected type of the elicitation response content, must be serializable
@@ -23,9 +23,9 @@ import misk.mcp.internal.generateJsonSchema
  * @property _meta Additional metadata from the elicitation response
  */
 data class TypedCreateElicitationResult<T : Any>(
-  val action: CreateElicitationResult.Action,
+  val action: ElicitResult.Action,
   val content: T?,
-  @Suppress("PropertyName") val _meta: JsonObject,
+  @Suppress("PropertyName") val _meta: JsonObject?,
 )
 
 /**
@@ -48,7 +48,7 @@ suspend inline fun <reified T : Any> createTypedElicitation(
   .createElicitation(
     message = message,
     requestedSchema = generateJsonSchema<T>().let { schema ->
-      RequestedSchema(
+      ElicitRequestParams.RequestedSchema(
         properties = requireNotNull(schema["properties"] as? JsonObject) {
           "RequestedSchema must have properties defined"
         },
@@ -63,6 +63,6 @@ suspend inline fun <reified T : Any> createTypedElicitation(
     TypedCreateElicitationResult(
       action = result.action,
       content = result.content?.decode<T>(),
-      _meta = result._meta,
+      _meta = result.meta,
     )
   }
