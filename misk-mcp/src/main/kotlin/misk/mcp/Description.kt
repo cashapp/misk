@@ -3,7 +3,6 @@ package misk.mcp
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialInfo
 import kotlin.annotation.AnnotationRetention.RUNTIME
-import kotlin.annotation.AnnotationTarget.VALUE_PARAMETER
 
 /**
  * Annotation used to provide human-readable descriptions for data class parameters in MCP (Model Context Protocol) tools.

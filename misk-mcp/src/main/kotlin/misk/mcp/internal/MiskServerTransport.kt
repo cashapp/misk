@@ -1,6 +1,6 @@
 package misk.mcp.internal
 
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.shared.AbstractTransport
 import misk.web.HttpCall
 

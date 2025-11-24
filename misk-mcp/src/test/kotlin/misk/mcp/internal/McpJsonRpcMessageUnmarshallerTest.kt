@@ -1,6 +1,6 @@
 package misk.mcp.internal
 
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import misk.web.mediatype.MediaTypes
 import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaType
