@@ -14,6 +14,7 @@ import misk.inject.keyOf
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
+import misk.inject.toKey
 import kotlin.test.assertFailsWith
 
 internal class ServiceManagerModuleTest {
@@ -247,5 +248,55 @@ internal class ServiceManagerModuleTest {
       |AnotherUpstreamService.shutDown
       |""".trimMargin()
     )
+  }
+
+  @Singleton
+  class ServiceA : AbstractIdleService() {
+    override fun startUp() {
+      System.out.println("ServiceA: starting")
+    }
+    override fun shutDown() {
+      System.out.println("ServiceA: stopping")
+    }
+  }
+
+  @Singleton
+  class ServiceB : AbstractIdleService() {
+    override fun startUp() {
+      System.out.println("ServiceB: starting")
+    }
+    override fun shutDown() {
+      System.out.println("ServiceB: stopping")
+    }
+  }
+
+  @Singleton
+  class ServiceC : AbstractIdleService() {
+    override fun startUp() {
+      System.out.println("ServiceC: starting")
+    }
+    override fun shutDown() {
+      System.out.println("ServiceC: stopping")
+    }
+  }
+
+  @Test fun serviceManagerStartupDependencyOrder() {
+    val injector = Guice.createInjector(
+      MiskTestingServiceModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          install(ServiceModule(key = ServiceA::class.toKey()).dependsOn<ReadyService>())
+
+          install(ServiceModule<ServiceB>().enhancedBy<ReadyService>())
+          install(ServiceModule<ServiceC>().enhancedBy<ReadyService>())
+        }
+      }
+    )
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+    throw RuntimeException()
   }
 }
