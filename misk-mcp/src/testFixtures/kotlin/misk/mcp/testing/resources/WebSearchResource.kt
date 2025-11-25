@@ -1,4 +1,4 @@
-package misk.mcp.resources
+package misk.mcp.testing.resources
 
 import io.modelcontextprotocol.kotlin.sdk.ReadResourceRequest
 import io.modelcontextprotocol.kotlin.sdk.ReadResourceResult

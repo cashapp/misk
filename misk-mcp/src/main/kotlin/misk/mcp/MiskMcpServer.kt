@@ -57,7 +57,6 @@ import kotlin.time.TimeSource
  * [misk.mcp.action.McpStreamManager]:
  *
  * ```kotlin
- * @Singleton
  * class MyMcpWebAction @Inject constructor(
  *   private val mcpStreamManager: McpStreamManager
  * ) : WebAction {
@@ -98,6 +97,7 @@ import kotlin.time.TimeSource
 @ExperimentalMiskApi
 class MiskMcpServer internal constructor(
   val name: String,
+  val version: String,
   val config: McpServerConfig,
   tools: Set<McpTool<*>>,
   resources: Set<McpResource>,
@@ -107,7 +107,7 @@ class MiskMcpServer internal constructor(
 ) : Server(
   Implementation(
     name = name,
-    version = config.version,
+    version = version,
   ),
   ServerOptions(
     capabilities = ServerCapabilities(
@@ -181,7 +181,7 @@ class MiskMcpServer internal constructor(
         throw ex
       } finally {
         val duration = mark.elapsedNow()
-        mcpMetrics.mcpToolHandlerLatency(duration, name, toolName, outcome)
+        mcpMetrics.mcpToolHandlerLatency(duration, name, version, toolName, outcome)
       }
     }
   }

@@ -8,7 +8,6 @@ plugins {
 }
 
 dependencies {
-  api(libs.aws2Auth)
   api(libs.aws2Sqs)
   api(libs.guava)
   api(libs.guice6)
@@ -22,11 +21,11 @@ dependencies {
   api(project(":misk-jobqueue"))
   api(project(":misk-testing-api"))
   api(project(":wisp:wisp-token"))
+  implementation(libs.aws2Auth)
   implementation(libs.aws2Core)
   implementation(libs.aws2Regions)
   implementation(libs.loggingApi)
   implementation(libs.openTracingDatadog)
-  implementation(libs.tracingDatadog)
   implementation(project(":misk-api"))
   implementation(project(":misk-aws"))
   implementation(project(":misk-metrics"))

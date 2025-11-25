@@ -1,4 +1,4 @@
-package misk.mcp.tools
+package misk.mcp.testing.tools
 
 import io.modelcontextprotocol.kotlin.sdk.TextContent
 import io.modelcontextprotocol.kotlin.sdk.Tool

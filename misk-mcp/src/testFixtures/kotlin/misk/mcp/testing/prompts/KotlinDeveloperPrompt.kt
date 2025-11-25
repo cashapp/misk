@@ -1,4 +1,4 @@
-package misk.mcp.prompts
+package misk.mcp.testing.prompts
 
 import io.modelcontextprotocol.kotlin.sdk.GetPromptRequest
 import io.modelcontextprotocol.kotlin.sdk.GetPromptResult

@@ -27,24 +27,24 @@ import misk.mcp.action.McpWebSocket
 import misk.mcp.action.handleMessage
 import misk.mcp.config.McpConfig
 import misk.mcp.config.McpServerConfig
-import misk.mcp.prompts.KotlinDeveloperPrompt
-import misk.mcp.resources.WebSearchResource
+import misk.mcp.testing.prompts.KotlinDeveloperPrompt
+import misk.mcp.testing.resources.WebSearchResource
 import misk.mcp.testing.asMcpStreamableHttpClient
 import misk.mcp.testing.asMcpWebSocketClient
-import misk.mcp.tools.CalculatorTool
-import misk.mcp.tools.CalculatorToolInput.Operation
-import misk.mcp.tools.CalculatorToolOutput
-import misk.mcp.tools.GetNicknameRequest
-import misk.mcp.tools.HierarchicalTool
-import misk.mcp.tools.HierarchicalToolOutput
-import misk.mcp.tools.KotlinSdkTool
-import misk.mcp.tools.NicknameElicitationTool
-import misk.mcp.tools.ThrowingTool
-import misk.mcp.tools.VersionMetadata
-import misk.mcp.tools.callCalculatorTool
-import misk.mcp.tools.callHierarchicalTool
-import misk.mcp.tools.callNicknameTool
-import misk.mcp.tools.callThrowingTool
+import misk.mcp.testing.tools.CalculatorTool
+import misk.mcp.testing.tools.CalculatorToolInput.Operation
+import misk.mcp.testing.tools.CalculatorToolOutput
+import misk.mcp.testing.tools.GetNicknameRequest
+import misk.mcp.testing.tools.HierarchicalTool
+import misk.mcp.testing.tools.HierarchicalToolOutput
+import misk.mcp.testing.tools.KotlinSdkTool
+import misk.mcp.testing.tools.NicknameElicitationTool
+import misk.mcp.testing.tools.ThrowingTool
+import misk.mcp.testing.tools.VersionMetadata
+import misk.mcp.testing.tools.callCalculatorTool
+import misk.mcp.testing.tools.callHierarchicalTool
+import misk.mcp.testing.tools.callNicknameTool
+import misk.mcp.testing.tools.callThrowingTool
 import misk.metrics.summaryCount
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -71,7 +71,6 @@ internal abstract class McpServerActionTest {
   class McpStreamableHttpServerActionTest : McpServerActionTest() {
     @OptIn(ExperimentalMiskApi::class)
     @Suppress("unused")
-    @Singleton
     class McpServerActionTestPostAction @Inject constructor(private val mcpStreamManager: McpStreamManager) :
       WebAction {
       @McpPost
@@ -101,7 +100,6 @@ internal abstract class McpServerActionTest {
   class McpWebSocketServerActionTest : McpServerActionTest() {
     @OptIn(ExperimentalMiskApi::class)
     @Suppress("unused")
-    @Singleton
     class McpWebSocketServerActionTestAction @Inject constructor(
       private val mcpStreamManager: McpStreamManager
     ) : WebAction {
@@ -434,6 +432,7 @@ internal abstract class McpServerActionTest {
       actual = registry.summaryCount(
         "mcp_tool_handler_latency",
         "server_name" to "mcp-server-action-test-server",
+        "server_version" to "1.0.0",
         "tool_name" to "calculator",
         "tool_outcome" to "Success",
       )
@@ -452,6 +451,7 @@ internal abstract class McpServerActionTest {
         registry.summaryCount(
         "mcp_tool_handler_latency",
         "server_name" to "mcp-server-action-test-server",
+        "server_version" to "1.0.0",
         "tool_name" to "calculator",
         "tool_outcome" to "Error",
       )
@@ -468,6 +468,7 @@ internal abstract class McpServerActionTest {
       actual = registry.summaryCount(
         "mcp_tool_handler_latency",
         "server_name" to "mcp-server-action-test-server",
+        "server_version" to "1.0.0",
         "tool_name" to "throwing",
         "tool_outcome" to "Exception",
       )

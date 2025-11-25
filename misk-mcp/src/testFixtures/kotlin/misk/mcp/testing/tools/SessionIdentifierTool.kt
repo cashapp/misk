@@ -1,4 +1,4 @@
-package misk.mcp.tools
+package misk.mcp.testing.tools
 
 import jakarta.inject.Inject
 import kotlinx.serialization.Serializable

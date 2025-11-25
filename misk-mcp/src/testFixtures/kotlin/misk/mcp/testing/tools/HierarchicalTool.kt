@@ -1,6 +1,6 @@
 @file:Suppress("PropertyName", "LocalVariableName")
 
-package misk.mcp.tools
+package misk.mcp.testing.tools
 
 import io.modelcontextprotocol.kotlin.sdk.client.Client
 import jakarta.inject.Inject

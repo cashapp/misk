@@ -109,7 +109,7 @@ internal class DeclarativeSchemaMigrator(
           throw IllegalStateException("No valid CREATE TABLE statement found in ${file.filename}")
         }
       } catch (e: Exception) {
-        throw IllegalStateException("Failed to parse SQL in ${file.filename}")
+        throw IllegalStateException("Failed to parse SQL in ${file.filename}: ${e.message}", e)
       }
     }
 
