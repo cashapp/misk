@@ -7,154 +7,169 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Provides
 import com.google.inject.Scopes
+import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.inject.AlwaysEnabledSwitch
+import misk.inject.AsyncSwitch
+import misk.inject.DefaultAsyncSwitchModule
+import kotlin.test.assertFailsWith
 import misk.inject.KAbstractModule
+import misk.inject.Switch
 import misk.inject.getInstance
 import misk.inject.keyOf
+import misk.logging.LogCollector
+import misk.logging.LogCollectorModule
+import misk.logging.getLogger
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
-import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 internal class ServiceManagerModuleTest {
   @Singleton
   class SingletonService1 : AbstractIdleService() {
     override fun startUp() {}
+
     override fun shutDown() {}
   }
 
   @jakarta.inject.Singleton
   class SingletonService2 : AbstractIdleService() {
     override fun startUp() {}
+
     override fun shutDown() {}
   }
 
   @javax.inject.Singleton
   class SingletonService3 : AbstractIdleService() {
     override fun startUp() {}
+
     override fun shutDown() {}
   }
 
   class NonSingletonService1 : AbstractIdleService() {
     override fun startUp() {}
+
     override fun shutDown() {}
   }
 
   class NonSingletonService2 : AbstractIdleService() {
     override fun startUp() {}
+
     override fun shutDown() {}
   }
 
   class ExplicitEagerSingletonService : AbstractIdleService() {
     override fun startUp() {}
+
     override fun shutDown() {}
   }
 
   class SingletonScopeService : AbstractIdleService() {
     override fun startUp() {}
+
     override fun shutDown() {}
   }
 
   class SingletonAnnotationService : AbstractIdleService() {
     override fun startUp() {}
+
     override fun shutDown() {}
   }
 
   class GoogleSingletonAnnotationService : AbstractIdleService() {
     override fun startUp() {}
+
     override fun shutDown() {}
   }
 
   class InstanceService : AbstractIdleService() {
     override fun startUp() {}
+
     override fun shutDown() {}
   }
 
   class ProvidesMethodService : AbstractIdleService() {
     override fun startUp() {}
+
     override fun shutDown() {}
   }
 
-  @Test fun multibindingServicesThrows() {
+  @Test
+  fun multibindingServicesThrows() {
     assertThat(
       assertFailsWith<com.google.inject.ProvisionException> {
-        val injector = Guice.createInjector(
-          MiskTestingServiceModule(),
-          object : KAbstractModule() {
-            override fun configure() {
-              // Multibinding services is not supported. Expect that we throw for the first service
-              // that was bound.
-              multibind<Service>().to<SingletonService1>()
-              multibind<Service>().to<SingletonService2>()
-              multibind<Service>().to<SingletonService3>()
-            }
-          }
-        )
+        val injector =
+          Guice.createInjector(
+            MiskTestingServiceModule(),
+            object : KAbstractModule() {
+              override fun configure() {
+                // Multibinding services is not supported. Expect that we throw for the first service
+                // that was bound.
+                multibind<Service>().to<SingletonService1>()
+                multibind<Service>().to<SingletonService2>()
+                multibind<Service>().to<SingletonService3>()
+              }
+            },
+          )
 
         injector.getInstance<ServiceManager>()
-      }.message
-    ).contains(
-      "This doesn't work anymore! " +
-        "Instead of using `multibind<Service>().to(SingletonService1)`, " +
-        "use `install(ServiceModule<SingletonService1>())`."
+      }
+        .message
     )
+      .contains(
+        "This doesn't work anymore! " +
+          "Instead of using `multibind<Service>().to(SingletonService1)`, " +
+          "use `install(ServiceModule<SingletonService1>())`."
+      )
   }
 
-  @Test fun detectsNonSingletonServiceEntries() {
+  @Test
+  fun detectsNonSingletonServiceEntries() {
     assertThat(
       assertFailsWith<com.google.inject.ProvisionException> {
-        val injector = Guice.createInjector(
-          MiskTestingServiceModule(),
-          object : KAbstractModule() {
-            override fun configure() {
-              // Should be recognized as singletons
-              install(ServiceModule<SingletonService1>())
-              install(ServiceModule<SingletonService2>())
-              install(ServiceModule<SingletonService3>())
-              install(ServiceModule<ProvidesMethodService>())
-              install(ServiceModule<InstanceService>())
-              bind(keyOf<InstanceService>()).toInstance(
-                InstanceService()
-              )
-              install(
-                ServiceModule<ExplicitEagerSingletonService>()
-              )
-              bind(keyOf<ExplicitEagerSingletonService>()).asEagerSingleton()
-              install(ServiceModule<SingletonScopeService>())
-              bind(keyOf<SingletonScopeService>())
-                .`in`(Scopes.SINGLETON)
-              install(ServiceModule<SingletonAnnotationService>())
-              bind(keyOf<SingletonAnnotationService>())
-                .`in`(Singleton::class.java)
-              install(
-                ServiceModule<GoogleSingletonAnnotationService>()
-              )
-              bind(keyOf<GoogleSingletonAnnotationService>())
-                .`in`(Singleton::class.java)
+        val injector =
+          Guice.createInjector(
+            MiskTestingServiceModule(),
+            object : KAbstractModule() {
+              override fun configure() {
+                // Should be recognized as singletons
+                install(ServiceModule<SingletonService1>())
+                install(ServiceModule<SingletonService2>())
+                install(ServiceModule<SingletonService3>())
+                install(ServiceModule<ProvidesMethodService>())
+                install(ServiceModule<InstanceService>())
+                bind(keyOf<InstanceService>()).toInstance(InstanceService())
+                install(ServiceModule<ExplicitEagerSingletonService>())
+                bind(keyOf<ExplicitEagerSingletonService>()).asEagerSingleton()
+                install(ServiceModule<SingletonScopeService>())
+                bind(keyOf<SingletonScopeService>()).`in`(Scopes.SINGLETON)
+                install(ServiceModule<SingletonAnnotationService>())
+                bind(keyOf<SingletonAnnotationService>()).`in`(Singleton::class.java)
+                install(ServiceModule<GoogleSingletonAnnotationService>())
+                bind(keyOf<GoogleSingletonAnnotationService>()).`in`(Singleton::class.java)
 
-              // Should be recognized as non-singletons
-              install(ServiceModule<NonSingletonService1>())
-              install(ServiceModule<NonSingletonService2>())
-            }
+                // Should be recognized as non-singletons
+                install(ServiceModule<NonSingletonService1>())
+                install(ServiceModule<NonSingletonService2>())
+              }
 
-            @Provides @Singleton
-            fun providesSingletonService(): ProvidesMethodService = ProvidesMethodService()
-          }
-        )
+              @Provides @Singleton fun providesSingletonService(): ProvidesMethodService = ProvidesMethodService()
+            },
+          )
 
         injector.getInstance<ServiceManager>()
-      }.message
-    ).contains(
-      "the following services are not marked as @Singleton: " +
-        "misk.ServiceManagerModuleTest\$NonSingletonService1, " +
-        "misk.ServiceManagerModuleTest\$NonSingletonService2"
+      }
+        .message
     )
+      .contains(
+        "the following services are not marked as @Singleton: " +
+          "misk.ServiceManagerModuleTest\$NonSingletonService1, " +
+          "misk.ServiceManagerModuleTest\$NonSingletonService2"
+      )
   }
 
   @Singleton
-  class ProducerService @Inject constructor(
-    private val log: StringBuilder
-  ) : AbstractService() {
+  class ProducerService @Inject constructor(private val log: StringBuilder) : AbstractService() {
     init {
       log.append("ProducerService.init\n")
     }
@@ -171,9 +186,7 @@ internal class ServiceManagerModuleTest {
   }
 
   @Singleton
-  class ConsumerService @Inject constructor(
-    private val log: StringBuilder
-  ) : AbstractService() {
+  class ConsumerService @Inject constructor(private val log: StringBuilder) : AbstractService() {
     init {
       log.append("ConsumerService.init\n")
     }
@@ -190,9 +203,7 @@ internal class ServiceManagerModuleTest {
   }
 
   @Singleton
-  class AnotherUpstreamService @Inject constructor(
-    private val log: StringBuilder
-  ) : AbstractService() {
+  class AnotherUpstreamService @Inject constructor(private val log: StringBuilder) : AbstractService() {
     init {
       log.append("AnotherUpstreamService.init\n")
     }
@@ -208,23 +219,21 @@ internal class ServiceManagerModuleTest {
     }
   }
 
-  @Test fun serviceNotProvidedUntilAllDependenciesCreated() {
+  @Test
+  fun serviceNotProvidedUntilAllDependenciesCreated() {
     val log = StringBuilder()
-    val injector = Guice.createInjector(
-      MiskTestingServiceModule(),
-      object : KAbstractModule() {
-        override fun configure() {
-          bind<StringBuilder>().toInstance(log)
-          install(ServiceModule<ProducerService>())
-          install(
-            ServiceModule<ConsumerService>()
-              .dependsOn<ProducerService>()
-              .dependsOn<AnotherUpstreamService>()
-          )
-          install(ServiceModule<AnotherUpstreamService>())
-        }
-      }
-    )
+    val injector =
+      Guice.createInjector(
+        MiskTestingServiceModule(),
+        object : KAbstractModule() {
+          override fun configure() {
+            bind<StringBuilder>().toInstance(log)
+            install(ServiceModule<ProducerService>())
+            install(ServiceModule<ConsumerService>().dependsOn<ProducerService>().dependsOn<AnotherUpstreamService>())
+            install(ServiceModule<AnotherUpstreamService>())
+          }
+        },
+      )
 
     val serviceManager = injector.getInstance<ServiceManager>()
     serviceManager.startAsync()
@@ -233,19 +242,109 @@ internal class ServiceManagerModuleTest {
     serviceManager.stopAsync()
     serviceManager.awaitStopped()
 
-    assertThat(log.toString()).isEqualTo(
-      """
-      |ProducerService.init
-      |ProducerService.startUp
-      |AnotherUpstreamService.init
-      |AnotherUpstreamService.startUp
-      |ConsumerService.init
-      |ConsumerService.startUp
-      |healthy
-      |ConsumerService.shutDown
-      |ProducerService.shutDown
-      |AnotherUpstreamService.shutDown
-      |""".trimMargin()
+    assertThat(log.toString())
+      .isEqualTo(
+        """
+        |ProducerService.init
+        |ProducerService.startUp
+        |AnotherUpstreamService.init
+        |AnotherUpstreamService.startUp
+        |ConsumerService.init
+        |ConsumerService.startUp
+        |healthy
+        |ConsumerService.shutDown
+        |ProducerService.shutDown
+        |AnotherUpstreamService.shutDown
+        |"""
+          .trimMargin()
+      )
+  }
+
+
+  class TestSwitch(var enabled: Boolean = true) : Switch {
+    override fun isEnabled(key: String): Boolean = enabled
+  }
+
+  @Singleton
+  class ConditionalService @Inject constructor() : AbstractIdleService() {
+    private val logger = getLogger<ConditionalService>()
+    override fun startUp() { logger.info("ConditionalService.startUp") }
+    override fun shutDown() { logger.info("ConditionalService.shutDown") }
+  }
+
+  @Test
+  fun conditionalOn_async_bindsRealService() {
+    val injector = Guice.createInjector(
+      MiskTestingServiceModule(),
+      LogCollectorModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          install(DefaultAsyncSwitchModule())
+          install(ServiceModule<ConditionalService>().conditionalOn<AsyncSwitch>("test"))
+        }
+      }
     )
+    val asyncSwitch = injector.getInstance<AsyncSwitch>()
+    assertTrue(asyncSwitch is AlwaysEnabledSwitch)
+    val logCollector = injector.getInstance<LogCollector>()
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+    val logs = logCollector.takeMessages(ConditionalService::class)
+    assertThat(logs).contains("ConditionalService.startUp")
+    assertThat(logs).contains("ConditionalService.shutDown")
+  }
+
+  @Test
+  fun conditionalOn_enabled_bindsRealService() {
+    val injector = Guice.createInjector(
+      MiskTestingServiceModule(),
+      LogCollectorModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          install(ServiceModule<ConditionalService>().conditionalOn<AlwaysEnabledSwitch>("test"))
+        }
+      }
+    )
+    val logCollector = injector.getInstance<LogCollector>()
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+    val logs = logCollector.takeMessages(ConditionalService::class)
+    assertThat(logs).contains("ConditionalService.startUp")
+    assertThat(logs).contains("ConditionalService.shutDown")
+  }
+
+  @Test
+  fun conditionalOn_disabled_bindsNoOpService() {
+    val disabledSwitch = TestSwitch(enabled = false)
+    val injector = Guice.createInjector(
+      MiskTestingServiceModule(),
+      LogCollectorModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          bind<TestSwitch>().toInstance(disabledSwitch)
+          install(ServiceModule<ConditionalService>().conditionalOn<TestSwitch>("test"))
+        }
+      }
+    )
+    val logCollector = injector.getInstance<LogCollector>()
+    val serviceManager = injector.getInstance<ServiceManager>()
+    val services = serviceManager.servicesByState().values().map { it.javaClass.simpleName }
+    // Conditional Service isn't present in the service graph
+    assertThat(services).doesNotContain(ConditionalService::class.java.simpleName)
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+    val conditionalLogs = logCollector.takeMessages(ConditionalService::class)
+    val noOpLogs = logCollector.takeMessages(NoOpService::class)
+    // NoOpService does not log anything, so logs should not contain ConditionalService logs
+    assertThat(conditionalLogs).isEmpty()
+    assertThat(noOpLogs).isEmpty()
   }
 }
