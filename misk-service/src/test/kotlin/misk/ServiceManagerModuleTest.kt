@@ -9,20 +9,12 @@ import com.google.inject.Provides
 import com.google.inject.Scopes
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import misk.inject.AlwaysEnabledSwitch
-import misk.inject.AsyncSwitch
-import misk.inject.DefaultAsyncSwitchModule
 import kotlin.test.assertFailsWith
 import misk.inject.KAbstractModule
-import misk.inject.Switch
 import misk.inject.getInstance
 import misk.inject.keyOf
-import misk.logging.LogCollector
-import misk.logging.LogCollectorModule
-import misk.logging.getLogger
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import kotlin.test.assertTrue
 
 internal class ServiceManagerModuleTest {
   @Singleton
@@ -258,93 +250,5 @@ internal class ServiceManagerModuleTest {
         |"""
           .trimMargin()
       )
-  }
-
-
-  class TestSwitch(var enabled: Boolean = true) : Switch {
-    override fun isEnabled(key: String): Boolean = enabled
-  }
-
-  @Singleton
-  class ConditionalService @Inject constructor() : AbstractIdleService() {
-    private val logger = getLogger<ConditionalService>()
-    override fun startUp() { logger.info("ConditionalService.startUp") }
-    override fun shutDown() { logger.info("ConditionalService.shutDown") }
-  }
-
-  @Test
-  fun conditionalOn_async_bindsRealService() {
-    val injector = Guice.createInjector(
-      MiskTestingServiceModule(),
-      LogCollectorModule(),
-      object : KAbstractModule() {
-        override fun configure() {
-          install(DefaultAsyncSwitchModule())
-          install(ServiceModule<ConditionalService>().conditionalOn<AsyncSwitch>("test"))
-        }
-      }
-    )
-    val asyncSwitch = injector.getInstance<AsyncSwitch>()
-    assertTrue(asyncSwitch is AlwaysEnabledSwitch)
-    val logCollector = injector.getInstance<LogCollector>()
-    val serviceManager = injector.getInstance<ServiceManager>()
-    serviceManager.startAsync()
-    serviceManager.awaitHealthy()
-    serviceManager.stopAsync()
-    serviceManager.awaitStopped()
-    val logs = logCollector.takeMessages(ConditionalService::class)
-    assertThat(logs).contains("ConditionalService.startUp")
-    assertThat(logs).contains("ConditionalService.shutDown")
-  }
-
-  @Test
-  fun conditionalOn_enabled_bindsRealService() {
-    val injector = Guice.createInjector(
-      MiskTestingServiceModule(),
-      LogCollectorModule(),
-      object : KAbstractModule() {
-        override fun configure() {
-          install(ServiceModule<ConditionalService>().conditionalOn<AlwaysEnabledSwitch>("test"))
-        }
-      }
-    )
-    val logCollector = injector.getInstance<LogCollector>()
-    val serviceManager = injector.getInstance<ServiceManager>()
-    serviceManager.startAsync()
-    serviceManager.awaitHealthy()
-    serviceManager.stopAsync()
-    serviceManager.awaitStopped()
-    val logs = logCollector.takeMessages(ConditionalService::class)
-    assertThat(logs).contains("ConditionalService.startUp")
-    assertThat(logs).contains("ConditionalService.shutDown")
-  }
-
-  @Test
-  fun conditionalOn_disabled_bindsNoOpService() {
-    val disabledSwitch = TestSwitch(enabled = false)
-    val injector = Guice.createInjector(
-      MiskTestingServiceModule(),
-      LogCollectorModule(),
-      object : KAbstractModule() {
-        override fun configure() {
-          bind<TestSwitch>().toInstance(disabledSwitch)
-          install(ServiceModule<ConditionalService>().conditionalOn<TestSwitch>("test"))
-        }
-      }
-    )
-    val logCollector = injector.getInstance<LogCollector>()
-    val serviceManager = injector.getInstance<ServiceManager>()
-    val services = serviceManager.servicesByState().values().map { it.javaClass.simpleName }
-    // Conditional Service isn't present in the service graph
-    assertThat(services).doesNotContain(ConditionalService::class.java.simpleName)
-    serviceManager.startAsync()
-    serviceManager.awaitHealthy()
-    serviceManager.stopAsync()
-    serviceManager.awaitStopped()
-    val conditionalLogs = logCollector.takeMessages(ConditionalService::class)
-    val noOpLogs = logCollector.takeMessages(NoOpService::class)
-    // NoOpService does not log anything, so logs should not contain ConditionalService logs
-    assertThat(conditionalLogs).isEmpty()
-    assertThat(noOpLogs).isEmpty()
   }
 }

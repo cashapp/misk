@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import jakarta.inject.Singleton
 import misk.inject.ConditionalProvider
+import misk.inject.ConditionalTypedProvider
 import misk.inject.KAbstractModule
 import misk.inject.Switch
 import misk.inject.asSingleton
