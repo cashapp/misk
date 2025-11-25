@@ -1,6 +1,9 @@
-public class misk/inject/AsyncKAbstractModule : misk/inject/KAbstractModule, misk/inject/AsyncModule {
+public final class misk/inject/AlwaysEnabledSwitch : misk/inject/AsyncSwitch, misk/inject/Switch {
 	public fun <init> ()V
-	public fun moduleWhenAsyncDisabled ()Lmisk/inject/KAbstractModule;
+	public fun ifDisabled (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public fun ifEnabled (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public fun isDisabled (Ljava/lang/String;)Z
+	public fun isEnabled (Ljava/lang/String;)Z
 }
 
 public abstract interface class misk/inject/AsyncModule {
@@ -9,6 +12,15 @@ public abstract interface class misk/inject/AsyncModule {
 
 public final class misk/inject/AsyncModule$DefaultImpls {
 	public static fun moduleWhenAsyncDisabled (Lmisk/inject/AsyncModule;)Lmisk/inject/KAbstractModule;
+}
+
+public abstract interface class misk/inject/AsyncSwitch : misk/inject/Switch {
+}
+
+public final class misk/inject/AsyncSwitch$DefaultImpls {
+	public static fun ifDisabled (Lmisk/inject/AsyncSwitch;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static fun ifEnabled (Lmisk/inject/AsyncSwitch;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static fun isDisabled (Lmisk/inject/AsyncSwitch;Ljava/lang/String;)Z
 }
 
 public abstract interface class misk/inject/BindingQualifier {
@@ -45,6 +57,42 @@ public final class misk/inject/BindingQualifier$TypeClassifier : misk/inject/Bin
 public final class misk/inject/BindingQualifierKt {
 	public static final fun getQualifier (Ljava/lang/annotation/Annotation;)Lmisk/inject/BindingQualifier;
 	public static final fun getQualifier (Lkotlin/reflect/KClass;)Lmisk/inject/BindingQualifier;
+}
+
+public final class misk/inject/ConditionalProvider : com/google/inject/Provider {
+	public field injector Lcom/google/inject/Injector;
+	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/Object;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/Object;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun get ()Ljava/lang/Object;
+	public final fun getDisabledInstance ()Ljava/lang/Object;
+	public final fun getEnabledInstance ()Ljava/lang/Object;
+	public final fun getInjector ()Lcom/google/inject/Injector;
+	public final fun getOutputType ()Lkotlin/reflect/KClass;
+	public final fun getSwitchKey ()Ljava/lang/String;
+	public final fun getSwitchType ()Lkotlin/reflect/KClass;
+	public final fun getTransformer ()Lkotlin/jvm/functions/Function1;
+	public final fun getType ()Lkotlin/reflect/KClass;
+	public final fun setInjector (Lcom/google/inject/Injector;)V
+}
+
+public final class misk/inject/ConditionalTypedProvider : com/google/inject/Provider {
+	public field injector Lcom/google/inject/Injector;
+	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun get ()Ljava/lang/Object;
+	public final fun getDisabledType ()Lkotlin/reflect/KClass;
+	public final fun getEnabledType ()Lkotlin/reflect/KClass;
+	public final fun getInjector ()Lcom/google/inject/Injector;
+	public final fun getOutputType ()Lkotlin/reflect/KClass;
+	public final fun getSwitchKey ()Ljava/lang/String;
+	public final fun getSwitchType ()Lkotlin/reflect/KClass;
+	public final fun getTransformer ()Lkotlin/jvm/functions/Function1;
+	public final fun getType ()Lkotlin/reflect/KClass;
+	public final fun setInjector (Lcom/google/inject/Injector;)V
+}
+
+public final class misk/inject/DefaultAsyncSwitchModule : misk/inject/KInstallOnceModule {
+	public fun <init> ()V
 }
 
 public final class misk/inject/GuiceKt {
@@ -138,5 +186,18 @@ public abstract class misk/inject/ReusableTestModule : misk/inject/KAbstractModu
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getIgnorePropertiesForEquality ()Ljava/util/Set;
 	public fun hashCode ()I
+}
+
+public abstract interface class misk/inject/Switch {
+	public abstract fun ifDisabled (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public abstract fun ifEnabled (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public abstract fun isDisabled (Ljava/lang/String;)Z
+	public abstract fun isEnabled (Ljava/lang/String;)Z
+}
+
+public final class misk/inject/Switch$DefaultImpls {
+	public static fun ifDisabled (Lmisk/inject/Switch;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static fun ifEnabled (Lmisk/inject/Switch;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static fun isDisabled (Lmisk/inject/Switch;Ljava/lang/String;)Z
 }
 

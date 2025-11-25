@@ -8,8 +8,8 @@ plugins {
 
 dependencies {
   api(libs.guice)
+  api(libs.jakartaInject)
   api(libs.javaxInject)
-  implementation(libs.jakartaInject)
   implementation(libs.kotlinReflect)
   implementation(libs.kotlinStdLibJdk8)
   implementation(project(":misk-api"))
