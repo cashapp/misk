@@ -3,6 +3,7 @@ package misk.logging
 import com.google.inject.BindingAnnotation
 import com.google.inject.Provides
 import jakarta.inject.Singleton
+import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.tasks.RepeatedTaskQueue
@@ -53,7 +54,10 @@ import misk.tasks.RepeatedTaskQueueFactory
 class DynamicLogLevelModule(val config: DynamicLoggingConfig) : KAbstractModule() {
   override fun configure() {
     install(ServiceModule<RepeatedTaskQueue>(DynamicLogLevel::class))
-    install(ServiceModule<DynamicLogLevelService>().dependsOn<RepeatedTaskQueue>(DynamicLogLevel::class))
+    install(ServiceModule<DynamicLogLevelService>()
+      .dependsOn<RepeatedTaskQueue>(DynamicLogLevel::class)
+      .dependsOn<ReadyService>()
+    )
     bind<DynamicLoggingConfig>().toInstance(config)
   }
 

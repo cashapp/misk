@@ -4,6 +4,7 @@ import ch.qos.logback.classic.LoggerContext
 import com.google.inject.Provides
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.ReadyService
 import misk.ServiceModule
 import misk.feature.Feature
 import misk.feature.testing.FakeFeatureFlags
@@ -266,7 +267,10 @@ class DynamicLogLevelIntegrationTest {
       bind<DynamicLoggingConfig>()
         .toInstance(DynamicLoggingConfig(enabled = true, feature_flag_name = "test-dynamic-logging"))
       install(ServiceModule<RepeatedTaskQueue>(DynamicLogLevel::class))
-      install(ServiceModule<DynamicLogLevelService>().dependsOn<RepeatedTaskQueue>(DynamicLogLevel::class))
+      install(ServiceModule<DynamicLogLevelService>()
+        .dependsOn<RepeatedTaskQueue>(DynamicLogLevel::class)
+        .dependsOn<ReadyService>()
+      )
     }
 
     @Provides @DynamicLogLevel fun providesDynamicLogLevel(): Feature = Feature("test-dynamic-logging")
