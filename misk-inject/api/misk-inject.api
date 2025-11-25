@@ -6,6 +6,11 @@ public final class misk/inject/AlwaysEnabledSwitch : misk/inject/AsyncSwitch, mi
 	public fun isEnabled (Ljava/lang/String;)Z
 }
 
+public class misk/inject/AsyncKAbstractModule : misk/inject/KAbstractModule, misk/inject/AsyncModule {
+	public fun <init> ()V
+	public fun moduleWhenAsyncDisabled ()Lmisk/inject/KAbstractModule;
+}
+
 public abstract interface class misk/inject/AsyncModule {
 	public abstract fun moduleWhenAsyncDisabled ()Lmisk/inject/KAbstractModule;
 }
@@ -61,6 +66,7 @@ public final class misk/inject/BindingQualifierKt {
 
 public final class misk/inject/ConditionalProvider : com/google/inject/Provider {
 	public field injector Lcom/google/inject/Injector;
+	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/Object;Ljava/lang/Object;)V
 	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/Object;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/Object;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun get ()Ljava/lang/Object;
@@ -77,6 +83,7 @@ public final class misk/inject/ConditionalProvider : com/google/inject/Provider 
 
 public final class misk/inject/ConditionalTypedProvider : com/google/inject/Provider {
 	public field injector Lcom/google/inject/Injector;
+	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
 	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun get ()Ljava/lang/Object;
