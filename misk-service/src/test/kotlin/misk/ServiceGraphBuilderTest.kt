@@ -5,7 +5,6 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import com.google.inject.name.Named
 import com.google.inject.name.Names
-import misk.inject.toKey
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
