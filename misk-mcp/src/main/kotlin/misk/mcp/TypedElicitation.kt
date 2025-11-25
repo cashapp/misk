@@ -47,7 +47,7 @@ suspend inline fun <reified T : Any> createTypedElicitation(
 ): TypedCreateElicitationResult<T> = currentServerSession()
   .createElicitation(
     message = message,
-    requestedSchema = T::class.generateJsonSchema().let { schema ->
+    requestedSchema = generateJsonSchema<T>().let { schema ->
       RequestedSchema(
         properties = requireNotNull(schema["properties"] as? JsonObject) {
           "RequestedSchema must have properties defined"

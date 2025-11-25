@@ -237,9 +237,8 @@ class SqsJobEnqueuer @Inject constructor(
     )
 
     // Preserve original trace id, if available.
-    (span as? DDSpan)?.let {
-      val traceId = it.context().traceId.toString()
-      metadata[SqsJob.JOBQUEUE_METADATA_ORIGINAL_TRACE_ID] = traceId
+    span.context().toTraceId()?.takeIf { it.isNotBlank() }?.let {
+      metadata[SqsJob.JOBQUEUE_METADATA_ORIGINAL_TRACE_ID] = it
     }
 
     return MessageAttributeValue.builder()
