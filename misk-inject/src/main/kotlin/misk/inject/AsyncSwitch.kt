@@ -7,7 +7,7 @@ import misk.annotation.ExperimentalMiskApi
 import kotlin.reflect.KClass
 
 /**
- * This class should be extended by modules that want to contribute tasks to which involve async processing. For
+ * This interface should be implemented by modules that want to contribute tasks which involve async processing. For
  * example, background jobs, job queues, eventing, message pub/sub.
  *
  * At service build time, these modules can be optionally filtered out before the Guice injector is created, in cases
