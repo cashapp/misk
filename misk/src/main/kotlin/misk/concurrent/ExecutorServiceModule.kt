@@ -33,11 +33,6 @@ class ExecutorServiceModule(
       nThreads: Int
     ) = ExecutorServiceModule(annotation) { it.fixed(nameFormat, nThreads) }
 
-    inline fun <reified T : Annotation> withFixedThreadPool(
-      nameFormat: String,
-      nThreads: Int
-    ) = withFixedThreadPool(T::class, nameFormat, nThreads)
-
     fun withUnboundThreadPool(
       annotation: KClass<out Annotation>,
       nameFormat: String
