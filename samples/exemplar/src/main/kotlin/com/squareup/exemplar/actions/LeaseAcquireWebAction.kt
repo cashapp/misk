@@ -22,7 +22,7 @@ class LeaseAcquireWebAction @Inject constructor(
   ): LeaseAcquireResponse {
     // Attempt to acquire a lease (will be held for configured duration)
     val lease = leaseManager.requestLease(name)
-    val acquired = lease.checkHeld()
+    val acquired = lease.acquire()
 
     return LeaseAcquireResponse(
       name = name,
