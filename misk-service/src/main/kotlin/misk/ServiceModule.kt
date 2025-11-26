@@ -77,14 +77,16 @@ import kotlin.reflect.KClass
  * the `STOPPING` state until all dependent services are `TERMINATED`.
  */
 class ServiceModule
-@JvmOverloads
+// TODO re-enable JVM overloads and remove the alternative constructors once downstream usages have been migrated
+//@JvmOverloads
+@Suppress("detekt:AnnotatePublicApisWithJvmOverloads")
 constructor(
   val key: Key<out Service>,
   val dependsOn: List<Key<out Service>> = listOf(),
   val enhancedBy: List<Key<out Service>> = listOf(),
-  val switchKey: String = "default",
-  val switchType: KClass<out Switch>? = null,
-  val disabledKey: Key<out Service> = key.ofType(NoOpService::class.typeLiteral()),
+  private val switchKey: String = "default",
+  private val switchType: KClass<out Switch>? = null,
+  private val disabledKey: Key<out Service> = key.ofType(NoOpService::class.typeLiteral()),
 ) : KAbstractModule() {
 
   // This constructor exists for binary-compatibility with older callers.
@@ -94,6 +96,14 @@ constructor(
     dependsOn: List<Key<out Service>> = listOf(),
     enhancedBy: List<Key<out Service>> = listOf(),
     @Suppress("UNUSED_PARAMETER") enhances: Key<out Service>? = null,
+  ) : this(key = key, dependsOn = dependsOn, enhancedBy = enhancedBy, switchKey = "default")
+
+  // This constructor exists for binary-compatibility with older callers.
+  @Deprecated("Use the new constructor which includes support for switch and new conditionOn APIs.")
+  constructor(
+    key: Key<out Service>,
+    dependsOn: List<Key<out Service>> = listOf(),
+    enhancedBy: List<Key<out Service>> = listOf(),
   ) : this(key = key, dependsOn = dependsOn, enhancedBy = enhancedBy, switchKey = "default")
 
   override fun configure() {
