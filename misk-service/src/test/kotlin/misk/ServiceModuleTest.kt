@@ -20,6 +20,10 @@ class ServiceModuleTest {
     override fun isEnabled(key: String): Boolean = enabled
   }
 
+  class KeyAwareSwitch(private val enabledKeys: Set<String> = emptySet()) : Switch {
+    override fun isEnabled(key: String): Boolean = enabledKeys.contains(key)
+  }
+
   @Singleton
   class TestService @Inject constructor(private val log: StringBuilder) : AbstractIdleService() {
     override fun startUp() { log.append("TestService.startUp\n") }
@@ -234,21 +238,20 @@ class ServiceModuleTest {
 
   @Test
   fun conditionalOn_withDifferentSwitchKeys_respectsIndividualKeys() {
-    val testSwitch = TestSwitch(enabled = true)
+    val keyAwareSwitch = KeyAwareSwitch(enabledKeys = setOf("enabled-key"))
     val log = StringBuilder()
     val injector = Guice.createInjector(
       MiskTestingServiceModule(),
       object : KAbstractModule() {
         override fun configure() {
           bind<StringBuilder>().toInstance(log)
-          bind<TestSwitch>().toInstance(testSwitch)
-          install(ServiceModule<TestService>().conditionalOn<TestSwitch>("enabled-key"))
-          install(ServiceModule<UpstreamService>().conditionalOn<TestSwitch>("disabled-key"))
+          bind<KeyAwareSwitch>().toInstance(keyAwareSwitch)
+          install(ServiceModule<TestService>().conditionalOn<KeyAwareSwitch>("enabled-key"))
+          install(ServiceModule<UpstreamService>().conditionalOn<KeyAwareSwitch>("disabled-key"))
         }
       }
     )
 
-    testSwitch.enabled = true
     val serviceManager = injector.getInstance<ServiceManager>()
     
     serviceManager.startAsync()
@@ -257,6 +260,6 @@ class ServiceModuleTest {
     serviceManager.awaitStopped()
     
     assertThat(log.toString()).contains("TestService.startUp")
-    assertThat(log.toString()).contains("UpstreamService.startUp")
+    assertThat(log.toString()).doesNotContain("UpstreamService.startUp")
   }
 }
