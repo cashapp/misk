@@ -17,7 +17,6 @@ dependencies {
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
-  testImplementation(project(":misk-inject"))
   testImplementation(project(":misk-testing"))
 }
 
