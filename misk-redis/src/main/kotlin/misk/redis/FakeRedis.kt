@@ -419,8 +419,8 @@ class FakeRedis : Redis {
     val lValueSize = lValue?.data?.size ?: 0
 
     return (value != null && clock.instant() < value.expiryInstant) ||
-      (hValue != null && clock.instant() < hValue.expiryInstant) ||
-      (lValue != null && lValueSize > 0 && clock.instant() < lValue.expiryInstant)
+            (hValue != null && clock.instant() < hValue.expiryInstant) ||
+            (lValue != null && lValueSize > 0 && clock.instant() < lValue.expiryInstant)
   }
 
   @Synchronized
@@ -475,6 +475,49 @@ class FakeRedis : Redis {
       else -> return false
     }
     return true
+  }
+
+  override fun hExpire(
+    key: String,
+    seconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?,
+  ): Map<String, Redis.ExpirationResult> {
+    throw NotImplementedError("Use misk.redis.testing.FakeRedis instead.")
+  }
+
+  override fun hPExpire(
+    key: String,
+    milliseconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?,
+  ): Map<String, Redis.ExpirationResult> {
+    throw NotImplementedError("Use misk.redis.testing.FakeRedis instead.")
+  }
+
+  override fun hExpireAt(
+    key: String,
+    timestampSeconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?,
+  ): Map<String, Redis.ExpirationResult> {
+    throw NotImplementedError("Use misk.redis.testing.FakeRedis instead.")
+  }
+
+  override fun hPExpireAt(
+    key: String,
+    timestampMilliseconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?,
+  ): Map<String, Redis.ExpirationResult> {
+    throw NotImplementedError("Use misk.redis.testing.FakeRedis instead.")
+  }
+
+  override fun hPersist(
+    key: String,
+    vararg fields: String
+  ): Map<String, Redis.ExpirationResult> {
+    throw NotImplementedError("Use misk.redis.testing.FakeRedis instead.")
   }
 
   override fun watch(vararg keys: String) {

@@ -24,6 +24,11 @@ import redis.clients.jedis.params.ZRangeParams
 import redis.clients.jedis.resps.Tuple
 import redis.clients.jedis.util.JedisClusterCRC16
 import misk.logging.getLogger
+import misk.redis.Redis.ExpirationOption.GT
+import misk.redis.Redis.ExpirationOption.LT
+import misk.redis.Redis.ExpirationOption.NX
+import misk.redis.Redis.ExpirationOption.XX
+import redis.clients.jedis.args.ExpiryOption
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -395,6 +400,99 @@ class RealRedis(
     return jedis { pexpireAt(keyBytes, timestampMilliseconds) == 1L }
   }
 
+  private fun parseListReplies(fields: Array<out String>, replies: List<Long>?): Map<String, Redis.ExpirationResult> {
+    if (replies.isNullOrEmpty()) {
+      return emptyMap()
+    }
+    return fields.zip(replies).associate { (field, reply) ->
+      field to Redis.ExpirationResult.fromLong(reply)
+    }
+  }
+
+  override fun hExpire(
+    key: String,
+    seconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?,
+  ): Map<String, Redis.ExpirationResult> {
+    val keyBytes = key.toByteArray(charset)
+    val fieldBytes = fields.map { it.toByteArray(charset) }.toTypedArray()
+    return jedis {
+      val replies = if (option != null) {
+        hexpire(keyBytes, seconds, option.toJedisOption(), *fieldBytes)
+      } else {
+        hexpire(keyBytes, seconds, *fieldBytes)
+      }
+      parseListReplies(fields, replies)
+    }
+  }
+
+  override fun hPExpire(
+    key: String,
+    milliseconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?,
+  ): Map<String, Redis.ExpirationResult> {
+    val keyBytes = key.toByteArray(charset)
+    val fieldBytes = fields.map { it.toByteArray(charset) }.toTypedArray()
+    return jedis {
+      val replies = if (option != null) {
+        hpexpire(keyBytes, milliseconds, option.toJedisOption(), *fieldBytes)
+      } else {
+        hpexpire(keyBytes, milliseconds, *fieldBytes)
+      }
+      parseListReplies(fields, replies)
+    }
+  }
+
+  override fun hExpireAt(
+    key: String,
+    timestampSeconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?,
+  ): Map<String, Redis.ExpirationResult> {
+    val keyBytes = key.toByteArray(charset)
+    val fieldBytes = fields.map { it.toByteArray(charset) }.toTypedArray()
+    return jedis {
+      val replies = if (option != null) {
+        hexpireAt(keyBytes, timestampSeconds, option.toJedisOption(), *fieldBytes)
+      } else {
+        hexpireAt(keyBytes, timestampSeconds, *fieldBytes)
+      }
+      parseListReplies(fields, replies)
+    }
+  }
+
+  override fun hPExpireAt(
+    key: String,
+    timestampMilliseconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?,
+  ): Map<String, Redis.ExpirationResult> {
+    val keyBytes = key.toByteArray(charset)
+    val fieldBytes = fields.map { it.toByteArray(charset) }.toTypedArray()
+    return jedis {
+      val replies = if (option != null) {
+        hpexpireAt(keyBytes, timestampMilliseconds, option.toJedisOption(), *fieldBytes)
+      } else {
+        hpexpireAt(keyBytes, timestampMilliseconds, *fieldBytes)
+      }
+      parseListReplies(fields, replies)
+    }
+  }
+
+  override fun hPersist(
+    key: String,
+    vararg fields: String
+  ): Map<String, Redis.ExpirationResult> {
+    val keyBytes = key.toByteArray(charset)
+    val fieldBytes = fields.map { it.toByteArray(charset) }.toTypedArray()
+    return jedis {
+      val replies = hpersist(keyBytes, *fieldBytes)
+      parseListReplies(fields, replies)
+    }
+  }
+
   override fun watch(vararg keys: String) {
     val keysAsBytes = keys.map { it.toByteArray() }.toTypedArray()
     invokeTransactionOp { watch(*keysAsBytes) }
@@ -419,7 +517,8 @@ class RealRedis(
   // multi() returns the jedis to the pool, despite returning a Transaction that holds a reference.
   // This is a bug, and will be fixed in a follow-up.
   override fun multi(): Transaction {
-    return unifiedJedis.multi() as? Transaction ?: error("Transactions aren't supported in misk-redis with ${unifiedJedis.javaClass} at this time.")
+    return unifiedJedis.multi() as? Transaction
+      ?: error("Transactions aren't supported in misk-redis with ${unifiedJedis.javaClass} at this time.")
   }
 
   // Pipelined requests do not get client histogram metrics right now.
@@ -432,7 +531,7 @@ class RealRedis(
   }
 
   override fun pipelining(block: DeferredRedis.() -> Unit) {
-      unifiedJedis.pipelined().use { pipeline ->
+    unifiedJedis.pipelined().use { pipeline ->
       block(RealPipelinedRedis(pipeline))
     }
   }

@@ -13,6 +13,7 @@ import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import jakarta.inject.Inject
+import kotlinx.html.Entities
 import misk.redis.DeferredRedis
 import misk.redis.Redis.ZAddOptions.XX
 import misk.redis.Redis.ZAddOptions.NX
@@ -66,7 +67,7 @@ class FakeRedis @Inject constructor(
 
     /** A nested hash map for hash operations. */
     data class Hash(
-      val data: ConcurrentHashMap<kotlin.String, ByteString>,
+      val data: KeyValueStore<String>,
       override var expiryInstant: Instant,
     ) : Value
 
@@ -88,10 +89,10 @@ class FakeRedis @Inject constructor(
     ) : Value
   }
 
-  private inner class KeyValueStore(
-    private val store: ConcurrentHashMap<String, Value>,
-  ) : ConcurrentMap<String, Value> by store {
-    override operator fun get(key: String): Value? {
+  private inner class KeyValueStore<V : Value>(
+    private val store: ConcurrentHashMap<String, V> = ConcurrentHashMap(),
+  ) : ConcurrentMap<String, V> by store {
+    override operator fun get(key: String): V? {
       val value = store[key] ?: return null
       if (clock.instant() >= value.expiryInstant) {
         store.remove(key)
@@ -113,7 +114,7 @@ class FakeRedis @Inject constructor(
   }
 
   /** Acts as the Redis key-value store. */
-  private val keyValueStore = KeyValueStore(ConcurrentHashMap<String, Value>())
+  private val keyValueStore = KeyValueStore<Value>()
 
   override fun reset() {
     keyValueStore.clear()
@@ -179,14 +180,14 @@ class FakeRedis @Inject constructor(
   override fun hget(key: String, field: String): ByteString? {
     val value = keyValueStore.getTyped<Value.Hash>(key) ?: return null
 
-    return value.data[field]
+    return value.data[field]?.data
   }
 
   @Synchronized
   override fun hgetAll(key: String): Map<String, ByteString> {
     val value = keyValueStore.getTyped<Value.Hash>(key) ?: return emptyMap()
 
-    return value.data.mapValues { it.value }
+    return value.data.mapValues { it.value.data }
   }
 
   @Synchronized
@@ -200,15 +201,15 @@ class FakeRedis @Inject constructor(
   override fun hkeys(key: String): List<ByteString> {
     val value = keyValueStore.getTyped<Value.Hash>(key) ?: return emptyList()
 
-    return value.data.keys().toList().map { it.encode(Charsets.UTF_8) }
+    return value.data.keys.toList().map { it.encode(Charsets.UTF_8) }
   }
 
   @Synchronized
   override fun hmget(key: String, vararg fields: String): List<ByteString?> {
-    val hash: Map<String, ByteString> = keyValueStore.getTyped<Value.Hash>(key)?.data ?: emptyMap()
+    val hash = keyValueStore.getTyped<Value.Hash>(key)?.data ?: KeyValueStore()
     return buildList {
       for (field in fields) {
-        add(hash[field])
+        add(hash[field]?.data)
       }
     }
   }
@@ -231,7 +232,7 @@ class FakeRedis @Inject constructor(
 
   private fun randomFields(key: String, count: Long): List<Pair<String, ByteString>>? {
     checkHrandFieldCount(count)
-    return hgetAll(key)?.toList()?.shuffled(random)?.take(count.toInt())
+    return hgetAll(key).toList().shuffled(random).take(count.toInt())
   }
 
   // Cursor and count are ignored for fake implementation. All matches are always
@@ -278,11 +279,11 @@ class FakeRedis @Inject constructor(
   @Synchronized
   override fun hset(key: String, field: String, value: ByteString): Long {
     if (!keyValueStore.containsKey(key)) {
-      keyValueStore[key] = Value.Hash(data = ConcurrentHashMap(), expiryInstant = Instant.MAX)
+      keyValueStore[key] = Value.Hash(data = KeyValueStore(), expiryInstant = Instant.MAX)
     }
     val valueHash = keyValueStore.getTyped<Value.Hash>(key)!!
     val newFieldCount = if (valueHash.data[field] != null) 0L else 1L
-    valueHash.data[field] = value
+    valueHash.data[field] = Value.String(value, expiryInstant = Instant.MAX)
     return newFieldCount
   }
 
@@ -509,6 +510,105 @@ class FakeRedis @Inject constructor(
       return true
     } else {
       return false
+    }
+  }
+
+  private fun Instant.isNotSet(): Boolean = Instant.MAX.equals(this)
+  private fun Instant.isSet(): Boolean = !Instant.MAX.equals(this)
+
+  override fun hExpire(
+    key: String,
+    seconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?,
+  ): Map<String, Redis.ExpirationResult> =
+    hPExpireAt(key, clock.millis().plus(Duration.ofSeconds(seconds).toMillis()), *fields, option = option)
+
+  override fun hPExpire(
+    key: String,
+    milliseconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?,
+  ): Map<String, Redis.ExpirationResult> =
+    hPExpireAt(key, clock.millis().plus(milliseconds), *fields, option = option)
+
+  override fun hExpireAt(
+    key: String,
+    timestampSeconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?,
+  ): Map<String, Redis.ExpirationResult> =
+    hPExpireAt(key, Instant.ofEpochSecond(timestampSeconds).toEpochMilli(), *fields, option = option)
+
+  override fun hPExpireAt(
+    key: String,
+    timestampMilliseconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?,
+  ): Map<String, Redis.ExpirationResult> {
+    val hash: KeyValueStore<Value.String> = keyValueStore.getTyped<Value.Hash>(key)?.data ?: KeyValueStore()
+    val expiryInstant = Instant.ofEpochMilli(timestampMilliseconds)
+
+    val successResult =
+      if (expiryInstant <= clock.instant()) Redis.ExpirationResult.EXPIRE_IS_DELETE else Redis.ExpirationResult.SUCCESS
+
+    return fields.associateWith { field ->
+      val fieldValue = hash[field]
+      if (fieldValue == null) {
+        Redis.ExpirationResult.NO_SUCH_KEY_OR_FIELD
+      } else {
+        when (option) {
+          Redis.ExpirationOption.NX -> {
+            if (fieldValue.expiryInstant.isNotSet()) {
+              successResult.also { fieldValue.expiryInstant = expiryInstant }
+            } else {
+              Redis.ExpirationResult.CONDITION_NOT_MET
+            }
+          }
+          Redis.ExpirationOption.XX -> {
+            if (fieldValue.expiryInstant.isSet()) {
+              successResult.also { fieldValue.expiryInstant = expiryInstant }
+            } else {
+              Redis.ExpirationResult.CONDITION_NOT_MET
+            }
+          }
+          Redis.ExpirationOption.GT -> {
+            if (fieldValue.expiryInstant > expiryInstant) {
+              successResult.also { fieldValue.expiryInstant = expiryInstant }
+            } else {
+              Redis.ExpirationResult.CONDITION_NOT_MET
+            }
+          }
+          Redis.ExpirationOption.LT -> {
+            if (fieldValue.expiryInstant < expiryInstant) {
+              successResult.also { fieldValue.expiryInstant = expiryInstant }
+            } else {
+              Redis.ExpirationResult.CONDITION_NOT_MET
+            }
+          }
+          null -> successResult.also { fieldValue.expiryInstant = expiryInstant }
+        }
+      }
+    }
+  }
+
+  override fun hPersist(
+    key: String,
+    vararg fields: String
+  ): Map<String, Redis.ExpirationResult> {
+    val hash = keyValueStore.getTyped<Value.Hash>(key)?.data ?: return emptyMap()
+    return fields.associateWith { field ->
+      val fieldValue = hash[field]
+      if (fieldValue == null) {
+        Redis.ExpirationResult.NO_SUCH_KEY_OR_FIELD
+      } else {
+        if (fieldValue.expiryInstant.isNotSet()) {
+          Redis.ExpirationResult.FIELD_IS_PERSISTENT
+        } else {
+          fieldValue.expiryInstant = Instant.MAX
+          Redis.ExpirationResult.SUCCESS
+        }
+      }
     }
   }
 
@@ -752,6 +852,49 @@ class FakeRedis @Inject constructor(
       this@FakeRedis.pExpireAt(key, timestampMilliseconds)
     }
 
+    override fun hExpire(
+      key: String,
+      seconds: Long,
+      vararg fields: String,
+      option: Redis.ExpirationOption?,
+    ): Supplier<Map<String, Redis.ExpirationResult>> = Supplier {
+      this@FakeRedis.hExpire(key, seconds, *fields, option = option)
+    }
+
+    override fun hPExpire(
+      key: String,
+      milliseconds: Long,
+      vararg fields: String,
+      option: Redis.ExpirationOption?,
+    ): Supplier<Map<String, Redis.ExpirationResult>> = Supplier {
+      this@FakeRedis.hPExpire(key, milliseconds, *fields, option = option)
+    }
+
+    override fun hExpireAt(
+      key: String,
+      timestampSeconds: Long,
+      vararg fields: String,
+      option: Redis.ExpirationOption?,
+    ): Supplier<Map<String, Redis.ExpirationResult>> = Supplier {
+      this@FakeRedis.hExpireAt(key, timestampSeconds, *fields, option = option)
+    }
+
+    override fun hPExpireAt(
+      key: String,
+      timestampMilliseconds: Long,
+      vararg fields: String,
+      option: Redis.ExpirationOption?,
+    ): Supplier<Map<String, Redis.ExpirationResult>> = Supplier {
+      this@FakeRedis.hPExpireAt(key, timestampMilliseconds, *fields, option = option)
+    }
+
+    override fun hPersist(
+      key: String,
+      vararg fields: String
+    ): Supplier<Map<String, Redis.ExpirationResult>> = Supplier {
+      this@FakeRedis.hPersist(key, *fields)
+    }
+
     override fun zadd(
       key: String,
       score: Double,
@@ -897,9 +1040,9 @@ class FakeRedis @Inject constructor(
     // all valid single options.
     if ((options.size == 1)
       && (((options[0] == XX) && exists)
-        || ((options[0] == NX) && !exists)
-        || ((options[0] == LT) && ((exists && score < currentScore!!) || !exists))
-        || ((options[0] == GT) && ((exists && score > currentScore!!) || !exists)))
+              || ((options[0] == NX) && !exists)
+              || ((options[0] == LT) && ((exists && score < currentScore!!) || !exists))
+              || ((options[0] == GT) && ((exists && score > currentScore!!) || !exists)))
     ) return true
 
     // valid option combos
@@ -910,13 +1053,15 @@ class FakeRedis @Inject constructor(
     // for existing ones, the score should be less than the existing scores.
     // XX will prevent adding new ones.
     if (options.contains(LT) && options.contains(XX) && exists
-      && score < currentScore!!) return true
+      && score < currentScore!!
+    ) return true
 
     // GT XX
     // for existing ones, the score should be more than the existing scores.
     // XX will prevent adding new ones.
     if (options.contains(GT) && options.contains(XX) && exists
-      && score > currentScore!!) return true
+      && score > currentScore!!
+    ) return true
 
     return false
   }

@@ -451,7 +451,7 @@ abstract class StartRedisTask @Inject constructor(
 
   @TaskAction
   fun startRedis() {
-    val redisVersion = "7.2"
+    val redisVersion = "7.4"
     val redisPort = System.getenv("REDIS_PORT")?.toInt() ?: 6379
     val redisContainerName = "miskTestRedis-$redisPort"
     val redisImage = "public.ecr.aws/docker/library/redis:$redisVersion"

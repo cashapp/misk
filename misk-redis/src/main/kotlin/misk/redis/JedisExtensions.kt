@@ -1,10 +1,15 @@
 package misk.redis
 
+import misk.redis.Redis.ExpirationOption.GT
+import misk.redis.Redis.ExpirationOption.LT
+import misk.redis.Redis.ExpirationOption.NX
+import misk.redis.Redis.ExpirationOption.XX
 import mu.KLogger
 import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.JedisPooled
 import redis.clients.jedis.UnifiedJedis
+import redis.clients.jedis.args.ExpiryOption
 
 internal fun UnifiedJedis.flushAllWithClusterSupport(logger: KLogger) {
   when (this) {
@@ -23,4 +28,11 @@ internal fun UnifiedJedis.flushAllWithClusterSupport(logger: KLogger) {
     }
     else -> error("flushAll is not supported for UnifiedJedis implementation ${this.javaClass}")
   }
+}
+
+internal fun Redis.ExpirationOption.toJedisOption(): ExpiryOption = when (this) {
+  NX -> ExpiryOption.NX
+  XX -> ExpiryOption.XX
+  GT -> ExpiryOption.GT
+  LT -> ExpiryOption.LT
 }

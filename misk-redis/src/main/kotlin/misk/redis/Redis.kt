@@ -4,6 +4,7 @@ import okio.ByteString
 import redis.clients.jedis.JedisPubSub
 import redis.clients.jedis.Pipeline
 import redis.clients.jedis.Transaction
+import redis.clients.jedis.args.ExpiryOption
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.params.ZAddParams
 import redis.clients.jedis.util.JedisClusterCRC16
@@ -514,6 +515,93 @@ interface Redis {
    */
   fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean
 
+
+  /**
+   * Set an expiration (TTL or time to live) on one or more [fields] of a given hash [key].
+   * Field(s) will automatically be deleted from the hash key when their TTLs expire.
+   * You must specify at least one field.
+   *
+   * The [option] parameter can be used to conditionally set the expiration based on the existence of the TTL on a field.
+   *
+   * Field expirations will only be cleared by commands that delete or overwrite the contents of the hash fields,
+   * including [hdel] and [hset] commands.
+   * This means that all the operations that conceptually alter the value stored at a hash key's field without replacing
+   * it with a new one will leave the TTL untouched.
+   *
+   * You can clear the TTL using the [hPersist] command, which turns the hash field back into a persistent field.
+   *
+   * Note that calling [hExpire]/[hPExpire] with a zero TTL or [hExpireAt]/[hPExpireAt] with a time in the past will
+   * result in the hash field being deleted.
+   *
+   * @return A map of field names to their respective [ExpirationResult]s, indicating the outcome for each field.
+   *    There should always be at least one entry in the map, as at least one field must be specified.
+   *
+   * Only available on Redis 7.4.0 or higher.
+   * Throws if Redis is too low of a version.
+   */
+  fun hExpire(
+    key: String,
+    seconds: Long,
+    vararg fields: String,
+    option: ExpirationOption? = null,
+  ): Map<String, ExpirationResult>
+
+  /**
+   * [hPExpire] has the same effect and semantics as [hExpire], but the expiration of [fields] is specified in
+   * [milliseconds] instead of seconds.
+   *
+   * Only available on Redis 7.4.0 or higher.
+   * Throws if Redis is too low of a version.
+   */
+  fun hPExpire(
+    key: String,
+    milliseconds: Long,
+    vararg fields: String,
+    option: ExpirationOption? = null,
+  ): Map<String, ExpirationResult>
+
+  /**
+   * [hExpireAt] has the same effect and semantics as [hExpire], but instead of specifying the number of seconds for
+   * the TTL (time to live), it takes [timestampSeconds] since Unix epoch.
+   * A timestamp in the past will delete the [fields] immediately.
+   *
+   * Only available on Redis 7.4.0 or higher.
+   * Throws if Redis is too low of a version.
+   */
+  fun hExpireAt(
+    key: String,
+    timestampSeconds: Long,
+    vararg fields: String,
+    option: ExpirationOption? = null,
+  ): Map<String, ExpirationResult>
+
+  /**
+   * [hPExpireAt] has the same effect and semantics as [hpExpire], but instead of specifying the number of milliseconds
+   * for the TTL (time to live), it takes [timestampMilliseconds] since Unix epoch.
+   * A timestamp in the past will delete the [fields] immediately.
+   *
+   * Only available on Redis 7.4.0 or higher.
+   * Throws if Redis is too low of a version.
+   */
+  fun hPExpireAt(
+    key: String,
+    timestampMilliseconds: Long,
+    vararg fields: String,
+    option: ExpirationOption? = null,
+  ): Map<String, ExpirationResult>
+
+  /**
+   * Remove the existing expiration on a hash [key]'s [fields], turning the field(s) from volatile
+   * (a field with expiration set) to persistent (a field that will never expire as no TTL (time to live) is associated).
+   *
+   * @return A map of field names to their respective [ExpirationResult]s, indicating the outcome for each field.
+   *    There should always be at least one entry in the map, as at least one field must be specified.
+   *
+   * Only available on Redis 7.4.0 or higher.
+   * Throws if Redis is too low of a version.
+   */
+  fun hPersist(key: String, vararg fields: String): Map<String, ExpirationResult>
+
   /**
    * Marks the given keys to be watched for conditional execution of a transaction.
    */
@@ -687,6 +775,59 @@ interface Redis {
     key: String
   ): Long
 
+  enum class ExpirationOption {
+    /**
+     * Set expiration only if the key or field has no expiration set.
+     */
+    NX,
+
+    /**
+     * Set expiration only if the key or field already has an expiration set.
+     */
+    XX,
+
+    /**
+     * Set expiration only if the new expiration is greater than the current one.
+     */
+    GT,
+
+    /**
+     * Set expiration only if the new expiration is less than the current one.
+     */
+    LT
+  }
+
+  enum class ExpirationResult(val status: Long) {
+    /**
+     * No such field exists in the provided hash key, or the provided key does not exist.
+     */
+    NO_SUCH_KEY_OR_FIELD(-2),
+
+    /**
+     * Reply for [hPersist] when the field exists but has no associated expiration set.
+     */
+    FIELD_IS_PERSISTENT(-1),
+
+    /**
+     * A specified [ExpirationOption] condition was not met.
+     */
+    CONDITION_NOT_MET(0),
+
+    /**
+     * The expiration time was set or updated.
+     */
+    SUCCESS(1),
+
+    /**
+     * The key or field was deleted because the expiration time was zero or negative.
+     */
+    EXPIRE_IS_DELETE(2);
+
+    companion object {
+      fun fromLong(value: Long): ExpirationResult = entries.first { it.status == value }
+    }
+  }
+
   /**
    * Different types of range queries.
    */
@@ -854,8 +995,8 @@ interface Redis {
         // GT, LT, NX are mutually exclusive.
         require(
           !(options.contains(NX) && options.contains(LT))
-            && !(options.contains(NX) && options.contains(GT))
-            && !(options.contains(GT) && options.contains(LT))
+                  && !(options.contains(NX) && options.contains(GT))
+                  && !(options.contains(GT) && options.contains(LT))
         ) {
           "ERR GT, LT, and/or NX options at the same time are not compatible"
         }

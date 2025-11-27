@@ -1,5 +1,7 @@
 package misk.redis
 
+import misk.redis.Redis.ExpirationOption
+import misk.redis.Redis.ExpirationResult
 import misk.redis.Redis.ScanResult
 import okio.ByteString
 import redis.clients.jedis.args.ListDirection
@@ -109,6 +111,36 @@ interface DeferredRedis {
   fun pExpire(key: String, milliseconds: Long): Supplier<Boolean>
 
   fun pExpireAt(key: String, timestampMilliseconds: Long): Supplier<Boolean>
+
+  fun hExpire(
+    key: String,
+    seconds: Long,
+    vararg fields: String,
+    option: ExpirationOption? = null,
+  ): Supplier<Map<String, ExpirationResult>>
+
+  fun hPExpire(
+    key: String,
+    milliseconds: Long,
+    vararg fields: String,
+    option: ExpirationOption? = null,
+  ): Supplier<Map<String, ExpirationResult>>
+
+  fun hExpireAt(
+    key: String,
+    timestampSeconds: Long,
+    vararg fields: String,
+    option: ExpirationOption? = null,
+  ): Supplier<Map<String, ExpirationResult>>
+
+  fun hPExpireAt(
+    key: String,
+    timestampMilliseconds: Long,
+    vararg fields: String,
+    option: ExpirationOption? = null,
+  ): Supplier<Map<String, ExpirationResult>>
+
+  fun hPersist(key: String, vararg fields: String): Supplier<Map<String, ExpirationResult>>
 
   fun zadd(
     key: String,
