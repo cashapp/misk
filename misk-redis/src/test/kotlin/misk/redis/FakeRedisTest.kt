@@ -10,13 +10,11 @@ import org.junit.jupiter.api.Test
 import misk.time.FakeClock
 import java.time.Duration
 import jakarta.inject.Inject
-import org.junit.jupiter.api.assertThrows
 import redis.clients.jedis.args.ListDirection
 import kotlin.random.Random
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
