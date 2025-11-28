@@ -328,37 +328,45 @@ class FakeRedis @Inject constructor(
     from: ListDirection,
     to: ListDirection
   ): ByteString? {
-    val sourceList = keyValueStore.getTyped<Value.List>(sourceKey)?.data?.toMutableList() ?: return null
+    val sourceExisting = keyValueStore.getTyped<Value.List>(sourceKey) ?: return null
+    val sourceExpiry = sourceExisting.expiryInstant
+    val sourceList = sourceExisting.data.toMutableList()
     val sourceValue = when (from) {
       ListDirection.LEFT -> sourceList.removeFirst()
       ListDirection.RIGHT -> sourceList.removeLast()
     }
-    keyValueStore[sourceKey] = Value.List(data = sourceList, expiryInstant = Instant.MAX)
+    keyValueStore[sourceKey] = Value.List(data = sourceList, expiryInstant = sourceExpiry)
 
-    val destinationList = keyValueStore.getTyped<Value.List>(destinationKey)?.data?.toMutableList() ?: mutableListOf()
+    val destinationExisting = keyValueStore.getTyped<Value.List>(destinationKey)
+    val destinationExpiry = destinationExisting?.expiryInstant ?: Instant.MAX
+    val destinationList = destinationExisting?.data?.toMutableList() ?: mutableListOf()
     when (to) {
       ListDirection.LEFT -> destinationList.add(index = 0, element = sourceValue)
       ListDirection.RIGHT -> destinationList.add(element = sourceValue)
     }
-    keyValueStore[destinationKey] = Value.List(data = destinationList, expiryInstant = Instant.MAX)
+    keyValueStore[destinationKey] = Value.List(data = destinationList, expiryInstant = destinationExpiry)
     return sourceValue
   }
 
   @Synchronized
   override fun lpush(key: String, vararg elements: ByteString): Long {
-    val updated = keyValueStore.getTyped<Value.List>(key)?.data?.toMutableList() ?: mutableListOf()
+    val existing = keyValueStore.getTyped<Value.List>(key)
+    val currentExpiry = existing?.expiryInstant ?: Instant.MAX
+    val updated = existing?.data?.toMutableList() ?: mutableListOf()
     for (element in elements) {
       updated.add(0, element)
     }
-    keyValueStore[key] = Value.List(data = updated, expiryInstant = Instant.MAX)
+    keyValueStore[key] = Value.List(data = updated, expiryInstant = currentExpiry)
     return updated.size.toLong()
   }
 
   @Synchronized
   override fun rpush(key: String, vararg elements: ByteString): Long {
-    val updated = keyValueStore.getTyped<Value.List>(key)?.data?.toMutableList() ?: mutableListOf()
+    val existing = keyValueStore.getTyped<Value.List>(key)
+    val currentExpiry = existing?.expiryInstant ?: Instant.MAX
+    val updated = existing?.data?.toMutableList() ?: mutableListOf()
     updated.addAll(elements)
-    keyValueStore[key] = Value.List(data = updated, expiryInstant = Instant.MAX)
+    keyValueStore[key] = Value.List(data = updated, expiryInstant = currentExpiry)
     return updated.size.toLong()
   }
 
@@ -421,20 +429,23 @@ class FakeRedis @Inject constructor(
 
   @Synchronized
   override fun ltrim(key: String, start: Long, stop: Long) {
-    val list = keyValueStore.getTyped<Value.List>(key)?.data ?: return
+    val value = keyValueStore.getTyped<Value.List>(key) ?: return
+    val expiry = value.expiryInstant
+    val list = value.data
 
     val startIdx = if (start < 0) list.size + start else start
     val stopIdx = if (stop < 0) list.size + stop else stop
     if (startIdx > stopIdx || startIdx >= list.size) {
-      keyValueStore[key] = Value.List(data = emptyList(), expiryInstant = Instant.MAX)
+      keyValueStore[key] = Value.List(data = emptyList(), expiryInstant = expiry)
       return
     }
     val trimmedList = list.subList(max(0, startIdx.toInt()), min(list.size, stopIdx.toInt() + 1))
-    keyValueStore[key] = Value.List(data = trimmedList, expiryInstant = Instant.MAX)
+    keyValueStore[key] = Value.List(data = trimmedList, expiryInstant = expiry)
   }
 
   override fun lrem(key: String, count: Long, element: ByteString): Long {
     val value = keyValueStore.getTyped<Value.List>(key) ?: return 0L
+    val expiry = value.expiryInstant
 
     val list = value.data.toMutableList()
     var totalCount = count
@@ -450,7 +461,7 @@ class FakeRedis @Inject constructor(
       iterList.remove(element)
       deleteCount += 1
     }
-    keyValueStore[key] = Value.List(data = list, expiryInstant = Instant.MAX)
+    keyValueStore[key] = Value.List(data = list, expiryInstant = expiry)
 
     return deleteCount
   }
