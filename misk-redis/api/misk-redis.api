@@ -11,6 +11,11 @@ public abstract interface class misk/redis/DeferredRedis {
 	public abstract fun expireAt (Ljava/lang/String;J)Ljava/util/function/Supplier;
 	public abstract fun get (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun getDel (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public abstract fun hExpire (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/function/Supplier;
+	public abstract fun hExpireAt (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/function/Supplier;
+	public abstract fun hPExpire (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/function/Supplier;
+	public abstract fun hPExpireAt (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/function/Supplier;
+	public abstract fun hPersist (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun hdel (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun hget (Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun hgetAll (Ljava/lang/String;)Ljava/util/function/Supplier;
@@ -53,6 +58,10 @@ public abstract interface class misk/redis/DeferredRedis {
 }
 
 public final class misk/redis/DeferredRedis$DefaultImpls {
+	public static synthetic fun hExpire$default (Lmisk/redis/DeferredRedis;Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;ILjava/lang/Object;)Ljava/util/function/Supplier;
+	public static synthetic fun hExpireAt$default (Lmisk/redis/DeferredRedis;Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;ILjava/lang/Object;)Ljava/util/function/Supplier;
+	public static synthetic fun hPExpire$default (Lmisk/redis/DeferredRedis;Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;ILjava/lang/Object;)Ljava/util/function/Supplier;
+	public static synthetic fun hPExpireAt$default (Lmisk/redis/DeferredRedis;Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;ILjava/lang/Object;)Ljava/util/function/Supplier;
 	public static synthetic fun set$default (Lmisk/redis/DeferredRedis;Ljava/lang/String;Lokio/ByteString;Ljava/time/Duration;ILjava/lang/Object;)Ljava/util/function/Supplier;
 	public static synthetic fun setnx$default (Lmisk/redis/DeferredRedis;Ljava/lang/String;Lokio/ByteString;Ljava/time/Duration;ILjava/lang/Object;)Ljava/util/function/Supplier;
 	public static synthetic fun zrange$default (Lmisk/redis/DeferredRedis;Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;ILjava/lang/Object;)Ljava/util/function/Supplier;
@@ -79,6 +88,11 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public final fun getClock ()Ljava/time/Clock;
 	public fun getDel (Ljava/lang/String;)Lokio/ByteString;
 	public final fun getRandom ()Lkotlin/random/Random;
+	public fun hExpire (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/Map;
+	public fun hExpireAt (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/Map;
+	public fun hPExpire (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/Map;
+	public fun hPExpireAt (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/Map;
+	public fun hPersist (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/Map;
 	public fun hdel (Ljava/lang/String;[Ljava/lang/String;)J
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
@@ -152,6 +166,11 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun flushDB ()V
 	public fun get (Ljava/lang/String;)Lokio/ByteString;
 	public fun getDel (Ljava/lang/String;)Lokio/ByteString;
+	public fun hExpire (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/Map;
+	public fun hExpireAt (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/Map;
+	public fun hPExpire (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/Map;
+	public fun hPExpireAt (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/Map;
+	public fun hPersist (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/Map;
 	public fun hdel (Ljava/lang/String;[Ljava/lang/String;)J
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
@@ -222,6 +241,11 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun flushDB ()V
 	public abstract fun get (Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun getDel (Ljava/lang/String;)Lokio/ByteString;
+	public abstract fun hExpire (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/Map;
+	public abstract fun hExpireAt (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/Map;
+	public abstract fun hPExpire (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/Map;
+	public abstract fun hPExpireAt (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/Map;
+	public abstract fun hPersist (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/Map;
 	public abstract fun hdel (Ljava/lang/String;[Ljava/lang/String;)J
 	public abstract fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
@@ -274,9 +298,40 @@ public abstract interface class misk/redis/Redis {
 }
 
 public final class misk/redis/Redis$DefaultImpls {
+	public static synthetic fun hExpire$default (Lmisk/redis/Redis;Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;ILjava/lang/Object;)Ljava/util/Map;
+	public static synthetic fun hExpireAt$default (Lmisk/redis/Redis;Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;ILjava/lang/Object;)Ljava/util/Map;
+	public static synthetic fun hPExpire$default (Lmisk/redis/Redis;Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;ILjava/lang/Object;)Ljava/util/Map;
+	public static synthetic fun hPExpireAt$default (Lmisk/redis/Redis;Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;ILjava/lang/Object;)Ljava/util/Map;
 	public static synthetic fun scan$default (Lmisk/redis/Redis;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)Lmisk/redis/Redis$ScanResult;
 	public static synthetic fun zrange$default (Lmisk/redis/Redis;Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;ILjava/lang/Object;)Ljava/util/List;
 	public static synthetic fun zrangeWithScores$default (Lmisk/redis/Redis;Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;ILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class misk/redis/Redis$ExpirationOption : java/lang/Enum {
+	public static final field GT Lmisk/redis/Redis$ExpirationOption;
+	public static final field LT Lmisk/redis/Redis$ExpirationOption;
+	public static final field NX Lmisk/redis/Redis$ExpirationOption;
+	public static final field XX Lmisk/redis/Redis$ExpirationOption;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/redis/Redis$ExpirationOption;
+	public static fun values ()[Lmisk/redis/Redis$ExpirationOption;
+}
+
+public final class misk/redis/Redis$ExpirationResult : java/lang/Enum {
+	public static final field CONDITION_NOT_MET Lmisk/redis/Redis$ExpirationResult;
+	public static final field Companion Lmisk/redis/Redis$ExpirationResult$Companion;
+	public static final field EXPIRE_IS_DELETE Lmisk/redis/Redis$ExpirationResult;
+	public static final field FIELD_IS_PERSISTENT Lmisk/redis/Redis$ExpirationResult;
+	public static final field NO_SUCH_KEY_OR_FIELD Lmisk/redis/Redis$ExpirationResult;
+	public static final field SUCCESS Lmisk/redis/Redis$ExpirationResult;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getStatus ()J
+	public static fun valueOf (Ljava/lang/String;)Lmisk/redis/Redis$ExpirationResult;
+	public static fun values ()[Lmisk/redis/Redis$ExpirationResult;
+}
+
+public final class misk/redis/Redis$ExpirationResult$Companion {
+	public final fun fromLong (J)Lmisk/redis/Redis$ExpirationResult;
 }
 
 public final class misk/redis/Redis$ScanResult {
@@ -579,6 +634,11 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis, misk/testing
 	public fun flushDB ()V
 	public fun get (Ljava/lang/String;)Lokio/ByteString;
 	public fun getDel (Ljava/lang/String;)Lokio/ByteString;
+	public fun hExpire (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/Map;
+	public fun hExpireAt (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/Map;
+	public fun hPExpire (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/Map;
+	public fun hPExpireAt (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/Map;
+	public fun hPersist (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/Map;
 	public fun hdel (Ljava/lang/String;[Ljava/lang/String;)J
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/Map;
@@ -645,6 +705,11 @@ public final class misk/redis/testing/FakeRedis$FakePipelinedRedis : misk/redis/
 	public fun expireAt (Ljava/lang/String;J)Ljava/util/function/Supplier;
 	public fun get (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun getDel (Ljava/lang/String;)Ljava/util/function/Supplier;
+	public fun hExpire (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/function/Supplier;
+	public fun hExpireAt (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/function/Supplier;
+	public fun hPExpire (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/function/Supplier;
+	public fun hPExpireAt (Ljava/lang/String;J[Ljava/lang/String;Lmisk/redis/Redis$ExpirationOption;)Ljava/util/function/Supplier;
+	public fun hPersist (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun hdel (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun hget (Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun hgetAll (Ljava/lang/String;)Ljava/util/function/Supplier;

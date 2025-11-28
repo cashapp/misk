@@ -60,6 +60,49 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(
   override fun scan(cursor: String, matchPattern: String?, count: Int?): Redis.ScanResult =
     error("scan is not supported in TestAlwaysPipelinedRedis")
 
+  override fun hExpire(
+    key: String,
+    seconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?
+  ): Map<String, Redis.ExpirationResult> = runPipeline {
+    hExpire(key, seconds, *fields, option = option)
+  }
+
+  override fun hPExpire(
+    key: String,
+    milliseconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?
+  ): Map<String, Redis.ExpirationResult> = runPipeline {
+    hPExpire(key, milliseconds, *fields, option = option)
+  }
+
+  override fun hExpireAt(
+    key: String,
+    timestampSeconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?
+  ): Map<String, Redis.ExpirationResult> = runPipeline {
+    hExpireAt(key, timestampSeconds, *fields, option = option)
+  }
+
+  override fun hPExpireAt(
+    key: String,
+    timestampMilliseconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?
+  ): Map<String, Redis.ExpirationResult> = runPipeline {
+    hPExpireAt(key, timestampMilliseconds, *fields, option = option)
+  }
+
+  override fun hPersist(
+    key: String,
+    vararg fields: String
+  ): Map<String, Redis.ExpirationResult> = runPipeline {
+    hPersist(key, *fields)
+  }
+
   override fun set(key: String, value: ByteString) = runPipeline { set(key, value) }
 
   override fun set(key: String, expiryDuration: Duration, value: ByteString) =

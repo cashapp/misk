@@ -30,7 +30,7 @@ object DockerRedis : ExternalDependency {
   private const val port = 6379
   private val hostname = ContainerUtil.dockerTargetOrLocalHost()
   private val logger = getLogger<DockerRedis>()
-  private const val redisVersion = "6.2"
+  private const val redisVersion = "7.4"
 
   private val jedis by lazy { JedisPooled(hostname, port) }
 

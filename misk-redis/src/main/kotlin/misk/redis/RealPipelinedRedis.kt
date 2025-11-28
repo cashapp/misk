@@ -401,6 +401,107 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     return Supplier { response.get() == 1L }
   }
 
+  override fun hPExpire(
+    key: String,
+    milliseconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?,
+  ): Supplier<Map<String, Redis.ExpirationResult>> {
+    val keyBytes = key.toByteArray(charset)
+    val fieldBytes = fields.map { it.toByteArray(charset) }.toTypedArray()
+    val response = if (option != null) {
+      pipeline.hpexpire(keyBytes, milliseconds, option.toJedisOption(), *fieldBytes)
+    } else {
+      pipeline.hpexpire(keyBytes, milliseconds, *fieldBytes)
+    }
+
+    return Supplier {
+      val replies = response.get()
+      fields.zip(replies).associate { (field, result) ->
+        field to Redis.ExpirationResult.fromLong(result)
+      }
+    }
+  }
+
+  override fun hExpire(
+    key: String,
+    seconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?,
+  ): Supplier<Map<String, Redis.ExpirationResult>> {
+    val keyBytes = key.toByteArray(charset)
+    val fieldBytes = fields.map { it.toByteArray(charset) }.toTypedArray()
+    val response = if (option != null) {
+      pipeline.hexpire(keyBytes, seconds, option.toJedisOption(), *fieldBytes)
+    } else {
+      pipeline.hexpire(keyBytes, seconds, *fieldBytes)
+    }
+
+    return Supplier {
+      val replies = response.get()
+      fields.zip(replies).associate { (field, result) ->
+        field to Redis.ExpirationResult.fromLong(result)
+      }
+    }
+  }
+
+  override fun hExpireAt(
+    key: String,
+    timestampSeconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?,
+  ): Supplier<Map<String, Redis.ExpirationResult>> {
+    val keyBytes = key.toByteArray(charset)
+    val fieldBytes = fields.map { it.toByteArray(charset) }.toTypedArray()
+    val response = if (option != null) {
+      pipeline.hexpireAt(keyBytes, timestampSeconds, option.toJedisOption(), *fieldBytes)
+    } else {
+      pipeline.hexpireAt(keyBytes, timestampSeconds, *fieldBytes)
+    }
+    return Supplier {
+      val replies = response.get()
+      fields.zip(replies).associate { (field, result) ->
+        field to Redis.ExpirationResult.fromLong(result)
+      }
+    }
+  }
+
+  override fun hPExpireAt(
+    key: String,
+    timestampMilliseconds: Long,
+    vararg fields: String,
+    option: Redis.ExpirationOption?,
+  ): Supplier<Map<String, Redis.ExpirationResult>> {
+    val keyBytes = key.toByteArray(charset)
+    val fieldBytes = fields.map { it.toByteArray(charset) }.toTypedArray()
+    val response = if (option != null) {
+      pipeline.hpexpireAt(keyBytes, timestampMilliseconds, option.toJedisOption(), *fieldBytes)
+    } else {
+      pipeline.hpexpireAt(keyBytes, timestampMilliseconds, *fieldBytes)
+    }
+    return Supplier {
+      val replies = response.get()
+      fields.zip(replies).associate { (field, result) ->
+        field to Redis.ExpirationResult.fromLong(result)
+      }
+    }
+  }
+
+  override fun hPersist(
+    key: String,
+    vararg fields: String
+  ): Supplier<Map<String, Redis.ExpirationResult>> {
+    val keyBytes = key.toByteArray(charset)
+    val fieldBytes = fields.map { it.toByteArray(charset) }.toTypedArray()
+    val response = pipeline.hpersist(keyBytes, *fieldBytes)
+    return Supplier {
+      val replies = response.get()
+      fields.zip(replies).associate { (field, result) ->
+        field to Redis.ExpirationResult.fromLong(result)
+      }
+    }
+  }
+
   override fun zadd(
     key: String,
     score: Double,

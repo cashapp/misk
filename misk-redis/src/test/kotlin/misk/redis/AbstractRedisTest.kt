@@ -318,8 +318,10 @@ abstract class AbstractRedisTest {
     assertFalse(redis.exists(nonExistentKey), "Non-existent key should not exist")
 
     // Delete all keys at once (including non-existent one)
-    assertEquals(3, redis.del(stringKey, hashKey, listKey, nonExistentKey),
-      "3 keys should have been deleted")
+    assertEquals(
+      3, redis.del(stringKey, hashKey, listKey, nonExistentKey),
+      "3 keys should have been deleted"
+    )
 
     // Verify all keys are gone
     assertFalse(redis.exists(stringKey), "String key should not exist after deletion")
@@ -1440,6 +1442,36 @@ abstract class AbstractRedisTest {
 
     assertNull(redis[key])
     assertNull(redis.getDel(key))
+  }
+
+  @Test fun `hash field expiry`() {
+    val key = "hash-with-expiring-fields"
+    redis.hset(key, mapOf("field1" to "hello".encodeUtf8(), "field2" to "world".encodeUtf8()))
+    redis.hExpire(key, 10, "field1", "field2", "field3").also { result ->
+      assertThat(result).containsExactlyInAnyOrderEntriesOf(
+        mapOf(
+          "field1" to Redis.ExpirationResult.SUCCESS,
+          "field2" to Redis.ExpirationResult.SUCCESS,
+          "field3" to Redis.ExpirationResult.NO_SUCH_KEY_OR_FIELD,
+        )
+      )
+    }
+    redis.hgetAll(key).also { result ->
+      assertThat(result).containsExactlyInAnyOrderEntriesOf(
+        mapOf(
+          "field1" to "hello".encodeUtf8(),
+          "field2" to "world".encodeUtf8(),
+        )
+      )
+    }
+
+    redis.hExpire("no-such-key", 20, "field1").also { result ->
+      assertThat(result).containsExactlyEntriesOf(
+        mapOf(
+          "field1" to Redis.ExpirationResult.NO_SUCH_KEY_OR_FIELD,
+        )
+      )
+    }
   }
 
   @Test
