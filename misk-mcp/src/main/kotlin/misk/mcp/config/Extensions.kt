@@ -1,8 +1,8 @@
 package misk.mcp.config
 
-import io.modelcontextprotocol.kotlin.sdk.ServerCapabilities.Prompts
-import io.modelcontextprotocol.kotlin.sdk.ServerCapabilities.Resources
-import io.modelcontextprotocol.kotlin.sdk.ServerCapabilities.Tools
+import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities.Prompts
+import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities.Resources
+import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities.Tools
 
 /**
  * Extension functions that convert Misk MCP configuration objects to MCP server ServerCapabilities.

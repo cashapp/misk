@@ -4,18 +4,20 @@ package misk.mcp
 
 import com.google.inject.Module
 import com.google.inject.util.Modules
-import io.modelcontextprotocol.kotlin.sdk.CreateElicitationResult
-import io.modelcontextprotocol.kotlin.sdk.GetPromptRequest
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
-import io.modelcontextprotocol.kotlin.sdk.ListPromptsRequest
-import io.modelcontextprotocol.kotlin.sdk.ListResourcesRequest
-import io.modelcontextprotocol.kotlin.sdk.ListToolsRequest
-import io.modelcontextprotocol.kotlin.sdk.ReadResourceRequest
-import io.modelcontextprotocol.kotlin.sdk.TextContent
 import io.modelcontextprotocol.kotlin.sdk.client.Client
+import io.modelcontextprotocol.kotlin.sdk.types.ElicitResult
+import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequest
+import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequestParams
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
+import io.modelcontextprotocol.kotlin.sdk.types.ListPromptsRequest
+import io.modelcontextprotocol.kotlin.sdk.types.ListResourcesRequest
+import io.modelcontextprotocol.kotlin.sdk.types.ListToolsRequest
+import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceRequest
+import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceRequestParams
+import io.modelcontextprotocol.kotlin.sdk.types.TextContent
+import io.modelcontextprotocol.kotlin.sdk.types.TextResourceContents
 import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
 import misk.MiskTestingServiceModule
@@ -27,10 +29,10 @@ import misk.mcp.action.McpWebSocket
 import misk.mcp.action.handleMessage
 import misk.mcp.config.McpConfig
 import misk.mcp.config.McpServerConfig
-import misk.mcp.testing.prompts.KotlinDeveloperPrompt
-import misk.mcp.testing.resources.WebSearchResource
 import misk.mcp.testing.asMcpStreamableHttpClient
 import misk.mcp.testing.asMcpWebSocketClient
+import misk.mcp.testing.prompts.KotlinDeveloperPrompt
+import misk.mcp.testing.resources.WebSearchResource
 import misk.mcp.testing.tools.CalculatorTool
 import misk.mcp.testing.tools.CalculatorToolInput.Operation
 import misk.mcp.testing.tools.CalculatorToolOutput
@@ -128,8 +130,8 @@ internal abstract class McpServerActionTest {
       val nickName = "Test Man"
 
       mcpClient.setElicitationHandler {
-        CreateElicitationResult(
-          action = CreateElicitationResult.Action.accept,
+        ElicitResult(
+          action = ElicitResult.Action.Accept,
           content = GetNicknameRequest(nickName).encode(),
         )
       }
@@ -144,8 +146,8 @@ internal abstract class McpServerActionTest {
     @Test
     fun `test nickname tool with decline elicitation action`(): Unit = runBlocking {
       mcpClient.setElicitationHandler {
-        CreateElicitationResult(
-          action = CreateElicitationResult.Action.decline,
+        ElicitResult(
+          action = ElicitResult.Action.Decline,
         )
       }
 
@@ -159,8 +161,8 @@ internal abstract class McpServerActionTest {
     @Test
     fun `test nickname tool with cancel elicitation action`(): Unit = runBlocking {
       mcpClient.setElicitationHandler {
-        CreateElicitationResult(
-          action = CreateElicitationResult.Action.cancel,
+        ElicitResult(
+          action = ElicitResult.Action.Cancel,
         )
       }
 
@@ -275,7 +277,7 @@ internal abstract class McpServerActionTest {
     )
 
     // Check kotlin-sdk-tool meta
-    assertEquals("1.2.3", kotlinSdkTool._meta.decode<VersionMetadata>().version)
+    assertEquals("1.2.3", kotlinSdkTool.meta?.decode<VersionMetadata>()?.version)
   }
 
   @Test
@@ -332,8 +334,10 @@ internal abstract class McpServerActionTest {
   @Test
   fun `test GetPrompt with arguments`() = runBlocking {
     val request = GetPromptRequest(
+      GetPromptRequestParams(
       name = "Kotlin Developer",
       arguments = mapOf("Project Name" to "TestProject"),
+      ),
     )
     val response = mcpClient.getPrompt(request)
 
@@ -351,12 +355,12 @@ internal abstract class McpServerActionTest {
 
     val message = response.messages.firstOrNull()
     assertNotNull(message)
-    assertEquals("user", message.role.toString())
+    assertEquals("User", message.role.toString())
 
     val textContent = message.content as? TextContent
     assertNotNull(textContent)
     assertContains(
-      textContent.text!!,
+      textContent.text,
       "Develop a kotlin project named <name>TestProject</name>",
       message = "Expected the project name to be included in the prompt message",
     )
@@ -394,7 +398,7 @@ internal abstract class McpServerActionTest {
 
   @Test
   fun `test ReadResource`() = runBlocking {
-    val request = ReadResourceRequest(uri = "https://search.com/")
+    val request = ReadResourceRequest(ReadResourceRequestParams(uri = "https://search.com/"))
     val response = mcpClient.readResource(request)
 
     assertNotNull(response)
@@ -404,7 +408,7 @@ internal abstract class McpServerActionTest {
       message = "Expected one content item in the resource response",
     )
 
-    val content = response.contents.firstOrNull() as? io.modelcontextprotocol.kotlin.sdk.TextResourceContents
+    val content = response.contents.firstOrNull() as? TextResourceContents
     assertNotNull(content)
     assertEquals(
       expected = "https://search.com/",
@@ -461,7 +465,7 @@ internal abstract class McpServerActionTest {
   @Test
   fun `test exception metrics`(): Unit = runBlocking {
     val result = mcpClient.callThrowingTool()
-    assertEquals(true, result?.isError)
+    assertEquals(true, result.isError)
 
     assertEquals(
       expected = 1.0,

@@ -1,6 +1,7 @@
 package misk.mcp.internal
 
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
+import io.modelcontextprotocol.kotlin.sdk.shared.TransportSendOptions
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import misk.logging.getLogger
 import misk.mcp.McpJson
 import misk.web.HttpCall
@@ -53,7 +54,10 @@ internal class MiskWebSocketServerTransport(
     }
   }
 
-  override suspend fun send(message: JSONRPCMessage) {
+  override suspend fun send(
+    message: JSONRPCMessage,
+    options: TransportSendOptions?
+  ) {
     if (!initialized.load()) {
       error("Not connected")
     }

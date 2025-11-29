@@ -1,10 +1,11 @@
 package misk.mcp.internal
 
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCNotification
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCRequest
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCResponse
-import io.modelcontextprotocol.kotlin.sdk.Method
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCNotification
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCRequest
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCResponse
+import io.modelcontextprotocol.kotlin.sdk.types.Method
+import io.modelcontextprotocol.kotlin.sdk.shared.TransportSendOptions
 import jakarta.inject.Inject
 import kotlinx.coroutines.channels.SendChannel
 import misk.annotation.ExperimentalMiskApi
@@ -54,7 +55,10 @@ internal class MiskStreamableHttpServerTransport @Inject constructor(
     }
   }
 
-  override suspend fun send(message: JSONRPCMessage) {
+  override suspend fun send(
+    message: JSONRPCMessage,
+    options: TransportSendOptions?
+  ) {
     if (!initialized.load()) {
       error("Not connected")
     }

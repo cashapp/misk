@@ -1,6 +1,6 @@
 package misk.mcp.internal
 
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.mcp.decode
