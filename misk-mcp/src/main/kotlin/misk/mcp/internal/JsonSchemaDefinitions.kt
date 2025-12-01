@@ -30,14 +30,14 @@ internal val SERIAL_NAME_TO_JSON_SCHEMA_REF = mapOf(
  *
  * This mapping indicates which other definitions are required when a particular definition is referenced.
  */
-internal val JSON_SCHEMA_REF_TO_DEPENDENT_REFS = mapOf<String, List<String>>(
+internal val JSON_SCHEMA_REF_TO_DEPENDENT_REFS = mapOf(
   JSON_PRIMITIVE_REF to emptyList(),
   JSON_ELEMENT_REF to listOf(JSON_PRIMITIVE_REF, JSON_ARRAY_REF, JSON_OBJECT_REF),
   JSON_OBJECT_REF to listOf(JSON_PRIMITIVE_REF, JSON_ARRAY_REF, JSON_ELEMENT_REF),
   JSON_ARRAY_REF to listOf(JSON_PRIMITIVE_REF, JSON_OBJECT_REF, JSON_ELEMENT_REF),
 )
 
-internal val JSON_SCHEMA_REF_TO_DEFINITION = mapOf<String, JsonObject>(
+internal val JSON_SCHEMA_REF_TO_DEFINITION = mapOf(
   JSON_PRIMITIVE_REF to buildJsonObject {
     put("oneOf", buildJsonArray {
       add(buildJsonObject { put("type", JsonPrimitive("string")) })
