@@ -31,7 +31,7 @@ internal val McpJson: Json by lazy {
     ignoreUnknownKeys = true
     encodeDefaults = true
     isLenient = true
-    classDiscriminatorMode = ClassDiscriminatorMode.NONE
+    classDiscriminatorMode = ClassDiscriminatorMode.POLYMORPHIC
     explicitNulls = false
   }
 }

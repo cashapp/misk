@@ -87,6 +87,7 @@ internal class JsonSchemaExtensionsTest {
 
   // Test data classes for Description annotation
   @Serializable
+  @Description("An object with various described fields")
   data class DescribedObject(
     @Description("The unique identifier for this object")
     val id: Long,
@@ -309,6 +310,23 @@ internal class JsonSchemaExtensionsTest {
     val recursiveEmbeddedObject: RecursiveObject?,
     val recursiveList: List<RecursiveObject>,
     val recursiveObject: Map<String, RecursiveObject>,
+  )
+
+  @Serializable
+  sealed interface Fruit
+
+  @Serializable @SerialName("apple")
+  data class Apple(val variety: String, val radius: Int): Fruit
+
+  @Serializable @SerialName("banana")
+  data class Banana(val length: Int, val ripeness: String): Fruit
+
+  @Serializable @SerialName("orange") @Description("citrus fruit")
+  data class Orange(val variety: String, val radius: Int):Fruit
+
+  @Serializable
+  data class SealedObject(
+    val fruits: List<Fruit>
   )
 
   @Test
@@ -541,6 +559,10 @@ internal class JsonSchemaExtensionsTest {
   fun `generateJsonSchema handles Description annotation correctly`() {
     val schema = generateJsonSchema<DescribedObject>()
     val properties = schema["properties"] as JsonObject
+
+    // Verify class-level description
+    assertEquals(JsonPrimitive("object"), schema["type"])
+    assertEquals(JsonPrimitive("An object with various described fields"), schema["description"])
 
     // Verify fields with descriptions have description property
     val idField = properties["id"] as JsonObject
@@ -992,21 +1014,67 @@ internal class JsonSchemaExtensionsTest {
   @Test
   fun `complex JSON types are handled correctly`() {
     val schema = generateJsonSchema<ComplexJsonTypes>()
+
+    // Verify top-level structure
+    assertEquals(JsonPrimitive("object"), schema["type"])
+    assertTrue(schema.containsKey("properties"))
+    assertTrue(schema.containsKey("required"))
+    assertTrue(schema.containsKey("\$defs"))
+
     val properties = schema["properties"] as JsonObject
+    val required = schema["required"] as JsonArray
+    val defs = schema["\$defs"] as JsonObject
 
-    // Verify jsonObject field
+    // Verify properties structure
+    assertEquals(3, properties.size)
+
+    // Verify jsonObject field uses $ref
     val jsonObjectField = properties["jsonObject"] as JsonObject
-    assertEquals(JsonPrimitive("object"), jsonObjectField["type"])
-    assertTrue(jsonObjectField.containsKey("properties") || jsonObjectField.isNotEmpty())
+    assertEquals(JsonPrimitive("$JSON_REF_PREFIX$JSON_OBJECT_REF"), jsonObjectField["\$ref"])
 
-    // Verify jsonElement field
+    // Verify jsonElement field uses $ref
     val jsonElementField = properties["jsonElement"] as JsonObject
-    assertEquals(JsonPrimitive("object"), jsonElementField["type"])
+    assertEquals(JsonPrimitive("$JSON_REF_PREFIX$JSON_ELEMENT_REF"), jsonElementField["\$ref"])
 
-    // Verify jsonArray field
+    // Verify jsonArray field uses $ref
     val jsonArrayField = properties["jsonArray"] as JsonObject
-    assertEquals(JsonPrimitive("array"), jsonArrayField["type"])
-    assertTrue(jsonArrayField.containsKey("items"))
+    assertEquals(JsonPrimitive("$JSON_REF_PREFIX$JSON_ARRAY_REF"), jsonArrayField["\$ref"])
+
+    // Verify all fields are required
+    val requiredFields = required.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("jsonObject", "jsonElement", "jsonArray"), requiredFields)
+
+    // Verify $defs contains the expected definitions
+    assertTrue(defs.containsKey(JSON_PRIMITIVE_REF))
+    assertTrue(defs.containsKey(JSON_ARRAY_REF))
+    assertTrue(defs.containsKey(JSON_ELEMENT_REF))
+    assertTrue(defs.containsKey(JSON_OBJECT_REF))
+
+    // Verify JsonPrimitive definition
+    val jsonPrimitiveDef = defs[JSON_PRIMITIVE_REF] as JsonObject
+    assertTrue(jsonPrimitiveDef.containsKey("oneOf"))
+    val jsonPrimitiveOneOf = jsonPrimitiveDef["oneOf"] as JsonArray
+    assertEquals(4, jsonPrimitiveOneOf.size) // string, number, boolean, null
+
+    // Verify JsonArray definition
+    val jsonArrayDef = defs[JSON_ARRAY_REF] as JsonObject
+    assertEquals(JsonPrimitive("array"), jsonArrayDef["type"])
+    assertTrue(jsonArrayDef.containsKey("items"))
+    val jsonArrayItems = jsonArrayDef["items"] as JsonObject
+    assertEquals(JsonPrimitive("$JSON_REF_PREFIX$JSON_ELEMENT_REF"), jsonArrayItems["\$ref"])
+
+    // Verify JsonElement definition
+    val jsonElementDef = defs[JSON_ELEMENT_REF] as JsonObject
+    assertTrue(jsonElementDef.containsKey("oneOf"))
+    val jsonElementOneOf = jsonElementDef["oneOf"] as JsonArray
+    assertEquals(3, jsonElementOneOf.size) // JsonPrimitive, JsonArray, JsonObject refs
+
+    // Verify JsonObject definition
+    val jsonObjectDef = defs[JSON_OBJECT_REF] as JsonObject
+    assertEquals(JsonPrimitive("object"), jsonObjectDef["type"])
+    assertTrue(jsonObjectDef.containsKey("additionalProperties"))
+    val jsonObjectAdditionalProps = jsonObjectDef["additionalProperties"] as JsonObject
+    assertEquals(JsonPrimitive("$JSON_REF_PREFIX$JSON_ELEMENT_REF"), jsonObjectAdditionalProps["\$ref"])
   }
 
   @Test
@@ -1069,5 +1137,113 @@ internal class JsonSchemaExtensionsTest {
     // (recursiveEmbeddedObject is nullable)
     val requiredFields = required.map { (it as JsonPrimitive).content }.toSet()
     assertEquals(setOf("recursiveList", "recursiveObject"), requiredFields)
+  }
+
+  @Test
+  fun `generateJsonSchema handles sealed interface correctly`() {
+    val schema = generateJsonSchema<SealedObject>()
+    val properties = schema["properties"] as JsonObject
+    val required = schema["required"] as JsonArray
+
+    // Verify top-level structure
+    assertEquals(JsonPrimitive("object"), schema["type"])
+    assertTrue(schema.containsKey("properties"))
+    assertTrue(schema.containsKey("required"))
+
+    // Verify fruits field is an array
+    val fruitsField = properties["fruits"] as JsonObject
+    assertEquals(JsonPrimitive("array"), fruitsField["type"])
+    assertTrue(fruitsField.containsKey("items"))
+
+    // Verify items use oneOf for sealed interface
+    val itemsField = fruitsField["items"] as JsonObject
+    assertFalse(itemsField.containsKey("type"), "Sealed interface should not have a single type")
+    assertTrue(itemsField.containsKey("oneOf"), "Sealed interface should use oneOf")
+
+    // Verify oneOf contains all three fruit types
+    val oneOf = itemsField["oneOf"] as JsonArray
+    assertEquals(3, oneOf.size, "Should have three fruit types: Apple, Banana, Orange")
+
+    // Extract the type labels from each variant
+    val variants = oneOf.map { variant ->
+      val variantObj = variant as JsonObject
+      val variantProperties = variantObj["properties"] as JsonObject
+      val typeProperty = variantProperties["type"] as JsonObject
+      val constValue = typeProperty["const"] as JsonPrimitive
+      constValue.content
+    }.toSet()
+
+    // Verify all three fruit types are present
+    assertTrue(variants.contains("apple"))
+    assertTrue(variants.contains("banana"))
+    assertTrue(variants.contains("orange"))
+
+    // Verify Apple variant structure
+    val appleVariant = oneOf.first { variant ->
+      val variantObj = variant as JsonObject
+      val variantProperties = variantObj["properties"] as JsonObject
+      val typeProperty = variantProperties["type"] as JsonObject
+      val constValue = typeProperty["const"] as JsonPrimitive
+      constValue.content == "apple"
+    } as JsonObject
+
+    assertEquals(JsonPrimitive("object"), appleVariant["type"])
+    val appleProperties = appleVariant["properties"] as JsonObject
+    assertTrue(appleProperties.containsKey("type"))
+    assertTrue(appleProperties.containsKey("variety"))
+    assertTrue(appleProperties.containsKey("radius"))
+
+    val appleVarietyField = appleProperties["variety"] as JsonObject
+    assertEquals(JsonPrimitive("string"), appleVarietyField["type"])
+
+    val appleRadiusField = appleProperties["radius"] as JsonObject
+    assertEquals(JsonPrimitive("integer"), appleRadiusField["type"])
+
+    // Verify Banana variant structure
+    val bananaVariant = oneOf.first { variant ->
+      val variantObj = variant as JsonObject
+      val variantProperties = variantObj["properties"] as JsonObject
+      val typeProperty = variantProperties["type"] as JsonObject
+      val constValue = typeProperty["const"] as JsonPrimitive
+      constValue.content == "banana"
+    } as JsonObject
+
+    assertEquals(JsonPrimitive("object"), bananaVariant["type"])
+    val bananaProperties = bananaVariant["properties"] as JsonObject
+    assertTrue(bananaProperties.containsKey("type"))
+    assertTrue(bananaProperties.containsKey("length"))
+    assertTrue(bananaProperties.containsKey("ripeness"))
+
+    val bananaLengthField = bananaProperties["length"] as JsonObject
+    assertEquals(JsonPrimitive("integer"), bananaLengthField["type"])
+
+    val bananaRipenessField = bananaProperties["ripeness"] as JsonObject
+    assertEquals(JsonPrimitive("string"), bananaRipenessField["type"])
+
+    // Verify Orange variant structure
+    val orangeVariant = oneOf.first { variant ->
+      val variantObj = variant as JsonObject
+      val variantProperties = variantObj["properties"] as JsonObject
+      val typeProperty = variantProperties["type"] as JsonObject
+      val constValue = typeProperty["const"] as JsonPrimitive
+      constValue.content == "orange"
+    } as JsonObject
+
+    assertEquals(JsonPrimitive("object"), orangeVariant["type"])
+    assertEquals(JsonPrimitive("citrus fruit"), orangeVariant["description"])
+    val orangeProperties = orangeVariant["properties"] as JsonObject
+    assertTrue(orangeProperties.containsKey("type"))
+    assertTrue(orangeProperties.containsKey("variety"))
+    assertTrue(orangeProperties.containsKey("radius"))
+
+    val orangeVarietyField = orangeProperties["variety"] as JsonObject
+    assertEquals(JsonPrimitive("string"), orangeVarietyField["type"])
+
+    val orangeRadiusField = orangeProperties["radius"] as JsonObject
+    assertEquals(JsonPrimitive("integer"), orangeRadiusField["type"])
+
+    // Verify fruits field is required
+    val requiredFields = required.map { (it as JsonPrimitive).content }.toSet()
+    assertEquals(setOf("fruits"), requiredFields)
   }
 }

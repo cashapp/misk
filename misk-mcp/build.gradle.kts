@@ -36,6 +36,7 @@ dependencies {
   implementation(libs.okio)
   implementation(libs.prometheusClient)
 
+  testImplementation(libs.jsonSchemaValidator)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.kotlinxCoroutinesTest)

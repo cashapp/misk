@@ -89,7 +89,7 @@ import kotlin.annotation.AnnotationTarget.VALUE_PARAMETER
  * @since 1.0.0
  */
 @OptIn(ExperimentalSerializationApi::class)
-@Target(AnnotationTarget.PROPERTY)
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.CLASS)
 @Retention(RUNTIME)
 @SerialInfo
 annotation class Description(val value: String)

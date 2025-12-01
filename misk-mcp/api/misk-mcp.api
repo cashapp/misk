@@ -301,8 +301,7 @@ public final class misk/mcp/config/McpToolConfig : misk/config/Config {
 }
 
 public final class misk/mcp/internal/JsonSchemaExtensionsKt {
-	public static final fun generateJsonSchema (Lkotlin/reflect/KType;Ljava/lang/String;)Lkotlinx/serialization/json/JsonObject;
-	public static synthetic fun generateJsonSchema$default (Lkotlin/reflect/KType;Ljava/lang/String;ILjava/lang/Object;)Lkotlinx/serialization/json/JsonObject;
+	public static final fun generateJsonSchema (Lkotlin/reflect/KType;)Lkotlinx/serialization/json/JsonObject;
 }
 
 public final class misk/mcp/internal/McpServerSession : kotlin/coroutines/AbstractCoroutineContextElement {
