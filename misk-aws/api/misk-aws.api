@@ -64,13 +64,12 @@ public final class misk/jobqueue/sqs/AwsSqsBatchJobHandlerModule$Companion {
 	public static synthetic fun create$default (Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;ILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule;
 }
 
-public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule : misk/inject/KAbstractModule, misk/inject/AsyncModule {
+public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;
 	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;Z)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZLjava/util/List;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
-	public fun moduleWhenAsyncDisabled ()Lmisk/inject/KAbstractModule;
 }
 
 public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion {
@@ -109,12 +108,14 @@ public final class misk/jobqueue/sqs/AwsSqsJobQueueConfig : misk/config/Config {
 	public final fun getTask_queue ()Lmisk/tasks/RepeatedTaskQueueConfig;
 }
 
-public class misk/jobqueue/sqs/AwsSqsJobQueueModule : misk/inject/KAbstractModule, misk/inject/AsyncModule {
+public class misk/jobqueue/sqs/AwsSqsJobQueueModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/jobqueue/sqs/AwsSqsJobQueueModule$Companion;
 	public fun <init> (Lmisk/jobqueue/sqs/AwsSqsJobQueueConfig;)V
 	protected fun configure ()V
 	public fun configureClient (Lcom/amazonaws/client/builder/AwsClientBuilder;)V
-	public fun moduleWhenAsyncDisabled ()Lmisk/inject/KAbstractModule;
+	public final fun consumerRepeatedTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;Lmisk/jobqueue/sqs/AwsSqsJobQueueConfig;)Lmisk/tasks/RepeatedTaskQueue;
+	public final fun provideSQSClient (Ljava/lang/String;Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;Lmisk/feature/FeatureFlags;)Lcom/amazonaws/services/sqs/AmazonSQS;
+	public final fun provideSQSClientForReceiving (Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;)Lcom/amazonaws/services/sqs/AmazonSQS;
 }
 
 public final class misk/jobqueue/sqs/AwsSqsJobQueueModule$Companion {
