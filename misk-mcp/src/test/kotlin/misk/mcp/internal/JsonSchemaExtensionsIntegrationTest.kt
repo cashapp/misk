@@ -12,6 +12,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -34,6 +35,9 @@ class JsonSchemaExtensionsIntegrationTest {
     private val recursive: List<SampleData>,
     private val enum: SampleEnum,
     private val jsonObject: JsonObject,
+    private val jsonElement: JsonElement,
+    private val jsonPrimitive: JsonPrimitive,
+    private val jsonArray: JsonArray,
     private val sealedFruit: List<Fruit>,
   ) {
     enum class SampleEnum {
@@ -69,6 +73,9 @@ class JsonSchemaExtensionsIntegrationTest {
           put("key", JsonPrimitive("value"))
         })
       },
+      jsonElement = JsonPrimitive("Just a primitive as an element"),
+      jsonPrimitive = JsonPrimitive(42),
+      jsonArray = JsonArray(listOf(JsonPrimitive("one"), JsonPrimitive("two"))),
       sealedFruit = listOf(
         SampleData.Apple(variety = "Granny Smith", radius = 5),
         SampleData.Banana(length = 7, ripeness = "Ripe"),
