@@ -5,7 +5,6 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import jakarta.inject.Singleton
 import misk.inject.ConditionalProvider
-import misk.inject.ConditionalTypedProvider
 import misk.inject.KAbstractModule
 import misk.inject.Switch
 import misk.inject.asSingleton
@@ -171,13 +170,17 @@ constructor(
   fun conditionalOn(switchKey: String, switchType: KClass<out Switch>) =
     ServiceModule(key, dependsOn, enhancedBy, switchKey, switchType, disabledKey)
 
-  fun dependsOn(upstream: Key<out Service>) = ServiceModule(key, dependsOn + upstream, enhancedBy, switchKey, switchType, disabledKey)
+  fun dependsOn(upstream: Key<out Service>) =
+    ServiceModule(key, dependsOn + upstream, enhancedBy, switchKey, switchType, disabledKey)
 
-  fun dependsOn(upstream: List<Key<out Service>>) = ServiceModule(key, dependsOn + upstream, enhancedBy, switchKey, switchType, disabledKey)
+  fun dependsOn(upstream: List<Key<out Service>>) =
+    ServiceModule(key, dependsOn + upstream, enhancedBy, switchKey, switchType, disabledKey)
 
-  fun enhancedBy(enhancement: Key<out Service>) = ServiceModule(key, dependsOn, enhancedBy + enhancement, switchKey, switchType, disabledKey)
+  fun enhancedBy(enhancement: Key<out Service>) =
+    ServiceModule(key, dependsOn, enhancedBy + enhancement, switchKey, switchType, disabledKey)
 
-  fun enhancedBy(enhancement: List<Key<out Service>>) = ServiceModule(key, dependsOn, enhancedBy + enhancement, switchKey, switchType, disabledKey)
+  fun enhancedBy(enhancement: List<Key<out Service>>) =
+    ServiceModule(key, dependsOn, enhancedBy + enhancement, switchKey, switchType, disabledKey)
 
   @JvmOverloads
   inline fun <reified T : Switch> conditionalOn(switchKey: String = "default") =
@@ -196,6 +199,7 @@ constructor(
  * Returns a [ServiceModule] and hooks up service dependencies and enhancements.
  *
  * Here's how:
+ *
  * ```
  * Guice.createInjector(object : KAbstractModule() {
  *   override fun configure() {
@@ -207,6 +211,7 @@ constructor(
  * ```
  *
  * Dependencies and services may be optionally annotated:
+ *
  * ```
  * Guice.createInjector(object : KAbstractModule() {
  *   override fun configure() {
