@@ -472,6 +472,10 @@ public final class misk/web/WebServerTestingModule$Companion {
 public final class misk/web/WebTestClient {
 	public fun <init> (Lcom/squareup/moshi/Moshi;Lmisk/web/jetty/JettyService;)V
 	public final fun call (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lmisk/web/WebTestClient$WebTestResponse;
+	public final fun delete (Ljava/lang/String;Ljava/lang/Object;Lkotlin/reflect/KClass;)Lmisk/web/WebTestClient$WebTestResponse;
+	public final fun delete (Ljava/lang/String;Ljava/lang/String;)Lmisk/web/WebTestClient$WebTestResponse;
+	public final fun delete (Ljava/lang/String;Ljava/lang/String;Lokhttp3/MediaType;)Lmisk/web/WebTestClient$WebTestResponse;
+	public static synthetic fun delete$default (Lmisk/web/WebTestClient;Ljava/lang/String;Ljava/lang/String;Lokhttp3/MediaType;ILjava/lang/Object;)Lmisk/web/WebTestClient$WebTestResponse;
 	public final fun get (Ljava/lang/String;)Lmisk/web/WebTestClient$WebTestResponse;
 	public final fun post (Ljava/lang/String;Ljava/lang/Object;Lkotlin/reflect/KClass;)Lmisk/web/WebTestClient$WebTestResponse;
 	public final fun post (Ljava/lang/String;Ljava/lang/String;)Lmisk/web/WebTestClient$WebTestResponse;
