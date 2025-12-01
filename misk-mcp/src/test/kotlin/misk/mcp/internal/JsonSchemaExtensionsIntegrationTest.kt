@@ -5,8 +5,13 @@ package misk.mcp.internal
 import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaRegistry
 import com.networknt.schema.SpecificationVersion
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -58,7 +63,11 @@ class JsonSchemaExtensionsIntegrationTest {
       recursive = emptyList(),
       enum = SampleData.SampleEnum.FIRST,
       jsonObject = buildJsonObject {
-        put("foo", JsonPrimitive("bar"))
+        put("primitiveTest", JsonPrimitive("bar"))
+        put("arrayTest", JsonArray(listOf(JsonPrimitive(1), JsonPrimitive(2), JsonPrimitive(3))))
+        put("objectTest", buildJsonObject {
+          put("key", JsonPrimitive("value"))
+        })
       },
       sealedFruit = listOf(
         SampleData.Apple(variety = "Granny Smith", radius = 5),
