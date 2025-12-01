@@ -132,6 +132,21 @@ inline fun <
     transformer
   )
 
+inline fun <
+  reified S : Switch,
+  reified Output : Any,
+  reified Enabled : Output,
+  reified Disabled : Output,
+  > ConditionalTypedProvider(switchKey: String) =
+  ConditionalTypedProvider(
+    switchKey,
+    S::class,
+    Output::class,
+    Output::class,
+    Enabled::class,
+    Disabled::class,
+  )
+
 class ConditionalTypedProvider<S : Switch, Output : Any, Input : Any, Enabled : Input, Disabled : Input> @JvmOverloads constructor(
   val switchKey: String,
   val switchType: KClass<out S>,
