@@ -1,24 +1,25 @@
+@file:Suppress("unused")
+
 package misk.mcp.internal
 
 import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaRegistry
 import com.networknt.schema.SpecificationVersion
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import misk.mcp.Description
 import misk.mcp.McpJson
 import org.junit.jupiter.api.Test
-import kotlin.test.assertContentEquals
 import kotlin.test.fail
 
 /**
  * Test to verify that the schemas produced by JSON Schema extensions correctly describe serialized data.
  */
 class JsonSchemaExtensionsIntegrationTest {
-  @Serializable
+  @Serializable @Description("A sample data class for testing JSON schema generation and validation")
   data class SampleData(
     private val id: Int,
     private val name: String,
@@ -37,11 +38,14 @@ class JsonSchemaExtensionsIntegrationTest {
     @Serializable
     sealed interface Fruit
 
-    @Serializable
+    @Serializable @SerialName("apple")
     data class Apple(val variety: String, val radius: Int): Fruit
 
-    @Serializable
+    @Serializable @SerialName("banana")
     data class Banana(val length: Int, val ripeness: String): Fruit
+
+    @Serializable @SerialName("orange")
+    data class Orange(val variety: String, val radius: Int): Fruit
   }
 
   @Test

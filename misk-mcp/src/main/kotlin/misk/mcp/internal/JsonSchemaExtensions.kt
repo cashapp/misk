@@ -1,4 +1,4 @@
-@file:OptIn( ExperimentalSerializationApi::class)
+@file:OptIn(ExperimentalSerializationApi::class)
 
 package misk.mcp.internal
 
@@ -9,7 +9,6 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.SerialKind
 import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.descriptors.elementDescriptors
-import kotlinx.serialization.descriptors.elementNames
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -28,13 +27,14 @@ import kotlin.reflect.typeOf
  * It handles nested objects, collections, maps, and primitive types.
  *
  * @receiver the [KType] to generate a JSON schema for
- * @param description Optional description to include in the root schema object
  * @return JsonObject representing the generated JSON schema with type, properties, and required fields
  * @throws IllegalArgumentException if the class has no serializer
  */
 @PublishedApi
-internal fun KType.generateJsonSchema(description: String? = null): JsonObject =
-  serializer().descriptor.generateJsonSchema(description)
+internal fun KType.generateJsonSchema(): JsonObject =
+  with(serializer().descriptor){
+    generateJsonSchema(annotations.description())
+  }
 
 /**
  * Generates a JSON schema for a reified serializable Kotlin type.
@@ -43,14 +43,13 @@ internal fun KType.generateJsonSchema(description: String? = null): JsonObject =
  * to [KType.generateJsonSchema] for schema generation.
  *
  * @param T the reified type to generate a schema for
- * @param description Optional description to include in the root schema object
  * @return JsonObject representing the generated JSON schema with type, properties, and required fields
  * @throws IllegalArgumentException if the class has no serializer
  * @see KType.generateJsonSchema
  */
 @PublishedApi
-internal inline fun <reified T : Any> generateJsonSchema(description: String? = null): JsonObject =
-  typeOf<T>().generateJsonSchema(description)
+internal inline fun <reified T : Any> generateJsonSchema(): JsonObject =
+  typeOf<T>().generateJsonSchema()
 
 /**
  * Generates a JSON Schema representation for this [SerialDescriptor].
@@ -67,6 +66,7 @@ internal inline fun <reified T : Any> generateJsonSchema(description: String? = 
 private fun SerialDescriptor.generateJsonSchema(
   description: String? = null,
   accumulatedObjectDescriptors: Set<SerialDescriptor> = emptySet(),
+  label: String? = null,
 ): JsonObject = buildJsonObject {
   description?.let {
     put("description", JsonPrimitive(it))
@@ -87,11 +87,18 @@ private fun SerialDescriptor.generateJsonSchema(
     PrimitiveKind.INT,
     PrimitiveKind.LONG,
     PrimitiveKind.SHORT,
-    PrimitiveKind.STRING -> {}
+    PrimitiveKind.STRING -> {
+      label?.let {
+        put("properties", buildLabelProperty(it))
+      }
+    }
 
     SerialKind.ENUM -> {
       val enumValues = (0 until elementsCount).map { index ->
         getElementName(index)
+      }
+      label?.let {
+        put("properties", buildLabelProperty(it))
       }
       put("enum", JsonArray(enumValues.map { JsonPrimitive(it) }))
     }
@@ -99,6 +106,9 @@ private fun SerialDescriptor.generateJsonSchema(
     StructureKind.LIST -> {
       val elementDescriptor = getElementDescriptor(0)
       val elementDescription = getElementAnnotations(0).description()
+      label?.let {
+        put("properties", buildLabelProperty(it))
+      }
       put("items", elementDescriptor.generateJsonSchema(elementDescription, accumulatedObjectDescriptors))
     }
 
@@ -106,9 +116,15 @@ private fun SerialDescriptor.generateJsonSchema(
       description?.let {
         put("description", JsonPrimitive(it))
       }
+      label?.let {
+        put("properties", buildLabelProperty(it))
+      }
       val valueDescriptor = getElementDescriptor(1)
       val valueDescription = getElementAnnotations(1).description()
-      put("additionalProperties", valueDescriptor.generateJsonSchema(valueDescription, accumulatedObjectDescriptors.plus(this@generateJsonSchema)))
+      put(
+        "additionalProperties",
+        valueDescriptor.generateJsonSchema(valueDescription, accumulatedObjectDescriptors.plus(this@generateJsonSchema))
+      )
     }
 
     StructureKind.CLASS,
@@ -116,10 +132,15 @@ private fun SerialDescriptor.generateJsonSchema(
       val properties = mutableMapOf<String, JsonObject>()
       val required = mutableListOf<String>()
 
+      label?.let {
+        properties["type"] = buildLabelProperty(it)["type"] as JsonObject
+      }
+
       elementDescriptors.forEachIndexed { index, paramDescriptor ->
         val name = getElementName(index)
         val description = getElementAnnotations(index).description()
-        properties[name] = paramDescriptor.generateJsonSchema(description, accumulatedObjectDescriptors.plus(this@generateJsonSchema))
+        properties[name] =
+          paramDescriptor.generateJsonSchema(description, accumulatedObjectDescriptors.plus(this@generateJsonSchema))
 
         if (!isElementOptional(index) && !paramDescriptor.isNullable) {
           required.add(name)
@@ -132,17 +153,22 @@ private fun SerialDescriptor.generateJsonSchema(
 
     PolymorphicKind.OPEN,
     PolymorphicKind.SEALED -> {
-      put("anyOf", buildJsonArray {
+      put("oneOf", buildJsonArray {
         // Auto-generated sealed descriptors have a "type" and "value" field, where "value" contains the actual subtype descriptors.
         // Custom serialized sealed descriptors (e.g. for JsonElement), the subtype descriptors are directly under the sealed descriptor.
-        val memberDescriptors = if (elementsCount > 1 && getElementName(1) == "value" && getElementDescriptor(1).kind == SerialKind.CONTEXTUAL) {
+        if (elementsCount > 1 && getElementName(1) == "value" && getElementDescriptor(1).kind == SerialKind.CONTEXTUAL) {
           getElementDescriptor(1).elementDescriptors
-        } else elementDescriptors
-
-        memberDescriptors.forEachIndexed { index, paramDescriptor ->
-          val description = getElementAnnotations(index).description()
-          add(paramDescriptor.generateJsonSchema(description, accumulatedObjectDescriptors.plus(this@generateJsonSchema)))
-        }
+        } else {
+          elementDescriptors
+        }.forEach { paramDescriptor ->
+            add(
+              paramDescriptor.generateJsonSchema(
+                description = paramDescriptor.annotations.description(),
+                accumulatedObjectDescriptors = accumulatedObjectDescriptors.plus(this@generateJsonSchema),
+                label = paramDescriptor.serialName,
+              )
+            )
+          }
       })
     }
 
@@ -152,6 +178,12 @@ private fun SerialDescriptor.generateJsonSchema(
 
 private fun List<Annotation>.description(): String? =
   filterIsInstance<Description>().firstOrNull()?.value
+
+private fun buildLabelProperty(label: String) = buildJsonObject {
+  put("type", buildJsonObject {
+    put("const", JsonPrimitive(label))
+  })
+}
 
 private fun SerialKind.toJsonType(): String? = when (this) {
   PrimitiveKind.INT,
