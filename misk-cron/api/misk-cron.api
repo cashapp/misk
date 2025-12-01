@@ -56,14 +56,13 @@ public final class misk/cron/CronManager$RunningCronEntry {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/cron/CronModule : misk/inject/KInstallOnceModule, misk/inject/AsyncModule {
+public final class misk/cron/CronModule : misk/inject/KInstallOnceModule {
 	public fun <init> (Ljava/time/ZoneId;)V
 	public fun <init> (Ljava/time/ZoneId;I)V
 	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;)V
 	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;Z)V
 	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;ZZ)V
 	public synthetic fun <init> (Ljava/time/ZoneId;ILjava/util/List;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun moduleWhenAsyncDisabled ()Lmisk/inject/KAbstractModule;
 	public final fun provideTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;)Lmisk/tasks/RepeatedTaskQueue;
 }
 

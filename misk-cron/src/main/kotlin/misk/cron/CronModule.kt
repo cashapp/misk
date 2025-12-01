@@ -7,12 +7,10 @@ import jakarta.inject.Qualifier
 import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
-import misk.annotation.ExperimentalMiskApi
 import misk.concurrent.ExecutorServiceModule
-import misk.inject.AsyncModule
-import misk.inject.KAbstractModule
+import misk.inject.AsyncSwitch
+import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KInstallOnceModule
-import misk.inject.toKey
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
 import wisp.lease.LeaseManager
@@ -35,7 +33,7 @@ class CronModule @JvmOverloads constructor(
   private val dependencies: List<Key<out Service>> = listOf(),
   private val installDashboardTab: Boolean = true,
   private val useMultipleLeases: Boolean = false
-) : AsyncModule, KInstallOnceModule() {
+) : KInstallOnceModule() {
   override fun configure() {
     install(
       FakeCronModule(
@@ -44,29 +42,19 @@ class CronModule @JvmOverloads constructor(
         dependencies = dependencies,
         installDashboardTab = installDashboardTab,
         useMultipleLeases = useMultipleLeases,
-      ),
+      )
     )
 
-    // TODO remove explicit inline environment variable check once AsyncModule filtering in Guice is working
-    if (!System.getenv("DISABLE_ASYNC_TASKS").toBoolean()) {
-      install(ServiceModule<RepeatedTaskQueue>(ForMiskCron::class).dependsOn<ReadyService>())
-      install(
-        ServiceModule(
-          key = CronTask::class.toKey(),
-          dependsOn = dependencies,
-        ).dependsOn<ReadyService>(),
-      )
-    }
-  }
-
-  @OptIn(ExperimentalMiskApi::class)
-  override fun moduleWhenAsyncDisabled(): KAbstractModule {
-    return FakeCronModule(
-      zoneId = zoneId,
-      threadPoolSize = threadPoolSize,
-      dependencies = dependencies,
-      installDashboardTab = installDashboardTab,
-      useMultipleLeases = useMultipleLeases,
+    install(
+      ServiceModule<RepeatedTaskQueue, ForMiskCron>()
+        .conditionalOn<AsyncSwitch>("cron")
+        .dependsOn<ReadyService>()
+    )
+    install(
+      ServiceModule<CronTask>()
+        .conditionalOn<AsyncSwitch>("cron")
+        .dependsOn(dependencies)
+        .dependsOn<ReadyService>()
     )
   }
 
@@ -87,18 +75,17 @@ class FakeCronModule @JvmOverloads constructor(
   override fun configure() {
     bind<ZoneId>().annotatedWith<ForMiskCron>().toInstance(zoneId)
     install(
-      ExecutorServiceModule.withFixedThreadPool(
-        ForMiskCron::class,
+      ExecutorServiceModule.withFixedThreadPool<ForMiskCron>(
         "misk-cron-cronjob-%d",
         threadPoolSize,
       ),
     )
     install(
-      ServiceModule(
-        key = CronService::class.toKey(),
-        dependsOn = dependencies,
-      ).dependsOn<ReadyService>(),
+      ServiceModule<CronService>()
+        .dependsOn(dependencies)
+        .dependsOn<ReadyService>()
     )
+    install(DefaultAsyncSwitchModule())
 
     if (installDashboardTab) {
       // Don't install by default since it adds extra dependencies to downstream tests
