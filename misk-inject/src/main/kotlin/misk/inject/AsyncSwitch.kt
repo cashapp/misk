@@ -134,15 +134,15 @@ inline fun <
 
 inline fun <
   reified S : Switch,
-  reified Input : Any,
-  reified Enabled : Input,
-  reified Disabled : Input,
+  reified Output : Any,
+  reified Enabled : Output,
+  reified Disabled : Output,
   > ConditionalTypedProvider(switchKey: String) =
   ConditionalTypedProvider(
     switchKey,
     S::class,
-    Input::class,
-    Input::class,
+    Output::class,
+    Output::class,
     Enabled::class,
     Disabled::class,
   )
