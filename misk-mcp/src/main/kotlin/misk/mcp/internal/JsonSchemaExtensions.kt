@@ -253,13 +253,13 @@ private fun SerialKind.toJsonType(): String? = when (this) {
 
   StructureKind.LIST -> "array"
 
-  PolymorphicKind.OPEN,
   SerialKind.CONTEXTUAL,
   StructureKind.CLASS,
   StructureKind.MAP,
   StructureKind.OBJECT -> "object"
 
-  // Sealed interfaces and classes are represented using oneOf, so they could have multiple types.
+  // Sealed interfaces and sealed/open classes are represented using oneOf, so they could have multiple types.
+  PolymorphicKind.OPEN,
   PolymorphicKind.SEALED -> null
 }
 
