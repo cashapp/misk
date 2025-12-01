@@ -255,4 +255,45 @@ class AsyncSwitchTest {
     )
     assertThat(disabledResult).isInstanceOf(Red::class.java)
   }
+
+  @Test
+  fun conditionalTypedProviderWithInputTypeOnlyReturnsEnabledWhenEnabled() {
+    val module = object : KAbstractModule() {
+      override fun configure() {
+        bind<AsyncSwitch>().toInstance(AlwaysEnabledSwitch())
+        bind<Blue>().toInstance(Blue())
+        bind<Red>().toInstance(Red())
+        bind<Color>().toProvider(
+          ConditionalTypedProvider<AsyncSwitch, Color, Blue, Red>(
+            switchKey = "test-key"
+          )
+        )
+      }
+    }
+    val injector = Guice.createInjector(module)
+    val result = injector.getInstance(Color::class.java)
+    assertThat(result).isInstanceOf(Blue::class.java)
+  }
+
+  @Test
+  fun conditionalTypedProviderWithInputTypeOnlyReturnsDisabledWhenDisabled() {
+    val customSwitch = object : AsyncSwitch {
+      override fun isEnabled(key: String) = false
+    }
+    val module = object : KAbstractModule() {
+      override fun configure() {
+        bind<AsyncSwitch>().toInstance(customSwitch)
+        bind<Blue>().toInstance(Blue())
+        bind<Red>().toInstance(Red())
+        bind<Color>().toProvider(
+          ConditionalTypedProvider<AsyncSwitch, Color, Blue, Red>(
+            switchKey = "test-key"
+          )
+        )
+      }
+    }
+    val injector = Guice.createInjector(module)
+    val result = injector.getInstance(Color::class.java)
+    assertThat(result).isInstanceOf(Red::class.java)
+  }
 }
