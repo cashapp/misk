@@ -222,7 +222,7 @@ private fun SerialDescriptor.generateJsonSchemaInternal(
   return SchemaWithDefinitions(schema, referencedDefinitions)
 }
 
-data class SchemaWithDefinitions(
+private data class SchemaWithDefinitions(
   val schema: JsonObject,
   val requiredDefinitions: Set<String>,
 )
