@@ -75,7 +75,7 @@ class DefaultAsyncSwitchModule : KInstallOnceModule() {
 inline fun <
   reified S : Switch,
   reified Output : Any,
-  reified Input : Any,
+  reified Input,
   reified Enabled : Input,
   reified Disabled : Input,
   > ConditionalProvider(
@@ -87,17 +87,17 @@ inline fun <
     switchKey = switchKey,
     switchType = S::class,
     outputType = Output::class,
-    type = Input::class,
+    type = Any::class,
     enabledInstance = enabledInstance,
     disabledInstance = disabledInstance,
-    transformer = transformer as (Any) -> Output,
+    transformer = transformer as (Any?) -> Output,
   )
 
-class ConditionalProvider<S : Switch, Output : Any, Input : Any> @JvmOverloads constructor(
+class ConditionalProvider<S : Switch, Output : Any, Input> @JvmOverloads constructor(
   val switchKey: String,
   val switchType: KClass<out S>,
   val outputType: KClass<out Output>,
-  val type: KClass<out Input>,
+  val type: KClass<*>,
   val enabledInstance: Input,
   val disabledInstance: Input,
   val transformer: (Input) -> Output = { it as Output },

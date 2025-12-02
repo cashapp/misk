@@ -1,16 +1,12 @@
 package misk
 
-import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
-import jakarta.inject.Singleton
 import misk.inject.ConditionalProvider
-import misk.inject.ConditionalTypedProvider
 import misk.inject.KAbstractModule
 import misk.inject.Switch
 import misk.inject.asSingleton
 import misk.inject.toKey
-import misk.inject.typeLiteral
 import kotlin.reflect.KClass
 
 /**
@@ -86,7 +82,6 @@ constructor(
   val enhancedBy: List<Key<out Service>> = listOf(),
   private val switchKey: String = "default",
   private val switchType: KClass<out Switch>? = null,
-  private val disabledKey: Key<out Service> = key.ofType(NoOpService::class.typeLiteral()),
 ) : KAbstractModule() {
 
   // This constructor exists for binary-compatibility with older callers.
@@ -108,17 +103,18 @@ constructor(
 
   override fun configure() {
     if (switchType != null) {
-      multibind<ServiceEntry>()
+      // TODO combine optional and non after rolled out and tested
+      multibind<OptionalServiceEntry>()
         .toProvider(
           ConditionalProvider(
             switchKey,
             switchType,
+            OptionalServiceEntry::class,
             ServiceEntry::class,
-            Key::class,
-            key,
-            disabledKey,
+            ServiceEntry(key),
+            null,
           ) {
-            ServiceEntry(it as Key<out Service>)
+            OptionalServiceEntry(key, it)
           }
         ).asSingleton()
     } else {
@@ -128,17 +124,17 @@ constructor(
 
     for (dependsOnKey in dependsOn) {
       if (switchType != null) {
-        multibind<DependencyEdge>()
+        multibind<OptionalDependencyEdge>()
           .toProvider(
             ConditionalProvider(
               switchKey,
               switchType,
+              OptionalDependencyEdge::class,
               DependencyEdge::class,
-              Key::class,
-              key,
-              disabledKey,
+              DependencyEdge(dependent = key, dependsOn = dependsOnKey),
+              null,
             ) {
-              DependencyEdge(dependent = it, dependsOn = dependsOnKey)
+              OptionalDependencyEdge(key, it)
             }
           ).asSingleton()
       } else {
@@ -148,17 +144,17 @@ constructor(
     }
     for (enhancedByKey in enhancedBy) {
       if (switchType != null) {
-        multibind<EnhancementEdge>()
+        multibind<OptionalEnhancementEdge>()
           .toProvider(
             ConditionalProvider(
               switchKey,
               switchType,
+              OptionalEnhancementEdge::class,
               EnhancementEdge::class,
-              Key::class,
-              key,
-              disabledKey,
+              EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey),
+              null,
             ) {
-              EnhancementEdge(toBeEnhanced = it, enhancement = enhancedByKey)
+              OptionalEnhancementEdge(key, it)
             }
           ).asSingleton()
       } else {
@@ -169,15 +165,15 @@ constructor(
   }
 
   fun conditionalOn(switchKey: String, switchType: KClass<out Switch>) =
-    ServiceModule(key, dependsOn, enhancedBy, switchKey, switchType, disabledKey)
+    ServiceModule(key, dependsOn, enhancedBy, switchKey, switchType)
 
-  fun dependsOn(upstream: Key<out Service>) = ServiceModule(key, dependsOn + upstream, enhancedBy, switchKey, switchType, disabledKey)
+  fun dependsOn(upstream: Key<out Service>) = ServiceModule(key, dependsOn + upstream, enhancedBy, switchKey, switchType)
 
-  fun dependsOn(upstream: List<Key<out Service>>) = ServiceModule(key, dependsOn + upstream, enhancedBy, switchKey, switchType, disabledKey)
+  fun dependsOn(upstream: List<Key<out Service>>) = ServiceModule(key, dependsOn + upstream, enhancedBy, switchKey, switchType)
 
-  fun enhancedBy(enhancement: Key<out Service>) = ServiceModule(key, dependsOn, enhancedBy + enhancement, switchKey, switchType, disabledKey)
+  fun enhancedBy(enhancement: Key<out Service>) = ServiceModule(key, dependsOn, enhancedBy + enhancement, switchKey, switchType)
 
-  fun enhancedBy(enhancement: List<Key<out Service>>) = ServiceModule(key, dependsOn, enhancedBy + enhancement, switchKey, switchType, disabledKey)
+  fun enhancedBy(enhancement: List<Key<out Service>>) = ServiceModule(key, dependsOn, enhancedBy + enhancement, switchKey, switchType)
 
   @JvmOverloads
   inline fun <reified T : Switch> conditionalOn(switchKey: String = "default") =
@@ -229,9 +225,8 @@ internal data class DependencyEdge(val dependent: Key<*>, val dependsOn: Key<*>)
 
 internal data class ServiceEntry(val key: Key<out Service>)
 
-@Singleton
-class NoOpService : AbstractIdleService() {
-  override fun startUp() {}
-
-  override fun shutDown() {}
-}
+// Wrapper types to handle optional conditional contributions
+// Each wrapper contains the original service key to make disabled entries unique
+internal data class OptionalServiceEntry(val originalServiceKey: Key<out Service>, val entry: ServiceEntry?)
+internal data class OptionalDependencyEdge(val originalServiceKey: Key<out Service>, val edge: DependencyEdge?)
+internal data class OptionalEnhancementEdge(val originalServiceKey: Key<out Service>, val edge: EnhancementEdge?)
