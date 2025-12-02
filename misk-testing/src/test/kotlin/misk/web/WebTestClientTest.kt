@@ -9,6 +9,7 @@ import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
+import misk.web.WebTestClientTest.Packet
 
 @MiskTest(startService = true)
 class WebTestClientTest {
@@ -24,6 +25,7 @@ class WebTestClientTest {
       install(WebActionModule.create<GetAction>())
       install(WebActionModule.create<GetActionWithQueryParams>())
       install(WebActionModule.create<PostAction>())
+      install(WebActionModule.create<DeleteAction>())
     }
   }
 
@@ -46,6 +48,13 @@ class WebTestClientTest {
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun post(@RequestBody body: Packet) = Packet(body.data)
+  }
+
+  class DeleteAction @Inject constructor() : WebAction {
+    @Delete("/delete")
+    @RequestContentType(MediaTypes.APPLICATION_JSON)
+    @ResponseContentType(MediaTypes.APPLICATION_JSON)
+    fun delete(@RequestBody body: Packet) = Packet("deleted ${body.data}")
   }
 
   @Test
@@ -84,5 +93,14 @@ class WebTestClientTest {
         }
         .response.code
     ).isEqualTo(200)
+  }
+
+  @Test
+  fun `performs a DELETE`() {
+    assertThat(
+      webTestClient
+       .delete("/delete", Packet("some data"))
+       .parseJson<Packet>()
+    ).isEqualTo(Packet("deleted some data"))
   }
 }
