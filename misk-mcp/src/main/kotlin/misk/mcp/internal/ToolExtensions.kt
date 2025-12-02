@@ -42,7 +42,7 @@ internal class ToolBuilder(
   /**
    * Optional metadata for the tool.
    */
-  var _meta: JsonObject = EmptyJsonObject
+  var meta: JsonObject = EmptyJsonObject
 
   fun build() = Tool(
     name = name,
@@ -51,7 +51,7 @@ internal class ToolBuilder(
     outputSchema = outputSchema,
     description = description,
     annotations = annotations,
-    meta = _meta,
+    meta = meta,
   )
 }
 

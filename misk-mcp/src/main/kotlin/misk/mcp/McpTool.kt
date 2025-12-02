@@ -206,7 +206,7 @@ abstract class McpTool<I : Any> {
   /**
    * Tool metadata that will be included in the tool definition.
    */
-  open val _meta: JsonObject? = null
+  open val meta: JsonObject? = null
 
   internal val inputSchema: ToolSchema by lazy {
     val schema = inputType.generateJsonSchema()

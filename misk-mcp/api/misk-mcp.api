@@ -93,11 +93,11 @@ public abstract class misk/mcp/McpTool {
 	public abstract fun getDescription ()Ljava/lang/String;
 	public fun getDestructiveHint ()Z
 	public fun getIdempotentHint ()Z
+	public fun getMeta ()Lkotlinx/serialization/json/JsonObject;
 	public abstract fun getName ()Ljava/lang/String;
 	public fun getOpenWorldHint ()Z
 	public fun getReadOnlyHint ()Z
 	public fun getTitle ()Ljava/lang/String;
-	public fun get_meta ()Lkotlinx/serialization/json/JsonObject;
 	public abstract fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	protected fun toCallToolResult (Lmisk/mcp/McpTool$ToolResult;)Lio/modelcontextprotocol/kotlin/sdk/types/CallToolResult;
 }
@@ -617,8 +617,8 @@ public final class misk/mcp/testing/tools/HierarchicalToolOutput$Companion {
 public final class misk/mcp/testing/tools/KotlinSdkTool : misk/mcp/McpTool {
 	public fun <init> ()V
 	public fun getDescription ()Ljava/lang/String;
+	public fun getMeta ()Lkotlinx/serialization/json/JsonObject;
 	public fun getName ()Ljava/lang/String;
-	public fun get_meta ()Lkotlinx/serialization/json/JsonObject;
 	public fun handle (Lio/modelcontextprotocol/kotlin/sdk/types/ToolSchema;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public synthetic fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }

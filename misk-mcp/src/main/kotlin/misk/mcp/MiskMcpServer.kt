@@ -155,7 +155,7 @@ class MiskMcpServer internal constructor(
             idempotentHint = tool.idempotentHint
             openWorldHint = tool.openWorldHint
           }
-          tool._meta?.let { _meta = it }
+          tool.meta?.let { meta = it }
         },
         handler = metricReportingHandler(tool.name, tool::handler),
       )

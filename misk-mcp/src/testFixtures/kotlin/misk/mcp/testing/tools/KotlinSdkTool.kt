@@ -18,7 +18,7 @@ data class VersionMetadata(
 class KotlinSdkTool @Inject constructor() : McpTool<ToolSchema>() {
   override val name = "kotlin-sdk-tool"
   override val description = "A test tool"
-  override val _meta: JsonObject = VersionMetadata(version = "1.2.3").encode()
+  override val meta: JsonObject = VersionMetadata(version = "1.2.3").encode()
 
   override suspend fun handle(input: ToolSchema) = ToolResult(TextContent("Hello, world!"))
 }
