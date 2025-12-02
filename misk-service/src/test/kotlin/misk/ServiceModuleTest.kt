@@ -262,4 +262,91 @@ class ServiceModuleTest {
     assertThat(log.toString()).contains("TestService.startUp")
     assertThat(log.toString()).doesNotContain("UpstreamService.startUp")
   }
+
+  @Test
+  fun multipleServicesWithConditionalOnDisabled_noGuiceErrors() {
+    val disabledSwitch = TestSwitch(enabled = false)
+    val log = StringBuilder()
+    val injector = Guice.createInjector(
+      MiskTestingServiceModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          bind<StringBuilder>().toInstance(log)
+          bind<TestSwitch>().toInstance(disabledSwitch)
+          install(ServiceModule<TestService>().conditionalOn<TestSwitch>("test"))
+          install(ServiceModule<UpstreamService>().conditionalOn<TestSwitch>("test"))
+          install(ServiceModule<EnhancementService>().conditionalOn<TestSwitch>("test"))
+        }
+      }
+    )
+
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+    
+    assertThat(log.toString()).doesNotContain("TestService.startUp")
+    assertThat(log.toString()).doesNotContain("UpstreamService.startUp")
+    assertThat(log.toString()).doesNotContain("EnhancementService.startUp")
+  }
+
+  @Test
+  fun multipleServicesWithDependenciesAndEnhancementsAllDisabled_noGuiceErrors() {
+    val disabledSwitch = TestSwitch(enabled = false)
+    val log = StringBuilder()
+    val injector = Guice.createInjector(
+      MiskTestingServiceModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          bind<StringBuilder>().toInstance(log)
+          bind<TestSwitch>().toInstance(disabledSwitch)
+          install(ServiceModule<UpstreamService>().conditionalOn<TestSwitch>("test"))
+          install(ServiceModule<EnhancementService>().conditionalOn<TestSwitch>("test"))
+          install(ServiceModule<TestService>()
+            .dependsOn<UpstreamService>()
+            .enhancedBy<EnhancementService>()
+            .conditionalOn<TestSwitch>("test"))
+        }
+      }
+    )
+
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+    
+    assertThat(log.toString()).doesNotContain("TestService.startUp")
+    assertThat(log.toString()).doesNotContain("UpstreamService.startUp")
+    assertThat(log.toString()).doesNotContain("EnhancementService.startUp")
+  }
+
+  @Test
+  fun multipleServicesWithSameSwitchKey_someEnabledSomeDisabled_noGuiceErrors() {
+    val keyAwareSwitch = KeyAwareSwitch(enabledKeys = setOf("enabled"))
+    val log = StringBuilder()
+    val injector = Guice.createInjector(
+      MiskTestingServiceModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          bind<StringBuilder>().toInstance(log)
+          bind<KeyAwareSwitch>().toInstance(keyAwareSwitch)
+          install(ServiceModule<TestService>().conditionalOn<KeyAwareSwitch>("enabled"))
+          install(ServiceModule<UpstreamService>().conditionalOn<KeyAwareSwitch>("disabled"))
+          install(ServiceModule<EnhancementService>().conditionalOn<KeyAwareSwitch>("disabled"))
+        }
+      }
+    )
+
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+    
+    assertThat(log.toString()).contains("TestService.startUp")
+    assertThat(log.toString()).doesNotContain("UpstreamService.startUp")
+    assertThat(log.toString()).doesNotContain("EnhancementService.startUp")
+  }
 }
