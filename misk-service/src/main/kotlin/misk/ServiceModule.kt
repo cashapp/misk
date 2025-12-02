@@ -225,6 +225,7 @@ internal data class DependencyEdge(val dependent: Key<*>, val dependsOn: Key<*>)
 
 internal data class ServiceEntry(val key: Key<out Service>)
 
+// TODO combine optional and non after rolled out and tested
 // Wrapper types to handle optional conditional contributions
 // Each wrapper contains the original service key to make disabled entries unique
 internal data class OptionalServiceEntry(val originalServiceKey: Key<out Service>, val entry: ServiceEntry?)
