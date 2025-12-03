@@ -1,6 +1,6 @@
 package misk.mcp.action
 
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.server.ServerSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +39,7 @@ import misk.web.sse.ServerSentEvent
  * - Client sends JSON-RPC messages via POST, server responds via Server-Sent Events (SSE) stream
  *
  * ### WebSocket
- * - Used with [McpWebSocket] annotated actions  
+ * - Used with [McpWebSocket] annotated actions
  * - Full bidirectional communication over persistent WebSocket connection
  * - Both client and server can initiate communication
  *
@@ -246,7 +246,7 @@ class McpStreamManager internal constructor(
       Dispatchers.IO.limitedParallelism(1)
           + McpServerSession(serverSession)
     )
-    
+
     override fun onMessage(webSocket: WebSocket, text: String) {
       logger.debug { "Received message: $text" }
       val message: JSONRPCMessage = text.decode()

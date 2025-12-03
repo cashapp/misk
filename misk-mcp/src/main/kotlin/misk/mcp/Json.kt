@@ -2,7 +2,7 @@
 
 package misk.mcp
 
-import io.modelcontextprotocol.kotlin.sdk.EmptyJsonObject
+import io.modelcontextprotocol.kotlin.sdk.types.EmptyJsonObject
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -17,7 +17,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.serializer
-import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
 /**

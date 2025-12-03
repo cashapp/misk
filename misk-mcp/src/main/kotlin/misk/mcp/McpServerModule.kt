@@ -4,7 +4,6 @@ package misk.mcp
 
 import com.google.inject.Provider
 import com.google.inject.TypeLiteral
-import com.google.inject.multibindings.OptionalBinder
 import jakarta.inject.Inject
 import kotlinx.coroutines.channels.SendChannel
 import misk.annotation.ExperimentalMiskApi
