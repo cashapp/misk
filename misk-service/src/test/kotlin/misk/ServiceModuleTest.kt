@@ -349,4 +349,158 @@ class ServiceModuleTest {
     assertThat(log.toString()).doesNotContain("UpstreamService.startUp")
     assertThat(log.toString()).doesNotContain("EnhancementService.startUp")
   }
+
+  @Test
+  fun duplicateServiceModule_withIdenticalParameters_deduplicates() {
+    // This would have failed before the fix with duplicate multibinding errors
+    val enabledSwitch = TestSwitch(enabled = true)
+    val log = StringBuilder()
+    val injector = Guice.createInjector(
+      MiskTestingServiceModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          bind<StringBuilder>().toInstance(log)
+          bind<TestSwitch>().toInstance(enabledSwitch)
+          // Install the exact same ServiceModule twice
+          install(ServiceModule<TestService>().conditionalOn<TestSwitch>("test"))
+          install(ServiceModule<TestService>().conditionalOn<TestSwitch>("test"))
+        }
+      }
+    )
+
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+
+    // Should only start once, not twice
+    assertThat(log.toString()).contains("TestService.startUp")
+    assertThat(log.toString().split("TestService.startUp").size - 1).isEqualTo(1)
+  }
+
+  @Test
+  fun duplicateConditionalService_installedFromMultipleModules_deduplicates() {
+    // Simulates the Auditorium scenario where multiple AwsSqsJobHandlerModule instances
+    // each install the same conditional service
+    val enabledSwitch = TestSwitch(enabled = true)
+    val log = StringBuilder()
+    
+    class ModuleA : KAbstractModule() {
+      override fun configure() {
+        install(ServiceModule<TestService>().conditionalOn<TestSwitch>("shared"))
+      }
+    }
+    
+    class ModuleB : KAbstractModule() {
+      override fun configure() {
+        install(ServiceModule<TestService>().conditionalOn<TestSwitch>("shared"))
+      }
+    }
+    
+    val injector = Guice.createInjector(
+      MiskTestingServiceModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          bind<StringBuilder>().toInstance(log)
+          bind<TestSwitch>().toInstance(enabledSwitch)
+          install(ModuleA())
+          install(ModuleB())
+        }
+      }
+    )
+
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+
+    assertThat(log.toString()).contains("TestService.startUp")
+  }
+
+  @Test
+  fun duplicateConditionalService_withDifferentSwitchKeys_doesNotDeduplicate() {
+    val keyAwareSwitch = KeyAwareSwitch(enabledKeys = setOf("key1"))
+    val log = StringBuilder()
+    val injector = Guice.createInjector(
+      MiskTestingServiceModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          bind<StringBuilder>().toInstance(log)
+          bind<KeyAwareSwitch>().toInstance(keyAwareSwitch)
+          // Different switchKeys should NOT deduplicate - they are different bindings
+          install(ServiceModule<TestService>().conditionalOn<KeyAwareSwitch>("key1"))
+          install(ServiceModule<UpstreamService>().conditionalOn<KeyAwareSwitch>("key2"))
+        }
+      }
+    )
+
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+
+    // Only key1 is enabled, so only TestService starts
+    assertThat(log.toString()).contains("TestService.startUp")
+    assertThat(log.toString()).doesNotContain("UpstreamService.startUp")
+  }
+
+  @Test
+  fun duplicateConditionalService_withDifferentDependencies_doesNotDeduplicate() {
+    val enabledSwitch = TestSwitch(enabled = true)
+    val log = StringBuilder()
+    val injector = Guice.createInjector(
+      MiskTestingServiceModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          bind<StringBuilder>().toInstance(log)
+          bind<TestSwitch>().toInstance(enabledSwitch)
+          install(ServiceModule<UpstreamService>())
+          // Different dependencies should NOT deduplicate - they are different configurations
+          install(ServiceModule<TestService>().conditionalOn<TestSwitch>("test"))
+          install(ServiceModule<EnhancementService>()
+            .dependsOn<UpstreamService>()
+            .conditionalOn<TestSwitch>("test"))
+        }
+      }
+    )
+
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+
+    assertThat(log.toString()).contains("TestService.startUp")
+    assertThat(log.toString()).contains("EnhancementService.startUp")
+    assertThat(log.toString()).contains("UpstreamService.startUp")
+  }
+
+  @Test
+  fun unconditionalServiceModule_duplicateInstalls_deduplicates() {
+    val log = StringBuilder()
+    val injector = Guice.createInjector(
+      MiskTestingServiceModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          bind<StringBuilder>().toInstance(log)
+          // Install the same unconditional service twice
+          install(ServiceModule<TestService>())
+          install(ServiceModule<TestService>())
+        }
+      }
+    )
+
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+
+    // Should only start once
+    assertThat(log.toString()).contains("TestService.startUp")
+    assertThat(log.toString().split("TestService.startUp").size - 1).isEqualTo(1)
+  }
 }
