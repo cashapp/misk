@@ -78,9 +78,11 @@ public final class misk/ServiceModule : misk/inject/KAbstractModule {
 	public final synthetic fun enhancedBy ()Lmisk/ServiceModule;
 	public final fun enhancedBy (Lcom/google/inject/Key;)Lmisk/ServiceModule;
 	public final fun enhancedBy (Ljava/util/List;)Lmisk/ServiceModule;
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDependsOn ()Ljava/util/List;
 	public final fun getEnhancedBy ()Ljava/util/List;
 	public final fun getKey ()Lcom/google/inject/Key;
+	public fun hashCode ()I
 }
 
 public final class misk/metadata/servicegraph/ServiceGraphMetadata : misk/web/metadata/Metadata {

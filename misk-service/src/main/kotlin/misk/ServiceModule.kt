@@ -114,7 +114,7 @@ constructor(
             ServiceEntry(key),
             null,
           ) {
-            OptionalServiceEntry(key, it)
+            OptionalServiceEntry(key, switchKey, switchType, it)
           }
         ).asSingleton()
     } else {
@@ -134,7 +134,7 @@ constructor(
               DependencyEdge(dependent = key, dependsOn = dependsOnKey),
               null,
             ) {
-              OptionalDependencyEdge(key, it)
+              OptionalDependencyEdge(key, switchKey, switchType, it)
             }
           ).asSingleton()
       } else {
@@ -154,7 +154,7 @@ constructor(
               EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey),
               null,
             ) {
-              OptionalEnhancementEdge(key, it)
+              OptionalEnhancementEdge(key, switchKey, switchType, it)
             }
           ).asSingleton()
       } else {
@@ -186,6 +186,26 @@ constructor(
   @JvmOverloads
   inline fun <reified T : Service> enhancedBy(qualifier: KClass<out Annotation>? = null) =
     enhancedBy(T::class.toKey(qualifier))
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is ServiceModule) return false
+    if (key != other.key) return false
+    if (dependsOn != other.dependsOn) return false
+    if (enhancedBy != other.enhancedBy) return false
+    if (switchKey != other.switchKey) return false
+    if (switchType != other.switchType) return false
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = key.hashCode()
+    result = 31 * result + dependsOn.hashCode()
+    result = 31 * result + enhancedBy.hashCode()
+    result = 31 * result + switchKey.hashCode()
+    result = 31 * result + (switchType?.hashCode() ?: 0)
+    return result
+  }
 }
 
 /**
@@ -227,7 +247,22 @@ internal data class ServiceEntry(val key: Key<out Service>)
 
 // TODO combine optional and non after rolled out and tested
 // Wrapper types to handle optional conditional contributions
-// Each wrapper contains the original service key to make disabled entries unique
-internal data class OptionalServiceEntry(val originalServiceKey: Key<out Service>, val entry: ServiceEntry?)
-internal data class OptionalDependencyEdge(val originalServiceKey: Key<out Service>, val edge: DependencyEdge?)
-internal data class OptionalEnhancementEdge(val originalServiceKey: Key<out Service>, val edge: EnhancementEdge?)
+// Each wrapper contains the service key, switchKey, and switchType to make entries unique per conditional registration
+internal data class OptionalServiceEntry(
+  val serviceKey: Key<out Service>,
+  val switchKey: String,
+  val switchType: KClass<out Switch>,
+  val entry: ServiceEntry?
+)
+internal data class OptionalDependencyEdge(
+  val serviceKey: Key<out Service>,
+  val switchKey: String,
+  val switchType: KClass<out Switch>,
+  val edge: DependencyEdge?
+)
+internal data class OptionalEnhancementEdge(
+  val serviceKey: Key<out Service>,
+  val switchKey: String,
+  val switchType: KClass<out Switch>,
+  val edge: EnhancementEdge?
+)
