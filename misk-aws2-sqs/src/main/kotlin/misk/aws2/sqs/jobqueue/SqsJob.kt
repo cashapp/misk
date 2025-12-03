@@ -14,8 +14,12 @@ class SqsJob(
   val publishToChannelTimestamp: Long,
 ) : Job {
   override val body: String = message.body()
-  override val attributes: Map<String, String>
-    get() = emptyMap()
+  override val attributes: Map<String, String> by lazy {
+    message.messageAttributes()
+      .filter { (key, _) -> key != JOBQUEUE_METADATA_ATTR }
+      .map { (key, value) -> key to value.stringValue() }.toMap()
+      .plus(message.attributes().map { (key, value) -> key.toString() to value })
+  }
   override val id: String = message.messageId()
   override val idempotenceKey: String by lazy {
     jobqueueMetadata[JOBQUEUE_METADATA_IDEMPOTENCE_KEY]
