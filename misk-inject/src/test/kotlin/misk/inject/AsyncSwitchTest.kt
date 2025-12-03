@@ -296,4 +296,88 @@ class AsyncSwitchTest {
     val result = injector.getInstance(Color::class.java)
     assertThat(result).isInstanceOf(Red::class.java)
   }
+
+  @Test
+  fun conditionalProvider_equalityBasedOnParameters() {
+    val provider1 = ConditionalProvider(
+      switchKey = "test",
+      switchType = AsyncSwitch::class,
+      outputType = String::class,
+      type = String::class,
+      enabledInstance = "enabled",
+      disabledInstance = "disabled"
+    )
+    val provider2 = ConditionalProvider(
+      switchKey = "test",
+      switchType = AsyncSwitch::class,
+      outputType = String::class,
+      type = String::class,
+      enabledInstance = "enabled",
+      disabledInstance = "disabled"
+    )
+    val provider3 = ConditionalProvider(
+      switchKey = "different",
+      switchType = AsyncSwitch::class,
+      outputType = String::class,
+      type = String::class,
+      enabledInstance = "enabled",
+      disabledInstance = "disabled"
+    )
+
+    assertThat(provider1).isEqualTo(provider2)
+    assertThat(provider1.hashCode()).isEqualTo(provider2.hashCode())
+    assertThat(provider1).isNotEqualTo(provider3)
+  }
+
+  @Test
+  fun conditionalTypedProvider_equalityBasedOnParameters() {
+    val provider1 = ConditionalTypedProvider<AsyncSwitch, Color, Color, Blue, Red>(
+      switchKey = "test"
+    )
+    val provider2 = ConditionalTypedProvider<AsyncSwitch, Color, Color, Blue, Red>(
+      switchKey = "test"
+    )
+    val provider3 = ConditionalTypedProvider<AsyncSwitch, Color, Color, Blue, Red>(
+      switchKey = "different"
+    )
+
+    assertThat(provider1).isEqualTo(provider2)
+    assertThat(provider1.hashCode()).isEqualTo(provider2.hashCode())
+    assertThat(provider1).isNotEqualTo(provider3)
+  }
+
+  @Test
+  fun conditionalProvider_identicalProviders_deduplicateInMultibinder() {
+    val module = object : KAbstractModule() {
+      override fun configure() {
+        bind<AsyncSwitch>().toInstance(AlwaysEnabledSwitch())
+        // Add the same provider twice with identical parameters
+        multibind<String>().toProvider(
+          ConditionalProvider(
+            switchKey = "test",
+            switchType = AsyncSwitch::class,
+            outputType = String::class,
+            type = String::class,
+            enabledInstance = "enabled",
+            disabledInstance = "disabled"
+          )
+        )
+        multibind<String>().toProvider(
+          ConditionalProvider(
+            switchKey = "test",
+            switchType = AsyncSwitch::class,
+            outputType = String::class,
+            type = String::class,
+            enabledInstance = "enabled",
+            disabledInstance = "disabled"
+          )
+        )
+      }
+    }
+    val injector = Guice.createInjector(module)
+    val results = injector.getInstance(com.google.inject.Key.get(object : com.google.inject.TypeLiteral<Set<String>>() {}))
+    // Should only have one element due to deduplication
+    assertThat(results).hasSize(1)
+    assertThat(results).containsExactly("enabled")
+  }
 }
