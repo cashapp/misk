@@ -352,6 +352,79 @@ class MyTest {
 }
 ```
 
+### Verifying action registration
+
+A common mistake is implementing a `WebAction` but forgetting to register it via 
+`WebActionModule.create<YourAction>()`. Without registration, the action won't be exposed as an 
+HTTP endpoint.
+
+Misk provides `WebActionRegistrationTesting` to catch this. It scans your service's packages for 
+`WebAction` implementations and verifies each has a corresponding `WebActionEntry` registration.
+
+**Using the base class:**
+
+```kotlin
+class WebActionRegistrationTest : AbstractWebActionRegistrationTest() {
+  override fun createInjector(): Injector {
+    // Use your service's testing module
+    return Guice.createInjector(MyServiceTestingModule())
+  }
+
+  override fun webActionPackages(): List<String> {
+    // Scan your service's packages for WebAction implementations
+    return listOf("com.example.myservice")
+  }
+
+  // Optional: exclude specific actions from verification
+  override fun excludeWebAction(actionClass: KClass<out WebAction>): Boolean {
+    return actionClass.simpleName in setOf("TestOnlyAction", "SpecialAdminAction")
+  }
+
+  // Optional: hint shown in error messages
+  override fun registrationModuleHint(): String = "WebModule"
+}
+```
+
+**Using the utility directly:**
+
+```kotlin
+@Test
+fun allWebActionsAreRegistered() {
+  val injector = Guice.createInjector(MyServiceTestingModule())
+  
+  WebActionRegistrationTesting.assertAllWebActionsRegistered(
+    injector,
+    WebActionRegistrationTesting.Options(
+      basePackages = listOf("com.example.myservice"),
+      excludePredicate = { actionClass ->
+        actionClass.simpleName == "SpecialAction"
+      },
+      registrationModuleHint = "WebModule",
+    )
+  )
+}
+```
+
+When a missing registration is detected, the assertion fails with a helpful error message including
+copy-paste registration code:
+
+```
+The following WebActions are not registered:
+  - com.example.myservice.actions.ForgottenAction
+
+Copy and paste the following lines into your WebAction registration module in WebModule:
+-----
+    install(WebActionModule.create<ForgottenAction>())
+-----
+```
+
+**Built-in exclusions:**
+
+The following are automatically excluded from verification:
+- Abstract classes and interfaces
+- Classes in `.api.internal.` packages (typically Wire/gRPC-generated actions registered via 
+  different mechanisms)
+
 ### Integration tests
 
 It's possible to perform tests terminating at the app's HTTP/gRPC interface.

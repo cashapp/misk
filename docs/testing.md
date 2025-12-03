@@ -49,3 +49,4 @@ class MyTestingModule : KAbstractModule() {
 Some common domains to test:
 
 - [Testing actions](actions.md#testing)
+- [Verifying action registration](actions.md#verifying-action-registration)

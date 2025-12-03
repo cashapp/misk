@@ -355,6 +355,15 @@ public final class misk/time/FakeTickerModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 }
 
+public abstract class misk/web/AbstractWebActionRegistrationTest {
+	public fun <init> ()V
+	public final fun allWebActionsAreRegistered ()V
+	protected abstract fun createInjector ()Lcom/google/inject/Injector;
+	protected fun excludeWebAction (Lkotlin/reflect/KClass;)Z
+	protected fun registrationModuleHint ()Ljava/lang/String;
+	protected abstract fun webActionPackages ()Ljava/util/List;
+}
+
 public final class misk/web/FakeHttpCall : misk/web/HttpCall {
 	public fun <init> ()V
 	public fun <init> (Lokhttp3/HttpUrl;)V
@@ -455,6 +464,29 @@ public final class misk/web/MiskCallerExtension : org/junit/jupiter/api/extensio
 	public fun <init> ()V
 	public fun afterTestExecution (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
 	public fun beforeTestExecution (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+}
+
+public final class misk/web/WebActionRegistrationTesting {
+	public static final field INSTANCE Lmisk/web/WebActionRegistrationTesting;
+	public final fun assertAllWebActionsRegistered (Lcom/google/inject/Injector;Lmisk/web/WebActionRegistrationTesting$Options;)V
+}
+
+public final class misk/web/WebActionRegistrationTesting$Options {
+	public fun <init> (Ljava/util/List;)V
+	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function1;)V
+	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function1;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function1;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Lkotlin/jvm/functions/Function1;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Lkotlin/jvm/functions/Function1;Ljava/lang/String;)Lmisk/web/WebActionRegistrationTesting$Options;
+	public static synthetic fun copy$default (Lmisk/web/WebActionRegistrationTesting$Options;Ljava/util/List;Lkotlin/jvm/functions/Function1;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/WebActionRegistrationTesting$Options;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBasePackages ()Ljava/util/List;
+	public final fun getExcludePredicate ()Lkotlin/jvm/functions/Function1;
+	public final fun getRegistrationModuleHint ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class misk/web/WebServerTestingModule : misk/inject/KAbstractModule {
