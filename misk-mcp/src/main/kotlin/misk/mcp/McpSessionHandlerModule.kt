@@ -1,6 +1,5 @@
 package misk.mcp
 
-import com.google.inject.multibindings.OptionalBinder
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
 import kotlin.reflect.KClass
