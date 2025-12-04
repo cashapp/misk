@@ -8,7 +8,7 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
 
-class WebActionRegistrationTestingTest {
+class WebActionRegistrationTesterTest {
 
   @Test
   fun `passes when all actions are registered`() {
@@ -20,9 +20,9 @@ class WebActionRegistrationTestingTest {
       }
     )
 
-    WebActionRegistrationTesting.assertAllWebActionsRegistered(
+    WebActionRegistrationTester.assertAllWebActionsRegistered(
       injector,
-      WebActionRegistrationTesting.Options(
+      WebActionRegistrationTester.Options(
         basePackages = listOf("misk.web"),
         excludePredicate = { actionClass ->
           // Exclude test actions from other test classes in this package
@@ -43,9 +43,9 @@ class WebActionRegistrationTestingTest {
     )
 
     assertThatThrownBy {
-      WebActionRegistrationTesting.assertAllWebActionsRegistered(
+      WebActionRegistrationTester.assertAllWebActionsRegistered(
         injector,
-        WebActionRegistrationTesting.Options(
+        WebActionRegistrationTester.Options(
           basePackages = listOf("misk.web"),
           excludePredicate = { actionClass ->
             // Only check UnregisteredAction for this test
@@ -70,9 +70,9 @@ class WebActionRegistrationTestingTest {
     )
 
     // Should not fail because AbstractAction is abstract
-    WebActionRegistrationTesting.assertAllWebActionsRegistered(
+    WebActionRegistrationTester.assertAllWebActionsRegistered(
       injector,
-      WebActionRegistrationTesting.Options(
+      WebActionRegistrationTester.Options(
         basePackages = listOf("misk.web"),
         excludePredicate = { actionClass ->
           // Exclude all non-abstract test actions
@@ -93,9 +93,9 @@ class WebActionRegistrationTestingTest {
     )
 
     // Should pass because ExcludedAction is excluded via predicate
-    WebActionRegistrationTesting.assertAllWebActionsRegistered(
+    WebActionRegistrationTester.assertAllWebActionsRegistered(
       injector,
-      WebActionRegistrationTesting.Options(
+      WebActionRegistrationTester.Options(
         basePackages = listOf("misk.web"),
         excludePredicate = { actionClass ->
           // Exclude all test actions
@@ -116,9 +116,9 @@ class WebActionRegistrationTestingTest {
     )
 
     assertThatThrownBy {
-      WebActionRegistrationTesting.assertAllWebActionsRegistered(
+      WebActionRegistrationTester.assertAllWebActionsRegistered(
         injector,
-        WebActionRegistrationTesting.Options(
+        WebActionRegistrationTester.Options(
           basePackages = listOf("misk.web"),
           excludePredicate = { actionClass ->
             actionClass != UnregisteredAction::class

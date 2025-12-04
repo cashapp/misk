@@ -23,9 +23,9 @@ import kotlin.reflect.KClass
  * @Test
  * fun allWebActionsAreRegistered() {
  *   val injector = // create your injector
- *   WebActionRegistrationTesting.assertAllWebActionsRegistered(
+ *   WebActionRegistrationTester.assertAllWebActionsRegistered(
  *     injector,
- *     WebActionRegistrationTesting.Options(
+ *     WebActionRegistrationTester.Options(
  *       basePackages = listOf("com.example.myservice"),
  *     )
  *   )
@@ -34,7 +34,7 @@ import kotlin.reflect.KClass
  *
  * Or use [AbstractWebActionRegistrationTest] for a simpler base class approach.
  */
-object WebActionRegistrationTesting {
+object WebActionRegistrationTester {
 
   /**
    * Configuration options for web action registration testing.
@@ -107,10 +107,7 @@ object WebActionRegistrationTesting {
             val clazz = classInfo.loadClass()
             !shouldExcludeByDefault(clazz)
           }
-          .map {
-            @Suppress("UNCHECKED_CAST")
-            it.loadClass().kotlin as KClass<out WebAction>
-          }
+          .map { it.loadClass().kotlin.asWebActionClass() }
           .filterNot { options.excludePredicate(it) }
           .toSet()
       }
@@ -174,8 +171,13 @@ object WebActionRegistrationTesting {
       appendLine("-----")
       missing.forEach { actionClass ->
         appendLine("    install(WebActionModule.create<${actionClass.simpleName}>())")
+        appendLine("or")
+        appendLine("    install(WebActionModule.create<${actionClass.simpleName}>(\"<optional path prefix>\"))")
       }
       append("-----")
     }
   }
+
+  @Suppress("UNCHECKED_CAST")
+  private fun KClass<*>.asWebActionClass(): KClass<out WebAction> = this as KClass<out WebAction>
 }

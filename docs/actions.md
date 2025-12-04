@@ -358,21 +358,20 @@ A common mistake is implementing a `WebAction` but forgetting to register it via
 `WebActionModule.create<YourAction>()`. Without registration, the action won't be exposed as an 
 HTTP endpoint.
 
-Misk provides `WebActionRegistrationTesting` to catch this. It scans your service's packages for 
+Misk provides `WebActionRegistrationTester` to catch this. It scans your service's packages for 
 `WebAction` implementations and verifies each has a corresponding `WebActionEntry` registration.
 
 **Using the base class:**
 
 ```kotlin
+@MiskTest
 class WebActionRegistrationTest : AbstractWebActionRegistrationTest() {
-  override fun createInjector(): Injector {
-    // Use your service's testing module
-    return Guice.createInjector(MyServiceTestingModule())
-  }
+  @MiskTestModule
+  val module: Module = DinoTestModule()
 
   override fun webActionPackages(): List<String> {
     // Scan your service's packages for WebAction implementations
-    return listOf("com.example.myservice")
+    return listOf("com.example.dino")
   }
 
   // Optional: exclude specific actions from verification
@@ -381,7 +380,7 @@ class WebActionRegistrationTest : AbstractWebActionRegistrationTest() {
   }
 
   // Optional: hint shown in error messages
-  override fun registrationModuleHint(): String = "WebModule"
+  override fun registrationModuleHint(): String = "your service's web actions module"
 }
 ```
 
@@ -390,16 +389,16 @@ class WebActionRegistrationTest : AbstractWebActionRegistrationTest() {
 ```kotlin
 @Test
 fun allWebActionsAreRegistered() {
-  val injector = Guice.createInjector(MyServiceTestingModule())
+  val injector = Guice.createInjector(DinoTestModule())
   
-  WebActionRegistrationTesting.assertAllWebActionsRegistered(
+  WebActionRegistrationTester.assertAllWebActionsRegistered(
     injector,
-    WebActionRegistrationTesting.Options(
-      basePackages = listOf("com.example.myservice"),
+    WebActionRegistrationTester.Options(
+      basePackages = listOf("com.example.dino"),
       excludePredicate = { actionClass ->
         actionClass.simpleName == "SpecialAction"
       },
-      registrationModuleHint = "WebModule",
+      registrationModuleHint = "DinoWebModule",
     )
   )
 }
@@ -410,11 +409,13 @@ copy-paste registration code:
 
 ```
 The following WebActions are not registered:
-  - com.example.myservice.actions.ForgottenAction
+  - com.example.dino.actions.ForgottenAction
 
-Copy and paste the following lines into your WebAction registration module in WebModule:
+Copy and paste the following lines into your WebAction registration module in DinoWebModule:
 -----
     install(WebActionModule.create<ForgottenAction>())
+or
+    install(WebActionModule.create<ForgottenAction>("<optional path prefix>"))
 -----
 ```
 

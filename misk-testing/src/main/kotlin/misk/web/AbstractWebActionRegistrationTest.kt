@@ -1,8 +1,12 @@
 package misk.web
 
 import com.google.inject.Injector
+import com.google.inject.Module
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
 import org.junit.jupiter.api.Test
+import jakarta.inject.Inject
 import kotlin.reflect.KClass
 
 /**
@@ -15,11 +19,10 @@ import kotlin.reflect.KClass
  * ## Usage
  *
  * ```kotlin
+ * @MiskTest
  * class WebActionRegistrationTest : AbstractWebActionRegistrationTest() {
- *   override fun createInjector(): Injector {
- *     // Use your service's testing module or injector builder
- *     return Guice.createInjector(MyServiceTestingModule())
- *   }
+ *   @MiskTestModule
+ *   val module: Module = MyServiceTestModule()
  *
  *   override fun webActionPackages(): List<String> {
  *     return listOf("com.example.myservice")
@@ -46,15 +49,11 @@ import kotlin.reflect.KClass
  *
  * Use [excludeWebAction] to add service-specific exclusions.
  */
+@MiskTest
 abstract class AbstractWebActionRegistrationTest {
 
-  /**
-   * Creates the Guice injector for the service under test.
-   *
-   * This should return an injector configured with all the modules your service uses,
-   * typically via your testing module or a similar mechanism.
-   */
-  protected abstract fun createInjector(): Injector
+  @Inject
+  private lateinit var injector: Injector
 
   /**
    * Returns the packages to scan for WebAction implementations.
@@ -89,10 +88,9 @@ abstract class AbstractWebActionRegistrationTest {
 
   @Test
   fun allWebActionsAreRegistered() {
-    val injector = createInjector()
-    WebActionRegistrationTesting.assertAllWebActionsRegistered(
+    WebActionRegistrationTester.assertAllWebActionsRegistered(
       injector,
-      WebActionRegistrationTesting.Options(
+      WebActionRegistrationTester.Options(
         basePackages = webActionPackages(),
         excludePredicate = ::excludeWebAction,
         registrationModuleHint = registrationModuleHint(),

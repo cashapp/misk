@@ -358,7 +358,6 @@ public final class misk/time/FakeTickerModule : misk/inject/KAbstractModule {
 public abstract class misk/web/AbstractWebActionRegistrationTest {
 	public fun <init> ()V
 	public final fun allWebActionsAreRegistered ()V
-	protected abstract fun createInjector ()Lcom/google/inject/Injector;
 	protected fun excludeWebAction (Lkotlin/reflect/KClass;)Z
 	protected fun registrationModuleHint ()Ljava/lang/String;
 	protected abstract fun webActionPackages ()Ljava/util/List;
@@ -466,12 +465,12 @@ public final class misk/web/MiskCallerExtension : org/junit/jupiter/api/extensio
 	public fun beforeTestExecution (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
 }
 
-public final class misk/web/WebActionRegistrationTesting {
-	public static final field INSTANCE Lmisk/web/WebActionRegistrationTesting;
-	public final fun assertAllWebActionsRegistered (Lcom/google/inject/Injector;Lmisk/web/WebActionRegistrationTesting$Options;)V
+public final class misk/web/WebActionRegistrationTester {
+	public static final field INSTANCE Lmisk/web/WebActionRegistrationTester;
+	public final fun assertAllWebActionsRegistered (Lcom/google/inject/Injector;Lmisk/web/WebActionRegistrationTester$Options;)V
 }
 
-public final class misk/web/WebActionRegistrationTesting$Options {
+public final class misk/web/WebActionRegistrationTester$Options {
 	public fun <init> (Ljava/util/List;)V
 	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function1;)V
 	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function1;Ljava/lang/String;)V
@@ -479,8 +478,8 @@ public final class misk/web/WebActionRegistrationTesting$Options {
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Lkotlin/jvm/functions/Function1;
 	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Ljava/util/List;Lkotlin/jvm/functions/Function1;Ljava/lang/String;)Lmisk/web/WebActionRegistrationTesting$Options;
-	public static synthetic fun copy$default (Lmisk/web/WebActionRegistrationTesting$Options;Ljava/util/List;Lkotlin/jvm/functions/Function1;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/WebActionRegistrationTesting$Options;
+	public final fun copy (Ljava/util/List;Lkotlin/jvm/functions/Function1;Ljava/lang/String;)Lmisk/web/WebActionRegistrationTester$Options;
+	public static synthetic fun copy$default (Lmisk/web/WebActionRegistrationTester$Options;Ljava/util/List;Lkotlin/jvm/functions/Function1;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/WebActionRegistrationTester$Options;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBasePackages ()Ljava/util/List;
 	public final fun getExcludePredicate ()Lkotlin/jvm/functions/Function1;
