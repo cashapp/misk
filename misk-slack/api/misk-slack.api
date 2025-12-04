@@ -111,16 +111,25 @@ public abstract interface class misk/slack/webapi/SlackClient {
 
 public final class misk/slack/webapi/SlackConfig {
 	public fun <init> (Ljava/lang/String;Lmisk/config/Secret;Lmisk/config/Secret;)V
-	public synthetic fun <init> (Ljava/lang/String;Lmisk/config/Secret;Lmisk/config/Secret;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lmisk/config/Secret;Lmisk/config/Secret;Lmisk/config/Secret;)V
+	public fun <init> (Ljava/lang/String;Lmisk/config/Secret;Lmisk/config/Secret;Lmisk/config/Secret;Lmisk/config/Secret;)V
+	public fun <init> (Ljava/lang/String;Lmisk/config/Secret;Lmisk/config/Secret;Lmisk/config/Secret;Lmisk/config/Secret;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/config/Secret;Lmisk/config/Secret;Lmisk/config/Secret;Lmisk/config/Secret;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lmisk/config/Secret;Lmisk/config/Secret;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lmisk/config/Secret;
 	public final fun component3 ()Lmisk/config/Secret;
-	public final fun copy (Ljava/lang/String;Lmisk/config/Secret;Lmisk/config/Secret;)Lmisk/slack/webapi/SlackConfig;
-	public static synthetic fun copy$default (Lmisk/slack/webapi/SlackConfig;Ljava/lang/String;Lmisk/config/Secret;Lmisk/config/Secret;ILjava/lang/Object;)Lmisk/slack/webapi/SlackConfig;
+	public final fun component4 ()Lmisk/config/Secret;
+	public final fun component5 ()Lmisk/config/Secret;
+	public final fun component6 ()Z
+	public final fun copy (Ljava/lang/String;Lmisk/config/Secret;Lmisk/config/Secret;Lmisk/config/Secret;Lmisk/config/Secret;Z)Lmisk/slack/webapi/SlackConfig;
+	public static synthetic fun copy$default (Lmisk/slack/webapi/SlackConfig;Ljava/lang/String;Lmisk/config/Secret;Lmisk/config/Secret;Lmisk/config/Secret;Lmisk/config/Secret;ZILjava/lang/Object;)Lmisk/slack/webapi/SlackConfig;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getApp_token ()Lmisk/config/Secret;
 	public final fun getBearer_token ()Lmisk/config/Secret;
+	public final fun getBot_token ()Lmisk/config/Secret;
 	public final fun getSigning_secret ()Lmisk/config/Secret;
+	public final fun getSocket_mode_enabled ()Z
 	public final fun getUrl ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
