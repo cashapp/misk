@@ -5,6 +5,7 @@ public final class wisp/lease/FakeLease : wisp/lease/Lease {
 	public fun checkHeld ()Z
 	public fun checkHeldElsewhere ()Z
 	public fun getName ()Ljava/lang/String;
+	public fun isHeld ()Z
 	public final fun notifyAfterAcquire ()V
 	public final fun notifyBeforeRelease ()V
 	public fun release ()Z

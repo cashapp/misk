@@ -1,18 +1,19 @@
 @file:Suppress("PropertyName", "LocalVariableName")
 
-package misk.mcp.tools
+package misk.mcp.testing.tools
 
-import io.modelcontextprotocol.kotlin.sdk.TextContent
+import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.client.Client
 import jakarta.inject.Inject
 import kotlinx.serialization.Serializable
 import misk.annotation.ExperimentalMiskApi
+import misk.mcp.Description
 import misk.mcp.StructuredMcpTool
-import misk.mcp.tools.CalculatorToolInput.Operation
+import misk.mcp.testing.tools.CalculatorToolInput.Operation
 
 @Serializable
 data class CalculatorToolInput(
-  @misk.mcp.Description(
+  @Description(
     """operation to perform, should be one of ADD, SUBTRACT, MULTIPLY, DIVIDE.
     | An ADD operation should be chosen for PLUS or (+) operator
     | A SUBTRACT operation should be chosen for MINUS, or (-)  operator
@@ -21,9 +22,9 @@ data class CalculatorToolInput(
   """,
   )
   val operation: String,
-  @misk.mcp.Description("first term, an integer")
+  @Description("first term, an integer")
   val first_term: Int,
-  @misk.mcp.Description("second term, an integer")
+  @Description("second term, an integer")
   val second_term: Int,
 ) {
   enum class Operation() { ADD, SUBTRACT, MULTIPLY, DIVIDE }
@@ -31,7 +32,7 @@ data class CalculatorToolInput(
 
 @Serializable
 data class CalculatorToolOutput(
-  @misk.mcp.Description(
+  @Description(
     """result of the operation
       A SUM for ADD,
       A DIFFERENCE for SUBTRACT,
@@ -40,7 +41,7 @@ data class CalculatorToolOutput(
   """,
   )
   val result: Int,
-  @misk.mcp.Description(
+  @Description(
     """optional remainder of the operation, only present for DIVIDE operations that do not divide evenly
       For example, if the operation is 7 divided by 3, the result would be 2 and the remainder would be 1
       If the operation is 8 divided by 4, the result would be 2 and the remainder would be null

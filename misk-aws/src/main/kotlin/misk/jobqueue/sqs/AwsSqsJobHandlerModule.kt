@@ -5,9 +5,9 @@ import com.google.inject.Key
 import misk.ReadyService
 import misk.ServiceModule
 import misk.annotation.ExperimentalMiskApi
-import misk.inject.AsyncModule
+import misk.inject.AsyncSwitch
+import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
-import misk.inject.toKey
 import misk.jobqueue.BatchJobHandler
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
@@ -22,38 +22,22 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
   private val handler: KClass<T>,
   private val installRetryQueue: Boolean,
   private val dependsOn: List<Key<out Service>>,
-) : AsyncModule, KAbstractModule() {
+) : KAbstractModule() {
   override fun configure() {
-    install(CommonModule(queueName, handler, installRetryQueue))
+    newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
+    newMapBinder<QueueName, BatchJobHandler>()
 
-    // TODO remove explicit inline environment variable check once AsyncModule filtering in Guice is working
-    if (!System.getenv("DISABLE_ASYNC_TASKS").toBoolean()) {
-      install(
-        ServiceModule(
-          key = AwsSqsJobHandlerSubscriptionService::class.toKey(),
-          dependsOn = dependsOn
-        ).dependsOn<ReadyService>()
-      )
+    if (installRetryQueue) {
+      newMapBinder<QueueName, JobHandler>().addBinding(queueName.retryQueue).to(handler.java)
     }
-  }
 
-  @OptIn(ExperimentalMiskApi::class)
-  override fun moduleWhenAsyncDisabled(): KAbstractModule = CommonModule(queueName, handler, installRetryQueue)
-
-  private class CommonModule<T : JobHandler>(
-    private val queueName: QueueName,
-    private val handler: KClass<T>,
-    private val installRetryQueue: Boolean,
-  ) : KAbstractModule() {
-    override fun configure() {
-
-      newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
-      newMapBinder<QueueName, BatchJobHandler>()
-
-      if (installRetryQueue) {
-        newMapBinder<QueueName, JobHandler>().addBinding(queueName.retryQueue).to(handler.java)
-      }
-    }
+    install(DefaultAsyncSwitchModule())
+    install(
+      ServiceModule<AwsSqsJobHandlerSubscriptionService>()
+        .conditionalOn<AsyncSwitch>("sqs")
+        .dependsOn(dependsOn)
+        .dependsOn<ReadyService>()
+    )
   }
 
   companion object {

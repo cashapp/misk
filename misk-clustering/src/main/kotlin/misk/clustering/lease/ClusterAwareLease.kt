@@ -5,7 +5,7 @@ import wisp.lease.Lease
 
 /**
  * Provides functions to acquire and check if a lease is held.
- * Returns true for acquire() and checkHeld() if the app is running in the active region.
+ * Returns true for acquire() and isHeld() if the app is running in the active region.
  *
  * This lease serves as a no-op lease, suitable for situations where lease injection is necessary
  * but not functionally important, such as in Misk SQS.
@@ -21,13 +21,13 @@ class ClusterAwareLease(
   override fun addListener(listener: Lease.StateChangeListener) {
   }
 
-  override fun checkHeld(): Boolean {
+  override fun isHeld(): Boolean {
     return (clusterWeightProvider.get() != 0)
   }
 
-  override fun checkHeldElsewhere(): Boolean {
-    return (clusterWeightProvider.get() == 0)
-  }
+  override fun checkHeld(): Boolean = isHeld()
+
+  override fun checkHeldElsewhere(): Boolean = !isHeld()
 
   override fun release(): Boolean {
     return true

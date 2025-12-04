@@ -10,7 +10,9 @@ class FakeLease(
 
   override fun shouldHold(): Boolean = true
 
-  override fun checkHeld() = manager.isLeaseHeld(name)
+  override fun isHeld() = manager.isLeaseHeld(name)
+
+  override fun checkHeld() = isHeld()
 
   /**
    * @return true if the other process holds the lease.
@@ -21,8 +23,8 @@ class FakeLease(
    * @return true if this process acquires the lease.
    */
   override fun acquire(): Boolean {
-    val result = checkHeld()
-    if (checkHeld()) {
+    val result = isHeld()
+    if (result) {
       notifyAfterAcquire()
     }
     return result
@@ -33,7 +35,7 @@ class FakeLease(
    * if the lease was not held.
    */
   override fun release(): Boolean {
-    if (!checkHeld()) {
+    if (!isHeld()) {
       return false
     }
     notifyBeforeRelease()
@@ -44,7 +46,7 @@ class FakeLease(
 
   override fun addListener(listener: Lease.StateChangeListener) {
     listeners.add(listener)
-    if (checkHeld()) {
+    if (isHeld()) {
       listener.afterAcquire(this)
     }
   }

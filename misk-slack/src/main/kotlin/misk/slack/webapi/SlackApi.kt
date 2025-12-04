@@ -1,5 +1,7 @@
 package misk.slack.webapi
 
+import misk.slack.webapi.helpers.AddReactionRequest
+import misk.slack.webapi.helpers.AddReactionResponse
 import misk.slack.webapi.helpers.GetChatPermalinkResponse
 import misk.slack.webapi.helpers.PostMessageRequest
 import misk.slack.webapi.helpers.PostMessageResponse
@@ -80,6 +82,16 @@ interface SlackApi {
   fun updateUserGroup(
     @Body updateRequestJson: UserGroupRequest,
   ): Call<UserGroupResponse>
+
+  /**
+   * Calls Slack and asks it to add a reaction (emoji) to a message.
+   * https://docs.slack.dev/reference/methods/reactions.add/
+   */
+  @POST("/api/reactions.add")
+  @Headers(value = ["accept: application/json"])
+  fun addReaction(
+    @Body addReactionJson: AddReactionRequest,
+  ): Call<AddReactionResponse>
 
   /**
    * Calls Slack and retrieve a permalink URL for a specific extant message

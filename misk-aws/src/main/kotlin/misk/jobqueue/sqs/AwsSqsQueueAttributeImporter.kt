@@ -37,10 +37,7 @@ internal class AwsSqsQueueAttributeImporter @Inject constructor(
       }
       val queue = queues.getForSending(queueName)
       val lease = leaseManager.requestLease("sqs-queue-attributes-${queue.queueName}")
-      var leaseHeld = lease.checkHeld()
-      if (!leaseHeld) {
-        leaseHeld = lease.acquire()
-      }
+      var leaseHeld = lease.isHeld() || lease.acquire()
       if (!leaseHeld) {
         metrics.sqsApproxNumberOfMessages.clear()
         metrics.sqsApproxNumberOfMessagesNotVisible.clear()

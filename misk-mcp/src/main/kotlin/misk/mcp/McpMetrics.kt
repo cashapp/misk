@@ -21,6 +21,7 @@ import kotlin.time.Duration
  *
  * **Labels:**
  * - `server_name`: The name of the MCP server instance (from [MiskMcpServer.name])
+ * - `server_version`: The version of the MCP server instance (from [MiskMcpServer.version])
  * - `tool_name`: The name of the executed tool (from [McpTool.name])
  * - `tool_outcome`: The execution outcome - one of [ToolCallOutcome] values
  *
@@ -38,7 +39,7 @@ import kotlin.time.Duration
  * @Singleton
  * class MyTool : McpTool<MyInput> {
  *   override val name = "my-tool"
- *   
+ *
  *   override suspend fun handler(request: CallToolRequest): CallToolResult {
  *     // This execution is automatically timed and reported
  *     return CallToolResult(content = listOf(TextContent("result")))
@@ -58,10 +59,10 @@ import kotlin.time.Duration
  * ```
  * # Average tool execution time by tool
  * rate(mcp_tool_handler_latency_sum[5m]) / rate(mcp_tool_handler_latency_count[5m])
- * 
+ *
  * # Tool error rate
  * rate(mcp_tool_handler_latency_count{tool_outcome!="Success"}[5m]) / rate(mcp_tool_handler_latency_count[5m])
- * 
+ *
  * # 95th percentile tool latency
  * histogram_quantile(0.95, rate(mcp_tool_handler_latency_bucket[5m]))
  * ```
@@ -74,9 +75,9 @@ internal class McpMetrics @Inject internal constructor(metrics: Metrics) {
   private val mcpToolHandlerLatency = metrics.histogram(
     "mcp_tool_handler_latency",
     "how long a tool's handler() method took",
-    listOf("server_name", "tool_name", "tool_outcome")
+    listOf("server_name", "server_version", "tool_name", "tool_outcome")
   )
-  
+
   /**
    * Records the execution time and outcome of an MCP tool handler.
    *
@@ -85,15 +86,22 @@ internal class McpMetrics @Inject internal constructor(metrics: Metrics) {
    *
    * @param duration The time taken to execute the tool handler
    * @param serverName The name of the MCP server instance
+   * @param version The version of the MCP server instance
    * @param toolName The name of the executed tool
    * @param outcome The execution outcome (Success, Error, or Exception)
    */
-  fun mcpToolHandlerLatency(duration: Duration, serverName: String, toolName: String, outcome: ToolCallOutcome) {
+  fun mcpToolHandlerLatency(
+    duration: Duration,
+    serverName: String,
+    version: String,
+    toolName: String,
+    outcome: ToolCallOutcome
+  ) {
     mcpToolHandlerLatency
-      .labels(serverName, toolName, outcome.name)
+      .labels(serverName, version, toolName, outcome.name)
       .observe(duration.inWholeMilliseconds.toDouble())
   }
-  
+
   /**
    * Represents the possible outcomes of MCP tool execution for metrics reporting.
    *
@@ -104,10 +112,10 @@ internal class McpMetrics @Inject internal constructor(metrics: Metrics) {
   enum class ToolCallOutcome {
     /** Tool executed successfully and returned a valid result */
     Success,
-    
+
     /** Tool executed but returned an error result (CallToolResult.isError = true) */
     Error,
-    
+
     /** Tool execution threw an unhandled exception */
     Exception,
   }

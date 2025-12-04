@@ -8,8 +8,8 @@ plugins {
 
 dependencies {
   api(libs.guice)
+  api(libs.jakartaInject)
   api(libs.javaxInject)
-  implementation(libs.jakartaInject)
   implementation(libs.kotlinReflect)
   implementation(libs.kotlinStdLibJdk8)
   implementation(project(":misk-api"))
@@ -17,7 +17,6 @@ dependencies {
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
-  testImplementation(project(":misk-inject"))
   testImplementation(project(":misk-testing"))
 }
 

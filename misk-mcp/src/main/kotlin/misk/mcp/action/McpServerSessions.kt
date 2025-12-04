@@ -1,6 +1,6 @@
 package misk.mcp.action
 
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.server.ServerSession
 import kotlinx.coroutines.currentCoroutineContext
 import misk.mcp.internal.McpServerSession

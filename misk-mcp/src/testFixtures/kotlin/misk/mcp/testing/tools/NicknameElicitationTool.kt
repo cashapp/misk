@@ -1,9 +1,9 @@
-package misk.mcp.tools
+package misk.mcp.testing.tools
 
-import io.modelcontextprotocol.kotlin.sdk.CreateElicitationResult.Action
-import io.modelcontextprotocol.kotlin.sdk.TextContent
-import io.modelcontextprotocol.kotlin.sdk.Tool
 import io.modelcontextprotocol.kotlin.sdk.client.Client
+import io.modelcontextprotocol.kotlin.sdk.types.ElicitResult
+import io.modelcontextprotocol.kotlin.sdk.types.TextContent
+import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import jakarta.inject.Inject
 import kotlinx.serialization.Serializable
 import misk.annotation.ExperimentalMiskApi
@@ -20,16 +20,16 @@ data class GetNicknameRequest(
 )
 
 @OptIn(ExperimentalMiskApi::class)
-class NicknameElicitationTool @Inject constructor() : McpTool<Tool.Input>() {
+class NicknameElicitationTool @Inject constructor() : McpTool<ToolSchema>() {
   override val name = "nickname"
   override val description = "A test tool that says hello to the user by their nickname"
 
-  override suspend fun handle(input: Tool.Input): ToolResult {
+  override suspend fun handle(input: ToolSchema): ToolResult {
     val result = createTypedElicitation<GetNicknameRequest>("What nickname would you like to use?")
     val response = when (result.action){
-      Action.accept -> "Hello, ${result.content?.nickname}!"
-      Action.decline -> "Sorry, don't know what to call you"
-      Action.cancel -> "Lets try again!"
+      ElicitResult.Action.Accept -> "Hello, ${result.content?.nickname}!"
+      ElicitResult.Action.Decline -> "Sorry, don't know what to call you"
+      ElicitResult.Action.Cancel -> "Lets try again!"
     }
     return ToolResult(TextContent(response))
   }

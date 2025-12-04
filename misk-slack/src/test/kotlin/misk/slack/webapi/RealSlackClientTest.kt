@@ -24,6 +24,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
 import jakarta.inject.Inject
+import misk.slack.webapi.helpers.AddReactionRequest
+import misk.slack.webapi.helpers.AddReactionResponse
 import misk.slack.webapi.helpers.Channel
 import misk.slack.webapi.helpers.ConversationTopic
 import misk.slack.webapi.helpers.GetChatPermalinkResponse
@@ -102,6 +104,14 @@ class RealSlackClientTest {
     server.enqueueChatPermalinkResponse(sampleChatPermalinkResponse)
 
     val response = slackApi.getChatPermalink("C123ABC456", "1759595633.721029").execute()
+    assertThat(response.isSuccessful).isTrue()
+  }
+
+  @Test
+  fun `add reaction to message`() {
+    server.enqueueReactionResponse(sampleReactionResponse)
+
+    val response = slackApi.addReaction(sampleReactionRequest).execute()
     assertThat(response.isSuccessful).isTrue()
   }
 
@@ -327,6 +337,16 @@ class RealSlackClientTest {
         ),
         user_count = 1,
       )
+    )
+
+    val sampleReactionRequest = AddReactionRequest(
+      name = "checkmark",
+      channel = "C012AB3CD",
+      timestamp = "1405894322.002768"
+    )
+
+    val sampleReactionResponse = AddReactionResponse(
+      ok = true
     )
   }
 }

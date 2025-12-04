@@ -2,9 +2,11 @@
 
 package misk.mcp
 
-import io.modelcontextprotocol.kotlin.sdk.EmptyJsonObject
+import io.modelcontextprotocol.kotlin.sdk.types.EmptyJsonObject
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.ClassDiscriminatorMode
 import kotlinx.serialization.json.Json
@@ -14,6 +16,8 @@ import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.serializer
+import kotlin.reflect.KType
 
 /**
  * JSON serialization instance configured for the misk-mcp module.
@@ -26,10 +30,37 @@ internal val McpJson: Json by lazy {
     ignoreUnknownKeys = true
     encodeDefaults = true
     isLenient = true
-    classDiscriminatorMode = ClassDiscriminatorMode.NONE
+    classDiscriminatorMode = ClassDiscriminatorMode.POLYMORPHIC
     explicitNulls = false
   }
 }
+
+/**
+ * Retrieves a [KSerializer] for this [KType] from the [McpJson] serializers module.
+ *
+ * @receiver the [KType] to get a serializer for
+ * @return the [KSerializer] for this type
+ * @throws IllegalArgumentException if no serializer is found for the type
+ */
+@Suppress("UNCHECKED_CAST")
+internal fun KType.serializer(): KSerializer<Any?> =
+  try {
+    McpJson.serializersModule.serializer(this)
+  } catch (e: SerializationException) {
+    throw IllegalArgumentException(
+      "No serializer found for class $this",
+      e,
+    )
+  }
+
+/**
+ * Casts this [KSerializer] to a [KSerializer] of type [T].
+ *
+ * @receiver the [KSerializer] to cast
+ * @return the [KSerializer] cast to type [T]
+ */
+@Suppress("NOTHING_TO_INLINE", "UNCHECKED_CAST")
+internal inline fun <T> KSerializer<*>.cast(): KSerializer<T> = this as KSerializer<T>
 
 /**
  * A reusable empty [JsonArray] instance.

@@ -2,12 +2,11 @@
 
 package misk.mcp
 
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
-import io.modelcontextprotocol.kotlin.sdk.ListToolsRequest
 import io.modelcontextprotocol.kotlin.sdk.client.StreamableHttpClientTransport
 import io.modelcontextprotocol.kotlin.sdk.client.StreamableHttpError
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
+import io.modelcontextprotocol.kotlin.sdk.types.ListToolsRequest
 import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
 import misk.MiskTestingServiceModule
@@ -20,9 +19,10 @@ import misk.mcp.action.SESSION_ID_HEADER
 import misk.mcp.action.handleMessage
 import misk.mcp.config.McpConfig
 import misk.mcp.config.McpServerConfig
+import misk.mcp.testing.InMemoryMcpSessionHandler
 import misk.mcp.testing.asMcpStreamableHttpClient
-import misk.mcp.tools.SessionIdentifierOutput
-import misk.mcp.tools.SessionIdentifierTool
+import misk.mcp.testing.tools.SessionIdentifierOutput
+import misk.mcp.testing.tools.SessionIdentifierTool
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.RequestBody
@@ -60,7 +60,6 @@ internal class McpStatefulServerActionTest {
 
   @OptIn(ExperimentalMiskApi::class)
   @Suppress("unused")
-  @Singleton
   class McpStatefulServerActionTestPostAction @Inject constructor(private val mcpStreamManager: McpStreamManager) :
     WebAction {
     @McpPost
@@ -71,7 +70,6 @@ internal class McpStatefulServerActionTest {
 
   @OptIn(ExperimentalMiskApi::class)
   @Suppress("unused")
-  @Singleton
   class McpStatefulServerActionTestDeleteAction @Inject constructor(
     private val mcpSessionHandler: McpSessionHandler
   ) : WebAction {

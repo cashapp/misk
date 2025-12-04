@@ -1,8 +1,8 @@
 package misk.mcp
 
-import io.modelcontextprotocol.kotlin.sdk.GetPromptRequest
-import io.modelcontextprotocol.kotlin.sdk.GetPromptResult
-import io.modelcontextprotocol.kotlin.sdk.PromptArgument
+import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequest
+import io.modelcontextprotocol.kotlin.sdk.types.GetPromptResult
+import io.modelcontextprotocol.kotlin.sdk.types.PromptArgument
 import misk.annotation.ExperimentalMiskApi
 
 /**

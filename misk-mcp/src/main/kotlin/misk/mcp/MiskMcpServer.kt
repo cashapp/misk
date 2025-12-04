@@ -1,12 +1,12 @@
 package misk.mcp
 
 import com.google.inject.Provider
-import io.modelcontextprotocol.kotlin.sdk.CallToolRequest
-import io.modelcontextprotocol.kotlin.sdk.CallToolResult
-import io.modelcontextprotocol.kotlin.sdk.Implementation
-import io.modelcontextprotocol.kotlin.sdk.ServerCapabilities
-import io.modelcontextprotocol.kotlin.sdk.Tool
-import io.modelcontextprotocol.kotlin.sdk.ToolAnnotations
+import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequest
+import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
+import io.modelcontextprotocol.kotlin.sdk.types.Implementation
+import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
+import io.modelcontextprotocol.kotlin.sdk.types.Tool
+import io.modelcontextprotocol.kotlin.sdk.types.ToolAnnotations
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
 import misk.annotation.ExperimentalMiskApi
@@ -57,7 +57,6 @@ import kotlin.time.TimeSource
  * [misk.mcp.action.McpStreamManager]:
  *
  * ```kotlin
- * @Singleton
  * class MyMcpWebAction @Inject constructor(
  *   private val mcpStreamManager: McpStreamManager
  * ) : WebAction {
@@ -98,6 +97,7 @@ import kotlin.time.TimeSource
 @ExperimentalMiskApi
 class MiskMcpServer internal constructor(
   val name: String,
+  val version: String,
   val config: McpServerConfig,
   tools: Set<McpTool<*>>,
   resources: Set<McpResource>,
@@ -107,12 +107,12 @@ class MiskMcpServer internal constructor(
 ) : Server(
   Implementation(
     name = name,
-    version = config.version,
+    version = version,
   ),
   ServerOptions(
     capabilities = ServerCapabilities(
       experimental = null,
-      sampling = null,
+      completions = null,
       logging = null,
       prompts = if (prompts.isNotEmpty()) config.prompts.asPrompts() else null,
       resources = if (resources.isNotEmpty()) config.resources.asResources() else null,
@@ -155,7 +155,7 @@ class MiskMcpServer internal constructor(
             idempotentHint = tool.idempotentHint
             openWorldHint = tool.openWorldHint
           }
-          tool._meta?.let { _meta = it }
+          tool.meta?.let { meta = it }
         },
         handler = metricReportingHandler(tool.name, tool::handler),
       )
@@ -169,7 +169,7 @@ class MiskMcpServer internal constructor(
     return { request ->
       val mark =  TimeSource.Monotonic.markNow()
       var outcome = McpMetrics.ToolCallOutcome.Success
-      
+
       try {
         handler(request).also { result ->
           outcome =
@@ -181,7 +181,7 @@ class MiskMcpServer internal constructor(
         throw ex
       } finally {
         val duration = mark.elapsedNow()
-        mcpMetrics.mcpToolHandlerLatency(duration, name, toolName, outcome)
+        mcpMetrics.mcpToolHandlerLatency(duration, name, version, toolName, outcome)
       }
     }
   }

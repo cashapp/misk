@@ -2,11 +2,10 @@
 
 package misk.mcp.internal
 
-import io.modelcontextprotocol.kotlin.sdk.EmptyJsonObject
-import io.modelcontextprotocol.kotlin.sdk.Tool
-import io.modelcontextprotocol.kotlin.sdk.Tool.Input
-import io.modelcontextprotocol.kotlin.sdk.Tool.Output
-import io.modelcontextprotocol.kotlin.sdk.ToolAnnotations
+import io.modelcontextprotocol.kotlin.sdk.types.EmptyJsonObject
+import io.modelcontextprotocol.kotlin.sdk.types.Tool
+import io.modelcontextprotocol.kotlin.sdk.types.ToolAnnotations
+import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import kotlinx.serialization.json.JsonObject
 
 internal class ToolBuilder(
@@ -17,7 +16,7 @@ internal class ToolBuilder(
   /**
    * A JSON object defining the expected parameters for the tool.
    */
-  var inputSchema: Input,
+  var inputSchema: ToolSchema,
 ) {
 
   /**
@@ -33,7 +32,7 @@ internal class ToolBuilder(
   /**
    * An optional JSON object defining the expected output schema for the tool.
    */
-  var outputSchema: Output? = null
+  var outputSchema: ToolSchema? = null
 
   /**
    * Optional additional tool information.
@@ -43,7 +42,7 @@ internal class ToolBuilder(
   /**
    * Optional metadata for the tool.
    */
-  var _meta: JsonObject = EmptyJsonObject
+  var meta: JsonObject = EmptyJsonObject
 
   fun build() = Tool(
     name = name,
@@ -52,7 +51,7 @@ internal class ToolBuilder(
     outputSchema = outputSchema,
     description = description,
     annotations = annotations,
-    _meta = _meta,
+    meta = meta,
   )
 }
 
@@ -106,7 +105,7 @@ internal class ToolAnnotationBuilder {
 
 internal fun Tool.Companion.build(
   name: String,
-  inputSchema: Input,
+  inputSchema: ToolSchema,
   builder: ToolBuilder.() -> Unit,
 ) = ToolBuilder(name, inputSchema).apply(builder).build()
 

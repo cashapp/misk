@@ -4,18 +4,20 @@ package misk.mcp
 
 import com.google.inject.Module
 import com.google.inject.util.Modules
-import io.modelcontextprotocol.kotlin.sdk.CreateElicitationResult
-import io.modelcontextprotocol.kotlin.sdk.GetPromptRequest
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
-import io.modelcontextprotocol.kotlin.sdk.ListPromptsRequest
-import io.modelcontextprotocol.kotlin.sdk.ListResourcesRequest
-import io.modelcontextprotocol.kotlin.sdk.ListToolsRequest
-import io.modelcontextprotocol.kotlin.sdk.ReadResourceRequest
-import io.modelcontextprotocol.kotlin.sdk.TextContent
 import io.modelcontextprotocol.kotlin.sdk.client.Client
+import io.modelcontextprotocol.kotlin.sdk.types.ElicitResult
+import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequest
+import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequestParams
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
+import io.modelcontextprotocol.kotlin.sdk.types.ListPromptsRequest
+import io.modelcontextprotocol.kotlin.sdk.types.ListResourcesRequest
+import io.modelcontextprotocol.kotlin.sdk.types.ListToolsRequest
+import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceRequest
+import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceRequestParams
+import io.modelcontextprotocol.kotlin.sdk.types.TextContent
+import io.modelcontextprotocol.kotlin.sdk.types.TextResourceContents
 import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
 import misk.MiskTestingServiceModule
@@ -27,24 +29,24 @@ import misk.mcp.action.McpWebSocket
 import misk.mcp.action.handleMessage
 import misk.mcp.config.McpConfig
 import misk.mcp.config.McpServerConfig
-import misk.mcp.prompts.KotlinDeveloperPrompt
-import misk.mcp.resources.WebSearchResource
 import misk.mcp.testing.asMcpStreamableHttpClient
 import misk.mcp.testing.asMcpWebSocketClient
-import misk.mcp.tools.CalculatorTool
-import misk.mcp.tools.CalculatorToolInput.Operation
-import misk.mcp.tools.CalculatorToolOutput
-import misk.mcp.tools.GetNicknameRequest
-import misk.mcp.tools.HierarchicalTool
-import misk.mcp.tools.HierarchicalToolOutput
-import misk.mcp.tools.KotlinSdkTool
-import misk.mcp.tools.NicknameElicitationTool
-import misk.mcp.tools.ThrowingTool
-import misk.mcp.tools.VersionMetadata
-import misk.mcp.tools.callCalculatorTool
-import misk.mcp.tools.callHierarchicalTool
-import misk.mcp.tools.callNicknameTool
-import misk.mcp.tools.callThrowingTool
+import misk.mcp.testing.prompts.KotlinDeveloperPrompt
+import misk.mcp.testing.resources.WebSearchResource
+import misk.mcp.testing.tools.CalculatorTool
+import misk.mcp.testing.tools.CalculatorToolInput.Operation
+import misk.mcp.testing.tools.CalculatorToolOutput
+import misk.mcp.testing.tools.GetNicknameRequest
+import misk.mcp.testing.tools.HierarchicalTool
+import misk.mcp.testing.tools.HierarchicalToolOutput
+import misk.mcp.testing.tools.KotlinSdkTool
+import misk.mcp.testing.tools.NicknameElicitationTool
+import misk.mcp.testing.tools.ThrowingTool
+import misk.mcp.testing.tools.VersionMetadata
+import misk.mcp.testing.tools.callCalculatorTool
+import misk.mcp.testing.tools.callHierarchicalTool
+import misk.mcp.testing.tools.callNicknameTool
+import misk.mcp.testing.tools.callThrowingTool
 import misk.metrics.summaryCount
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -71,7 +73,6 @@ internal abstract class McpServerActionTest {
   class McpStreamableHttpServerActionTest : McpServerActionTest() {
     @OptIn(ExperimentalMiskApi::class)
     @Suppress("unused")
-    @Singleton
     class McpServerActionTestPostAction @Inject constructor(private val mcpStreamManager: McpStreamManager) :
       WebAction {
       @McpPost
@@ -101,7 +102,6 @@ internal abstract class McpServerActionTest {
   class McpWebSocketServerActionTest : McpServerActionTest() {
     @OptIn(ExperimentalMiskApi::class)
     @Suppress("unused")
-    @Singleton
     class McpWebSocketServerActionTestAction @Inject constructor(
       private val mcpStreamManager: McpStreamManager
     ) : WebAction {
@@ -130,8 +130,8 @@ internal abstract class McpServerActionTest {
       val nickName = "Test Man"
 
       mcpClient.setElicitationHandler {
-        CreateElicitationResult(
-          action = CreateElicitationResult.Action.accept,
+        ElicitResult(
+          action = ElicitResult.Action.Accept,
           content = GetNicknameRequest(nickName).encode(),
         )
       }
@@ -146,8 +146,8 @@ internal abstract class McpServerActionTest {
     @Test
     fun `test nickname tool with decline elicitation action`(): Unit = runBlocking {
       mcpClient.setElicitationHandler {
-        CreateElicitationResult(
-          action = CreateElicitationResult.Action.decline,
+        ElicitResult(
+          action = ElicitResult.Action.Decline,
         )
       }
 
@@ -161,8 +161,8 @@ internal abstract class McpServerActionTest {
     @Test
     fun `test nickname tool with cancel elicitation action`(): Unit = runBlocking {
       mcpClient.setElicitationHandler {
-        CreateElicitationResult(
-          action = CreateElicitationResult.Action.cancel,
+        ElicitResult(
+          action = ElicitResult.Action.Cancel,
         )
       }
 
@@ -277,7 +277,7 @@ internal abstract class McpServerActionTest {
     )
 
     // Check kotlin-sdk-tool meta
-    assertEquals("1.2.3", kotlinSdkTool._meta.decode<VersionMetadata>().version)
+    assertEquals("1.2.3", kotlinSdkTool.meta?.decode<VersionMetadata>()?.version)
   }
 
   @Test
@@ -334,8 +334,10 @@ internal abstract class McpServerActionTest {
   @Test
   fun `test GetPrompt with arguments`() = runBlocking {
     val request = GetPromptRequest(
+      GetPromptRequestParams(
       name = "Kotlin Developer",
       arguments = mapOf("Project Name" to "TestProject"),
+      ),
     )
     val response = mcpClient.getPrompt(request)
 
@@ -353,12 +355,12 @@ internal abstract class McpServerActionTest {
 
     val message = response.messages.firstOrNull()
     assertNotNull(message)
-    assertEquals("user", message.role.toString())
+    assertEquals("User", message.role.toString())
 
     val textContent = message.content as? TextContent
     assertNotNull(textContent)
     assertContains(
-      textContent.text!!,
+      textContent.text,
       "Develop a kotlin project named <name>TestProject</name>",
       message = "Expected the project name to be included in the prompt message",
     )
@@ -396,7 +398,7 @@ internal abstract class McpServerActionTest {
 
   @Test
   fun `test ReadResource`() = runBlocking {
-    val request = ReadResourceRequest(uri = "https://search.com/")
+    val request = ReadResourceRequest(ReadResourceRequestParams(uri = "https://search.com/"))
     val response = mcpClient.readResource(request)
 
     assertNotNull(response)
@@ -406,7 +408,7 @@ internal abstract class McpServerActionTest {
       message = "Expected one content item in the resource response",
     )
 
-    val content = response.contents.firstOrNull() as? io.modelcontextprotocol.kotlin.sdk.TextResourceContents
+    val content = response.contents.firstOrNull() as? TextResourceContents
     assertNotNull(content)
     assertEquals(
       expected = "https://search.com/",
@@ -434,6 +436,7 @@ internal abstract class McpServerActionTest {
       actual = registry.summaryCount(
         "mcp_tool_handler_latency",
         "server_name" to "mcp-server-action-test-server",
+        "server_version" to "1.0.0",
         "tool_name" to "calculator",
         "tool_outcome" to "Success",
       )
@@ -452,6 +455,7 @@ internal abstract class McpServerActionTest {
         registry.summaryCount(
         "mcp_tool_handler_latency",
         "server_name" to "mcp-server-action-test-server",
+        "server_version" to "1.0.0",
         "tool_name" to "calculator",
         "tool_outcome" to "Error",
       )
@@ -461,13 +465,14 @@ internal abstract class McpServerActionTest {
   @Test
   fun `test exception metrics`(): Unit = runBlocking {
     val result = mcpClient.callThrowingTool()
-    assertEquals(true, result?.isError)
+    assertEquals(true, result.isError)
 
     assertEquals(
       expected = 1.0,
       actual = registry.summaryCount(
         "mcp_tool_handler_latency",
         "server_name" to "mcp-server-action-test-server",
+        "server_version" to "1.0.0",
         "tool_name" to "throwing",
         "tool_outcome" to "Exception",
       )

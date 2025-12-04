@@ -1,11 +1,11 @@
-package misk.mcp.prompts
+package misk.mcp.testing.prompts
 
-import io.modelcontextprotocol.kotlin.sdk.GetPromptRequest
-import io.modelcontextprotocol.kotlin.sdk.GetPromptResult
-import io.modelcontextprotocol.kotlin.sdk.PromptArgument
-import io.modelcontextprotocol.kotlin.sdk.PromptMessage
-import io.modelcontextprotocol.kotlin.sdk.Role
-import io.modelcontextprotocol.kotlin.sdk.TextContent
+import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequest
+import io.modelcontextprotocol.kotlin.sdk.types.GetPromptResult
+import io.modelcontextprotocol.kotlin.sdk.types.PromptArgument
+import io.modelcontextprotocol.kotlin.sdk.types.PromptMessage
+import io.modelcontextprotocol.kotlin.sdk.types.Role
+import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import jakarta.inject.Inject
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.McpPrompt
@@ -23,10 +23,10 @@ class KotlinDeveloperPrompt @Inject constructor() : McpPrompt {
   )
 
   override suspend fun handler(request: GetPromptRequest) = GetPromptResult(
-    "Description for ${request.name}",
+    description = "Description for ${request.name}",
     messages = listOf(
       PromptMessage(
-        role = Role.user,
+        role = Role.User,
         content = TextContent("Develop a kotlin project named <name>${request.arguments?.get("Project Name")}</name>"),
       ),
     ),

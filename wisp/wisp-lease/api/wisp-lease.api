@@ -8,6 +8,7 @@ public final class wisp/lease/AutoCloseableLease : java/lang/AutoCloseable, wisp
 	public fun checkHeldElsewhere ()Z
 	public fun close ()V
 	public fun getName ()Ljava/lang/String;
+	public fun isHeld ()Z
 	public fun release ()Z
 	public fun release (Z)Z
 	public fun shouldHold ()Z
@@ -32,6 +33,7 @@ public abstract interface class wisp/lease/Lease {
 	public abstract fun checkHeld ()Z
 	public abstract fun checkHeldElsewhere ()Z
 	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun isHeld ()Z
 	public abstract fun release ()Z
 	public abstract fun release (Z)Z
 	public abstract fun shouldHold ()Z
