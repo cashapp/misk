@@ -417,6 +417,61 @@ class ServiceModuleTest {
     serviceManager.awaitStopped()
 
     assertThat(log.toString()).contains("TestService.startUp")
+    assertThat(log.toString().split("TestService.startUp").size - 1).isEqualTo(1)
+  }
+
+  @Test
+  fun nestedConditionalService_fromMultipleLayers_deduplicates() {
+    // Simulates the Orderly scenario where multiple publishing modules each install
+    // a job handler module, which in turn installs the same conditional subscription service
+    val enabledSwitch = TestSwitch(enabled = true)
+    val log = StringBuilder()
+    
+    class JobHandlerModuleA : KAbstractModule() {
+      override fun configure() {
+        install(ServiceModule<UpstreamService>().conditionalOn<TestSwitch>("worker"))
+      }
+    }
+    
+    class JobHandlerModuleB : KAbstractModule() {
+      override fun configure() {
+        install(ServiceModule<UpstreamService>().conditionalOn<TestSwitch>("worker"))
+      }
+    }
+    
+    class PublishingModuleA : KAbstractModule() {
+      override fun configure() {
+        install(JobHandlerModuleA())
+      }
+    }
+    
+    class PublishingModuleB : KAbstractModule() {
+      override fun configure() {
+        install(JobHandlerModuleB())
+      }
+    }
+    
+    val injector = Guice.createInjector(
+      MiskTestingServiceModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          bind<StringBuilder>().toInstance(log)
+          bind<TestSwitch>().toInstance(enabledSwitch)
+          install(PublishingModuleA())
+          install(PublishingModuleB())
+        }
+      }
+    )
+
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+
+    // Should only start once despite being installed from two different module hierarchies
+    assertThat(log.toString()).contains("UpstreamService.startUp")
+    assertThat(log.toString().split("UpstreamService.startUp").size - 1).isEqualTo(1)
   }
 
   @Test

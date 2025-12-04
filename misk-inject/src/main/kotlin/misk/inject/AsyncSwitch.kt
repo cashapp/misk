@@ -113,6 +113,28 @@ class ConditionalProvider<S : Switch, Output : Any, Input> @JvmOverloads constru
       transformer(disabledInstance)
     }
   }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is ConditionalProvider<*, *, *>) return false
+    if (switchKey != other.switchKey) return false
+    if (switchType != other.switchType) return false
+    if (outputType != other.outputType) return false
+    if (type != other.type) return false
+    if (enabledInstance != other.enabledInstance) return false
+    if (disabledInstance != other.disabledInstance) return false
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = switchKey.hashCode()
+    result = 31 * result + switchType.hashCode()
+    result = 31 * result + outputType.hashCode()
+    result = 31 * result + type.hashCode()
+    result = 31 * result + (enabledInstance?.hashCode() ?: 0)
+    result = 31 * result + (disabledInstance?.hashCode() ?: 0)
+    return result
+  }
 }
 
 inline fun <
@@ -169,5 +191,27 @@ class ConditionalTypedProvider<S : Switch, Output : Any, Input : Any, Enabled : 
     } else {
       transformer(disabled)
     }
+  }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is ConditionalTypedProvider<*, *, *, *, *>) return false
+    if (switchKey != other.switchKey) return false
+    if (switchType != other.switchType) return false
+    if (outputType != other.outputType) return false
+    if (type != other.type) return false
+    if (enabledType != other.enabledType) return false
+    if (disabledType != other.disabledType) return false
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = switchKey.hashCode()
+    result = 31 * result + switchType.hashCode()
+    result = 31 * result + outputType.hashCode()
+    result = 31 * result + type.hashCode()
+    result = 31 * result + enabledType.hashCode()
+    result = 31 * result + disabledType.hashCode()
+    return result
   }
 }
