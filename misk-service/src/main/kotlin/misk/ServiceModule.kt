@@ -186,26 +186,6 @@ constructor(
   @JvmOverloads
   inline fun <reified T : Service> enhancedBy(qualifier: KClass<out Annotation>? = null) =
     enhancedBy(T::class.toKey(qualifier))
-
-  override fun equals(other: Any?): Boolean {
-    if (this === other) return true
-    if (other !is ServiceModule) return false
-    if (key != other.key) return false
-    if (dependsOn != other.dependsOn) return false
-    if (enhancedBy != other.enhancedBy) return false
-    if (switchKey != other.switchKey) return false
-    if (switchType != other.switchType) return false
-    return true
-  }
-
-  override fun hashCode(): Int {
-    var result = key.hashCode()
-    result = 31 * result + dependsOn.hashCode()
-    result = 31 * result + enhancedBy.hashCode()
-    result = 31 * result + switchKey.hashCode()
-    result = 31 * result + (switchType?.hashCode() ?: 0)
-    return result
-  }
 }
 
 /**

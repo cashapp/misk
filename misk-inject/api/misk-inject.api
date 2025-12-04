@@ -69,6 +69,7 @@ public final class misk/inject/ConditionalProvider : com/google/inject/Provider 
 	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/Object;Ljava/lang/Object;)V
 	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/Object;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/Object;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
 	public fun get ()Ljava/lang/Object;
 	public final fun getDisabledInstance ()Ljava/lang/Object;
 	public final fun getEnabledInstance ()Ljava/lang/Object;
@@ -78,6 +79,7 @@ public final class misk/inject/ConditionalProvider : com/google/inject/Provider 
 	public final fun getSwitchType ()Lkotlin/reflect/KClass;
 	public final fun getTransformer ()Lkotlin/jvm/functions/Function1;
 	public final fun getType ()Lkotlin/reflect/KClass;
+	public fun hashCode ()I
 	public final fun setInjector (Lcom/google/inject/Injector;)V
 }
 
@@ -86,6 +88,7 @@ public final class misk/inject/ConditionalTypedProvider : com/google/inject/Prov
 	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
 	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
 	public fun get ()Ljava/lang/Object;
 	public final fun getDisabledType ()Lkotlin/reflect/KClass;
 	public final fun getEnabledType ()Lkotlin/reflect/KClass;
@@ -95,6 +98,7 @@ public final class misk/inject/ConditionalTypedProvider : com/google/inject/Prov
 	public final fun getSwitchType ()Lkotlin/reflect/KClass;
 	public final fun getTransformer ()Lkotlin/jvm/functions/Function1;
 	public final fun getType ()Lkotlin/reflect/KClass;
+	public fun hashCode ()I
 	public final fun setInjector (Lcom/google/inject/Injector;)V
 }
 
