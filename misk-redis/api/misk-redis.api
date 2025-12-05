@@ -418,24 +418,26 @@ public final class misk/redis/RedisClusterModule : misk/inject/KAbstractModule {
 }
 
 public final class misk/redis/RedisClusterReplicationGroupConfig {
-	public fun <init> (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;)V
-	public fun <init> (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;)V
-	public fun <init> (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;I)V
-	public synthetic fun <init> (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;I)V
+	public synthetic fun <init> (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Lmisk/redis/RedisNodeConfig;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()I
 	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()I
-	public final fun copy (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;I)Lmisk/redis/RedisClusterReplicationGroupConfig;
-	public static synthetic fun copy$default (Lmisk/redis/RedisClusterReplicationGroupConfig;Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;IILjava/lang/Object;)Lmisk/redis/RedisClusterReplicationGroupConfig;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()I
+	public final fun copy (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;I)Lmisk/redis/RedisClusterReplicationGroupConfig;
+	public static synthetic fun copy$default (Lmisk/redis/RedisClusterReplicationGroupConfig;Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;IILjava/lang/Object;)Lmisk/redis/RedisClusterReplicationGroupConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getClient_name ()Ljava/lang/String;
 	public final fun getConfiguration_endpoint ()Lmisk/redis/RedisNodeConfig;
 	public final fun getMax_attempts ()I
 	public final fun getRedis_auth_password ()Ljava/lang/String;
 	public final fun getTimeout_ms ()I
+	public final fun getUser ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
