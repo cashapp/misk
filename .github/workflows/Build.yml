@@ -2,6 +2,7 @@ name: Build
 
 on:
   pull_request:
+  merge_group:
   push:
     branches:
       - master
@@ -22,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -64,7 +65,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -74,7 +75,7 @@ jobs:
 
       - name: Publish Test Report
         if: ${{ always() }}
-        uses: mikepenz/action-junit-report@v5
+        uses: mikepenz/action-junit-report@v6
         with:
           check_name: Test Report - ${{ matrix.cmd }}
           job_name: Test - ${{ matrix.cmd }}
@@ -94,7 +95,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV

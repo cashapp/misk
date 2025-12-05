@@ -1,7 +1,8 @@
 package misk.mcp
 
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialInfo
 import kotlin.annotation.AnnotationRetention.RUNTIME
-import kotlin.annotation.AnnotationTarget.VALUE_PARAMETER
 
 /**
  * Annotation used to provide human-readable descriptions for data class parameters in MCP (Model Context Protocol) tools.
@@ -86,6 +87,8 @@ import kotlin.annotation.AnnotationTarget.VALUE_PARAMETER
  * @see misk.mcp.internal.generateJsonSchema
  * @since 1.0.0
  */
-@Target(VALUE_PARAMETER)
+@OptIn(ExperimentalSerializationApi::class)
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.CLASS)
 @Retention(RUNTIME)
+@SerialInfo
 annotation class Description(val value: String)

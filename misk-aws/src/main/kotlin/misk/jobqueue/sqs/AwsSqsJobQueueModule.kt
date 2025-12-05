@@ -10,6 +10,7 @@ import com.amazonaws.services.sqs.buffered.AmazonSQSBufferedAsyncClient
 import com.amazonaws.services.sqs.buffered.QueueBufferConfig
 import com.google.inject.Provider
 import com.google.inject.Provides
+import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
@@ -17,8 +18,9 @@ import misk.cloud.aws.AwsRegion
 import misk.concurrent.ExecutorServiceModule
 import misk.config.AppName
 import misk.feature.FeatureFlags
+import misk.inject.AsyncSwitch
+import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
-import misk.inject.keyOf
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
@@ -27,7 +29,6 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueConfig
 import misk.tasks.RepeatedTaskQueueFactory
 import wisp.lease.LeaseManager
-import jakarta.inject.Inject
 
 /** [AwsSqsJobQueueModule] installs job queue support provided by SQS. */
 open class AwsSqsJobQueueModule(
@@ -45,15 +46,13 @@ open class AwsSqsJobQueueModule(
     bind<JobQueue>().to<SqsJobQueue>()
     bind<TransactionalJobQueue>().to<SqsTransactionalJobQueue>()
 
-    install(ServiceModule(keyOf<RepeatedTaskQueue>(ForSqsHandling::class)).dependsOn<ReadyService>())
-
     // We use an unbounded thread pool for the number of consumers, as we want to process
     // the messages received as fast a possible.
     install(
       ExecutorServiceModule.withUnboundThreadPool(
         ForSqsHandling::class,
-        "sqs-consumer-%d"
-      )
+        "sqs-consumer-%d",
+      ),
     )
 
     // We use an unbounded thread pool for number of receivers, as this will be controlled dynamically
@@ -61,8 +60,8 @@ open class AwsSqsJobQueueModule(
     install(
       ExecutorServiceModule.withUnboundThreadPool(
         ForSqsReceiving::class,
-        "sqs-receiver-%d"
-      )
+        "sqs-receiver-%d",
+      ),
     )
 
     // Bind a map of AmazonSQS clients for each external region that we need to contact
@@ -73,7 +72,7 @@ open class AwsSqsJobQueueModule(
       .distinct()
       .forEach {
         regionSpecificClientBinder.addBinding(it).toProvider(
-          AmazonSQSProvider(config, it, false, ::configureSyncClient, ::configureAsyncClient)
+          AmazonSQSProvider(config, it, false, ::configureSyncClient, ::configureAsyncClient),
         )
       }
     val regionSpecificClientBinderForReceiving =
@@ -90,8 +89,8 @@ open class AwsSqsJobQueueModule(
               it,
               true,
               ::configureSyncClient,
-              ::configureAsyncClient
-            )
+              ::configureAsyncClient,
+            ),
           )
       }
 
@@ -100,9 +99,23 @@ open class AwsSqsJobQueueModule(
     config.external_queues.map { QueueName(it.key) to it.value }.forEach { (queueName, config) ->
       externalQueueConfigBinder.addBinding(queueName).toInstance(config)
     }
+
+    install(DefaultAsyncSwitchModule())
+    install(
+      ServiceModule<RepeatedTaskQueue, ForSqsHandling>()
+        .conditionalOn<AsyncSwitch>("sqs")
+        .dependsOn<ReadyService>()
+    )
   }
 
-  @Provides @Singleton
+
+  open fun <BuilderT : AwsClientBuilder<BuilderT, ClientT>, ClientT> configureClient(builder: BuilderT) {}
+  private fun configureSyncClient(builder: AmazonSQSClientBuilder) = configureClient(builder)
+  private fun configureAsyncClient(builder: AmazonSQSAsyncClientBuilder) = configureClient(builder)
+
+
+  @Provides
+  @Singleton
   fun provideSQSClient(
     @AppName appName: String,
     region: AwsRegion,
@@ -112,7 +125,9 @@ open class AwsSqsJobQueueModule(
     return buildClient(appName, config, credentials, region, features, ::configureAsyncClient)
   }
 
-  @Provides @Singleton @ForSqsReceiving
+  @Provides
+  @Singleton
+  @ForSqsReceiving
   fun provideSQSClientForReceiving(
     region: AwsRegion,
     credentials: AWSCredentialsProvider
@@ -120,18 +135,16 @@ open class AwsSqsJobQueueModule(
     return buildReceivingClient(credentials, region, ::configureSyncClient)
   }
 
-  open fun <BuilderT : AwsClientBuilder<BuilderT, ClientT>, ClientT> configureClient(builder: BuilderT) {}
-  private fun configureSyncClient(builder: AmazonSQSClientBuilder) = configureClient(builder)
-  private fun configureAsyncClient(builder: AmazonSQSAsyncClientBuilder) = configureClient(builder)
-
-  @Provides @ForSqsHandling @Singleton
+  @Provides
+  @ForSqsHandling
+  @Singleton
   fun consumerRepeatedTaskQueue(
     queueFactory: RepeatedTaskQueueFactory,
     config: AwsSqsJobQueueConfig
   ): RepeatedTaskQueue {
     return queueFactory.new(
       "sqs-consumer-poller",
-      repeatedTaskQueueConfig(config)
+      repeatedTaskQueueConfig(config),
     )
   }
 
@@ -145,9 +158,15 @@ open class AwsSqsJobQueueModule(
     val configureClient: (AmazonSQSClientBuilder) -> Unit,
     val configureAsyncClient: (AmazonSQSAsyncClientBuilder) -> Unit
   ) : Provider<AmazonSQS> {
-    @Inject lateinit var credentials: AWSCredentialsProvider
-    @Inject lateinit var features: FeatureFlags
-    @Inject @AppName lateinit var appName: String
+    @Inject
+    lateinit var credentials: AWSCredentialsProvider
+
+    @Inject
+    lateinit var features: FeatureFlags
+
+    @Inject
+    @AppName
+    lateinit var appName: String
 
     override fun get(): AmazonSQS {
       return if (forSqsReceiving) {
@@ -176,7 +195,7 @@ open class AwsSqsJobQueueModule(
             // Do not artificially constrain the # of connections to SQS. Instead we rely on higher
             // level resource limiting knobs (e.g # of parallel receivers).
             // We only do this for receiving, as sending does not have equivalent knobs.
-            .withMaxConnections(Int.MAX_VALUE)
+            .withMaxConnections(Int.MAX_VALUE),
         )
       configureClient(builder)
       return builder.build()
@@ -203,7 +222,7 @@ open class AwsSqsJobQueueModule(
           ClientConfiguration()
             .withSocketTimeout(config.sqs_sending_socket_timeout_ms)
             .withConnectionTimeout(config.sqs_sending_connect_timeout_ms)
-            .withRequestTimeout(config.sqs_sending_request_timeout_ms)
+            .withRequestTimeout(config.sqs_sending_request_timeout_ms),
         )
       configureAsyncClient(asyncClientBuilder)
       val asyncClient = asyncClientBuilder.build()
@@ -218,7 +237,7 @@ open class AwsSqsJobQueueModule(
         asyncClient,
         AmazonSQSBufferedAsyncClient(asyncClient, bufferConfig),
         appName,
-        features
+        features,
       )
     }
   }

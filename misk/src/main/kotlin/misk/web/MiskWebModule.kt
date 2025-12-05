@@ -159,6 +159,8 @@ class MiskWebModule @JvmOverloads constructor(
       .annotatedWith<MiskServlet>()
       .to<WebActionsServlet>()
 
+    bind<UrlMatcher>().to<RealUrlMatcher>()
+
     install(ServiceModule<RepeatedTaskQueue>(ReadinessRefreshQueue::class))
 
     // Install support for accessing the current request and caller as ActionScoped types
@@ -345,7 +347,7 @@ class MiskWebModule @JvmOverloads constructor(
     }
 
     // TODO(adrw) replace this with a config YAML approach to avoid optional Guice bindings
-    OptionalBinder.newOptionalBinder(binder(), ProtoDocumentationProvider::class.java)
+    bindOptional<ProtoDocumentationProvider>()
   }
 
   @Provides

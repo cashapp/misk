@@ -70,7 +70,7 @@ public abstract interface annotation class misk/cron/CronPattern : java/lang/ann
 	public abstract fun pattern ()Ljava/lang/String;
 }
 
-public final class misk/cron/FakeCronModule : misk/inject/KAbstractModule {
+public final class misk/cron/FakeCronModule : misk/inject/KInstallOnceModule {
 	public fun <init> (Ljava/time/ZoneId;)V
 	public fun <init> (Ljava/time/ZoneId;I)V
 	public fun <init> (Ljava/time/ZoneId;ILjava/util/List;)V

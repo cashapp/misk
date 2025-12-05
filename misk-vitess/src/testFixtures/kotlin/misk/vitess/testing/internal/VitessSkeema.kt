@@ -1,5 +1,6 @@
 package misk.vitess.testing.internal
 
+import misk.vitess.testing.VitessTestDbException
 import java.io.File
 import java.nio.file.Files
 
@@ -11,7 +12,8 @@ internal class VitessSkeema(
   private val hostname: String,
   private val mysqlPort: Int,
   private val dbaUser: String,
-  private val dbaUserPassword: String
+  private val dbaUserPassword: String,
+  private val debugStartup: Boolean = false
 ) {
   companion object {
     val SKEEMA_BINARY = "skeema"
@@ -25,7 +27,7 @@ internal class VitessSkeema(
   fun diff(keyspace: VitessKeyspace): SkeemaDiff {
     val skeemaDirectory = prepareSkeemaDirectory(keyspace)
     try {
-      val processBuilder = ProcessBuilder(listOf(SKEEMA_BINARY, "diff", "--allow-unsafe"))
+      val processBuilder = ProcessBuilder(listOf(skeemaBinaryPath, "diff", "--allow-unsafe"))
       processBuilder.redirectErrorStream(true) // Combine stderr and stdout
       processBuilder.directory(skeemaDirectory)
 
@@ -42,6 +44,12 @@ internal class VitessSkeema(
       }
 
       return SkeemaDiff.parseDifferences(output)
+    } catch (e: Exception) {
+      throw VitessTestDbException(
+        "Failed to execute skeema at path: `$skeemaBinaryPath`. " +
+        "Working directory: `${skeemaDirectory.absolutePath}`. " +
+        "Error: `${e.message}`", e
+      )
     } finally {
       skeemaDirectory.deleteRecursively()
     }
@@ -79,6 +87,59 @@ internal class VitessSkeema(
     )
 
     return tempDir
+  }
+
+  private fun printDebug(message: String) {
+    if (debugStartup) {
+      println("[VitessSkeema] $message")
+    }
+  }
+
+  private fun findSkeemaBinary(): String {
+    // First, try to let OS resolve it directly (works when PATH is set)
+    try {
+      val process = ProcessBuilder(listOf(SKEEMA_BINARY, "--version"))
+        .redirectErrorStream(true)
+        .start()
+
+      if (process.waitFor() == 0) {
+        printDebug("Found skeema in PATH")
+        return SKEEMA_BINARY
+      }
+    } catch (e: Exception) {
+      printDebug("Direct skeema execution failed: ${e.message}")
+    }
+
+    // Try known absolute paths
+    val absolutePaths = listOf(
+      "/opt/homebrew/bin/skeema",
+      "/usr/local/bin/skeema"
+    )
+    
+    for (path in absolutePaths) {
+      if (File(path).exists()) {
+        printDebug("Found skeema at: $path")
+        try {
+          val process = ProcessBuilder(listOf(path, "--version"))
+            .redirectErrorStream(true)
+            .start()
+          if (process.waitFor() == 0) {
+            return path
+          }
+        } catch (e: Exception) {
+          printDebug("Found skeema `$path` but couldn't execute: `${e.message}`")
+        }
+      }
+    }
+    
+
+    throw VitessTestDbException(
+      message = "Cannot find skeema binary. Tried: direct execution and absolute paths: `${absolutePaths.joinToString(", ")}`}"
+    )
+  }
+
+  private val skeemaBinaryPath: String by lazy {
+    findSkeemaBinary()
   }
 }
 

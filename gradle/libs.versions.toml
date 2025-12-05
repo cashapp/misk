@@ -1,7 +1,7 @@
 [versions]
 awaitility = "4.3.0"
 aws1 = "1.12.791"
-aws2 = "2.34.2"
+aws2 = "2.37.2"
 bucket4j = "8.8.0"
 datadog = "1.53.0"
 dependencyAnalysisPlugin = "3.0.4"
@@ -12,12 +12,13 @@ googleHttp = "2.0.0"
 guava = "33.5.0-jre"
 hoplite = "2.7.5"
 jackson = "2.20.0"
-junit = "5.13.4"
+junit = "5.14.1"
 kotest = "6.0.3"
 kotlin = "2.1.21"
 kotlinBinaryCompatibilityPlugin = "0.18.1"
 ktor = "3.3.0"
 mavenPublish = "0.34.0"
+mcp = "0.8.0"
 micrometer = "1.12.13"
 netty = "4.2.6.Final"
 okHttp = "5.1.0"
@@ -26,7 +27,7 @@ prometheus = "0.16.0"
 protobuf = "3.25.8"
 retrofit = "3.0.0"
 sqldelight = "2.1.0"
-tempest = "2025.09.18.063705-9bd8953"
+tempest = "2025.10.27.160126-16a22a2"
 wire = "5.4.0"
 
 [libraries]
@@ -146,6 +147,7 @@ jettyWebsocketApi = { module = "org.eclipse.jetty.websocket:websocket-jetty-api"
 jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-server" }
 jnrUnixsocket = { module = "com.github.jnr:jnr-unixsocket", version = "0.38.23" }
 jooq = { module = "org.jooq:jooq", version = "3.19.17" }
+jsonSchemaValidator = { module = "com.networknt:json-schema-validator", version = "2.0.0" }
 jsqlparser = { module = "com.github.jsqlparser:jsqlparser", version = "5.3" }
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
@@ -184,9 +186,9 @@ lettuceCore = { module = "io.lettuce:lettuce-core", version = "6.8.1.RELEASE" }
 logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.6" }
 logbackCore = { module = "ch.qos.logback:logback-core", version = "1.5.6" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
-mcpKotlinSdkClient = { module = "io.modelcontextprotocol:kotlin-sdk-client", version = "0.7.2" }
-mcpKotlinSdkCore = { module = "io.modelcontextprotocol:kotlin-sdk-core", version = "0.7.2" }
-mcpKotlinSdkServer = { module = "io.modelcontextprotocol:kotlin-sdk-server", version = "0.7.2" }
+mcpKotlinSdkClient = { module = "io.modelcontextprotocol:kotlin-sdk-client", version.ref = "mcp" }
+mcpKotlinSdkCore = { module = "io.modelcontextprotocol:kotlin-sdk-core", version.ref = "mcp" }
+mcpKotlinSdkServer = { module = "io.modelcontextprotocol:kotlin-sdk-server", version.ref = "mcp" }
 micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
 mockitoCore = { module = "org.mockito:mockito-core", version = "5.20.0" }

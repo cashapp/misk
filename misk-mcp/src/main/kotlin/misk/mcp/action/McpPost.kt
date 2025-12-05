@@ -7,16 +7,21 @@ import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
 
 /**
- * Marks a web action method as an MCP (Model Context Protocol) HTTP POST endpoint for client-to-server messaging.
+ * Marks a web action method as an MCP (Model Context Protocol) HTTP POST endpoint for StreamableHTTP transport.
  *
- * This annotation creates endpoints that handle client-to-server JSON-RPC 2.0 messages as specified
- * in the MCP transport specification for "sending messages to the server". The endpoint accepts
- * JSON-RPC requests from MCP clients and responds with Server-Sent Events (SSE) for real-time
- * bidirectional communication.
+ * This annotation creates endpoints that handle client-to-server JSON-RPC 2.0 messages using
+ * StreamableHTTP transport (Server-Sent Events). The endpoint accepts JSON-RPC requests from
+ * MCP clients and responds with Server-Sent Events (SSE) for real-time bidirectional communication.
+ *
+ * ## Transport Compatibility
+ *
+ * **StreamableHTTP Transport Only**: This annotation is designed exclusively for StreamableHTTP
+ * transport using Server-Sent Events. For WebSocket-based MCP communication, use `@McpWebSocket`
+ * instead, which handles all communication over a persistent WebSocket connection.
  *
  * ## Purpose
  * Implements the MCP specification requirement for "sending messages to the server" by providing
- * an HTTP POST endpoint that processes client JSON-RPC 2.0 messages and maintains SSE connections
+ * an HTTP POST endpoint that processes client JSON-RPC 2.0 messages and maintains Server-Sent Events (SSE) connections
  * for server responses.
  *
  * ## Configuration
@@ -24,7 +29,7 @@ import misk.web.mediatype.MediaTypes
  * The annotation automatically configures:
  * - **Endpoint**: `POST /mcp`
  * - **Request Content-Type**: `application/json` (for JSON-RPC messages)
- * - **Response Content-Type**: `text/event-stream` (for SSE responses)
+ * - **Response Content-Type**: `text/event-stream` (for Server-Sent Events (SSE) responses)
  *
  * ## Session Support
  * The endpoint accepts an optional `Mcp-Session-Id` header (referenced by [SESSION_ID_HEADER])
@@ -34,11 +39,9 @@ import misk.web.mediatype.MediaTypes
  * @McpPost
  * suspend fun handleMcpRequest(
  *   @RequestBody message: JSONRPCMessage,
- *   @RequestHeaders headers: Headers,
  *   sendChannel: SendChannel<ServerSentEvent>
  * ) {
- *   val sessionId = headers[SESSION_ID_PARAM]
- *   mcpStreamManager.withResponseChannel(sendChannel, sessionId) {
+ *   mcpStreamManager.withSseChannel(sendChannel) {
  *     // Handle the MCP JSON-RPC message
  *     handleMessage(message)
  *   }
@@ -49,7 +52,7 @@ import misk.web.mediatype.MediaTypes
  *
  * Methods annotated with `@McpPost` should typically have:
  * - `@RequestBody message: JSONRPCMessage` - For JSON-RPC 2.0 message processing
- * - `sendChannel: SendChannel<ServerSentEvent>` - For SSE responses
+ * - `sendChannel: SendChannel<ServerSentEvent>` - For Server-Sent Events (SSE) responses
  * - `suspend` modifier for coroutine support
  * - Optional `@RequestHeaders headers: Headers` for session ID extraction
  *
@@ -74,12 +77,10 @@ import misk.web.mediatype.MediaTypes
  *   @McpPost
  *   suspend fun handleMcpRequest(
  *     @RequestBody message: JSONRPCMessage,
- *     @RequestHeaders headers: Headers,
  *     sendChannel: SendChannel<ServerSentEvent>
  *   ) {
- *     val sessionId = headers[SESSION_ID_PARAM]
- *     mcpStreamManager.withResponseChannel(sendChannel, sessionId) {
- *       // Process client JSON-RPC message and send response via SSE
+ *     mcpStreamManager.withSseChannel(sendChannel) {
+ *       // Process client JSON-RPC message and send response via Server-Sent Events (SSE)
  *       handleMessage(message)
  *     }
  *   }
@@ -90,7 +91,7 @@ import misk.web.mediatype.MediaTypes
  * @see McpDelete for session termination
  * @see SESSION_ID_HEADER for the session ID header constant
  * @see McpStreamManager For managing MCP streams and server lifecycle
- * @see MiskMcpServer For the underlying MCP server implementation
+ * @see misk.mcp.MiskMcpServer For the underlying MCP server implementation
  */
 @Post("/mcp")
 @RequestContentType(MediaTypes.APPLICATION_JSON)

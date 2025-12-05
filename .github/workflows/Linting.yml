@@ -2,6 +2,7 @@ name: Linting
 
 on:
   pull_request:
+  merge_group:
   push:
     branches:
       - master
@@ -22,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -36,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV

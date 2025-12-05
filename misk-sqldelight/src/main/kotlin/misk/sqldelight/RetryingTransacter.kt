@@ -51,53 +51,51 @@ abstract class RetryingTransacter @JvmOverloads constructor(
       inTransaction.set(true)
     }
 
-    val backoff = ExponentialBackoff(
-      Duration.ofMillis(options.minRetryDelayMillis),
-      Duration.ofMillis(options.maxRetryDelayMillis),
-      Duration.ofMillis(options.retryJitterMillis)
-    )
-    var attempt = 0
-    while (true) {
-      try {
-        attempt++
-        val result = work()
+    try {
+      val backoff = ExponentialBackoff(
+        Duration.ofMillis(options.minRetryDelayMillis),
+        Duration.ofMillis(options.maxRetryDelayMillis),
+        Duration.ofMillis(options.retryJitterMillis)
+      )
+      var attempt = 0
+      while (true) {
+        try {
+          attempt++
+          val result = work()
 
-        if (attempt > 1) {
-          logger.info {
-            "retried transaction succeeded (attempt $attempt)"
+          if (attempt > 1) {
+            logger.info {
+              "retried transaction succeeded (attempt $attempt)"
+            }
           }
-        }
 
-        if (outermostTransaction) {
-          inTransaction.set(false)
-        }
+          return result
+        } catch (e: Exception) {
+          if (!(isRetryable(e) && outermostTransaction)) throw e
 
-        return result
-      } catch (e: Exception) {
-        if (!(isRetryable(e) && outermostTransaction)) throw e
+          if (attempt >= options.maxAttempts) {
+            logger.info {
+              "recoverable transaction exception " +
+                "(attempt $attempt), no more attempts"
+            }
 
-        if (attempt >= options.maxAttempts) {
-          logger.info {
+            throw e
+          }
+
+          val sleepDuration = backoff.nextRetry()
+          logger.info(e) {
             "recoverable transaction exception " +
-              "(attempt $attempt), no more attempts"
+              "(attempt $attempt), will retry after a $sleepDuration delay"
           }
 
-          if (outermostTransaction) {
-            inTransaction.set(false)
+          if (!sleepDuration.isZero) {
+            Thread.sleep(sleepDuration.toMillis())
           }
-
-          throw e
         }
-
-        val sleepDuration = backoff.nextRetry()
-        logger.info(e) {
-          "recoverable transaction exception " +
-            "(attempt $attempt), will retry after a $sleepDuration delay"
-        }
-
-        if (!sleepDuration.isZero) {
-          Thread.sleep(sleepDuration.toMillis())
-        }
+      }
+    } finally {
+      if (outermostTransaction) {
+        inTransaction.set(false)
       }
     }
   }

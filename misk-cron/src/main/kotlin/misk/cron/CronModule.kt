@@ -8,13 +8,13 @@ import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceModule
-import misk.inject.KAbstractModule
+import misk.inject.AsyncSwitch
+import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KInstallOnceModule
-import misk.inject.toKey
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
-import java.time.ZoneId
 import wisp.lease.LeaseManager
+import java.time.ZoneId
 
 /**
  * Provides cron scheduling functionality for Misk services.
@@ -42,14 +42,19 @@ class CronModule @JvmOverloads constructor(
         dependencies = dependencies,
         installDashboardTab = installDashboardTab,
         useMultipleLeases = useMultipleLeases,
-      ),
+      )
     )
-    install(ServiceModule<RepeatedTaskQueue>(ForMiskCron::class).dependsOn<ReadyService>())
+
     install(
-      ServiceModule(
-        key = CronTask::class.toKey(),
-        dependsOn = dependencies,
-      ).dependsOn<ReadyService>(),
+      ServiceModule<RepeatedTaskQueue, ForMiskCron>()
+        .conditionalOn<AsyncSwitch>("cron")
+        .dependsOn<ReadyService>()
+    )
+    install(
+      ServiceModule<CronTask>()
+        .conditionalOn<AsyncSwitch>("cron")
+        .dependsOn(dependencies)
+        .dependsOn<ReadyService>()
     )
   }
 
@@ -66,22 +71,21 @@ class FakeCronModule @JvmOverloads constructor(
   private val dependencies: List<Key<out Service>> = listOf(),
   private val installDashboardTab: Boolean = false,
   private val useMultipleLeases: Boolean = false,
-) : KAbstractModule() {
+) : KInstallOnceModule() {
   override fun configure() {
     bind<ZoneId>().annotatedWith<ForMiskCron>().toInstance(zoneId)
     install(
-      ExecutorServiceModule.withFixedThreadPool(
-        ForMiskCron::class,
+      ExecutorServiceModule.withFixedThreadPool<ForMiskCron>(
         "misk-cron-cronjob-%d",
         threadPoolSize,
       ),
     )
     install(
-      ServiceModule(
-        key = CronService::class.toKey(),
-        dependsOn = dependencies,
-      ).dependsOn<ReadyService>(),
+      ServiceModule<CronService>()
+        .dependsOn(dependencies)
+        .dependsOn<ReadyService>()
     )
+    install(DefaultAsyncSwitchModule())
 
     if (installDashboardTab) {
       // Don't install by default since it adds extra dependencies to downstream tests

@@ -1,6 +1,7 @@
 package misk.time
 
 import com.google.common.util.concurrent.AbstractIdleService
+import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import java.time.ZoneId
 import misk.logging.getLogger
@@ -16,7 +17,7 @@ import misk.logging.getLogger
  * container to restart in such cases.
  */
 @Singleton
-class ValidateZoneRulesProviderService : AbstractIdleService() {
+class ValidateZoneRulesProviderService @Inject constructor() : AbstractIdleService() {
   override fun startUp() {
     try {
       // this uses ZoneRulesProvider.getAvailableZoneIds() under the hood

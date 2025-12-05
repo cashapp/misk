@@ -210,5 +210,16 @@ class JdbcModule @JvmOverloads constructor(
             SpanInjector(tracer, config)
         }).asSingleton()
     }
+
+    if (config.type == DataSourceType.MYSQL && config.mysql_use_aws_secret_for_credentials) {
+      val tracingDecoratorKey = TracingDataSourceDecorator::class.toKey(qualifier)
+      bind(tracingDecoratorKey)
+        .toProvider(object : Provider<TracingDataSourceDecorator> {
+          @com.google.inject.Inject(optional = true) var tracer: Tracer? = null
+
+          override fun get(): TracingDataSourceDecorator =
+            TracingDataSourceDecorator(tracer, config)
+        }).asSingleton()
+    }
   }
 }

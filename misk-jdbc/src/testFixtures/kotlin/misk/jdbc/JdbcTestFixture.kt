@@ -72,9 +72,9 @@ class JdbcTestFixture(
                   if (tableName.equals("dual")) continue
 
                   if (config.type == DataSourceType.COCKROACHDB || config.type == DataSourceType.POSTGRESQL) {
-                    statement.addBatch("TRUNCATE $tableName CASCADE")
+                    statement.addBatch("TRUNCATE \"$tableName\" CASCADE")
                   } else {
-                    statement.addBatch("DELETE FROM $tableName")
+                    statement.addBatch("DELETE FROM `$tableName`")
                   }
                   truncatedTableNames += tableName
                 }

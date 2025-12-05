@@ -8,6 +8,7 @@ public final class wisp/lease/AutoCloseableLease : java/lang/AutoCloseable, wisp
 	public fun checkHeldElsewhere ()Z
 	public fun close ()V
 	public fun getName ()Ljava/lang/String;
+	public fun isHeld ()Z
 	public fun release ()Z
 	public fun release (Z)Z
 	public fun shouldHold ()Z
@@ -19,12 +20,20 @@ public final class wisp/lease/ExtensionsKt {
 	public static synthetic fun acquireOrNull$default (Lwisp/lease/LeaseManager;Ljava/lang/String;ZILjava/lang/Object;)Lwisp/lease/AutoCloseableLease;
 }
 
+public abstract interface class wisp/lease/LeaderLeaseManager : wisp/lease/LeaseManager {
+}
+
+public final class wisp/lease/LeaderLeaseManager$DefaultImpls {
+	public static fun releaseAll (Lwisp/lease/LeaderLeaseManager;)V
+}
+
 public abstract interface class wisp/lease/Lease {
 	public abstract fun acquire ()Z
 	public abstract fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
 	public abstract fun checkHeld ()Z
 	public abstract fun checkHeldElsewhere ()Z
 	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun isHeld ()Z
 	public abstract fun release ()Z
 	public abstract fun release (Z)Z
 	public abstract fun shouldHold ()Z
@@ -44,34 +53,17 @@ public final class wisp/lease/LeaseManager$DefaultImpls {
 	public static fun releaseAll (Lwisp/lease/LeaseManager;)V
 }
 
-public final class wisp/lease/pool/PoolLease : wisp/lease/Lease {
-	public fun <init> (Lwisp/lease/Lease;Lwisp/lease/pool/PoolLeaseManager;)V
-	public fun acquire ()Z
-	public fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
-	public fun checkHeld ()Z
-	public fun checkHeldElsewhere ()Z
-	public fun getName ()Ljava/lang/String;
-	public fun release ()Z
-	public fun release (Z)Z
-	public fun shouldHold ()Z
+public abstract interface class wisp/lease/LoadBalancedLeaseManager : wisp/lease/LeaseManager {
 }
 
-public final class wisp/lease/pool/PoolLeaseConfig {
-	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lwisp/lease/pool/PoolLeaseConfig;
-	public static synthetic fun copy$default (Lwisp/lease/pool/PoolLeaseConfig;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lwisp/lease/pool/PoolLeaseConfig;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getLeaseNames ()Ljava/util/List;
-	public final fun getName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
+public final class wisp/lease/LoadBalancedLeaseManager$DefaultImpls {
+	public static fun releaseAll (Lwisp/lease/LoadBalancedLeaseManager;)V
 }
 
-public final class wisp/lease/pool/PoolLeaseManager : wisp/lease/LeaseManager {
-	public fun <init> (Lwisp/lease/LeaseManager;Lwisp/deployment/Deployment;Ljava/util/List;)V
-	public fun releaseAll ()V
-	public fun requestLease (Ljava/lang/String;)Lwisp/lease/Lease;
+public abstract interface class wisp/lease/PersistentLeaseManager : wisp/lease/LeaseManager {
+}
+
+public final class wisp/lease/PersistentLeaseManager$DefaultImpls {
+	public static fun releaseAll (Lwisp/lease/PersistentLeaseManager;)V
 }
 

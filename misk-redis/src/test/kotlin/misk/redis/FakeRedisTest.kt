@@ -10,8 +10,11 @@ import org.junit.jupiter.api.Test
 import misk.time.FakeClock
 import java.time.Duration
 import jakarta.inject.Inject
+import redis.clients.jedis.args.ListDirection
 import kotlin.random.Random
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -163,7 +166,15 @@ class FakeRedisTest: AbstractRedisTest() {
     val expectedKeys = mutableSetOf<String>()
     for (i in 1..100) {
       expectedKeys.add(i.toString())
-      redis[i.toString()] = i.toString().encodeUtf8()
+      if (i <= 25) {
+        redis[i.toString()] = i.toString().encodeUtf8()
+      } else if (i <= 50) {
+        redis.hset(i.toString(), i.toString(), i.toString().encodeUtf8())
+      } else if (i <= 75) {
+        redis.lpush(i.toString(), i.toString().encodeUtf8())
+      } else {
+        redis.zadd(i.toString(), mapOf(i.toString() to i.toDouble()))
+      }
     }
 
     val scanResult = redis.scan("0")
@@ -207,4 +218,84 @@ class FakeRedisTest: AbstractRedisTest() {
     assertEquals(listOf("two", "one"), redis.lrange(key, 0, -1).map { it?.utf8() })
   }
 
+
+  @Test fun `cannot set same key multiple times with different data types`() {
+    val key = "mykey"
+    val value = "value".encodeUtf8()
+    redis[key] = value
+
+    assertEquals(value, redis[key])
+
+    assertFails {
+      redis.hset(key, "field", value)
+    }.also { exception ->
+      assertContains(exception.message!!, "WRONGTYPE")
+    }
+
+    assertFails {
+      redis.lpush(key, value)
+    }.also { exception ->
+      assertContains(exception.message!!, "WRONGTYPE")
+    }
+
+    assertFails {
+      redis.zadd(key, mapOf(value.toString() to 1.0))
+    }.also { exception ->
+      assertContains(exception.message!!, "WRONGTYPE")
+    }
+  }
+
+  @Test fun listOperationsPreserveExpiry() {
+    val key = "mylist"
+    val expirySec = 5L
+
+    // Create list with initial value and set expiry
+    redis.lpush(key, "initial".encodeUtf8())
+    redis.expire(key, expirySec)
+
+    // Verify expiry is active before operations
+    clock.add(Duration.ofSeconds(4))
+    assertEquals(1, redis.llen(key))
+
+    // Perform various list operations - all should preserve expiry
+    redis.rpush(key, "added-right".encodeUtf8())
+    redis.lpush(key, "added-left".encodeUtf8())
+    redis.ltrim(key, 0, 10)
+    redis.lrem(key, 0, "nonexistent".encodeUtf8())
+
+    // List should still exist
+    assertTrue(redis.llen(key) > 0, "List should not be empty after operations")
+
+    // Advance past original expiry time
+    clock.add(Duration.ofSeconds(2))
+
+    // List should have expired despite the operations
+    assertEquals(0, redis.llen(key), "List should have expired based on original TTL")
+    assertNull(redis.lpop(key), "List should be expired")
+  }
+
+  @Test fun lmovePreservesExpiryOnBothKeys() {
+    val sourceKey = "source"
+    val destKey = "dest"
+
+    // Create both lists with different expiry times
+    redis.lpush(sourceKey, "item1".encodeUtf8(), "item2".encodeUtf8())
+    redis.expire(sourceKey, 3L)
+
+    redis.lpush(destKey, "existing".encodeUtf8())
+    redis.expire(destKey, 5L)
+
+    // Move item from source to dest
+    redis.lmove(sourceKey, destKey, ListDirection.LEFT, ListDirection.RIGHT)
+
+    // Both lists should still have their original expiry times
+    // Source expires at 3s
+    clock.add(Duration.ofSeconds(3))
+    assertEquals(0, redis.llen(sourceKey), "Source should expire at 3s")
+    assertEquals(2, redis.llen(destKey), "Dest should not expire yet")
+
+    // Dest expires at 5s (total)
+    clock.add(Duration.ofSeconds(2))
+    assertEquals(0, redis.llen(destKey), "Dest should expire at 5s")
+  }
 }

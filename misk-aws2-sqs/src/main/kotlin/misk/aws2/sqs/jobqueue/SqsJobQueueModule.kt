@@ -1,10 +1,13 @@
 package misk.aws2.sqs.jobqueue
 
 import com.google.inject.Provides
+import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.cloud.aws.AwsRegion
+import misk.inject.AsyncSwitch
+import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
 import misk.jobqueue.v2.JobConsumer
 import misk.jobqueue.v2.JobEnqueuer
@@ -19,10 +22,16 @@ open class SqsJobQueueModule @JvmOverloads constructor(
   override fun configure() {
     requireBinding<AwsCredentialsProvider>()
     requireBinding<AwsRegion>()
-    install(ServiceModule<SqsJobConsumer>().dependsOn<ReadyService>())
     bind<JobConsumer>().to<SqsJobConsumer>()
     bind<JobEnqueuer>().to<SqsJobEnqueuer>()
     multibind<TestFixture>().to<SqsJobConsumer>()
+
+    install(DefaultAsyncSwitchModule())
+    install(
+      ServiceModule<SqsJobConsumer>()
+        .conditionalOn<AsyncSwitch>("sqs")
+        .dependsOn<ReadyService>()
+    )
   }
 
   @Provides
@@ -32,16 +41,15 @@ open class SqsJobQueueModule @JvmOverloads constructor(
     } else {
       config.copy(
         all_queues = config.all_queues.copy(
-          region = awsRegion.name
-        )
+          region = awsRegion.name,
+        ),
       )
     }
   }
 
   @Provides
-  fun sqsClientClientFactory(
+  @Singleton
+  fun sqsClientFactory(
     credentialsProvider: AwsCredentialsProvider,
-  ) : SqsClientFactory {
-    return SqsClientFactory(credentialsProvider, configureClient)
-  }
+  ): SqsClientFactory = RealSqsClientFactory(credentialsProvider, configureClient)
 }

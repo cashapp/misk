@@ -34,40 +34,43 @@ class MyAppModule : KAbstractModule() {
 
 ## Web Action Integration
 
-To expose MCP functionality through HTTP endpoints, you need to create web actions using the MCP annotations and install the appropriate WebActionModule.
+To expose MCP functionality through HTTP endpoints, you need to create web actions using the MCP annotations and install the appropriate WebActionModule. The misk-mcp module supports two transport protocols:
 
-### Required and Optional Endpoints
+### Transport Options
 
+#### StreamableHTTP Transport
+Uses HTTP POST requests with Server-Sent Events (SSE) for streaming responses:
 - **`@McpPost`** (Required): Handles incoming MCP requests from clients
-- **`@McpGet`** (Optional): Enables out-of-band server-to-client notifications, typically used when a stateful session is present
+- **`@McpGet`** (Optional): Enables out-of-band server-to-client notifications
 - **`@McpDelete`** (Optional): Allows clients to explicitly delete an existing stateful session
+
+#### WebSocket Transport  
+Uses persistent WebSocket connections for full bidirectional communication:
+- **`@McpWebSocket`** (Required): Handles all MCP communication over WebSocket
+
+### StreamableHTTP Transport Example
 
 ```kotlin
 @ExperimentalMiskApi
-@Singleton
-class MyMcpWebAction @Inject constructor(
+class MyMcpSseAction @Inject constructor(
   private val mcpStreamManager: McpStreamManager
 ) : WebAction {
 
   @McpPost
   suspend fun handleMcpRequest(
     @RequestBody message: JSONRPCMessage,
-    @RequestHeaders headers: Headers,
     sendChannel: SendChannel<ServerSentEvent>
   ) {
-    val sessionId = headers[SESSION_ID_HEADER]
-    mcpStreamManager.withResponseChannel(sendChannel) {
+    mcpStreamManager.withSseChannel(sendChannel) {
       handleMessage(message)
     }
   }
 
   @McpGet  
   suspend fun streamServerEvents(
-    @RequestHeaders headers: Headers,
     sendChannel: SendChannel<ServerSentEvent>
   ) {
-    val sessionId = headers[SESSION_ID_HEADER]
-    mcpStreamManager.withResponseChannel(sendChannel) {
+    mcpStreamManager.withSseChannel(sendChannel) {
       // Stream server-initiated events to client
     }
   }
@@ -82,6 +85,46 @@ class MyMcpWebAction @Inject constructor(
   }
 }
 ```
+
+### WebSocket Transport Example
+
+```kotlin
+@ExperimentalMiskApi
+class MyMcpWebSocketAction @Inject constructor(
+  private val mcpStreamManager: McpStreamManager
+) : WebAction {
+
+  @McpWebSocket
+  fun handleWebSocket(webSocket: WebSocket): WebSocketListener {
+    return mcpStreamManager.withWebSocket(webSocket)
+  }
+}
+```
+
+### Transport Comparison
+
+| Feature | StreamableHTTP Transport | WebSocket Transport |
+|---------|--------------------------|-------------------|
+| **Connection Type** | HTTP POST + SSE streaming | Persistent WebSocket |
+| **Communication** | Client→Server (POST)<br/>Server→Client (SSE) | Full bidirectional |
+| **Complexity** | Multiple endpoints | Single endpoint |
+| **Session Management** | Optional via headers | Built-in connection state |
+| **Use Cases** | Traditional web apps<br/>Request-response patterns | Real-time applications<br/>Interactive AI tools |
+| **Client Support** | Universal HTTP support | WebSocket support required |
+
+### Choosing a Transport
+
+**Use StreamableHTTP Transport when:**
+- Building traditional web applications
+- Need maximum client compatibility
+- Implementing request-response patterns
+- Want explicit control over session management
+
+**Use WebSocket Transport when:**
+- Building real-time interactive applications
+- Need bidirectional communication
+- Want simplified connection management
+- Implementing conversational AI interfaces
 
 **Important**: You must install a WebActionModule to register your MCP web actions:
 
@@ -329,6 +372,91 @@ mcp:
 - **version**: Server version reported to clients (semantic versioning recommended)
 - **resources.subscribe**: Enable resource update notifications (default: false)
 - **list_changed**: Whether dynamic registration is supported (default: false, not currently implemented)
+
+## WebAction Scoping Best Practices
+
+MCP WebActions can be scoped as either **unscoped** (no annotation) or **`@Singleton`**. The choice affects how `McpStreamManager` and `MiskMcpServer` instances are created.
+
+### Recommended: Unscoped WebActions (Default)
+
+**Unscoped WebActions are the preferred pattern** because they create fresh `McpStreamManager` and `MiskMcpServer` instances per request, allowing for request-specific behavior.
+
+```kotlin
+@ExperimentalMiskApi
+class MyMcpAction @Inject constructor(
+  private val mcpStreamManager: McpStreamManager  // ✅ Fresh instance per request
+) : WebAction {
+  
+  @McpPost
+  suspend fun handleMcpRequest(
+    @RequestBody message: JSONRPCMessage,
+    sendChannel: SendChannel<ServerSentEvent>
+  ) {
+    mcpStreamManager.withSseChannel(sendChannel) {
+      handleMessage(message)
+    }
+  }
+}
+```
+
+**Benefits of unscoped WebActions:**
+- Fresh server instance per request
+- Tool/resource/prompt metadata can be request-specific
+- Supports dynamic tool descriptions based on user context
+- Simpler mental model - no need for providers
+
+**Use unscoped WebActions when:**
+- Tool descriptions vary by user permissions or roles
+- Resource availability changes based on request context
+- You have multi-tenant scenarios with different tool sets
+- You want the flexibility for future dynamic behavior (recommended default)
+
+### Alternative: Singleton WebActions with Provider
+
+If you need a singleton WebAction (e.g., for expensive initialization), **you must inject `Provider<McpStreamManager>`** instead of `McpStreamManager` directly:
+
+```kotlin
+@ExperimentalMiskApi
+@Singleton
+class MyMcpAction @Inject constructor(
+  private val mcpStreamManagerProvider: Provider<McpStreamManager>  // ✅ Use Provider
+) : WebAction {
+  
+  @McpPost
+  suspend fun handleMcpRequest(
+    @RequestBody message: JSONRPCMessage,
+    sendChannel: SendChannel<ServerSentEvent>
+  ) {
+    // Get a fresh instance per request
+    mcpStreamManagerProvider.get().withSseChannel(sendChannel) {
+      handleMessage(message)
+    }
+  }
+}
+```
+
+**Important:** If you inject `McpStreamManager` directly into a `@Singleton` WebAction (without using `Provider`), you effectively create a singleton `MiskMcpServer` that is reused across all requests. While this works, it prevents request-specific tool metadata and should only be done if all your tool/resource/prompt descriptions are completely static.
+
+```kotlin
+@ExperimentalMiskApi
+@Singleton
+class MyMcpAction @Inject constructor(
+  private val mcpStreamManager: McpStreamManager  // ⚠️ Effectively singleton server
+) : WebAction {
+  // This creates ONE MiskMcpServer instance for the lifetime of the application
+  // Only use this pattern if ALL tool descriptions are static
+}
+```
+
+### Comparison
+
+| Pattern                                    | Server Lifecycle | Use Case |
+|--------------------------------------------|------------------|----------|
+| **Unscoped WebAction + Direct Injection** (Recommended)      | Fresh per request | Dynamic tool metadata, flexible, default choice |
+| **Singleton WebAction + Provider**         | Fresh per request | Expensive WebAction initialization, still supports dynamic metadata |
+| **Singleton WebAction + Direct Injection** | Singleton (one instance) | All tool/resource/prompt descriptions are completely static |
+
+**Default recommendation:** Use unscoped WebActions for the best balance of flexibility and simplicity.
 
 ## Implementing MCP Components
 

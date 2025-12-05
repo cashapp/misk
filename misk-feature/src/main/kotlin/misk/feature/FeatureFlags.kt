@@ -338,3 +338,114 @@ inline fun <reified T> FeatureFlags.trackJson(
   executor: Executor,
   noinline tracker: (T) -> Unit
 ): TrackerReference = trackJson(feature, key, T::class.java, attributes, executor, tracker)
+
+
+fun wisp.feature.FeatureFlags.toMisk(): FeatureFlags = WispToMiskFeatureFlagsAdapter(this)
+
+private class WispToMiskFeatureFlagsAdapter(private val wispFeatureFlags: wisp.feature.FeatureFlags) : FeatureFlags {
+  override fun get(flag: BooleanFeatureFlag): Boolean = wispFeatureFlags.get(flag)
+
+  override fun get(flag: StringFeatureFlag): String = wispFeatureFlags.get(flag)
+
+  override fun get(flag: IntFeatureFlag): Int = wispFeatureFlags.get(flag)
+
+  override fun get(flag: DoubleFeatureFlag): Double = wispFeatureFlags.get(flag)
+
+  override fun <T : Enum<T>> get(flag: EnumFeatureFlag<T>): T = wispFeatureFlags.get(flag)
+
+  override fun <T : Any> get(flag: JsonFeatureFlag<T>): T = wispFeatureFlags.get(flag)
+
+  override fun getBoolean(
+    feature: Feature,
+    key: String,
+    attributes: Attributes
+  ): Boolean = wispFeatureFlags.getBoolean(feature, key, attributes)
+
+  override fun getDouble(
+    feature: Feature,
+    key: String,
+    attributes: Attributes
+  ): Double = wispFeatureFlags.getDouble(feature, key, attributes)
+
+  override fun getInt(
+    feature: Feature,
+    key: String,
+    attributes: Attributes
+  ): Int = wispFeatureFlags.getInt(feature, key, attributes)
+
+  override fun getString(
+    feature: Feature,
+    key: String,
+    attributes: Attributes
+  ): String = wispFeatureFlags.getString(feature, key, attributes)
+
+  override fun <T : Enum<T>> getEnum(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    attributes: Attributes
+  ): T = wispFeatureFlags.getEnum(feature, key, clazz, attributes)
+
+  override fun <T> getJson(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    attributes: Attributes
+  ): T = wispFeatureFlags.getJson(feature, key, clazz, attributes)
+
+  override fun getJsonString(
+    feature: Feature,
+    key: String,
+    attributes: Attributes
+  ): String = wispFeatureFlags.getJsonString(feature, key, attributes)
+
+  override fun trackBoolean(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (Boolean) -> Unit
+  ): TrackerReference = wispFeatureFlags.trackBoolean(feature, key, attributes, executor, tracker).toMisk()
+
+  override fun trackDouble(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (Double) -> Unit
+  ): TrackerReference = wispFeatureFlags.trackDouble(feature, key, attributes, executor, tracker).toMisk()
+
+  override fun trackInt(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (Int) -> Unit
+  ): TrackerReference = wispFeatureFlags.trackInt(feature, key, attributes, executor, tracker).toMisk()
+
+  override fun trackString(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (String) -> Unit
+  ): TrackerReference = wispFeatureFlags.trackString(feature, key, attributes, executor, tracker).toMisk()
+
+  override fun <T : Enum<T>> trackEnum(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (T) -> Unit
+  ): TrackerReference = wispFeatureFlags.trackEnum(feature, key, clazz, attributes, executor, tracker).toMisk()
+
+  override fun <T> trackJson(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (T) -> Unit
+  ): TrackerReference = wispFeatureFlags.trackJson(feature, key, clazz, attributes, executor, tracker).toMisk()
+}

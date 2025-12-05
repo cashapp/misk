@@ -4,8 +4,10 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import misk.ReadyService
 import misk.ServiceModule
+import misk.annotation.ExperimentalMiskApi
+import misk.inject.AsyncSwitch
+import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
-import misk.inject.toKey
 import misk.jobqueue.BatchJobHandler
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
@@ -29,11 +31,12 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
       newMapBinder<QueueName, JobHandler>().addBinding(queueName.retryQueue).to(handler.java)
     }
 
+    install(DefaultAsyncSwitchModule())
     install(
-      ServiceModule(
-        key = AwsSqsJobHandlerSubscriptionService::class.toKey(),
-        dependsOn = dependsOn
-      ).dependsOn<ReadyService>()
+      ServiceModule<AwsSqsJobHandlerSubscriptionService>()
+        .conditionalOn<AsyncSwitch>("sqs")
+        .dependsOn(dependsOn)
+        .dependsOn<ReadyService>()
     )
   }
 
@@ -45,7 +48,8 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
       dependsOn: List<Key<out Service>> = emptyList(),
     ): AwsSqsJobHandlerModule<T> = create(queueName, T::class, installRetryQueue, dependsOn)
 
-    @JvmStatic @JvmOverloads
+    @JvmStatic
+    @JvmOverloads
     fun <T : JobHandler> create(
       queueName: QueueName,
       handlerClass: Class<T>,

@@ -347,6 +347,13 @@ inline fun <reified T> FeatureFlags.trackJson(
 /**
  * Typed feature string.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "Feature(name)",
+    imports = ["misk.feature.Feature"]
+  )
+)
 open class Feature(val name: String) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -369,6 +376,13 @@ open class Feature(val name: String) {
 /**
  * Extra attributes to be used for evaluating features.
  */
+@Deprecated(
+  message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
+  replaceWith = ReplaceWith(
+    expression = "Attributes(text, number, anonymous)",
+    imports = ["misk.feature.Attributes"]
+  )
+)
 open class Attributes @JvmOverloads constructor(
     val text: Map<String, String> = mapOf(),
     // NB: LaunchDarkly uses typed Gson attributes. We could leak that through, but that could make

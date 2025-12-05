@@ -2,21 +2,23 @@
 
 package misk.mcp
 
-import io.modelcontextprotocol.kotlin.sdk.CallToolRequest
-import io.modelcontextprotocol.kotlin.sdk.CallToolResult
-import io.modelcontextprotocol.kotlin.sdk.PromptMessageContent
-import io.modelcontextprotocol.kotlin.sdk.TextContent
-import io.modelcontextprotocol.kotlin.sdk.Tool
+
+import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequest
+import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
+import io.modelcontextprotocol.kotlin.sdk.types.ContentBlock
+import io.modelcontextprotocol.kotlin.sdk.types.EmptyJsonObject
+import io.modelcontextprotocol.kotlin.sdk.types.TextContent
+import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.serializer
 import misk.annotation.ExperimentalMiskApi
-import misk.mcp.internal.McpJson
 import misk.mcp.internal.generateJsonSchema
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.full.allSupertypes
 
 /**
  * Base class for tools in the Model Context Protocol (MCP) specification with type-safe input handling.
@@ -201,9 +203,14 @@ abstract class McpTool<I : Any> {
    */
   open val openWorldHint: Boolean = true
 
-  internal val inputSchema: Tool.Input by lazy {
-    val schema = inputClass.generateJsonSchema()
-    Tool.Input(
+  /**
+   * Tool metadata that will be included in the tool definition.
+   */
+  open val meta: JsonObject? = null
+
+  internal val inputSchema: ToolSchema by lazy {
+    val schema = inputType.generateJsonSchema()
+    ToolSchema(
       properties = requireNotNull(schema["properties"] as? JsonObject) {
         "Input schema must have properties defined"
       },
@@ -213,19 +220,21 @@ abstract class McpTool<I : Any> {
     )
   }
 
-  internal open val outputSchema: Tool.Output? = null
+  internal open val outputSchema: ToolSchema? = null
 
   @OptIn(InternalSerializationApi::class)
   internal suspend fun handler(request: CallToolRequest): CallToolResult {
     // Parse the input arguments from the request
     val parsedInput = try {
-      McpJson.decodeFromJsonElement(inputClass.serializer(), request.arguments)
+      requireNotNull(request.arguments?.decode(inputType.serializer().cast<I>())) {
+        "No input arguments provided to tool '$name'. Expected input type: $inputType."
+      }
     } catch (e: SerializationException) {
       return ToolResult(
         TextContent(
           "Failed to parse input for tool '$name'. " +
-            "Expected input type: ${inputClass.simpleName}. " +
-            "Error: ${e.message}",
+              "Expected input type: $inputType. " +
+              "Error: ${e.message}",
         ),
         isError = true,
       ).toCallToolResult()
@@ -233,8 +242,8 @@ abstract class McpTool<I : Any> {
       return ToolResult(
         TextContent(
           "Failed to parse input for tool '$name'. " +
-            "Expected input type: ${inputClass.simpleName}. " +
-            "Error: ${e.message}",
+              "Expected input type: $inputType. " +
+              "Error: ${e.message}",
         ),
         isError = true,
       ).toCallToolResult()
@@ -250,52 +259,64 @@ abstract class McpTool<I : Any> {
 
   @ConsistentCopyVisibility
   data class PromptToolResult internal constructor(
-    val result: List<PromptMessageContent>,
+    val result: List<ContentBlock>,
     override val isError: Boolean,
     override val _meta: JsonObject,
   ) : ToolResult
 
 
   protected fun ToolResult(
-    vararg results: PromptMessageContent,
+    vararg results: ContentBlock,
     isError: Boolean = false,
-    _meta: JsonObject = JsonObject(emptyMap()),
+    _meta: JsonObject = EmptyJsonObject
   ): ToolResult = ToolResult(results.toList(), isError, _meta)
 
-  protected fun ToolResult(
-    result: List<PromptMessageContent>,
+  protected inline fun <reified T : Any> ToolResult(
+    vararg results: ContentBlock,
     isError: Boolean = false,
-    _meta: JsonObject = JsonObject(emptyMap()),
+    _meta: T? = null,
+  ): ToolResult = ToolResult(results.toList(), isError, _meta.encode())
+
+  protected fun ToolResult(
+    result: List<ContentBlock>,
+    isError: Boolean = false,
+    _meta: JsonObject = EmptyJsonObject
   ): ToolResult = PromptToolResult(
     result = result,
     isError = isError,
     _meta = _meta,
   )
 
+  protected inline fun <reified T : Any> ToolResult(
+    results: List<ContentBlock>,
+    isError: Boolean = false,
+    _meta: T? = null,
+  ): ToolResult = ToolResult(results, isError, _meta.encode())
+
   protected open fun ToolResult.toCallToolResult() = when (this) {
     is PromptToolResult -> CallToolResult(
       content = result,
       isError = isError,
-      _meta = _meta,
+      meta = _meta,
     )
-
     else -> {
       throw IllegalArgumentException("${this::class.simpleName} is not supported by this tool: $name")
     }
   }
 
+
   abstract suspend fun handle(input: I): ToolResult
 
-  private val inputClass: KClass<I> by lazy {
+  private val inputType: KType by lazy {
     @Suppress("UNCHECKED_CAST")
-    this::class.supertypes
+    this::class.allSupertypes
       .first { type ->
         (type.classifier as? KClass<*>)?.simpleName?.let { simpleName ->
           simpleName == McpTool::class.simpleName
-            || simpleName == StructuredMcpTool::class.simpleName
+              || simpleName == StructuredMcpTool::class.simpleName
         } ?: false
       }
-      .arguments.first().type!!.classifier as KClass<I>
+      .arguments.first().type!!
   }
 }
 
@@ -488,9 +509,9 @@ abstract class McpTool<I : Any> {
 abstract class StructuredMcpTool<I : Any, O : Any> : McpTool<I>() {
 
 
-  override val outputSchema: Tool.Output by lazy {
-    val schema = outputClass.generateJsonSchema()
-    Tool.Output(
+  override val outputSchema: ToolSchema by lazy {
+    val schema = outputType.generateJsonSchema()
+    ToolSchema(
       properties = requireNotNull(schema["properties"] as? JsonObject) {
         "Output schema must have properties defined"
       },
@@ -511,12 +532,18 @@ abstract class StructuredMcpTool<I : Any, O : Any> : McpTool<I>() {
   protected fun ToolResult(
     result: O,
     isError: Boolean = false,
-    _meta: JsonObject = JsonObject(emptyMap()),
+    _meta: JsonObject = EmptyJsonObject
   ): ToolResult = StructuredToolResult(
     result = result,
     isError = isError,
     _meta = _meta,
   )
+
+  protected inline fun <reified T : Any> ToolResult(
+    result: O,
+    isError: Boolean = false,
+    _meta: T? = null,
+  ): ToolResult = ToolResult(result, isError, _meta.encode())
 
   @OptIn(InternalSerializationApi::class)
   override fun ToolResult.toCallToolResult(): CallToolResult {
@@ -524,32 +551,33 @@ abstract class StructuredMcpTool<I : Any, O : Any> : McpTool<I>() {
       is PromptToolResult -> CallToolResult(
         content = result,
         isError = isError,
-        _meta = _meta,
+        meta = _meta,
       )
 
       is StructuredToolResult<*> -> {
         @Suppress("UNCHECKED_CAST")
-        val serializedOutput = McpJson.encodeToJsonElement(outputClass.serializer(), result as O) as JsonObject
+        val typeResult = result as O
+        val serializedOutput: JsonObject = typeResult.encode(outputType.serializer().cast())
         CallToolResult(
           // For backwards compatibility
           // See: [https://modelcontextprotocol.io/specification/2025-06-18/server/tools#structured-content]
           content = listOf(TextContent(serializedOutput.toString())),
           structuredContent = serializedOutput,
           isError = isError,
-          _meta = _meta,
+          meta = _meta,
         )
       }
     }
   }
 
-  private val outputClass: KClass<O> by lazy {
+  private val outputType: KType by lazy {
     @Suppress("UNCHECKED_CAST")
-    this::class.supertypes
+    this::class.allSupertypes
       .first { type ->
         (type.classifier as? KClass<*>)?.simpleName?.let { simpleName ->
           simpleName == StructuredMcpTool::class.simpleName
         } ?: false
       }
-      .arguments.last().type!!.classifier as KClass<O>
+      .arguments.last().type!!
   }
 }

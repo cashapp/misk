@@ -1,19 +1,27 @@
 package misk.mcp
 
 /**
- * Handles MCP (Model Context Protocol) session lifecycle management.
+ * Handles MCP (Model Context Protocol) session lifecycle management for StreamableHTTP transport.
  *
- * This interface provides session management capabilities for MCP servers, allowing for
- * session creation, validation, and termination. When installed via [McpSessionHandlerModule],
- * the framework automatically integrates with the session lifecycle and returns the session ID
- * in the "Mcp-Session-Id" response header.
+ * This interface provides session management capabilities for MCP servers using StreamableHTTP
+ * transport (StreamableHTTP-based communication via `@McpPost`, `@McpGet`, and `@McpDelete` endpoints).
+ * When installed via [McpSessionHandlerModule], the framework automatically integrates with
+ * the session lifecycle and returns the session ID in the "Mcp-Session-Id" response header.
+ *
+ * ## Transport Compatibility
+ *
+ * **StreamableHTTP Transport Only**: This session handler is designed exclusively for
+ * StreamableHTTP transport using Server-Sent Events. It is not used with WebSocket
+ * transport (`@McpWebSocket`), which maintains connection state through the persistent
+ * WebSocket connection itself.
  *
  * ## Framework Integration
  *
  * The framework automatically handles:
  * - Calling [initialize] when a new session is needed
- * - Calling [isActive] to validate existing sessions
+ * - Calling [isActive] to validate existing sessions before processing `@McpPost` requests
  * - Including the session ID in the "Mcp-Session-Id" response header
+ * - Managing session lifecycle across multiple HTTP requests
  *
  * ## Manual Session Termination
  *
@@ -35,6 +43,9 @@ package misk.mcp
  * <https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#session-management>
  *
  * @see McpSessionHandlerModule for installation instructions
+ * @see misk.mcp.action.McpPost for StreamableHTTP request handling
+ * @see misk.mcp.action.McpGet for StreamableHTTP event streaming
+ * @see misk.mcp.action.McpDelete for StreamableHTTP session termination
  */
 interface McpSessionHandler {
   /**

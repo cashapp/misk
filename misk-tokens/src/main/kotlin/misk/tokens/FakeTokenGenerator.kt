@@ -6,7 +6,7 @@ import misk.testing.FakeFixture
 import misk.tokens.TokenGenerator2.Companion.CANONICALIZE_LENGTH_MAX
 import misk.tokens.TokenGenerator2.Companion.CANONICALIZE_LENGTH_MIN
 import misk.tokens.TokenGenerator2.Companion.canonicalize
-import java.util.*
+import java.util.Collections
 import java.util.concurrent.atomic.AtomicLong
 
 @Singleton

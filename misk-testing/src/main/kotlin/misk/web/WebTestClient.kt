@@ -53,6 +53,31 @@ class WebTestClient @Inject constructor(
   ) = call(path) { post(body.toRequestBody(mediaType)) }
 
   /**
+   * Performs a DELETE request with a JSON request body created from the input.
+   */
+  fun <T : Any> delete(path: String, body: T, tClass: KClass<T>): WebTestResponse = call(path) {
+    delete(
+      moshi.adapter(tClass.java).toJson(body)
+        .toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
+    )
+  }
+
+  /**
+   * Performs a DELETE request with a JSON request body created from the input.
+   */
+  inline fun <reified T : Any> delete(path: String, body: T) = delete(path, body, T::class)
+
+  /**
+   * Performs a DELETE request.
+   */
+  @JvmOverloads
+  fun delete(
+    path: String,
+    body: String,
+    mediaType: MediaType = MediaTypes.APPLICATION_JSON_MEDIA_TYPE
+  ) = call(path) { delete(body.toRequestBody(mediaType)) }
+
+  /**
    * Performs a call to the started service. Allows the caller to customize the action before it's
    * sent through.
    */

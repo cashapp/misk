@@ -151,6 +151,10 @@ public final class misk/clustering/fake/FakeClusterModule : misk/inject/KAbstrac
 	public fun <init> ()V
 }
 
+public final class misk/clustering/fake/lease/FakeLeaderLeaseManager : misk/clustering/fake/lease/FakeLeaseManager, wisp/lease/LeaderLeaseManager {
+	public fun <init> ()V
+}
+
 public final class misk/clustering/fake/lease/FakeLease : wisp/lease/Lease {
 	public fun <init> (Ljava/lang/String;Lmisk/clustering/fake/lease/FakeLeaseManager;)V
 	public fun acquire ()Z
@@ -158,6 +162,7 @@ public final class misk/clustering/fake/lease/FakeLease : wisp/lease/Lease {
 	public fun checkHeld ()Z
 	public fun checkHeldElsewhere ()Z
 	public fun getName ()Ljava/lang/String;
+	public fun isHeld ()Z
 	public final fun notifyAfterAcquire ()V
 	public final fun notifyBeforeRelease ()V
 	public fun release ()Z
@@ -165,7 +170,7 @@ public final class misk/clustering/fake/lease/FakeLease : wisp/lease/Lease {
 	public fun shouldHold ()Z
 }
 
-public final class misk/clustering/fake/lease/FakeLeaseManager : misk/testing/FakeFixture, wisp/lease/LeaseManager {
+public class misk/clustering/fake/lease/FakeLeaseManager : misk/testing/FakeFixture, wisp/lease/LeaseManager {
 	public fun <init> ()V
 	public final fun isLeaseHeld (Ljava/lang/String;)Z
 	public final fun isLeaseHeldElsewhere (Ljava/lang/String;)Z
@@ -176,6 +181,10 @@ public final class misk/clustering/fake/lease/FakeLeaseManager : misk/testing/Fa
 }
 
 public final class misk/clustering/fake/lease/FakeLeaseModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/clustering/fake/lease/FakeLoadBalancedLeaseManager : misk/clustering/fake/lease/FakeLeaseManager, wisp/lease/LoadBalancedLeaseManager {
 	public fun <init> ()V
 }
 
@@ -221,12 +230,13 @@ public final class misk/clustering/lease/ClusterAwareLease : wisp/lease/Lease {
 	public fun checkHeld ()Z
 	public fun checkHeldElsewhere ()Z
 	public fun getName ()Ljava/lang/String;
+	public fun isHeld ()Z
 	public fun release ()Z
 	public fun release (Z)Z
 	public fun shouldHold ()Z
 }
 
-public final class misk/clustering/lease/ClusterAwareLeaseManager : wisp/lease/LeaseManager {
+public final class misk/clustering/lease/ClusterAwareLeaseManager : wisp/lease/LeaderLeaseManager, wisp/lease/LoadBalancedLeaseManager {
 	public fun releaseAll ()V
 	public fun requestLease (Ljava/lang/String;)Lwisp/lease/Lease;
 }

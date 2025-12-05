@@ -5,6 +5,7 @@ import misk.config.Config
 import misk.containers.ContainerUtil
 import wisp.deployment.Deployment
 import java.time.Duration
+import java.util.Properties
 
 /** Defines a type of datasource */
 enum class DataSourceType(
@@ -148,6 +149,38 @@ data class DataSourceConfig @JvmOverloads constructor(
       }
     }
   }
+  fun getDriverClassName(): String {
+    return if (mysql_use_aws_secret_for_credentials) {
+      "com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver"
+    } else {
+      type.driverClassName
+    }
+  }
+
+  fun getDataSourceProperties() : Properties {
+    // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
+    val properties = Properties()
+
+    properties["cachePrepStmts"] = "true"
+    properties["prepStmtCacheSize"] = "250"
+    properties["prepStmtCacheSqlLimit"] = "2048"
+    if (type == DataSourceType.MYSQL || type == DataSourceType.VITESS_MYSQL || type == DataSourceType.TIDB) {
+      properties["useServerPrepStmts"] = "true"
+    }
+    if (mysql_use_aws_secret_for_credentials) {
+      properties["user"] = mysql_aws_secret_name
+    }
+    properties["useLocalSessionState"] = "true"
+    properties["rewriteBatchedStatements"] = "true"
+    properties["cacheResultSetMetadata"] = "true"
+    properties["cacheServerConfiguration"] = "true"
+    properties["elideSetAutoCommits"] = "true"
+    properties["maintainTimeStats"] = "false"
+    properties["characterEncoding"] = "UTF-8"
+
+    return properties
+  }
+
   fun withDefaults(): DataSourceConfig {
     val server_hostname = ContainerUtil.dockerTargetOrLocalIp()
     return when (type) {
@@ -286,10 +319,7 @@ data class DataSourceConfig @JvmOverloads constructor(
         }
 
         if(mysql_use_aws_secret_for_credentials) {
-          val region = "us-east-1"
-          queryParams += "&secretId=$mysql_aws_secret_name&region=$region"
-          Class.forName( "com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver" )
-          "jdbc:tracing:jdbc-secretsmanager:mysql://${config.host}:${config.port}/${config.database}$queryParams"
+          "jdbc-secretsmanager:mysql://${config.host}:${config.port}/${config.database}$queryParams"
         }
         else {
           "jdbc:tracing:mysql://${config.host}:${config.port}/${config.database}$queryParams"

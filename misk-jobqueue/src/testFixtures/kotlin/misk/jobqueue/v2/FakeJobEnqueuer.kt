@@ -90,9 +90,80 @@ class FakeJobEnqueuer @Inject constructor(
     throwIfQueuedFailure(queueName)
     val id = tokenGenerator.generate("fakeJobQueue")
     val resolvedIdempotencyKey = idempotencyKey ?: tokenGenerator.generate("fakeJobIdempotence")
-    val job = FakeJob(queueName, id, resolvedIdempotencyKey, body, attributes, clock.instant(), deliveryDelay)
+    val job = FakeJob(
+      queueName = queueName,
+      id = id,
+      idempotenceKey = resolvedIdempotencyKey,
+      body = body,
+      attributes = attributes,
+      enqueuedAt = clock.instant(),
+      deliveryDelay= deliveryDelay)
     jobQueues.getOrPut(queueName, ::PriorityBlockingQueue).add(job)
     return CompletableFuture.supplyAsync { true }
+  }
+
+  override suspend fun batchEnqueue(
+    queueName: QueueName,
+    jobs: List<JobEnqueuer.JobRequest>
+  ): JobEnqueuer.BatchEnqueueResult {
+    return batchEnqueueAsync(queueName, jobs).await()
+  }
+
+  override fun batchEnqueueBlocking(
+    queueName: QueueName,
+    jobs: List<JobEnqueuer.JobRequest>
+  ): JobEnqueuer.BatchEnqueueResult {
+    return batchEnqueueAsync(queueName, jobs).join()
+  }
+
+  override fun batchEnqueueAsync(
+    queueName: QueueName,
+    jobs: List<JobEnqueuer.JobRequest>
+  ): CompletableFuture<JobEnqueuer.BatchEnqueueResult> {
+    require(jobs.size <= JobEnqueuer.SQS_MAX_BATCH_ENQUEUE_JOB_SIZE) {
+      "a maximum of 10 jobs can be batched (got ${jobs.size})"
+    }
+
+    return CompletableFuture.supplyAsync {
+      try {
+        throwIfQueuedFailure(queueName)
+
+        val successful = mutableListOf<String>()
+        val jobQueue = jobQueues.getOrPut(queueName, ::PriorityBlockingQueue)
+
+        jobs.forEach { jobRequest ->
+          val id = tokenGenerator.generate("fakeJobQueue")
+          val resolvedIdempotencyKey = jobRequest.idempotencyKey ?: tokenGenerator.generate("fakeJobIdempotence")
+          val fakeJob = FakeJob(
+            queueName = queueName,
+            id = id,
+            idempotenceKey = resolvedIdempotencyKey,
+            body = jobRequest.body,
+            attributes = jobRequest.attributes,
+            enqueuedAt = clock.instant(),
+            deliveryDelay = jobRequest.deliveryDelay
+          )
+          jobQueue.add(fakeJob)
+          successful.add(resolvedIdempotencyKey)
+        }
+
+        JobEnqueuer.BatchEnqueueResult(
+          isFullySuccessful = true,
+          successfulIds = successful,
+          invalidIds = emptyList(),
+          retriableIds = emptyList()
+        )
+      } catch (e: Exception) {
+        // If there's a failure, treat all jobs as retriable (server error)
+        val jobIds = jobs.map { it.idempotencyKey ?: tokenGenerator.generate("fakeJobIdempotence") }
+        JobEnqueuer.BatchEnqueueResult(
+          isFullySuccessful = false,
+          successfulIds = emptyList(),
+          invalidIds = emptyList(),
+          retriableIds = jobIds
+        )
+      }
+    }
   }
 
   private fun nextFailure(queueName: QueueName?): Exception? {

@@ -2,6 +2,7 @@ name: Build docs site (& deploy if on master to gh-pages)
 
 on:
   pull_request:
+  merge_group:
   push:
     branches:
       - master
@@ -15,13 +16,13 @@ jobs:
 
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: Set up Python 3.8
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: 3.8
 

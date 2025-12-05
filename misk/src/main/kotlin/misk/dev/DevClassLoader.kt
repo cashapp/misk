@@ -15,12 +15,6 @@ internal class DevClassLoader(parent: ClassLoader) : ClassLoader(parent) {
   private val classFiles: MutableMap<String, Long> = ConcurrentHashMap()
   private val classRoots: MutableSet<String> = ConcurrentSkipListSet()
 
-  companion object {
-    init {
-      registerAsParallelCapable()
-    }
-  }
-
   override fun loadClass(className: String, resolve: Boolean): Class<*>? {
     val existing = findLoadedClass(className)
     if (existing != null) return existing

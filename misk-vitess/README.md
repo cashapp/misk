@@ -61,12 +61,12 @@ Other configurable parameters include:
 - `inMemoryStorageSize` (default `1024M`): The size of in-memory storage (tmpfs) when `enableInMemoryStorage` is set to `true`.
 - `keepAlive` (default `true`): Whether to keep the container running between test runs. It will detect schema changes and argument changes and restart the container if needed.
 - `lintSchema` (default `false`): Whether to lint the schema before starting the test database, which can help detect errors early.
-- `mysqlVersion` (default `8.0.36`): The MySQL version to use.
+- `mysqlVersion` (default `8.0.42`): The MySQL version to use.
 - `port` (default `27003`): The port used to connect to the sharded database, aka the vtgate.
 - `sqlMode` (defaults to the [MySQL8 defaults](https://dev.mysql.com/doc/refman/8.0/en/sql-mode.html)): The server side `sql_mode` setting.
 - `transactionIsolationLevel` (default `REPEATABLE_READ`): The transaction isolation level.
 - `transactionTimeoutSeconds` (default `30s`): the duration in seconds before Vitess times out a transaction. Setting a higher value may be useful for debugging.
-- `vitessImage` (default: `vitess/vttestserver:v21.0.4-mysql80`): The Docker image to use for the container. DockerHub Images can be  found at https://hub.docker.com/r/vitess/vttestserver/tags. Custom ECR images can also be passed in.
+- `vitessImage` (default: `vitess/vttestserver:v21.0.5-mysql80`): The Docker image to use for the container. DockerHub Images can be  found at https://hub.docker.com/r/vitess/vttestserver/tags. Custom ECR images can also be passed in.
 - `vitessVersion` (default: `21`): The version of Vitess to use, which must match the version of `vitessImage`.
 
 ### Connecting to the test database

@@ -150,3 +150,10 @@ include(":misk-vitess")
 include(":misk-vitess-database-gradle-plugin")
 include(":samples:exemplar")
 include(":samples:exemplarchat")
+
+val localSettings = file("local.settings.gradle.kts")
+if (localSettings.exists()) {
+  logger.lifecycle("Applying local settings at ${localSettings.absolutePath}")
+  apply(from = localSettings)
+}
+
