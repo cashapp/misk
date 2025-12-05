@@ -33,6 +33,7 @@ dependencies {
   implementation(libs.dockerTransportCore)
   implementation(libs.guavaTestLib)
   implementation(libs.guiceTestLib)
+  implementation(libs.classGraph)
   implementation(libs.mockitoCore)
   implementation(libs.mockk)
   implementation(libs.okio)
