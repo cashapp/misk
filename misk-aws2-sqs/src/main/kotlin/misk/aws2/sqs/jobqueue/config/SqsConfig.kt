@@ -8,10 +8,12 @@ import misk.config.Config
  *
  * `default_config` will be applied to any queue that does not have its own configuration.
  * `per_queue_config` allows overriding configuration for a given queue
+ * `buffered_batch_flush_frequency_ms` controls how often buffered messages are flushed to SQS when using enqueueBuffered
  */
 data class SqsConfig @JvmOverloads constructor(
   val all_queues: SqsQueueConfig = SqsQueueConfig(),
   val per_queue_overrides: Map<String, SqsQueueConfig> = emptyMap(),
+  val buffered_batch_flush_frequency_ms: Long = 50,
 ): Config {
   /**
    * Returns resolved configuration for a given queue.
