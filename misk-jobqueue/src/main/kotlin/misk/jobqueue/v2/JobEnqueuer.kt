@@ -117,6 +117,20 @@ interface JobEnqueuer {
   ): CompletableFuture<Boolean>
 
   /**
+   * Enqueue a job using automatic batching and suspend waiting for the confirmation.
+   *
+   * This is a convenience overload that accepts a [JobRequest] instead of individual parameters.
+   *
+   * @see enqueueBuffered
+   */
+  suspend fun enqueueBuffered(
+    queueName: QueueName,
+    job: JobRequest,
+  ): Boolean {
+    return enqueueBufferedAsync(queueName, job).await()
+  }
+
+  /**
    * Enqueue a job using automatic batching for high-throughput scenarios.
    *
    * This is a convenience overload that accepts a [JobRequest] instead of individual parameters.

@@ -126,6 +126,13 @@ class FakeJobEnqueuer @Inject constructor(
     return enqueueBufferedAsync(queueName, body, idempotencyKey, deliveryDelay, attributes).await()
   }
 
+  override suspend fun enqueueBuffered(
+    queueName: QueueName,
+    job: JobEnqueuer.JobRequest,
+  ): Boolean {
+    return enqueueBufferedAsync(queueName, job).await()
+  }
+
   override fun enqueueBufferedAsync(
     queueName: QueueName,
     body: String,
