@@ -73,6 +73,7 @@ public final class misk/aws2/sqs/jobqueue/SqsJobEnqueuer : misk/jobqueue/v2/JobE
 	public fun enqueueAsync (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)Ljava/util/concurrent/CompletableFuture;
 	public fun enqueueBlocking (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
 	public fun enqueueBuffered (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun enqueueBuffered (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobEnqueuer$JobRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun enqueueBufferedAsync (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)Ljava/util/concurrent/CompletableFuture;
 	public fun enqueueBufferedAsync (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobEnqueuer$JobRequest;)Ljava/util/concurrent/CompletableFuture;
 }
