@@ -52,21 +52,7 @@ class SqsJobEnqueuer @Inject constructor(
     attributes: Map<String, String>,
   ): CompletableFuture<Boolean> {
     return tracer.withSpanAsync("enqueue-job-${queueName.value}") { span, scope ->
-      val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
-      val resolvedIdempotencyKey = idempotencyKey ?: tokenGenerator.generate()
-
-      val attrs = attributes.map {
-        it.key to MessageAttributeValue.builder().dataType("String").stringValue(it.value).build()
-      }.toMap().toMutableMap()
-      attrs[SqsJob.JOBQUEUE_METADATA_ATTR] =
-        createMetadataMessageAttributeValue(queueName, resolvedIdempotencyKey, span)
-
-      val request = SendMessageRequest.builder()
-        .queueUrl(queueUrl)
-        .messageBody(body)
-        .delaySeconds(deliveryDelay?.toSeconds()?.toInt())
-        .messageAttributes(attrs)
-        .build()
+      val request = buildSendMessageRequest(queueName, body, idempotencyKey, deliveryDelay, attributes, span)
 
       val startTimeMs = clock.millis()
       try {
@@ -134,12 +120,6 @@ class SqsJobEnqueuer @Inject constructor(
       }
 
       val messageEntries = validJobsWithKeys.map { (job, resolvedIdempotencyKey) ->
-        val attrs = job.attributes.map {
-          it.key to MessageAttributeValue.builder().dataType("String").stringValue(it.value).build()
-        }.toMap().toMutableMap()
-        attrs[SqsJob.JOBQUEUE_METADATA_ATTR] =
-          createMetadataMessageAttributeValue(queueName, resolvedIdempotencyKey, span)
-
         SendMessageBatchRequestEntry.builder()
           .id(resolvedIdempotencyKey)
           .messageBody(job.body)
@@ -148,7 +128,7 @@ class SqsJobEnqueuer @Inject constructor(
               delaySeconds(delay.toSeconds().toInt())
             }
           }
-          .messageAttributes(attrs)
+          .messageAttributes(buildMessageAttributes(queueName, resolvedIdempotencyKey, job.attributes, span))
           .build()
       }
 
@@ -224,6 +204,39 @@ class SqsJobEnqueuer @Inject constructor(
     }
 
     return result
+  }
+
+  private fun buildMessageAttributes(
+    queueName: QueueName,
+    idempotencyKey: String,
+    attributes: Map<String, String>,
+    span: Span,
+  ): Map<String, MessageAttributeValue> {
+    val attrs = attributes.mapValues {
+      MessageAttributeValue.builder().dataType("String").stringValue(it.value).build()
+    }.toMutableMap()
+    attrs[SqsJob.JOBQUEUE_METADATA_ATTR] =
+      createMetadataMessageAttributeValue(queueName, idempotencyKey, span)
+    return attrs
+  }
+
+  private fun buildSendMessageRequest(
+    queueName: QueueName,
+    body: String,
+    idempotencyKey: String?,
+    deliveryDelay: Duration?,
+    attributes: Map<String, String>,
+    span: Span,
+  ): SendMessageRequest {
+    val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
+    val resolvedIdempotencyKey = idempotencyKey ?: tokenGenerator.generate()
+
+    return SendMessageRequest.builder()
+      .queueUrl(queueUrl)
+      .messageBody(body)
+      .delaySeconds(deliveryDelay?.toSeconds()?.toInt())
+      .messageAttributes(buildMessageAttributes(queueName, resolvedIdempotencyKey, attributes, span))
+      .build()
   }
 
   private fun createMetadataMessageAttributeValue(
