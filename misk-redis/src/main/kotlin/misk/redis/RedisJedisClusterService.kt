@@ -40,6 +40,9 @@ internal class RedisJedisClusterService(
       .password(replicationGroup.redis_auth_password
         .ifEmpty { null }
       )
+      .user(replicationGroup.user
+        .ifEmpty { null }
+      )
       .clientName(replicationGroup.client_name)
       .ssl(useSsl)
       //CLIENT SETINFO is only supported in Redis v7.2+

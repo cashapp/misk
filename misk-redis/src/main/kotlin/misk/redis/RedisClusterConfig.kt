@@ -28,6 +28,7 @@ data class RedisClusterReplicationGroupConfig @JvmOverloads constructor(
   val max_attempts: Int = DEFAULT_MAX_ATTEMPTS,
   @Redact
   val redis_auth_password: String,
+  val user: String,
   val timeout_ms: Int = Protocol.DEFAULT_TIMEOUT
 )
 
