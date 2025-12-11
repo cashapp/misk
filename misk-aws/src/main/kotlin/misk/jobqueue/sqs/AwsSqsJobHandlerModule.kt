@@ -8,6 +8,7 @@ import misk.annotation.ExperimentalMiskApi
 import misk.inject.AsyncSwitch
 import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
+import misk.inject.KInstallOnceModule
 import misk.jobqueue.BatchJobHandler
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
@@ -31,13 +32,9 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
       newMapBinder<QueueName, JobHandler>().addBinding(queueName.retryQueue).to(handler.java)
     }
 
-    install(DefaultAsyncSwitchModule())
-    install(
-      ServiceModule<AwsSqsJobHandlerSubscriptionService>()
-        .conditionalOn<AsyncSwitch>("sqs")
-        .dependsOn(dependsOn)
-        .dependsOn<ReadyService>()
-    )
+    // Install the subscription service module once, even if multiple handlers are registered
+    // The first invocation's dependsOn parameter is used for the service
+    install(AwsSqsJobHandlerSubscriptionServiceModule(dependsOn))
   }
 
   companion object {
@@ -71,5 +68,32 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
     ): AwsSqsJobHandlerModule<T> {
       return AwsSqsJobHandlerModule(queueName, handlerClass, installRetryQueue, dependsOn)
     }
+  }
+}
+
+/**
+ * Internal module that installs the AwsSqsJobHandlerSubscriptionService.
+ * This extends KInstallOnceModule so it's only configured once even if
+ * multiple AwsSqsJobHandlerModule instances are installed.
+ *
+ * IMPORTANT: KInstallOnceModule uses class-based equality, so Guice will only
+ * call configure() on the FIRST instance it encounters. This means:
+ * - The first AwsSqsJobHandlerModule installation determines the dependencies
+ * - Subsequent installations are skipped entirely by Guice (configure() won't be called)
+ * - If you need consistent dependencies across all handlers, ensure they're all
+ *   installed with the same dependsOn parameter (typically the default empty list)
+ */
+private class AwsSqsJobHandlerSubscriptionServiceModule(
+  private val dependsOn: List<Key<out Service>>
+) : KInstallOnceModule() {
+
+  override fun configure() {
+    install(DefaultAsyncSwitchModule())
+    install(
+      ServiceModule<AwsSqsJobHandlerSubscriptionService>()
+        .conditionalOn<AsyncSwitch>("sqs")
+        .dependsOn(dependsOn)
+        .dependsOn<ReadyService>()
+    )
   }
 }
