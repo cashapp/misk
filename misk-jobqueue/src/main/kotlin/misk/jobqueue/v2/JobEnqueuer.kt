@@ -3,7 +3,6 @@ package misk.jobqueue.v2
 import kotlinx.coroutines.future.await
 import misk.jobqueue.QueueName
 import java.time.Duration
-import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
 interface JobEnqueuer {
@@ -80,6 +79,76 @@ interface JobEnqueuer {
     queueName: QueueName,
     jobs: List<JobRequest>,
   ): CompletableFuture<BatchEnqueueResult>
+
+  /**
+   * Enqueue a job using automatic batching and suspend waiting for the confirmation.
+   *
+   * Messages are buffered client-side and sent in batches automatically when:
+   * - The batch size reaches 10 messages, or
+   * - The send frequency timeout is reached (50 ms, @see RealSqsBatchManagerFactory)
+   *
+   * @return true when the message is successfully sent
+   */
+  suspend fun enqueueBuffered(
+    queueName: QueueName,
+    body: String,
+    idempotencyKey: String? = null,
+    deliveryDelay: Duration? = Duration.ZERO,
+    attributes: Map<String, String> = emptyMap(),
+  ): Boolean {
+    return enqueueBufferedAsync(queueName, body, idempotencyKey, deliveryDelay, attributes).await()
+  }
+
+  /**
+   * Enqueue a job using automatic batching for high-throughput scenarios.
+   *
+   * Messages are buffered client-side and sent in batches automatically when:
+   * - The batch size reaches 10 messages, or
+   * - The send frequency timeout is reached (50 ms, @see RealSqsBatchManagerFactory)
+   *
+   * @return CompletableFuture that completes with true when the message is successfully sent
+   */
+  fun enqueueBufferedAsync(
+    queueName: QueueName,
+    body: String,
+    idempotencyKey: String? = null,
+    deliveryDelay: Duration? = Duration.ZERO,
+    attributes: Map<String, String> = emptyMap(),
+  ): CompletableFuture<Boolean>
+
+  /**
+   * Enqueue a job using automatic batching and suspend waiting for the confirmation.
+   *
+   * This is a convenience overload that accepts a [JobRequest] instead of individual parameters.
+   *
+   * @see enqueueBuffered
+   */
+  suspend fun enqueueBuffered(
+    queueName: QueueName,
+    job: JobRequest,
+  ): Boolean {
+    return enqueueBufferedAsync(queueName, job).await()
+  }
+
+  /**
+   * Enqueue a job using automatic batching for high-throughput scenarios.
+   *
+   * This is a convenience overload that accepts a [JobRequest] instead of individual parameters.
+   *
+   * @see enqueueBufferedAsync
+   */
+  fun enqueueBufferedAsync(
+    queueName: QueueName,
+    job: JobRequest,
+  ): CompletableFuture<Boolean> {
+    return enqueueBufferedAsync(
+      queueName = queueName,
+      body = job.body,
+      idempotencyKey = job.idempotencyKey,
+      deliveryDelay = job.deliveryDelay,
+      attributes = job.attributes,
+    )
+  }
 
   /**
    * Result of a batch enqueue operation with message ID focus

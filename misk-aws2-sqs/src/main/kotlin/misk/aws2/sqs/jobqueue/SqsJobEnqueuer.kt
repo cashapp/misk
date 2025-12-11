@@ -3,7 +3,6 @@ package misk.aws2.sqs.jobqueue
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.squareup.moshi.Moshi
-import ddtrot.dd.trace.core.DDSpan
 import io.opentracing.Scope
 import io.opentracing.Span
 import io.opentracing.Tracer
@@ -26,6 +25,7 @@ import java.util.concurrent.CompletableFuture
 @Singleton
 class SqsJobEnqueuer @Inject constructor(
   private val sqsClientFactory: SqsClientFactory,
+  private val sqsBatchManagerFactory: SqsBatchManagerFactory,
   private val sqsConfig: SqsConfig,
   private val sqsQueueResolver: SqsQueueResolver,
   private val tokenGenerator: TokenGenerator,
@@ -152,6 +152,43 @@ class SqsJobEnqueuer @Inject constructor(
         }
       } catch (e: Exception) {
         sqsMetrics.jobBatchEnqueueFailures.labels(queueName.value).inc(jobs.size.toDouble())
+        throw e
+      }
+    }
+  }
+
+  /**
+   * Enqueue a job using SqsAsyncBatchManager for automatic client-side batching and parallelization.
+   *
+   * This method buffers messages and sends them in batches automatically, optimizing
+   * for high-throughput scenarios where many messages are sent concurrently.
+   */
+  override fun enqueueBufferedAsync(
+    queueName: QueueName,
+    body: String,
+    idempotencyKey: String?,
+    deliveryDelay: Duration?,
+    attributes: Map<String, String>,
+  ): CompletableFuture<Boolean> {
+    return tracer.withSpanAsync("enqueue-buffered-job-${queueName.value}") { span, scope ->
+      val request = buildSendMessageRequest(queueName, body, idempotencyKey, deliveryDelay, attributes, span)
+
+      val startTimeMs = clock.millis()
+      try {
+        val region = sqsConfig.getQueueConfig(queueName).region!!
+        val batchManager = sqsBatchManagerFactory.get(region)
+        val response = batchManager.sendMessage(request)
+        sqsMetrics.jobsEnqueued.labels(queueName.value).inc()
+        response.whenComplete { _, error ->
+          sqsMetrics.sqsSendTime.labels(queueName.value).observe((clock.millis() - startTimeMs).toDouble())
+          if (error != null) {
+            sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc()
+          }
+          span.finish()
+          scope.close()
+        }.thenApply { true }
+      } catch (e: Exception) {
+        sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc()
         throw e
       }
     }

@@ -26,7 +26,6 @@ dependencies {
   implementation(libs.aws2Core)
   implementation(libs.aws2Regions)
   implementation(libs.loggingApi)
-  implementation(libs.openTracingDatadog)
   implementation(project(":misk-api"))
   implementation(project(":misk-metrics"))
   implementation(project(":misk-moshi"))

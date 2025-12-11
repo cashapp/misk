@@ -13,6 +13,19 @@ public final class misk/aws2/sqs/jobqueue/DefaultDeadLetterQueueProvider : misk/
 	public fun deadLetterQueueFor (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/QueueName;
 }
 
+public final class misk/aws2/sqs/jobqueue/RealSqsBatchManagerFactory : com/google/common/util/concurrent/AbstractIdleService, misk/aws2/sqs/jobqueue/SqsBatchManagerFactory {
+	public static final field Companion Lmisk/aws2/sqs/jobqueue/RealSqsBatchManagerFactory$Companion;
+	public fun <init> (Lmisk/aws2/sqs/jobqueue/SqsClientFactory;Lmisk/aws2/sqs/jobqueue/config/SqsConfig;)V
+	public fun get (Ljava/lang/String;)Lsoftware/amazon/awssdk/services/sqs/batchmanager/SqsAsyncBatchManager;
+}
+
+public final class misk/aws2/sqs/jobqueue/RealSqsBatchManagerFactory$Companion {
+}
+
+public abstract interface class misk/aws2/sqs/jobqueue/SqsBatchManagerFactory {
+	public abstract fun get (Ljava/lang/String;)Lsoftware/amazon/awssdk/services/sqs/batchmanager/SqsAsyncBatchManager;
+}
+
 public abstract interface class misk/aws2/sqs/jobqueue/SqsClientFactory {
 	public abstract fun get (Ljava/lang/String;)Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;
 }
@@ -52,13 +65,17 @@ public final class misk/aws2/sqs/jobqueue/SqsJobConsumer$Companion {
 
 public final class misk/aws2/sqs/jobqueue/SqsJobEnqueuer : misk/jobqueue/v2/JobEnqueuer {
 	public static final field Companion Lmisk/aws2/sqs/jobqueue/SqsJobEnqueuer$Companion;
-	public fun <init> (Lmisk/aws2/sqs/jobqueue/SqsClientFactory;Lmisk/aws2/sqs/jobqueue/config/SqsConfig;Lmisk/aws2/sqs/jobqueue/SqsQueueResolver;Lwisp/token/TokenGenerator;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Lcom/squareup/moshi/Moshi;Lio/opentracing/Tracer;Ljava/time/Clock;)V
+	public fun <init> (Lmisk/aws2/sqs/jobqueue/SqsClientFactory;Lmisk/aws2/sqs/jobqueue/SqsBatchManagerFactory;Lmisk/aws2/sqs/jobqueue/config/SqsConfig;Lmisk/aws2/sqs/jobqueue/SqsQueueResolver;Lwisp/token/TokenGenerator;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Lcom/squareup/moshi/Moshi;Lio/opentracing/Tracer;Ljava/time/Clock;)V
 	public fun batchEnqueue (Lmisk/jobqueue/QueueName;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun batchEnqueueAsync (Lmisk/jobqueue/QueueName;Ljava/util/List;)Ljava/util/concurrent/CompletableFuture;
 	public fun batchEnqueueBlocking (Lmisk/jobqueue/QueueName;Ljava/util/List;)Lmisk/jobqueue/v2/JobEnqueuer$BatchEnqueueResult;
 	public fun enqueue (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun enqueueAsync (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)Ljava/util/concurrent/CompletableFuture;
 	public fun enqueueBlocking (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
+	public fun enqueueBuffered (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun enqueueBuffered (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobEnqueuer$JobRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun enqueueBufferedAsync (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)Ljava/util/concurrent/CompletableFuture;
+	public fun enqueueBufferedAsync (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobEnqueuer$JobRequest;)Ljava/util/concurrent/CompletableFuture;
 }
 
 public final class misk/aws2/sqs/jobqueue/SqsJobEnqueuer$Companion {
@@ -79,6 +96,7 @@ public class misk/aws2/sqs/jobqueue/SqsJobQueueModule : misk/inject/KAbstractMod
 	public fun <init> (Lmisk/aws2/sqs/jobqueue/config/SqsConfig;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lmisk/aws2/sqs/jobqueue/config/SqsConfig;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	protected fun configure ()V
+	public final fun sqsBatchManagerFactory (Lmisk/aws2/sqs/jobqueue/SqsClientFactory;Lmisk/aws2/sqs/jobqueue/config/SqsConfig;)Lmisk/aws2/sqs/jobqueue/RealSqsBatchManagerFactory;
 	public final fun sqsClientFactory (Lsoftware/amazon/awssdk/auth/credentials/AwsCredentialsProvider;)Lmisk/aws2/sqs/jobqueue/SqsClientFactory;
 	public final fun sqsConfig (Lmisk/cloud/aws/AwsRegion;)Lmisk/aws2/sqs/jobqueue/config/SqsConfig;
 }
