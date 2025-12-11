@@ -22,7 +22,7 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
   companion object {
     const val FIELD_ENCRYPTION_KEY_NAME: String = "key_name"
     const val FIELD_ENCRYPTION_INDEXABLE: String = "indexable"
-    val logger = getLogger<SecretColumnType>()
+    private val logger = getLogger<SecretColumnType>()
   }
 
   private lateinit var encryptionAdapter: EncryptionAdapter

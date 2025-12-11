@@ -55,7 +55,7 @@ internal class HibernateHealthCheck(
   }
 
   companion object {
-    val logger = getLogger<HibernateHealthCheck>()
+    private val logger = getLogger<HibernateHealthCheck>()
     val CLOCK_SKEW_WARN_THRESHOLD: Duration = Duration.ofSeconds(10)
     val CLOCK_SKEW_UNHEALTHY_THRESHOLD: Duration = Duration.ofSeconds(30)
   }

@@ -47,7 +47,6 @@ public final class misk/aws2/sqs/jobqueue/SqsJobConsumer : com/google/common/uti
 }
 
 public final class misk/aws2/sqs/jobqueue/SqsJobConsumer$Companion {
-	public final fun getLogger ()Lmu/KLogger;
 }
 
 public final class misk/aws2/sqs/jobqueue/SqsJobEnqueuer : misk/jobqueue/v2/JobEnqueuer {
@@ -135,7 +134,6 @@ public final class misk/aws2/sqs/jobqueue/Subscriber {
 }
 
 public final class misk/aws2/sqs/jobqueue/Subscriber$Companion {
-	public final fun getLogger ()Lmu/KLogger;
 }
 
 public final class misk/aws2/sqs/jobqueue/SubscriptionService : com/google/common/util/concurrent/AbstractIdleService {

@@ -79,7 +79,7 @@ data class HttpClientsConfig @JvmOverloads constructor(
     }.values
 
   companion object {
-    val logger = getLogger<HttpClientsConfig>()
+    private val logger = getLogger<HttpClientsConfig>()
     val httpClientConfigDefaults = HttpClientConfig(
       maxRequests = 128,
       maxRequestsPerHost = 32,

@@ -55,6 +55,6 @@ class RealSlackClient @Inject constructor(
   }
 
   companion object {
-    val logger = getLogger<RealSlackClient>()
+    private val logger = getLogger<RealSlackClient>()
   }
 }
