@@ -5,7 +5,6 @@ public final class misk/slack/RealSlackClient : misk/slack/SlackClient {
 }
 
 public final class misk/slack/RealSlackClient$Companion {
-	public final fun getLogger ()Lmu/KLogger;
 }
 
 public class misk/slack/SlackClient {

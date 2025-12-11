@@ -29,7 +29,7 @@ import jakarta.inject.Singleton
       .toMap()
 
   companion object {
-    val logger = getLogger<ClientLoggingInterceptor>()
+    private val logger = getLogger<ClientLoggingInterceptor>()
 
     val LOGGED_HEADERS = listOf(
       "content-type",

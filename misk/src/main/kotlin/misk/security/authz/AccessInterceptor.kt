@@ -146,6 +146,6 @@ class AccessInterceptor private constructor(
   }
 
   companion object {
-    val logger = getLogger<AccessInterceptor>()
+    private val logger = getLogger<AccessInterceptor>()
   }
 }

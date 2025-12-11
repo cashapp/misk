@@ -644,7 +644,6 @@ public final class misk/client/HttpClientsConfig : misk/config/Config {
 
 public final class misk/client/HttpClientsConfig$Companion {
 	public final fun getHttpClientConfigDefaults ()Lmisk/client/HttpClientConfig;
-	public final fun getLogger ()Lmu/KLogger;
 }
 
 public final class misk/client/HttpClientsConfigBackwardsCompatibilityKt {
@@ -1059,7 +1058,6 @@ public final class misk/security/authz/AccessInterceptor : misk/ApplicationInter
 }
 
 public final class misk/security/authz/AccessInterceptor$Companion {
-	public final fun getLogger ()Lmu/KLogger;
 }
 
 public abstract interface annotation class misk/security/authz/DevelopmentOnly : java/lang/annotation/Annotation {

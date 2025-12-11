@@ -53,7 +53,7 @@ class DockerPostgresServer(
   }
 
   companion object {
-    val logger = KotlinLogging.logger {}
+    private val logger = KotlinLogging.logger {}
 
     const val SHA = "7421834e2eae283f829d3face39acba2e8ffbe24be756f7cabdfe778e7bfec57"
     const val IMAGE = "postgres@sha256:$SHA"

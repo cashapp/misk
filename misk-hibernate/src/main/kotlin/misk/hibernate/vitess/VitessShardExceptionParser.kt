@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting
 import misk.vitess.Shard
 import misk.logging.getLogger
 import java.util.Optional
-import java.util.function.Consumer
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -162,7 +161,7 @@ class VitessShardExceptionParser {
       "operation not allowed in state NOT_SERVING"
     )
 
-    val logger = getLogger<VitessShardExceptionParser>()
+    private val logger = getLogger<VitessShardExceptionParser>()
   }
 }
 

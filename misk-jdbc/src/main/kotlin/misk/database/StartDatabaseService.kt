@@ -138,7 +138,7 @@ class StartDatabaseService(
   )
 
   companion object {
-    val logger = KotlinLogging.logger {}
+    internal val logger = KotlinLogging.logger {}
 
     /**
      * Global cache of running database servers.

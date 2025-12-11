@@ -582,6 +582,5 @@ public final class misk/hibernate/vitess/VitessShardExceptionParser {
 }
 
 public final class misk/hibernate/vitess/VitessShardExceptionParser$Companion {
-	public final fun getLogger ()Lmu/KLogger;
 }
 
