@@ -25,11 +25,21 @@ internal class JettyWebSocket(
   val response: JettyServerUpgradeResponse
 ) : WebSocket {
 
+  internal sealed interface Message {
+    val byteCount: Long
+    data class Text(val text: String) : Message {
+      override val byteCount = text.utf8Size()
+    }
+    data class Binary(val data: ByteString) : Message {
+      override val byteCount = data.size.toLong()
+    }
+  }
+
   /** Total size of messages enqueued and not yet transmitted by Jetty. */
   private var outgoingQueueSize = 0L
 
   /** Messages to send when the Web Socket connects. */
-  private var queue = ArrayDeque<String>()
+  private var queue = ArrayDeque<Message>()
 
   /** Application's listener to notify of incoming messages from the client. */
   private var listener: WebSocketListener? = null
@@ -93,14 +103,22 @@ internal class JettyWebSocket(
   }
 
   override fun send(text: String): Boolean {
-    val byteCount = text.utf8Size()
+    return enqueue(Message.Text(text))
+  }
+
+  override fun send(bytes: ByteString): Boolean {
+    return enqueue(Message.Binary(bytes))
+  }
+
+  private fun enqueue(message: Message): Boolean {
+    val byteCount = message.byteCount
     if (outgoingQueueSize + byteCount > MAX_QUEUE_SIZE) {
       close(1001, null)
       return false
     }
 
     outgoingQueueSize += byteCount
-    queue.add(text)
+    queue.add(message)
     sendQueue()
 
     return true
@@ -108,26 +126,32 @@ internal class JettyWebSocket(
 
   private fun sendQueue() {
     while (adapter.isConnected && queue.isNotEmpty()) {
-      val text = queue.pop()
-      val byteCount = text.utf8Size()
-
-      adapter.remote.sendString(
-        text,
-        object : WriteCallback {
-          override fun writeSuccess() {
-            outgoingQueueSize -= byteCount
-          }
-
-          override fun writeFailed(x: Throwable?) {
-            outgoingQueueSize -= byteCount
-          }
+      val message = queue.pop()
+      val byteCount = message.byteCount
+      val callback = object : WriteCallback {
+        override fun writeSuccess() {
+          outgoingQueueSize -= byteCount
         }
-      )
-    }
-  }
 
-  override fun send(bytes: ByteString): Boolean {
-    TODO()
+        override fun writeFailed(x: Throwable?) {
+          outgoingQueueSize -= byteCount
+        }
+      }
+      when (message) {
+        is Message.Text -> {
+          adapter.remote.sendString(
+            message.text,
+            callback
+          )
+        }
+        is Message.Binary -> {
+          adapter.remote.sendBytes(
+            message.data.asByteBuffer(),
+            callback
+          )
+        }
+      }
+    }
   }
 
   override fun close(code: Int, reason: String?): Boolean {
@@ -167,7 +191,7 @@ internal class JettyWebSocket(
         it.match(DispatchMechanism.WEBSOCKET, null, listOf(), httpCall.url)
       }
 
-      val bestAction = candidateActions.sorted().firstOrNull() ?: return null
+      val bestAction = candidateActions.minOrNull() ?: return null
       bestAction.action.scopeAndHandle(request.httpServletRequest, httpCall, bestAction.pathMatcher)
       return realWebSocket.adapter
     }
