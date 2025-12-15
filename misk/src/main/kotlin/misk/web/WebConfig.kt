@@ -6,6 +6,7 @@ import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
 import misk.web.concurrencylimits.ConcurrencyLimiterStrategy
 import misk.web.exceptions.ActionExceptionLogLevelConfig
+import org.eclipse.jetty.websocket.core.WebSocketConstants
 import org.slf4j.event.Level
 import wisp.config.Config
 
@@ -209,6 +210,9 @@ data class WebConfig @JvmOverloads constructor(
   /** Config used by client and server interceptors installed by DeadlinePropagationModule
    * Only applies if DeadlinePropagationModule is installed, ignored otherwise  */
   val request_deadlines: RequestDeadlinesConfig = RequestDeadlinesConfig(),
+
+  /** Config used to customize the Jetty WebSocket servlet container. */
+  val websocket_servlet_config: WebSocketServletConfig = WebSocketServletConfig(),
 ) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
@@ -340,7 +344,7 @@ data class GracefulShutdownConfig @JvmOverloads constructor(
 data class RequestDeadlinesConfig @JvmOverloads constructor(
   /**
    * Default timeout in milliseconds for requests that don't have an explicit deadline.
-   * 
+   *
    * This value is used when:
    * - No deadline headers are found in incoming requests, and
    * - Actions don't have [@RequestDeadlineTimeout][misk.web.RequestDeadlineTimeout] annotation
@@ -387,3 +391,37 @@ enum class RequestDeadlineMode {
    */
   ENFORCE_ALL
 }
+
+data class WebSocketServletConfig @JvmOverloads constructor(
+  /**
+   * The maximum size of a binary message that can be received.
+   */
+  val max_binary_message_size: Long = WebSocketConstants.DEFAULT_MAX_BINARY_MESSAGE_SIZE.toLong(),
+  /**
+   * The maximum size of a text message that can be received.
+   */
+  val max_text_message_size: Long = WebSocketConstants.DEFAULT_MAX_TEXT_MESSAGE_SIZE.toLong(),
+  /**
+   * The maximum payload size of any WebSocket frame that can be received.
+   */
+  val max_frame_size: Long = WebSocketConstants.DEFAULT_MAX_FRAME_SIZE.toLong(),
+  /**
+   * The input buffer size used to read from network/transport layer.
+   */
+  val input_buffer_size: Int = WebSocketConstants.DEFAULT_INPUT_BUFFER_SIZE,
+
+  /**
+   * The output buffer size used to write to the network/transport layer.
+   */
+  val output_buffer_size: Int = WebSocketConstants.DEFAULT_OUTPUT_BUFFER_SIZE,
+
+  /**
+   * Whether frames are automatically fragmented to respect the maximum frame size.
+   */
+  val auto_fragment: Boolean = WebSocketConstants.DEFAULT_AUTO_FRAGMENT,
+
+  /**
+   * The duration that a websocket connection may be idle before being closed by the implementation.
+   */
+  val idle_timeout_seconds: Long = WebSocketConstants.DEFAULT_IDLE_TIMEOUT.seconds,
+)

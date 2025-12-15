@@ -45,6 +45,8 @@ import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import misk.logging.getLogger
+import org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer
+import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer.Configurator
 import java.io.File
 import java.io.IOException
 import java.lang.Thread.sleep
@@ -52,12 +54,14 @@ import java.net.InetAddress
 import java.nio.file.Files
 import java.nio.file.InvalidPathException
 import java.nio.file.attribute.PosixFilePermissions
+import java.time.Duration
 import java.util.EnumSet
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 import javax.servlet.DispatcherType
+import javax.servlet.ServletContext
 
 @Singleton
 class JettyService @Inject internal constructor(
@@ -307,7 +311,15 @@ class JettyService @Inject internal constructor(
     val servletContextHandler = ServletContextHandler()
     servletContextHandler.addServlet(ServletHolder(webActionsServlet), "/*")
 
-    JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null)
+    JettyWebSocketServletContainerInitializer.configure(servletContextHandler) { _, container ->
+      container.maxBinaryMessageSize = webConfig.websocket_servlet_config.max_binary_message_size
+      container.maxTextMessageSize = webConfig.websocket_servlet_config.max_text_message_size
+      container.maxFrameSize = webConfig.websocket_servlet_config.max_frame_size
+      container.inputBufferSize = webConfig.websocket_servlet_config.input_buffer_size
+      container.outputBufferSize = webConfig.websocket_servlet_config.output_buffer_size
+      container.isAutoFragment = webConfig.websocket_servlet_config.auto_fragment
+      container.idleTimeout = Duration.ofSeconds(webConfig.websocket_servlet_config.idle_timeout_seconds)
+    }
     server.addManaged(servletContextHandler)
 
     statisticsHandler.handler = servletContextHandler
