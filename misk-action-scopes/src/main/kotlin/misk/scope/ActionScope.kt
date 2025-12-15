@@ -6,7 +6,6 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asContextElement
-import java.util.UUID
 import java.util.concurrent.Callable
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KFunction
@@ -25,7 +24,6 @@ class ActionScope @Inject internal constructor(
 ) : AutoCloseable {
   companion object {
     private val threadLocalInstance = ThreadLocal<Instance>()
-    private val threadLocalUUID = ThreadLocal<UUID>()
   }
 
   /**
@@ -135,22 +133,11 @@ class ActionScope @Inject internal constructor(
 
     threadLocalInstance.set(instance)
 
-    // If an action scope had previously been entered on the thread, re-use its UUID.
-    // Otherwise, generate a new one.
-    if (threadLocalUUID.get() == null) {
-      threadLocalUUID.set(UUID.randomUUID())
-    }
-
     return this
   }
 
   override fun close() {
     threadLocalInstance.remove()
-
-    // Explicitly NOT removing threadLocalUUID because we want to retain the thread's UUID if
-    // the action scope is re-entered on the same thread.
-    // The only way in which threadLocalUUID is removed is through garbage collection, which occurs
-    // when the thread is no longer alive.
   }
 
   /** Returns true if currently in the scope */
@@ -164,12 +151,11 @@ class ActionScope @Inject internal constructor(
     check(inScope()) { "not running within an ActionScope" }
 
     val currentInstance = threadLocalInstance.get()
-    val currentThreadUUID = threadLocalUUID.get()
 
     return Callable {
-      // If the original thread is the same as the thread that calls the Callable and we are already
+      // If the original scope is the same as the scope that calls the KFunction and we are already
       // in scope, then there is no need to re-enter the scope.
-      if (inScope() && currentThreadUUID == threadLocalUUID.get()) {
+      if (inScope() && currentInstance === threadLocalInstance.get()) {
         c.call()
       } else {
         currentInstance.inScope {
@@ -187,8 +173,7 @@ class ActionScope @Inject internal constructor(
     check(inScope()) { "not running within an ActionScope" }
 
     val currentInstance = threadLocalInstance.get()
-    val currentThreadUUID = threadLocalUUID.get()
-    return WrappedKFunction(currentInstance, this, f, currentThreadUUID)
+    return WrappedKFunction(currentInstance, this, f)
   }
 
   /**
@@ -199,12 +184,11 @@ class ActionScope @Inject internal constructor(
     check(inScope()) { "not running within an ActionScope" }
 
     val currentInstance = threadLocalInstance.get()
-    val currentThreadUUID = threadLocalUUID.get()
 
     return {
-      // If the original thread is the same as the thread that calls the KFunction and we are already
+      // If the original scope is the same as the scope that calls the KFunction and we are already
       // in scope, then there is no need to re-enter the scope.
-      if (inScope() && currentThreadUUID == threadLocalUUID.get()) {
+      if (inScope() && currentInstance === threadLocalInstance.get()) {
         f.invoke()
       } else {
         currentInstance.inScope(f)
@@ -254,12 +238,11 @@ class ActionScope @Inject internal constructor(
     val instance: Instance,
     val scope: ActionScope,
     val wrapped: KFunction<T>,
-    val threadUUID: UUID
   ) : KFunction<T> {
     override fun call(vararg args: Any?): T {
-      // If the original thread is the same as the thread that calls the KFunction and we are already
+      // If the original scope is the same as the scope that calls the KFunction and we are already
       // in scope, then there is no need to re-enter the scope.
-      return if (scope.inScope() && threadUUID == threadLocalUUID.get()) {
+      return if (scope.inScope() && instance === threadLocalInstance.get()) {
         wrapped.call(*args)
       } else {
         instance.inScope {
@@ -269,9 +252,9 @@ class ActionScope @Inject internal constructor(
     }
 
     override fun callBy(args: Map<KParameter, Any?>): T {
-      // If the original thread is the same as the thread that calls the KFunction and we are already
+      // If the original scope is the same as the scope that calls the KFunction and we are already
       // in scope, then there is no need to re-enter the scope.
-      return if (scope.inScope() && threadUUID == threadLocalUUID.get()) {
+      return if (scope.inScope() && instance === threadLocalInstance.get()) {
         wrapped.callBy(args)
       } else {
         instance.inScope {

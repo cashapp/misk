@@ -34,11 +34,13 @@ internal class ActionScopePropagationTest {
       keyOf<String>(Names.named("from-seed")) to "my seed data"
     )
 
-    val callable = scope.enter(seedData).use {
+    val actionScopeInstance = scope.create(seedData)
+
+    val callable = actionScopeInstance.inScope {
       scope.propagate(Callable { tester.fooValue() })
     }
 
-    scope.enter(seedData).use {
+    actionScopeInstance.inScope {
       // Submit to same thread after we've already entered the scope
       val result = directExecutor.submit(callable).get()
       assertThat(result).isEqualTo("my seed data and bar and foo!")
@@ -55,7 +57,9 @@ internal class ActionScopePropagationTest {
       keyOf<String>(Names.named("from-seed")) to "my seed data"
     )
 
-    val callable = scope.enter(seedData).use {
+    val actionScopeInstance = scope.create(seedData)
+
+    val callable = actionScopeInstance.inScope {
       scope.propagate(Callable { tester.fooValue() })
     }
 
@@ -74,13 +78,15 @@ internal class ActionScopePropagationTest {
       keyOf<String>(Names.named("from-seed")) to "my seed data"
     )
 
+    val actionScopeInstance = scope.create(seedData)
+
     // Propagate on the the KCallable directly
     val f: KFunction<String> = tester::fooValue
-    val callable = scope.enter(seedData).use {
+    val callable = actionScopeInstance.inScope {
       scope.propagate(f)
     }
 
-    scope.enter(seedData).use {
+    scope.enter(actionScopeInstance).use {
       // Submit to same thread after we've already entered the scope
       val result = directExecutor.submit(
         Callable {
@@ -126,12 +132,14 @@ internal class ActionScopePropagationTest {
       keyOf<String>(Names.named("from-seed")) to "my seed data"
     )
 
+    val actionScopeInstance = scope.create(seedData)
+
     // Propagate on a lambda directly
-    val function = scope.enter(seedData).use {
+    val function = actionScopeInstance.inScope {
       scope.propagate { tester.fooValue() }
     }
 
-    scope.enter(seedData).use {
+    actionScopeInstance.inScope {
       // Submit to same thread after we've already entered the scope
       val result = directExecutor.submit(Callable { function() }).get()
       assertThat(result).isEqualTo("my seed data and bar and foo!")
