@@ -4,6 +4,8 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import misk.ReadyService
 import misk.ServiceModule
+import misk.inject.AsyncSwitch
+import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
 import misk.inject.toKey
 import misk.jobqueue.BatchJobHandler
@@ -29,11 +31,12 @@ class AwsSqsBatchJobHandlerModule<T : BatchJobHandler> private constructor(
       newMapBinder<QueueName, BatchJobHandler>().addBinding(queueName.retryQueue).to(handler.java)
     }
 
+    install(DefaultAsyncSwitchModule())
     install(
-      ServiceModule(
-        key = AwsSqsJobHandlerSubscriptionService::class.toKey(),
-        dependsOn = dependsOn
-      ).dependsOn<ReadyService>()
+      ServiceModule<AwsSqsJobHandlerSubscriptionService>()
+        .conditionalOn<AsyncSwitch>("sqs")
+        .dependsOn(dependsOn)
+        .dependsOn<ReadyService>()
     )
   }
 
