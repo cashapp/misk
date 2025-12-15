@@ -7,6 +7,7 @@ import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
 import misk.web.concurrencylimits.ConcurrencyLimiterStrategy
 import misk.web.exceptions.ActionExceptionLogLevelConfig
+import org.eclipse.jetty.websocket.core.WebSocketConstants
 import org.slf4j.event.Level
 
 data class WebConfig @JvmOverloads constructor(
@@ -225,6 +226,15 @@ data class WebConfig @JvmOverloads constructor(
 
   /** WebSocket idle timeout in seconds. Defaults to -1 (no timeout). */
   val websocket_idle_timeout_seconds: Long = -1,
+
+  /** The max binary message size that can be received on a WebSocket in bytes. */
+  val websocket_max_binary_message_size: Long = WebSocketConstants.DEFAULT_MAX_BINARY_MESSAGE_SIZE.toLong(),
+
+  /** The max text message size that can be received on a WebSocket in bytes. */
+  val websocket_max_text_message_size: Long = WebSocketConstants.DEFAULT_MAX_TEXT_MESSAGE_SIZE.toLong(),
+
+  /** The maximum payload size of any WebSocket frame that can be received in bytes. */
+  val websocket_max_frame_size: Long = WebSocketConstants.DEFAULT_MAX_FRAME_SIZE.toLong()
 ) : Config
 
 data class WebSslConfig @JvmOverloads constructor(
