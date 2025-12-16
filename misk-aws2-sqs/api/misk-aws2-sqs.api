@@ -80,10 +80,9 @@ public final class misk/aws2/sqs/jobqueue/SqsJobEnqueuer : misk/jobqueue/v2/JobE
 public final class misk/aws2/sqs/jobqueue/SqsJobEnqueuer$Companion {
 }
 
-public final class misk/aws2/sqs/jobqueue/SqsJobHandlerModule : misk/inject/KAbstractModule, misk/inject/AsyncModule {
+public final class misk/aws2/sqs/jobqueue/SqsJobHandlerModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/aws2/sqs/jobqueue/SqsJobHandlerModule$Companion;
 	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun moduleWhenAsyncDisabled ()Lmisk/inject/KAbstractModule;
 }
 
 public final class misk/aws2/sqs/jobqueue/SqsJobHandlerModule$Companion {
