@@ -12,14 +12,15 @@ import org.jooq.Configuration
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.conf.MappedSchema
-import org.jooq.conf.RenderMapping
-import org.jooq.conf.Settings
 import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.jooq.impl.DataSourceConnectionProvider
 import org.jooq.impl.DefaultExecuteListenerProvider
 import org.jooq.impl.DefaultTransactionProvider
 import misk.logging.getLogger
+import org.jooq.kotlin.renderMapping
+import org.jooq.kotlin.schemata
+import org.jooq.kotlin.settings
 import java.time.Clock
 import java.time.Duration
 
@@ -102,15 +103,18 @@ class JooqTransacter @JvmOverloads constructor(
     datasourceConfig: DataSourceConfig,
     options: TransacterOptions,
   ): DSLContext {
-    val settings = Settings()
-      .withExecuteWithOptimisticLocking(true)
-      .withRenderMapping(
-        RenderMapping().withSchemata(
-          MappedSchema()
-            .withInput(jooqCodeGenSchemaName)
-            .withOutput(datasourceConfig.database),
-        ),
-      )
+    val settings = settings {
+      isExecuteWithOptimisticLocking = true
+      renderMapping {
+        schemata {
+          add(
+            MappedSchema()
+              .withInput(jooqCodeGenSchemaName)
+              .withOutput(datasourceConfig.database)
+          )
+        }
+      }
+    }
 
     val connectionProvider = IsolationLevelAwareConnectionProvider(
       dataSourceConnectionProvider = DataSourceConnectionProvider(dataSourceService.dataSource),
@@ -125,11 +129,11 @@ class JooqTransacter @JvmOverloads constructor(
             false,
           ),
         ).apply {
-          val executeListeners = mutableListOf(
-            DefaultExecuteListenerProvider(AvoidUsingSelectStarListener()),
-          )
-          if ("true" == datasourceConfig.show_sql) {
-            executeListeners.add(DefaultExecuteListenerProvider(JooqSQLLogger()))
+          val executeListeners = buildList {
+            add(DefaultExecuteListenerProvider(AvoidUsingSelectStarListener()),)
+            if (datasourceConfig.show_sql.toBoolean()) {
+              add(DefaultExecuteListenerProvider(JooqSQLLogger()))
+            }
           }
           set(*executeListeners.toTypedArray())
 
