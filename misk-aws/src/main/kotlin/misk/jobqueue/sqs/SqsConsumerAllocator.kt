@@ -1,6 +1,7 @@
 package misk.jobqueue.sqs
 
 import com.google.common.annotations.VisibleForTesting
+import misk.feature.Feature
 import misk.feature.FeatureFlags
 import misk.jobqueue.QueueName
 import wisp.lease.LeaseManager
@@ -14,8 +15,14 @@ import jakarta.inject.Singleton
 @Singleton
 class SqsConsumerAllocator @Inject constructor(
   private val leaseManager: LeaseManager,
-  private val featureFlags: FeatureFlags
+  private val featureFlags: FeatureFlags,
+  awsSqsJobQueueConfig: AwsSqsJobQueueConfig
 ) {
+
+  private val podConsumersPerQueueFlag = awsSqsJobQueueConfig.pod_consumers_queue_feature_flag?.let {
+      Feature(it)
+    } ?: SqsJobConsumer.POD_CONSUMERS_PER_QUEUE
+
   fun computeSqsConsumersForPod(
     queueName: QueueName,
     receiverPolicy: AwsSqsJobReceiverPolicy
@@ -61,7 +68,7 @@ class SqsConsumerAllocator @Inject constructor(
   }
 
   private fun receiversPerPodForQueue(queueName: QueueName): Int {
-    return featureFlags.getInt(SqsJobConsumer.POD_CONSUMERS_PER_QUEUE, queueName.value)
+    return featureFlags.getInt(podConsumersPerQueueFlag, queueName.value)
   }
 
   /** Returns a ceiling on # of consumers a pod should have. */
