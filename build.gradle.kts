@@ -71,6 +71,7 @@ dependencyAnalysis {
     project(":misk-jooq") {
       onIncorrectConfiguration {
         exclude("org.jooq:jooq")
+        exclude("org.jooq:jooq-kotlin")
       }
     }
     project(":detektive") {
