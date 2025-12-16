@@ -76,6 +76,7 @@ public final class misk/slack/webapi/RealSlackClient : misk/slack/webapi/SlackCl
 	public final fun addReaction (Lmisk/slack/webapi/helpers/AddReactionRequest;)Lmisk/slack/webapi/helpers/AddReactionResponse;
 	public final fun getChatPermalink (Ljava/lang/String;Ljava/lang/String;)Lmisk/slack/webapi/helpers/GetChatPermalinkResponse;
 	public fun getUserByEmail (Ljava/lang/String;)Lmisk/slack/webapi/helpers/GetUserResponse;
+	public fun getUserById (Ljava/lang/String;)Lmisk/slack/webapi/helpers/GetUserResponse;
 	public final fun inviteToConversation (Lmisk/slack/webapi/helpers/InviteRequest;)Lmisk/slack/webapi/helpers/InviteResponse;
 	public fun postConfirmation (Ljava/lang/String;Lmisk/slack/webapi/helpers/PostMessageRequest;)Lmisk/slack/webapi/helpers/PostMessageResponse;
 	public fun postMessage (Lmisk/slack/webapi/helpers/PostMessageRequest;)Lmisk/slack/webapi/helpers/PostMessageResponse;
@@ -91,6 +92,7 @@ public abstract interface class misk/slack/webapi/SlackApi {
 	public abstract fun addReaction (Lmisk/slack/webapi/helpers/AddReactionRequest;)Lretrofit2/Call;
 	public abstract fun getChatPermalink (Ljava/lang/String;Ljava/lang/String;)Lretrofit2/Call;
 	public abstract fun getUserByEmail (Ljava/lang/String;)Lretrofit2/Call;
+	public abstract fun getUserById (Ljava/lang/String;)Lretrofit2/Call;
 	public abstract fun inviteToConversation (Lmisk/slack/webapi/helpers/InviteRequest;)Lretrofit2/Call;
 	public abstract fun postConfirmation (Ljava/lang/String;Lmisk/slack/webapi/helpers/PostMessageRequest;)Lretrofit2/Call;
 	public abstract fun postMessage (Lmisk/slack/webapi/helpers/PostMessageRequest;)Lretrofit2/Call;
@@ -104,6 +106,7 @@ public final class misk/slack/webapi/SlackApiKt {
 
 public abstract interface class misk/slack/webapi/SlackClient {
 	public abstract fun getUserByEmail (Ljava/lang/String;)Lmisk/slack/webapi/helpers/GetUserResponse;
+	public abstract fun getUserById (Ljava/lang/String;)Lmisk/slack/webapi/helpers/GetUserResponse;
 	public abstract fun postConfirmation (Ljava/lang/String;Lmisk/slack/webapi/helpers/PostMessageRequest;)Lmisk/slack/webapi/helpers/PostMessageResponse;
 	public abstract fun postMessage (Lmisk/slack/webapi/helpers/PostMessageRequest;)Lmisk/slack/webapi/helpers/PostMessageResponse;
 }
