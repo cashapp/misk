@@ -27,7 +27,7 @@ internal class WebActionExceptionMapper @Inject internal constructor(
   }
 
   override fun toGrpcResponse(th: WebActionException): GrpcErrorResponse {
-    return GrpcErrorResponse(th.grpcStatus ?: toGrpcStatus(th.code), th.responseBody, th.details)
+    return GrpcErrorResponse(th.grpcStatus ?: toGrpcStatus(th.code), "${th.responseBody}\n${th.stackTraceToString()}", th.details)
   }
 
   override fun loggingLevel(th: WebActionException) =
