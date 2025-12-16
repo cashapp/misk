@@ -32,6 +32,5 @@ class SqsJobHandlerTestModule(
     install(SqsJobQueueModule(sqsConfig) { endpointOverride(dockerSqs.endpointUri) })
     install(SqsJobHandlerModule.create<ExampleHandler>(QueueName("test-queue-1")))
     install(SqsJobHandlerModule.create<ExampleExternalQueueHandler>(QueueName("external-test-queue")))
-    install(ServiceModule<SubscriptionService>().dependsOn<ReadyService>())
   }
 }
