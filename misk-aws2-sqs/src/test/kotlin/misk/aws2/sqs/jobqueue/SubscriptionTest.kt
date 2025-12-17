@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import java.time.Duration
+import java.util.concurrent.CompletableFuture
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
@@ -346,6 +347,62 @@ class SubscriptionTest {
 
     // No jobs should be processed
     assertEquals(0, handler.jobs.size)
+  }
+
+  @Test
+  fun `enqueueBufferedAsync with JobRequest sends message successfully`() = runTest {
+    val queueName = QueueName("test-queue-1")
+    val handler = handlers[queueName] as ExampleHandler
+    handler.resetCounter(1)
+
+    val job = JobEnqueuer.JobRequest(
+      body = "buffered_job_request",
+      idempotencyKey = "buffered_job_key",
+      deliveryDelay = Duration.ofSeconds(1),
+      attributes = mapOf("type" to "job_request")
+    )
+
+    val startTime = System.currentTimeMillis()
+    val result = jobEnqueuer.enqueueBufferedAsync(queueName, job).join()
+
+    assertTrue(result)
+
+    val latch = handler.counter
+    latch.await()
+    assertEquals(0, latch.count)
+
+    val elapsed = System.currentTimeMillis() - startTime
+    assertTrue(elapsed >= 1000, "Message should have been delayed by at least 1 second")
+    assertEquals(1, handler.jobs.size)
+  }
+
+  @Test
+  fun `enqueueBufferedAsync batches multiple concurrent messages`() = runTest {
+    val queueName = QueueName("test-queue-1")
+    val handler = handlers[queueName] as ExampleHandler
+    val messageCount = 20
+    handler.resetCounter(messageCount)
+
+    // Fire off multiple messages concurrently - they should be batched automatically
+    val futures = (1..messageCount).map { i ->
+      jobEnqueuer.enqueueBufferedAsync(
+        queueName = queueName,
+        body = "concurrent_message_$i",
+        idempotencyKey = "concurrent_key_$i",
+      )
+    }
+
+    // Wait for all futures to complete
+    CompletableFuture.allOf(*futures.toTypedArray()).join()
+
+    // Verify all succeeded
+    futures.forEach { assertTrue(it.get()) }
+
+    // Wait for all messages to be consumed
+    val latch = handler.counter
+    latch.await()
+    assertEquals(0, latch.count)
+    assertEquals(messageCount, handler.jobs.size)
   }
 }
 

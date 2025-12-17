@@ -40,7 +40,7 @@ class ExemplarCronModule : KAbstractModule() {
     override fun shutDown() {}
 
     companion object {
-      val logger = getLogger<DependentService>()
+      private val logger = getLogger<DependentService>()
     }
   }
 
@@ -57,7 +57,7 @@ class ExemplarCronModule : KAbstractModule() {
     }
 
     companion object {
-      val logger = getLogger<MinuteCron>()
+      private val logger = getLogger<MinuteCron>()
     }
   }
 }

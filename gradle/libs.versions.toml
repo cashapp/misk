@@ -12,13 +12,14 @@ googleHttp = "2.0.0"
 guava = "33.5.0-jre"
 hoplite = "2.7.5"
 jackson = "2.20.0"
+jooq = "3.19.29"
 junit = "5.14.1"
 kotest = "6.0.3"
 kotlin = "2.1.21"
 kotlinBinaryCompatibilityPlugin = "0.18.1"
 ktor = "3.3.0"
 mavenPublish = "0.34.0"
-mcp = "0.8.0"
+mcp = "0.8.1"
 micrometer = "1.12.13"
 netty = "4.2.6.Final"
 okHttp = "5.1.0"
@@ -146,7 +147,9 @@ jettyUtil = { module = "org.eclipse.jetty:jetty-util" }
 jettyWebsocketApi = { module = "org.eclipse.jetty.websocket:websocket-jetty-api" }
 jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-server" }
 jnrUnixsocket = { module = "com.github.jnr:jnr-unixsocket", version = "0.38.23" }
-jooq = { module = "org.jooq:jooq", version = "3.19.17" }
+jooq = { module = "org.jooq:jooq" }
+jooqBom = { module = "org.jooq:jooq-bom", version.ref="jooq" }
+jooqKotlin = { module = "org.jooq:jooq-kotlin" }
 jsonSchemaValidator = { module = "com.networknt:json-schema-validator", version = "2.0.0" }
 jsqlparser = { module = "com.github.jsqlparser:jsqlparser", version = "5.3" }
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }

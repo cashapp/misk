@@ -86,7 +86,7 @@ class DockerCockroachCluster(
   }
 
   companion object {
-    val logger = KotlinLogging.logger {}
+    private val logger = KotlinLogging.logger {}
 
     const val SHA = "67f0547f1a989ebd119e5cbf903c8537556f574da20182454c036da63ea67c7d"
     const val IMAGE = "cockroachdb/cockroach@sha256:$SHA"

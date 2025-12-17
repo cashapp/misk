@@ -154,7 +154,7 @@ class DataSourceService @JvmOverloads constructor(
   }
 
   companion object {
-    val logger = getLogger<DataSourceService>()
+    private val logger = getLogger<DataSourceService>()
     private val DEFAULT_CONNECTION_IDLE_TIMEOUT_OFFSET = Duration.ofSeconds(10)
   }
 
