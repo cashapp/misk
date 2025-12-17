@@ -57,7 +57,7 @@ class SqsConsumerAllocator @Inject constructor(
   /** Returns true if the lease was acquired false otherwise. */
   private fun maybeAcquireConsumerLease(queueName: QueueName, candidate: Int): Boolean {
     val lease = leaseManager.requestLease(leaseName(queueName, candidate))
-    return lease.isHeld() || lease.acquire()
+    return lease.checkHeld() || lease.acquire()
   }
 
   private fun receiversPerPodForQueue(queueName: QueueName): Int {
