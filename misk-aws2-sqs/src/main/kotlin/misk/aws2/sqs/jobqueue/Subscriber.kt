@@ -213,6 +213,6 @@ class Subscriber(
   }
 
   companion object {
-    val logger = getLogger<Subscriber>()
+    private val logger = getLogger<Subscriber>()
   }
 }

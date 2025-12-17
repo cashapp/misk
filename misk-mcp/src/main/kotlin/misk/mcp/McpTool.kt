@@ -581,3 +581,55 @@ abstract class StructuredMcpTool<I : Any, O : Any> : McpTool<I>() {
       .arguments.last().type!!
   }
 }
+
+/**
+ * Extracts the typed result from a [McpTool.ToolResult].
+ *
+ * This extension function provides a convenient way to extract the strongly-typed result
+ * from a [StructuredMcpTool.StructuredToolResult]. It is primarily useful in testing scenarios
+ * where you want to verify the output of a [StructuredMcpTool] without dealing with the
+ * sealed interface directly.
+ *
+ * ## Usage
+ *
+ * ```kotlin
+ * @Test
+ * fun `test calculator tool returns correct result`() = runBlocking {
+ *   val tool = CalculatorTool()
+ *   val toolResult = tool.handle(CalculatorToolInput("ADD", 5, 3))
+ *
+ *   // Extract the typed result
+ *   val output: CalculatorToolOutput = toolResult.result()
+ *   assertEquals(8, output.result)
+ * }
+ * ```
+ *
+ * ## Type Safety
+ *
+ * The function uses reified type parameters to provide compile-time type checking.
+ * If the actual result type doesn't match the expected type [T], an [IllegalStateException]
+ * is thrown with a descriptive error message.
+ *
+ * @param T The expected type of the result. Must match the output type of the
+ *   [StructuredMcpTool] that produced this result.
+ * @return The typed result extracted from the [misk.mcp.StructuredMcpTool.StructuredToolResult].
+ * @throws IllegalStateException If this [misk.mcp.McpTool.ToolResult] is not a [misk.mcp.StructuredMcpTool.StructuredToolResult],
+ *   or if the result cannot be cast to type [T].
+ *
+ * @see StructuredMcpTool for creating tools with structured output
+ * @see StructuredMcpTool.StructuredToolResult for the result type this function operates on
+ */
+@OptIn(ExperimentalMiskApi::class)
+inline fun <reified T: Any> McpTool.ToolResult.result(): T = when (this) {
+  is StructuredMcpTool.StructuredToolResult<*> -> {
+    @Suppress("UNCHECKED_CAST")
+    (this.result as? T)
+      ?: throw IllegalStateException(
+        "Expected result of type ${T::class}, but got ${this.result::class}"
+      )
+  }
+  else ->
+    throw IllegalStateException(
+      "Expected StructuredToolResult with type ${T::class}, but got ${this::class.simpleName}"
+    )
+}

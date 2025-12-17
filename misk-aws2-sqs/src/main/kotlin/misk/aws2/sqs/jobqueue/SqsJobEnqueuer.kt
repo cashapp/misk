@@ -3,7 +3,6 @@ package misk.aws2.sqs.jobqueue
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.squareup.moshi.Moshi
-import ddtrot.dd.trace.core.DDSpan
 import io.opentracing.Scope
 import io.opentracing.Span
 import io.opentracing.Tracer
@@ -26,6 +25,7 @@ import java.util.concurrent.CompletableFuture
 @Singleton
 class SqsJobEnqueuer @Inject constructor(
   private val sqsClientFactory: SqsClientFactory,
+  private val sqsBatchManagerFactory: SqsBatchManagerFactory,
   private val sqsConfig: SqsConfig,
   private val sqsQueueResolver: SqsQueueResolver,
   private val tokenGenerator: TokenGenerator,
@@ -52,21 +52,7 @@ class SqsJobEnqueuer @Inject constructor(
     attributes: Map<String, String>,
   ): CompletableFuture<Boolean> {
     return tracer.withSpanAsync("enqueue-job-${queueName.value}") { span, scope ->
-      val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
-      val resolvedIdempotencyKey = idempotencyKey ?: tokenGenerator.generate()
-
-      val attrs = attributes.map {
-        it.key to MessageAttributeValue.builder().dataType("String").stringValue(it.value).build()
-      }.toMap().toMutableMap()
-      attrs[SqsJob.JOBQUEUE_METADATA_ATTR] =
-        createMetadataMessageAttributeValue(queueName, resolvedIdempotencyKey, span)
-
-      val request = SendMessageRequest.builder()
-        .queueUrl(queueUrl)
-        .messageBody(body)
-        .delaySeconds(deliveryDelay?.toSeconds()?.toInt())
-        .messageAttributes(attrs)
-        .build()
+      val request = buildSendMessageRequest(queueName, body, idempotencyKey, deliveryDelay, attributes, span)
 
       val startTimeMs = clock.millis()
       try {
@@ -134,12 +120,6 @@ class SqsJobEnqueuer @Inject constructor(
       }
 
       val messageEntries = validJobsWithKeys.map { (job, resolvedIdempotencyKey) ->
-        val attrs = job.attributes.map {
-          it.key to MessageAttributeValue.builder().dataType("String").stringValue(it.value).build()
-        }.toMap().toMutableMap()
-        attrs[SqsJob.JOBQUEUE_METADATA_ATTR] =
-          createMetadataMessageAttributeValue(queueName, resolvedIdempotencyKey, span)
-
         SendMessageBatchRequestEntry.builder()
           .id(resolvedIdempotencyKey)
           .messageBody(job.body)
@@ -148,7 +128,7 @@ class SqsJobEnqueuer @Inject constructor(
               delaySeconds(delay.toSeconds().toInt())
             }
           }
-          .messageAttributes(attrs)
+          .messageAttributes(buildMessageAttributes(queueName, resolvedIdempotencyKey, job.attributes, span))
           .build()
       }
 
@@ -172,6 +152,43 @@ class SqsJobEnqueuer @Inject constructor(
         }
       } catch (e: Exception) {
         sqsMetrics.jobBatchEnqueueFailures.labels(queueName.value).inc(jobs.size.toDouble())
+        throw e
+      }
+    }
+  }
+
+  /**
+   * Enqueue a job using SqsAsyncBatchManager for automatic client-side batching and parallelization.
+   *
+   * This method buffers messages and sends them in batches automatically, optimizing
+   * for high-throughput scenarios where many messages are sent concurrently.
+   */
+  override fun enqueueBufferedAsync(
+    queueName: QueueName,
+    body: String,
+    idempotencyKey: String?,
+    deliveryDelay: Duration?,
+    attributes: Map<String, String>,
+  ): CompletableFuture<Boolean> {
+    return tracer.withSpanAsync("enqueue-buffered-job-${queueName.value}") { span, scope ->
+      val request = buildSendMessageRequest(queueName, body, idempotencyKey, deliveryDelay, attributes, span)
+
+      val startTimeMs = clock.millis()
+      try {
+        val region = sqsConfig.getQueueConfig(queueName).region!!
+        val batchManager = sqsBatchManagerFactory.get(region)
+        val response = batchManager.sendMessage(request)
+        sqsMetrics.jobsEnqueued.labels(queueName.value).inc()
+        response.whenComplete { _, error ->
+          sqsMetrics.sqsSendTime.labels(queueName.value).observe((clock.millis() - startTimeMs).toDouble())
+          if (error != null) {
+            sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc()
+          }
+          span.finish()
+          scope.close()
+        }.thenApply { true }
+      } catch (e: Exception) {
+        sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc()
         throw e
       }
     }
@@ -224,6 +241,39 @@ class SqsJobEnqueuer @Inject constructor(
     }
 
     return result
+  }
+
+  private fun buildMessageAttributes(
+    queueName: QueueName,
+    idempotencyKey: String,
+    attributes: Map<String, String>,
+    span: Span,
+  ): Map<String, MessageAttributeValue> {
+    val attrs = attributes.mapValues {
+      MessageAttributeValue.builder().dataType("String").stringValue(it.value).build()
+    }.toMutableMap()
+    attrs[SqsJob.JOBQUEUE_METADATA_ATTR] =
+      createMetadataMessageAttributeValue(queueName, idempotencyKey, span)
+    return attrs
+  }
+
+  private fun buildSendMessageRequest(
+    queueName: QueueName,
+    body: String,
+    idempotencyKey: String?,
+    deliveryDelay: Duration?,
+    attributes: Map<String, String>,
+    span: Span,
+  ): SendMessageRequest {
+    val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
+    val resolvedIdempotencyKey = idempotencyKey ?: tokenGenerator.generate()
+
+    return SendMessageRequest.builder()
+      .queueUrl(queueUrl)
+      .messageBody(body)
+      .delaySeconds(deliveryDelay?.toSeconds()?.toInt())
+      .messageAttributes(buildMessageAttributes(queueName, resolvedIdempotencyKey, attributes, span))
+      .build()
   }
 
   private fun createMetadataMessageAttributeValue(

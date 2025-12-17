@@ -104,7 +104,7 @@ internal class SqlLeaseManager @Inject constructor(
     /**
      * Returns true if the lease is held by another process.
      */
-    override fun checkHeldElsewhere(): Boolean = !isHeld()
+    override fun checkHeldElsewhere(): Boolean = !checkHeld()
 
     /**
      * Attempts to acquire the lease.

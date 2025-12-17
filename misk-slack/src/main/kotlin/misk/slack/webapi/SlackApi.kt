@@ -53,6 +53,15 @@ interface SlackApi {
   @Headers(value = ["accept: application/json"])
   fun getUserByEmail(@Query("email") email: String): Call<GetUserResponse>
 
+    /**
+   * Calls Slack to fetch user for given user id.
+   *
+   * https://docs.slack.dev/reference/methods/users.info
+   */
+  @GET("/api/users.info")
+  @Headers(value = ["accept: application/json"])
+  fun getUserById(@Query("userId") userId: String): Call<GetUserResponse>
+
   /**
    * Calls Slack and asks it to set a channel topic.
    * https://slack.com/api/conversations.setTopic

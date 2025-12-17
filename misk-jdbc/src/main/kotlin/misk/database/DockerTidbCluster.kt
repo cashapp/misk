@@ -95,7 +95,7 @@ class DockerTidbCluster(
   }
 
   companion object {
-    val logger = KotlinLogging.logger {}
+    private val logger = KotlinLogging.logger {}
 
     // TiDB version 4.0.4
     const val SHA = "431e8e71d3a02134297b4370abbb40b0bd2bc5aec0c42f12e4d4e03943b50910"

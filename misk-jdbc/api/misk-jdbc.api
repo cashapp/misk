@@ -32,7 +32,6 @@ public final class misk/database/DockerCockroachCluster : misk/database/Database
 }
 
 public final class misk/database/DockerCockroachCluster$Companion {
-	public final fun getLogger ()Lmu/KLogger;
 	public final fun pullImage ()V
 }
 
@@ -56,7 +55,6 @@ public final class misk/database/DockerPostgresServer : misk/database/DatabaseSe
 }
 
 public final class misk/database/DockerPostgresServer$Companion {
-	public final fun getLogger ()Lmu/KLogger;
 	public final fun pullImage ()V
 }
 
@@ -83,7 +81,6 @@ public final class misk/database/DockerTidbCluster : misk/database/DatabaseServe
 }
 
 public final class misk/database/DockerTidbCluster$Companion {
-	public final fun getLogger ()Lmu/KLogger;
 	public final fun pullImage ()V
 }
 
@@ -118,7 +115,6 @@ public final class misk/database/StartDatabaseService$CacheKey {
 }
 
 public final class misk/database/StartDatabaseService$Companion {
-	public final fun getLogger ()Lmu/KLogger;
 	public final fun getServers ()Lcom/google/common/cache/LoadingCache;
 	public final fun setServers (Lcom/google/common/cache/LoadingCache;)V
 }
@@ -360,7 +356,6 @@ public final class misk/jdbc/DataSourceService : com/google/common/util/concurre
 }
 
 public final class misk/jdbc/DataSourceService$Companion {
-	public final fun getLogger ()Lmu/KLogger;
 }
 
 public final class misk/jdbc/DataSourceType : java/lang/Enum {

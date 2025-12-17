@@ -32,6 +32,8 @@ open class SqsJobQueueModule @JvmOverloads constructor(
         .conditionalOn<AsyncSwitch>("sqs")
         .dependsOn<ReadyService>()
     )
+    bind<SqsBatchManagerFactory>().to<RealSqsBatchManagerFactory>()
+    install(ServiceModule<RealSqsBatchManagerFactory>())
   }
 
   @Provides
@@ -52,4 +54,13 @@ open class SqsJobQueueModule @JvmOverloads constructor(
   fun sqsClientFactory(
     credentialsProvider: AwsCredentialsProvider,
   ): SqsClientFactory = RealSqsClientFactory(credentialsProvider, configureClient)
+
+  @Provides
+  @Singleton
+  fun sqsBatchManagerFactory(
+    sqsClientFactory: SqsClientFactory,
+    sqsConfig: SqsConfig,
+  ): RealSqsBatchManagerFactory {
+    return RealSqsBatchManagerFactory(sqsClientFactory, sqsConfig)
+  }
 }
