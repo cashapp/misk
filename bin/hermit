@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+# THIS FILE IS GENERATED; DO NOT MODIFY
 
 set -eo pipefail
 
@@ -24,7 +26,7 @@ if [ ! -x "${HERMIT_EXE}" ]; then
   echo "Bootstrapping ${HERMIT_EXE} from ${HERMIT_DIST_URL}" 1>&2
   INSTALL_SCRIPT="$(mktemp)"
   # This value must match that of the install script
-  INSTALL_SCRIPT_SHA256="180e997dd837f839a3072a5e2f558619b6d12555cd5452d3ab19d87720704e38"
+  INSTALL_SCRIPT_SHA256="09ed936378857886fd4a7a4878c0f0c7e3d839883f39ca8b4f2f242e3126e1c6"
   if [ "${INSTALL_SCRIPT_SHA256}" = "BYPASS" ]; then
     curl -fsSL "${HERMIT_DIST_URL}/install.sh" -o "${INSTALL_SCRIPT}"
   else
