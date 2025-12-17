@@ -53,6 +53,28 @@ class GrpcClientModule<T : Service, G : T> @JvmOverloads constructor(
     newMultibinder<CallFactoryWrapper>()
   }
 
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is GrpcClientModule<*, *>) return false
+
+    if (kclass != other.kclass) return false
+    if (grpcClientClass != other.grpcClientClass) return false
+    if (name != other.name) return false
+    if (annotation != other.annotation) return false
+    if (minMessageToCompress != other.minMessageToCompress) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = kclass.hashCode()
+    result = 31 * result + grpcClientClass.hashCode()
+    result = 31 * result + name.hashCode()
+    result = 31 * result + (annotation?.hashCode() ?: 0)
+    result = 31 * result + minMessageToCompress.hashCode()
+    return result
+  }
+
   companion object {
     inline fun <reified T : Service, reified G : T> create(
       name: String,
