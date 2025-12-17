@@ -216,8 +216,7 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   }
 
   private companion object {
-    val logger = getLogger<ConcurrencyLimitsInterceptor>()
-
+    private val logger = getLogger<ConcurrencyLimitsInterceptor>()
   }
 }
 

@@ -116,6 +116,34 @@ class FakeJobEnqueuer @Inject constructor(
     return batchEnqueueAsync(queueName, jobs).join()
   }
 
+  override suspend fun enqueueBuffered(
+    queueName: QueueName,
+    body: String,
+    idempotencyKey: String?,
+    deliveryDelay: Duration?,
+    attributes: Map<String, String>
+  ): Boolean {
+    return enqueueBufferedAsync(queueName, body, idempotencyKey, deliveryDelay, attributes).await()
+  }
+
+  override suspend fun enqueueBuffered(
+    queueName: QueueName,
+    job: JobEnqueuer.JobRequest,
+  ): Boolean {
+    return enqueueBufferedAsync(queueName, job).await()
+  }
+
+  override fun enqueueBufferedAsync(
+    queueName: QueueName,
+    body: String,
+    idempotencyKey: String?,
+    deliveryDelay: Duration?,
+    attributes: Map<String, String>
+  ): CompletableFuture<Boolean> {
+    // For fake implementation, just delegate to enqueueAsync since batching is not relevant in tests
+    return enqueueAsync(queueName, body, idempotencyKey, deliveryDelay, attributes)
+  }
+
   override fun batchEnqueueAsync(
     queueName: QueueName,
     jobs: List<JobEnqueuer.JobRequest>

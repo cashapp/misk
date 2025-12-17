@@ -249,6 +249,10 @@ public final class misk/jobqueue/v2/FakeJobEnqueuer : misk/testing/FakeFixture, 
 	public fun enqueue (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun enqueueAsync (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)Ljava/util/concurrent/CompletableFuture;
 	public fun enqueueBlocking (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
+	public fun enqueueBuffered (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun enqueueBuffered (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobEnqueuer$JobRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun enqueueBufferedAsync (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)Ljava/util/concurrent/CompletableFuture;
+	public fun enqueueBufferedAsync (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobEnqueuer$JobRequest;)Ljava/util/concurrent/CompletableFuture;
 	public final fun handleJob (Lmisk/jobqueue/v2/Job;ZI)Z
 	public static synthetic fun handleJob$default (Lmisk/jobqueue/v2/FakeJobEnqueuer;Lmisk/jobqueue/v2/Job;ZIILjava/lang/Object;)Z
 	public final fun handleJobs (Lmisk/jobqueue/QueueName;ZIZ)Ljava/util/List;
@@ -300,6 +304,10 @@ public abstract interface class misk/jobqueue/v2/JobEnqueuer {
 	public abstract fun enqueue (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun enqueueAsync (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)Ljava/util/concurrent/CompletableFuture;
 	public abstract fun enqueueBlocking (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
+	public abstract fun enqueueBuffered (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun enqueueBuffered (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobEnqueuer$JobRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun enqueueBufferedAsync (Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun enqueueBufferedAsync (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobEnqueuer$JobRequest;)Ljava/util/concurrent/CompletableFuture;
 }
 
 public final class misk/jobqueue/v2/JobEnqueuer$BatchEnqueueResult {
@@ -331,6 +339,11 @@ public final class misk/jobqueue/v2/JobEnqueuer$DefaultImpls {
 	public static synthetic fun enqueueAsync$default (Lmisk/jobqueue/v2/JobEnqueuer;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;ILjava/lang/Object;)Ljava/util/concurrent/CompletableFuture;
 	public static fun enqueueBlocking (Lmisk/jobqueue/v2/JobEnqueuer;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;)V
 	public static synthetic fun enqueueBlocking$default (Lmisk/jobqueue/v2/JobEnqueuer;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;ILjava/lang/Object;)V
+	public static fun enqueueBuffered (Lmisk/jobqueue/v2/JobEnqueuer;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun enqueueBuffered (Lmisk/jobqueue/v2/JobEnqueuer;Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobEnqueuer$JobRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun enqueueBuffered$default (Lmisk/jobqueue/v2/JobEnqueuer;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static fun enqueueBufferedAsync (Lmisk/jobqueue/v2/JobEnqueuer;Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobEnqueuer$JobRequest;)Ljava/util/concurrent/CompletableFuture;
+	public static synthetic fun enqueueBufferedAsync$default (Lmisk/jobqueue/v2/JobEnqueuer;Lmisk/jobqueue/QueueName;Ljava/lang/String;Ljava/lang/String;Ljava/time/Duration;Ljava/util/Map;ILjava/lang/Object;)Ljava/util/concurrent/CompletableFuture;
 }
 
 public final class misk/jobqueue/v2/JobEnqueuer$JobRequest {

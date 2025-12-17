@@ -110,6 +110,6 @@ class SqsJobConsumer @Inject constructor(
   }
 
   companion object {
-    val logger = getLogger<SqsJobConsumer>()
+    private val logger = getLogger<SqsJobConsumer>()
   }
 }

@@ -11,6 +11,8 @@ plugins {
 dependencies {
   api(libs.guava)
   api(libs.guice)
+  api(platform(libs.jooqBom))
+  api(libs.jooqKotlin)
   api(libs.jooq)
   api(libs.loggingApi)
   api(project(":misk-core"))

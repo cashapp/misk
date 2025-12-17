@@ -32,6 +32,10 @@ class RealSlackClient @Inject constructor(
     return callSlack { slackApi.getUserByEmail(email).execute() }
   }
 
+  override fun getUserById(userId: String): GetUserResponse {
+    return callSlack { slackApi.getUserById(userId).execute() }
+  }
+
   fun inviteToConversation(request: InviteRequest): InviteResponse {
     return callSlack { slackApi.inviteToConversation(request).execute() }
   }

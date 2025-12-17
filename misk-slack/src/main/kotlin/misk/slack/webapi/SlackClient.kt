@@ -15,4 +15,6 @@ interface SlackClient {
   ): PostMessageResponse
 
   fun getUserByEmail(email: String): GetUserResponse
+
+  fun getUserById(userId: String): GetUserResponse
 }
