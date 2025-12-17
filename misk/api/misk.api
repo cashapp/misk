@@ -469,6 +469,8 @@ public final class misk/client/GrpcClientModule : misk/inject/KAbstractModule {
 	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/annotation/Annotation;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/annotation/Annotation;J)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/annotation/Annotation;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
 }
 
 public final class misk/client/GrpcClientModule$Companion {
