@@ -72,6 +72,7 @@ fun TagConsumer<*>.Alert(
         div("flex-shrink-0") {
           when (theme) {
             AlertTheme.BLUE, AlertTheme.BLUE_HIGHLIGHT -> {
+              // TODO upstream these to Heroicons
               unsafe {
                 raw(
                   """
@@ -84,6 +85,7 @@ fun TagConsumer<*>.Alert(
             }
 
             AlertTheme.GREEN -> {
+              // TODO upstream these to Heroicons
               unsafe {
                 raw(
                   """
@@ -96,6 +98,7 @@ fun TagConsumer<*>.Alert(
             }
 
             AlertTheme.RED -> {
+              // TODO upstream these to Heroicons
               unsafe {
                 raw(
                   """
