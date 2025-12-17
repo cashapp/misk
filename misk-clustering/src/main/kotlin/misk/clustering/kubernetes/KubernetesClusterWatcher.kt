@@ -72,7 +72,7 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
             .limit(null)
             .resourceVersion(null)
             .resourceVersionMatch(null)
-            .sendInitialEvents(false)
+            .sendInitialEvents(null)
             .timeoutSeconds(null)
             .watch(true)
             .buildCall(null),
