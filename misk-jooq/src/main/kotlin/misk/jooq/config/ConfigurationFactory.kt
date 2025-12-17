@@ -22,62 +22,62 @@ import org.jooq.kotlin.settings
 import java.time.Clock
 
 internal abstract class ConfigurationFactory {
-    abstract fun getConfiguration(options: JooqTransacter.TransacterOptions): Configuration
+  abstract fun getConfiguration(options: JooqTransacter.TransacterOptions): Configuration
 
-    protected fun buildConfiguration(
-        clock: Clock,
-        dataSourceConfig: DataSourceConfig,
-        dataSourceService: DataSourceService,
-        jooqCodeGenSchemaName: String,
-        jooqTimestampRecordListenerOptions: JooqTimestampRecordListenerOptions,
-        options: JooqTransacter.TransacterOptions
-    ): Configuration {
-        val settings = settings {
-            isExecuteWithOptimisticLocking = true
-            renderMapping {
-                schemata {
-                    add(
-                        MappedSchema()
-                            .withInput(jooqCodeGenSchemaName)
-                            .withOutput(dataSourceConfig.database)
-                    )
-                }
-            }
+  protected fun buildConfiguration(
+    clock: Clock,
+    dataSourceConfig: DataSourceConfig,
+    dataSourceService: DataSourceService,
+    jooqCodeGenSchemaName: String,
+    jooqTimestampRecordListenerOptions: JooqTimestampRecordListenerOptions,
+    options: JooqTransacter.TransacterOptions
+  ): Configuration {
+    val settings = settings {
+      isExecuteWithOptimisticLocking = true
+      renderMapping {
+        schemata {
+          add(
+            MappedSchema()
+              .withInput(jooqCodeGenSchemaName)
+              .withOutput(dataSourceConfig.database),
+          )
         }
-        val connectionProvider = IsolationLevelAwareConnectionProvider(
-            dataSourceConnectionProvider = DataSourceConnectionProvider(dataSourceService.dataSource),
-            transacterOptions = options,
+      }
+    }
+    val connectionProvider = IsolationLevelAwareConnectionProvider(
+      dataSourceConnectionProvider = DataSourceConnectionProvider(dataSourceService.dataSource),
+      transacterOptions = options,
+    )
+    return DefaultConfiguration().apply {
+      set(settings)
+      set(dataSourceConfig.type.toSqlDialect())
+      set(DefaultTransactionProvider(connectionProvider, false))
+      val executeListeners = buildList {
+        add(DefaultExecuteListenerProvider(AvoidUsingSelectStarListener()))
+        if (dataSourceConfig.show_sql.toBoolean()) {
+          add(DefaultExecuteListenerProvider(JooqSQLLogger()))
+        }
+      }
+      set(*executeListeners.toTypedArray())
+
+      if (jooqTimestampRecordListenerOptions.install) {
+        set(
+          JooqTimestampRecordListener(
+            clock = clock,
+            createdAtColumnName = jooqTimestampRecordListenerOptions.createdAtColumnName,
+            updatedAtColumnName = jooqTimestampRecordListenerOptions.updatedAtColumnName,
+          ),
         )
-        return DefaultConfiguration().apply {
-            set(settings)
-            set(dataSourceConfig.type.toSqlDialect())
-            set(DefaultTransactionProvider(connectionProvider, false))
-            val executeListeners = buildList {
-                add(DefaultExecuteListenerProvider(AvoidUsingSelectStarListener()))
-                if (dataSourceConfig.show_sql.toBoolean()) {
-                    add(DefaultExecuteListenerProvider(JooqSQLLogger()))
-                }
-            }
-            set(*executeListeners.toTypedArray())
-
-            if (jooqTimestampRecordListenerOptions.install) {
-                set(
-                    JooqTimestampRecordListener(
-                        clock = clock,
-                        createdAtColumnName = jooqTimestampRecordListenerOptions.createdAtColumnName,
-                        updatedAtColumnName = jooqTimestampRecordListenerOptions.updatedAtColumnName,
-                    ),
-                )
-            }
-        }
+      }
     }
+  }
 
-    protected fun DataSourceType.toSqlDialect() = when (this) {
-        DataSourceType.MYSQL -> SQLDialect.MYSQL
-        DataSourceType.HSQLDB -> SQLDialect.HSQLDB
-        DataSourceType.VITESS_MYSQL -> SQLDialect.MYSQL
-        DataSourceType.POSTGRESQL -> SQLDialect.POSTGRES
-        DataSourceType.TIDB -> SQLDialect.MYSQL
-        else -> throw IllegalArgumentException("no SQLDialect for " + this.name)
-    }
+  protected fun DataSourceType.toSqlDialect() = when (this) {
+    DataSourceType.MYSQL -> SQLDialect.MYSQL
+    DataSourceType.HSQLDB -> SQLDialect.HSQLDB
+    DataSourceType.VITESS_MYSQL -> SQLDialect.MYSQL
+    DataSourceType.POSTGRESQL -> SQLDialect.POSTGRES
+    DataSourceType.TIDB -> SQLDialect.MYSQL
+    else -> throw IllegalArgumentException("no SQLDialect for " + this.name)
+  }
 }

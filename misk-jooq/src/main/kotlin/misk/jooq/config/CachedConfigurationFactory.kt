@@ -19,29 +19,29 @@ import java.util.concurrent.ConcurrentHashMap
  * https://www.jooq.org/doc/latest/manual/sql-building/dsl-context/thread-safety/).
  */
 internal class CachedConfigurationFactory(
-    private val clock: Clock,
-    private val dataSourceConfig: DataSourceConfig,
-    private val dataSourceService: DataSourceService,
-    private val jooqCodeGenSchemaName: String,
-    private val jooqTimestampRecordListenerOptions: JooqTimestampRecordListenerOptions,
-    private val jooqConfigExtension: Configuration.() -> Unit = {},
+  private val clock: Clock,
+  private val dataSourceConfig: DataSourceConfig,
+  private val dataSourceService: DataSourceService,
+  private val jooqCodeGenSchemaName: String,
+  private val jooqTimestampRecordListenerOptions: JooqTimestampRecordListenerOptions,
+  private val jooqConfigExtension: Configuration.() -> Unit = {},
 ) : ConfigurationFactory() {
-    private val concurrentHashMap = ConcurrentHashMap<TransactionIsolationLevel, Configuration>()
+  private val concurrentHashMap = ConcurrentHashMap<TransactionIsolationLevel, Configuration>()
 
-    @VisibleForTesting
-    val cacheContents
-        get() = concurrentHashMap.entries.toSet()
+  @VisibleForTesting
+  val cacheContents
+    get() = concurrentHashMap.entries.toSet()
 
-    override fun getConfiguration(options: JooqTransacter.TransacterOptions): Configuration {
-        return concurrentHashMap.getOrPut(options.isolationLevel) {
-            buildConfiguration(
-                clock,
-                dataSourceConfig,
-                dataSourceService,
-                jooqCodeGenSchemaName,
-                jooqTimestampRecordListenerOptions,
-                options
-            ).apply(jooqConfigExtension)
-        }
+  override fun getConfiguration(options: JooqTransacter.TransacterOptions): Configuration {
+    return concurrentHashMap.getOrPut(options.isolationLevel) {
+      buildConfiguration(
+        clock = clock,
+        dataSourceConfig = dataSourceConfig,
+        dataSourceService = dataSourceService,
+        jooqCodeGenSchemaName = jooqCodeGenSchemaName,
+        jooqTimestampRecordListenerOptions = jooqTimestampRecordListenerOptions,
+        options = options,
+      ).apply(jooqConfigExtension)
     }
+  }
 }
