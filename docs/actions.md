@@ -352,6 +352,80 @@ class MyTest {
 }
 ```
 
+### Verifying action registration
+
+A common mistake is implementing a `WebAction` but forgetting to register it via 
+`WebActionModule.create<YourAction>()`. Without registration, the action won't be exposed as an 
+HTTP endpoint.
+
+Misk provides `WebActionRegistrationTester` to catch this. It scans your service's packages for 
+`WebAction` implementations and verifies each has a corresponding `WebActionEntry` registration.
+
+**Using the base class:**
+
+```kotlin
+@MiskTest
+class WebActionRegistrationTest : AbstractWebActionRegistrationTest() {
+  @MiskTestModule
+  val module: Module = DinoTestModule()
+
+  override fun webActionPackages(): List<String> {
+    // Scan your service's packages for WebAction implementations
+    return listOf("com.example.dino")
+  }
+
+  // Optional: exclude specific actions from verification
+  override fun excludeWebAction(actionClass: KClass<out WebAction>): Boolean {
+    return actionClass.simpleName in setOf("TestOnlyAction", "SpecialAdminAction")
+  }
+
+  // Optional: hint shown in error messages
+  override fun registrationModuleHint(): String = "your service's web actions module"
+}
+```
+
+**Using the utility directly:**
+
+```kotlin
+@Test
+fun allWebActionsAreRegistered() {
+  val injector = Guice.createInjector(DinoTestModule())
+  
+  WebActionRegistrationTester.assertAllWebActionsRegistered(
+    injector,
+    WebActionRegistrationTester.Options(
+      basePackages = listOf("com.example.dino"),
+      excludePredicate = { actionClass ->
+        actionClass.simpleName == "SpecialAction"
+      },
+      registrationModuleHint = "DinoWebModule",
+    )
+  )
+}
+```
+
+When a missing registration is detected, the assertion fails with a helpful error message including
+copy-paste registration code:
+
+```
+The following WebActions are not registered:
+  - com.example.dino.actions.ForgottenAction
+
+Copy and paste the following lines into your WebAction registration module in DinoWebModule:
+-----
+    install(WebActionModule.create<ForgottenAction>())
+or
+    install(WebActionModule.create<ForgottenAction>("<optional path prefix>"))
+-----
+```
+
+**Built-in exclusions:**
+
+The following are automatically excluded from verification:
+- Abstract classes and interfaces
+- Classes in `.api.internal.` packages (typically Wire/gRPC-generated actions registered via 
+  different mechanisms)
+
 ### Integration tests
 
 It's possible to perform tests terminating at the app's HTTP/gRPC interface.

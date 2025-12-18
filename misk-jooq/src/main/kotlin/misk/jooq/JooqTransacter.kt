@@ -1,37 +1,14 @@
 package misk.jooq
 
 import misk.backoff.ExponentialBackoff
-import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceService
-import misk.jdbc.DataSourceType
-import misk.jooq.listeners.AvoidUsingSelectStarListener
-import misk.jooq.listeners.JooqSQLLogger
-import misk.jooq.listeners.JooqTimestampRecordListener
-import misk.jooq.listeners.JooqTimestampRecordListenerOptions
+import misk.logging.getLogger
 import org.jooq.Configuration
-import org.jooq.DSLContext
-import org.jooq.SQLDialect
-import org.jooq.conf.MappedSchema
 import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
-import org.jooq.impl.DataSourceConnectionProvider
-import org.jooq.impl.DefaultExecuteListenerProvider
-import org.jooq.impl.DefaultTransactionProvider
-import misk.logging.getLogger
-import org.jooq.kotlin.renderMapping
-import org.jooq.kotlin.schemata
-import org.jooq.kotlin.settings
-import java.time.Clock
 import java.time.Duration
 
-class JooqTransacter @JvmOverloads constructor(
-  private val dataSourceService: DataSourceService,
-  private val dataSourceConfig: DataSourceConfig,
-  private val jooqCodeGenSchemaName: String,
-  private val jooqTimestampRecordListenerOptions: JooqTimestampRecordListenerOptions =
-    JooqTimestampRecordListenerOptions(install = false),
-  private val clock: Clock,
-  private val jooqConfigExtension: Configuration.() -> Unit = {}
+class JooqTransacter(
+  private val configurationFactory: (TransacterOptions) -> Configuration,
 ) {
 
   @JvmOverloads
@@ -86,7 +63,7 @@ class JooqTransacter @JvmOverloads constructor(
   ): RETURN_TYPE {
     var jooqSession: JooqSession? = null
     return try {
-      dslContext(dataSourceService, clock, dataSourceConfig, options).transactionResult { configuration ->
+      DSL.using(configurationFactory(options)).transactionResult { configuration ->
         jooqSession = JooqSession(DSL.using(configuration))
         runCatching { callback(jooqSession).also { jooqSession.executePreCommitHooks() } }
           .onFailure { jooqSession.onSessionClose { jooqSession.executeRollbackHooks(it) } }
@@ -95,68 +72,6 @@ class JooqTransacter @JvmOverloads constructor(
     } finally {
       jooqSession?.executeSessionCloseHooks()
     }
-  }
-
-  private fun dslContext(
-    dataSourceService: DataSourceService,
-    clock: Clock,
-    datasourceConfig: DataSourceConfig,
-    options: TransacterOptions,
-  ): DSLContext {
-    val settings = settings {
-      isExecuteWithOptimisticLocking = true
-      renderMapping {
-        schemata {
-          add(
-            MappedSchema()
-              .withInput(jooqCodeGenSchemaName)
-              .withOutput(datasourceConfig.database)
-          )
-        }
-      }
-    }
-
-    val connectionProvider = IsolationLevelAwareConnectionProvider(
-      dataSourceConnectionProvider = DataSourceConnectionProvider(dataSourceService.dataSource),
-      transacterOptions = options,
-    )
-
-    return DSL.using(connectionProvider, datasourceConfig.type.toSqlDialect(), settings)
-      .apply {
-        configuration().set(
-          DefaultTransactionProvider(
-            configuration().connectionProvider(),
-            false,
-          ),
-        ).apply {
-          val executeListeners = buildList {
-            add(DefaultExecuteListenerProvider(AvoidUsingSelectStarListener()),)
-            if (datasourceConfig.show_sql.toBoolean()) {
-              add(DefaultExecuteListenerProvider(JooqSQLLogger()))
-            }
-          }
-          set(*executeListeners.toTypedArray())
-
-          if (jooqTimestampRecordListenerOptions.install) {
-            set(
-              JooqTimestampRecordListener(
-                clock = clock,
-                createdAtColumnName = jooqTimestampRecordListenerOptions.createdAtColumnName,
-                updatedAtColumnName = jooqTimestampRecordListenerOptions.updatedAtColumnName,
-              ),
-            )
-          }
-        }.apply(jooqConfigExtension)
-      }
-  }
-
-  private fun DataSourceType.toSqlDialect() = when (this) {
-    DataSourceType.MYSQL -> SQLDialect.MYSQL
-    DataSourceType.HSQLDB -> SQLDialect.HSQLDB
-    DataSourceType.VITESS_MYSQL -> SQLDialect.MYSQL
-    DataSourceType.POSTGRESQL -> SQLDialect.POSTGRES
-    DataSourceType.TIDB -> SQLDialect.MYSQL
-    else -> throw IllegalArgumentException("no SQLDialect for " + this.name)
   }
 
   data class TransacterOptions @JvmOverloads constructor(
