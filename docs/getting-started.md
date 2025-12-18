@@ -1,8 +1,8 @@
 Getting Started
 ===============
 
-The easiest way to get started is to copy the 
-[Misk exemplar project](https://github.com/cashapp/misk/tree/master/samples/exemplar). This exemplar 
+The easiest way to get started is to copy the
+[Misk exemplar project](https://github.com/cashapp/misk/tree/master/samples/exemplar). This exemplar
 contains a Misk web app with the requisite dependencies.
 
 ## Prerequisites
@@ -11,6 +11,10 @@ Misk relies on [hermit][hermit] to install tools required to develop and run the
 Please follow [this](https://cashapp.github.io/hermit/) to install and activate hermit.
 
 Misk uses [Gradle][gradle] to build and run test locally.
+
+To exclude the commit that formatted the repo from git-blame, please run
+`git config blame.ignoreRevsFile .git-blame-ignore-revs`.
+See [the ignore file for further details](../.git-blame-ignore-revs)
 
 ### Formatting
 
@@ -44,24 +48,25 @@ Misk is unopinionated about which of its features your application chooses to us
 multiple alternatives for some common concerns.
 
 ### The main function
+
 The entry point to every Misk application is
 [`MiskApplication`](https://github.com/cashapp/misk/blob/master/misk/src/main/kotlin/misk/MiskApplication.kt):
 
 ```kotlin
 fun main(args: Array<String>) {
-  val environment = Environment.fromEnvironmentVariable()
-  val env = Env(environment.name)
-  val config = MiskConfig.load<ExemplarConfig>("exemplar", env)
+    val environment = Environment.fromEnvironmentVariable()
+    val env = Env(environment.name)
+    val config = MiskConfig.load<ExemplarConfig>("exemplar", env)
 
-  MiskApplication(
-    MiskRealServiceModule(),
-    MiskWebModule(config.web),
-    ExemplarAccessModule(),
-    ExemplarWebActionsModule(),
+    MiskApplication(
+        MiskRealServiceModule(),
+        MiskWebModule(config.web),
+        ExemplarAccessModule(),
+        ExemplarWebActionsModule(),
 
-    // e.g. to add an admin dashboard:
-    AdminDashboardModule(isDevelopment = true)
-  ).run(args)
+        // e.g. to add an admin dashboard:
+        AdminDashboardModule(isDevelopment = true)
+    ).run(args)
 }
 ```
 
@@ -90,17 +95,18 @@ This then corresponds to a YAML file:
 my_config_value: "this value"
 
 http_clients:
-  # ... config
+# ... config
 ```
 
 ### Config resolution
+
 Configs are loaded using the app’s resource loader. The config loader looks for files in the
 following order by default:
 
 1. `$SERVICE_NAME-common.yaml`
 2. `$SERVICE_NAME-$ENVIRONMENT.yaml`
 
-At least one of `$SERVICE_NAME-common.yaml` or `$SERVICE_NAME-$ENVIRONMENT.yaml` must exist. 
+At least one of `$SERVICE_NAME-common.yaml` or `$SERVICE_NAME-$ENVIRONMENT.yaml` must exist.
 
 Values from later files take precedence.
 
@@ -113,14 +119,14 @@ Actions inherit from `WebAction` and have a `@Get`/`@Post` annotation:
 ```kotlin
 @Singleton
 class HelloWebAction @Inject constructor() : WebAction {
-  @Get("/hello/{name}")
-  @Unauthenticated
-  @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  fun hello(
-    @PathParam name: String,
-  ): HelloResponse {
-    return HelloResponse(name)
-  }
+    @Get("/hello/{name}")
+    @Unauthenticated
+    @ResponseContentType(MediaTypes.APPLICATION_JSON)
+    fun hello(
+        @PathParam name: String,
+    ): HelloResponse {
+        return HelloResponse(name)
+    }
 }
 
 data class HelloResponse(val name: String)
@@ -131,42 +137,45 @@ Read more about this in [Actions](./actions.md).
 ## Test the endpoint
 
 You can unit test directly:
+
 ```kotlin
 class HelloWebActionTest {
-  @Test
-  fun `tests the unit`() {
-    assertThat(HelloWebAction().hello("sandy", headersOf(), null, null))
-        .isEqualTo(HelloResponse("sandy"))
-  }
+    @Test
+    fun `tests the unit`() {
+        assertThat(HelloWebAction().hello("sandy", headersOf(), null, null))
+            .isEqualTo(HelloResponse("sandy"))
+    }
 }
 ```
 
 Integration tests set up a module for you, and adds an injector to the test class.
 
-You can use `WebServerTestingModule` to set up a running web server and make `WebTestClient` 
+You can use `WebServerTestingModule` to set up a running web server and make `WebTestClient`
 available.
 
 ```kotlin
 @MiskTest(startService = true)
 class HelloWebActionTest {
-  @MiskTestModule val module = TestModule()
+    @MiskTestModule
+    val module = TestModule()
 
-  @Inject private lateinit var webTestClient: WebTestClient
+    @Inject
+    private lateinit var webTestClient: WebTestClient
 
-  @Test
-  fun `tests a request being made`() {
-    val hello = webTestClient.get("/hello/sandy")
-    assertThat(hello.response.code).isEqualTo(200)
-    assertThat(hello.parseJson<HelloResponse>())
-      .isEqualTo(HelloResponse("sandy"))
-  }
-
-  class TestModule : KAbstractModule() {
-    override fun configure() {
-      install(WebServerTestingModule())
-      install(HelloModule())
+    @Test
+    fun `tests a request being made`() {
+        val hello = webTestClient.get("/hello/sandy")
+        assertThat(hello.response.code).isEqualTo(200)
+        assertThat(hello.parseJson<HelloResponse>())
+            .isEqualTo(HelloResponse("sandy"))
     }
-  }
+
+    class TestModule : KAbstractModule() {
+        override fun configure() {
+            install(WebServerTestingModule())
+            install(HelloModule())
+        }
+    }
 }
 ```
 
@@ -179,18 +188,20 @@ threads that do the real work are written as `Services` using [Guava’s Service
 Framework](https://github.com/google/guava/wiki/ServiceExplained).
 
 A `Service` is bound by installing a `ServiceModule`, for example:
+
 ```kotlin
 class MyServiceModule : KAbstractModule() {
-  override fun configure() {
-    install(ServiceModule<MyService>())
-  }
+    override fun configure() {
+        install(ServiceModule<MyService>())
+    }
 }
 ```
 
 Notice that in this example we use
 [`KAbstractModule()`](https://github.com/square/misk/blob/master/misk/src/main/kotlin/misk/inject/KAbstractModule.kt),
 Misk’s Kotlin wrapper for
-[`AbstractModule`](https://google.github.io/guice/api-docs/latest/javadoc/index.html?com/google/inject/AbstractModule.html),
+[
+`AbstractModule`](https://google.github.io/guice/api-docs/latest/javadoc/index.html?com/google/inject/AbstractModule.html),
 as our base Module class.
 
 `MiskApplication` will start all services installed by a `ServiceModule`.
@@ -199,30 +210,38 @@ If there is a `Service` that must be run after a other set of `Services` have st
 service dependency graph should be specified at the installation site.
 
 For example, if you are operating a movie service, which needs a database:
+
 ```kotlin
 class MovieServiceModule : KAbstractModule() {
-  override fun configure() {
-    // Note that DatabaseService does not have to be installed here.
-    // It could be installed in another KAbstractModule if preferred.
-    install(ServiceModule<DatabaseService>())
+    override fun configure() {
+        // Note that DatabaseService does not have to be installed here.
+        // It could be installed in another KAbstractModule if preferred.
+        install(ServiceModule<DatabaseService>())
 
-    // Multiple dependencies can be added by chaining calls to `dependsOn`.
-    install(ServiceModule<MovieService>()
-        .dependsOn<DatabaseService>())
-  }
+        // Multiple dependencies can be added by chaining calls to `dependsOn`.
+        install(
+            ServiceModule<MovieService>()
+                .dependsOn<DatabaseService>()
+        )
+    }
 }
 ```
-See [`ServiceModule`](./0.x/misk-service/misk-service/misk/-service-module/index.md) for more details about the 
+
+See [`ServiceModule`](./0.x/misk-service/misk-service/misk/-service-module/index.md) for more details about the
 service graph.
 
 When writing `Services`, always prefer to inherit from one of the common base classes:
-[`AbstractIdleService`](https://google.github.io/guava/releases/19.0/api/docs/com/google/common/util/concurrent/AbstractIdleService.html),
-[`AbstractScheduledService`](https://google.github.io/guava/releases/19.0/api/docs/com/google/common/util/concurrent/AbstractScheduledService.html),
+[
+`AbstractIdleService`](https://google.github.io/guava/releases/19.0/api/docs/com/google/common/util/concurrent/AbstractIdleService.html),
+[
+`AbstractScheduledService`](https://google.github.io/guava/releases/19.0/api/docs/com/google/common/util/concurrent/AbstractScheduledService.html),
 or
-[`AbstractExecutionThreadService`](https://google.github.io/guava/releases/19.0/api/docs/com/google/common/util/concurrent/AbstractExecutionThreadService.html).
+[
+`AbstractExecutionThreadService`](https://google.github.io/guava/releases/19.0/api/docs/com/google/common/util/concurrent/AbstractExecutionThreadService.html).
 See [Services Explained](https://github.com/google/guava/wiki/ServiceExplained) for details. If your
 service is can make use of exponential backoff and scheduling, take a look at using
 [`RepeatedTaskQueue`](https://github.com/cashapp/misk/blob/master/misk/src/main/kotlin/misk/tasks/RepeatedTaskQueue.kt).
 
 [hermit]: https://cashapp.github.io/hermit/
+
 [gradle]: https://gradle.org/
