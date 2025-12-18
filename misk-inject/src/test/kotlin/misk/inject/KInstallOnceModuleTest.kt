@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 
 @MiskTest
 class KInstallOnceModuleTest {
-  @MiskTestModule val module = TestModule()
+  @MiskTestModule @Suppress("unused") val module = TestModule()
 
   @Inject private lateinit var map: Map<String, TestValue>
 
@@ -34,13 +34,13 @@ class KInstallOnceModuleTest {
       |Duplicates:
       |  Key: "key"
       |  Bound at:
-      |    1 : KInstallOnceModuleTest${"$"}TestDuplicateFailureModule.configure(KInstallOnceModuleTest.kt:86)
+      |    1 : KInstallOnceModuleTest${"$"}TestDuplicateFailureModule.configure(KInstallOnceModuleTest.kt:88)
       |      \_ installed by: KInstallOnceModuleTest${"$"}TestFailureModule -> KInstallOnceModuleTest${"$"}TestDuplicateFailureModule
-      |    2 : KInstallOnceModuleTest${"$"}TestDuplicateFailureModule.configure(KInstallOnceModuleTest.kt:86)
+      |    2 : KInstallOnceModuleTest${"$"}TestDuplicateFailureModule.configure(KInstallOnceModuleTest.kt:88)
       |      \_ installed by: KInstallOnceModuleTest${"$"}TestFailureModule -> KInstallOnceModuleTest${"$"}TestDuplicateFailureModule
       |
       |MapBinder declared at:
-      |  KInstallOnceModuleTest${"$"}TestDuplicateFailureModule.configure(KInstallOnceModuleTest.kt:96)
+      |  KInstallOnceModuleTest${"$"}TestDuplicateFailureModule.configure(KInstallOnceModuleTest.kt:97)
       |      \_ installed by: KInstallOnceModuleTest${"$"}TestFailureModule -> KInstallOnceModuleTest${"$"}TestDuplicateFailureModule -> RealMapBinder
       |
       |1 error
