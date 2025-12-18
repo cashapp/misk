@@ -3,60 +3,54 @@ package misk.perf
 import com.google.common.base.Ticker
 import com.google.common.util.concurrent.AbstractExecutionThreadService
 import io.prometheus.client.Histogram
-import misk.concurrent.Sleeper
-import misk.metrics.v2.Metrics
-import misk.metrics.v2.PeakGauge
-import org.slf4j.event.Level
-import misk.logging.getLogger
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.time.Duration
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.NANOSECONDS
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
+import misk.concurrent.Sleeper
+import misk.logging.getLogger
+import misk.metrics.v2.Metrics
+import misk.metrics.v2.PeakGauge
+import org.slf4j.event.Level
 
 /**
- * Detects and records pauses experienced by the VM. Garbage collection is a common source of
- * pauses, but pauses can be caused by many things: CPU throttling, excessive swapping, excessive
- * active threads, etc.
+ * Detects and records pauses experienced by the VM. Garbage collection is a common source of pauses, but pauses can be
+ * caused by many things: CPU throttling, excessive swapping, excessive active threads, etc.
  *
  * Heavily inspired by [jhiccup](https://www.azulsystems.com/jHiccup) which is
  * [public domain](https://creativecommons.org/publicdomain/zero/1.0/)
  */
 @Singleton
-internal class PauseDetector @Inject constructor(
+internal class PauseDetector
+@Inject
+constructor(
   private val config: PauseDetectorConfig,
   @ForPauseDetector private val ticker: Ticker,
   @ForPauseDetector private val sleeper: Sleeper,
   val metrics: Metrics,
 ) : AbstractExecutionThreadService() {
 
-  /** Log levels by pause time sorted by severity descending*/
-  private val logLevels: List<LogLevels> = listOf(
-    LogLevels(config.logErrorMillis, Level.ERROR),
-    LogLevels(config.logWarnMillis, Level.WARN),
-    LogLevels(config.logInfoMillis, Level.INFO)
-  )
+  /** Log levels by pause time sorted by severity descending */
+  private val logLevels: List<LogLevels> =
+    listOf(
+      LogLevels(config.logErrorMillis, Level.ERROR),
+      LogLevels(config.logWarnMillis, Level.WARN),
+      LogLevels(config.logInfoMillis, Level.INFO),
+    )
 
   /**
    * Tracks the distribution and total amount of pause time observed.
    *
-   * (We prefer histogram to summary here because the latter has higher CPU overhead, this runs
-   * ideally at close to 1k QPS, and we don't strictly require accurate quantiles.)
+   * (We prefer histogram to summary here because the latter has higher CPU overhead, this runs ideally at close to 1k
+   * QPS, and we don't strictly require accurate quantiles.)
    */
   private val pauseHistogram: Histogram =
-    metrics.histogram(
-      "jvm_pause_time_histogram_ms",
-      "Histogram of observed pause time durations in millis",
-      listOf()
-    )
+    metrics.histogram("jvm_pause_time_histogram_ms", "Histogram of observed pause time durations in millis", listOf())
 
   /** Tracks peak pause time. */
   private val pausePeak: PeakGauge =
-    metrics.peakGauge(
-      "jvm_pause_time_peak_ms",
-      "Peak gauge of observed pause time duration in millis",
-      listOf()
-    )
+    metrics.peakGauge("jvm_pause_time_peak_ms", "Peak gauge of observed pause time duration in millis", listOf())
 
   // No synchronization is necessary for these variables: they are only ever accessed by the
   // detector thread itself OR by a test harness thread.
@@ -90,8 +84,8 @@ internal class PauseDetector @Inject constructor(
   }
 
   /**
-   * Check the elapsed time after an invocation to [sleep]. Elapsed time beyond the configured
-   * resolution and the shortest observed delta is recorded as pause time.
+   * Check the elapsed time after an invocation to [sleep]. Elapsed time beyond the configured resolution and the
+   * shortest observed delta is recorded as pause time.
    *
    * NB: [sleep] and [check] must always be invoked from the same thread.
    */
@@ -131,13 +125,10 @@ internal class PauseDetector @Inject constructor(
       }
     }
 
-    return PauseResults(
-      pauseTimeMillis = pauseMillis,
-      shortestObservedDeltaNsec = shortestObservedDeltaTimeNsec
-    )
+    return PauseResults(pauseTimeMillis = pauseMillis, shortestObservedDeltaNsec = shortestObservedDeltaTimeNsec)
   }
 
-  private fun getLoggingLevel(pauseMillis: Long) : Level? {
+  private fun getLoggingLevel(pauseMillis: Long): Level? {
     return logLevels.firstOrNull { it.limitMillis in 0..pauseMillis }?.level
   }
 

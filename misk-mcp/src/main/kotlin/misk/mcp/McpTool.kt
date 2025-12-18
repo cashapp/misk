@@ -2,13 +2,15 @@
 
 package misk.mcp
 
-
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequest
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.ContentBlock
 import io.modelcontextprotocol.kotlin.sdk.types.EmptyJsonObject
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
+import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.full.allSupertypes
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonArray
@@ -16,25 +18,19 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.internal.generateJsonSchema
-import kotlin.reflect.KClass
-import kotlin.reflect.KType
-import kotlin.reflect.full.allSupertypes
 
 /**
  * Base class for tools in the Model Context Protocol (MCP) specification with type-safe input handling.
  *
- * This abstract class represents a tool that can be exposed through an MCP server, allowing
- * AI models and other clients to discover and invoke functionality. Tools are one of the
- * core primitives in MCP, enabling models to perform actions and retrieve information
- * from external systems.
+ * This abstract class represents a tool that can be exposed through an MCP server, allowing AI models and other clients
+ * to discover and invoke functionality. Tools are one of the core primitives in MCP, enabling models to perform actions
+ * and retrieve information from external systems.
  *
- * The MCP specification defines tools as discrete pieces of functionality that can be
- * called by clients with structured inputs and return structured outputs. Each tool
- * must have a unique name within its server context and provide a JSON schema
- * describing its expected input parameters.
+ * The MCP specification defines tools as discrete pieces of functionality that can be called by clients with structured
+ * inputs and return structured outputs. Each tool must have a unique name within its server context and provide a JSON
+ * schema describing its expected input parameters.
  *
  * ## Key Features
- *
  * - **Type-safe input handling**: Input is automatically deserialized to the specified type [I]
  * - **Automatic schema generation**: Input schema is generated from the Kotlin class definition
  * - **Type-safe result handling**: Results are wrapped in [ToolResult] sealed interface
@@ -51,7 +47,6 @@ import kotlin.reflect.full.allSupertypes
  * ## Registration
  *
  * Tools should be registered with an MCP server using [McpToolModule]:
- *
  * ```kotlin
  * // In your Guice module configuration
  * install(McpToolModule.create<MyCustomTool>("myServerName"))
@@ -103,7 +98,6 @@ import kotlin.reflect.full.allSupertypes
  * ## Working with ToolResult
  *
  * The [ToolResult] sealed interface provides type-safe result handling:
- *
  * ```kotlin
  * // Return a simple text result
  * return ToolResult(TextContent("Success!"))
@@ -128,7 +122,6 @@ import kotlin.reflect.full.allSupertypes
  * ```
  *
  * @param I The input type for this tool, must be a serializable data class
- *
  * @see StructuredMcpTool for tools that return structured data
  * @see <a href="https://modelcontextprotocol.io/specification/2025-06-18">MCP Specification</a>
  * @see McpToolModule for registration and dependency injection
@@ -138,85 +131,75 @@ abstract class McpTool<I : Any> {
   /**
    * The unique identifier for this tool within the MCP server context.
    *
-   * Must be unique among all tools registered with the same server instance.
-   * Should use lowercase letters, numbers, and underscores for consistency.
+   * Must be unique among all tools registered with the same server instance. Should use lowercase letters, numbers, and
+   * underscores for consistency.
    */
   abstract val name: String
 
   /**
    * Human-readable description of what this tool does.
    *
-   * This description is exposed to clients and AI models to help them understand
-   * when and how to use this tool. Should be clear and concise, explaining the
-   * tool's purpose and expected behavior.
+   * This description is exposed to clients and AI models to help them understand when and how to use this tool. Should
+   * be clear and concise, explaining the tool's purpose and expected behavior.
    */
   abstract val description: String
 
   /**
    * Human-readable title for this tool.
    *
-   * Provides a user-friendly display name for the tool that may be shown in user interfaces.
-   * Defaults to the tool's [name] if not overridden.
+   * Provides a user-friendly display name for the tool that may be shown in user interfaces. Defaults to the tool's
+   * [name] if not overridden.
    */
   open val title: String = name
 
   /**
    * Hint indicating whether this tool performs read-only operations.
    *
-   * When true, indicates that the tool only reads data and does not modify any state.
-   * This can be used by clients to optimize caching or to provide appropriate UI indicators.
-   * Defaults to false, indicating the tool may modify state.
+   * When true, indicates that the tool only reads data and does not modify any state. This can be used by clients to
+   * optimize caching or to provide appropriate UI indicators. Defaults to false, indicating the tool may modify state.
    */
   open val readOnlyHint: Boolean = false
 
   /**
    * Hint indicating whether this tool performs destructive operations.
    *
-   * When true, indicates that the tool may delete, overwrite, or otherwise destructively
-   * modify data. Clients may use this hint to show warnings or require confirmation
-   * before invoking the tool. Defaults to true for safety.
+   * When true, indicates that the tool may delete, overwrite, or otherwise destructively modify data. Clients may use
+   * this hint to show warnings or require confirmation before invoking the tool. Defaults to true for safety.
    *
-   * Note: This hint is only relevant when [readOnlyHint] is false. Read-only tools
-   * are inherently non-destructive.
+   * Note: This hint is only relevant when [readOnlyHint] is false. Read-only tools are inherently non-destructive.
    */
   open val destructiveHint: Boolean = true
 
   /**
    * Hint indicating whether this tool is idempotent.
    *
-   * When true, indicates that calling the tool multiple times with the same input
-   * will produce the same result and have the same effect as calling it once.
-   * This can be useful for retry logic and error recovery. Defaults to false.
+   * When true, indicates that calling the tool multiple times with the same input will produce the same result and have
+   * the same effect as calling it once. This can be useful for retry logic and error recovery. Defaults to false.
    *
-   * Note: This hint is only relevant when [readOnlyHint] is false. Read-only tools
-   * are inherently idempotent since they don't modify state.
+   * Note: This hint is only relevant when [readOnlyHint] is false. Read-only tools are inherently idempotent since they
+   * don't modify state.
    */
   open val idempotentHint: Boolean = false
 
   /**
    * Hint indicating whether this tool operates in an open-world context.
    *
-   * When true, indicates that the tool may interact with external systems or resources
-   * that are not fully controlled or predictable (e.g., network services, file systems).
-   * When false, indicates the tool operates in a closed, predictable environment.
-   * Defaults to true.
+   * When true, indicates that the tool may interact with external systems or resources that are not fully controlled or
+   * predictable (e.g., network services, file systems). When false, indicates the tool operates in a closed,
+   * predictable environment. Defaults to true.
    */
   open val openWorldHint: Boolean = true
 
-  /**
-   * Tool metadata that will be included in the tool definition.
-   */
+  /** Tool metadata that will be included in the tool definition. */
   open val meta: JsonObject? = null
 
   internal val inputSchema: ToolSchema by lazy {
     val schema = inputType.generateJsonSchema()
     ToolSchema(
-      properties = requireNotNull(schema["properties"] as? JsonObject) {
-        "Input schema must have properties defined"
-      },
-      required = requireNotNull(schema["required"] as? JsonArray) {
-        "Input schema must have required properties defined"
-      }.map { it.jsonPrimitive.content },
+      properties = requireNotNull(schema["properties"] as? JsonObject) { "Input schema must have properties defined" },
+      required =
+        requireNotNull(schema["required"] as? JsonArray) { "Input schema must have required properties defined" }
+          .map { it.jsonPrimitive.content },
     )
   }
 
@@ -225,32 +208,30 @@ abstract class McpTool<I : Any> {
   @OptIn(InternalSerializationApi::class)
   internal suspend fun handler(request: CallToolRequest): CallToolResult {
     // Parse the input arguments from the request
-    val parsedInput = try {
-      requireNotNull(request.arguments?.decode(inputType.serializer().cast<I>())) {
-        "No input arguments provided to tool '$name'. Expected input type: $inputType."
+    val parsedInput =
+      try {
+        requireNotNull(request.arguments?.decode(inputType.serializer().cast<I>())) {
+          "No input arguments provided to tool '$name'. Expected input type: $inputType."
+        }
+      } catch (e: SerializationException) {
+        return ToolResult(
+            TextContent(
+              "Failed to parse input for tool '$name'. " + "Expected input type: $inputType. " + "Error: ${e.message}"
+            ),
+            isError = true,
+          )
+          .toCallToolResult()
+      } catch (e: IllegalArgumentException) {
+        return ToolResult(
+            TextContent(
+              "Failed to parse input for tool '$name'. " + "Expected input type: $inputType. " + "Error: ${e.message}"
+            ),
+            isError = true,
+          )
+          .toCallToolResult()
       }
-    } catch (e: SerializationException) {
-      return ToolResult(
-        TextContent(
-          "Failed to parse input for tool '$name'. " +
-              "Expected input type: $inputType. " +
-              "Error: ${e.message}",
-        ),
-        isError = true,
-      ).toCallToolResult()
-    } catch (e: IllegalArgumentException) {
-      return ToolResult(
-        TextContent(
-          "Failed to parse input for tool '$name'. " +
-              "Expected input type: $inputType. " +
-              "Error: ${e.message}",
-        ),
-        isError = true,
-      ).toCallToolResult()
-    }
     return handle(parsedInput).toCallToolResult()
   }
-
 
   sealed interface ToolResult {
     val isError: Boolean
@@ -258,17 +239,14 @@ abstract class McpTool<I : Any> {
   }
 
   @ConsistentCopyVisibility
-  data class PromptToolResult internal constructor(
-    val result: List<ContentBlock>,
-    override val isError: Boolean,
-    override val _meta: JsonObject,
-  ) : ToolResult
-
+  data class PromptToolResult
+  internal constructor(val result: List<ContentBlock>, override val isError: Boolean, override val _meta: JsonObject) :
+    ToolResult
 
   protected fun ToolResult(
     vararg results: ContentBlock,
     isError: Boolean = false,
-    _meta: JsonObject = EmptyJsonObject
+    _meta: JsonObject = EmptyJsonObject,
   ): ToolResult = ToolResult(results.toList(), isError, _meta)
 
   protected inline fun <reified T : Any> ToolResult(
@@ -280,12 +258,8 @@ abstract class McpTool<I : Any> {
   protected fun ToolResult(
     result: List<ContentBlock>,
     isError: Boolean = false,
-    _meta: JsonObject = EmptyJsonObject
-  ): ToolResult = PromptToolResult(
-    result = result,
-    isError = isError,
-    _meta = _meta,
-  )
+    _meta: JsonObject = EmptyJsonObject,
+  ): ToolResult = PromptToolResult(result = result, isError = isError, _meta = _meta)
 
   protected inline fun <reified T : Any> ToolResult(
     results: List<ContentBlock>,
@@ -293,42 +267,39 @@ abstract class McpTool<I : Any> {
     _meta: T? = null,
   ): ToolResult = ToolResult(results, isError, _meta.encode())
 
-  protected open fun ToolResult.toCallToolResult() = when (this) {
-    is PromptToolResult -> CallToolResult(
-      content = result,
-      isError = isError,
-      meta = _meta,
-    )
-    else -> {
-      throw IllegalArgumentException("${this::class.simpleName} is not supported by this tool: $name")
+  protected open fun ToolResult.toCallToolResult() =
+    when (this) {
+      is PromptToolResult -> CallToolResult(content = result, isError = isError, meta = _meta)
+      else -> {
+        throw IllegalArgumentException("${this::class.simpleName} is not supported by this tool: $name")
+      }
     }
-  }
-
 
   abstract suspend fun handle(input: I): ToolResult
 
   private val inputType: KType by lazy {
     @Suppress("UNCHECKED_CAST")
-    this::class.allSupertypes
+    this::class
+      .allSupertypes
       .first { type ->
         (type.classifier as? KClass<*>)?.simpleName?.let { simpleName ->
-          simpleName == McpTool::class.simpleName
-              || simpleName == StructuredMcpTool::class.simpleName
+          simpleName == McpTool::class.simpleName || simpleName == StructuredMcpTool::class.simpleName
         } ?: false
       }
-      .arguments.first().type!!
+      .arguments
+      .first()
+      .type!!
   }
 }
 
 /**
  * Extended MCP tool class that supports structured output in addition to prompt content.
  *
- * This class extends [McpTool] to provide type-safe structured output handling, allowing tools
- * to return strongly-typed data structures that can be consumed by AI models and other clients.
- * The structured output is automatically serialized to JSON and included in the MCP response.
+ * This class extends [McpTool] to provide type-safe structured output handling, allowing tools to return strongly-typed
+ * data structures that can be consumed by AI models and other clients. The structured output is automatically
+ * serialized to JSON and included in the MCP response.
  *
  * ## Key Features
- *
  * - **Type-safe output**: Output is strongly typed using the [O] type parameter
  * - **Automatic output schema generation**: Output schema is generated from the Kotlin class definition
  * - **Dual output format**: Returns both text representation and structured JSON data
@@ -481,9 +452,7 @@ abstract class McpTool<I : Any> {
  * - The output schema is automatically exposed to clients for validation
  * - AI models can parse and understand the structured data format
  *
- * The tool can still return [PromptToolResult] for error cases or when structured
- * output is not appropriate:
- *
+ * The tool can still return [PromptToolResult] for error cases or when structured output is not appropriate:
  * ```kotlin
  * override suspend fun handle(input: I): ToolResult {
  *   return if (someErrorCondition) {
@@ -501,62 +470,40 @@ abstract class McpTool<I : Any> {
  *
  * @param I The input type for this tool, must be a serializable data class
  * @param O The output type for this tool, must be a serializable data class
- *
  * @see McpTool for the base tool implementation
  * @see <a href="https://modelcontextprotocol.io/specification/2025-06-18">MCP Specification</a>
  */
 @ExperimentalMiskApi
 abstract class StructuredMcpTool<I : Any, O : Any> : McpTool<I>() {
 
-
   override val outputSchema: ToolSchema by lazy {
     val schema = outputType.generateJsonSchema()
     ToolSchema(
-      properties = requireNotNull(schema["properties"] as? JsonObject) {
-        "Output schema must have properties defined"
-      },
-      required = requireNotNull(schema["required"] as? JsonArray) {
-        "Output schema must have required properties defined"
-      }.map { it.jsonPrimitive.content },
+      properties = requireNotNull(schema["properties"] as? JsonObject) { "Output schema must have properties defined" },
+      required =
+        requireNotNull(schema["required"] as? JsonArray) { "Output schema must have required properties defined" }
+          .map { it.jsonPrimitive.content },
     )
   }
 
   @OptIn(ExperimentalMiskApi::class)
   @ConsistentCopyVisibility
-  data class StructuredToolResult<O : Any> internal constructor(
-    val result: O,
-    override val isError: Boolean,
-    override val _meta: JsonObject,
-  ) : ToolResult
+  data class StructuredToolResult<O : Any>
+  internal constructor(val result: O, override val isError: Boolean, override val _meta: JsonObject) : ToolResult
 
-  protected fun ToolResult(
-    result: O,
-    isError: Boolean = false,
-    _meta: JsonObject = EmptyJsonObject
-  ): ToolResult = StructuredToolResult(
-    result = result,
-    isError = isError,
-    _meta = _meta,
-  )
+  protected fun ToolResult(result: O, isError: Boolean = false, _meta: JsonObject = EmptyJsonObject): ToolResult =
+    StructuredToolResult(result = result, isError = isError, _meta = _meta)
 
-  protected inline fun <reified T : Any> ToolResult(
-    result: O,
-    isError: Boolean = false,
-    _meta: T? = null,
-  ): ToolResult = ToolResult(result, isError, _meta.encode())
+  protected inline fun <reified T : Any> ToolResult(result: O, isError: Boolean = false, _meta: T? = null): ToolResult =
+    ToolResult(result, isError, _meta.encode())
 
   @OptIn(InternalSerializationApi::class)
   override fun ToolResult.toCallToolResult(): CallToolResult {
     return when (this) {
-      is PromptToolResult -> CallToolResult(
-        content = result,
-        isError = isError,
-        meta = _meta,
-      )
+      is PromptToolResult -> CallToolResult(content = result, isError = isError, meta = _meta)
 
       is StructuredToolResult<*> -> {
-        @Suppress("UNCHECKED_CAST")
-        val typeResult = result as O
+        @Suppress("UNCHECKED_CAST") val typeResult = result as O
         val serializedOutput: JsonObject = typeResult.encode(outputType.serializer().cast())
         CallToolResult(
           // For backwards compatibility
@@ -572,23 +519,25 @@ abstract class StructuredMcpTool<I : Any, O : Any> : McpTool<I>() {
 
   private val outputType: KType by lazy {
     @Suppress("UNCHECKED_CAST")
-    this::class.allSupertypes
+    this::class
+      .allSupertypes
       .first { type ->
         (type.classifier as? KClass<*>)?.simpleName?.let { simpleName ->
           simpleName == StructuredMcpTool::class.simpleName
         } ?: false
       }
-      .arguments.last().type!!
+      .arguments
+      .last()
+      .type!!
   }
 }
 
 /**
  * Extracts the typed result from a [McpTool.ToolResult].
  *
- * This extension function provides a convenient way to extract the strongly-typed result
- * from a [StructuredMcpTool.StructuredToolResult]. It is primarily useful in testing scenarios
- * where you want to verify the output of a [StructuredMcpTool] without dealing with the
- * sealed interface directly.
+ * This extension function provides a convenient way to extract the strongly-typed result from a
+ * [StructuredMcpTool.StructuredToolResult]. It is primarily useful in testing scenarios where you want to verify the
+ * output of a [StructuredMcpTool] without dealing with the sealed interface directly.
  *
  * ## Usage
  *
@@ -606,30 +555,27 @@ abstract class StructuredMcpTool<I : Any, O : Any> : McpTool<I>() {
  *
  * ## Type Safety
  *
- * The function uses reified type parameters to provide compile-time type checking.
- * If the actual result type doesn't match the expected type [T], an [IllegalStateException]
- * is thrown with a descriptive error message.
+ * The function uses reified type parameters to provide compile-time type checking. If the actual result type doesn't
+ * match the expected type [T], an [IllegalStateException] is thrown with a descriptive error message.
  *
- * @param T The expected type of the result. Must match the output type of the
- *   [StructuredMcpTool] that produced this result.
+ * @param T The expected type of the result. Must match the output type of the [StructuredMcpTool] that produced this
+ *   result.
  * @return The typed result extracted from the [misk.mcp.StructuredMcpTool.StructuredToolResult].
- * @throws IllegalStateException If this [misk.mcp.McpTool.ToolResult] is not a [misk.mcp.StructuredMcpTool.StructuredToolResult],
- *   or if the result cannot be cast to type [T].
- *
+ * @throws IllegalStateException If this [misk.mcp.McpTool.ToolResult] is not a
+ *   [misk.mcp.StructuredMcpTool.StructuredToolResult], or if the result cannot be cast to type [T].
  * @see StructuredMcpTool for creating tools with structured output
  * @see StructuredMcpTool.StructuredToolResult for the result type this function operates on
  */
 @OptIn(ExperimentalMiskApi::class)
-inline fun <reified T: Any> McpTool.ToolResult.result(): T = when (this) {
-  is StructuredMcpTool.StructuredToolResult<*> -> {
-    @Suppress("UNCHECKED_CAST")
-    (this.result as? T)
-      ?: throw IllegalStateException(
-        "Expected result of type ${T::class}, but got ${this.result::class}"
+inline fun <reified T : Any> McpTool.ToolResult.result(): T =
+  when (this) {
+    is StructuredMcpTool.StructuredToolResult<*> -> {
+      @Suppress("UNCHECKED_CAST")
+      (this.result as? T)
+        ?: throw IllegalStateException("Expected result of type ${T::class}, but got ${this.result::class}")
+    }
+    else ->
+      throw IllegalStateException(
+        "Expected StructuredToolResult with type ${T::class}, but got ${this::class.simpleName}"
       )
   }
-  else ->
-    throw IllegalStateException(
-      "Expected StructuredToolResult with type ${T::class}, but got ${this::class.simpleName}"
-    )
-}

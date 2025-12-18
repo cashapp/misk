@@ -1,6 +1,10 @@
 package misk.hibernate.advisorylocks
 
 import jakarta.inject.Inject
+import java.time.LocalDate
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import misk.hibernate.DbMovie
 import misk.hibernate.MovieQuery
 import misk.hibernate.Movies
@@ -15,18 +19,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
 
 abstract class TransacterLocksTest {
-  @Inject
-  @Movies
-  lateinit var transacter: Transacter
+  @Inject @Movies lateinit var transacter: Transacter
 
-  @Inject
-  lateinit var queryFactory: Query.Factory
+  @Inject lateinit var queryFactory: Query.Factory
 
   @BeforeEach
   fun setup() {
@@ -46,9 +43,7 @@ abstract class TransacterLocksTest {
     holder.start()
     holdLockLatch.await(1, TimeUnit.SECONDS)
 
-    assertThrows<IllegalStateException>("Unable to acquire lock $LOCK_KEY") {
-      transacter.withLock(LOCK_KEY) {}
-    }
+    assertThrows<IllegalStateException>("Unable to acquire lock $LOCK_KEY") { transacter.withLock(LOCK_KEY) {} }
     finishLatch.countDown()
     holder.join(1000)
 
@@ -61,23 +56,17 @@ abstract class TransacterLocksTest {
     transacter.withLock(LOCK_KEY) {
       assertDoesNotThrow {
         transacter.transaction { session ->
-          queryFactory.newQuery(MovieQuery::class)
-            .name("Star Wars")
-            .uniqueResult(session)!!
+          queryFactory.newQuery(MovieQuery::class).name("Star Wars").uniqueResult(session)!!
         }
       }
       assertThrows<IllegalStateException>("nested session") {
         transacter.withLock(LOCK_KEY) {
-          transacter.transaction { session ->
-            throw AssertionError("expected unreachable")
-          }
+          transacter.transaction { session -> throw AssertionError("expected unreachable") }
         }
       }
       assertDoesNotThrow {
         transacter.transaction { session ->
-          queryFactory.newQuery(MovieQuery::class)
-            .name("Jurassic Park")
-            .uniqueResult(session)!!
+          queryFactory.newQuery(MovieQuery::class).name("Jurassic Park").uniqueResult(session)!!
         }
       }
     }
@@ -86,12 +75,8 @@ abstract class TransacterLocksTest {
   @Test
   fun `lock is released automatically`() {
     val counter = AtomicInteger()
-    transacter.withLock(LOCK_KEY) {
-      counter.incrementAndGet()
-    }
-    transacter.withLock(LOCK_KEY) {
-      counter.incrementAndGet()
-    }
+    transacter.withLock(LOCK_KEY) { counter.incrementAndGet() }
+    transacter.withLock(LOCK_KEY) { counter.incrementAndGet() }
     assertThat(counter.get()).isEqualTo(2)
   }
 
@@ -111,18 +96,15 @@ abstract class TransacterLocksTest {
 
 @MiskTest(startService = true)
 class MySQLTransacterLocksTest : TransacterLocksTest() {
-  @MiskTestModule
-  val module = MoviesTestModule(DataSourceType.MYSQL,)
+  @MiskTestModule val module = MoviesTestModule(DataSourceType.MYSQL)
 }
 
 @MiskTest(startService = true)
 class PostgresTransacterLocksTest : TransacterLocksTest() {
-  @MiskTestModule
-  val module = MoviesTestModule(DataSourceType.POSTGRESQL)
+  @MiskTestModule val module = MoviesTestModule(DataSourceType.POSTGRESQL)
 }
 
 @MiskTest(startService = true)
 class VitessTransacterLocksTest : TransacterLocksTest() {
-  @MiskTestModule
-  val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
+  @MiskTestModule val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
 }

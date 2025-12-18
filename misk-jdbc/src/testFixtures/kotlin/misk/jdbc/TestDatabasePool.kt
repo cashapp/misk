@@ -1,6 +1,5 @@
 package misk.jdbc
 
-import misk.logging.getLogger
 import java.sql.SQLException
 import java.time.Clock
 import java.time.Duration
@@ -10,32 +9,28 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.regex.Pattern
+import misk.logging.getLogger
 
 /**
  * A [DatabasePool] that is used in tests to get a unique database for each test suite.
  *
- * See [misk.hibernate.HibernateTestingModule] for usage instructions. */
-val SHARED_TEST_DATABASE_POOL = TestDatabasePool(
-  MySqlTestDatabasePoolBackend(
-    DataSourceConfig(type = DataSourceType.MYSQL, username = "root").withDefaults()
-  ),
-  Clock.systemUTC()
-)
+ * See [misk.hibernate.HibernateTestingModule] for usage instructions.
+ */
+val SHARED_TEST_DATABASE_POOL =
+  TestDatabasePool(
+    MySqlTestDatabasePoolBackend(DataSourceConfig(type = DataSourceType.MYSQL, username = "root").withDefaults()),
+    Clock.systemUTC(),
+  )
 
 /**
- * Manages an inventory of databases for testing. Databases are named like
- * `movies__20190730__5` where `movies` is the database name in a [DataSourceConfig], `20190730` is
- * today's date, and 5 is a sequence number.
+ * Manages an inventory of databases for testing. Databases are named like `movies__20190730__5` where `movies` is the
+ * database name in a [DataSourceConfig], `20190730` is today's date, and 5 is a sequence number.
  *
- * These are used _only_ in tests, so that each test gets a reserved database to avoid
- * parallelism issues.
+ * These are used _only_ in tests, so that each test gets a reserved database to avoid parallelism issues.
  *
  * Thread-safe.
  */
-class TestDatabasePool(
-  val backend: Backend,
-  val clock: Clock
-) : DatabasePool {
+class TestDatabasePool(val backend: Backend, val clock: Clock) : DatabasePool {
   /** The key is the config's database name. */
   private val poolsByKey = Collections.synchronizedMap(mutableMapOf<String, ConfigSpecificPool>())
 
@@ -53,8 +48,8 @@ class TestDatabasePool(
   }
 
   /**
-   * Drops all databases that were created by an allocator which are older than the retention
-   * duration of this allocator.
+   * Drops all databases that were created by an allocator which are older than the retention duration of this
+   * allocator.
    *
    * @param retention Must be longer than any test could possibly run for.
    */
@@ -78,10 +73,7 @@ class TestDatabasePool(
   }
 
   /** A pool of databases for a particular config. Thread-safe. */
-  inner class ConfigSpecificPool(
-    val key: String,
-    val type: DataSourceType
-  ) {
+  inner class ConfigSpecificPool(val key: String, val type: DataSourceType) {
     private val databaseNameRegex = Regex("""(${Pattern.quote(key)})__([0-9]{8})__([0-9]{1,5})""")
 
     private val formatter = DateTimeFormatter.BASIC_ISO_DATE
@@ -95,7 +87,7 @@ class TestDatabasePool(
       return DatabaseName(
         matchResult.groups[1]!!.value,
         matchResult.groups[2]!!.value.toLong(),
-        matchResult.groups[3]!!.value.toInt()
+        matchResult.groups[3]!!.value.toInt(),
       )
     }
 
@@ -120,14 +112,11 @@ class TestDatabasePool(
       val today = LocalDate.now(clock)
       val todayYearMonthDay = today.format(formatter).toLong()
 
-      val todaysLatest = getDatabases()
-        .filter { it.yearMonthDay == todayYearMonthDay }
-        .maxByOrNull { it.version }
+      val todaysLatest = getDatabases().filter { it.yearMonthDay == todayYearMonthDay }.maxByOrNull { it.version }
 
       val nextVersion = (todaysLatest?.version ?: 0) + 1
 
-      var databaseName =
-        DatabaseName(key, todayYearMonthDay, nextVersion)
+      var databaseName = DatabaseName(key, todayYearMonthDay, nextVersion)
 
       // Keep trying to create a database until we have found an unused name.
       while (true) {
@@ -147,11 +136,12 @@ class TestDatabasePool(
       val evictBefore = LocalDate.now(clock).minus(Period.ofDays(retention.toDays().toInt()))
       val evictBeforeYearMonthDay = evictBefore.format(formatter).toLong()
 
-      val oldDatabases = if (retention.isZero) {
-        getDatabases()
-      } else {
-        getDatabases().filter { it.yearMonthDay < evictBeforeYearMonthDay }
-      }
+      val oldDatabases =
+        if (retention.isZero) {
+          getDatabases()
+        } else {
+          getDatabases().filter { it.yearMonthDay < evictBeforeYearMonthDay }
+        }
 
       for (database in oldDatabases) {
         backend.dropDatabase("$database")

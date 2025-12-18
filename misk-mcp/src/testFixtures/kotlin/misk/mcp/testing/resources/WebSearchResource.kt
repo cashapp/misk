@@ -13,9 +13,8 @@ class WebSearchResource @Inject constructor() : McpResource {
   override val name = "Web Search"
   override val description = "Web search engine"
 
-  override suspend fun handler(request: ReadResourceRequest) = ReadResourceResult(
-    contents = listOf(
-      TextResourceContents("Placeholder content for ${request.uri}", request.uri, "text/html"),
-    ),
-  )
+  override suspend fun handler(request: ReadResourceRequest) =
+    ReadResourceResult(
+      contents = listOf(TextResourceContents("Placeholder content for ${request.uri}", request.uri, "text/html"))
+    )
 }

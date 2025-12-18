@@ -6,8 +6,8 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
 
 /**
- * A class loader that allows for hot reloads. If changes are detected in underlying class files this class loader
- * can be discarded and a new instance created.
+ * A class loader that allows for hot reloads. If changes are detected in underlying class files this class loader can
+ * be discarded and a new instance created.
  */
 internal class DevClassLoader(parent: ClassLoader) : ClassLoader(parent) {
 
@@ -18,14 +18,14 @@ internal class DevClassLoader(parent: ClassLoader) : ClassLoader(parent) {
   override fun loadClass(className: String, resolve: Boolean): Class<*>? {
     val existing = findLoadedClass(className)
     if (existing != null) return existing
-    if (className.startsWith("misk.") || className.startsWith("wisp.") ) {
+    if (className.startsWith("misk.") || className.startsWith("wisp.")) {
       // Needed for the exemplar in the Misk repo itself
       return super.loadClass(className, resolve)
     }
     val classPath = className.replace('.', '/') + ".class"
     val uris = parent.getResources(classPath)
     val elements = arrayListOf<URL>()
-    while(uris.hasMoreElements()) {
+    while (uris.hasMoreElements()) {
       elements.add(uris.nextElement())
     }
     if (elements.size != 1) {

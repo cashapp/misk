@@ -10,16 +10,16 @@ import kotlinx.html.visit
  *
  * Follows the spec from Hotwire docs: https://turbo.hotwired.dev/handbook/streams
  */
-class Template(consumer: TagConsumer<*>) : HTMLTag(
-  tagName = "template",
-  consumer = consumer,
-  initialAttributes = emptyMap(),
-  inlineTag = true,
-  emptyTag = false
-), HtmlInlineTag
+class Template(consumer: TagConsumer<*>) :
+  HTMLTag(
+    tagName = "template",
+    consumer = consumer,
+    initialAttributes = emptyMap(),
+    inlineTag = true,
+    emptyTag = false,
+  ),
+  HtmlInlineTag
 
-fun TagConsumer<*>.template(
-  block: Template.() -> Unit = {}
-) {
+fun TagConsumer<*>.template(block: Template.() -> Unit = {}) {
   Template(this).visit(block)
 }

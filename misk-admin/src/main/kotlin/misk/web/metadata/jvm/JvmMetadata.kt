@@ -1,38 +1,29 @@
 package misk.web.metadata.jvm
 
 import jakarta.inject.Inject
-import kotlinx.html.TagConsumer
+import java.lang.management.RuntimeMXBean
 import misk.moshi.adapter
-import misk.tailwind.components.AlertInfo
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
 import misk.web.metadata.toFormattedJson
 import wisp.moshi.defaultKotlinMoshi
-import java.lang.management.RuntimeMXBean
 
-internal data class JvmMetadata(
-  val jvmRuntime: JvmRuntime,
-) : Metadata(
-  metadata = jvmRuntime,
-  prettyPrint = defaultKotlinMoshi
-    .adapter<JvmRuntime>()
-    .toFormattedJson(jvmRuntime),
-  descriptionString = "JVM runtime MX bean configuration."
-)
+internal data class JvmMetadata(val jvmRuntime: JvmRuntime) :
+  Metadata(
+    metadata = jvmRuntime,
+    prettyPrint = defaultKotlinMoshi.adapter<JvmRuntime>().toFormattedJson(jvmRuntime),
+    descriptionString = "JVM runtime MX bean configuration.",
+  )
 
 internal class JvmMetadataProvider : MetadataProvider<JvmMetadata> {
   @Inject private lateinit var runtimeMxBean: RuntimeMXBean
 
   override val id: String = "jvm"
 
-  override fun get() = JvmMetadata(
-    jvmRuntime = JvmRuntime.create(runtimeMxBean)
-  )
+  override fun get() = JvmMetadata(jvmRuntime = JvmRuntime.create(runtimeMxBean))
 }
 
-/**
- * A data class for serializing information from [java.lang.management.RuntimeMxBean]
- */
+/** A data class for serializing information from [java.lang.management.RuntimeMxBean] */
 internal data class JvmRuntime(
   val pid: Long?,
   val name: String?,
@@ -67,11 +58,12 @@ internal data class JvmRuntime(
         class_path = runtimeMxBean.classPath,
         library_path = runtimeMxBean.libraryPath,
         is_boot_class_path_supported = runtimeMxBean.isBootClassPathSupported,
-        boot_class_path = if (runtimeMxBean.isBootClassPathSupported) {
-          runtimeMxBean.bootClassPath
-        } else {
-          null
-        },
+        boot_class_path =
+          if (runtimeMxBean.isBootClassPathSupported) {
+            runtimeMxBean.bootClassPath
+          } else {
+            null
+          },
         input_arguments = runtimeMxBean.inputArguments,
         uptime_millis = runtimeMxBean.uptime,
         start_time_millis = runtimeMxBean.startTime,

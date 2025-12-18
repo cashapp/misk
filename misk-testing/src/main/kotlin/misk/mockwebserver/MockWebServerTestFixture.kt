@@ -1,16 +1,14 @@
 package misk.mockwebserver
 
+import java.util.concurrent.LinkedBlockingQueue
 import misk.testing.TestFixture
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import mockwebserver3.QueueDispatcher
 import mockwebserver3.RecordedRequest
-import java.util.concurrent.LinkedBlockingQueue
 
-/**
- * A resettable TestFixture around a MockWebServer which can be used in Misk tests with injector reuse.
- * */
+/** A resettable TestFixture around a MockWebServer which can be used in Misk tests with injector reuse. */
 class MockWebServerTestFixture(private val mockServer: MockWebServer) : TestFixture {
 
   private lateinit var wrappedDispatcher: QueueStateHolderDispatcher

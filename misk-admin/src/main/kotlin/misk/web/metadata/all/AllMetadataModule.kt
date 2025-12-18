@@ -35,11 +35,13 @@ class AllMetadataModule : KAbstractModule() {
 
     // Install dashbaord tab
     install(WebActionModule.create<MetadataTabIndexAction>())
-    install(DashboardModule.createHotwireTab<AdminDashboard, AdminDashboardAccess>(
-      slug = "metadata",
-      urlPathPrefix = MetadataTabIndexAction.PATH,
-      menuLabel = "Metadata",
-      menuCategory = "Container Admin"
-    ))
+    install(
+      DashboardModule.createHotwireTab<AdminDashboard, AdminDashboardAccess>(
+        slug = "metadata",
+        urlPathPrefix = MetadataTabIndexAction.PATH,
+        menuLabel = "Metadata",
+        menuCategory = "Container Admin",
+      )
+    )
   }
 }

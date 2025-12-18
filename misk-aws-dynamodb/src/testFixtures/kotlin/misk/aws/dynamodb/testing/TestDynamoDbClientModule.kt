@@ -14,10 +14,7 @@ import misk.dynamodb.DynamoDbService
 import misk.dynamodb.RequiredDynamoDbTable
 import misk.inject.KAbstractModule
 
-class TestDynamoDbClientModule(
-  private val port: Int,
-  private val tables: List<DynamoDbTable>
-) : KAbstractModule() {
+class TestDynamoDbClientModule(private val port: Int, private val tables: List<DynamoDbTable>) : KAbstractModule() {
 
   constructor(port: Int, vararg tables: DynamoDbTable) : this(port, tables.toList())
 
@@ -31,15 +28,14 @@ class TestDynamoDbClientModule(
 
   @Provides
   @Singleton
-  fun provideRequiredTables(): List<RequiredDynamoDbTable> =
-    tables.map { RequiredDynamoDbTable(it.tableName) }
+  fun provideRequiredTables(): List<RequiredDynamoDbTable> = tables.map { RequiredDynamoDbTable(it.tableName) }
 
   @Provides
   @Singleton
   fun providesTestDynamoDbClient(): TestDynamoDbClient {
     return DefaultTestDynamoDbClient(
       tables = tables.map { TestTable.create(it.tableClass, it.configureTable) },
-      port = port
+      port = port,
     )
   }
 
@@ -59,5 +55,6 @@ class TestDynamoDbClientModule(
 @Singleton
 private class TestDynamoDbService @Inject constructor() : AbstractService(), DynamoDbService {
   override fun doStart() = notifyStarted()
+
   override fun doStop() = notifyStopped()
 }

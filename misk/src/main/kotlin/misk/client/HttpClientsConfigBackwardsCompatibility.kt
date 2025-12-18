@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.type.TypeFactory
 import com.fasterxml.jackson.databind.util.Converter
 import java.time.Duration
 
-data class BackwardsCompatibleEndpointConfig @JvmOverloads constructor(
+data class BackwardsCompatibleEndpointConfig
+@JvmOverloads
+constructor(
   // Common fields
   val url: String? = null,
   val envoy: HttpClientEnvoyConfig? = null,
@@ -23,10 +25,12 @@ data class BackwardsCompatibleEndpointConfig @JvmOverloads constructor(
   val ssl: HttpClientSSLConfig? = null,
 
   // New fields
-  val clientConfig: HttpClientConfig? = null
+  val clientConfig: HttpClientConfig? = null,
 )
 
-data class BackwardsCompatibleClientsConfig @JvmOverloads constructor(
+data class BackwardsCompatibleClientsConfig
+@JvmOverloads
+constructor(
   // Legacy fields
   val defaultConnectTimeout: Duration? = null,
   val defaultWriteTimeout: Duration? = null,
@@ -39,56 +43,52 @@ data class BackwardsCompatibleClientsConfig @JvmOverloads constructor(
   val endpoints: Map<String, BackwardsCompatibleEndpointConfig> = mapOf(),
 
   // New fields
-  @JsonAlias("hosts")
-  val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf(),
+  @JsonAlias("hosts") val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf(),
   val logRequests: Boolean = false,
 )
 
-class BackwardsCompatibleClientsConfigConverter :
-  Converter<BackwardsCompatibleClientsConfig, HttpClientsConfig> {
+class BackwardsCompatibleClientsConfigConverter : Converter<BackwardsCompatibleClientsConfig, HttpClientsConfig> {
   override fun getInputType(typeFactory: TypeFactory) =
     typeFactory.constructType(BackwardsCompatibleClientsConfig::class.java)
 
-  override fun getOutputType(typeFactory: TypeFactory) =
-    typeFactory.constructType(HttpClientsConfig::class.java)
+  override fun getOutputType(typeFactory: TypeFactory) = typeFactory.constructType(HttpClientsConfig::class.java)
 
   override fun convert(value: BackwardsCompatibleClientsConfig): HttpClientsConfig {
     // Convert defaults into HttpClientConfig, or null
-    val defaults = listOfNotNull(
-      value.defaultConnectTimeout,
-      value.defaultWriteTimeout,
-      value.defaultReadTimeout,
-      value.ssl,
-      value.defaultPingInterval,
-      value.defaultCallTimeout
-    )
-      .takeUnless { it.isEmpty() }
-      ?.let {
-        HttpClientConfig(
-          connectTimeout = value.defaultConnectTimeout,
-          writeTimeout = value.defaultWriteTimeout,
-          readTimeout = value.defaultReadTimeout,
-          ssl = value.ssl,
-          pingInterval = value.defaultPingInterval,
-          callTimeout = value.defaultCallTimeout
+    val defaults =
+      listOfNotNull(
+          value.defaultConnectTimeout,
+          value.defaultWriteTimeout,
+          value.defaultReadTimeout,
+          value.ssl,
+          value.defaultPingInterval,
+          value.defaultCallTimeout,
         )
-      }
+        .takeUnless { it.isEmpty() }
+        ?.let {
+          HttpClientConfig(
+            connectTimeout = value.defaultConnectTimeout,
+            writeTimeout = value.defaultWriteTimeout,
+            readTimeout = value.defaultReadTimeout,
+            ssl = value.ssl,
+            pingInterval = value.defaultPingInterval,
+            callTimeout = value.defaultCallTimeout,
+          )
+        }
 
     // If `defaults` is specified - prepend it to the list of patterns as highest priority
-    val hostConfigs = defaults?.let { def ->
-      sequence {
-        yield(".*" to def)
-        yieldAll(value.hostConfigs.asSequence().map { it.toPair() })
-      }.toMap(LinkedHashMap())
-    } ?: value.hostConfigs
+    val hostConfigs =
+      defaults?.let { def ->
+        sequence {
+            yield(".*" to def)
+            yieldAll(value.hostConfigs.asSequence().map { it.toPair() })
+          }
+          .toMap(LinkedHashMap())
+      } ?: value.hostConfigs
 
     val endpoints = value.endpoints.mapValues { (_, v) -> convert(v) }
 
-    return HttpClientsConfig(
-      hostConfigs = hostConfigs,
-      endpoints = endpoints,
-      logRequests = value.logRequests,
-    )
+    return HttpClientsConfig(hostConfigs = hostConfigs, endpoints = endpoints, logRequests = value.logRequests)
   }
 
   private fun convert(value: BackwardsCompatibleEndpointConfig) =
@@ -96,25 +96,21 @@ class BackwardsCompatibleClientsConfigConverter :
       HttpClientEndpointConfig(
         url = value.url,
         envoy = value.envoy,
-        clientConfig = HttpClientConfig(
-          connectTimeout = value.connectTimeout,
-          writeTimeout = value.writeTimeout,
-          readTimeout = value.readTimeout,
-          pingInterval = value.pingInterval,
-          callTimeout = value.callTimeout,
-          maxRequests = value.maxRequests,
-          maxRequestsPerHost = value.maxRequestsPerHost,
-          maxIdleConnections = value.maxIdleConnections,
-          keepAliveDuration = value.keepAliveDuration,
-          ssl = value.ssl
-        )
+        clientConfig =
+          HttpClientConfig(
+            connectTimeout = value.connectTimeout,
+            writeTimeout = value.writeTimeout,
+            readTimeout = value.readTimeout,
+            pingInterval = value.pingInterval,
+            callTimeout = value.callTimeout,
+            maxRequests = value.maxRequests,
+            maxRequestsPerHost = value.maxRequestsPerHost,
+            maxIdleConnections = value.maxIdleConnections,
+            keepAliveDuration = value.keepAliveDuration,
+            ssl = value.ssl,
+          ),
       )
-    else
-      HttpClientEndpointConfig(
-        url = value.url,
-        envoy = value.envoy,
-        clientConfig = value.clientConfig
-      )
+    else HttpClientEndpointConfig(url = value.url, envoy = value.envoy, clientConfig = value.clientConfig)
 }
 
 @Deprecated("Use default constructor")
@@ -130,20 +126,22 @@ fun HttpClientEndpointConfig(
   maxRequestsPerHost: Int? = null,
   maxIdleConnections: Int? = null,
   keepAliveDuration: Duration? = null,
-  ssl: HttpClientSSLConfig? = null
-) = HttpClientEndpointConfig(
-  url = url,
-  envoy = envoy,
-  clientConfig = HttpClientConfig(
-    connectTimeout = connectTimeout,
-    writeTimeout = writeTimeout,
-    readTimeout = readTimeout,
-    pingInterval = pingInterval,
-    callTimeout = callTimeout,
-    maxRequests = maxRequests,
-    maxRequestsPerHost = maxRequestsPerHost,
-    maxIdleConnections = maxIdleConnections,
-    keepAliveDuration = keepAliveDuration,
-    ssl = ssl
+  ssl: HttpClientSSLConfig? = null,
+) =
+  HttpClientEndpointConfig(
+    url = url,
+    envoy = envoy,
+    clientConfig =
+      HttpClientConfig(
+        connectTimeout = connectTimeout,
+        writeTimeout = writeTimeout,
+        readTimeout = readTimeout,
+        pingInterval = pingInterval,
+        callTimeout = callTimeout,
+        maxRequests = maxRequests,
+        maxRequestsPerHost = maxRequestsPerHost,
+        maxIdleConnections = maxIdleConnections,
+        keepAliveDuration = keepAliveDuration,
+        ssl = ssl,
+      ),
   )
-)

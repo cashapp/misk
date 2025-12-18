@@ -1,11 +1,11 @@
 package misk.hibernate.vitess
 
 import com.google.common.annotations.VisibleForTesting
-import misk.vitess.Shard
-import misk.logging.getLogger
 import java.util.Optional
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import misk.logging.getLogger
+import misk.vitess.Shard
 
 class VitessShardExceptionParser {
   /*
@@ -26,9 +26,7 @@ class VitessShardExceptionParser {
     vitessShardException = parseVitessShardException(exception, message!!)
 
     vitessShardException.ifPresent({ vitessShardException: VitessShardExceptionData ->
-      this.logShardInfo(
-        vitessShardException
-      )
+      this.logShardInfo(vitessShardException)
     })
 
     // Check if first error is a primary shard health error, if so we return
@@ -48,32 +46,24 @@ class VitessShardExceptionParser {
       vitessShardException = parseVitessShardException(cause, message)
 
       if (isPrimaryShardAndContainsHealthError(vitessShardException)) {
-        vitessShardException.ifPresent(
-          { vitessShardException: VitessShardExceptionData ->
-            this.logShardInfo(
-              vitessShardException
-            )
-          })
+        vitessShardException.ifPresent({ vitessShardException: VitessShardExceptionData ->
+          this.logShardInfo(vitessShardException)
+        })
         return vitessShardException
       }
 
       cause = cause.cause
       i++
     }
-    if (vitessShardException.isPresent()) vitessShardException.ifPresent(
-      { vitessShardException: VitessShardExceptionData ->
-        this.logShardInfo(
-          vitessShardException
-        )
+    if (vitessShardException.isPresent())
+      vitessShardException.ifPresent({ vitessShardException: VitessShardExceptionData ->
+        this.logShardInfo(vitessShardException)
       })
 
     return vitessShardException
   }
 
-  private fun parseVitessShardException(
-    exception: Throwable,
-    message: String
-  ): Optional<VitessShardExceptionData> {
+  private fun parseVitessShardException(exception: Throwable, message: String): Optional<VitessShardExceptionData> {
     val shardString = getShardString(message)
     val isShardHealthError = isShardHealthErrorCheck(message)
 
@@ -82,13 +72,7 @@ class VitessShardExceptionParser {
       val shard: Shard = Shard.parse(shardString)!!
 
       return Optional.of<VitessShardExceptionData>(
-        VitessShardExceptionData(
-          shard,
-          message,
-          isShardHealthError,
-          isPrimary,
-          exception
-        )
+        VitessShardExceptionData(shard, message, isShardHealthError, isPrimary, exception)
       )
     }
     return Optional.empty<VitessShardExceptionData>()
@@ -104,8 +88,7 @@ class VitessShardExceptionParser {
 
   private fun isShardHealthErrorCheck(message: String): Boolean {
     // Check if message contains at least one included pattern
-    return INCLUDED_MESSAGES.stream()
-      .anyMatch { pattern: String? -> Pattern.compile(pattern).matcher(message).find() }
+    return INCLUDED_MESSAGES.stream().anyMatch { pattern: String? -> Pattern.compile(pattern).matcher(message).find() }
   }
 
   private fun getShardString(message: String): String {
@@ -136,32 +119,33 @@ class VitessShardExceptionParser {
       ("""vitessShardException: ${vitessShardException.shard}
         | message: ${vitessShardException.causeException.message}
         |  isprimary:${vitessShardException.isPrimary}
-        |   isShardHealthError: ${vitessShardException.isShardHealthError}""".trimMargin()
-        )
+        |   isShardHealthError: ${vitessShardException.isShardHealthError}"""
+        .trimMargin())
     )
   }
 
-  @VisibleForTesting fun configureStackDepth(maxStackDepth: Int) {
+  @VisibleForTesting
+  fun configureStackDepth(maxStackDepth: Int) {
     MAX_STACK_DEPTH = maxStackDepth
   }
 
   companion object {
-    private var MAX_STACK_DEPTH =
-      300 // Making the stack depth intentionally high to avoid missing root cause
+    private var MAX_STACK_DEPTH = 300 // Making the stack depth intentionally high to avoid missing root cause
 
-    private val SHARD_PATTERN: Pattern = Pattern.compile(
-      "target:\\s+([^.]+)\\.(-?[0-9]+|[0-9a-f]+-[0-9a-f]+|[0-9]+(?:-[0-9]+)?|[0-9a-f]+-|[0-9a-f]+)\\.(primary|replica):"
-    )
+    private val SHARD_PATTERN: Pattern =
+      Pattern.compile(
+        "target:\\s+([^.]+)\\.(-?[0-9]+|[0-9a-f]+-[0-9a-f]+|[0-9]+(?:-[0-9]+)?|[0-9a-f]+-|[0-9a-f]+)\\.(primary|replica):"
+      )
 
-    private val INCLUDED_MESSAGES = listOf(
-      "due to context deadline exceeded",
-      "primary is not serving",
-      "code = Aborted desc = transaction.*not found",
-      "code = Aborted desc = transaction.*ended at.*\\(unlocked closed connection\\)",
-      "operation not allowed in state NOT_SERVING"
-    )
+    private val INCLUDED_MESSAGES =
+      listOf(
+        "due to context deadline exceeded",
+        "primary is not serving",
+        "code = Aborted desc = transaction.*not found",
+        "code = Aborted desc = transaction.*ended at.*\\(unlocked closed connection\\)",
+        "operation not allowed in state NOT_SERVING",
+      )
 
     private val logger = getLogger<VitessShardExceptionParser>()
   }
 }
-

@@ -2,6 +2,10 @@ package misk.web.jetty
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.net.HttpURLConnection
+import java.net.ProtocolException
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 import misk.logging.getLogger
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
@@ -31,13 +35,11 @@ import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
 import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse
 import org.eclipse.jetty.websocket.server.JettyWebSocketServlet
 import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory
-import java.net.HttpURLConnection
-import java.net.ProtocolException
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Singleton
-internal class WebActionsServlet @Inject constructor(
+internal class WebActionsServlet
+@Inject
+constructor(
   webActionFactory: WebActionFactory,
   webActionEntries: List<WebActionEntry>,
   private val webConfig: WebConfig,
@@ -49,9 +51,7 @@ internal class WebActionsServlet @Inject constructor(
 
   internal val boundActions: MutableSet<BoundAction<out WebAction>> = mutableSetOf()
 
-  internal val webActionsMetadata: List<WebActionMetadata> by lazy {
-    boundActions.map { it.metadata }
-  }
+  internal val webActionsMetadata: List<WebActionMetadata> by lazy { boundActions.map { it.metadata } }
 
   init {
     for (entry in webActionEntries) {
@@ -70,9 +70,9 @@ internal class WebActionsServlet @Inject constructor(
     // Check http2 is enabled if any gRPC actions are bound.
     if (boundActions.any { it.action.dispatchMechanism == DispatchMechanism.GRPC }) {
       val isHttp2Enabled =
-        webConfig.http2 || webConfig.unix_domain_socket?.h2c ?: false || webConfig.unix_domain_sockets?.any {
-          it.h2c ?: false
-        } ?: false
+        webConfig.http2 ||
+          webConfig.unix_domain_socket?.h2c ?: false ||
+          webConfig.unix_domain_sockets?.any { it.h2c ?: false } ?: false
       if (!isHttp2Enabled) {
         log.warn {
           "HTTP/2 must be enabled either via a unix domain socket or HTTP listener if any " +
@@ -96,11 +96,7 @@ internal class WebActionsServlet @Inject constructor(
     try {
       super.service(request, response)
     } catch (e: Throwable) {
-      handleThrowable(
-        request,
-        response,
-        e,
-      )
+      handleThrowable(request, response, e)
     }
   }
 
@@ -127,28 +123,30 @@ internal class WebActionsServlet @Inject constructor(
   private fun handleCall(request: HttpServletRequest, response: HttpServletResponse) {
     try {
       val responseBody = response.outputStream.sink().buffer()
-      val dispatchMechanism =
-        request.dispatchMechanism() ?: return sendNotFound(request, response, responseBody)
+      val dispatchMechanism = request.dispatchMechanism() ?: return sendNotFound(request, response, responseBody)
 
-      val httpCall = ServletHttpCall.create(
-        request = request,
-        linkLayerLocalAddress = extractLinkLayerLocalAddress(request),
-        dispatchMechanism = dispatchMechanism,
-        upstreamResponse = if (response is Response) {
-          JettyServletUpstreamResponse(response)
-        } else {
-          GenericServletUpstreamResponse(response)
-        },
-        requestBody = request.inputStream.source().buffer(),
-        responseBody = responseBody
-      )
+      val httpCall =
+        ServletHttpCall.create(
+          request = request,
+          linkLayerLocalAddress = extractLinkLayerLocalAddress(request),
+          dispatchMechanism = dispatchMechanism,
+          upstreamResponse =
+            if (response is Response) {
+              JettyServletUpstreamResponse(response)
+            } else {
+              GenericServletUpstreamResponse(response)
+            },
+          requestBody = request.inputStream.source().buffer(),
+          responseBody = responseBody,
+        )
 
       val requestContentType = httpCall.contentType()
       val requestAccepts = httpCall.accepts()
 
-      val candidateActions = boundActions.mapNotNull {
-        it.match(httpCall.dispatchMechanism, requestContentType, requestAccepts, httpCall.url)
-      }
+      val candidateActions =
+        boundActions.mapNotNull {
+          it.match(httpCall.dispatchMechanism, requestContentType, requestAccepts, httpCall.url)
+        }
       val bestAction = candidateActions.minOrNull()
 
       if (bestAction != null) {
@@ -159,22 +157,12 @@ internal class WebActionsServlet @Inject constructor(
       // which are covered by the NotFoundAction.
       sendNotFound(request, response, responseBody)
     } catch (e: Throwable) {
-      handleThrowable(
-        request,
-        response,
-        e,
-      )
+      handleThrowable(request, response, e)
     }
   }
 
-  private fun handleThrowable(
-    request: HttpServletRequest,
-    response: HttpServletResponse,
-    throwable: Throwable,
-  ) {
-    log.error(throwable) {
-      "Uncaught exception on ${request.dispatchMechanism()} ${request.httpUrl()}"
-    }
+  private fun handleThrowable(request: HttpServletRequest, response: HttpServletResponse, throwable: Throwable) {
+    log.error(throwable) { "Uncaught exception on ${request.dispatchMechanism()} ${request.httpUrl()}" }
 
     when (throwable) {
       is BadMessageException -> {
@@ -192,11 +180,7 @@ internal class WebActionsServlet @Inject constructor(
     response.writer.close()
   }
 
-  private fun sendNotFound(
-    request: HttpServletRequest,
-    response: HttpServletResponse,
-    responseBody: BufferedSink,
-  ) {
+  private fun sendNotFound(request: HttpServletRequest, response: HttpServletResponse, responseBody: BufferedSink) {
     response.status = HttpURLConnection.HTTP_NOT_FOUND
     response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
     responseBody.writeUtf8("Nothing found at ${request.method} ${request.httpUrl()}")
@@ -255,10 +239,12 @@ internal fun HttpServletRequest.httpUrl(): HttpUrl {
 internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism? {
   return when (method) {
     HttpMethod.GET.name -> DispatchMechanism.GET
-    HttpMethod.POST.name -> when (contentType()) {
-      MediaTypes.APPLICATION_GRPC_MEDIA_TYPE, MediaTypes.APPLICATION_GRPC_PROTOBUF_MEDIA_TYPE -> DispatchMechanism.GRPC
-      else -> DispatchMechanism.POST
-    }
+    HttpMethod.POST.name ->
+      when (contentType()) {
+        MediaTypes.APPLICATION_GRPC_MEDIA_TYPE,
+        MediaTypes.APPLICATION_GRPC_PROTOBUF_MEDIA_TYPE -> DispatchMechanism.GRPC
+        else -> DispatchMechanism.POST
+      }
 
     HttpMethod.PATCH.name -> DispatchMechanism.PATCH
     HttpMethod.PUT.name -> DispatchMechanism.PUT
@@ -267,27 +253,19 @@ internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism? {
   }
 }
 
-/**
- * Extracts socket address information from an HttpServletRequest if available.
- */
+/** Extracts socket address information from an HttpServletRequest if available. */
 private fun extractLinkLayerLocalAddress(request: HttpServletRequest): SocketAddress? {
   val jettyRequest = request as? Request ?: return null
   val httpChannel = jettyRequest.httpChannel ?: return null
   val connector = httpChannel.connector ?: return null
 
   return when (connector) {
-    is UnixDomainServerConnector -> SocketAddress.Unix(
-      connector.unixDomainPath.toString()
-    )
+    is UnixDomainServerConnector -> SocketAddress.Unix(connector.unixDomainPath.toString())
 
-    is UnixSocketConnector -> SocketAddress.Unix(
-      connector.unixSocket
-    )
+    is UnixSocketConnector -> SocketAddress.Unix(connector.unixSocket)
 
-    is ServerConnector -> SocketAddress.Network(
-      httpChannel.endPoint.remoteAddress.address.hostAddress,
-      connector.localPort
-    )
+    is ServerConnector ->
+      SocketAddress.Network(httpChannel.endPoint.remoteAddress.address.hostAddress, connector.localPort)
 
     else -> throw IllegalStateException("Unknown socket connector.")
   }

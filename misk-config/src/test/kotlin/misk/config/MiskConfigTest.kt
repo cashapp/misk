@@ -3,7 +3,12 @@ package misk.config
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.inject.util.Modules
 import jakarta.inject.Inject
+import java.io.File
+import java.time.Duration
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import misk.environment.DeploymentModule
+import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.logging.LogCollectorService
 import misk.resources.FakeFilesModule
@@ -23,11 +28,6 @@ import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 import uk.org.webcompere.systemstubs.jupiter.SystemStub
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension
 import wisp.deployment.TESTING
-import misk.logging.LogCollector
-import java.io.File
-import java.time.Duration
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 @ExtendWith(SystemStubsExtension::class)
 @MiskTest
@@ -37,35 +37,43 @@ class MiskConfigTest {
   @Inject private lateinit var resourceLoader: ResourceLoader
 
   @MiskTestModule
-  val module = Modules.combine(
-    ConfigModule.create("test_app", config),
-    DeploymentModule(TESTING),
-    LogCollectorModule(),
-    // @TODO(jwilson) https://github.cgcobom/square/misk/issues/272
-    TestingResourceLoaderModule(),
-    FakeFilesModule(
-      mapOf(
-        "/misk/resources/secrets/secret_information_values.yaml"
-          to """
+  val module =
+    Modules.combine(
+      ConfigModule.create("test_app", config),
+      DeploymentModule(TESTING),
+      LogCollectorModule(),
+      // @TODO(jwilson) https://github.cgcobom/square/misk/issues/272
+      TestingResourceLoaderModule(),
+      FakeFilesModule(
+        mapOf(
+          "/misk/resources/secrets/secret_information_values.yaml" to
+            """
             |answer_to_universe: 42
             |limit: 5
-          """.trimMargin(),
+            """
+              .trimMargin()
+        )
       ),
-    ),
-  )
+    )
 
   @Inject private lateinit var testConfig: TestConfig
   @Inject private lateinit var logCollector: LogCollector
   @Inject private lateinit var logCollectorService: LogCollectorService
 
   @SystemStub
-  private val envVars = EnvironmentVariables(
-    "STRING_VALUE", "abc123",
-    "NUMBER_VALUE", "14",
-    "BOOLEAN_VALUE", "true",
-    "SECRET_API_KEY", "def456",
-    "SECRET_NUMBER", "42",
-  )
+  private val envVars =
+    EnvironmentVariables(
+      "STRING_VALUE",
+      "abc123",
+      "NUMBER_VALUE",
+      "14",
+      "BOOLEAN_VALUE",
+      "true",
+      "SECRET_API_KEY",
+      "def456",
+      "SECRET_NUMBER",
+      "42",
+    )
 
   @BeforeEach
   fun setUp() {
@@ -83,9 +91,8 @@ class MiskConfigTest {
     assertThat(testConfig.consumer_a).isEqualTo(ConsumerConfig(0, 1))
     assertThat(testConfig.consumer_b).isEqualTo(ConsumerConfig(1, 2))
     assertThat(testConfig.duration).isEqualTo(DurationConfig(Duration.parse("PT1S")))
-    assertThat((testConfig.action_exception_log_level)).isEqualTo(
-      ActionExceptionLogLevelConfig(Level.INFO, Level.ERROR),
-    )
+    assertThat((testConfig.action_exception_log_level))
+      .isEqualTo(ActionExceptionLogLevelConfig(Level.INFO, Level.ERROR))
   }
 
   @Test
@@ -100,43 +107,37 @@ class MiskConfigTest {
 
   @Test
   fun friendlyErrorMessagesWhenFilesNotFound() {
-    val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>("missing", TESTING)
-    }
+    val exception = assertFailsWith<IllegalStateException> { MiskConfig.load<TestConfig>("missing", TESTING) }
 
-    assertThat(exception).hasMessageContaining(
-      "could not find configuration files -" +
-        " checked [classpath:/missing-common.yaml, classpath:/missing-testing.yaml]",
-    )
+    assertThat(exception)
+      .hasMessageContaining(
+        "could not find configuration files -" +
+          " checked [classpath:/missing-common.yaml, classpath:/missing-testing.yaml]"
+      )
   }
 
   @Test
   fun friendlyErrorMessageWhenConfigPropertyMissing() {
-    val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>("partial_test_app", TESTING)
-    }
+    val exception = assertFailsWith<IllegalStateException> { MiskConfig.load<TestConfig>("partial_test_app", TESTING) }
 
-    assertThat(exception).hasMessageContaining(
-      "could not find 'consumer_a' of 'TestConfig' in partial_test_app-testing.yaml",
-    )
+    assertThat(exception)
+      .hasMessageContaining("could not find 'consumer_a' of 'TestConfig' in partial_test_app-testing.yaml")
   }
 
   @Test
   fun friendErrorMessageWhenConfigPropertyMissingInList() {
-    val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>("missing_property_in_list", TESTING)
-    }
+    val exception =
+      assertFailsWith<IllegalStateException> { MiskConfig.load<TestConfig>("missing_property_in_list", TESTING) }
 
-    assertThat(exception).hasMessageContaining(
-      "could not find 'collection.0.name' of 'TestConfig' in missing_property_in_list-testing.yaml",
-    )
+    assertThat(exception)
+      .hasMessageContaining(
+        "could not find 'collection.0.name' of 'TestConfig' in missing_property_in_list-testing.yaml"
+      )
   }
 
   @Test
   fun friendlyErrorMessagesWhenFileUnparseable() {
-    val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>("unparsable", TESTING)
-    }
+    val exception = assertFailsWith<IllegalStateException> { MiskConfig.load<TestConfig>("unparsable", TESTING) }
 
     assertThat(exception).hasMessageContaining("could not parse classpath:/unparsable-common.yaml")
   }
@@ -184,12 +185,12 @@ class MiskConfigTest {
 
   @Test
   fun poorlyFormedEnvironmentVariableThrows() {
-    val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<EnvironmentTestConfig>("environment_throws", TESTING)
-    }
-    assertThat(exception).hasMessageContaining(
-      "Resource references for non-Secret fields must be in the form of \${scheme:path} or \${scheme:path:-defaultValue}",
-    )
+    val exception =
+      assertFailsWith<IllegalStateException> { MiskConfig.load<EnvironmentTestConfig>("environment_throws", TESTING) }
+    assertThat(exception)
+      .hasMessageContaining(
+        "Resource references for non-Secret fields must be in the form of \${scheme:path} or \${scheme:path:-defaultValue}"
+      )
   }
 
   @Test
@@ -197,13 +198,13 @@ class MiskConfigTest {
     // This test specifically verifies the fix for the original issue where URLs with colons
     // in default values would cause IllegalStateException
     val actual = MiskConfig.load<EnvironmentTestConfig>("environment", TESTING)
-    
+
     // These environment variables don't exist, so should use the default values
     // The key test is that these don't throw exceptions during parsing
     assertThat(actual.http_url_default).isEqualTo("http://localhost:8888")
     assertThat(actual.jdbc_url_default).isEqualTo("jdbc:postgresql://localhost:5432/database")
     assertThat(actual.https_url_with_port_default).isEqualTo("https://example.com:443/api/v1")
-    
+
     // Verify the URLs are properly included in toString (not redacted)
     assertThat(actual.toString()).contains("http://localhost:8888")
     assertThat(actual.toString()).contains("jdbc:postgresql://localhost:5432/database")
@@ -217,21 +218,17 @@ class MiskConfigTest {
     // present.
     MiskConfig.load<TestConfig>("unknownproperty", TESTING)
 
-    assertThat(logCollector.takeMessages(MiskConfig::class))
-      .hasSize(1)
-      .allMatch { it.contains("'consumer_b.blue_items' not found") }
+    assertThat(logCollector.takeMessages(MiskConfig::class)).hasSize(1).allMatch {
+      it.contains("'consumer_b.blue_items' not found")
+    }
   }
 
   @Test
   fun failsWhenPropertiesNotFoundAndFailOnUnknownPropertiesIsEnabled() {
-    val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>(
-        TestConfig::class.java,
-        "unknownproperty",
-        TESTING,
-        failOnUnknownProperties = true,
-      )
-    }
+    val exception =
+      assertFailsWith<IllegalStateException> {
+        MiskConfig.load<TestConfig>(TestConfig::class.java, "unknownproperty", TESTING, failOnUnknownProperties = true)
+      }
     assertThat(exception).hasMessageContaining("Unrecognized field \"blue_items\"")
   }
 
@@ -239,57 +236,52 @@ class MiskConfigTest {
   fun friendLogsWhenConfigPropertyNotFoundInList() {
     MiskConfig.load<TestConfig>("unknownproperty_in_list", TESTING)
 
-    assertThat(logCollector.takeMessages(MiskConfig::class))
-      .hasSize(1)
-      .allMatch { it.contains("'collection.0.power_level' not found") }
+    assertThat(logCollector.takeMessages(MiskConfig::class)).hasSize(1).allMatch {
+      it.contains("'collection.0.power_level' not found")
+    }
   }
 
   @Test
   fun misspelledRequiredPrimitivePropertiesFail() {
-    val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>("misspelledproperty", TESTING)
-    }
+    val exception =
+      assertFailsWith<IllegalStateException> { MiskConfig.load<TestConfig>("misspelledproperty", TESTING) }
 
-    assertThat(exception).hasMessageContaining(
-      "could not find 'consumer_b.max_items' of 'TestConfig' in misspelledproperty-testing.yaml",
-    )
+    assertThat(exception)
+      .hasMessageContaining("could not find 'consumer_b.max_items' of 'TestConfig' in misspelledproperty-testing.yaml")
     // Also contains a message about similar properties that it had found.
     assertThat(exception).hasMessageContaining("consumer_b.mox_items")
   }
 
   @Test
   fun misspelledRequiredObjectPropertiesFail() {
-    val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>("misspelledobject", TESTING)
-    }
+    val exception = assertFailsWith<IllegalStateException> { MiskConfig.load<TestConfig>("misspelledobject", TESTING) }
 
-    assertThat(exception).hasMessageContaining(
-      "could not find 'duration.interval' of 'TestConfig' in misspelledobject-testing.yaml",
-    )
+    assertThat(exception)
+      .hasMessageContaining("could not find 'duration.interval' of 'TestConfig' in misspelledobject-testing.yaml")
     // Also contains a message about similar properties that it had found.
     assertThat(exception).hasMessageContaining("duration.intervel")
   }
 
   @Test
   fun misspelledRequiredStringPropertiesFail() {
-    val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>("misspelledstring", TESTING)
-    }
+    val exception = assertFailsWith<IllegalStateException> { MiskConfig.load<TestConfig>("misspelledstring", TESTING) }
 
-    assertThat(exception).hasMessageContaining(
-      "could not find 'nested.child_nested.nested_value' of 'TestConfig' in misspelledstring-testing.yaml",
-    )
+    assertThat(exception)
+      .hasMessageContaining(
+        "could not find 'nested.child_nested.nested_value' of 'TestConfig' in misspelledstring-testing.yaml"
+      )
     // Also contains a message about similar properties that it had found.
     assertThat(exception).hasMessageContaining("nested.child_nested.nexted_value")
   }
 
   @Test
   fun mergesExternalFiles() {
-    val overrides = listOf(
-      MiskConfigTest::class.java.getResource("/overrides/override-test-app1.yaml"),
-      MiskConfigTest::class.java.getResource("/overrides/override-test-app2.yaml"),
-    )
-      .map { File(it.file) }
+    val overrides =
+      listOf(
+          MiskConfigTest::class.java.getResource("/overrides/override-test-app1.yaml"),
+          MiskConfigTest::class.java.getResource("/overrides/override-test-app2.yaml"),
+        )
+        .map { File(it.file) }
 
     val config = MiskConfig.load<TestConfig>("test_app", TESTING, overrides)
     assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 27))
@@ -298,10 +290,8 @@ class MiskConfigTest {
 
   @Test
   fun mergesResources() {
-    val overrides = listOf(
-      "classpath:/overrides/override-test-app1.yaml",
-      "classpath:/overrides/override-test-app2.yaml",
-    )
+    val overrides =
+      listOf("classpath:/overrides/override-test-app1.yaml", "classpath:/overrides/override-test-app2.yaml")
     val config = MiskConfig.load<TestConfig>("test_app", TESTING, overrides)
     assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 27))
     assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 122))
@@ -310,10 +300,7 @@ class MiskConfigTest {
   @Test
   fun mergesResourcesAndFiles() {
     val file = MiskConfigTest::class.java.getResource("/overrides/override-test-app1.yaml")!!.file
-    val overrides = listOf(
-      "filesystem:${file}",
-      "classpath:/overrides/override-test-app2.yaml",
-    )
+    val overrides = listOf("filesystem:${file}", "classpath:/overrides/override-test-app2.yaml")
     val config = MiskConfig.load<TestConfig>("test_app", TESTING, overrides)
     assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 27))
     assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 122))
@@ -334,10 +321,7 @@ class MiskConfigTest {
     val overrideValue = ObjectMapper().readTree(overrideString)
 
     val file = MiskConfigTest::class.java.getResource("/overrides/override-test-app1.yaml")!!.file
-    val overrideResources = listOf(
-      "filesystem:${file}",
-      "classpath:/overrides/override-test-app2.yaml",
-    )
+    val overrideResources = listOf("filesystem:${file}", "classpath:/overrides/override-test-app2.yaml")
     val config = MiskConfig.load<TestConfig>("test_app", TESTING, overrideResources, overrideValue)
     assertThat(config.consumer_a).isEqualTo(ConsumerConfig(12, 86))
     assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 122))
@@ -356,11 +340,12 @@ class MiskConfigTest {
 
   @Test
   fun handlesDuplicateNamedExternalFiles() {
-    val overrides = listOf(
-      MiskConfigTest::class.java.getResource("/overrides/override-test-app1.yaml"),
-      MiskConfigTest::class.java.getResource("/additional_overrides/override-test-app1.yaml"),
-    )
-      .map { File(it.file) }
+    val overrides =
+      listOf(
+          MiskConfigTest::class.java.getResource("/overrides/override-test-app1.yaml"),
+          MiskConfigTest::class.java.getResource("/additional_overrides/override-test-app1.yaml"),
+        )
+        .map { File(it.file) }
 
     val config = MiskConfig.load<TestConfig>("test_app", TESTING, overrides)
     assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 27))

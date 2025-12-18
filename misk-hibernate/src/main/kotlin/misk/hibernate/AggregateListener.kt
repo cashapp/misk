@@ -1,7 +1,10 @@
 package misk.hibernate
 
 import com.google.common.collect.LinkedHashMultimap
+import com.google.inject.Provider
 import org.hibernate.event.service.spi.EventListenerRegistry
+import org.hibernate.event.spi.DeleteEvent
+import org.hibernate.event.spi.DeleteEventListener
 import org.hibernate.event.spi.EventType
 import org.hibernate.event.spi.FlushEntityEvent
 import org.hibernate.event.spi.FlushEntityEventListener
@@ -21,23 +24,17 @@ import org.hibernate.event.spi.PreLoadEvent
 import org.hibernate.event.spi.PreLoadEventListener
 import org.hibernate.event.spi.PreUpdateEvent
 import org.hibernate.event.spi.PreUpdateEventListener
-import org.hibernate.event.spi.SaveOrUpdateEvent
 import org.hibernate.event.spi.SaveOrUpdateEventListener
-import org.hibernate.jpa.event.spi.Callback
 import org.hibernate.jpa.event.spi.CallbackRegistry
 import org.hibernate.jpa.event.spi.CallbackRegistryConsumer
 import org.hibernate.persister.entity.EntityPersister
-import com.google.inject.Provider
-import org.hibernate.event.spi.DeleteEvent
-import org.hibernate.event.spi.DeleteEventListener
 
 /**
- * This class delegates to other event listeners registered with Guice. This allows us to defer
- * providing the listener instance until its event arrives.
+ * This class delegates to other event listeners registered with Guice. This allows us to defer providing the listener
+ * instance until its event arrives.
  */
-internal class AggregateListener(
-  registrations: Set<ListenerRegistration>
-) : PreLoadEventListener,
+internal class AggregateListener(registrations: Set<ListenerRegistration>) :
+  PreLoadEventListener,
   PostLoadEventListener,
   PreDeleteEventListener,
   PostDeleteEventListener,
@@ -65,9 +62,7 @@ internal class AggregateListener(
 
       // SaveOrUpdateEventListener is annoying because it shares one interface across 3 event types.
       var listener: Any? = this
-      if (eventType == EventType.SAVE || eventType == EventType.UPDATE
-        || eventType == EventType.SAVE_UPDATE
-        ) {
+      if (eventType == EventType.SAVE || eventType == EventType.UPDATE || eventType == EventType.SAVE_UPDATE) {
         listener = SaveOrUpdateEventListener { event ->
           for (provider in providers) {
             (provider.get() as SaveOrUpdateEventListener).onSaveOrUpdate(event)
@@ -117,16 +112,13 @@ internal class AggregateListener(
   override fun requiresPostCommitHanding(persister: EntityPersister?): Boolean {
     var veto = false
     for (provider in multimap[EventType.POST_INSERT]) {
-      veto =
-        veto or (provider.get() as PostInsertEventListener).requiresPostCommitHandling(persister)
+      veto = veto or (provider.get() as PostInsertEventListener).requiresPostCommitHandling(persister)
     }
     for (provider in multimap[EventType.POST_UPDATE]) {
-      veto =
-        veto or (provider.get() as PostUpdateEventListener).requiresPostCommitHandling(persister)
+      veto = veto or (provider.get() as PostUpdateEventListener).requiresPostCommitHandling(persister)
     }
     for (provider in multimap[EventType.POST_DELETE]) {
-      veto =
-        veto or (provider.get() as PostDeleteEventListener).requiresPostCommitHandling(persister)
+      veto = veto or (provider.get() as PostDeleteEventListener).requiresPostCommitHandling(persister)
     }
     return veto
   }
@@ -179,5 +171,4 @@ internal class AggregateListener(
       handler.injectCallbackRegistry(callbackRegistry)
     }
   }
-
 }

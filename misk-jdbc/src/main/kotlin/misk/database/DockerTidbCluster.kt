@@ -10,6 +10,14 @@ import com.github.dockerjava.api.model.Volume
 import com.github.dockerjava.core.async.ResultCallbackTemplate
 import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.sql.Connection
+import java.time.Duration
+import java.util.Properties
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.concurrent.thread
 import misk.backoff.DontRetryException
 import misk.backoff.ExponentialBackoff
 import misk.backoff.RetryConfig
@@ -20,45 +28,25 @@ import misk.jdbc.uniqueInt
 import misk.resources.ResourceLoader
 import mu.KotlinLogging
 import wisp.deployment.TESTING
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.sql.Connection
-import java.time.Duration
-import java.util.Properties
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.concurrent.thread
 
-class TidbCluster(
-  val resourceLoader: ResourceLoader,
-  val config: DataSourceConfig
-) {
+class TidbCluster(val resourceLoader: ResourceLoader, val config: DataSourceConfig) {
   val httpPort = 10080
   val mysqlPort = 4000
   val configDir: Path
 
   init {
-    configDir =
-      Paths.get("/tmp/tidb_conf_${System.currentTimeMillis()}")
+    configDir = Paths.get("/tmp/tidb_conf_${System.currentTimeMillis()}")
     Files.createDirectories(configDir)
     resourceLoader.copyTo("classpath:/misk/tidb", configDir)
-    Runtime.getRuntime().addShutdownHook(
-      thread(start = false) {
-        configDir.toFile().deleteRecursively()
-      })
+    Runtime.getRuntime().addShutdownHook(thread(start = false) { configDir.toFile().deleteRecursively() })
   }
 
-  /**
-   * Connect to vtgate.
-   */
+  /** Connect to vtgate. */
   fun openConnection(): Connection = dataSource().connection
 
   private fun dataSource(): DriverDataSource {
     val jdbcUrl = config.withDefaults().buildJdbcUrl(TESTING)
-    return DriverDataSource(
-      jdbcUrl, config.type.driverClassName, Properties(),
-      config.username, config.password
-    )
+    return DriverDataSource(jdbcUrl, config.type.driverClassName, Properties(), config.username, config.password)
   }
 }
 
@@ -66,7 +54,7 @@ class DockerTidbCluster(
   val moshi: Moshi,
   val resourceLoader: ResourceLoader,
   val config: DataSourceConfig,
-  val docker: DockerClient
+  val docker: DockerClient,
 ) : DatabaseServer {
   val cluster = TidbCluster(resourceLoader = resourceLoader, config = config)
 
@@ -112,9 +100,7 @@ class DockerTidbCluster(
           return
         }
 
-        if (runCommand(
-            "docker images --digests | grep -q $SHA || docker pull $IMAGE"
-          ) != 0) {
+        if (runCommand("docker images --digests | grep -q $SHA || docker pull $IMAGE") != 0) {
           logger.warn("Failed to pull TiDB docker image. Proceeding regardless.")
         }
         imagePulled.set(true)
@@ -146,11 +132,8 @@ class DockerTidbCluster(
 
     // Kill and remove container that don't match our requirements
     var matchingContainer: Container? = null
-    val runningContainer = docker.listContainersCmd()
-      .withNameFilter(listOf(containerName()))
-      .withLimit(1)
-      .exec()
-      .firstOrNull()
+    val runningContainer =
+      docker.listContainersCmd().withNameFilter(listOf(containerName())).withLimit(1).exec().firstOrNull()
     if (runningContainer != null) {
       val mismatches = containerMismatches(runningContainer)
       if (!mismatches.isEmpty()) {
@@ -164,24 +147,27 @@ class DockerTidbCluster(
       }
     }
 
-
     containerId = matchingContainer?.id
 
     if (containerId == null) {
       logger.info("Starting TiDB cluster")
       stopContainerOnExit = true
-      containerId = docker.createContainerCmd(IMAGE)
-        .withCmd(cmd.toList())
-        .withVolumes(confVolume)
-        .withBinds(Bind(cluster.configDir.toAbsolutePath().toString(), confVolume))
-        .withExposedPorts(mysqlPort, httpPort)
-        .withPortBindings(ports)
-        .withTty(true)
-        .withName(containerName())
-        .exec().id!!
+      containerId =
+        docker
+          .createContainerCmd(IMAGE)
+          .withCmd(cmd.toList())
+          .withVolumes(confVolume)
+          .withBinds(Bind(cluster.configDir.toAbsolutePath().toString(), confVolume))
+          .withExposedPorts(mysqlPort, httpPort)
+          .withPortBindings(ports)
+          .withTty(true)
+          .withName(containerName())
+          .exec()
+          .id!!
       val containerId = containerId!!
       docker.startContainerCmd(containerId).exec()
-      docker.logContainerCmd(containerId)
+      docker
+        .logContainerCmd(containerId)
         .withStdErr(true)
         .withStdOut(true)
         .withFollowStream(true)
@@ -192,22 +178,21 @@ class DockerTidbCluster(
     logger.info("Started TiDB with container id $containerId")
 
     waitUntilHealthy()
-    cluster.openConnection().use { c ->
-      c.createStatement().executeUpdate("SET GLOBAL time_zone = '+00:00'")
-    }
+    cluster.openConnection().use { c -> c.createStatement().executeUpdate("SET GLOBAL time_zone = '+00:00'") }
   }
 
   private fun containerName() = CONTAINER_NAME
 
   /**
-   * Check if the container is a container that we can use for our tests. If it is not return a
-   * description of the mismatch.
+   * Check if the container is a container that we can use for our tests. If it is not return a description of the
+   * mismatch.
    */
-  private fun containerMismatches(container: Container): List<String> = listOfNotNull(
-    shouldMatch("container name", container.name(), containerName()),
-    shouldMatch("container state", container.state, "running"),
-    shouldMatch("container image", container.image, IMAGE)
-  )
+  private fun containerMismatches(container: Container): List<String> =
+    listOfNotNull(
+      shouldMatch("container name", container.name(), containerName()),
+      shouldMatch("container state", container.state, "running"),
+      shouldMatch("container image", container.image, IMAGE),
+    )
 
   private fun shouldMatch(description: String, actual: Any, expected: Any): String? =
     if (expected != actual) {
@@ -216,9 +201,7 @@ class DockerTidbCluster(
       null
     }
 
-  /**
-   * Return the single name of a container and strip away the prefix /
-   */
+  /** Return the single name of a container and strip away the prefix / */
   private fun Container.name(): String {
     val name = names.single()
     return if (name.startsWith("/")) name.substring(1) else name
@@ -226,16 +209,10 @@ class DockerTidbCluster(
 
   private fun waitUntilHealthy() {
     try {
-      val retryConfig = RetryConfig.Builder(
-        20, ExponentialBackoff(
-        Duration.ofSeconds(1),
-        Duration.ofSeconds(5)
-      )
-      )
+      val retryConfig = RetryConfig.Builder(20, ExponentialBackoff(Duration.ofSeconds(1), Duration.ofSeconds(5)))
       retry(retryConfig.build()) {
         cluster.openConnection().use { c ->
-          val result =
-            c.createStatement().executeQuery("SELECT 1").uniqueInt()
+          val result = c.createStatement().executeQuery("SELECT 1").uniqueInt()
           check(result == 1)
         }
       }
@@ -255,7 +232,7 @@ class DockerTidbCluster(
       )
       val containerId = containerId
       if (containerId != null) {
-        docker.killContainerCmd(containerId);
+        docker.killContainerCmd(containerId)
       }
     }
   }

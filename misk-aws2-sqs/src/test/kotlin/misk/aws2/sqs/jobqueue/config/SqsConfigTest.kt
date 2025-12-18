@@ -1,7 +1,7 @@
 package misk.aws2.sqs.jobqueue.config
 
-import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 class SqsConfigTest {
   @Test

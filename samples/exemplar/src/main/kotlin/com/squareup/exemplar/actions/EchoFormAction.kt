@@ -1,5 +1,7 @@
 package com.squareup.exemplar.actions
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.security.authz.Unauthenticated
 import misk.web.FormField
 import misk.web.FormValue
@@ -8,8 +10,6 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @Singleton
 class EchoFormAction @Inject constructor() : WebAction {
@@ -26,6 +26,6 @@ class EchoFormAction @Inject constructor() : WebAction {
     val int: Int,
     val nullable: String?,
     val optional: String = "optional",
-    @FormField("list-of-strings") val list: List<String>
+    @FormField("list-of-strings") val list: List<String>,
   )
 }

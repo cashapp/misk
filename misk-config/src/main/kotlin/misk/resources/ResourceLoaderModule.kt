@@ -39,9 +39,8 @@ class TestingResourceLoaderModule : KAbstractModule() {
   @StringMapKey("filesystem:")
   @Singleton
   @Suppress("unused")
-  internal fun fakeFilesystemLoaderBackend(
-    @ForFakeFiles fakeFiles: Map<String, String>
-  ): ResourceLoader.Backend = FakeFilesystemLoaderBackend(fakeFiles)
+  internal fun fakeFilesystemLoaderBackend(@ForFakeFiles fakeFiles: Map<String, String>): ResourceLoader.Backend =
+    FakeFilesystemLoaderBackend(fakeFiles)
 
   @ProvidesIntoMap
   @StringMapKey(OnePasswordResourceLoaderBackend.SCHEME)
@@ -52,5 +51,4 @@ class TestingResourceLoaderModule : KAbstractModule() {
   ): ResourceLoader.Backend = FakeResourceLoaderBackend(fakeFiles)
 }
 
-@Qualifier
-annotation class ForFakeFiles
+@Qualifier annotation class ForFakeFiles

@@ -53,23 +53,24 @@ class JDBCSession(val connection: Connection) : Session {
 
   fun ConcurrentMap<HookType, List<() -> Unit>>.add(hookType: HookType, work: () -> Unit) {
     merge(hookType, listOf(work)) { oldList, newList ->
-      mutableListOf<() -> Unit>().apply {
-        addAll(oldList)
-        addAll(newList)
-      }.toList()
+      mutableListOf<() -> Unit>()
+        .apply {
+          addAll(oldList)
+          addAll(newList)
+        }
+        .toList()
     }
   }
 
   enum class HookType {
     PRE,
     POST,
-    SESSION_CLOSE
+    SESSION_CLOSE,
   }
 
   /**
-   * Allows for destructuring the JooqSession and writing simpler code like this
-   * transacter.transaction { (connection) -> ... }
+   * Allows for destructuring the JooqSession and writing simpler code like this transacter.transaction { (connection)
+   * -> ... }
    */
   operator fun component1(): Connection = connection
 }
-

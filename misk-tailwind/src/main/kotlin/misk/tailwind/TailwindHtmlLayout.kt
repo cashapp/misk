@@ -10,26 +10,44 @@ import kotlinx.html.script
 import kotlinx.html.title
 import misk.turbo.addHotwireHeadImports
 
-
 internal class DevMode {
   companion object {
-    val devMode by lazy {
-      System.getProperty("misk.dev.running") == "true"
-    }
+    val devMode by lazy { System.getProperty("misk.dev.running") == "true" }
   }
 }
 
 // TODO remove once callsites are migrated to use the one with hotReload param
-fun TagConsumer<*>.TailwindHtmlLayout(appRoot: String, title: String, playCdn: Boolean = false, appCssPath: String? = null, headBlock: TagConsumer<*>.() -> Unit = {}, bodyBlock: TagConsumer<*>.() -> Unit) =
-  TailwindHtmlLayout(appRoot = appRoot, title = title, playCdn = playCdn, appCssPath = appCssPath, headBlock = headBlock, hotReload = true, bodyBlock = bodyBlock)
+fun TagConsumer<*>.TailwindHtmlLayout(
+  appRoot: String,
+  title: String,
+  playCdn: Boolean = false,
+  appCssPath: String? = null,
+  headBlock: TagConsumer<*>.() -> Unit = {},
+  bodyBlock: TagConsumer<*>.() -> Unit,
+) =
+  TailwindHtmlLayout(
+    appRoot = appRoot,
+    title = title,
+    playCdn = playCdn,
+    appCssPath = appCssPath,
+    headBlock = headBlock,
+    hotReload = true,
+    bodyBlock = bodyBlock,
+  )
 
-fun TagConsumer<*>.TailwindHtmlLayout(appRoot: String, title: String, playCdn: Boolean = false, appCssPath: String? = null, headBlock: TagConsumer<*>.() -> Unit = {}, hotReload: Boolean = true, bodyBlock: TagConsumer<*>.() -> Unit) {
+fun TagConsumer<*>.TailwindHtmlLayout(
+  appRoot: String,
+  title: String,
+  playCdn: Boolean = false,
+  appCssPath: String? = null,
+  headBlock: TagConsumer<*>.() -> Unit = {},
+  hotReload: Boolean = true,
+  bodyBlock: TagConsumer<*>.() -> Unit,
+) {
   html {
     attributes["class"] = "h-full bg-white"
     head {
-      meta {
-        charset = "utf-8"
-      }
+      meta { charset = "utf-8" }
       meta {
         name = "viewport"
         content = "width=device-width, initial-scale=1.0"
@@ -41,13 +59,13 @@ fun TagConsumer<*>.TailwindHtmlLayout(appRoot: String, title: String, playCdn: B
       }
       // TODO add Gradle plugin to comb through service JAR to build minified Tailwind CSS
       // Until then, use play CDN so all CSS is present for UI from Misk or internal libaries/services
-//      if (playCdn) {
-        // Play CDN is useful for development
+      //      if (playCdn) {
+      // Play CDN is useful for development
       script {
-//        src = "https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"
+        //        src = "https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"
         src = "/static/cache/tailwind/3.3.5/tailwind.min.js"
       }
-//      }
+      //      }
       appCssPath?.let { path ->
         link {
           href = path
@@ -69,10 +87,6 @@ fun TagConsumer<*>.TailwindHtmlLayout(appRoot: String, title: String, playCdn: B
       addHotwireHeadImports(appRoot)
       headBlock()
     }
-    body(classes = "h-full") {
-      bodyBlock()
-    }
+    body(classes = "h-full") { bodyBlock() }
   }
 }
-
-

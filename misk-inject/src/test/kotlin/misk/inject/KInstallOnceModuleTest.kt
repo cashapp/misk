@@ -3,30 +3,30 @@ package misk.inject
 import com.google.inject.CreationException
 import com.google.inject.Guice
 import jakarta.inject.Inject
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 @MiskTest
 class KInstallOnceModuleTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var map: Map<String, TestValue>
 
-  @Test fun testInstallOnceModule() {
+  @Test
+  fun testInstallOnceModule() {
     assertThat(map["key"]).isEqualTo(TestValue("abc"))
     assertThat(map.size).isEqualTo(1)
   }
 
-  @Test fun failure() {
-    val exception = assertFailsWith<CreationException> {
-      Guice.createInjector(TestFailureModule())
-    }
-    assertEquals("""
+  @Test
+  fun failure() {
+    val exception = assertFailsWith<CreationException> { Guice.createInjector(TestFailureModule()) }
+    assertEquals(
+      """
       |com.google.inject.CreationException: Unable to create injector, see the following errors:
       |
       |1) [Guice/DuplicateMapKey]: Duplicate key "key" found in Map<String, KInstallOnceModuleTest${"$"}TestValue>.
@@ -55,8 +55,10 @@ class KInstallOnceModuleTest {
       |========================
       |End of classname legend:
       |========================
-      |
-      """.trimMargin(), exception.toString())
+      |"""
+        .trimMargin(),
+      exception.toString(),
+    )
   }
 
   class TestModule : KAbstractModule() {
@@ -89,4 +91,3 @@ class KInstallOnceModuleTest {
 
   private data class TestValue(val value: String)
 }
-

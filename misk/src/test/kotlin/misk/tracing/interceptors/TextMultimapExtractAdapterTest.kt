@@ -15,13 +15,7 @@ class TextMultimapExtractAdapterTest {
     val pairs: MutableList<Pair<String, String>> = mutableListOf()
     adapter.iterator().forEach { pairs.add(Pair(it.key, it.value)) }
 
-    assertThat(pairs).isEqualTo(
-      listOf(
-        Pair("a", "1"),
-        Pair("a", "2"),
-        Pair("b", "3")
-      )
-    )
+    assertThat(pairs).isEqualTo(listOf(Pair("a", "1"), Pair("a", "2"), Pair("b", "3")))
   }
 
   @Test

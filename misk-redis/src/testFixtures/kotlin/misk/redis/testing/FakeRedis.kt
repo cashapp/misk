@@ -1,96 +1,80 @@
 package misk.redis.testing
 
-import misk.redis.Redis
-import misk.redis.checkHrandFieldCount
-import okio.ByteString
-import okio.ByteString.Companion.encode
-import redis.clients.jedis.JedisPubSub
-import redis.clients.jedis.Pipeline
-import redis.clients.jedis.Transaction
-import redis.clients.jedis.args.ListDirection
+import jakarta.inject.Inject
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
+import java.util.SortedMap
 import java.util.concurrent.ConcurrentHashMap
-import jakarta.inject.Inject
+import java.util.concurrent.ConcurrentMap
+import java.util.function.Supplier
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.random.Random
 import misk.redis.DeferredRedis
-import misk.redis.Redis.ZAddOptions.XX
-import misk.redis.Redis.ZAddOptions.NX
-import misk.redis.Redis.ZAddOptions.LT
-import misk.redis.Redis.ZAddOptions.GT
+import misk.redis.Redis
 import misk.redis.Redis.ZAddOptions.CH
+import misk.redis.Redis.ZAddOptions.GT
+import misk.redis.Redis.ZAddOptions.LT
+import misk.redis.Redis.ZAddOptions.NX
+import misk.redis.Redis.ZAddOptions.XX
 import misk.redis.Redis.ZRangeIndexMarker
 import misk.redis.Redis.ZRangeLimit
 import misk.redis.Redis.ZRangeMarker
 import misk.redis.Redis.ZRangeRankMarker
 import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType
+import misk.redis.checkHrandFieldCount
 import misk.testing.TestFixture
+import okio.ByteString
+import okio.ByteString.Companion.encode
 import okio.ByteString.Companion.encodeUtf8
 import org.apache.commons.io.FilenameUtils
-import java.util.SortedMap
-import java.util.concurrent.ConcurrentMap
-import java.util.function.Supplier
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.random.Random
+import redis.clients.jedis.JedisPubSub
+import redis.clients.jedis.Pipeline
+import redis.clients.jedis.Transaction
+import redis.clients.jedis.args.ListDirection
 
 /**
  * An in-memory key-value store which closely mimics [misk.redis.RealRedis].
  *
  * This should be used if:
- *  - It is undesirable to start an actual Redis instance via [DockerRedis] in test.
- *  - You need fine-grained control over randomness in tests
- *  - You need fine-grained control over key-expiry in tests
+ * - It is undesirable to start an actual Redis instance via [DockerRedis] in test.
+ * - You need fine-grained control over randomness in tests
+ * - You need fine-grained control over key-expiry in tests
  *
  * Caveats:
- *  - FakeRedis does not currently support [Redis.multi] transactions
+ * - FakeRedis does not currently support [Redis.multi] transactions
  */
-class FakeRedis @Inject constructor(
-  private val clock: Clock,
-  @ForFakeRedis private val random: Random,
-) : Redis, TestFixture {
+class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis private val random: Random) :
+  Redis, TestFixture {
   /**
-   * Represents a value in the key-value store.
-   * By grouping all data types that the [Redis] interface supports under a single sealed class we can use a single
-   * key-value store for all entries which simplifies implementation of several Redis operations and better mimic in
-   * tests how Redis actually behaves.
+   * Represents a value in the key-value store. By grouping all data types that the [Redis] interface supports under a
+   * single sealed class we can use a single key-value store for all entries which simplifies implementation of several
+   * Redis operations and better mimic in tests how Redis actually behaves.
    */
   private sealed interface Value {
     var expiryInstant: Instant
 
-    data class String(
-      val data: ByteString,
-      override var expiryInstant: Instant,
-    ) : Value
+    data class String(val data: ByteString, override var expiryInstant: Instant) : Value
 
     /** A nested hash map for hash operations. */
-    data class Hash(
-      val data: ConcurrentHashMap<kotlin.String, ByteString>,
-      override var expiryInstant: Instant,
-    ) : Value
+    data class Hash(val data: ConcurrentHashMap<kotlin.String, ByteString>, override var expiryInstant: Instant) : Value
 
     /** A hash map for list operations. */
-    data class List(
-      val data: kotlin.collections.List<ByteString>,
-      override var expiryInstant: Instant,
-    ) : Value
+    data class List(val data: kotlin.collections.List<ByteString>, override var expiryInstant: Instant) : Value
 
     /**
-     * Note: Redis sorted set actually orders by value. It is quite complex to implement it here.
-     * In this Fake Redis implementation which is generally used for testing, we have simply used a
-     * HashMap to key score->members. So any sorting based on values will have to be handled in the
-     * implementation of the functions for this sorted set.
+     * Note: Redis sorted set actually orders by value. It is quite complex to implement it here. In this Fake Redis
+     * implementation which is generally used for testing, we have simply used a HashMap to key score->members. So any
+     * sorting based on values will have to be handled in the implementation of the functions for this sorted set.
      */
-    data class SortedSet(
-      val data: SortedMap<Double, HashSet<kotlin.String>>,
-      override var expiryInstant: Instant,
-    ) : Value
+    data class SortedSet(val data: SortedMap<Double, HashSet<kotlin.String>>, override var expiryInstant: Instant) :
+      Value
   }
 
-  private inner class KeyValueStore(
-    private val store: ConcurrentHashMap<String, Value>,
-  ) : ConcurrentMap<String, Value> by store {
+  private inner class KeyValueStore(private val store: ConcurrentHashMap<String, Value>) :
+    ConcurrentMap<String, Value> by store {
     override operator fun get(key: String): Value? {
       val value = store[key] ?: return null
       if (clock.instant() >= value.expiryInstant) {
@@ -124,8 +108,7 @@ class FakeRedis @Inject constructor(
     return keyValueStore.remove(key) != null
   }
 
-  @Synchronized
-  override fun del(vararg keys: String): Int = keys.count { del(it) }
+  @Synchronized override fun del(vararg keys: String): Int = keys.count { del(it) }
 
   @Synchronized
   override fun mget(vararg keys: String): List<ByteString?> {
@@ -142,9 +125,7 @@ class FakeRedis @Inject constructor(
   override fun mset(vararg keyValues: ByteString) {
     require(keyValues.size % 2 == 0) { "Wrong number of arguments to mset" }
 
-    (keyValues.indices step 2).forEach {
-      set(keyValues[it].utf8(), keyValues[it + 1])
-    }
+    (keyValues.indices step 2).forEach { set(keyValues[it].utf8(), keyValues[it + 1]) }
   }
 
   @Synchronized
@@ -156,8 +137,8 @@ class FakeRedis @Inject constructor(
 
   @Synchronized
   override fun getDel(key: String): ByteString? {
-    val value = get(key);
-    keyValueStore.remove(key);
+    val value = get(key)
+    keyValueStore.remove(key)
     return value
   }
 
@@ -255,10 +236,7 @@ class FakeRedis @Inject constructor(
 
   @Synchronized
   override fun set(key: String, expiryDuration: Duration, value: ByteString) {
-    keyValueStore[key] = Value.String(
-      data = value,
-      expiryInstant = clock.instant().plusSeconds(expiryDuration.seconds)
-    )
+    keyValueStore[key] = Value.String(data = value, expiryInstant = clock.instant().plusSeconds(expiryDuration.seconds))
   }
 
   @Synchronized
@@ -291,8 +269,7 @@ class FakeRedis @Inject constructor(
     return hash.entries.sumOf { (field, value) -> hset(key, field, value) }
   }
 
-  @Synchronized
-  override fun incr(key: String): Long = incrBy(key, 1)
+  @Synchronized override fun incr(key: String): Long = incrBy(key, 1)
 
   @Synchronized
   override fun incrBy(key: String, increment: Long): Long {
@@ -308,7 +285,7 @@ class FakeRedis @Inject constructor(
     destinationKey: String,
     from: ListDirection,
     to: ListDirection,
-    timeoutSeconds: Double
+    timeoutSeconds: Double,
   ): ByteString? = lmove(sourceKey, destinationKey, from, to)
 
   @Synchronized
@@ -322,19 +299,15 @@ class FakeRedis @Inject constructor(
     )
 
   @Synchronized
-  override fun lmove(
-    sourceKey: String,
-    destinationKey: String,
-    from: ListDirection,
-    to: ListDirection
-  ): ByteString? {
+  override fun lmove(sourceKey: String, destinationKey: String, from: ListDirection, to: ListDirection): ByteString? {
     val sourceExisting = keyValueStore.getTyped<Value.List>(sourceKey) ?: return null
     val sourceExpiry = sourceExisting.expiryInstant
     val sourceList = sourceExisting.data.toMutableList()
-    val sourceValue = when (from) {
-      ListDirection.LEFT -> sourceList.removeFirst()
-      ListDirection.RIGHT -> sourceList.removeLast()
-    }
+    val sourceValue =
+      when (from) {
+        ListDirection.LEFT -> sourceList.removeFirst()
+        ListDirection.RIGHT -> sourceList.removeLast()
+      }
     keyValueStore[sourceKey] = Value.List(data = sourceList, expiryInstant = sourceExpiry)
 
     val destinationExisting = keyValueStore.getTyped<Value.List>(destinationKey)
@@ -373,15 +346,12 @@ class FakeRedis @Inject constructor(
   @Synchronized
   override fun lpop(key: String, count: Int): List<ByteString?> {
     val value = keyValueStore.getTyped<Value.List>(key) ?: return emptyList()
-    val result = with(value) {
-      data.subList(0, min(data.size, count)).toList()
-    }
+    val result = with(value) { data.subList(0, min(data.size, count)).toList() }
     keyValueStore[key] = value.copy(data = value.data.drop(count))
     return result
   }
 
-  @Synchronized
-  override fun lpop(key: String): ByteString? = lpop(key, count = 1).firstOrNull()
+  @Synchronized override fun lpop(key: String): ByteString? = lpop(key, count = 1).firstOrNull()
 
   @Synchronized
   override fun blpop(keys: Array<String>, timeoutSeconds: Double): Pair<String, ByteString>? {
@@ -400,9 +370,7 @@ class FakeRedis @Inject constructor(
   @Synchronized
   override fun rpop(key: String, count: Int): List<ByteString?> {
     val value = keyValueStore.getTyped<Value.List>(key) ?: return emptyList()
-    val result = with(value) {
-      data.takeLast(min(data.size, count)).asReversed()
-    }
+    val result = with(value) { data.takeLast(min(data.size, count)).asReversed() }
     keyValueStore[key] = value.copy(data = value.data.dropLast(count))
     return result
   }
@@ -449,12 +417,13 @@ class FakeRedis @Inject constructor(
 
     val list = value.data.toMutableList()
     var totalCount = count
-    val iterList = if (count < 0) {
-      totalCount = -totalCount
-      list.asReversed()
-    } else {
-      list
-    }
+    val iterList =
+      if (count < 0) {
+        totalCount = -totalCount
+        list.asReversed()
+      } else {
+        list
+      }
 
     var deleteCount = 0L
     while ((count == 0L || deleteCount < totalCount) && iterList.contains(element)) {
@@ -467,21 +436,15 @@ class FakeRedis @Inject constructor(
   }
 
   @Synchronized
-  override fun rpoplpush(sourceKey: String, destinationKey: String) = lmove(
-    sourceKey = sourceKey,
-    destinationKey = destinationKey,
-    from = ListDirection.RIGHT,
-    to = ListDirection.LEFT
-  )
+  override fun rpoplpush(sourceKey: String, destinationKey: String) =
+    lmove(sourceKey = sourceKey, destinationKey = destinationKey, from = ListDirection.RIGHT, to = ListDirection.LEFT)
 
   override fun exists(key: String): Boolean {
     return keyValueStore.containsKey(key)
   }
 
   override fun exists(vararg key: String): Long {
-    return key.sumOf {
-      if (exists(it)) 1L else 0L
-    }
+    return key.sumOf { if (exists(it)) 1L else 0L }
   }
 
   override fun persist(key: String): Boolean {
@@ -508,8 +471,7 @@ class FakeRedis @Inject constructor(
   }
 
   @Synchronized
-  override fun pExpire(key: String, milliseconds: Long): Boolean =
-    pExpireAt(key, clock.millis().plus(milliseconds))
+  override fun pExpire(key: String, milliseconds: Long): Boolean = pExpireAt(key, clock.millis().plus(milliseconds))
 
   @Synchronized
   override fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean {
@@ -544,68 +506,41 @@ class FakeRedis @Inject constructor(
     FakePipelinedRedis().block()
   }
 
-  /**
-   * A poor implementation of pipelining for testing purposes.
-   * Unlike a real pipeline, this does not queue commands.
-   */
+  /** A poor implementation of pipelining for testing purposes. Unlike a real pipeline, this does not queue commands. */
   inner class FakePipelinedRedis : DeferredRedis {
     override fun del(key: String): Supplier<Boolean> = Supplier { this@FakeRedis.del(key) }
 
     override fun del(vararg keys: String): Supplier<Int> = Supplier { this@FakeRedis.del(*keys) }
 
-    override fun mget(vararg keys: String): Supplier<List<ByteString?>> = Supplier {
-      this@FakeRedis.mget(*keys)
-    }
+    override fun mget(vararg keys: String): Supplier<List<ByteString?>> = Supplier { this@FakeRedis.mget(*keys) }
 
-    override fun mset(vararg keyValues: ByteString): Supplier<Unit> = Supplier {
-      this@FakeRedis.mset(*keyValues)
-    }
+    override fun mset(vararg keyValues: ByteString): Supplier<Unit> = Supplier { this@FakeRedis.mset(*keyValues) }
 
     override fun get(key: String): Supplier<ByteString?> = Supplier { this@FakeRedis[key] }
 
-    override fun getDel(key: String): Supplier<ByteString?> = Supplier {
-      this@FakeRedis.getDel(key)
-    }
+    override fun getDel(key: String): Supplier<ByteString?> = Supplier { this@FakeRedis.getDel(key) }
 
     override fun hdel(key: String, vararg fields: String): Supplier<Long> = Supplier {
       this@FakeRedis.hdel(key, *fields)
     }
 
-    override fun hget(key: String, field: String): Supplier<ByteString?> = Supplier {
-      this@FakeRedis.hget(key, field)
-    }
+    override fun hget(key: String, field: String): Supplier<ByteString?> = Supplier { this@FakeRedis.hget(key, field) }
 
-    override fun hgetAll(key: String): Supplier<Map<String, ByteString>?> = Supplier {
-      this@FakeRedis.hgetAll(key)
-    }
+    override fun hgetAll(key: String): Supplier<Map<String, ByteString>?> = Supplier { this@FakeRedis.hgetAll(key) }
 
-    override fun hlen(key: String): Supplier<Long> = Supplier {
-      this@FakeRedis.hlen(key)
-    }
+    override fun hlen(key: String): Supplier<Long> = Supplier { this@FakeRedis.hlen(key) }
 
-    override fun hkeys(key: String): Supplier<List<ByteString>> = Supplier {
-      this@FakeRedis.hkeys(key)
-    }
+    override fun hkeys(key: String): Supplier<List<ByteString>> = Supplier { this@FakeRedis.hkeys(key) }
 
-    override fun hmget(
-      key: String,
-      vararg fields: String
-    ): Supplier<List<ByteString?>> = Supplier {
+    override fun hmget(key: String, vararg fields: String): Supplier<List<ByteString?>> = Supplier {
       this@FakeRedis.hmget(key, *fields)
     }
 
-    override fun hincrBy(
-      key: String,
-      field: String,
-      increment: Long
-    ): Supplier<Long> = Supplier {
+    override fun hincrBy(key: String, field: String, increment: Long): Supplier<Long> = Supplier {
       this@FakeRedis.hincrBy(key, field, increment)
     }
 
-    override fun hrandFieldWithValues(
-      key: String,
-      count: Long
-    ): Supplier<Map<String, ByteString>?> = Supplier {
+    override fun hrandFieldWithValues(key: String, count: Long): Supplier<Map<String, ByteString>?> = Supplier {
       this@FakeRedis.hrandFieldWithValues(key, count)
     }
 
@@ -621,12 +556,7 @@ class FakeRedis @Inject constructor(
       }
     }
 
-
-    override fun setnx(
-      key: String,
-      value: ByteString,
-      expiryDuration: Duration?
-    ): Supplier<Boolean> = Supplier {
+    override fun setnx(key: String, value: ByteString, expiryDuration: Duration?): Supplier<Boolean> = Supplier {
       if (expiryDuration == null) {
         this@FakeRedis.setnx(key, value)
       } else {
@@ -642,9 +572,7 @@ class FakeRedis @Inject constructor(
       this@FakeRedis.hset(key, hash)
     }
 
-    override fun incr(key: String): Supplier<Long> = Supplier {
-      this@FakeRedis.incr(key)
-    }
+    override fun incr(key: String): Supplier<Long> = Supplier { this@FakeRedis.incr(key) }
 
     override fun incrBy(key: String, increment: Long): Supplier<Long> = Supplier {
       this@FakeRedis.incrBy(key, increment)
@@ -655,27 +583,20 @@ class FakeRedis @Inject constructor(
       destinationKey: String,
       from: ListDirection,
       to: ListDirection,
-      timeoutSeconds: Double
-    ): Supplier<ByteString?> = Supplier {
-      this@FakeRedis.blmove(sourceKey, destinationKey, from, to, timeoutSeconds)
-    }
+      timeoutSeconds: Double,
+    ): Supplier<ByteString?> = Supplier { this@FakeRedis.blmove(sourceKey, destinationKey, from, to, timeoutSeconds) }
 
-    override fun brpoplpush(
-      sourceKey: String,
-      destinationKey: String,
-      timeoutSeconds: Int
-    ): Supplier<ByteString?> = Supplier {
-      this@FakeRedis.brpoplpush(sourceKey, destinationKey, timeoutSeconds)
-    }
+    override fun brpoplpush(sourceKey: String, destinationKey: String, timeoutSeconds: Int): Supplier<ByteString?> =
+      Supplier {
+        this@FakeRedis.brpoplpush(sourceKey, destinationKey, timeoutSeconds)
+      }
 
     override fun lmove(
       sourceKey: String,
       destinationKey: String,
       from: ListDirection,
-      to: ListDirection
-    ): Supplier<ByteString?> = Supplier {
-      this@FakeRedis.lmove(sourceKey, destinationKey, from, to)
-    }
+      to: ListDirection,
+    ): Supplier<ByteString?> = Supplier { this@FakeRedis.lmove(sourceKey, destinationKey, from, to) }
 
     override fun lpush(key: String, vararg elements: ByteString): Supplier<Long> = Supplier {
       this@FakeRedis.lpush(key, *elements)
@@ -689,9 +610,7 @@ class FakeRedis @Inject constructor(
       this@FakeRedis.lpop(key, count)
     }
 
-    override fun lpop(key: String): Supplier<ByteString?> = Supplier {
-      this@FakeRedis.lpop(key)
-    }
+    override fun lpop(key: String): Supplier<ByteString?> = Supplier { this@FakeRedis.lpop(key) }
 
     override fun blpop(keys: Array<String>, timeoutSeconds: Double): Supplier<Pair<String, ByteString>?> = Supplier {
       this@FakeRedis.blpop(keys, timeoutSeconds)
@@ -701,19 +620,11 @@ class FakeRedis @Inject constructor(
       this@FakeRedis.rpop(key, count)
     }
 
-    override fun llen(key: String): Supplier<Long> = Supplier {
-      this@FakeRedis.llen(key)
-    }
+    override fun llen(key: String): Supplier<Long> = Supplier { this@FakeRedis.llen(key) }
 
-    override fun rpop(key: String): Supplier<ByteString?> = Supplier {
-      this@FakeRedis.rpop(key)
-    }
+    override fun rpop(key: String): Supplier<ByteString?> = Supplier { this@FakeRedis.rpop(key) }
 
-    override fun lrange(
-      key: String,
-      start: Long,
-      stop: Long
-    ): Supplier<List<ByteString?>> = Supplier {
+    override fun lrange(key: String, start: Long, stop: Long): Supplier<List<ByteString?>> = Supplier {
       this@FakeRedis.lrange(key, start, stop)
     }
 
@@ -725,24 +636,15 @@ class FakeRedis @Inject constructor(
       this@FakeRedis.lrem(key, count, element)
     }
 
-    override fun rpoplpush(
-      sourceKey: String,
-      destinationKey: String
-    ): Supplier<ByteString?> = Supplier {
+    override fun rpoplpush(sourceKey: String, destinationKey: String): Supplier<ByteString?> = Supplier {
       this@FakeRedis.rpoplpush(sourceKey, destinationKey)
     }
 
-    override fun exists(key: String): Supplier<Boolean> = Supplier {
-      this@FakeRedis.exists(key)
-    }
+    override fun exists(key: String): Supplier<Boolean> = Supplier { this@FakeRedis.exists(key) }
 
-    override fun exists(vararg keys: String): Supplier<Long> = Supplier {
-      this@FakeRedis.exists(*keys)
-    }
+    override fun exists(vararg keys: String): Supplier<Long> = Supplier { this@FakeRedis.exists(*keys) }
 
-    override fun persist(key: String): Supplier<Boolean> = Supplier {
-      this@FakeRedis.persist(key)
-    }
+    override fun persist(key: String): Supplier<Boolean> = Supplier { this@FakeRedis.persist(key) }
 
     override fun expire(key: String, seconds: Long): Supplier<Boolean> = Supplier {
       this@FakeRedis.expire(key, seconds)
@@ -756,29 +658,20 @@ class FakeRedis @Inject constructor(
       this@FakeRedis.pExpire(key, milliseconds)
     }
 
-    override fun pExpireAt(
-      key: String,
-      timestampMilliseconds: Long
-    ): Supplier<Boolean> = Supplier {
+    override fun pExpireAt(key: String, timestampMilliseconds: Long): Supplier<Boolean> = Supplier {
       this@FakeRedis.pExpireAt(key, timestampMilliseconds)
     }
 
-    override fun zadd(
-      key: String,
-      score: Double,
-      member: String,
-      vararg options: Redis.ZAddOptions
-    ): Supplier<Long> = Supplier {
-      this@FakeRedis.zadd(key, score, member, *options)
-    }
+    override fun zadd(key: String, score: Double, member: String, vararg options: Redis.ZAddOptions): Supplier<Long> =
+      Supplier {
+        this@FakeRedis.zadd(key, score, member, *options)
+      }
 
     override fun zadd(
       key: String,
       scoreMembers: Map<String, Double>,
-      vararg options: Redis.ZAddOptions
-    ): Supplier<Long> = Supplier {
-      this@FakeRedis.zadd(key, scoreMembers, *options)
-    }
+      vararg options: Redis.ZAddOptions,
+    ): Supplier<Long> = Supplier { this@FakeRedis.zadd(key, scoreMembers, *options) }
 
     override fun zscore(key: String, member: String): Supplier<Double?> = Supplier {
       this@FakeRedis.zscore(key, member)
@@ -790,10 +683,8 @@ class FakeRedis @Inject constructor(
       start: ZRangeMarker,
       stop: ZRangeMarker,
       reverse: Boolean,
-      limit: ZRangeLimit?
-    ): Supplier<List<ByteString?>> = Supplier {
-      this@FakeRedis.zrange(key, type, start, stop, reverse, limit)
-    }
+      limit: ZRangeLimit?,
+    ): Supplier<List<ByteString?>> = Supplier { this@FakeRedis.zrange(key, type, start, stop, reverse, limit) }
 
     override fun zrangeWithScores(
       key: String,
@@ -801,22 +692,17 @@ class FakeRedis @Inject constructor(
       start: ZRangeMarker,
       stop: ZRangeMarker,
       reverse: Boolean,
-      limit: ZRangeLimit?
+      limit: ZRangeLimit?,
     ): Supplier<List<Pair<ByteString?, Double>>> = Supplier {
       this@FakeRedis.zrangeWithScores(key, type, start, stop, reverse, limit)
     }
 
-    override fun zremRangeByRank(
-      key: String,
-      start: ZRangeRankMarker,
-      stop: ZRangeRankMarker
-    ): Supplier<Long> = Supplier {
-      this@FakeRedis.zremRangeByRank(key, start, stop)
-    }
+    override fun zremRangeByRank(key: String, start: ZRangeRankMarker, stop: ZRangeRankMarker): Supplier<Long> =
+      Supplier {
+        this@FakeRedis.zremRangeByRank(key, start, stop)
+      }
 
-    override fun zcard(key: String): Supplier<Long> = Supplier {
-      this@FakeRedis.zcard(key)
-    }
+    override fun zcard(key: String): Supplier<Long> = Supplier { this@FakeRedis.zcard(key) }
 
     override fun close() {
       // No-op.
@@ -843,12 +729,7 @@ class FakeRedis @Inject constructor(
     flushAll()
   }
 
-  private fun zaddInternal(
-    key: String,
-    score: Double,
-    member: String,
-    options: Array<out Redis.ZAddOptions>,
-  ): Long {
+  private fun zaddInternal(key: String, score: Double, member: String, options: Array<out Redis.ZAddOptions>): Long {
     Redis.ZAddOptions.verify(options)
     var newFieldCount = 0L
     var elementsChanged = 0L
@@ -892,26 +773,26 @@ class FakeRedis @Inject constructor(
     return newFieldCount
   }
 
-  /**
-   * If [exists], the [currentScore] will be present. If not, [currentScore] will be null
-   */
+  /** If [exists], the [currentScore] will be present. If not, [currentScore] will be null */
   private fun shouldUpdateScore(
     currentScore: Double?,
     score: Double,
     exists: Boolean,
-    zaddOptions: Array<out Redis.ZAddOptions>
+    zaddOptions: Array<out Redis.ZAddOptions>,
   ): Boolean {
     val options = zaddOptions.filter { it != CH }
     // default without any options
     if (options.isEmpty()) return true
 
     // all valid single options.
-    if ((options.size == 1)
-      && (((options[0] == XX) && exists)
-        || ((options[0] == NX) && !exists)
-        || ((options[0] == LT) && ((exists && score < currentScore!!) || !exists))
-        || ((options[0] == GT) && ((exists && score > currentScore!!) || !exists)))
-    ) return true
+    if (
+      (options.size == 1) &&
+        (((options[0] == XX) && exists) ||
+          ((options[0] == NX) && !exists) ||
+          ((options[0] == LT) && ((exists && score < currentScore!!) || !exists)) ||
+          ((options[0] == GT) && ((exists && score > currentScore!!) || !exists)))
+    )
+      return true
 
     // valid option combos
     // only two valid combos of two option are possible.
@@ -920,35 +801,22 @@ class FakeRedis @Inject constructor(
     // LT XX
     // for existing ones, the score should be less than the existing scores.
     // XX will prevent adding new ones.
-    if (options.contains(LT) && options.contains(XX) && exists
-      && score < currentScore!!) return true
+    if (options.contains(LT) && options.contains(XX) && exists && score < currentScore!!) return true
 
     // GT XX
     // for existing ones, the score should be more than the existing scores.
     // XX will prevent adding new ones.
-    if (options.contains(GT) && options.contains(XX) && exists
-      && score > currentScore!!) return true
+    if (options.contains(GT) && options.contains(XX) && exists && score > currentScore!!) return true
 
     return false
   }
 
-  override fun zadd(
-    key: String,
-    score: Double,
-    member: String,
-    vararg options: Redis.ZAddOptions,
-  ): Long {
+  override fun zadd(key: String, score: Double, member: String, vararg options: Redis.ZAddOptions): Long {
     return zaddInternal(key, score, member, options)
   }
 
-  override fun zadd(
-    key: String,
-    scoreMembers: Map<String, Double>,
-    vararg options: Redis.ZAddOptions
-  ): Long {
-    return scoreMembers.entries.sumOf { (member, score) ->
-      zaddInternal(key, score, member, options)
-    }
+  override fun zadd(key: String, scoreMembers: Map<String, Double>, vararg options: Redis.ZAddOptions): Long {
+    return scoreMembers.entries.sumOf { (member, score) -> zaddInternal(key, score, member, options) }
   }
 
   override fun zscore(key: String, member: String): Double? {
@@ -973,8 +841,7 @@ class FakeRedis @Inject constructor(
     reverse: Boolean,
     limit: ZRangeLimit?,
   ): List<ByteString?> {
-    return zrangeWithScores(key, type, start, stop, reverse, limit)
-      .map { (member, _) -> member }.toList()
+    return zrangeWithScores(key, type, start, stop, reverse, limit).map { (member, _) -> member }.toList()
   }
 
   override fun zrangeWithScores(
@@ -987,33 +854,30 @@ class FakeRedis @Inject constructor(
   ): List<Pair<ByteString?, Double>> {
     val sortedSet = keyValueStore.getTyped<Value.SortedSet>(key)?.data?.toSortedMap() ?: return listOf()
 
-    val ansWithScore = when (type) {
-      ZRangeType.INDEX ->
-        zrangeByIndex(
-          sortedSet = sortedSet,
-          start = start as ZRangeIndexMarker,
-          stop = stop as ZRangeIndexMarker,
-          reverse = reverse
-        )
+    val ansWithScore =
+      when (type) {
+        ZRangeType.INDEX ->
+          zrangeByIndex(
+            sortedSet = sortedSet,
+            start = start as ZRangeIndexMarker,
+            stop = stop as ZRangeIndexMarker,
+            reverse = reverse,
+          )
 
-      ZRangeType.SCORE ->
-        zrangeByScore(
-          sortedSet = sortedSet,
-          start = start as ZRangeScoreMarker,
-          stop = stop as ZRangeScoreMarker,
-          reverse = reverse,
-          limit = limit
-        )
-    }
+        ZRangeType.SCORE ->
+          zrangeByScore(
+            sortedSet = sortedSet,
+            start = start as ZRangeScoreMarker,
+            stop = stop as ZRangeScoreMarker,
+            reverse = reverse,
+            limit = limit,
+          )
+      }
 
     return ansWithScore
   }
 
-  override fun zremRangeByRank(
-    key: String,
-    start: ZRangeRankMarker,
-    stop: ZRangeRankMarker,
-  ): Long {
+  override fun zremRangeByRank(key: String, start: ZRangeRankMarker, stop: ZRangeRankMarker): Long {
     val sortedSet = keyValueStore.getTyped<Value.SortedSet>(key)?.data ?: return 0
     val scores = sortedSet.keys.toList()
 
@@ -1046,9 +910,7 @@ class FakeRedis @Inject constructor(
     return (length - added)
   }
 
-  override fun zcard(
-    key: String
-  ): Long {
+  override fun zcard(key: String): Long {
     val sortedSet = keyValueStore.getTyped<Value.SortedSet>(key)?.data ?: return 0
     var length = 0L
     sortedSet.values.forEach { length += it.size }
@@ -1080,11 +942,10 @@ class FakeRedis @Inject constructor(
     sortedSet: SortedMap<Double, HashSet<String>>,
     start: ZRangeIndexMarker,
     stop: ZRangeIndexMarker,
-    reverse: Boolean
+    reverse: Boolean,
   ): List<Pair<ByteString?, Double>> {
     val scores = if (!reverse) sortedSet.keys.toList() else sortedSet.keys.toList().reversed()
-    val (minInt, maxInt) =
-      getMinMaxIndex(sortedSet, start.intValue.toLong(), stop.intValue.toLong())
+    val (minInt, maxInt) = getMinMaxIndex(sortedSet, start.intValue.toLong(), stop.intValue.toLong())
 
     if (minInt > maxInt) return listOf()
 
@@ -1111,7 +972,7 @@ class FakeRedis @Inject constructor(
     start: ZRangeScoreMarker,
     stop: ZRangeScoreMarker,
     reverse: Boolean,
-    limit: ZRangeLimit?
+    limit: ZRangeLimit?,
   ): List<Pair<ByteString?, Double>> {
     val scores = if (!reverse) sortedSet.keys.toList() else sortedSet.keys.toList().reversed()
     val minDouble = start.value as Double
@@ -1120,11 +981,9 @@ class FakeRedis @Inject constructor(
     if (minDouble > maxDouble) return listOf()
 
     fun Double.cmp(): Boolean {
-      var ans = if (start.included) this >= minDouble
-      else this > minDouble
+      var ans = if (start.included) this >= minDouble else this > minDouble
 
-      ans = if (stop.included) ans && this <= maxDouble
-      else ans && this < maxDouble
+      ans = if (stop.included) ans && this <= maxDouble else ans && this < maxDouble
 
       return ans
     }

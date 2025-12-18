@@ -8,20 +8,12 @@ import misk.inject.KAbstractModule
 class ExemplarGuiceBindingsModule : KAbstractModule() {
   override fun configure() {
     bind<Service>().to<ServiceImpl>()
-    bind<Service>()
-      .annotatedWith(Names.named("AnotherService"))
-      .to<AnotherServiceImpl>()
-    bind<String>()
-      .annotatedWith(Names.named("ConstantBindingExample"))
-      .toInstance("MyString")
-    bind<Service>()
-      .annotatedWith(Names.named("ServiceInCompanionClass"))
-      .to<MyCompanionService>()
+    bind<Service>().annotatedWith(Names.named("AnotherService")).to<AnotherServiceImpl>()
+    bind<String>().annotatedWith(Names.named("ConstantBindingExample")).toInstance("MyString")
+    bind<Service>().annotatedWith(Names.named("ServiceInCompanionClass")).to<MyCompanionService>()
   }
 
-  @Provides
-  @Named("YetAnotherService")
-  fun provideYetAnotherService(): Service = AnotherServiceImpl()
+  @Provides @Named("YetAnotherService") fun provideYetAnotherService(): Service = AnotherServiceImpl()
 
   companion object {
     class MyCompanionService : Service {

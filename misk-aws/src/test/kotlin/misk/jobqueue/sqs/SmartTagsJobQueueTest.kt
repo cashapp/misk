@@ -5,37 +5,39 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.CreateQueueRequest
 import jakarta.inject.Inject
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import misk.annotation.ExperimentalMiskApi
+import misk.feature.testing.FakeFeatureFlags
 import misk.inject.KAbstractModule
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
 import misk.jobqueue.sqs.SqsJobConsumer.Companion.CONSUMERS_BATCH_SIZE
 import misk.jobqueue.subscribe
+import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
+import misk.logging.getLogger
+import misk.logging.withSmartTags
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import misk.feature.testing.FakeFeatureFlags
-import misk.logging.LogCollector
-import misk.logging.getLogger
-import misk.logging.withSmartTags
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
 
 @OptIn(ExperimentalMiskApi::class)
 @MiskTest(startService = true)
 internal class SmartTagsJobQueueTest {
   @MiskExternalDependency private val dockerSqs = DockerSqs
-  @MiskTestModule private val module = object : KAbstractModule() {
-    override fun configure() {
-      install(SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client))
-      install(LogCollectorModule())
+  @MiskTestModule
+  private val module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client))
+        install(LogCollectorModule())
+      }
     }
-  }
 
   @Inject private lateinit var sqs: AmazonSQS
   @Inject private lateinit var queue: JobQueue
@@ -86,10 +88,8 @@ internal class SmartTagsJobQueueTest {
 
     assertThat(allJobsComplete.await(10, TimeUnit.SECONDS)).isTrue()
 
-    val serviceLogEvents =
-      logCollector.takeEvents(SmartTagsJobQueueTest::class, consumeUnmatchedLogs = false)
-    val sqsLogErrorEvents = logCollector.takeEvents(SqsJobConsumer::class)
-      .filter { it.level == Level.ERROR }
+    val serviceLogEvents = logCollector.takeEvents(SmartTagsJobQueueTest::class, consumeUnmatchedLogs = false)
+    val sqsLogErrorEvents = logCollector.takeEvents(SqsJobConsumer::class).filter { it.level == Level.ERROR }
 
     assertThat(serviceLogEvents).hasSize(1)
     assertThat(serviceLogEvents.single().message).isEqualTo("Test log with mdc")
@@ -124,10 +124,8 @@ internal class SmartTagsJobQueueTest {
 
     assertThat(allJobsComplete.await(10, TimeUnit.SECONDS)).isTrue()
 
-    val serviceLogEvents =
-      logCollector.takeEvents(SmartTagsJobQueueTest::class, consumeUnmatchedLogs = false)
-    val sqsLogErrorEvents = logCollector.takeEvents(SqsJobConsumer::class)
-      .filter { it.level == Level.ERROR }
+    val serviceLogEvents = logCollector.takeEvents(SmartTagsJobQueueTest::class, consumeUnmatchedLogs = false)
+    val sqsLogErrorEvents = logCollector.takeEvents(SqsJobConsumer::class).filter { it.level == Level.ERROR }
 
     assertThat(serviceLogEvents).hasSize(1)
     assertThat(serviceLogEvents.single().message).isEqualTo("Test log without mdc")
@@ -137,16 +135,10 @@ internal class SmartTagsJobQueueTest {
     assertExistingMdcPropertiesArePresent(sqsLogErrorEvents.single(), messageIdToVerify)
   }
 
-  private fun assertExistingMdcPropertiesArePresent(
-    logEvent: ILoggingEvent,
-    messageIdToVerify: String?
-  ) {
+  private fun assertExistingMdcPropertiesArePresent(logEvent: ILoggingEvent, messageIdToVerify: String?) {
     assertThat(logEvent.mdcPropertyMap).containsEntry("sqs_job_id", messageIdToVerify)
     assertThat(logEvent.mdcPropertyMap).containsEntry("misk.job_queue.job_id", messageIdToVerify)
-    assertThat(logEvent.mdcPropertyMap).containsEntry(
-      "misk.job_queue.queue_name",
-      queueName.value
-    )
+    assertThat(logEvent.mdcPropertyMap).containsEntry("misk.job_queue.queue_name", queueName.value)
     assertThat(logEvent.mdcPropertyMap).containsEntry("misk.job_queue.queue_type", "aws-sqs")
   }
 

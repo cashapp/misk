@@ -5,13 +5,11 @@ import java.time.Instant
 /**
  * This complements [DbEntity] for entities that keep updated_at and created_at timestamps.
  *
- * Misk uses the application's clock time to set [created_at] and [updated_at]. We prefer the
- * application's (ie. JVM's) clock over the database's clock because only the application's clock
- * can be faked in tests.
+ * Misk uses the application's clock time to set [created_at] and [updated_at]. We prefer the application's (ie. JVM's)
+ * clock over the database's clock because only the application's clock can be faked in tests.
  *
- * To use timestamped entities first add two columns in your `CREATE TABLE` statement. You may also
- * add an optional index on `updated_at`:
- *
+ * To use timestamped entities first add two columns in your `CREATE TABLE` statement. You may also add an optional
+ * index on `updated_at`:
  * ```
  * CREATE TABLE movies(
  *   id bigint NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -22,12 +20,11 @@ import java.time.Instant
  * );
  * ```
  *
- * The above SQL uses `timestamp(3)` and `NOW(3)` to get millisecond precision which interoperates
- * nicely with Java. Although we declare `DEFAULT NOW(3)` and `ON UPDATE NOW(3)`, these don't apply
- * to writes from Hibernate because it always provides a value explicitly.
+ * The above SQL uses `timestamp(3)` and `NOW(3)` to get millisecond precision which interoperates nicely with Java.
+ * Although we declare `DEFAULT NOW(3)` and `ON UPDATE NOW(3)`, these don't apply to writes from Hibernate because it
+ * always provides a value explicitly.
  *
  * Next implement this interface and add the following declarations to your entity class:
- *
  * ```
  * @Entity
  * @Table(name = "movies")
@@ -46,9 +43,8 @@ import java.time.Instant
  * }
  * ```
  *
- * The timestamp listener will automatically populate these values on save and update.
- * (Incidentally, the `@Columns` are not marked `nullable = false` because the timestamp listener is
- * triggered _after_ the nullability check.)
+ * The timestamp listener will automatically populate these values on save and update. (Incidentally, the `@Columns` are
+ * not marked `nullable = false` because the timestamp listener is triggered _after_ the nullability check.)
  */
 interface DbTimestampedEntity {
   var created_at: Instant

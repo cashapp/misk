@@ -2,22 +2,22 @@ package misk.jobqueue.sqs
 
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
+import kotlin.reflect.KClass
 import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.AsyncSwitch
 import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
-import misk.inject.toKey
 import misk.jobqueue.BatchJobHandler
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
-import kotlin.reflect.KClass
 
 /**
- * Install this module to register a batch handler for an SQS queue,
- * and if specified, registers its corresponding retry queue.
+ * Install this module to register a batch handler for an SQS queue, and if specified, registers its corresponding retry
+ * queue.
  */
-class AwsSqsBatchJobHandlerModule<T : BatchJobHandler> private constructor(
+class AwsSqsBatchJobHandlerModule<T : BatchJobHandler>
+private constructor(
   private val queueName: QueueName,
   private val handler: KClass<T>,
   private val installRetryQueue: Boolean,
@@ -48,7 +48,8 @@ class AwsSqsBatchJobHandlerModule<T : BatchJobHandler> private constructor(
       dependsOn: List<Key<out Service>> = emptyList(),
     ): AwsSqsBatchJobHandlerModule<T> = create(queueName, T::class, installRetryQueue, dependsOn)
 
-    @JvmStatic @JvmOverloads
+    @JvmStatic
+    @JvmOverloads
     fun <T : BatchJobHandler> create(
       queueName: QueueName,
       handlerClass: Class<T>,
@@ -58,9 +59,7 @@ class AwsSqsBatchJobHandlerModule<T : BatchJobHandler> private constructor(
       return create(queueName, handlerClass.kotlin, installRetryQueue, dependsOn)
     }
 
-    /**
-     * Returns a module that registers a batch handler for an SQS queue.
-     */
+    /** Returns a module that registers a batch handler for an SQS queue. */
     @JvmOverloads
     fun <T : BatchJobHandler> create(
       queueName: QueueName,

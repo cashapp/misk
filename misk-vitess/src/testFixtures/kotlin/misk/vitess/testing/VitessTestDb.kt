@@ -1,10 +1,10 @@
 package misk.vitess.testing
 
-import misk.vitess.testing.internal.VitessDockerContainer
-import misk.vitess.testing.internal.VitessQueryExecutor
 import java.sql.Connection
 import java.time.Duration
 import kotlin.time.measureTime
+import misk.vitess.testing.internal.VitessDockerContainer
+import misk.vitess.testing.internal.VitessQueryExecutor
 
 /**
  * `VitessTestDb` is a class used to start a local Vitess database for tests.
@@ -15,12 +15,14 @@ import kotlin.time.measureTime
  * @property enableDeclarativeSchemaChanges Whether to use declarative schema changes. Default is `false`.
  * @property enableInMemoryStorage Whether to use in-memory storage (tmpfs) for faster performance. Default is `false`.
  * @property enableScatters Whether to enable scatter queries, which fan out to all shards. Default is `true`.
- * @property inMemoryStorageSize The size of in-memory storage (tmpfs) if `enableInMemoryStorage` is `true` (e.g., "1G", "512M"). Default is "1024M".
+ * @property inMemoryStorageSize The size of in-memory storage (tmpfs) if `enableInMemoryStorage` is `true` (e.g., "1G",
+ *   "512M"). Default is "1024M".
  * @property keepAlive Whether to keep the database running after the test suite completes. Default is `true`.
  * @property mysqlVersion The MySQL version to use. Default is `8.0.42`.
  * @property port The port to connect to the database, which represents the vtgate. Default is `27003`.
- * @property schemaDir The location of vschema and SQL schema change files, which can be a classpath or filesystem path, which
- * is designated by the prefix `classpath:` or `filesystem:`. When using `classpath:`, `VitessTestDb` looks within `resources`.
+ * @property schemaDir The location of vschema and SQL schema change files, which can be a classpath or filesystem path,
+ *   which is designated by the prefix `classpath:` or `filesystem:`. When using `classpath:`, `VitessTestDb` looks
+ *   within `resources`.
  *
  * The expected input format of a schema directory looks like:
  * ```
@@ -34,7 +36,8 @@ import kotlin.time.measureTime
  * │   │   ├── vschema.json
  * ```
  *
- * `VitessTestDb` will throw exceptions if an invalid directory structure is provided. The default value is `classpath:/vitess/schema`.
+ * `VitessTestDb` will throw exceptions if an invalid directory structure is provided. The default value is
+ * `classpath:/vitess/schema`.
  *
  * @property sqlMode The server SQL mode. Defaults to the MySQL8 defaults:
  *   `ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION`.
@@ -98,7 +101,9 @@ class VitessTestDb(
       this.enableDeclarativeSchemaChanges = enableDeclarativeSchemaChanges
     }
 
-    fun enableInMemoryStorage(enableInMemoryStorage: Boolean) = apply { this.enableInMemoryStorage = enableInMemoryStorage }
+    fun enableInMemoryStorage(enableInMemoryStorage: Boolean) = apply {
+      this.enableInMemoryStorage = enableInMemoryStorage
+    }
 
     fun enableScatters(enableScatters: Boolean) = apply { this.enableScatters = enableScatters }
 
@@ -226,17 +231,18 @@ class VitessTestDb(
 
   /**
    * Truncate all tables in all keyspaces except for sequence tables using an external vtgate port provided by the user.
-   * This should only be used in scenarios where the `containerName` cannot be relied on to retrieve the
-   * running Vitess Docker container, as default vtgate user credentials will be assumed.
+   * This should only be used in scenarios where the `containerName` cannot be relied on to retrieve the running Vitess
+   * Docker container, as default vtgate user credentials will be assumed.
    */
   fun truncate(userPort: Int) {
     try {
-      val vitessQueryExecutor = VitessQueryExecutor(
-        hostname,
-        vtgatePort = userPort,
-        vtgateUser = DefaultSettings.VTGATE_USER,
-        vtgateUserPassword = DefaultSettings.VTGATE_USER_PASSWORD
-      )
+      val vitessQueryExecutor =
+        VitessQueryExecutor(
+          hostname,
+          vtgatePort = userPort,
+          vtgateUser = DefaultSettings.VTGATE_USER,
+          vtgateUserPassword = DefaultSettings.VTGATE_USER_PASSWORD,
+        )
       vitessQueryExecutor.truncate()
     } catch (e: Exception) {
       throw VitessTestDbTruncateException("Failed to truncate tables", e)
@@ -292,7 +298,6 @@ class VitessTestDb(
    * Get the list of tables for a specific keyspace.
    *
    * @param keyspace The name of the keyspace to retrieve tables from.
-   *
    * @return A list of [VitessTable] objects representing the tables in the specified keyspace.
    */
   fun getTables(keyspace: String): List<VitessTable> {
@@ -305,7 +310,6 @@ class VitessTestDb(
    *
    * @param query The SQL query to execute.
    * @param target The target for the query, which defaults to "@primary". This can be used to specify a specific shard.
-   *
    * @return A list of maps representing the rows returned by the query, where each map corresponds to a row and each
    *   key-value pair corresponds to a column name and its value.
    */
@@ -319,7 +323,6 @@ class VitessTestDb(
    *
    * @param query The SQL statement to execute.
    * @param target The target for the query, which defaults to "@primary". This can be used to specify a specific shard.
-   *
    * @return `true` if the execution was successful, `false` otherwise.
    */
   fun executeUpdate(query: String, target: String = "@primary"): Int {
@@ -332,7 +335,6 @@ class VitessTestDb(
    *
    * @param query The SQL statement to execute as a transaction.
    * @param target The target for the query, which defaults to "@primary". This can be used to specify a specific shard.
-   *
    * @return `true` if the transaction was successful, `false` otherwise.
    */
   fun executeTransaction(query: String, target: String = "@primary"): Boolean {
@@ -341,24 +343,26 @@ class VitessTestDb(
   }
 
   private fun getVitessDockerContainer(): VitessDockerContainer {
-    val container = VitessDockerContainer(
-      autoApplySchemaChanges = autoApplySchemaChanges,
-      containerName = containerName,
-      debugStartup = debugStartup,
-      enableDeclarativeSchemaChanges = enableDeclarativeSchemaChanges,
-      enableInMemoryStorage = enableInMemoryStorage,
-      enableScatters = enableScatters,
-      inMemoryStorageSize = inMemoryStorageSize,
-      keepAlive = keepAlive,
-      lintSchema = lintSchema,
-      mysqlVersion = mysqlVersion,
-      schemaDir = schemaDir,
-      sqlMode = sqlMode,
-      transactionIsolationLevel = transactionIsolationLevel,
-      transactionTimeoutSeconds = transactionTimeoutSeconds,
-      userPort = port,
-      vitessImage = vitessImage,
-      vitessVersion = vitessVersion)
+    val container =
+      VitessDockerContainer(
+        autoApplySchemaChanges = autoApplySchemaChanges,
+        containerName = containerName,
+        debugStartup = debugStartup,
+        enableDeclarativeSchemaChanges = enableDeclarativeSchemaChanges,
+        enableInMemoryStorage = enableInMemoryStorage,
+        enableScatters = enableScatters,
+        inMemoryStorageSize = inMemoryStorageSize,
+        keepAlive = keepAlive,
+        lintSchema = lintSchema,
+        mysqlVersion = mysqlVersion,
+        schemaDir = schemaDir,
+        sqlMode = sqlMode,
+        transactionIsolationLevel = transactionIsolationLevel,
+        transactionTimeoutSeconds = transactionTimeoutSeconds,
+        userPort = port,
+        vitessImage = vitessImage,
+        vitessVersion = vitessVersion,
+      )
 
     return container
   }
@@ -381,16 +385,14 @@ data class VitessTestDbStartupResult(
 ) : StartContainerResult
 
 /**
- * This class contains information about a shutdown operation of VitessTestDb, which attempts
- * to remove the container and its volumes.
+ * This class contains information about a shutdown operation of VitessTestDb, which attempts to remove the container
+ * and its volumes.
  *
  * @property containerId The ID of the Docker container that was removed.
  * @property containerRemoved Whether the container was removed after.
  */
-data class VitessTestDbShutdownResult(
-  override val containerId: String?,
-  override val containerRemoved: Boolean
-) : RemoveContainerResult
+data class VitessTestDbShutdownResult(override val containerId: String?, override val containerRemoved: Boolean) :
+  RemoveContainerResult
 
 interface StartContainerResult {
   val containerId: String
@@ -407,8 +409,7 @@ open class VitessTestDbException(message: String, cause: Throwable? = null) : Ru
 
 class VitessTestDbStartupException(message: String, cause: Throwable? = null) : VitessTestDbException(message, cause)
 
-class VitessTestDbSchemaLintException(message: String, cause: Throwable? = null) :
-  VitessTestDbException(message, cause)
+class VitessTestDbSchemaLintException(message: String, cause: Throwable? = null) : VitessTestDbException(message, cause)
 
 class VitessTestDbSchemaParseException(message: String, cause: Throwable? = null) :
   VitessTestDbException(message, cause)

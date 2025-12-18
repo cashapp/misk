@@ -1,23 +1,20 @@
 package wisp.resources
 
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 class OnePasswordResourceLoaderBackendTest {
 
-  private val resourceLoader: ResourceLoader = ResourceLoader(
-    mapOf(
-      OnePasswordResourceLoaderBackend.SCHEME to OnePasswordResourceLoaderBackend,
-    )
-  )
+  private val resourceLoader: ResourceLoader =
+    ResourceLoader(mapOf(OnePasswordResourceLoaderBackend.SCHEME to OnePasswordResourceLoaderBackend))
 
   private val nonExistentOnePasswordResource = "1password://Employee/Test login for unit tests/does-not-exist"
   private val existingOnePasswordResource = "1password://Employee/Test login for unit tests/password"
-  private val existingOnePasswordResourceWithAccount = "1password:squareup.1password.com@//Employee/Test login for unit tests/password"
-
+  private val existingOnePasswordResourceWithAccount =
+    "1password:squareup.1password.com@//Employee/Test login for unit tests/password"
 
   @Test
   fun onePasswordResourcePath() {
@@ -25,23 +22,41 @@ class OnePasswordResourceLoaderBackendTest {
     assertThat(resourcePath.account).isNull()
     assertEquals(resourcePath.secretReference, "//My Vault Name/My Secret Name/field_name_here")
     assertEquals(resourcePath.asCliArgs(), listOf("--no-newline", "op://My Vault Name/My Secret Name/field_name_here"))
-    assertEquals(resourcePath.asCliArgs(attribute = "type"), listOf("--no-newline", "op://My Vault Name/My Secret Name/field_name_here?attribute=type"))
+    assertEquals(
+      resourcePath.asCliArgs(attribute = "type"),
+      listOf("--no-newline", "op://My Vault Name/My Secret Name/field_name_here?attribute=type"),
+    )
   }
 
   @Test
   fun onePasswordResourcePathWithAccountId() {
-    val resourcePath = OnePasswordResourcePath.fromPath("myAccount.1password.com@//My Vault Name/My Secret Name/field_name_here")
+    val resourcePath =
+      OnePasswordResourcePath.fromPath("myAccount.1password.com@//My Vault Name/My Secret Name/field_name_here")
     assertEquals(resourcePath.account, "myAccount.1password.com")
     assertEquals(resourcePath.secretReference, "//My Vault Name/My Secret Name/field_name_here")
-    assertEquals(resourcePath.asCliArgs(), listOf("--no-newline", "--account", "myAccount.1password.com", "op://My Vault Name/My Secret Name/field_name_here"))
-    assertEquals(resourcePath.asCliArgs(attribute = "type"), listOf("--no-newline", "--account", "myAccount.1password.com", "op://My Vault Name/My Secret Name/field_name_here?attribute=type"))
+    assertEquals(
+      resourcePath.asCliArgs(),
+      listOf(
+        "--no-newline",
+        "--account",
+        "myAccount.1password.com",
+        "op://My Vault Name/My Secret Name/field_name_here",
+      ),
+    )
+    assertEquals(
+      resourcePath.asCliArgs(attribute = "type"),
+      listOf(
+        "--no-newline",
+        "--account",
+        "myAccount.1password.com",
+        "op://My Vault Name/My Secret Name/field_name_here?attribute=type",
+      ),
+    )
   }
 
   @Test
   fun onePasswordResourcePathInvalidFormat() {
-    assertFailsWith<IllegalArgumentException> {
-      OnePasswordResourcePath.fromPath("Malformed Name/field_name_here")
-    }
+    assertFailsWith<IllegalArgumentException> { OnePasswordResourcePath.fromPath("Malformed Name/field_name_here") }
 
     assertFailsWith<IllegalArgumentException> {
       OnePasswordResourcePath.fromPath("myAccount.1password.com@Malformed Name/field_name_here")
@@ -51,18 +66,14 @@ class OnePasswordResourceLoaderBackendTest {
   @Disabled("Requires no `op` binary on path")
   @Test
   fun onePasswordMissingBinary() {
-    assertFailsWith<UnsupportedOperationException> {
-      resourceLoader.utf8(existingOnePasswordResource)
-    }
+    assertFailsWith<UnsupportedOperationException> { resourceLoader.utf8(existingOnePasswordResource) }
   }
 
   @Disabled("Requires `op` binary on path")
   @Test
   fun onePasswordMissingSecret() {
     assertThat(resourceLoader.exists(nonExistentOnePasswordResource)).isFalse()
-    assertFailsWith<NoSuchElementException> {
-      resourceLoader.utf8(nonExistentOnePasswordResource)
-    }
+    assertFailsWith<NoSuchElementException> { resourceLoader.utf8(nonExistentOnePasswordResource) }
   }
 
   @Disabled("Requires `op` binary on path and a test secret")

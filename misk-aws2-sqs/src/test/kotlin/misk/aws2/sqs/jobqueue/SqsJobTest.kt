@@ -15,65 +15,66 @@ internal class SqsJobTest {
 
   @Test
   fun `idempotenceKey returns key from jobqueue metadata`() {
-    val message = Message.builder()
-      .messageId("id-0")
-      .body("body-0")
-      .messageAttributes(
-        mapOf(
-          "foo" to MessageAttributeValue.builder().dataType("String").stringValue("bar").build(),
-          SqsJob.JOBQUEUE_METADATA_ATTR to MessageAttributeValue.builder()
-            .dataType("String")
-            .stringValue(
-              """{
+    val message =
+      Message.builder()
+        .messageId("id-0")
+        .body("body-0")
+        .messageAttributes(
+          mapOf(
+            "foo" to MessageAttributeValue.builder().dataType("String").stringValue("bar").build(),
+            SqsJob.JOBQUEUE_METADATA_ATTR to
+              MessageAttributeValue.builder()
+                .dataType("String")
+                .stringValue(
+                  """{
                 |  "${SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE}": "test",
                 |  "${SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY}": "ik-0",
                 |  "${SqsJob.JOBQUEUE_METADATA_ORIGINAL_TRACE_ID}": "oti-0"
-                |}""".trimMargin()
-            )
-            .build()
+                |}"""
+                    .trimMargin()
+                )
+                .build(),
+          )
         )
-      )
-      .build()
+        .build()
 
     val job = SqsJob(testQueue, moshi, message, "queue-url", System.currentTimeMillis())
 
     assertThat(job.idempotenceKey).isEqualTo("ik-0")
-    assertThat(job.attributes)
-      .containsEntry("foo", "bar")
-      .doesNotContainKey(SqsJob.JOBQUEUE_METADATA_ATTR)
+    assertThat(job.attributes).containsEntry("foo", "bar").doesNotContainKey(SqsJob.JOBQUEUE_METADATA_ATTR)
   }
 
   @Test
   fun `attributes includes both message attributes and system attributes`() {
     val sentTimestamp = System.currentTimeMillis().toString()
-    val message = Message.builder()
-      .messageId("id-0")
-      .body("body-0")
-      .attributes(
-        mapOf(
-          MessageSystemAttributeName.SENT_TIMESTAMP to sentTimestamp,
-          MessageSystemAttributeName.APPROXIMATE_RECEIVE_COUNT to "1"
+    val message =
+      Message.builder()
+        .messageId("id-0")
+        .body("body-0")
+        .attributes(
+          mapOf(
+            MessageSystemAttributeName.SENT_TIMESTAMP to sentTimestamp,
+            MessageSystemAttributeName.APPROXIMATE_RECEIVE_COUNT to "1",
+          )
         )
-      )
-      .messageAttributes(
-        mapOf(
-          "customAttribute" to MessageAttributeValue.builder()
-            .dataType("String")
-            .stringValue("customValue")
-            .build(),
-          SqsJob.JOBQUEUE_METADATA_ATTR to MessageAttributeValue.builder()
-            .dataType("String")
-            .stringValue(
-              """{
+        .messageAttributes(
+          mapOf(
+            "customAttribute" to MessageAttributeValue.builder().dataType("String").stringValue("customValue").build(),
+            SqsJob.JOBQUEUE_METADATA_ATTR to
+              MessageAttributeValue.builder()
+                .dataType("String")
+                .stringValue(
+                  """{
                 |  "${SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE}": "test",
                 |  "${SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY}": "ik-0",
                 |  "${SqsJob.JOBQUEUE_METADATA_ORIGINAL_TRACE_ID}": "oti-0"
-                |}""".trimMargin()
-            )
-            .build()
+                |}"""
+                    .trimMargin()
+                )
+                .build(),
+          )
         )
-      )
-      .build()
+        .build()
 
     val job = SqsJob(testQueue, moshi, message, "queue-url", System.currentTimeMillis())
 
@@ -91,31 +92,34 @@ internal class SqsJobTest {
   @Test
   fun `attributes with only system attributes and no custom attributes`() {
     val sentTimestamp = System.currentTimeMillis().toString()
-    val message = Message.builder()
-      .messageId("id-0")
-      .body("body-0")
-      .attributes(
-        mapOf(
-          MessageSystemAttributeName.SENT_TIMESTAMP to sentTimestamp,
-          MessageSystemAttributeName.APPROXIMATE_FIRST_RECEIVE_TIMESTAMP to sentTimestamp,
-          MessageSystemAttributeName.APPROXIMATE_RECEIVE_COUNT to "2"
+    val message =
+      Message.builder()
+        .messageId("id-0")
+        .body("body-0")
+        .attributes(
+          mapOf(
+            MessageSystemAttributeName.SENT_TIMESTAMP to sentTimestamp,
+            MessageSystemAttributeName.APPROXIMATE_FIRST_RECEIVE_TIMESTAMP to sentTimestamp,
+            MessageSystemAttributeName.APPROXIMATE_RECEIVE_COUNT to "2",
+          )
         )
-      )
-      .messageAttributes(
-        mapOf(
-          SqsJob.JOBQUEUE_METADATA_ATTR to MessageAttributeValue.builder()
-            .dataType("String")
-            .stringValue(
-              """{
+        .messageAttributes(
+          mapOf(
+            SqsJob.JOBQUEUE_METADATA_ATTR to
+              MessageAttributeValue.builder()
+                .dataType("String")
+                .stringValue(
+                  """{
                 |  "${SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE}": "test",
                 |  "${SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY}": "ik-0",
                 |  "${SqsJob.JOBQUEUE_METADATA_ORIGINAL_TRACE_ID}": "oti-0"
-                |}""".trimMargin()
-            )
-            .build()
+                |}"""
+                    .trimMargin()
+                )
+                .build()
+          )
         )
-      )
-      .build()
+        .build()
 
     val job = SqsJob(testQueue, moshi, message, "queue-url", System.currentTimeMillis())
 
@@ -130,32 +134,31 @@ internal class SqsJobTest {
   @Test
   fun `attributes with multiple custom attributes and system attributes`() {
     val sentTimestamp = System.currentTimeMillis().toString()
-    val message = Message.builder()
-      .messageId("id-0")
-      .body("body-0")
-      .attributes(
-        mapOf(
-          MessageSystemAttributeName.SENT_TIMESTAMP to sentTimestamp
-        )
-      )
-      .messageAttributes(
-        mapOf(
-          "attr1" to MessageAttributeValue.builder().dataType("String").stringValue("value1").build(),
-          "attr2" to MessageAttributeValue.builder().dataType("String").stringValue("value2").build(),
-          "attr3" to MessageAttributeValue.builder().dataType("String").stringValue("value3").build(),
-          SqsJob.JOBQUEUE_METADATA_ATTR to MessageAttributeValue.builder()
-            .dataType("String")
-            .stringValue(
-              """{
+    val message =
+      Message.builder()
+        .messageId("id-0")
+        .body("body-0")
+        .attributes(mapOf(MessageSystemAttributeName.SENT_TIMESTAMP to sentTimestamp))
+        .messageAttributes(
+          mapOf(
+            "attr1" to MessageAttributeValue.builder().dataType("String").stringValue("value1").build(),
+            "attr2" to MessageAttributeValue.builder().dataType("String").stringValue("value2").build(),
+            "attr3" to MessageAttributeValue.builder().dataType("String").stringValue("value3").build(),
+            SqsJob.JOBQUEUE_METADATA_ATTR to
+              MessageAttributeValue.builder()
+                .dataType("String")
+                .stringValue(
+                  """{
                 |  "${SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE}": "test",
                 |  "${SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY}": "ik-0",
                 |  "${SqsJob.JOBQUEUE_METADATA_ORIGINAL_TRACE_ID}": "oti-0"
-                |}""".trimMargin()
-            )
-            .build()
+                |}"""
+                    .trimMargin()
+                )
+                .build(),
+          )
         )
-      )
-      .build()
+        .build()
 
     val job = SqsJob(testQueue, moshi, message, "queue-url", System.currentTimeMillis())
 
@@ -170,23 +173,26 @@ internal class SqsJobTest {
 
   @Test
   fun `body and id are correctly extracted from message`() {
-    val message = Message.builder()
-      .messageId("test-message-id")
-      .body("test-body-content")
-      .messageAttributes(
-        mapOf(
-          SqsJob.JOBQUEUE_METADATA_ATTR to MessageAttributeValue.builder()
-            .dataType("String")
-            .stringValue(
-              """{
+    val message =
+      Message.builder()
+        .messageId("test-message-id")
+        .body("test-body-content")
+        .messageAttributes(
+          mapOf(
+            SqsJob.JOBQUEUE_METADATA_ATTR to
+              MessageAttributeValue.builder()
+                .dataType("String")
+                .stringValue(
+                  """{
                 |  "${SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE}": "test",
                 |  "${SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY}": "ik-0"
-                |}""".trimMargin()
-            )
-            .build()
+                |}"""
+                    .trimMargin()
+                )
+                .build()
+          )
         )
-      )
-      .build()
+        .build()
 
     val job = SqsJob(testQueue, moshi, message, "queue-url", System.currentTimeMillis())
 
@@ -197,43 +203,38 @@ internal class SqsJobTest {
 
   @Test
   fun `idempotenceKey throws error when metadata attribute is missing`() {
-    val message = Message.builder()
-      .messageId("id-0")
-      .body("body-0")
-      .build()
+    val message = Message.builder().messageId("id-0").body("body-0").build()
 
     val job = SqsJob(testQueue, moshi, message, "queue-url", System.currentTimeMillis())
 
-    assertThrows<IllegalStateException> {
-      job.idempotenceKey
-    }
+    assertThrows<IllegalStateException> { job.idempotenceKey }
   }
 
   @Test
   fun `idempotenceKey throws error when idempotence_key is missing from metadata`() {
-    val message = Message.builder()
-      .messageId("id-0")
-      .body("body-0")
-      .messageAttributes(
-        mapOf(
-          SqsJob.JOBQUEUE_METADATA_ATTR to MessageAttributeValue.builder()
-            .dataType("String")
-            .stringValue(
-              """{
+    val message =
+      Message.builder()
+        .messageId("id-0")
+        .body("body-0")
+        .messageAttributes(
+          mapOf(
+            SqsJob.JOBQUEUE_METADATA_ATTR to
+              MessageAttributeValue.builder()
+                .dataType("String")
+                .stringValue(
+                  """{
                 |  "${SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE}": "test"
-                |}""".trimMargin()
-            )
-            .build()
+                |}"""
+                    .trimMargin()
+                )
+                .build()
+          )
         )
-      )
-      .build()
+        .build()
 
     val job = SqsJob(testQueue, moshi, message, "queue-url", System.currentTimeMillis())
 
-    val exception = assertThrows<IllegalStateException> {
-      job.idempotenceKey
-    }
+    val exception = assertThrows<IllegalStateException> { job.idempotenceKey }
     assertThat(exception.message).contains(SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY)
   }
 }
-

@@ -2,6 +2,10 @@
 
 package misk.mcp.internal
 
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -16,10 +20,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import misk.mcp.Description
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 internal class JsonSchemaExtensionsTest {
 
@@ -31,7 +31,7 @@ internal class JsonSchemaExtensionsTest {
     val longField: Long,
     val floatField: Float,
     val doubleField: Double,
-    val booleanField: Boolean
+    val booleanField: Boolean,
   )
 
   // Test data classes for nullable and optional fields
@@ -40,39 +40,20 @@ internal class JsonSchemaExtensionsTest {
     val requiredString: String,
     val nullableString: String?,
     val optionalString: String = "default",
-    val optionalNullableString: String? = null
+    val optionalNullableString: String? = null,
   )
 
   // Test data classes for embedded objects
-  @Serializable
-  data class Address(
-    val street: String,
-    val city: String,
-    val zipCode: Int
-  )
+  @Serializable data class Address(val street: String, val city: String, val zipCode: Int)
 
-  @Serializable
-  data class Person(
-    val name: String,
-    val age: Int,
-    val address: Address
-  )
+  @Serializable data class Person(val name: String, val age: Int, val address: Address)
 
   // Test data classes for nested objects
-  @Serializable
-  data class Company(
-    val name: String,
-    val address: Address,
-    val ceo: Person
-  )
+  @Serializable data class Company(val name: String, val address: Address, val ceo: Person)
 
   // Test data classes for arrays/lists
   @Serializable
-  data class ArrayObject(
-    val stringList: List<String>,
-    val intList: List<Int>,
-    val objectList: List<Address>
-  )
+  data class ArrayObject(val stringList: List<String>, val intList: List<Int>, val objectList: List<Address>)
 
   // Test data class with mixed types but no arrays (to test working functionality)
   @Serializable
@@ -82,22 +63,18 @@ internal class JsonSchemaExtensionsTest {
     val active: Boolean,
     val metadata: Address,
     val score: Double?,
-    val description: String = "default description"
+    val description: String = "default description",
   )
 
   // Test data classes for Description annotation
   @Serializable
   @Description("An object with various described fields")
   data class DescribedObject(
-    @Description("The unique identifier for this object")
-    val id: Long,
-    @Description("The display name of the object")
-    val name: String,
-    @Description("Whether this object is currently active")
-    val active: Boolean,
-    @Description("Optional metadata for the object")
-    val metadata: String? = null,
-    val undescribedField: String
+    @Description("The unique identifier for this object") val id: Long,
+    @Description("The display name of the object") val name: String,
+    @Description("Whether this object is currently active") val active: Boolean,
+    @Description("Optional metadata for the object") val metadata: String? = null,
+    val undescribedField: String,
   )
 
   // Test data classes for maps
@@ -106,33 +83,26 @@ internal class JsonSchemaExtensionsTest {
     val stringToStringMap: Map<String, String>,
     val stringToIntMap: Map<String, Int>,
     val stringToObjectMap: Map<String, Address>,
-    @Description("A map of configuration values")
-    val configMap: Map<String, String>
+    @Description("A map of configuration values") val configMap: Map<String, String>,
   )
 
   @Serializable
   data class NestedMapObject(
     val mapOfMaps: Map<String, Map<String, String>>,
-    @Description("A complex nested structure")
-    val complexMap: Map<String, Map<String, Address>>
+    @Description("A complex nested structure") val complexMap: Map<String, Map<String, Address>>,
   )
 
   @Serializable
   data class MixedDescribedObject(
-    @Description("User identification number")
-    val userId: Long,
-    @Description("User profile information")
-    val profile: Person,
-    @Description("User preferences as key-value pairs")
-    val preferences: Map<String, String>,
-    @Description("User's addresses mapped by type (home, work, etc.)")
-    val addresses: Map<String, Address>,
-    val tags: List<String>
+    @Description("User identification number") val userId: Long,
+    @Description("User profile information") val profile: Person,
+    @Description("User preferences as key-value pairs") val preferences: Map<String, String>,
+    @Description("User's addresses mapped by type (home, work, etc.)") val addresses: Map<String, Address>,
+    val tags: List<String>,
   )
 
   // Test data classes for single field and field names
-  @Serializable
-  data class SingleFieldObject(val value: String)
+  @Serializable data class SingleFieldObject(val value: String)
 
   @Serializable
   data class FieldNamesObject(
@@ -140,7 +110,7 @@ internal class JsonSchemaExtensionsTest {
     val snake_case: String,
     val PascalCase: String,
     val `field with spaces`: String,
-    val field123: String
+    val field123: String,
   )
 
   // Test class without serializer
@@ -154,7 +124,7 @@ internal class JsonSchemaExtensionsTest {
     ACTIVE,
     INACTIVE,
     PENDING,
-    ARCHIVED
+    ARCHIVED,
   }
 
   @Serializable
@@ -162,134 +132,79 @@ internal class JsonSchemaExtensionsTest {
     LOW,
     MEDIUM,
     HIGH,
-    URGENT
+    URGENT,
   }
 
   // Test data classes with enums
-  @Serializable
-  data class EnumObject(
-    val status: Status,
-    val priority: Priority
-  )
+  @Serializable data class EnumObject(val status: Status, val priority: Priority)
 
   @Serializable
-  data class OptionalEnumObject(
-    val status: Status,
-    val priority: Priority?,
-    val defaultStatus: Status = Status.ACTIVE
-  )
+  data class OptionalEnumObject(val status: Status, val priority: Priority?, val defaultStatus: Status = Status.ACTIVE)
 
   @Serializable
   data class DescribedEnumObject(
-    @Description("The current status of the object")
-    val status: Status,
-    @Description("The priority level")
-    val priority: Priority
+    @Description("The current status of the object") val status: Status,
+    @Description("The priority level") val priority: Priority,
   )
 
-  @Serializable
-  data class EnumListObject(
-    val statuses: List<Status>,
-    val priorities: List<Priority>
-  )
+  @Serializable data class EnumListObject(val statuses: List<Status>, val priorities: List<Priority>)
 
-  @Serializable
-  data class EnumMapObject(
-    val statusMap: Map<String, Status>,
-    val priorityMap: Map<String, Priority>
-  )
+  @Serializable data class EnumMapObject(val statusMap: Map<String, Status>, val priorityMap: Map<String, Priority>)
 
   @Serializable
   data class ComplexEnumObject(
-    @Description("Primary status")
-    val primaryStatus: Status,
+    @Description("Primary status") val primaryStatus: Status,
     val secondaryStatuses: List<Status>,
     val statusMapping: Map<String, Status>,
-    @Description("Optional priority")
-    val priority: Priority? = null
+    @Description("Optional priority") val priority: Priority? = null,
   )
 
   // Test enums with @SerialName annotation
   @Serializable
   enum class HttpMethod {
-    @SerialName("GET")
-    GET,
-
-    @SerialName("POST")
-    POST,
-
-    @SerialName("put")
-    PUT,
-
-    @SerialName("delete")
-    DELETE
+    @SerialName("GET") GET,
+    @SerialName("POST") POST,
+    @SerialName("put") PUT,
+    @SerialName("delete") DELETE,
   }
 
   @Serializable
   enum class OrderStatus {
-    @SerialName("pending_payment")
-    PENDING_PAYMENT,
-
-    @SerialName("processing")
-    PROCESSING,
-
-    @SerialName("shipped")
-    SHIPPED,
-
-    @SerialName("delivered")
-    DELIVERED,
-
-    @SerialName("cancelled")
-    CANCELLED
+    @SerialName("pending_payment") PENDING_PAYMENT,
+    @SerialName("processing") PROCESSING,
+    @SerialName("shipped") SHIPPED,
+    @SerialName("delivered") DELIVERED,
+    @SerialName("cancelled") CANCELLED,
   }
 
   // Mixed enum - some with SerialName, some without
   @Serializable
   enum class MixedEnum {
-    @SerialName("custom_value_1")
-    VALUE_ONE,
-    VALUE_TWO,  // No SerialName, should use enum constant name
-
-    @SerialName("custom_value_3")
-    VALUE_THREE
+    @SerialName("custom_value_1") VALUE_ONE,
+    VALUE_TWO, // No SerialName, should use enum constant name
+    @SerialName("custom_value_3") VALUE_THREE,
   }
 
-  @Serializable
-  data class SerialNameEnumObject(
-    val method: HttpMethod,
-    val orderStatus: OrderStatus
-  )
+  @Serializable data class SerialNameEnumObject(val method: HttpMethod, val orderStatus: OrderStatus)
 
   @Serializable
   data class MixedSerialNameEnumObject(
     val mixedValue: MixedEnum,
-    @Description("HTTP method for the request")
-    val method: HttpMethod
+    @Description("HTTP method for the request") val method: HttpMethod,
   )
+
+  @Serializable data class SerialNameEnumListObject(val methods: List<HttpMethod>, val statuses: List<OrderStatus>)
 
   @Serializable
-  data class SerialNameEnumListObject(
-    val methods: List<HttpMethod>,
-    val statuses: List<OrderStatus>
-  )
+  data class SerialNameEnumMapObject(val methodMap: Map<String, HttpMethod>, val statusMap: Map<String, OrderStatus>)
 
-  @Serializable
-  data class SerialNameEnumMapObject(
-    val methodMap: Map<String, HttpMethod>,
-    val statusMap: Map<String, OrderStatus>
-  )
-
-  @Serializable(with = CustomSerializer::class)
-  class CustomSerializerObject
+  @Serializable(with = CustomSerializer::class) class CustomSerializerObject
 
   object CustomSerializer : KSerializer<CustomSerializerObject> {
     override val descriptor: SerialDescriptor
       get() = PrimitiveSerialDescriptor(CustomSerializerObject::class.qualifiedName!!, PrimitiveKind.STRING)
 
-    override fun serialize(
-      encoder: Encoder,
-      value: CustomSerializerObject
-    ) {
+    override fun serialize(encoder: Encoder, value: CustomSerializerObject) {
       encoder.encodeString("CustomSerializerObject")
     }
 
@@ -299,11 +214,7 @@ internal class JsonSchemaExtensionsTest {
   }
 
   @Serializable
-  data class ComplexJsonTypes(
-    val jsonObject: JsonObject,
-    val jsonElement: JsonElement,
-    val jsonArray: JsonArray,
-  )
+  data class ComplexJsonTypes(val jsonObject: JsonObject, val jsonElement: JsonElement, val jsonArray: JsonArray)
 
   @Serializable
   data class RecursiveObject(
@@ -312,22 +223,18 @@ internal class JsonSchemaExtensionsTest {
     val recursiveObject: Map<String, RecursiveObject>,
   )
 
-  @Serializable
-  sealed interface Fruit
+  @Serializable sealed interface Fruit
 
-  @Serializable @SerialName("apple")
-  data class Apple(val variety: String, val radius: Int): Fruit
+  @Serializable @SerialName("apple") data class Apple(val variety: String, val radius: Int) : Fruit
 
-  @Serializable @SerialName("banana")
-  data class Banana(val length: Int, val ripeness: String): Fruit
-
-  @Serializable @SerialName("orange") @Description("citrus fruit")
-  data class Orange(val variety: String, val radius: Int):Fruit
+  @Serializable @SerialName("banana") data class Banana(val length: Int, val ripeness: String) : Fruit
 
   @Serializable
-  data class SealedObject(
-    val fruits: List<Fruit>
-  )
+  @SerialName("orange")
+  @Description("citrus fruit")
+  data class Orange(val variety: String, val radius: Int) : Fruit
+
+  @Serializable data class SealedObject(val fruits: List<Fruit>)
 
   @Test
   fun `generateJsonSchema handles primitive types correctly`() {
@@ -524,9 +431,7 @@ internal class JsonSchemaExtensionsTest {
 
   @Test
   fun `generateJsonSchema fails gracefully for class without a serial descriptor`() {
-    assertFailsWith<IllegalArgumentException> {
-      generateJsonSchema<NoSerializerClass>()
-    }
+    assertFailsWith<IllegalArgumentException> { generateJsonSchema<NoSerializerClass>() }
   }
 
   @Test
@@ -1113,7 +1018,10 @@ internal class JsonSchemaExtensionsTest {
     assertEquals(JsonPrimitive("object"), nestedRecursiveMap["type"])
     val nestedMapAdditionalProps = nestedRecursiveMap["additionalProperties"] as JsonObject
     assertEquals(JsonPrimitive("object"), nestedMapAdditionalProps["type"])
-    assertFalse(nestedMapAdditionalProps.containsKey("properties"), "Nested recursive map values should not have properties")
+    assertFalse(
+      nestedMapAdditionalProps.containsKey("properties"),
+      "Nested recursive map values should not have properties",
+    )
 
     // Verify recursiveList field at top level
     val recursiveListField = properties["recursiveList"] as JsonObject
@@ -1131,7 +1039,10 @@ internal class JsonSchemaExtensionsTest {
     val mapAdditionalProps = recursiveObjectMapField["additionalProperties"] as JsonObject
     assertEquals(JsonPrimitive("object"), mapAdditionalProps["type"])
     // Top-level map values should NOT have properties due to recursion prevention
-    assertFalse(mapAdditionalProps.containsKey("properties"), "Top-level recursive map values should not have properties")
+    assertFalse(
+      mapAdditionalProps.containsKey("properties"),
+      "Top-level recursive map values should not have properties",
+    )
 
     // Verify required fields - only recursiveList and recursiveObject should be required
     // (recursiveEmbeddedObject is nullable)
@@ -1165,13 +1076,16 @@ internal class JsonSchemaExtensionsTest {
     assertEquals(3, oneOf.size, "Should have three fruit types: Apple, Banana, Orange")
 
     // Extract the type labels from each variant
-    val variants = oneOf.map { variant ->
-      val variantObj = variant as JsonObject
-      val variantProperties = variantObj["properties"] as JsonObject
-      val typeProperty = variantProperties["type"] as JsonObject
-      val constValue = typeProperty["const"] as JsonPrimitive
-      constValue.content
-    }.toSet()
+    val variants =
+      oneOf
+        .map { variant ->
+          val variantObj = variant as JsonObject
+          val variantProperties = variantObj["properties"] as JsonObject
+          val typeProperty = variantProperties["type"] as JsonObject
+          val constValue = typeProperty["const"] as JsonPrimitive
+          constValue.content
+        }
+        .toSet()
 
     // Verify all three fruit types are present
     assertTrue(variants.contains("apple"))
@@ -1179,13 +1093,14 @@ internal class JsonSchemaExtensionsTest {
     assertTrue(variants.contains("orange"))
 
     // Verify Apple variant structure
-    val appleVariant = oneOf.first { variant ->
-      val variantObj = variant as JsonObject
-      val variantProperties = variantObj["properties"] as JsonObject
-      val typeProperty = variantProperties["type"] as JsonObject
-      val constValue = typeProperty["const"] as JsonPrimitive
-      constValue.content == "apple"
-    } as JsonObject
+    val appleVariant =
+      oneOf.first { variant ->
+        val variantObj = variant as JsonObject
+        val variantProperties = variantObj["properties"] as JsonObject
+        val typeProperty = variantProperties["type"] as JsonObject
+        val constValue = typeProperty["const"] as JsonPrimitive
+        constValue.content == "apple"
+      } as JsonObject
 
     assertEquals(JsonPrimitive("object"), appleVariant["type"])
     val appleProperties = appleVariant["properties"] as JsonObject
@@ -1200,13 +1115,14 @@ internal class JsonSchemaExtensionsTest {
     assertEquals(JsonPrimitive("integer"), appleRadiusField["type"])
 
     // Verify Banana variant structure
-    val bananaVariant = oneOf.first { variant ->
-      val variantObj = variant as JsonObject
-      val variantProperties = variantObj["properties"] as JsonObject
-      val typeProperty = variantProperties["type"] as JsonObject
-      val constValue = typeProperty["const"] as JsonPrimitive
-      constValue.content == "banana"
-    } as JsonObject
+    val bananaVariant =
+      oneOf.first { variant ->
+        val variantObj = variant as JsonObject
+        val variantProperties = variantObj["properties"] as JsonObject
+        val typeProperty = variantProperties["type"] as JsonObject
+        val constValue = typeProperty["const"] as JsonPrimitive
+        constValue.content == "banana"
+      } as JsonObject
 
     assertEquals(JsonPrimitive("object"), bananaVariant["type"])
     val bananaProperties = bananaVariant["properties"] as JsonObject
@@ -1221,13 +1137,14 @@ internal class JsonSchemaExtensionsTest {
     assertEquals(JsonPrimitive("string"), bananaRipenessField["type"])
 
     // Verify Orange variant structure
-    val orangeVariant = oneOf.first { variant ->
-      val variantObj = variant as JsonObject
-      val variantProperties = variantObj["properties"] as JsonObject
-      val typeProperty = variantProperties["type"] as JsonObject
-      val constValue = typeProperty["const"] as JsonPrimitive
-      constValue.content == "orange"
-    } as JsonObject
+    val orangeVariant =
+      oneOf.first { variant ->
+        val variantObj = variant as JsonObject
+        val variantProperties = variantObj["properties"] as JsonObject
+        val typeProperty = variantProperties["type"] as JsonObject
+        val constValue = typeProperty["const"] as JsonPrimitive
+        constValue.content == "orange"
+      } as JsonObject
 
     assertEquals(JsonPrimitive("object"), orangeVariant["type"])
     assertEquals(JsonPrimitive("citrus fruit"), orangeVariant["description"])

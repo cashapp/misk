@@ -4,6 +4,12 @@ import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Ports
 import com.google.common.base.Stopwatch
+import java.lang.Thread.sleep
+import java.time.Duration
+import misk.containers.Composer
+import misk.containers.Container
+import misk.containers.ContainerUtil
+import misk.logging.getLogger
 import misk.redis.RedisClusterConfig
 import misk.redis.RedisClusterReplicationGroupConfig
 import misk.redis.RedisNodeConfig
@@ -13,18 +19,11 @@ import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.exceptions.JedisClusterException
 import redis.clients.jedis.util.JedisClusterCRC16
-import misk.containers.Composer
-import misk.containers.Container
-import misk.containers.ContainerUtil
-import misk.logging.getLogger
-import java.lang.Thread.sleep
-import java.time.Duration
 
 /**
  * To use this in tests:
- *
- * 1. Install a `RedisClusterModule` instead of a `FakeRedisModule`.
- *    Make sure to supply the [DockerRedisCluster.replicationGroupConfig] as the [RedisClusterReplicationGroupConfig].
+ * 1. Install a `RedisClusterModule` instead of a `FakeRedisModule`. Make sure to supply the
+ *    [DockerRedisCluster.replicationGroupConfig] as the [RedisClusterReplicationGroupConfig].
  * 2. Add `@MiskExternalDependency private val dockerRedis: DockerRedisCluster` to your test class.
  */
 object DockerRedisCluster : ExternalDependency {
@@ -37,31 +36,34 @@ object DockerRedisCluster : ExternalDependency {
   private val jedis by lazy { JedisCluster(HostAndPort(hostname, initialPort)) }
 
   private val redisNodeConfig = RedisNodeConfig(hostname, initialPort)
-  val replicationGroupConfig = RedisClusterReplicationGroupConfig(
-    configuration_endpoint = redisNodeConfig,
-    redis_auth_password = "",
-    timeout_ms = 1_000,
-  )
+  val replicationGroupConfig =
+    RedisClusterReplicationGroupConfig(
+      configuration_endpoint = redisNodeConfig,
+      redis_auth_password = "",
+      timeout_ms = 1_000,
+    )
   val config = RedisClusterConfig(mapOf("test-group" to replicationGroupConfig))
 
   private const val containerName = "misk-redis-cluster-testing"
-  private val composer = Composer(
-    containerName,
-    Container {
-      val envVars = listOf("IP=0.0.0.0", "INITIAL_PORT=$initialPort", "MASTERS=3", "SLAVES_PER_MASTER=1")
-      withImage("grokzen/redis-cluster:$redisVersion")
-      withName(containerName)
-      withExposedPorts(*REDIS_CLUSTER_PORTS.map { ExposedPort.tcp(it) }.toTypedArray())
-      withHostConfig(
-        HostConfig().withPortBindings(Ports().apply {
-          REDIS_CLUSTER_PORTS.forEach { port ->
-            bind(ExposedPort.tcp(port), Ports.Binding.bindPort(port))
-          }
-        })
-      )
-      withEnv(envVars)
-    }
-  )
+  private val composer =
+    Composer(
+      containerName,
+      Container {
+        val envVars = listOf("IP=0.0.0.0", "INITIAL_PORT=$initialPort", "MASTERS=3", "SLAVES_PER_MASTER=1")
+        withImage("grokzen/redis-cluster:$redisVersion")
+        withName(containerName)
+        withExposedPorts(*REDIS_CLUSTER_PORTS.map { ExposedPort.tcp(it) }.toTypedArray())
+        withHostConfig(
+          HostConfig()
+            .withPortBindings(
+              Ports().apply {
+                REDIS_CLUSTER_PORTS.forEach { port -> bind(ExposedPort.tcp(port), Ports.Binding.bindPort(port)) }
+              }
+            )
+        )
+        withEnv(envVars)
+      },
+    )
 
   override fun startup() {
     try {
@@ -73,15 +75,12 @@ object DockerRedisCluster : ExternalDependency {
 
     while (true) {
       try {
-        //We invoke redis commands to verify connection
-        //even if jedis.ping returns a response, it's possible cluster is not assembled yet
-        val clusterInfo = jedis.clusterNodes.values.first().resource.use {connection ->
-          Jedis(connection).use {
-            it.clusterInfo()
-          }
-        }
+        // We invoke redis commands to verify connection
+        // even if jedis.ping returns a response, it's possible cluster is not assembled yet
+        val clusterInfo =
+          jedis.clusterNodes.values.first().resource.use { connection -> Jedis(connection).use { it.clusterInfo() } }
         check(clusterInfo.contains("cluster_state:ok"))
-        //check if all slots are covered
+        // check if all slots are covered
         for (i in 1..9) {
           try {
             jedis.get(i.toString())
@@ -103,9 +102,7 @@ object DockerRedisCluster : ExternalDependency {
   }
 
   override fun shutdown() {
-    with(jedis) {
-      close()
-    }
+    with(jedis) { close() }
     composer.stop()
   }
 
@@ -124,4 +121,3 @@ fun main() {
   sleep(Duration.ofSeconds(60).toMillis())
   DockerRedisCluster.shutdown()
 }
-

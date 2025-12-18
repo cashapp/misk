@@ -8,6 +8,11 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
 import com.google.common.util.concurrent.AbstractIdleService
+import java.io.IOException
+import java.time.Duration
+import java.util.Optional
+import java.util.concurrent.TimeUnit
+import kotlin.reflect.KClass
 import misk.docker.withMiskDefaults
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
@@ -15,19 +20,15 @@ import misk.resources.ResourceLoader
 import mu.KotlinLogging
 import wisp.deployment.Deployment
 import wisp.moshi.defaultKotlinMoshi
-import java.io.IOException
-import java.time.Duration
-import java.util.Optional
-import java.util.concurrent.TimeUnit
-import kotlin.reflect.KClass
 
 fun runCommand(command: String): Int {
   StartDatabaseService.logger.info(command)
   return try {
-    val process = ProcessBuilder("bash", "-c", command)
-      .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-      .redirectError(ProcessBuilder.Redirect.INHERIT)
-      .start()
+    val process =
+      ProcessBuilder("bash", "-c", command)
+        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+        .redirectError(ProcessBuilder.Redirect.INHERIT)
+        .start()
     process.waitFor(60, TimeUnit.MINUTES)
     return process.exitValue()
   } catch (e: IOException) {
@@ -37,35 +38,27 @@ fun runCommand(command: String): Int {
 }
 
 /**
- * On startup, the service will look for a cluster in the cache, and if not found, look for it in
- * Docker by container name, or as a last resort start the container itself.
+ * On startup, the service will look for a cluster in the cache, and if not found, look for it in Docker by container
+ * name, or as a last resort start the container itself.
  *
- * On shutdown, the cache is invalidated by a JVM shutdown hook. On invalidation, the cache will
- * call the each entry's `stop()` method. If the cluster container was created in this JVM, it
- * will be stopped and removed. Otherwise (if the container was started by a different process), it
- * will be left running.
+ * On shutdown, the cache is invalidated by a JVM shutdown hook. On invalidation, the cache will call the each entry's
+ * `stop()` method. If the cluster container was created in this JVM, it will be stopped and removed. Otherwise (if the
+ * container was started by a different process), it will be left running.
  */
 class StartDatabaseService(
   private val qualifier: KClass<out Annotation>,
   private val deployment: Deployment,
-  private val config: DataSourceConfig
+  private val config: DataSourceConfig,
 ) : AbstractIdleService() {
   var server: DatabaseServer? = null
 
   fun init(): StartDatabaseService {
-    servers = CacheBuilder.newBuilder()
-      .removalListener<CacheKey, Optional<DatabaseServer>> { entry ->
-        entry.value?.ifPresent { it.stop() }
-      }
-      .build(CacheLoader.from { config: CacheKey? ->
-        Optional.ofNullable(config?.let {
-          createDatabaseServer(it)
-        })
-      })
+    servers =
+      CacheBuilder.newBuilder()
+        .removalListener<CacheKey, Optional<DatabaseServer>> { entry -> entry.value?.ifPresent { it.stop() } }
+        .build(CacheLoader.from { config: CacheKey? -> Optional.ofNullable(config?.let { createDatabaseServer(it) }) })
 
-    Runtime.getRuntime().addShutdownHook(Thread {
-      servers.invalidateAll()
-    })
+    Runtime.getRuntime().addShutdownHook(Thread { servers.invalidateAll() })
 
     if (shouldStartServer()) {
       val name = qualifier.simpleName!!
@@ -82,25 +75,21 @@ class StartDatabaseService(
     this.server?.start()
   }
 
-  override fun shutDown() {
-  }
+  override fun shutDown() {}
 
   private fun shouldStartServer() = deployment.isTest || deployment.isLocalDevelopment
 
   private val defaultDockerClientConfig =
-    DefaultDockerClientConfig
-      .createDefaultConfigBuilder()
-      .withMiskDefaults()
+    DefaultDockerClientConfig.createDefaultConfigBuilder().withMiskDefaults().build()
+  private val httpClient =
+    ApacheDockerHttpClient.Builder()
+      .dockerHost(defaultDockerClientConfig.dockerHost)
+      .sslConfig(defaultDockerClientConfig.sslConfig)
+      .maxConnections(100)
+      .connectionTimeout(Duration.ofSeconds(60))
+      .responseTimeout(Duration.ofSeconds(120))
       .build()
-  private val httpClient = ApacheDockerHttpClient.Builder()
-    .dockerHost(defaultDockerClientConfig.dockerHost)
-    .sslConfig(defaultDockerClientConfig.sslConfig)
-    .maxConnections(100)
-    .connectionTimeout(Duration.ofSeconds(60))
-    .responseTimeout(Duration.ofSeconds(120))
-    .build()
-  private val docker: DockerClient =
-    DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
+  private val docker: DockerClient = DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
   private val moshi = defaultKotlinMoshi
 
   private fun createDatabaseServer(config: CacheKey): DatabaseServer? =
@@ -111,7 +100,7 @@ class StartDatabaseService(
           config = config.config,
           resourceLoader = ResourceLoader.SYSTEM,
           moshi = moshi,
-          docker = docker
+          docker = docker,
         )
       }
       DataSourceType.TIDB -> {
@@ -119,30 +108,21 @@ class StartDatabaseService(
           moshi = moshi,
           resourceLoader = ResourceLoader.SYSTEM,
           config = config.config,
-          docker = docker
+          docker = docker,
         )
       }
       DataSourceType.POSTGRESQL -> {
-        DockerPostgresServer(
-          config = config.config,
-          docker = docker
-        )
+        DockerPostgresServer(config = config.config, docker = docker)
       }
       else -> null
     }
 
-  data class CacheKey(
-    val name: String,
-    val config: DataSourceConfig,
-    val deployment: Deployment
-  )
+  data class CacheKey(val name: String, val config: DataSourceConfig, val deployment: Deployment)
 
   companion object {
     internal val logger = KotlinLogging.logger {}
 
-    /**
-     * Global cache of running database servers.
-     */
+    /** Global cache of running database servers. */
     lateinit var servers: LoadingCache<CacheKey, Optional<DatabaseServer>>
   }
 }

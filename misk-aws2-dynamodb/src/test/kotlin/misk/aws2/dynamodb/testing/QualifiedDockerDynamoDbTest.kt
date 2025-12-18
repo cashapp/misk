@@ -19,32 +19,23 @@ class QualifiedDockerDynamoDbTest : AbstractQualifiedDynamoDbTest() {
       // Install an unqualified module with all tables
       install(
         DockerDynamoDbModule(
-          tables = listOf(
-            DynamoDbTable("movies", DyMovie::class) { createTableEnhancedRequest ->
-              createTableEnhancedRequest.globalSecondaryIndices(
-                EnhancedGlobalSecondaryIndex.builder()
-                  .indexName("movies.release_date_index")
-                  .projection { it.projectionType(ProjectionType.ALL) }
-                  .provisionedThroughput { it.readCapacityUnits(40_000L).writeCapacityUnits(40_000L) }
-                  .build()
-              )
-            },
-            DynamoDbTable("characters", DyCharacter::class)
-          )
+          tables =
+            listOf(
+              DynamoDbTable("movies", DyMovie::class) { createTableEnhancedRequest ->
+                createTableEnhancedRequest.globalSecondaryIndices(
+                  EnhancedGlobalSecondaryIndex.builder()
+                    .indexName("movies.release_date_index")
+                    .projection { it.projectionType(ProjectionType.ALL) }
+                    .provisionedThroughput { it.readCapacityUnits(40_000L).writeCapacityUnits(40_000L) }
+                    .build()
+                )
+              },
+              DynamoDbTable("characters", DyCharacter::class),
+            )
         )
       )
-      install(
-        DockerDynamoDbModule(
-          qualifier = PrimaryDb::class,
-          tables = listOf()
-        )
-      )
-      install(
-        DockerDynamoDbModule(
-          qualifier = SecondaryDb::class,
-          tables = listOf()
-        )
-      )
+      install(DockerDynamoDbModule(qualifier = PrimaryDb::class, tables = listOf()))
+      install(DockerDynamoDbModule(qualifier = SecondaryDb::class, tables = listOf()))
     }
   }
 }

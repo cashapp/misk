@@ -1,15 +1,11 @@
 package misk.redis
 
-import misk.redis.Redis.ScanResult
-import okio.ByteString
-import redis.clients.jedis.args.ListDirection
 import java.time.Duration
 import java.util.function.Supplier
+import okio.ByteString
+import redis.clients.jedis.args.ListDirection
 
-/**
- * Like [Redis], but returns [Supplier]s to defer value retrieval.
- * **Does not support transactions or pubsub.**
- */
+/** Like [Redis], but returns [Supplier]s to defer value retrieval. **Does not support transactions or pubsub.** */
 interface DeferredRedis {
   fun del(key: String): Supplier<Boolean>
 
@@ -58,21 +54,12 @@ interface DeferredRedis {
     destinationKey: String,
     from: ListDirection,
     to: ListDirection,
-    timeoutSeconds: Double
+    timeoutSeconds: Double,
   ): Supplier<ByteString?>
 
-  fun brpoplpush(
-    sourceKey: String,
-    destinationKey: String,
-    timeoutSeconds: Int
-  ): Supplier<ByteString?>
+  fun brpoplpush(sourceKey: String, destinationKey: String, timeoutSeconds: Int): Supplier<ByteString?>
 
-  fun lmove(
-    sourceKey: String,
-    destinationKey: String,
-    from: ListDirection,
-    to: ListDirection
-  ): Supplier<ByteString?>
+  fun lmove(sourceKey: String, destinationKey: String, from: ListDirection, to: ListDirection): Supplier<ByteString?>
 
   fun lpush(key: String, vararg elements: ByteString): Supplier<Long>
 
@@ -110,23 +97,11 @@ interface DeferredRedis {
 
   fun pExpireAt(key: String, timestampMilliseconds: Long): Supplier<Boolean>
 
-  fun zadd(
-    key: String,
-    score: Double,
-    member: String,
-    vararg options: Redis.ZAddOptions
-  ): Supplier<Long>
+  fun zadd(key: String, score: Double, member: String, vararg options: Redis.ZAddOptions): Supplier<Long>
 
-  fun zadd(
-    key: String,
-    scoreMembers: Map<String, Double>,
-    vararg options: Redis.ZAddOptions
-  ): Supplier<Long>
+  fun zadd(key: String, scoreMembers: Map<String, Double>, vararg options: Redis.ZAddOptions): Supplier<Long>
 
-  fun zscore(
-    key: String,
-    member: String
-  ): Supplier<Double?>
+  fun zscore(key: String, member: String): Supplier<Double?>
 
   fun zrange(
     key: String,
@@ -146,11 +121,7 @@ interface DeferredRedis {
     limit: Redis.ZRangeLimit? = null,
   ): Supplier<List<Pair<ByteString?, Double>>>
 
-  fun zremRangeByRank(
-    key: String,
-    start: Redis.ZRangeRankMarker,
-    stop: Redis.ZRangeRankMarker,
-  ): Supplier<Long>
+  fun zremRangeByRank(key: String, start: Redis.ZRangeRankMarker, stop: Redis.ZRangeRankMarker): Supplier<Long>
 
   fun llen(key: String): Supplier<Long>
 

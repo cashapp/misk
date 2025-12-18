@@ -1,6 +1,19 @@
 package misk.hibernate
 
+import jakarta.inject.Inject
+import jakarta.inject.Qualifier
+import java.io.Serializable
+import java.util.Objects
+import javax.persistence.AttributeConverter
+import javax.persistence.Column
+import javax.persistence.Convert
+import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.Table
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.jvm.javaField
 import misk.MiskTestingServiceModule
+import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
@@ -10,20 +23,7 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Percentage
 import org.junit.jupiter.api.Test
-import misk.config.Config
 import wisp.deployment.TESTING
-import java.io.Serializable
-import java.util.Objects
-import jakarta.inject.Inject
-import jakarta.inject.Qualifier
-import javax.persistence.AttributeConverter
-import javax.persistence.Column
-import javax.persistence.Convert
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Table
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.jvm.javaField
 
 interface SwappableTransformer {
   fun assemble(ctx: TransformerContext, owner: Any?, value: Serializable): Any
@@ -32,14 +32,9 @@ interface SwappableTransformer {
 }
 
 class DelegatingTransformer(private val ctx: TransformerContext) : Transformer(ctx) {
-  @Inject
-  lateinit var transformer: SwappableTransformer
+  @Inject lateinit var transformer: SwappableTransformer
 
-  override fun assemble(owner: Any?, value: Serializable): Any = transformer.assemble(
-    ctx,
-    owner,
-    value
-  )
+  override fun assemble(owner: Any?, value: Serializable): Any = transformer.assemble(ctx, owner, value)
 
   override fun disassemble(value: Any): Serializable = transformer.disassemble(ctx, value)
 }
@@ -47,31 +42,25 @@ class DelegatingTransformer(private val ctx: TransformerContext) : Transformer(c
 @MiskTest(startService = true)
 class TransformedColumnTest {
 
-  @Inject
-  @TransformedColumnTestDb
-  lateinit var transacter: Transacter
+  @Inject @TransformedColumnTestDb lateinit var transacter: Transacter
 
-  @Inject
-  lateinit var queryFactory: Query.Factory
+  @Inject lateinit var queryFactory: Query.Factory
 
   var swappableTransformer: SwappableTransformer? = null
 
   private fun withTransformer(
     assemble: (TransformerContext, Any?, Serializable) -> Any,
     disassemble: (TransformerContext, Any) -> Serializable,
-    f: () -> Unit
+    f: () -> Unit,
   ) {
     val saved = swappableTransformer
 
-    swappableTransformer = object : SwappableTransformer {
-      override fun assemble(ctx: TransformerContext, owner: Any?, value: Serializable) = assemble(
-        ctx,
-        owner,
-        value
-      )
+    swappableTransformer =
+      object : SwappableTransformer {
+        override fun assemble(ctx: TransformerContext, owner: Any?, value: Serializable) = assemble(ctx, owner, value)
 
-      override fun disassemble(ctx: TransformerContext, value: Any) = disassemble(ctx, value)
-    }
+        override fun disassemble(ctx: TransformerContext, value: Any) = disassemble(ctx, value)
+      }
 
     try {
       f()
@@ -97,24 +86,18 @@ class TransformedColumnTest {
     }
 
     withTransformer(assemble, disassemble) {
-      transacter.transaction { session ->
-        session.save(DbManyTypes(1, 1.2, "Test", "Bytes".toByteArray()))
-      }
+      transacter.transaction { session -> session.save(DbManyTypes(1, 1.2, "Test", "Bytes".toByteArray())) }
       transacter.transaction { session ->
         session.hibernateSession.sessionFactory.sessionFactoryOptions.criteriaLiteralHandlingMode
 
-        val rows = queryFactory.newQuery<ManyTypesRawQuery>()
-          .allowTableScan()
-          .list(session)
+        val rows = queryFactory.newQuery<ManyTypesRawQuery>().allowTableScan().list(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(3)
       }
 
       transacter.transaction { session ->
-        val rows = queryFactory.newQuery<ManyTypesQuery>()
-          .allowTableScan()
-          .list(session)
+        val rows = queryFactory.newQuery<ManyTypesQuery>().allowTableScan().list(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(1)
@@ -141,13 +124,9 @@ class TransformedColumnTest {
     }
 
     withTransformer(assemble, disassemble) {
+      transacter.transaction { session -> session.save(DbManyTypes(1, 1.2, "Test", "Bytes".toByteArray())) }
       transacter.transaction { session ->
-        session.save(DbManyTypes(1, 1.2, "Test", "Bytes".toByteArray()))
-      }
-      transacter.transaction { session ->
-        val rows = queryFactory.newQuery<ManyTypesRawQuery>()
-          .allowTableScan()
-          .list(session)
+        val rows = queryFactory.newQuery<ManyTypesRawQuery>().allowTableScan().list(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(3)
@@ -155,9 +134,7 @@ class TransformedColumnTest {
       }
 
       transacter.transaction { session ->
-        val rows = queryFactory.newQuery<ManyTypesQuery>()
-          .allowTableScan()
-          .list(session)
+        val rows = queryFactory.newQuery<ManyTypesQuery>().allowTableScan().list(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(1)
@@ -191,20 +168,15 @@ class TransformedColumnTest {
       }
 
       transacter.transaction { session ->
-        val rows = queryFactory.newQuery<ManyTypesProjectionQuery>()
-          .allowTableScan()
-          .stringField("Test")
-          .query(session)
+        val rows = queryFactory.newQuery<ManyTypesProjectionQuery>().allowTableScan().stringField("Test").query(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].stringField).isEqualTo("Test")
       }
 
       transacter.transaction { session ->
-        val rows = queryFactory.newQuery<ManyTypesRawQuery>()
-          .allowTableScan()
-          .stringField("Test_modified")
-          .list(session)
+        val rows =
+          queryFactory.newQuery<ManyTypesRawQuery>().allowTableScan().stringField("Test_modified").list(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].stringField).isEqualTo("Test$suffix")
@@ -235,20 +207,14 @@ class TransformedColumnTest {
       }
 
       transacter.transaction { session ->
-        val rows = queryFactory.newQuery<ManyTypesProjectionQuery>()
-          .allowTableScan()
-          .intField(1)
-          .query(session)
+        val rows = queryFactory.newQuery<ManyTypesProjectionQuery>().allowTableScan().intField(1).query(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(1)
       }
 
       transacter.transaction { session ->
-        val rows = queryFactory.newQuery<ManyTypesRawQuery>()
-          .allowTableScan()
-          .intField(3)
-          .list(session)
+        val rows = queryFactory.newQuery<ManyTypesRawQuery>().allowTableScan().intField(3).list(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(3)
@@ -275,27 +241,22 @@ class TransformedColumnTest {
     withTransformer(assemble, disassemble) {
       val value = 1
 
-      transacter.transaction { session ->
-        session.save(DbManyTypes(value, 1.2, "Test", "Bytes".toByteArray()))
-      }
+      transacter.transaction { session -> session.save(DbManyTypes(value, 1.2, "Test", "Bytes".toByteArray())) }
 
       transacter.transaction { session ->
-        val rows = queryFactory.newQuery<ManyTypesProjectionQuery>()
-          .allowTableScan()
-          .intField(value)
-          .list(session)
+        val rows = queryFactory.newQuery<ManyTypesProjectionQuery>().allowTableScan().intField(value).list(session)
         assertThat(rows).hasSize(1)
         assertThat(rows.first().intField).isEqualTo(value)
       }
 
       transacter.transaction { session ->
-        val rows = queryFactory.newQuery<ManyTypesRawQuery>()
-          .allowTableScan()
-          .list(session)
+        val rows = queryFactory.newQuery<ManyTypesRawQuery>().allowTableScan().list(session)
 
-        val annotationForInt = DbManyTypes::class.declaredMemberProperties
-          .mapNotNull { prop -> prop.javaField?.getAnnotation(TransformedInt::class.java) }
-          .first()
+        val annotationForInt =
+          DbManyTypes::class
+            .declaredMemberProperties
+            .mapNotNull { prop -> prop.javaField?.getAnnotation(TransformedInt::class.java) }
+            .first()
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(value + annotationForInt.amount)
       }
@@ -303,42 +264,31 @@ class TransformedColumnTest {
   }
 
   interface ManyTypesQuery : Query<DbManyTypes> {
-    @Constraint(path = "intField")
-    fun intField(intField: Int): ManyTypesQuery
+    @Constraint(path = "intField") fun intField(intField: Int): ManyTypesQuery
 
-    @Constraint(path = "doubleField")
-    fun doubleField(doubleField: Double): ManyTypesQuery
+    @Constraint(path = "doubleField") fun doubleField(doubleField: Double): ManyTypesQuery
 
-    @Constraint(path = "stringField")
-    fun stringField(stringField: String): ManyTypesQuery
+    @Constraint(path = "stringField") fun stringField(stringField: String): ManyTypesQuery
 
-    @Constraint(path = "byteArrayField")
-    fun byteArrayField(byteArrayField: ByteArray): ManyTypesQuery
+    @Constraint(path = "byteArrayField") fun byteArrayField(byteArrayField: ByteArray): ManyTypesQuery
   }
 
   interface ManyTypesRawQuery : Query<DbManyTypesRaw> {
-    @Constraint(path = "intField")
-    fun intField(intField: Int): ManyTypesRawQuery
+    @Constraint(path = "intField") fun intField(intField: Int): ManyTypesRawQuery
 
-    @Constraint(path = "stringField")
-    fun stringField(stringField: String): ManyTypesRawQuery
+    @Constraint(path = "stringField") fun stringField(stringField: String): ManyTypesRawQuery
   }
 
   interface ManyTypesProjectionQuery : Query<DbManyTypes> {
-    @Constraint(path = "intField")
-    fun intField(intField: Int): ManyTypesProjectionQuery
+    @Constraint(path = "intField") fun intField(intField: Int): ManyTypesProjectionQuery
 
-    @Constraint(path = "doubleField")
-    fun doubleField(doubleField: Double): ManyTypesProjectionQuery
+    @Constraint(path = "doubleField") fun doubleField(doubleField: Double): ManyTypesProjectionQuery
 
-    @Constraint(path = "stringField")
-    fun stringField(stringField: String): ManyTypesProjectionQuery
+    @Constraint(path = "stringField") fun stringField(stringField: String): ManyTypesProjectionQuery
 
-    @Constraint(path = "byteArrayField")
-    fun byteArrayField(byteArrayField: ByteArray): ManyTypesProjectionQuery
+    @Constraint(path = "byteArrayField") fun byteArrayField(byteArrayField: ByteArray): ManyTypesProjectionQuery
 
-    @Select
-    fun query(session: Session): List<ManyTypesProjection>
+    @Select fun query(session: Session): List<ManyTypesProjection>
   }
 
   @Target(AnnotationTarget.FIELD)
@@ -359,39 +309,26 @@ class TransformedColumnTest {
 
   class Bumper : AttributeConverter<Int, Int> {
     override fun convertToDatabaseColumn(attribute: Int): Int = attribute + 2
+
     override fun convertToEntityAttribute(dbData: Int): Int = dbData - 2
   }
 
   @Entity
   @Table(name = "manytypes")
   class DbManyTypes : DbUnsharded<DbManyTypes> {
-    @javax.persistence.Id
-    @GeneratedValue
-    override lateinit var id: Id<DbManyTypes>
+    @javax.persistence.Id @GeneratedValue override lateinit var id: Id<DbManyTypes>
 
-    @Column(name = "int_field")
-    @TransformedInt(amount = 2)
-    @Convert(converter = Bumper::class)
-    var intField: Int = 0
+    @Column(name = "int_field") @TransformedInt(amount = 2) @Convert(converter = Bumper::class) var intField: Int = 0
 
-    @Column(name = "double_field")
-    @TransformedDouble
-    var doubleField: Double = 0.0
+    @Column(name = "double_field") @TransformedDouble var doubleField: Double = 0.0
 
-    @Column(name = "string_field")
-    @TransformedString
-    var stringField: String = ""
+    @Column(name = "string_field") @TransformedString var stringField: String = ""
 
     @Column(name = "byte_array_field", nullable = false)
     @TransformedByteArray
     var byteArrayField: ByteArray = byteArrayOf()
 
-    constructor(
-      intField: Int,
-      doubleField: Double,
-      stringField: String,
-      byteArrayField: ByteArray
-    ) {
+    constructor(intField: Int, doubleField: Double, stringField: String, byteArrayField: ByteArray) {
       this.intField = intField
       this.doubleField = doubleField
       this.stringField = stringField
@@ -402,28 +339,17 @@ class TransformedColumnTest {
   @Entity
   @Table(name = "manytypes")
   class DbManyTypesRaw : DbUnsharded<DbManyTypesRaw> {
-    @javax.persistence.Id
-    @GeneratedValue
-    override lateinit var id: Id<DbManyTypesRaw>
+    @javax.persistence.Id @GeneratedValue override lateinit var id: Id<DbManyTypesRaw>
 
-    @Column(name = "int_field")
-    var intField: Int = 0
+    @Column(name = "int_field") var intField: Int = 0
 
-    @Column(name = "double_field")
-    var doubleField: Double = 0.0
+    @Column(name = "double_field") var doubleField: Double = 0.0
 
-    @Column(name = "string_field")
-    var stringField: String = ""
+    @Column(name = "string_field") var stringField: String = ""
 
-    @Column(name = "byte_array_field")
-    var byteArrayField: ByteArray = byteArrayOf()
+    @Column(name = "byte_array_field") var byteArrayField: ByteArray = byteArrayOf()
 
-    constructor(
-      intField: Int,
-      doubleField: Double,
-      stringField: String,
-      byteArrayField: ByteArray
-    ) {
+    constructor(intField: Int, doubleField: Double, stringField: String, byteArrayField: ByteArray) {
       this.intField = intField
       this.doubleField = doubleField
       this.stringField = stringField
@@ -435,9 +361,10 @@ class TransformedColumnTest {
     @Property("intField") val intField: Int,
     @Property("doubleField") val doubleField: Double,
     @Property("stringField") val stringField: String,
-    @Property("byteArrayField") val byteArrayField: ByteArray
+    @Property("byteArrayField") val byteArrayField: ByteArray,
   ) : Projection {
     override fun hashCode(): Int = Objects.hash(intField, doubleField, stringField, byteArrayField)
+
     override fun equals(other: Any?): Boolean {
       if (other == null) {
         return false
@@ -452,40 +379,38 @@ class TransformedColumnTest {
     }
   }
 
-  @Qualifier
-  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-  annotation class TransformedColumnTestDb
+  @Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) annotation class TransformedColumnTestDb
 
   data class TransformedColumnTestConfig(val data_source: DataSourceConfig) : Config
 
   @MiskTestModule
-  val module = object : KAbstractModule() {
-    override fun configure() {
-      install(MiskTestingServiceModule())
-      install(DeploymentModule(TESTING))
+  val module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(MiskTestingServiceModule())
+        install(DeploymentModule(TESTING))
 
-      bind<SwappableTransformer>().toInstance(object : SwappableTransformer {
-        override fun assemble(
-          ctx: TransformerContext,
-          owner: Any?,
-          value: Serializable
-        ): Any = swappableTransformer?.assemble(ctx, owner, value)!!
+        bind<SwappableTransformer>()
+          .toInstance(
+            object : SwappableTransformer {
+              override fun assemble(ctx: TransformerContext, owner: Any?, value: Serializable): Any =
+                swappableTransformer?.assemble(ctx, owner, value)!!
 
-        override fun disassemble(
-          ctx: TransformerContext,
-          value: Any
-        ): Serializable = swappableTransformer?.disassemble(ctx, value)!!
-      })
+              override fun disassemble(ctx: TransformerContext, value: Any): Serializable =
+                swappableTransformer?.disassemble(ctx, value)!!
+            }
+          )
 
-      val conf =
-        MiskConfig.load<TransformedColumnTestConfig>("transformedcolumn", TESTING)
-      install(HibernateTestingModule(TransformedColumnTestDb::class))
-      install(HibernateModule(TransformedColumnTestDb::class, conf.data_source))
-      install(object : HibernateEntityModule(TransformedColumnTestDb::class) {
-        override fun configureHibernate() {
-          addEntities(DbManyTypes::class, DbManyTypesRaw::class)
-        }
-      })
+        val conf = MiskConfig.load<TransformedColumnTestConfig>("transformedcolumn", TESTING)
+        install(HibernateTestingModule(TransformedColumnTestDb::class))
+        install(HibernateModule(TransformedColumnTestDb::class, conf.data_source))
+        install(
+          object : HibernateEntityModule(TransformedColumnTestDb::class) {
+            override fun configureHibernate() {
+              addEntities(DbManyTypes::class, DbManyTypesRaw::class)
+            }
+          }
+        )
+      }
     }
-  }
 }

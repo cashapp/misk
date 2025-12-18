@@ -74,11 +74,7 @@ abstract class BaseDynamoDBTransactionTest<K> {
     val update = AttributeValue.fromB(SdkBytes.fromUtf8String("update"))
     val transaction = createTransaction(key)
 
-    val result = transaction.compareAndSwap(
-      original.b().asByteArray(),
-      update.b().asByteArray(),
-      null
-    )
+    val result = transaction.compareAndSwap(original.b().asByteArray(), update.b().asByteArray(), null)
     val state = getState(key)
 
     assertThat(result).isTrue()
@@ -95,11 +91,7 @@ abstract class BaseDynamoDBTransactionTest<K> {
     saveState(key, initial)
     val transaction = createTransaction(key)
 
-    val result = transaction.compareAndSwap(
-      original.b().asByteArray(),
-      update.b().asByteArray(),
-      null
-    )
+    val result = transaction.compareAndSwap(original.b().asByteArray(), update.b().asByteArray(), null)
     val state = getState(key)
 
     assertThat(result).isFalse()
@@ -109,23 +101,19 @@ abstract class BaseDynamoDBTransactionTest<K> {
   private fun saveState(key: K, state: AttributeValue?) {
     dynamoDb.putItem {
       it.tableName(getTableName(key))
-      it.item(
-        mapOf(
-          DEFAULT_KEY_NAME to keyToAttributeValue(key),
-          DEFAULT_STATE_NAME to state
-        )
-      )
+      it.item(mapOf(DEFAULT_KEY_NAME to keyToAttributeValue(key), DEFAULT_STATE_NAME to state))
     }
   }
 
   private fun getState(key: K): AttributeValue =
-    dynamoDb.getItem {
-      it.tableName(getTableName(key))
-      it.consistentRead(true)
-      it.key(
-        mapOf(DEFAULT_KEY_NAME to keyToAttributeValue(key))
-      )
-    }.item().getValue(DEFAULT_STATE_NAME)
+    dynamoDb
+      .getItem {
+        it.tableName(getTableName(key))
+        it.consistentRead(true)
+        it.key(mapOf(DEFAULT_KEY_NAME to keyToAttributeValue(key)))
+      }
+      .item()
+      .getValue(DEFAULT_STATE_NAME)
 
   private fun getTableName(key: K): String {
     return when (key) {

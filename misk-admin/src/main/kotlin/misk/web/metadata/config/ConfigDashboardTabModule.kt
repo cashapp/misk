@@ -11,13 +11,14 @@ import misk.web.metadata.jvm.JvmMetadata
 import misk.web.metadata.jvm.JvmMetadataProvider
 
 /**
- * Installs Config dashboard tab which shows the raw config inputs
- * and the merged runtime config for your Misk service.
+ * Installs Config dashboard tab which shows the raw config inputs and the merged runtime config for your Misk service.
  *
- * [mode] If you have config parameters that include secrets, you should only install this tab
- *    in [SAFE] mode because the Misk secrets will be visible at runtime in the admin dashboard.
+ * [mode] If you have config parameters that include secrets, you should only install this tab in [SAFE] mode because
+ * the Misk secrets will be visible at runtime in the admin dashboard.
  */
-class ConfigDashboardTabModule @JvmOverloads constructor(
+class ConfigDashboardTabModule
+@JvmOverloads
+constructor(
   private val isDevelopment: Boolean,
   /** DO NOT change default of [SAFE] until redaction of Misk.Secrets and other YAML is added. */
   private val mode: ConfigMetadataAction.ConfigTabMode = SAFE,

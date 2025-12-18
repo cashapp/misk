@@ -6,19 +6,20 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.Action
 import misk.MiskCaller
+import misk.logging.getLogger
 import misk.scope.ActionScoped
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.interceptors.hooks.RequestResponseHook
-import misk.logging.getLogger
 
 private val logger = getLogger<RequestLoggingInterceptor>()
 
 /**
- * Logs request and response information for an action.
- * Timing information doesn't count time writing the response to the remote client.
+ * Logs request and response information for an action. Timing information doesn't count time writing the response to
+ * the remote client.
  */
-class RequestLoggingInterceptor internal constructor(
+class RequestLoggingInterceptor
+internal constructor(
   private val caller: ActionScoped<MiskCaller?>,
   private val ticker: Ticker,
   private val bodyCapture: RequestResponseCapture,
@@ -26,7 +27,9 @@ class RequestLoggingInterceptor internal constructor(
   private val requestLoggingTransformers: List<RequestLoggingTransformer>,
 ) : NetworkInterceptor {
   @Singleton
-  class Factory @Inject internal constructor(
+  class Factory
+  @Inject
+  internal constructor(
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
     private val ticker: Ticker,
     private val bodyCapture: RequestResponseCapture,
@@ -69,18 +72,16 @@ class RequestLoggingInterceptor internal constructor(
       // and cannot be reliably controlled by services.
       // In practice, they will be applied in the order that they happened to be bound.
       val transformedRequestResponseBody =
-        requestLoggingTransformers.fold(requestResponse) { body, transformer ->
-          transformer.tryTransform(body)
-        }
+        requestLoggingTransformers.fold(requestResponse) { body, transformer -> transformer.tryTransform(body) }
       requestResponseHooks.forEach { hook ->
-          hook.handle(
-            caller = caller.get(),
-            httpCall = chain.httpCall,
-            requestResponse = transformedRequestResponseBody,
-            elapsed = elapsed,
-            elapsedToString = elapsedToString,
-            error = error,
-          )
+        hook.handle(
+          caller = caller.get(),
+          httpCall = chain.httpCall,
+          requestResponse = transformedRequestResponseBody,
+          elapsed = elapsed,
+          elapsedToString = elapsedToString,
+          error = error,
+        )
       }
     } catch (e: Throwable) {
       logger.error(e) { "Unexpected error while logging request" }
@@ -92,16 +93,13 @@ class RequestLoggingInterceptor internal constructor(
   }
 }
 
-/**
- * A set of per-action logging config overrides.
- */
-data class RequestLoggingConfig(val actions: Map<String, ActionLoggingConfig>) {
-}
+/** A set of per-action logging config overrides. */
+data class RequestLoggingConfig(val actions: Map<String, ActionLoggingConfig>) {}
 
-/**
- * This class should have all the same config options as [LogRequestResponse]. See that class for details.
- */
-data class ActionLoggingConfig @JvmOverloads constructor(
+/** This class should have all the same config options as [LogRequestResponse]. See that class for details. */
+data class ActionLoggingConfig
+@JvmOverloads
+constructor(
   val ratePerSecond: Long = 10,
   val errorRatePerSecond: Long = 0,
   val bodySampling: Double = 0.0,
@@ -112,26 +110,29 @@ data class ActionLoggingConfig @JvmOverloads constructor(
   val includeResponseHeaders: Boolean = false,
 ) {
   companion object {
-    fun fromAnnotation(logRequestResponse: LogRequestResponse): ActionLoggingConfig = ActionLoggingConfig(
-      ratePerSecond = logRequestResponse.ratePerSecond,
-      errorRatePerSecond = logRequestResponse.errorRatePerSecond,
-      bodySampling = logRequestResponse.bodySampling,
-      errorBodySampling = logRequestResponse.errorBodySampling,
-      excludedEnvironments = logRequestResponse.excludedEnvironments.toList(),
-      requestLoggingMode = logRequestResponse.requestLoggingMode,
-      includeRequestHeaders = logRequestResponse.includeRequestHeaders,
-      includeResponseHeaders = logRequestResponse.includeResponseHeaders,
-    )
+    fun fromAnnotation(logRequestResponse: LogRequestResponse): ActionLoggingConfig =
+      ActionLoggingConfig(
+        ratePerSecond = logRequestResponse.ratePerSecond,
+        errorRatePerSecond = logRequestResponse.errorRatePerSecond,
+        bodySampling = logRequestResponse.bodySampling,
+        errorBodySampling = logRequestResponse.errorBodySampling,
+        excludedEnvironments = logRequestResponse.excludedEnvironments.toList(),
+        requestLoggingMode = logRequestResponse.requestLoggingMode,
+        includeRequestHeaders = logRequestResponse.includeRequestHeaders,
+        includeResponseHeaders = logRequestResponse.includeResponseHeaders,
+      )
 
     fun fromConfigMapOrAnnotation(
       action: Action,
       configs: Set<RequestLoggingConfig>,
-      annotation: LogRequestResponse
+      annotation: LogRequestResponse,
     ): ActionLoggingConfig {
       // Look for any configs that may have been provided from somewhere other than the annotation itself
       val endpointConfigs = configs.mapNotNull { it.actions[action.name] }.distinct()
       if (endpointConfigs.size > 1) {
-        throw IllegalArgumentException("Found multiple conflicting configs for action [${action.name}]: $endpointConfigs")
+        throw IllegalArgumentException(
+          "Found multiple conflicting configs for action [${action.name}]: $endpointConfigs"
+        )
       }
 
       // Fall back to using the annotation's config if no other configs were found

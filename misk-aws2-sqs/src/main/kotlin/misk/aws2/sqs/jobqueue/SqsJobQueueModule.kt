@@ -15,10 +15,10 @@ import misk.testing.TestFixture
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.services.sqs.SqsAsyncClientBuilder
 
-open class SqsJobQueueModule @JvmOverloads constructor(
-  private val config: SqsConfig,
-  private val configureClient: SqsAsyncClientBuilder.() -> Unit = {}
-) : KAbstractModule() {
+open class SqsJobQueueModule
+@JvmOverloads
+constructor(private val config: SqsConfig, private val configureClient: SqsAsyncClientBuilder.() -> Unit = {}) :
+  KAbstractModule() {
   override fun configure() {
     requireBinding<AwsCredentialsProvider>()
     requireBinding<AwsRegion>()
@@ -27,11 +27,7 @@ open class SqsJobQueueModule @JvmOverloads constructor(
     multibind<TestFixture>().to<SqsJobConsumer>()
 
     install(DefaultAsyncSwitchModule())
-    install(
-      ServiceModule<SqsJobConsumer>()
-        .conditionalOn<AsyncSwitch>("sqs")
-        .dependsOn<ReadyService>()
-    )
+    install(ServiceModule<SqsJobConsumer>().conditionalOn<AsyncSwitch>("sqs").dependsOn<ReadyService>())
     bind<SqsBatchManagerFactory>().to<RealSqsBatchManagerFactory>()
     install(ServiceModule<RealSqsBatchManagerFactory>())
   }
@@ -41,26 +37,18 @@ open class SqsJobQueueModule @JvmOverloads constructor(
     return if (config.all_queues.region != null) {
       config
     } else {
-      config.copy(
-        all_queues = config.all_queues.copy(
-          region = awsRegion.name,
-        ),
-      )
+      config.copy(all_queues = config.all_queues.copy(region = awsRegion.name))
     }
   }
 
   @Provides
   @Singleton
-  fun sqsClientFactory(
-    credentialsProvider: AwsCredentialsProvider,
-  ): SqsClientFactory = RealSqsClientFactory(credentialsProvider, configureClient)
+  fun sqsClientFactory(credentialsProvider: AwsCredentialsProvider): SqsClientFactory =
+    RealSqsClientFactory(credentialsProvider, configureClient)
 
   @Provides
   @Singleton
-  fun sqsBatchManagerFactory(
-    sqsClientFactory: SqsClientFactory,
-    sqsConfig: SqsConfig,
-  ): RealSqsBatchManagerFactory {
+  fun sqsBatchManagerFactory(sqsClientFactory: SqsClientFactory, sqsConfig: SqsConfig): RealSqsBatchManagerFactory {
     return RealSqsBatchManagerFactory(sqsClientFactory, sqsConfig)
   }
 }

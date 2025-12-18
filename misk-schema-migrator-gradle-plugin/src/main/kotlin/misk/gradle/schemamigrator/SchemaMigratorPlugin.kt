@@ -2,6 +2,7 @@ package misk.gradle.schemamigrator
 
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
+import java.time.Duration
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -13,7 +14,6 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
-import java.time.Duration
 
 class SchemaMigratorPlugin : Plugin<Project> {
   override fun apply(project: Project) {
@@ -45,48 +45,37 @@ abstract class SchemaMigratorTask : DefaultTask() {
     const val NAME = "migrateSchema"
   }
 
-  @get:Input
-  abstract val database: Property<String>
+  @get:Input abstract val database: Property<String>
 
-  @get:Input
-  @get:Optional
-  abstract val host: Property<String>
+  @get:Input @get:Optional abstract val host: Property<String>
 
-  @get:Input
-  @get:Optional
-  abstract val port: Property<Int>
+  @get:Input @get:Optional abstract val port: Property<Int>
 
-  @get:Input
-  abstract val databaseType: Property<String>
+  @get:Input abstract val databaseType: Property<String>
 
-  @get:Input
-  abstract val username: Property<String>
+  @get:Input abstract val username: Property<String>
 
-  @get:Input
-  abstract val password: Property<String>
+  @get:Input abstract val password: Property<String>
 
-  @get:PathSensitive(PathSensitivity.RELATIVE)
-  @get:InputDirectory
-  abstract val migrationsDir: DirectoryProperty
+  @get:PathSensitive(PathSensitivity.RELATIVE) @get:InputDirectory abstract val migrationsDir: DirectoryProperty
 
-  @get:Input
-  @get:Optional
-  abstract val migrationsFormat: Property<String>
+  @get:Input @get:Optional abstract val migrationsFormat: Property<String>
 
   @TaskAction
   fun migrateSchemas() {
-    val injector = Guice.createInjector(
-      SchemaMigratorModule(
-        database.get(),
-        host.orNull,
-        port.orNull,
-        databaseType.get(),
-        username.get(),
-        password.get(),
-        migrationsDir.asFile.get(),
-        migrationsFormat.get()
+    val injector =
+      Guice.createInjector(
+        SchemaMigratorModule(
+          database.get(),
+          host.orNull,
+          port.orNull,
+          databaseType.get(),
+          username.get(),
+          password.get(),
+          migrationsDir.asFile.get(),
+          migrationsFormat.get(),
+        )
       )
-    )
 
     val serviceManager = injector.getInstance(ServiceManager::class.java)
 

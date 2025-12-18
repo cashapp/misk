@@ -1,14 +1,16 @@
 package misk.aws2.sqs.jobqueue
 
+import java.util.concurrent.ConcurrentHashMap
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.SqsAsyncClientBuilder
-import java.util.concurrent.ConcurrentHashMap
 
-internal class RealSqsClientFactory @JvmOverloads constructor(
+internal class RealSqsClientFactory
+@JvmOverloads
+constructor(
   private val credentialsProvider: AwsCredentialsProvider,
-  private val configureClient: SqsAsyncClientBuilder.() -> Unit = {}
+  private val configureClient: SqsAsyncClientBuilder.() -> Unit = {},
 ) : SqsClientFactory {
   private val clients = ConcurrentHashMap<String, SqsAsyncClient>()
 

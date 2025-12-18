@@ -20,8 +20,8 @@ import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
 /**
  * Spins up a docker container for testing. It clears the table content before each test starts.
  *
- * Note that this may not be used alongside [LocalDynamoDbModule]. DynamoDB may execute in Docker or
- * in-process, but never both.
+ * Note that this may not be used alongside [LocalDynamoDbModule]. DynamoDB may execute in Docker or in-process, but
+ * never both.
  *
  * This module supports multiple installations with different qualifiers:
  * ```
@@ -41,23 +41,21 @@ import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
  * )
  * ```
  *
- * All installations share the same underlying TestDynamoDbService instance (since it can only
- * be instantiated once per process), but each creates its own set of tables.
+ * All installations share the same underlying TestDynamoDbService instance (since it can only be instantiated once per
+ * process), but each creates its own set of tables.
  */
 class DockerDynamoDbModule : KAbstractModule {
   private val qualifier: KClass<out Annotation>?
   private val tables: List<DynamoDbTable>
 
-  constructor(
-    qualifier: KClass<out Annotation>?,
-    tables: List<DynamoDbTable>,
-  ) {
+  constructor(qualifier: KClass<out Annotation>?, tables: List<DynamoDbTable>) {
     this.qualifier = qualifier
     this.tables = tables
   }
 
   // Backward-compatible constructors (unqualified)
   constructor(tables: List<DynamoDbTable>) : this(null, tables)
+
   constructor(vararg tables: DynamoDbTable) : this(null, tables.toList())
 
   override fun configure() {
@@ -73,45 +71,48 @@ class DockerDynamoDbModule : KAbstractModule {
       tableMultibinder.addBinding().toInstance(table)
     }
 
-    bind(keyOf<List<RequiredDynamoDbTable>>(qualifier)).toInstance(
-      tables.map { RequiredDynamoDbTable(it.tableName) }
-    )
+    bind(keyOf<List<RequiredDynamoDbTable>>(qualifier)).toInstance(tables.map { RequiredDynamoDbTable(it.tableName) })
 
     // Install shared core module that creates TestDynamoDb from all registered tables
     install(DockerDynamoDbCoreModule)
 
     val testDynamoDbProvider = getProvider(keyOf<TestDynamoDb>())
 
-    bind(keyOf<DynamoDbClient>(qualifier)).toProvider(Provider {
-      testDynamoDbProvider.get().service.client.dynamoDb
-    }).asSingleton()
+    bind(keyOf<DynamoDbClient>(qualifier))
+      .toProvider(Provider { testDynamoDbProvider.get().service.client.dynamoDb })
+      .asSingleton()
 
-    bind(keyOf<DynamoDbStreamsClient>(qualifier)).toProvider(Provider {
-      testDynamoDbProvider.get().service.client.dynamoDbStreams
-    }).asSingleton()
+    bind(keyOf<DynamoDbStreamsClient>(qualifier))
+      .toProvider(Provider { testDynamoDbProvider.get().service.client.dynamoDbStreams })
+      .asSingleton()
 
-    bind(keyOf<DynamoDbService>(qualifier)).toProvider(Provider {
-      DockerDynamoDbService()
-    }).asSingleton()
+    bind(keyOf<DynamoDbService>(qualifier)).toProvider(Provider { DockerDynamoDbService() }).asSingleton()
     install(ServiceModule<DynamoDbService>(qualifier).dependsOn<TestDynamoDb>())
   }
 
   private object DockerDynamoDbCoreModule : KAbstractModule() {
     override fun configure() {
-      bind(keyOf<TestDynamoDb>()).toProvider(object : Provider<TestDynamoDb> {
-        @Inject lateinit var allTables: Set<DynamoDbTable>
-        override fun get(): TestDynamoDb = TestDynamoDb(
-          TestDynamoDbService.create(
-            serverFactory = DockerDynamoDbServer.Factory,
-            tables = allTables.map { table ->
-              TestTable.create(table.tableName, table.tableClass) {
-                table.configureTable(it.toBuilder()).build()
-              }
-            },
-            port = null
-          )
+      bind(keyOf<TestDynamoDb>())
+        .toProvider(
+          object : Provider<TestDynamoDb> {
+            @Inject lateinit var allTables: Set<DynamoDbTable>
+
+            override fun get(): TestDynamoDb =
+              TestDynamoDb(
+                TestDynamoDbService.create(
+                  serverFactory = DockerDynamoDbServer.Factory,
+                  tables =
+                    allTables.map { table ->
+                      TestTable.create(table.tableName, table.tableClass) {
+                        table.configureTable(it.toBuilder()).build()
+                      }
+                    },
+                  port = null,
+                )
+              )
+          }
         )
-      }).asSingleton()
+        .asSingleton()
       install(ServiceModule<TestDynamoDb>())
       multibind<TestFixture>().to(keyOf<TestDynamoDb>())
     }
@@ -120,6 +121,7 @@ class DockerDynamoDbModule : KAbstractModule {
   /** This service does nothing; depending on Tempest's [TestDynamoDb] is sufficient. */
   private class DockerDynamoDbService : AbstractService(), DynamoDbService {
     override fun doStart() = notifyStarted()
+
     override fun doStop() = notifyStopped()
   }
 }

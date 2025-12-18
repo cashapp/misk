@@ -8,21 +8,20 @@ import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.Module
 import com.google.inject.Provides
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.time.Duration
+import java.util.concurrent.BlockingDeque
+import java.util.concurrent.LinkedBlockingDeque
 import misk.MiskTestingServiceModule
 import misk.ServiceModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
+import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import misk.logging.LogCollector
-import java.time.Duration
-import java.util.concurrent.BlockingDeque
-import java.util.concurrent.LinkedBlockingDeque
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-import misk.annotation.ExperimentalMiskApi
 
 internal class WarmupTest {
   private val events = LinkedBlockingDeque<String>()
@@ -32,44 +31,36 @@ internal class WarmupTest {
 
   @Test
   fun `happy path`() {
-    startUpAndShutDown(
-      ServiceModule<LoggingService>(),
-      WarmupModule<LoggingWarmupTask>(),
-    )
+    startUpAndShutDown(ServiceModule<LoggingService>(), WarmupModule<LoggingWarmupTask>())
 
-    assertThat(events).containsExactly(
-      "LoggingService startUp",
-      "LoggingWarmupTask created on warmup-0",
-      "LoggingWarmupTask warming on warmup-0",
-      "HealthChecks all passed",
-      "LoggingService shutDown",
-    )
+    assertThat(events)
+      .containsExactly(
+        "LoggingService startUp",
+        "LoggingWarmupTask created on warmup-0",
+        "LoggingWarmupTask warming on warmup-0",
+        "HealthChecks all passed",
+        "LoggingService shutDown",
+      )
 
-    assertThat(logCollector.takeMessage(minLevel = Level.INFO))
-      .isEqualTo("Starting ready service")
-    assertThat(logCollector.takeMessage(minLevel = Level.INFO))
-      .isEqualTo("Running warmup tasks: [LoggingWarmupTask]")
-    assertThat(logCollector.takeMessage(minLevel = Level.INFO))
-      .startsWith("Warmup task LoggingWarmupTask completed")
+    assertThat(logCollector.takeMessage(minLevel = Level.INFO)).isEqualTo("Starting ready service")
+    assertThat(logCollector.takeMessage(minLevel = Level.INFO)).isEqualTo("Running warmup tasks: [LoggingWarmupTask]")
+    assertThat(logCollector.takeMessage(minLevel = Level.INFO)).startsWith("Warmup task LoggingWarmupTask completed")
   }
 
   @Test
   fun `suspending warmup task`() {
-    startUpAndShutDown(
-      ServiceModule<LoggingService>(),
-      WarmupModule<SuspendingLoggingWarmupTask>(),
-    )
+    startUpAndShutDown(ServiceModule<LoggingService>(), WarmupModule<SuspendingLoggingWarmupTask>())
 
-    assertThat(events).containsExactly(
-      "LoggingService startUp",
-      "SuspendingLoggingWarmupTask created on warmup-0",
-      "SuspendingLoggingWarmupTask warming on warmup-0 @coroutine#1",
-      "HealthChecks all passed",
-      "LoggingService shutDown",
-    )
+    assertThat(events)
+      .containsExactly(
+        "LoggingService startUp",
+        "SuspendingLoggingWarmupTask created on warmup-0",
+        "SuspendingLoggingWarmupTask warming on warmup-0 @coroutine#1",
+        "HealthChecks all passed",
+        "LoggingService shutDown",
+      )
 
-    assertThat(logCollector.takeMessage(minLevel = Level.INFO))
-      .isEqualTo("Starting ready service")
+    assertThat(logCollector.takeMessage(minLevel = Level.INFO)).isEqualTo("Starting ready service")
     assertThat(logCollector.takeMessage(minLevel = Level.INFO))
       .isEqualTo("Running warmup tasks: [SuspendingLoggingWarmupTask]")
     assertThat(logCollector.takeMessage(minLevel = Level.INFO))
@@ -78,31 +69,24 @@ internal class WarmupTest {
 
   @Test
   fun `service is healthy even after warmup task throws`() {
-    startUpAndShutDown(
-      ServiceModule<LoggingService>(),
-      WarmupModule<ThrowingWarmupTask>(),
-    )
+    startUpAndShutDown(ServiceModule<LoggingService>(), WarmupModule<ThrowingWarmupTask>())
 
-    assertThat(events).containsExactly(
-      "LoggingService startUp",
-      "ThrowingWarmupTask created on warmup-0",
-      "ThrowingWarmupTask about to crash on warmup-0",
-      "HealthChecks all passed",
-      "LoggingService shutDown",
-    )
+    assertThat(events)
+      .containsExactly(
+        "LoggingService startUp",
+        "ThrowingWarmupTask created on warmup-0",
+        "ThrowingWarmupTask about to crash on warmup-0",
+        "HealthChecks all passed",
+        "LoggingService shutDown",
+      )
 
-    assertThat(logCollector.takeMessage(minLevel = Level.INFO))
-      .isEqualTo("Starting ready service")
-    assertThat(logCollector.takeMessage(minLevel = Level.INFO))
-      .isEqualTo("Running warmup tasks: [ThrowingWarmupTask]")
-    assertThat(logCollector.takeMessage(minLevel = Level.ERROR))
-      .startsWith("Warmup task ThrowingWarmupTask crashed")
+    assertThat(logCollector.takeMessage(minLevel = Level.INFO)).isEqualTo("Starting ready service")
+    assertThat(logCollector.takeMessage(minLevel = Level.INFO)).isEqualTo("Running warmup tasks: [ThrowingWarmupTask]")
+    assertThat(logCollector.takeMessage(minLevel = Level.ERROR)).startsWith("Warmup task ThrowingWarmupTask crashed")
   }
 
   @Singleton
-  class LoggingService @Inject constructor(
-    private val events: BlockingDeque<String>
-  ) : AbstractIdleService() {
+  class LoggingService @Inject constructor(private val events: BlockingDeque<String>) : AbstractIdleService() {
 
     override fun startUp() {
       events += "LoggingService startUp"
@@ -114,9 +98,7 @@ internal class WarmupTest {
   }
 
   @Singleton
-  class LoggingWarmupTask @Inject constructor(
-    private val events: BlockingDeque<String>
-  ) : WarmupTask() {
+  class LoggingWarmupTask @Inject constructor(private val events: BlockingDeque<String>) : WarmupTask() {
     init {
       events += "LoggingWarmupTask created on ${Thread.currentThread().name}"
     }
@@ -127,9 +109,7 @@ internal class WarmupTest {
   }
 
   @Singleton
-  class ThrowingWarmupTask @Inject constructor(
-    private val events: BlockingDeque<String>
-  ) : WarmupTask() {
+  class ThrowingWarmupTask @Inject constructor(private val events: BlockingDeque<String>) : WarmupTask() {
     init {
       events += "ThrowingWarmupTask created on ${Thread.currentThread().name}"
     }
@@ -141,9 +121,8 @@ internal class WarmupTest {
   }
 
   @Singleton
-  class SuspendingLoggingWarmupTask @Inject constructor(
-    private val events: BlockingDeque<String>
-  ) : SuspendingWarmupTask() {
+  class SuspendingLoggingWarmupTask @Inject constructor(private val events: BlockingDeque<String>) :
+    SuspendingWarmupTask() {
     init {
       events += "SuspendingLoggingWarmupTask created on ${Thread.currentThread().name}"
     }
@@ -154,23 +133,24 @@ internal class WarmupTest {
   }
 
   /**
-   * This test doesn't use `@MiskTest` so we can start up and shut down the injector in the test.
-   * It also customizes the modules per-test.
+   * This test doesn't use `@MiskTest` so we can start up and shut down the injector in the test. It also customizes the
+   * modules per-test.
    */
   private fun startUpAndShutDown(vararg modules: Module) {
-    val injector = Guice.createInjector(
-      object : KAbstractModule() {
-        override fun configure() {
-          install(MiskTestingServiceModule())
-          install(LogCollectorModule())
-          for (module in modules) {
-            install(module)
+    val injector =
+      Guice.createInjector(
+        object : KAbstractModule() {
+          override fun configure() {
+            install(MiskTestingServiceModule())
+            install(LogCollectorModule())
+            for (module in modules) {
+              install(module)
+            }
           }
-        }
 
-        @Provides fun provideEvents(): BlockingDeque<String> = events
-      }
-    )
+          @Provides fun provideEvents(): BlockingDeque<String> = events
+        }
+      )
 
     logCollector = injector.getInstance()
 
@@ -180,9 +160,7 @@ internal class WarmupTest {
 
     healthChecks = injector.getInstance(object : Key<List<HealthCheck>>() {})
 
-    healthChecks.await {
-      all { it.status().isHealthy }
-    }
+    healthChecks.await { all { it.status().isHealthy } }
     events += "HealthChecks all passed"
 
     serviceManager.stopAsync()
@@ -192,7 +170,7 @@ internal class WarmupTest {
   private fun <T> T.await(
     timeout: Duration = Duration.ofSeconds(10L),
     sleep: Duration = Duration.ofMillis(20L),
-    condition: T.() -> Boolean
+    condition: T.() -> Boolean,
   ) {
     val stopwatch = Stopwatch.createStarted()
     while (stopwatch.elapsed() < timeout) {

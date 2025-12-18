@@ -9,22 +9,14 @@ import kotlinx.html.unsafe
 import misk.tailwind.Link
 
 @Deprecated("Use AlertSuccess with misk.tailwind.Link parameter instead.")
-fun TagConsumer<*>.AlertMessage(
-  successMessage: String?,
-  errorMessage: String?,
-  label: String?,
-  link: String?,
-) = AlertMessage(
-  successMessage = successMessage,
-  errorMessage = errorMessage,
-  link = label?.let { Link(label = label, href = link ?: "#") },
-)
+fun TagConsumer<*>.AlertMessage(successMessage: String?, errorMessage: String?, label: String?, link: String?) =
+  AlertMessage(
+    successMessage = successMessage,
+    errorMessage = errorMessage,
+    link = label?.let { Link(label = label, href = link ?: "#") },
+  )
 
-fun TagConsumer<*>.AlertMessage(
-  successMessage: String?,
-  errorMessage: String?,
-  link: Link?,
-) {
+fun TagConsumer<*>.AlertMessage(successMessage: String?, errorMessage: String?, link: Link?) {
   val isSuccessMessage = !successMessage.isNullOrBlank()
   val message = if (isSuccessMessage) successMessage else errorMessage
 
@@ -46,12 +38,7 @@ fun TagConsumer<*>.Alert(
   Alert(
     theme = theme,
     message = message,
-    link = label?.let {
-      Link(
-        label = label,
-        href = link ?: "#"
-      )
-    },
+    link = label?.let { Link(label = label, href = link ?: "#") },
     spaceAbove = spaceAbove,
     spaceBelow = spaceBelow,
   )
@@ -71,14 +58,16 @@ fun TagConsumer<*>.Alert(
       div("flex") {
         div("flex-shrink-0") {
           when (theme) {
-            AlertTheme.BLUE, AlertTheme.BLUE_HIGHLIGHT -> {
+            AlertTheme.BLUE,
+            AlertTheme.BLUE_HIGHLIGHT -> {
               unsafe {
                 raw(
                   """
                     <svg class="h-5 w-5 ${theme.iconColor}" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                       <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" />
                     </svg>
-                      """.trimIndent()
+                      """
+                    .trimIndent()
                 )
               }
             }
@@ -90,7 +79,8 @@ fun TagConsumer<*>.Alert(
                       <svg class="h-5 w-5 ${theme.iconColor}" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
                       </svg>
-                      """.trimIndent()
+                      """
+                    .trimIndent()
                 )
               }
             }
@@ -102,7 +92,8 @@ fun TagConsumer<*>.Alert(
                       <svg class="h-5 w-5 ${theme.iconColor}" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
                       </svg>
-                      """.trimIndent()
+                      """
+                    .trimIndent()
                 )
               }
             }
@@ -110,13 +101,12 @@ fun TagConsumer<*>.Alert(
         }
 
         div("ml-3 flex-1 md:flex md:justify-between") {
-          p("text-sm ${theme.textColor}") {
-            +message
-          }
+          p("text-sm ${theme.textColor}") { +message }
           p("mt-3 text-sm md:ml-6 md:mt-0") {
             a(classes = "whitespace-nowrap font-medium ${theme.textColor} hover:${theme.hoverTextColor}") {
               if (link?.href in listOf("/_admin/database/")) {
-                // TODO Expose non-hardcoded configurability, this disables turbo for existing Misk-Web tabs so browser history works as expected
+                // TODO Expose non-hardcoded configurability, this disables turbo for existing Misk-Web tabs so browser
+                // history works as expected
                 attributes["data-turbo"] = "false"
               }
 
@@ -163,12 +153,13 @@ fun TagConsumer<*>.AlertSuccess(
   link: String? = null,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
-) = AlertSuccess(
-  message = message,
-  link = label?.let { Link(label = label, href = link ?: "#") },
-  spaceAbove = spaceAbove,
-  spaceBelow = spaceBelow,
-)
+) =
+  AlertSuccess(
+    message = message,
+    link = label?.let { Link(label = label, href = link ?: "#") },
+    spaceAbove = spaceAbove,
+    spaceBelow = spaceBelow,
+  )
 
 fun TagConsumer<*>.AlertSuccess(
   message: String?,
@@ -186,19 +177,13 @@ fun TagConsumer<*>.AlertError(
   spaceBelow: Boolean = true,
   dataAction: String? = null,
   onClick: String? = null,
-) = AlertError(
-  message = message,
-  link = label?.let {
-    Link(
-      label = label,
-      href = link ?: "#",
-      dataAction = dataAction,
-      onClick = onClick,
-    )
-  },
-  spaceAbove = spaceAbove,
-  spaceBelow = spaceBelow,
-)
+) =
+  AlertError(
+    message = message,
+    link = label?.let { Link(label = label, href = link ?: "#", dataAction = dataAction, onClick = onClick) },
+    spaceAbove = spaceAbove,
+    spaceBelow = spaceBelow,
+  )
 
 fun TagConsumer<*>.AlertError(
   message: String?,
@@ -214,12 +199,13 @@ fun TagConsumer<*>.AlertInfo(
   link: String? = null,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
-) = AlertInfo(
-  message = message,
-  link = label?.let { Link(label = label, href = link ?: "#") },
-  spaceAbove = spaceAbove,
-  spaceBelow = spaceBelow,
-)
+) =
+  AlertInfo(
+    message = message,
+    link = label?.let { Link(label = label, href = link ?: "#") },
+    spaceAbove = spaceAbove,
+    spaceBelow = spaceBelow,
+  )
 
 fun TagConsumer<*>.AlertInfo(
   message: String?,
@@ -235,12 +221,13 @@ fun TagConsumer<*>.AlertInfoHighlight(
   link: String? = null,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
-) = AlertInfoHighlight(
-  message = message,
-  link = label?.let { Link(label = label, href = link ?: "#") },
-  spaceAbove = spaceAbove,
-  spaceBelow = spaceBelow,
-)
+) =
+  AlertInfoHighlight(
+    message = message,
+    link = label?.let { Link(label = label, href = link ?: "#") },
+    spaceAbove = spaceAbove,
+    spaceBelow = spaceBelow,
+  )
 
 fun TagConsumer<*>.AlertInfoHighlight(
   message: String?,
@@ -254,7 +241,7 @@ enum class AlertTheme(
   val textColor: String,
   val headingTextColor: String,
   val iconColor: String,
-  val hoverTextColor: String
+  val hoverTextColor: String,
 ) {
   BLUE_HIGHLIGHT(
     backgroundColor = "bg-white",
@@ -283,5 +270,5 @@ enum class AlertTheme(
     headingTextColor = "text-red-800",
     iconColor = "text-red-400",
     hoverTextColor = "text-red-600",
-  )
+  ),
 }

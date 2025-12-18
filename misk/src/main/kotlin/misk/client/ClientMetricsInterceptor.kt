@@ -8,25 +8,25 @@ import io.prometheus.client.Histogram
 import io.prometheus.client.Summary
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.net.SocketTimeoutException
+import java.net.URL
+import java.util.concurrent.TimeUnit
 import misk.metrics.backends.prometheus.PrometheusConfig
 import misk.metrics.v2.Metrics
 import okhttp3.Interceptor
 import okhttp3.Response
 import okhttp3.ResponseBody
 import retrofit2.Invocation
-import java.net.SocketTimeoutException
-import java.net.URL
-import java.util.concurrent.TimeUnit
 
-class ClientMetricsInterceptor private constructor(
+class ClientMetricsInterceptor
+private constructor(
   val clientName: String,
   private val requestDurationSummary: Summary?,
   private val requestDurationHistogram: Histogram,
 ) : Interceptor {
 
   override fun intercept(chain: Interceptor.Chain): Response {
-    val actionName = actionName(chain)
-      ?: return chain.proceed(chain.request())
+    val actionName = actionName(chain) ?: return chain.proceed(chain.request())
 
     val stopwatch = Stopwatch.createStarted(Ticker.systemTicker())
     try {
@@ -38,14 +38,12 @@ class ClientMetricsInterceptor private constructor(
         return result
       }
 
-      return result.newBuilder()
+      return result
+        .newBuilder()
         .body(
-          TrailerAwareResponseBody(
-            result.body!!,
-          ) { emitStatusCodeMetrics(actionName, elapsedMillis, true, result) }
+          TrailerAwareResponseBody(result.body!!) { emitStatusCodeMetrics(actionName, elapsedMillis, true, result) }
         )
         .build()
-
     } catch (e: SocketTimeoutException) {
       val elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS).toDouble()
       requestDurationSummary?.labels(actionName, "timeout")?.observe(elapsedMillis)
@@ -78,15 +76,16 @@ class ClientMetricsInterceptor private constructor(
     actionName: String,
     elapsedMillis: Double,
     readTrailers: Boolean,
-    response: Response
+    response: Response,
   ) {
-    val grpcStatusHeader = if (readTrailers) {
-      // If the response has trailers, we should use them to get the grpc-status.
-      // trailers() is only available after HTTP response body has been consumed.
-      response.trailers()[GRPC_STATUS_HEADER] ?: response.headers[GRPC_STATUS_HEADER]
-    } else {
-      response.headers[GRPC_STATUS_HEADER]
-    }
+    val grpcStatusHeader =
+      if (readTrailers) {
+        // If the response has trailers, we should use them to get the grpc-status.
+        // trailers() is only available after HTTP response body has been consumed.
+        response.trailers()[GRPC_STATUS_HEADER] ?: response.headers[GRPC_STATUS_HEADER]
+      } else {
+        response.headers[GRPC_STATUS_HEADER]
+      }
     val grpcStatus = grpcStatusHeader?.toIntOrNull()
     val code = grpcStatusToHttpCode(grpcStatus) ?: response.code
     requestDurationSummary?.labels(actionName, "$code")?.observe(elapsedMillis)
@@ -125,46 +124,43 @@ class ClientMetricsInterceptor private constructor(
   }
 
   @Singleton
-  class Factory @Inject internal constructor(
-    m: Metrics,
-    config: PrometheusConfig,
-  ) {
-    internal val requestDurationSummary = when (config.disable_default_summary_metrics) {
-      true -> null
-      false -> m.summary(
-        name = "client_http_request_latency_ms",
-        help = "count and duration in ms of outgoing client requests",
+  class Factory @Inject internal constructor(m: Metrics, config: PrometheusConfig) {
+    internal val requestDurationSummary =
+      when (config.disable_default_summary_metrics) {
+        true -> null
+        false ->
+          m.summary(
+            name = "client_http_request_latency_ms",
+            help = "count and duration in ms of outgoing client requests",
+            labelNames = listOf("action", "code"),
+            maxAgeSeconds = config.max_age_in_seconds,
+          )
+      }
+
+    internal val requestDurationHistogram =
+      m.histogram(
+        name = "histo_client_http_request_latency_ms",
+        help = "histogram in ms of outgoing client requests",
         labelNames = listOf("action", "code"),
-        maxAgeSeconds = config.max_age_in_seconds,
       )
-    }
 
-    internal val requestDurationHistogram = m.histogram(
-      name = "histo_client_http_request_latency_ms",
-      help = "histogram in ms of outgoing client requests",
-      labelNames = listOf("action", "code")
-    )
-
-    fun create(clientName: String) = ClientMetricsInterceptor(
-      clientName,
-      requestDurationSummary,
-      requestDurationHistogram
-    )
+    fun create(clientName: String) =
+      ClientMetricsInterceptor(clientName, requestDurationSummary, requestDurationHistogram)
   }
 
-  private class TrailerAwareResponseBody(
-    private val delegate: ResponseBody,
-    private val func: () -> Unit
-  ) : ResponseBody() {
+  private class TrailerAwareResponseBody(private val delegate: ResponseBody, private val func: () -> Unit) :
+    ResponseBody() {
     override fun contentLength() = delegate.contentLength()
+
     override fun contentType() = delegate.contentType()
+
     override fun source() = delegate.source()
+
     override fun close() {
       delegate.close()
       func.invoke()
     }
   }
-
 }
 
 internal const val HTTP_OK = 200

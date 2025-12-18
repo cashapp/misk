@@ -16,49 +16,28 @@ abstract class AbstractBucket4jRateLimiterTest<T> {
   private val metrics = RateLimiterMetrics(meterRegistry)
 
   private val consumedMetrics by lazy {
-    metrics.consumptionAttempts(
-      TestRateLimitConfig,
-      RateLimiterMetrics.ConsumptionResult.SUCCESS
-    )
+    metrics.consumptionAttempts(TestRateLimitConfig, RateLimiterMetrics.ConsumptionResult.SUCCESS)
   }
 
   private val rejectedMetrics by lazy {
-    metrics.consumptionAttempts(
-      TestRateLimitConfig,
-      RateLimiterMetrics.ConsumptionResult.REJECTED
-    )
+    metrics.consumptionAttempts(TestRateLimitConfig, RateLimiterMetrics.ConsumptionResult.REJECTED)
   }
 
   private val exceptionMetrics by lazy {
-    metrics.consumptionAttempts(
-      TestRateLimitConfig,
-      RateLimiterMetrics.ConsumptionResult.EXCEPTION
-    )
+    metrics.consumptionAttempts(TestRateLimitConfig, RateLimiterMetrics.ConsumptionResult.EXCEPTION)
   }
 
-  private val totalConsumed by lazy {
-    metrics.tokensConsumed(TestRateLimitConfig)
-  }
+  private val totalConsumed by lazy { metrics.tokensConsumed(TestRateLimitConfig) }
 
-  private val availableDuration by lazy {
-    metrics.limitAvailabilityDuration(TestRateLimitConfig)
-  }
+  private val availableDuration by lazy { metrics.limitAvailabilityDuration(TestRateLimitConfig) }
 
-  private val consumptionDuration by lazy {
-    metrics.limitConsumptionDuration(TestRateLimitConfig)
-  }
+  private val consumptionDuration by lazy { metrics.limitConsumptionDuration(TestRateLimitConfig) }
 
-  private val releaseDuration by lazy {
-    metrics.limitReleaseDuration(TestRateLimitConfig)
-  }
+  private val releaseDuration by lazy { metrics.limitReleaseDuration(TestRateLimitConfig) }
 
-  private val resetDuration by lazy {
-    metrics.limitResetDuration(TestRateLimitConfig)
-  }
+  private val resetDuration by lazy { metrics.limitResetDuration(TestRateLimitConfig) }
 
-  private val testDuration by lazy {
-    metrics.limitTestDuration(TestRateLimitConfig)
-  }
+  private val testDuration by lazy { metrics.limitTestDuration(TestRateLimitConfig) }
 
   @Test
   fun `can take tokens up to limit`() {
@@ -66,9 +45,7 @@ abstract class AbstractBucket4jRateLimiterTest<T> {
       val result = rateLimiter.consumeToken(KEY, TestRateLimitConfig)
       with(result) {
         assertThat(didConsume).isTrue()
-        assertThat(remaining)
-          .isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig))
-          .isEqualTo(4L - it)
+        assertThat(remaining).isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig)).isEqualTo(4L - it)
       }
       assertThat(consumedMetrics.count()).isEqualTo(it.toDouble() + 1.0)
       assertThat(rejectedMetrics.count()).isZero()
@@ -83,9 +60,7 @@ abstract class AbstractBucket4jRateLimiterTest<T> {
     val result = rateLimiter.consumeToken(KEY, TestRateLimitConfig)
     with(result) {
       assertThat(didConsume).isFalse()
-      assertThat(remaining)
-        .isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig))
-        .isZero()
+      assertThat(remaining).isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig)).isZero()
     }
     assertThat(consumedMetrics.count()).isEqualTo(TestRateLimitConfig.capacity.toDouble())
     assertThat(rejectedMetrics.count()).isOne()
@@ -105,11 +80,8 @@ abstract class AbstractBucket4jRateLimiterTest<T> {
         // test consumption had been a real consumption
         .isEqualTo(testConsumptionResult.remaining)
       with(result) {
-        assertThat(didConsume)
-          .isEqualTo(testConsumptionResult.couldHaveConsumed)
-          .isTrue()
-        assertThat(remaining)
-          .isEqualTo(4L - it)
+        assertThat(didConsume).isEqualTo(testConsumptionResult.couldHaveConsumed).isTrue()
+        assertThat(remaining).isEqualTo(4L - it)
       }
       // Test consumptions should not affect metric emission
       assertThat(consumedMetrics.count()).isEqualTo(it.toDouble() + 1.0)
@@ -128,11 +100,7 @@ abstract class AbstractBucket4jRateLimiterTest<T> {
   @Test
   fun `withToken respects limits`() {
     var counter = 0
-    repeat((TestRateLimitConfig.capacity * 2).toInt()) {
-      rateLimiter.withToken(KEY, TestRateLimitConfig) {
-        counter++
-      }
-    }
+    repeat((TestRateLimitConfig.capacity * 2).toInt()) { rateLimiter.withToken(KEY, TestRateLimitConfig) { counter++ } }
     // Should have consumed capacity tokens, then been rejected for capacity tokens
     assertThat(consumedMetrics.count()).isEqualTo(TestRateLimitConfig.capacity.toDouble())
     assertThat(rejectedMetrics.count()).isEqualTo(TestRateLimitConfig.capacity.toDouble())
@@ -146,18 +114,12 @@ abstract class AbstractBucket4jRateLimiterTest<T> {
   @Test
   fun `bucket is refilled on schedule`() {
     var counter = 0
-    repeat(TestRateLimitConfig.capacity.toInt()) {
-      rateLimiter.withToken(KEY, TestRateLimitConfig) {
-        counter++
-      }
-    }
+    repeat(TestRateLimitConfig.capacity.toInt()) { rateLimiter.withToken(KEY, TestRateLimitConfig) { counter++ } }
     assertThat(consumedMetrics.count()).isEqualTo(TestRateLimitConfig.capacity.toDouble())
     assertThat(rejectedMetrics.count()).isZero()
     assertThat(exceptionMetrics.count()).isZero()
 
-    val result = rateLimiter.withToken(KEY, TestRateLimitConfig) {
-      counter++
-    }
+    val result = rateLimiter.withToken(KEY, TestRateLimitConfig) { counter++ }
     assertThat(result.consumptionData.didConsume).isFalse()
     assertThat(result.result).isNull()
     assertThat(result.consumptionData.remaining)
@@ -172,14 +134,8 @@ abstract class AbstractBucket4jRateLimiterTest<T> {
 
     // Elapse enough time that the next request refills the bucket
     fakeClock.add(TestRateLimitConfig.refillPeriod)
-    repeat(TestRateLimitConfig.capacity.toInt()) {
-      rateLimiter.withToken(KEY, TestRateLimitConfig) {
-        counter++
-      }
-    }
-    assertThat(counter)
-      .isEqualTo(10)
-      .isEqualTo(TestRateLimitConfig.capacity * 2)
+    repeat(TestRateLimitConfig.capacity.toInt()) { rateLimiter.withToken(KEY, TestRateLimitConfig) { counter++ } }
+    assertThat(counter).isEqualTo(10).isEqualTo(TestRateLimitConfig.capacity * 2)
 
     assertThat(consumedMetrics.count()).isEqualTo(10.0)
     assertThat(rejectedMetrics.count()).isOne()
@@ -189,18 +145,12 @@ abstract class AbstractBucket4jRateLimiterTest<T> {
   @Test
   fun `resetting the bucket permits consumption of full capacity`() {
     var counter = 0
-    repeat(TestRateLimitConfig.capacity.toInt()) {
-      rateLimiter.withToken(KEY, TestRateLimitConfig) {
-        counter++
-      }
-    }
+    repeat(TestRateLimitConfig.capacity.toInt()) { rateLimiter.withToken(KEY, TestRateLimitConfig) { counter++ } }
     assertThat(consumedMetrics.count()).isEqualTo(TestRateLimitConfig.capacity.toDouble())
     assertThat(rejectedMetrics.count()).isZero()
     assertThat(exceptionMetrics.count()).isZero()
 
-    val result = rateLimiter.withToken(KEY, TestRateLimitConfig) {
-      counter++
-    }
+    val result = rateLimiter.withToken(KEY, TestRateLimitConfig) { counter++ }
     assertThat(result.consumptionData.didConsume).isFalse()
     assertThat(result.result).isNull()
     assertThat(result.consumptionData.remaining)
@@ -215,16 +165,9 @@ abstract class AbstractBucket4jRateLimiterTest<T> {
 
     // Reset the bucket to refill it entirely
     rateLimiter.resetBucket(KEY, TestRateLimitConfig)
-    assertThat(rateLimiter.availableTokens(KEY, TestRateLimitConfig))
-      .isEqualTo(TestRateLimitConfig.capacity)
-    repeat(TestRateLimitConfig.capacity.toInt()) {
-      rateLimiter.withToken(KEY, TestRateLimitConfig) {
-        counter++
-      }
-    }
-    assertThat(counter)
-      .isEqualTo(10)
-      .isEqualTo(TestRateLimitConfig.capacity * 2)
+    assertThat(rateLimiter.availableTokens(KEY, TestRateLimitConfig)).isEqualTo(TestRateLimitConfig.capacity)
+    repeat(TestRateLimitConfig.capacity.toInt()) { rateLimiter.withToken(KEY, TestRateLimitConfig) { counter++ } }
+    assertThat(counter).isEqualTo(10).isEqualTo(TestRateLimitConfig.capacity * 2)
 
     assertThat(consumedMetrics.count()).isEqualTo(10.0)
     assertThat(rejectedMetrics.count()).isOne()
@@ -235,20 +178,14 @@ abstract class AbstractBucket4jRateLimiterTest<T> {
   @Test
   fun `exception metrics are tracked`() {
     var counter = 0
-    rateLimiter.withToken(KEY, TestRateLimitConfig) {
-      counter++
-    }
+    rateLimiter.withToken(KEY, TestRateLimitConfig) { counter++ }
     assertThat(counter).isOne()
     assertThat(consumedMetrics.count()).isOne()
     assertThat(rejectedMetrics.count()).isZero()
     assertThat(exceptionMetrics.count()).isZero()
 
     setException(RuntimeException())
-    assertThrows<RuntimeException> {
-      rateLimiter.withToken(KEY, TestRateLimitConfig) {
-        counter++
-      }
-    }
+    assertThrows<RuntimeException> { rateLimiter.withToken(KEY, TestRateLimitConfig) { counter++ } }
     assertThat(counter).isOne()
     assertThat(consumedMetrics.count()).isOne()
     assertThat(rejectedMetrics.count()).isZero()

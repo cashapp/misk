@@ -6,22 +6,17 @@ import java.util.concurrent.BlockingQueue
 import java.util.concurrent.TimeUnit
 
 /**
- * This BlockingQueue implementation allows measuring how long dequeued items have been
- * in the queue. It requires a delayHandler which consumes the latency every time an item is
- * removed from the queue.
+ * This BlockingQueue implementation allows measuring how long dequeued items have been in the queue. It requires a
+ * delayHandler which consumes the latency every time an item is removed from the queue.
  *
- * Caveat: The operations remove(element), removeAll() and retainAll() are supported but may not
- * always invoke the delayHandler in a multithreaded environment. For removing items, poll(),
- * take() and remove() should be used instead.
+ * Caveat: The operations remove(element), removeAll() and retainAll() are supported but may not always invoke the
+ * delayHandler in a multithreaded environment. For removing items, poll(), take() and remove() should be used instead.
  *
  * @param <T> The type of the elements held in this queue
  */
-internal class TimedBlockingQueue<T>(
-  maxQueueSize: Int,
-  private val delayHandler: (Duration) -> Unit
-) : BlockingQueue<T> {
-  private val queue: BlockingQueue<TimedQueueItem<T>> =
-    ArrayBlockingQueue<TimedQueueItem<T>>(maxQueueSize)
+internal class TimedBlockingQueue<T>(maxQueueSize: Int, private val delayHandler: (Duration) -> Unit) :
+  BlockingQueue<T> {
+  private val queue: BlockingQueue<TimedQueueItem<T>> = ArrayBlockingQueue<TimedQueueItem<T>>(maxQueueSize)
 
   override fun poll(timeout: Long, unit: TimeUnit): T? {
     val item = queue.poll(timeout, unit)
@@ -105,9 +100,7 @@ internal class TimedBlockingQueue<T>(
   }
 
   override fun retainAll(elements: Collection<T>): Boolean {
-    val toRemove = queue
-      .filter { wrappedItem -> !elements.contains(wrappedItem.value) }
-      .map { item -> item.value }
+    val toRemove = queue.filter { wrappedItem -> !elements.contains(wrappedItem.value) }.map { item -> item.value }
     return removeItems(toRemove) > 0
   }
 

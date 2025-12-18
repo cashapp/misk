@@ -14,21 +14,19 @@ import misk.mcp.McpPrompt
 class KotlinDeveloperPrompt @Inject constructor() : McpPrompt {
   override val name = "Kotlin Developer"
   override val description = "Develop small kotlin applications"
-  override val arguments = listOf(
-    PromptArgument(
-      name = "Project Name",
-      description = "Project name for the new project",
-      required = true,
-    ),
-  )
+  override val arguments =
+    listOf(PromptArgument(name = "Project Name", description = "Project name for the new project", required = true))
 
-  override suspend fun handler(request: GetPromptRequest) = GetPromptResult(
-    description = "Description for ${request.name}",
-    messages = listOf(
-      PromptMessage(
-        role = Role.User,
-        content = TextContent("Develop a kotlin project named <name>${request.arguments?.get("Project Name")}</name>"),
-      ),
-    ),
-  )
+  override suspend fun handler(request: GetPromptRequest) =
+    GetPromptResult(
+      description = "Description for ${request.name}",
+      messages =
+        listOf(
+          PromptMessage(
+            role = Role.User,
+            content =
+              TextContent("Develop a kotlin project named <name>${request.arguments?.get("Project Name")}</name>"),
+          )
+        ),
+    )
 }

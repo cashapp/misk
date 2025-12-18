@@ -1,5 +1,8 @@
 package misk.web.interceptors
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import javax.servlet.http.HttpServletRequest
 import misk.Action
 import misk.MiskCaller
 import misk.scope.ActionScoped
@@ -7,20 +10,18 @@ import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.mdc.LogContextProvider
 import org.slf4j.MDC
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-import javax.servlet.http.HttpServletRequest
 
 /**
- * [RequestLogContextInterceptor] puts information about the current request into the
- * logging MDC so it can be included in structured logs
+ * [RequestLogContextInterceptor] puts information about the current request into the logging MDC so it can be included
+ * in structured logs
  */
-internal class RequestLogContextInterceptor private constructor(
+internal class RequestLogContextInterceptor
+private constructor(
   private val action: Action,
   private val currentCaller: ActionScoped<MiskCaller?>,
   private val currentRequest: ActionScoped<HttpServletRequest>,
   @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
-  private val logContextProviders: java.util.Map<String, LogContextProvider>
+  private val logContextProviders: java.util.Map<String, LogContextProvider>,
 ) : NetworkInterceptor {
 
   override fun intercept(chain: NetworkChain) {
@@ -28,11 +29,7 @@ internal class RequestLogContextInterceptor private constructor(
     return try {
       MDC.put(MDC_ACTION, action.name)
       MDC.put(MDC_CALLING_PRINCIPAL, currentCaller.get()?.principal ?: "unknown")
-      logContextProviders.forEach { key, provider ->
-        provider.get(request)?.let { value ->
-          MDC.put(key, value)
-        }
-      }
+      logContextProviders.forEach { key, provider -> provider.get(request)?.let { value -> MDC.put(key, value) } }
       chain.proceed(chain.httpCall)
     } finally {
       allContextNames.forEach { MDC.remove(it) }
@@ -41,11 +38,13 @@ internal class RequestLogContextInterceptor private constructor(
   }
 
   @Singleton
-  class Factory @Inject internal constructor(
+  class Factory
+  @Inject
+  internal constructor(
     private val currentCaller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
     private val currentRequest: @JvmSuppressWildcards ActionScoped<HttpServletRequest>,
     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
-    private val logContextProviders: java.util.Map<String, LogContextProvider>
+    private val logContextProviders: java.util.Map<String, LogContextProvider>,
   ) : NetworkInterceptor.Factory {
     override fun create(action: Action) =
       RequestLogContextInterceptor(action, currentCaller, currentRequest, logContextProviders)
@@ -59,9 +58,6 @@ internal class RequestLogContextInterceptor private constructor(
     const val MDC_PROTOCOL = "protocol"
     const val MDC_HTTP_METHOD = "http_method"
 
-    val allContextNames = listOf(
-      MDC_ACTION,
-      MDC_CALLING_PRINCIPAL,
-    )
+    val allContextNames = listOf(MDC_ACTION, MDC_CALLING_PRINCIPAL)
   }
 }

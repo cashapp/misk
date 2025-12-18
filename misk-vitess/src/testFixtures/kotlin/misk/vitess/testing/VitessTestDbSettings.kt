@@ -1,7 +1,7 @@
 package misk.vitess.testing
 
-import misk.containers.ContainerUtil
 import java.time.Duration
+import misk.containers.ContainerUtil
 
 object DefaultSettings {
   const val AUTO_APPLY_SCHEMA_CHANGES = true

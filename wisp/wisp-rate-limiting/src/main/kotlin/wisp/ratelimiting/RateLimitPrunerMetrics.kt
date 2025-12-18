@@ -5,9 +5,10 @@ import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.MeterRegistry
 
 class RateLimitPrunerMetrics(meterRegistry: MeterRegistry) {
-  val bucketsPruned: Counter = Counter.builder(PRUNED_BUCKETS_COUNTER_NAME)
-    .description("count of rate limit buckets pruned")
-    .register(meterRegistry)
+  val bucketsPruned: Counter =
+    Counter.builder(PRUNED_BUCKETS_COUNTER_NAME)
+      .description("count of rate limit buckets pruned")
+      .register(meterRegistry)
 
   val pruningDuration: DistributionSummary =
     DistributionSummary.builder(PRUNING_DURATION)

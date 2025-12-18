@@ -6,8 +6,7 @@ import misk.web.dashboard.AdminDashboardAccess
 import misk.web.dashboard.DashboardModule
 
 /**
- * Installs WebActions dashboard tab which allows introspection
- * and exercising actions from an auto-fill JSON editor.
+ * Installs WebActions dashboard tab which allows introspection and exercising actions from an auto-fill JSON editor.
  */
 class WebActionsDashboardTabModule(private val isDevelopment: Boolean) : KAbstractModule() {
   override fun configure() {

@@ -27,12 +27,7 @@ class ExemplarDashboardModule(private val deployment: Deployment) : KAbstractMod
   override fun configure() {
     // Favicon.ico and any other shared static assets available at /static/*
     multibind<StaticResourceEntry>()
-      .toInstance(
-        StaticResourceEntry(
-          url_path_prefix = "/static/",
-          resourcePath = "classpath:/web/static/"
-        )
-      )
+      .toInstance(StaticResourceEntry(url_path_prefix = "/static/", resourcePath = "classpath:/web/static/"))
     install(WebActionModule.createWithPrefix<StaticResourceAction>(url_path_prefix = "/static/"))
 
     // Custom Frontend at /app/
@@ -44,15 +39,13 @@ class ExemplarDashboardModule(private val deployment: Deployment) : KAbstractMod
     // Custom Support Dashboard /support/
     install(WebActionModule.create<SupportDashboardIndexAction>())
     install(WebActionModule.create<SupportBravoIndexAction>())
-    multibind<DashboardHomeUrl>().toInstance(
-      DashboardHomeUrl<SupportDashboard>("/support/")
-    )
+    multibind<DashboardHomeUrl>().toInstance(DashboardHomeUrl<SupportDashboard>("/support/"))
     install(
       DashboardModule.createHotwireTab<SupportDashboard, SupportDashboardAccess>(
         slug = "bravo",
         urlPathPrefix = "/support/bravo/",
         menuLabel = "Bravo",
-        menuCategory = "Support"
+        menuCategory = "Support",
       )
     )
     install(
@@ -86,16 +79,18 @@ class ExemplarDashboardModule(private val deployment: Deployment) : KAbstractMod
         slug = "exemplar-alpha",
         urlPathPrefix = AlphaIndexAction.PATH,
         menuLabel = "Alpha",
-        menuCategory = "Admin Tools"
+        menuCategory = "Admin Tools",
       )
     )
 
     // Custom links
-    install(DashboardModule.createMenuLink<AdminDashboard, AdminDashboardAccess>(
-      label = { appName, deployment -> "Internal Tool" },
-      url = { appName, deployment -> "https://internal-tool.cash.app/?app=$appName&deployment=$deployment" },
-      category = "Internal"
-    ))
+    install(
+      DashboardModule.createMenuLink<AdminDashboard, AdminDashboardAccess>(
+        label = { appName, deployment -> "Internal Tool" },
+        url = { appName, deployment -> "https://internal-tool.cash.app/?app=$appName&deployment=$deployment" },
+        category = "Internal",
+      )
+    )
 
     // Custom Admin Dashboard Tab at /_admin/... which doesn't exist and shows graceful failure 404
     install(WebActionModule.create<AlphaIndexAction>())
@@ -107,7 +102,7 @@ class ExemplarDashboardModule(private val deployment: Deployment) : KAbstractMod
         urlPathPrefix = "/_admin/not-found-iframe/",
         iframePath = "/path/to/not-found-iframe/index.html",
         menuLabel = "Not Found IFrame",
-        menuCategory = "Admin Tools"
+        menuCategory = "Admin Tools",
       )
     )
     install(
@@ -117,7 +112,7 @@ class ExemplarDashboardModule(private val deployment: Deployment) : KAbstractMod
         urlPathPrefix = "/_admin/not-found-misk-web/",
         developmentWebProxyUrl = "http://localhost:3000/",
         menuLabel = "Not Found Misk-Web",
-        menuCategory = "Admin Tools"
+        menuCategory = "Admin Tools",
       )
     )
     install(
@@ -126,23 +121,21 @@ class ExemplarDashboardModule(private val deployment: Deployment) : KAbstractMod
         urlPathPrefix = "/_admin/not-found-react/",
         iframePath = "/_tab/not-found-react/index.html",
         menuLabel = "Not Found React",
-        menuCategory = "Admin Tools"
+        menuCategory = "Admin Tools",
       )
     )
-    install(DashboardModule.createMenuLink<AdminDashboard, AdminDashboardAccess>(
-      label = "Not Found Link",
-      url = "/_admin/not-found-link/",
-      category = "Admin Tools"
-    ))
+    install(
+      DashboardModule.createMenuLink<AdminDashboard, AdminDashboardAccess>(
+        label = "Not Found Link",
+        url = "/_admin/not-found-link/",
+        category = "Admin Tools",
+      )
+    )
   }
 }
 
 /** Dashboard Annotation used for all tabs bound in the Exemplar service support dashboard. */
-@Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-annotation class SupportDashboard
+@Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) annotation class SupportDashboard
 
 /** Access for the support dashboard. */
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION)
-annotation class SupportDashboardAccess
+@Retention(AnnotationRetention.RUNTIME) @Target(AnnotationTarget.FUNCTION) annotation class SupportDashboardAccess

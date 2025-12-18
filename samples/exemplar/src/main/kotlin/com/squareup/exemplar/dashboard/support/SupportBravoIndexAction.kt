@@ -11,15 +11,12 @@ import misk.web.mediatype.MediaTypes
 import misk.web.v2.DashboardPageLayout
 
 @Singleton
-class SupportBravoIndexAction @Inject constructor(
-  private val dashboardPageLayout: DashboardPageLayout
-) : WebAction {
+class SupportBravoIndexAction @Inject constructor(private val dashboardPageLayout: DashboardPageLayout) : WebAction {
   @Get("/support/bravo/")
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @SupportDashboardAccess
-  fun get(): String = dashboardPageLayout
-    .newBuilder()
-    .build { appName, _, _ ->
+  fun get(): String =
+    dashboardPageLayout.newBuilder().build { appName, _, _ ->
       h1 { +"""This is a custom Hotwire tab for Support dashboard on $appName""" }
     }
 }

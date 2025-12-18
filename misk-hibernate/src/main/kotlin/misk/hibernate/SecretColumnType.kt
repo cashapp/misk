@@ -2,21 +2,21 @@ package misk.hibernate
 
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.DeterministicAead
+import java.io.Serializable
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+import java.sql.Types
+import java.util.*
 import misk.crypto.AeadKeyManager
 import misk.crypto.DeterministicAeadKeyManager
 import misk.crypto.KeyNotFoundException
+import misk.logging.getLogger
 import org.hibernate.HibernateException
 import org.hibernate.engine.spi.SharedSessionContractImplementor
 import org.hibernate.type.spi.TypeConfiguration
 import org.hibernate.type.spi.TypeConfigurationAware
 import org.hibernate.usertype.ParameterizedType
 import org.hibernate.usertype.UserType
-import misk.logging.getLogger
-import java.io.Serializable
-import java.sql.PreparedStatement
-import java.sql.ResultSet
-import java.sql.Types
-import java.util.*
 
 internal class SecretColumnType : UserType, ParameterizedType, TypeConfigurationAware {
   companion object {
@@ -39,11 +39,12 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
     keyName = parameters.getProperty(FIELD_ENCRYPTION_KEY_NAME)
     val indexable = parameters.getProperty(FIELD_ENCRYPTION_INDEXABLE)!!.toBoolean()
 
-    encryptionAdapter = if (indexable) {
-      DeterministicAeadAdapter(_typeConfiguration, keyName)
-    } else {
-      AeadAdapter(_typeConfiguration, keyName)
-    }
+    encryptionAdapter =
+      if (indexable) {
+        DeterministicAeadAdapter(_typeConfiguration, keyName)
+      } else {
+        AeadAdapter(_typeConfiguration, keyName)
+      }
   }
 
   override fun hashCode(x: Any): Int = (x as ByteArray).hashCode()
@@ -61,19 +62,14 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
   }
 
   /**
-   * This method is used by Hibernate when caching values, see [org.hibernate.type.Type.disassemble].
-   * This implementation makes sure that data is stored encrypted even when being cached in memory.
+   * This method is used by Hibernate when caching values, see [org.hibernate.type.Type.disassemble]. This
+   * implementation makes sure that data is stored encrypted even when being cached in memory.
    */
   override fun disassemble(value: Any?): Serializable {
     return encryptionAdapter.encrypt(value as ByteArray, null)
   }
 
-  override fun nullSafeSet(
-    st: PreparedStatement,
-    value: Any?,
-    index: Int,
-    session: SharedSessionContractImplementor?
-  ) {
+  override fun nullSafeSet(st: PreparedStatement, value: Any?, index: Int, session: SharedSessionContractImplementor?) {
     if (value == null) {
       st.setNull(index, Types.VARBINARY)
     } else {
@@ -86,7 +82,7 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
     rs: ResultSet?,
     names: Array<out String>,
     session: SharedSessionContractImplementor?,
-    owner: Any?
+    owner: Any?,
   ): Any? {
     val result = rs?.getBytes(names[0])
     return result?.let {
@@ -105,13 +101,13 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
 
 internal interface EncryptionAdapter {
   fun encrypt(plaintext: ByteArray, associatedData: ByteArray?): ByteArray
+
   fun decrypt(ciphertext: ByteArray, associatedData: ByteArray?): ByteArray
 }
 
 internal class AeadAdapter(typeConfig: TypeConfiguration, keyName: String) : EncryptionAdapter {
   private val keyManager =
-    typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
-      .getInstance(AeadKeyManager::class.java)
+    typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector.getInstance(AeadKeyManager::class.java)
 
   val aead: Aead by lazy {
     try {
@@ -130,12 +126,12 @@ internal class AeadAdapter(typeConfig: TypeConfiguration, keyName: String) : Enc
   }
 }
 
-internal class DeterministicAeadAdapter(typeConfig: TypeConfiguration, keyName: String) :
-  EncryptionAdapter {
+internal class DeterministicAeadAdapter(typeConfig: TypeConfiguration, keyName: String) : EncryptionAdapter {
 
   private val keyManager =
-    typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
-      .getInstance(DeterministicAeadKeyManager::class.java)
+    typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector.getInstance(
+      DeterministicAeadKeyManager::class.java
+    )
   val daead: DeterministicAead by lazy {
     try {
       keyManager[keyName]

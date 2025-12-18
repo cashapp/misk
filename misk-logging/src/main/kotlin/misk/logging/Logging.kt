@@ -5,7 +5,6 @@ import mu.KLogger
 import mu.KotlinLogging
 import org.slf4j.MDC
 import org.slf4j.event.Level
-import misk.annotation.ExperimentalMiskApi
 
 typealias Tag = Pair<String, Any?>
 
@@ -14,35 +13,30 @@ inline fun <reified T> getLogger(): KLogger {
 }
 
 /**
- * Returns a logger that samples logs. This logger MUST be instantiated statically,
- * in a companion object or as a Singleton.
+ * Returns a logger that samples logs. This logger MUST be instantiated statically, in a companion object or as a
+ * Singleton.
  *
  * To get a rate limited logger:
  *
- *   val logger = getLogger<MyClass>().sampled(RateLimitingSampler(RATE_PER_SECOND))
+ * val logger = getLogger<MyClass>().sampled(RateLimitingSampler(RATE_PER_SECOND))
  *
  * To get a probabilistic sampler
  *
- *   val logger = getLogger<MyClass>().sampled(PercentSampler(PERCENTAGE_TO_ALLOW))
+ * val logger = getLogger<MyClass>().sampled(PercentSampler(PERCENTAGE_TO_ALLOW))
  */
 fun KLogger.sampled(sampler: Sampler = Sampler.rateLimiting(1L)): KLogger {
   return SampledLogger(this, sampler)
 }
 
-fun KLogger.info(vararg tags: Tag, message: () -> Any?) =
-  log(Level.INFO, message = message, tags = tags)
+fun KLogger.info(vararg tags: Tag, message: () -> Any?) = log(Level.INFO, message = message, tags = tags)
 
-fun KLogger.warn(vararg tags: Tag, message: () -> Any?) =
-  log(Level.WARN, message = message, tags = tags)
+fun KLogger.warn(vararg tags: Tag, message: () -> Any?) = log(Level.WARN, message = message, tags = tags)
 
-fun KLogger.error(vararg tags: Tag, message: () -> Any?) =
-  log(Level.ERROR, message = message, tags = tags)
+fun KLogger.error(vararg tags: Tag, message: () -> Any?) = log(Level.ERROR, message = message, tags = tags)
 
-fun KLogger.debug(vararg tags: Tag, message: () -> Any?) =
-  log(Level.DEBUG, message = message, tags = tags)
+fun KLogger.debug(vararg tags: Tag, message: () -> Any?) = log(Level.DEBUG, message = message, tags = tags)
 
-fun KLogger.trace(vararg tags: Tag, message: () -> Any?) =
-  log(Level.TRACE, message = message, tags = tags)
+fun KLogger.trace(vararg tags: Tag, message: () -> Any?) = log(Level.TRACE, message = message, tags = tags)
 
 fun KLogger.info(th: Throwable, vararg tags: Tag, message: () -> Any?) =
   log(Level.INFO, th, message = message, tags = tags)
@@ -87,11 +81,12 @@ fun KLogger.log(level: Level, th: Throwable?, vararg tags: Tag, message: () -> A
 
 fun <T> withTags(vararg tags: Tag, block: () -> T): T {
   // Establish MDC, saving prior MDC
-  val priorMDC = tags.map { (key, value) ->
-    val priorValue = MDC.get(key)
-    MDC.put(key, value.toString())
-    key to priorValue
-  }
+  val priorMDC =
+    tags.map { (key, value) ->
+      val priorValue = MDC.get(key)
+      MDC.put(key, value.toString())
+      key to priorValue
+    }
 
   try {
     return block()
@@ -101,14 +96,8 @@ fun <T> withTags(vararg tags: Tag, block: () -> T): T {
   }
 }
 
-/**
- * `includeTagsOnExceptionLogs`: For usage instructions, please see docs below on `withSmartTags`
- */
-fun <T> withTags(
-  vararg tags: Tag,
-  includeTagsOnExceptionLogs: Boolean = false,
-  block: () -> T
-): T {
+/** `includeTagsOnExceptionLogs`: For usage instructions, please see docs below on `withSmartTags` */
+fun <T> withTags(vararg tags: Tag, includeTagsOnExceptionLogs: Boolean = false, block: () -> T): T {
   return withTags(*tags) {
     if (includeTagsOnExceptionLogs) {
       SmartTagsThreadLocalHandler.includeTagsOnExceptions(*tags, block = block)
@@ -121,13 +110,13 @@ fun <T> withTags(
 /**
  * Use this function to add tags to the MDC context for the duration of the block.
  *
- * This is particularly useful (the smart aspect) when an exception is thrown within the block,
- * the tags can be retrieved outside that block using `SmartTagsThreadLocalHandler.popThreadLocalSmartTags()`
- * and added to the MDC context again when logging the exception.
+ * This is particularly useful (the smart aspect) when an exception is thrown within the block, the tags can be
+ * retrieved outside that block using `SmartTagsThreadLocalHandler.popThreadLocalSmartTags()` and added to the MDC
+ * context again when logging the exception.
  *
- * Within Misk this is already built into both WebAction (`misk.web.exceptions.ExceptionHandlingInterceptor`)
- * and `misk.jobqueue.sqs.SqsJobConsumer`. These can be used as an example to extend for any
- * other incoming "event" consumers within a service such as Kafka, scheduled tasks, temporal workflows, etc.
+ * Within Misk this is already built into both WebAction (`misk.web.exceptions.ExceptionHandlingInterceptor`) and
+ * `misk.jobqueue.sqs.SqsJobConsumer`. These can be used as an example to extend for any other incoming "event"
+ * consumers within a service such as Kafka, scheduled tasks, temporal workflows, etc.
  *
  * Usage:
  * ```

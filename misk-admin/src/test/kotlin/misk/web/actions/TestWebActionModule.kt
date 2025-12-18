@@ -4,6 +4,7 @@ import com.squareup.protos.test.parsing.Shipment
 import com.squareup.protos.test.parsing.Warehouse
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
+import jakarta.inject.Inject
 import misk.MiskCaller
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
@@ -22,7 +23,6 @@ import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
-import jakarta.inject.Inject
 
 // Common module for web action-related tests to use to use that bind up some sample web actions
 class TestWebActionModule : KAbstractModule() {
@@ -36,12 +36,10 @@ class TestWebActionModule : KAbstractModule() {
     install(WebActionModule.create<RequestTypeAction>())
     install(WebActionModule.create<GrpcAction>())
 
-    multibind<AccessAnnotationEntry>().toInstance(
-      AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments"))
-    )
-    multibind<AccessAnnotationEntry>().toInstance(
-      AccessAnnotationEntry<CustomCapabilityAccess>(capabilities = listOf("admin"))
-    )
+    multibind<AccessAnnotationEntry>()
+      .toInstance(AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments")))
+    multibind<AccessAnnotationEntry>()
+      .toInstance(AccessAnnotationEntry<CustomCapabilityAccess>(capabilities = listOf("admin")))
     multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
   }
 
@@ -50,15 +48,14 @@ class TestWebActionModule : KAbstractModule() {
     @WireRpc(
       path = "/test/GetDestinationWarehouse",
       requestAdapter = "com.squareup.protos.test.parsing.Shipment#ADAPTER",
-      responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER"
+      responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER",
     )
     fun GetDestinationWarehouse(requestType: Shipment): Warehouse
   }
 }
 
 class CustomServiceAccessAction @Inject constructor() : WebAction {
-  @Inject
-  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+  @Inject lateinit var scopedCaller: ActionScoped<MiskCaller?>
 
   @Get("/custom_service_access")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
@@ -66,13 +63,10 @@ class CustomServiceAccessAction @Inject constructor() : WebAction {
   fun get() = "${scopedCaller.get()} authorized as custom service".toResponseBody()
 }
 
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION)
-annotation class CustomServiceAccess
+@Retention(AnnotationRetention.RUNTIME) @Target(AnnotationTarget.FUNCTION) annotation class CustomServiceAccess
 
 class CustomCapabilityAccessAction @Inject constructor() : WebAction {
-  @Inject
-  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+  @Inject lateinit var scopedCaller: ActionScoped<MiskCaller?>
 
   @Get("/custom_capability_access")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
@@ -80,9 +74,7 @@ class CustomCapabilityAccessAction @Inject constructor() : WebAction {
   fun get() = "${scopedCaller.get()} authorized with custom capability".toResponseBody()
 }
 
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION)
-annotation class CustomCapabilityAccess
+@Retention(AnnotationRetention.RUNTIME) @Target(AnnotationTarget.FUNCTION) annotation class CustomCapabilityAccess
 
 class RequestTypeAction @Inject constructor() : WebAction {
   @Post("/request_type")
@@ -92,13 +84,9 @@ class RequestTypeAction @Inject constructor() : WebAction {
   fun shipment(@RequestBody requestType: Shipment) = "request: $requestType".toResponseBody()
 }
 
-class GrpcAction @Inject constructor() :
-  TestWebActionModule.ShippingGetDestinationWarehouseBlockingServer,
-  WebAction {
+class GrpcAction @Inject constructor() : TestWebActionModule.ShippingGetDestinationWarehouseBlockingServer, WebAction {
   @Unauthenticated
   override fun GetDestinationWarehouse(requestType: Shipment): Warehouse {
-    return Warehouse.Builder()
-      .warehouse_id(7777L)
-      .build()
+    return Warehouse.Builder().warehouse_id(7777L).build()
   }
 }

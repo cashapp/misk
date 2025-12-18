@@ -24,19 +24,18 @@ import misk.web.mediatype.MediaTypes
 import misk.web.v2.DashboardPageLayout
 
 @Singleton
-internal class MetadataTabIndexAction @Inject constructor(
-  private val dashboardPageLayout: DashboardPageLayout,
-  private val allMetadataAction: AllMetadataAction,
-) : WebAction {
+internal class MetadataTabIndexAction
+@Inject
+constructor(private val dashboardPageLayout: DashboardPageLayout, private val allMetadataAction: AllMetadataAction) :
+  WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @AdminDashboardAccess
   fun get(
     /** Metadata id to show. */
     @QueryParam q: String?
-  ): String = dashboardPageLayout
-    .newBuilder()
-    .build { _, _, _ ->
+  ): String =
+    dashboardPageLayout.newBuilder().build { _, _, _ ->
       val allKeys = allMetadataAction.allKeys
       val metadata = allMetadataAction.getAll(q).all.values.firstOrNull()
 
@@ -48,7 +47,9 @@ internal class MetadataTabIndexAction @Inject constructor(
         div {
           form {
             action = PATH
-            select("mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6") {
+            select(
+              "mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            ) {
               id = "q"
               name = "q"
               onChange = "this.form.submit()"
@@ -78,9 +79,7 @@ internal class MetadataTabIndexAction @Inject constructor(
           if (q != null && metadata != null) {
             h3("mb-4 text-color-blue-500") {
               code {
-                span("font-bold") {
-                  +"GET "
-                }
+                span("font-bold") { +"GET " }
                 a(classes = "text-blue-500 hover:underline") {
                   href = AllMetadataAction.PATH.replace("{id}", q)
                   +AllMetadataAction.PATH.replace("{id}", q)
@@ -88,9 +87,7 @@ internal class MetadataTabIndexAction @Inject constructor(
               }
             }
 
-            div("my-4") {
-              metadata.descriptionBlock(this@build)
-            }
+            div("my-4") { metadata.descriptionBlock(this@build) }
 
             metadata.contentBlock(this@build)
           }

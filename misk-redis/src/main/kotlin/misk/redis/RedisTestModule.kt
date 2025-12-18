@@ -1,12 +1,11 @@
 package misk.redis
 
-import misk.inject.KAbstractModule
 import jakarta.inject.Qualifier
 import kotlin.random.Random
+import misk.inject.KAbstractModule
 
 @Deprecated("Moved to misk-redis-testing.", ReplaceWith("misk.redis.testing.RedisTestModule"))
-class RedisTestModule @JvmOverloads constructor(private val random: Random = Random.Default) :
-  KAbstractModule() {
+class RedisTestModule @JvmOverloads constructor(private val random: Random = Random.Default) : KAbstractModule() {
   override fun configure() {
     bind<Random>().annotatedWith<ForFakeRedis>().toInstance(random)
     bind<Redis>().toInstance(FakeRedis())

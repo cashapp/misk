@@ -39,17 +39,13 @@ import retrofit2.http.POST
 
 @MiskTest(startService = true)
 internal class ClientServerTraceTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
-  @Inject
-  private lateinit var jetty: JettyService
+  @Inject private lateinit var jetty: JettyService
 
-  @Inject
-  private lateinit var serverTracer: ConcurrentMockTracer
+  @Inject private lateinit var serverTracer: ConcurrentMockTracer
 
-  @Inject
-  private lateinit var serverInjector: Injector
+  @Inject private lateinit var serverInjector: Injector
 
   private lateinit var clientInjector: Injector
 
@@ -57,9 +53,7 @@ internal class ClientServerTraceTest {
 
   @BeforeEach
   fun createClient() {
-    clientInjector = Guice.createInjector(
-      MockTracingBackendModule(), MiskTestingServiceModule(), ClientModule(jetty)
-    )
+    clientInjector = Guice.createInjector(MockTracingBackendModule(), MiskTestingServiceModule(), ClientModule(jetty))
   }
 
   @Test
@@ -75,8 +69,7 @@ internal class ClientServerTraceTest {
     // Two spans here because one is created at the app level and another at the network interceptor
     // level.
     assertThat(clientTracer.finishedSpans().size).isEqualTo(2)
-    val clientSpan =
-      clientTracer.finishedSpans().find { it.context().spanId() == serverSpan.parentId() }
+    val clientSpan = clientTracer.finishedSpans().find { it.context().spanId() == serverSpan.parentId() }
 
     assertThat(clientSpan).isNotNull()
   }
@@ -97,8 +90,7 @@ internal class ClientServerTraceTest {
   @Test
   fun traceHopsFromClientToServerToServer() {
     val childServerInjector = serverInjector.createChildInjector(ClientModule(jetty))
-    RoarLikeDinosaurAction.returnADinosaur =
-      childServerInjector.getInstance<ReturnADinosaur>(Names.named("dinosaur"))
+    RoarLikeDinosaurAction.returnADinosaur = childServerInjector.getInstance<ReturnADinosaur>(Names.named("dinosaur"))
 
     val client = clientInjector.getInstance<RoarLikeDinosaur>(Names.named("roar"))
     client.doRoar(dinosaurRequest).execute()
@@ -132,29 +124,25 @@ internal class ClientServerTraceTest {
     // Two spans here because one is created at the app level and another at the network interceptor
     // level.
     assertThat(clientTracer.finishedSpans().size).isEqualTo(2)
-    val clientSpan =
-      clientTracer.finishedSpans()
-        .find { it.context().spanId() == initialServerSpan!!.parentId() }
+    val clientSpan = clientTracer.finishedSpans().find { it.context().spanId() == initialServerSpan!!.parentId() }
 
     assertThat(clientSpan).isNotNull()
   }
 
   interface ReturnADinosaur {
-    @POST("/cooldinos")
-    fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
+    @POST("/cooldinos") fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
   }
 
   class ReturnADinosaurAction @Inject constructor() : WebAction {
     @Post("/cooldinos")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun getDinosaur(@RequestBody request: Dinosaur):
-      Dinosaur = request.newBuilder().name("super${request.name}").build()
+    fun getDinosaur(@RequestBody request: Dinosaur): Dinosaur =
+      request.newBuilder().name("super${request.name}").build()
   }
 
   interface RoarLikeDinosaur {
-    @POST("/roar")
-    fun doRoar(@Body request: Dinosaur): Call<Dinosaur>
+    @POST("/roar") fun doRoar(@Body request: Dinosaur): Call<Dinosaur>
   }
 
   @Singleton
@@ -168,8 +156,7 @@ internal class ClientServerTraceTest {
     @Post("/roar")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun doRoar(@RequestBody request: Dinosaur):
-      Dinosaur = returnADinosaur!!.getDinosaur(request).execute().body()!!
+    fun doRoar(@RequestBody request: Dinosaur): Dinosaur = returnADinosaur!!.getDinosaur(request).execute().body()!!
   }
 
   class TestModule : KAbstractModule() {
@@ -189,10 +176,11 @@ internal class ClientServerTraceTest {
       install(
         HttpClientsConfigModule(
           HttpClientsConfig(
-            endpoints = mapOf(
-              "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
-              "roar" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-            )
+            endpoints =
+              mapOf(
+                "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
+                "roar" to HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
+              )
           )
         )
       )

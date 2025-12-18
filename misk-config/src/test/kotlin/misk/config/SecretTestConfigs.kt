@@ -1,7 +1,5 @@
 package misk.config
 
-import misk.config.Config
-
 data class SuperSecretConfig(
   val string_value: String,
   val secret_information: Secret<SecretInformationConfig>,
@@ -12,24 +10,16 @@ data class SuperSecretConfig(
   val nested_secret: Secret<NestedSecretConfig>,
   val secret_information_wrapper: SecretInformationWrapperConfig,
   val secret_string: Secret<String>,
-  val secret_bytearray: Secret<ByteArray>
+  val secret_bytearray: Secret<ByteArray>,
 ) : Config
 
 data class NestedSecretConfig(val nested_nested: SecretInformationWrapperConfig) : Config
 
-data class SecretInformationWrapperConfig(val secret_information: Secret<SecretInformationConfig>) :
-  Config
+data class SecretInformationWrapperConfig(val secret_information: Secret<SecretInformationConfig>) : Config
 
-data class SecretInformationConfig(
-  val answer_to_universe: String,
-  val limit: Int
-) : Config
+data class SecretInformationConfig(val answer_to_universe: String, val limit: Int) : Config
 
 // These are examples of how NOT to define secrets.
-data class SelfSecretConfigRoot(
-  override var value: SelfSecretConfigRoot
-) : Secret<SelfSecretConfigRoot>, Config
+data class SelfSecretConfigRoot(override var value: SelfSecretConfigRoot) : Secret<SelfSecretConfigRoot>, Config
 
-data class SecretConfigRoot(
-  override var value: SecretInformationConfig
-) : Secret<SecretInformationConfig>, Config
+data class SecretConfigRoot(override var value: SecretInformationConfig) : Secret<SecretInformationConfig>, Config

@@ -10,16 +10,14 @@ import com.amazonaws.services.sqs.model.QueueDoesNotExistException
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Ports
-import misk.jobqueue.sqs.DockerSqs.clientPort
-import misk.testing.ExternalDependency
 import misk.containers.Composer
 import misk.containers.Container
 import misk.containers.ContainerUtil
+import misk.jobqueue.sqs.DockerSqs.clientPort
 import misk.logging.getLogger
+import misk.testing.ExternalDependency
 
-/**
- * A test SQS Service. Tests can connect to the service at 127.0.0.1:[clientPort]
- */
+/** A test SQS Service. Tests can connect to the service at 127.0.0.1:[clientPort] */
 internal object DockerSqs : ExternalDependency {
 
   private val log = getLogger<DockerSqs>()
@@ -33,51 +31,46 @@ internal object DockerSqs : ExternalDependency {
   /** cleans up the queues after each run */
   override fun afterEach() {
     val queues = client.listQueues()
-    queues.queueUrls.forEach {
-      client.deleteQueue(ensureUrlWithProperTarget(it))
-    }
+    queues.queueUrls.forEach { client.deleteQueue(ensureUrlWithProperTarget(it)) }
   }
 
-  private val composer = Composer(
-    "e-sqs",
-    Container {
-      // NB(mmihic): Because the client port is embedded directly into the queue URLs, we have to use
-      // the same external port as we do for the internal port
-      val exposedClientPort = ExposedPort.tcp(clientPort)
-      withImage("softwaremill/elasticmq:1.6.5")
-        .withName("sqs")
-        .withExposedPorts(exposedClientPort)
-        .withHostConfig(
-          HostConfig.newHostConfig().withPortBindings(
-            Ports().apply { bind(exposedClientPort, Ports.Binding.bindPort(clientPort)) }
+  private val composer =
+    Composer(
+      "e-sqs",
+      Container {
+        // NB(mmihic): Because the client port is embedded directly into the queue URLs, we have to use
+        // the same external port as we do for the internal port
+        val exposedClientPort = ExposedPort.tcp(clientPort)
+        withImage("softwaremill/elasticmq:1.6.5")
+          .withName("sqs")
+          .withExposedPorts(exposedClientPort)
+          .withHostConfig(
+            HostConfig.newHostConfig()
+              .withPortBindings(Ports().apply { bind(exposedClientPort, Ports.Binding.bindPort(clientPort)) })
           )
-        )
-    }
-  )
+      },
+    )
 
-  val credentials = object : AWSCredentialsProvider {
-    override fun refresh() {}
-    override fun getCredentials(): AWSCredentials {
-      return BasicAWSCredentials("access-key-id", "secret-access-key")
+  val credentials =
+    object : AWSCredentialsProvider {
+      override fun refresh() {}
+
+      override fun getCredentials(): AWSCredentials {
+        return BasicAWSCredentials("access-key-id", "secret-access-key")
+      }
     }
-  }
 
   private fun ensureUrlWithProperTarget(url: String): String {
     return if (ContainerUtil.isRunningInDocker)
       url.replace("localhost", hostInternalTarget).replace("127.0.0.1", hostInternalTarget)
-    else
-      url
+    else url
   }
 
-  val endpoint = AwsClientBuilder.EndpointConfiguration(
-    "http://${ContainerUtil.dockerTargetOrLocalIp()}:$clientPort",
-    "us-east-1"
-  )
+  val endpoint =
+    AwsClientBuilder.EndpointConfiguration("http://${ContainerUtil.dockerTargetOrLocalIp()}:$clientPort", "us-east-1")
 
-  val client: AmazonSQS = AmazonSQSClient.builder()
-    .withCredentials(credentials)
-    .withEndpointConfiguration(endpoint)
-    .build()
+  val client: AmazonSQS =
+    AmazonSQSClient.builder().withCredentials(credentials).withEndpointConfiguration(endpoint).build()
 
   override fun startup() {
     composer.start()

@@ -2,10 +2,16 @@ package misk.jdbc
 
 import com.google.inject.util.Modules
 import jakarta.inject.Inject
+import java.sql.Connection
+import java.sql.SQLException
+import java.time.LocalDate
+import kotlin.test.assertFailsWith
+import kotlin.test.fail
 import misk.MiskTestingServiceModule
 import misk.backoff.FlatBackoff
 import misk.backoff.RetryConfig
 import misk.backoff.retry
+import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
@@ -18,13 +24,7 @@ import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import misk.config.Config
 import wisp.deployment.TESTING
-import java.sql.Connection
-import java.sql.SQLException
-import java.time.LocalDate
-import kotlin.test.assertFailsWith
-import kotlin.test.fail
 
 abstract class RealTransacterTest {
   @Inject @Movies lateinit var transacter: Transacter
@@ -32,18 +32,18 @@ abstract class RealTransacterTest {
   @Test
   fun happyPathWithConnection() {
     createTestData()
-    val actual = transacter.transaction { connection ->
-      connection.createStatement()
-        .executeQuery("SELECT name, created_at FROM movies ORDER BY created_at ASC")
-        .map {
+    val actual =
+      transacter.transaction { connection ->
+        connection.createStatement().executeQuery("SELECT name, created_at FROM movies ORDER BY created_at ASC").map {
           Movie(it.getString(1), it.getDate(2).toLocalDate())
         }
-    }
-    val expected = listOf(
-      Movie("Star Wars", LocalDate.of(1977, 5, 25)),
-      Movie("Luxo Jr.", LocalDate.of(1986, 8, 17)),
-      Movie("Jurassic Park", LocalDate.of(1993, 6, 9)),
-    )
+      }
+    val expected =
+      listOf(
+        Movie("Star Wars", LocalDate.of(1977, 5, 25)),
+        Movie("Luxo Jr.", LocalDate.of(1986, 8, 17)),
+        Movie("Jurassic Park", LocalDate.of(1993, 6, 9)),
+      )
     assertThat(actual).containsExactlyElementsOf(expected)
   }
 
@@ -51,19 +51,19 @@ abstract class RealTransacterTest {
   fun happyPath() {
     createTestData()
 
-    val actual = transacter.transactionWithSession { (connection) ->
-      connection.createStatement()
-        .executeQuery("SELECT name, created_at FROM movies ORDER BY created_at ASC")
-        .map {
+    val actual =
+      transacter.transactionWithSession { (connection) ->
+        connection.createStatement().executeQuery("SELECT name, created_at FROM movies ORDER BY created_at ASC").map {
           Movie(it.getString(1), it.getDate(2).toLocalDate())
         }
-    }
+      }
 
-    val expected = listOf(
-      Movie("Star Wars", LocalDate.of(1977, 5, 25)),
-      Movie("Luxo Jr.", LocalDate.of(1986, 8, 17)),
-      Movie("Jurassic Park", LocalDate.of(1993, 6, 9)),
-    )
+    val expected =
+      listOf(
+        Movie("Star Wars", LocalDate.of(1977, 5, 25)),
+        Movie("Luxo Jr.", LocalDate.of(1986, 8, 17)),
+        Movie("Jurassic Park", LocalDate.of(1993, 6, 9)),
+      )
     assertThat(actual).containsExactlyElementsOf(expected)
   }
 
@@ -71,9 +71,7 @@ abstract class RealTransacterTest {
 
   val count: (connection: Connection) -> Int = { connection ->
     connection.createStatement().use { statement ->
-      statement.executeQuery("SELECT count(*) FROM movies").map {
-        it.getInt(1)
-      }[0]
+      statement.executeQuery("SELECT count(*) FROM movies").map { it.getInt(1) }[0]
     }
   }
 
@@ -101,12 +99,8 @@ abstract class RealTransacterTest {
     var preCommit2Executed = false
     transacter.transactionWithSession { session ->
       session.useConnection {
-        session.onPreCommit {
-          preCommit1Executed = true
-        }
-        session.onPreCommit {
-          preCommit2Executed = true
-        }
+        session.onPreCommit { preCommit1Executed = true }
+        session.onPreCommit { preCommit2Executed = true }
       }
     }
 
@@ -119,9 +113,7 @@ abstract class RealTransacterTest {
     assertThatExceptionOfType(RuntimeException::class.java).isThrownBy {
       transacter.transactionWithSession { session ->
         session.useConnection { connection ->
-          session.onPreCommit {
-            throw RuntimeException()
-          }
+          session.onPreCommit { throw RuntimeException() }
           connection.createStatement().execute("INSERT INTO movies (name) VALUES ('hello')")
         }
       }
@@ -136,12 +128,8 @@ abstract class RealTransacterTest {
     var postCommit2Executed = false
     transacter.transactionWithSession { session ->
       session.useConnection {
-        session.onPostCommit {
-          postCommit1Executed = true
-        }
-        session.onPostCommit {
-          postCommit2Executed = true
-        }
+        session.onPostCommit { postCommit1Executed = true }
+        session.onPostCommit { postCommit2Executed = true }
       }
     }
 
@@ -155,9 +143,7 @@ abstract class RealTransacterTest {
       assertThatExceptionOfType(PostCommitHookFailedException::class.java).isThrownBy {
         transacter.transactionWithSession { session ->
           session.useConnection { connection ->
-            session.onPostCommit {
-              throw RuntimeException()
-            }
+            session.onPostCommit { throw RuntimeException() }
             connection.createStatement().execute("INSERT INTO movies (name) VALUES ('hello')")
           }
         }
@@ -207,12 +193,8 @@ abstract class RealTransacterTest {
     var sessionCloseHook2Executed = false
     transacter.transactionWithSession { session ->
       session.useConnection {
-        session.onSessionClose {
-          sessionCloseHook1Executed = true
-        }
-        session.onSessionClose {
-          sessionCloseHook2Executed = true
-        }
+        session.onSessionClose { sessionCloseHook1Executed = true }
+        session.onSessionClose { sessionCloseHook2Executed = true }
       }
     }
     assertThat(sessionCloseHook1Executed).isTrue
@@ -225,12 +207,8 @@ abstract class RealTransacterTest {
     assertThatExceptionOfType(RuntimeException::class.java).isThrownBy {
       transacter.transactionWithSession { session ->
         session.useConnection {
-          session.onSessionClose {
-            sessionCloseHook1Executed = true
-          }
-          session.onPreCommit {
-            throw RuntimeException()
-          }
+          session.onSessionClose { sessionCloseHook1Executed = true }
+          session.onPreCommit { throw RuntimeException() }
         }
       }
     }
@@ -240,12 +218,8 @@ abstract class RealTransacterTest {
     assertThatExceptionOfType(PostCommitHookFailedException::class.java).isThrownBy {
       transacter.transactionWithSession { session ->
         session.useConnection {
-          session.onSessionClose {
-            sessionCloseHook2Executed = true
-          }
-          session.onPostCommit {
-            throw RuntimeException()
-          }
+          session.onSessionClose { sessionCloseHook2Executed = true }
+          session.onPostCommit { throw RuntimeException() }
         }
       }
     }
@@ -255,9 +229,7 @@ abstract class RealTransacterTest {
     assertThatExceptionOfType(Exception::class.java).isThrownBy {
       transacter.transactionWithSession { session ->
         session.useConnection { connection ->
-          session.onSessionClose {
-            sessionCloseHook3Executed = true
-          }
+          session.onSessionClose { sessionCloseHook3Executed = true }
           // force a sql exception by storing null for a non nullable column
           connection.createStatement().execute("INSERT INTO movies (name) VALUES (null)")
         }
@@ -271,9 +243,7 @@ abstract class RealTransacterTest {
     assertThatExceptionOfType(RuntimeException::class.java).isThrownBy {
       transacter.transactionWithSession { session ->
         session.useConnection { connection ->
-          session.onSessionClose {
-            throw RuntimeException()
-          }
+          session.onSessionClose { throw RuntimeException() }
           connection.createStatement().execute("INSERT INTO movies (name) VALUES ('hello')")
         }
       }
@@ -290,8 +260,7 @@ abstract class RealTransacterTest {
           session.onSessionClose {
             transacter.transactionWithSession { innerSession ->
               innerSession.useConnection { innerConnection ->
-                innerConnection.createStatement()
-                  .execute("INSERT INTO movies (name) VALUES ('1')")
+                innerConnection.createStatement().execute("INSERT INTO movies (name) VALUES ('1')")
               }
             }
           }
@@ -311,11 +280,7 @@ abstract class RealTransacterTest {
   @Test
   fun cannotStartTransactionWhileInTransaction() {
     assertFailsWith<IllegalStateException> {
-      transacter.transactionWithSession {
-        transacter.transactionWithSession {
-          fail("transaction in transaction")
-        }
-      }
+      transacter.transactionWithSession { transacter.transactionWithSession { fail("transaction in transaction") } }
     }
   }
 
@@ -323,18 +288,18 @@ abstract class RealTransacterTest {
     // Insert some movies, characters and actors.
     transacter.transactionWithSession { session ->
       session.useConnection { connection ->
-        connection.prepareStatement("INSERT INTO movies (name, created_at) VALUES (?, ?)")
-          .use { statement ->
-            val insertMovie = fun(movie: Movie) {
+        connection.prepareStatement("INSERT INTO movies (name, created_at) VALUES (?, ?)").use { statement ->
+          val insertMovie =
+            fun(movie: Movie) {
               statement.setString(1, movie.name)
               statement.setObject(2, movie.date)
               statement.addBatch()
             }
-            insertMovie(Movie("Jurassic Park", LocalDate.of(1993, 6, 9)))
-            insertMovie(Movie("Star Wars", LocalDate.of(1977, 5, 25)))
-            insertMovie(Movie("Luxo Jr.", LocalDate.of(1986, 8, 17)))
-            statement.executeBatch()
-          }
+          insertMovie(Movie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+          insertMovie(Movie("Star Wars", LocalDate.of(1977, 5, 25)))
+          insertMovie(Movie("Luxo Jr.", LocalDate.of(1986, 8, 17)))
+          statement.executeBatch()
+        }
       }
     }
   }
@@ -351,15 +316,10 @@ abstract class RealTransacterTest {
 
   class RealTransacterTestModule(
     private val type: DataSourceType,
-    private val dataSourceConfig: DataSourceConfig? = null
+    private val dataSourceConfig: DataSourceConfig? = null,
   ) : KAbstractModule() {
     override fun configure() {
-      install(
-        Modules.override(MiskTestingServiceModule()).with(
-          FakeClockModule(),
-          MockTracingBackendModule()
-        )
-      )
+      install(Modules.override(MiskTestingServiceModule()).with(FakeClockModule(), MockTracingBackendModule()))
       install(DeploymentModule(TESTING))
       val config = MiskConfig.load<RootConfig>("test_transacter", TESTING)
       install(JdbcTestingModule(Movies::class))
@@ -380,35 +340,31 @@ abstract class RealTransacterTest {
 
 @MiskTest(startService = true)
 class MySQLRealTransacterTest : RealTransacterTest() {
-  @MiskTestModule
-  val module = RealTransacterTestModule(DataSourceType.MYSQL)
+  @MiskTestModule val module = RealTransacterTestModule(DataSourceType.MYSQL)
 }
 
 @MiskTest(startService = true)
 class MySQLEnforceWritableConnectionsTransacterTest : RealTransacterTest() {
   @MiskTestModule
-  val module = RealTransacterTestModule(
-    DataSourceType.MYSQL,
-    MiskConfig.load<RootConfig>("test_transacter", TESTING)
-      .mysql_enforce_writable_connections_data_source
-  )
+  val module =
+    RealTransacterTestModule(
+      DataSourceType.MYSQL,
+      MiskConfig.load<RootConfig>("test_transacter", TESTING).mysql_enforce_writable_connections_data_source,
+    )
 }
 
 @MiskTest(startService = true)
 class TiDBRealTransacterTest : RealTransacterTest() {
-  @MiskTestModule
-  val module = RealTransacterTestModule(DataSourceType.TIDB)
+  @MiskTestModule val module = RealTransacterTestModule(DataSourceType.TIDB)
 }
 
 @MiskTest(startService = true)
 class PostgreSQLRealTransacterTest : RealTransacterTest() {
-  @MiskTestModule
-  val module = RealTransacterTestModule(DataSourceType.POSTGRESQL)
+  @MiskTestModule val module = RealTransacterTestModule(DataSourceType.POSTGRESQL)
 }
 
 @MiskTest(startService = true)
 @Disabled(value = "Requires the ExternalDependency implementation to be less flakey")
 class CockroachDbRealTransacterTest : RealTransacterTest() {
-  @MiskTestModule
-  val module = RealTransacterTestModule(DataSourceType.COCKROACHDB)
+  @MiskTestModule val module = RealTransacterTestModule(DataSourceType.COCKROACHDB)
 }

@@ -4,11 +4,12 @@ import java.time.Duration
 import java.util.concurrent.ThreadLocalRandom
 
 /**
- * Performs exponential backoff with optional jitter. Durations are supplied as
- * functions, so that they can change dynamically as the system is running (e.g.
- * in response to changes in dynamic flags)
+ * Performs exponential backoff with optional jitter. Durations are supplied as functions, so that they can change
+ * dynamically as the system is running (e.g. in response to changes in dynamic flags)
  */
-open class ExponentialBackoff @JvmOverloads constructor(
+open class ExponentialBackoff
+@JvmOverloads
+constructor(
   private val baseDelay: () -> Duration,
   private val maxDelay: () -> Duration,
   private val jitter: () -> Duration,
@@ -19,18 +20,19 @@ open class ExponentialBackoff @JvmOverloads constructor(
   private var maxRetryCount = Integer.MAX_VALUE
 
   /**
-   * Creates a new unjittered [ExponentialBackoff] using a function for the base
-   * and max retry delays.
+   * Creates a new unjittered [ExponentialBackoff] using a function for the base and max retry delays.
    *
    * @param baseDelay The [Supplier] for the base delay
    * @param maxDelay The [Supplier] for maximum amount of time to wait between retries
    */
-  constructor(baseDelay: () -> Duration, maxDelay: () -> Duration) :
-    this(baseDelay, maxDelay, { Duration.ZERO }, { Duration.ZERO })
+  constructor(
+    baseDelay: () -> Duration,
+    maxDelay: () -> Duration,
+  ) : this(baseDelay, maxDelay, { Duration.ZERO }, { Duration.ZERO })
 
   /**
-   * Creates a new jittered [ExponentialBackoff] using a function for the base
-   * and max retry delays, and a function for the jitter amount.
+   * Creates a new jittered [ExponentialBackoff] using a function for the base and max retry delays, and a function for
+   * the jitter amount.
    *
    * @param baseDelay The [Supplier] for the base delay
    * @param maxDelay The [Supplier] for maximum amount of time to wait between retries
@@ -39,13 +41,11 @@ open class ExponentialBackoff @JvmOverloads constructor(
   constructor(
     baseDelay: () -> Duration,
     maxDelay: () -> Duration,
-    jitterFromNextDelay: (Long) -> Duration
-  ) :
-    this(baseDelay, maxDelay, { Duration.ZERO }, jitterFromNextDelay)
+    jitterFromNextDelay: (Long) -> Duration,
+  ) : this(baseDelay, maxDelay, { Duration.ZERO }, jitterFromNextDelay)
 
   /**
-   * Creates a new jittered [ExponentialBackoff] from fixed delays and jitter amounts and a function
-   * for the jitter.
+   * Creates a new jittered [ExponentialBackoff] from fixed delays and jitter amounts and a function for the jitter.
    *
    * @param baseDelay The base retry delay
    * @param maxDelay The max amount of time to delay
@@ -54,9 +54,8 @@ open class ExponentialBackoff @JvmOverloads constructor(
   constructor(
     baseDelay: Duration,
     maxDelay: Duration,
-    jitterFromNextDelay: (Long) -> Duration
-  ) :
-    this({ baseDelay }, { maxDelay }, { Duration.ZERO }, jitterFromNextDelay)
+    jitterFromNextDelay: (Long) -> Duration,
+  ) : this({ baseDelay }, { maxDelay }, { Duration.ZERO }, jitterFromNextDelay)
 
   /**
    * Creates a new [ExponentialBackoff] from fixed delays and jitter amounts
@@ -65,8 +64,11 @@ open class ExponentialBackoff @JvmOverloads constructor(
    * @param maxDelay The max amount of time to delay
    * @param jitter The amount of jitter to introduce
    */
-  constructor(baseDelay: Duration, maxDelay: Duration, jitter: Duration) :
-    this({ baseDelay }, { maxDelay }, { jitter }, { jitter })
+  constructor(
+    baseDelay: Duration,
+    maxDelay: Duration,
+    jitter: Duration,
+  ) : this({ baseDelay }, { maxDelay }, { jitter }, { jitter })
 
   /**
    * Creates a new [ExponentialBackoff] from fixed delays, without jitter
@@ -74,8 +76,7 @@ open class ExponentialBackoff @JvmOverloads constructor(
    * @param baseDelay The base retry delay
    * @param maxDelay The max amount of time to delay
    */
-  constructor(baseDelay: Duration, maxDelay: Duration) :
-    this(baseDelay, maxDelay, Duration.ofMillis(0))
+  constructor(baseDelay: Duration, maxDelay: Duration) : this(baseDelay, maxDelay, Duration.ofMillis(0))
 
   override fun reset() {
     consecutiveRetryCount = 0
@@ -96,7 +97,6 @@ open class ExponentialBackoff @JvmOverloads constructor(
 
   private fun randomJitter(curDelayMs: Long): Long {
     val maxJitterMs = jitterFromNextDelay(curDelayMs).toMillis()
-    return if (maxJitterMs == 0L) 0
-    else Math.floorMod(ThreadLocalRandom.current().nextLong(), maxJitterMs)
+    return if (maxJitterMs == 0L) 0 else Math.floorMod(ThreadLocalRandom.current().nextLong(), maxJitterMs)
   }
 }

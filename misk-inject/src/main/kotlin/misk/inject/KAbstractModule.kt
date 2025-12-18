@@ -12,17 +12,16 @@ import com.google.inject.multibindings.MapBinder
 import com.google.inject.multibindings.Multibinder
 import com.google.inject.multibindings.OptionalBinder
 import com.google.inject.util.Types
-import misk.inject.BindingQualifier.InstanceQualifier
-import misk.inject.BindingQualifier.TypeClassifier
 import java.lang.reflect.Type
 import kotlin.reflect.KClass
+import misk.inject.BindingQualifier.InstanceQualifier
+import misk.inject.BindingQualifier.TypeClassifier
 
 /**
- * A class that provides helper methods for working with Kotlin and Guice, allowing implementing
- * classes to operate in the Kotlin type system rather than converting to Java.
+ * A class that provides helper methods for working with Kotlin and Guice, allowing implementing classes to operate in
+ * the Kotlin type system rather than converting to Java.
  *
  * The more Kotlin friendly API allows calls like:
- *
  * ```
  * bind(Foo::class.java).to(RealFoo::class.java)
  * ```
@@ -33,9 +32,8 @@ import kotlin.reflect.KClass
  * ```
  */
 abstract class KAbstractModule : AbstractModule() {
-  protected class KotlinAnnotatedBindingBuilder<X>(
-    private val annotatedBuilder: AnnotatedBindingBuilder<X>
-  ) : AnnotatedBindingBuilder<X> by annotatedBuilder {
+  protected class KotlinAnnotatedBindingBuilder<X>(private val annotatedBuilder: AnnotatedBindingBuilder<X>) :
+    AnnotatedBindingBuilder<X> by annotatedBuilder {
     inline fun <reified T : Annotation> annotatedWith(): LinkedBindingBuilder<X> {
       return annotatedWith(T::class.java)
     }
@@ -57,43 +55,32 @@ abstract class KAbstractModule : AbstractModule() {
     requireBinding(Key.get(T::class.java, A::class.java))
   }
 
-  protected inline fun <reified T : Any> multibind(
-    annotation: KClass<out Annotation>?
-  ): LinkedBindingBuilder<T> = newMultibinder<T>(annotation).addBinding()
+  protected inline fun <reified T : Any> multibind(annotation: KClass<out Annotation>?): LinkedBindingBuilder<T> =
+    newMultibinder<T>(annotation).addBinding()
 
-  protected inline fun <reified T : Any> multibind(
-    qualifier: BindingQualifier? = null
-  ): LinkedBindingBuilder<T> = newMultibinder<T>(qualifier).addBinding()
+  protected inline fun <reified T : Any> multibind(qualifier: BindingQualifier? = null): LinkedBindingBuilder<T> =
+    newMultibinder<T>(qualifier).addBinding()
 
-  protected inline fun <reified T : Any, reified A : Annotation> multibind():
-    LinkedBindingBuilder<T> = newMultibinder<T>(A::class).addBinding()
+  protected inline fun <reified T : Any, reified A : Annotation> multibind(): LinkedBindingBuilder<T> =
+    newMultibinder<T>(A::class).addBinding()
 
-  protected inline fun <reified T : Any> newMultibinder(
-    annotation: KClass<out Annotation>?
-  ): Multibinder<T> = newMultibinder(T::class, annotation)
+  protected inline fun <reified T : Any> newMultibinder(annotation: KClass<out Annotation>?): Multibinder<T> =
+    newMultibinder(T::class, annotation)
 
-  protected inline fun <reified T : Any> newMultibinder(
-    qualifier: BindingQualifier? = null
-  ): Multibinder<T> = newMultibinder(T::class, qualifier)
+  protected inline fun <reified T : Any> newMultibinder(qualifier: BindingQualifier? = null): Multibinder<T> =
+    newMultibinder(T::class, qualifier)
 
-  protected inline fun <reified T : Any, reified A: Annotation> newMultibinder(
-  ): Multibinder<T> = newMultibinder(T::class, A::class)
+  protected inline fun <reified T : Any, reified A : Annotation> newMultibinder(): Multibinder<T> =
+    newMultibinder(T::class, A::class)
 
-  protected fun <T : Any> newMultibinder(
-    type: KClass<T>,
-    annotation: KClass<out Annotation>?
-  ): Multibinder<T> = newMultibinder(type.typeLiteral(), annotation?.qualifier)
+  protected fun <T : Any> newMultibinder(type: KClass<T>, annotation: KClass<out Annotation>?): Multibinder<T> =
+    newMultibinder(type.typeLiteral(), annotation?.qualifier)
 
-  protected fun <T : Any> newMultibinder(
-    type: KClass<T>,
-    qualifier: BindingQualifier? = null
-  ): Multibinder<T> = newMultibinder(type.typeLiteral(), qualifier)
+  protected fun <T : Any> newMultibinder(type: KClass<T>, qualifier: BindingQualifier? = null): Multibinder<T> =
+    newMultibinder(type.typeLiteral(), qualifier)
 
   @Suppress("UNCHECKED_CAST")
-  protected fun <T : Any> newMultibinder(
-    type: TypeLiteral<T>,
-    qualifier: BindingQualifier? = null
-  ): Multibinder<T> {
+  protected fun <T : Any> newMultibinder(type: TypeLiteral<T>, qualifier: BindingQualifier? = null): Multibinder<T> {
     val setOfT = setOfType(type)
     val mutableSetOfTKey = setOfT.toKey(qualifier) as Key<MutableSet<T>>
     // As of Guice 5.1, Set<? out T> is now bound.
@@ -101,14 +88,12 @@ abstract class KAbstractModule : AbstractModule() {
     val listOfOutT = listOfType(type.subtype().typeLiteral()) as TypeLiteral<List<T>>
     val listOfOutTKey = listOfOutT.toKey(qualifier)
     val listOfTKey = listOfT.toKey(qualifier)
-    bind(listOfOutTKey).toProvider(
-      ListProvider(mutableSetOfTKey, getProvider(mutableSetOfTKey))
-    )
+    bind(listOfOutTKey).toProvider(ListProvider(mutableSetOfTKey, getProvider(mutableSetOfTKey)))
     bind(listOfTKey).to(listOfOutTKey)
 
     return when (qualifier) {
       is InstanceQualifier -> Multibinder.newSetBinder(binder(), type, qualifier.annotation)
-      is TypeClassifier ->  Multibinder.newSetBinder(binder(), type, qualifier.type.java)
+      is TypeClassifier -> Multibinder.newSetBinder(binder(), type, qualifier.type.java)
       null -> Multibinder.newSetBinder(binder(), type)
     }
   }
@@ -120,41 +105,40 @@ abstract class KAbstractModule : AbstractModule() {
   protected fun <K : Any, V : Any> newMapBinder(
     keyType: KClass<K>,
     valueType: KClass<V>,
-    annotation: KClass<out Annotation>?
+    annotation: KClass<out Annotation>?,
   ): MapBinder<K, V> = newMapBinder(keyType.typeLiteral(), valueType.typeLiteral(), annotation?.qualifier)
 
-  protected inline fun <reified K : Any, reified V : Any> newMapBinder(
-    annotation: Annotation?
-  ): MapBinder<K, V> = newMapBinder(K::class, V::class, annotation)
+  protected inline fun <reified K : Any, reified V : Any> newMapBinder(annotation: Annotation?): MapBinder<K, V> =
+    newMapBinder(K::class, V::class, annotation)
 
   protected fun <K : Any, V : Any> newMapBinder(
     keyType: KClass<K>,
     valueType: KClass<V>,
-    annotation: Annotation?
+    annotation: Annotation?,
   ): MapBinder<K, V> = newMapBinder(keyType.typeLiteral(), valueType.typeLiteral(), annotation?.qualifier)
 
   protected fun <K : Any, V : Any> newMapBinder(
     keyType: KClass<K>,
     valueType: KClass<V>,
-    qualifier: BindingQualifier? = null
+    qualifier: BindingQualifier? = null,
   ): MapBinder<K, V> = newMapBinder(keyType.typeLiteral(), valueType.typeLiteral(), qualifier)
 
   protected fun <K : Any, V : Any> newMapBinder(
     keyType: TypeLiteral<K>,
     valueType: TypeLiteral<V>,
-    annotation: KClass<out Annotation>?
-  ): MapBinder<K, V>  = newMapBinder(keyType, valueType, annotation?.qualifier)
+    annotation: KClass<out Annotation>?,
+  ): MapBinder<K, V> = newMapBinder(keyType, valueType, annotation?.qualifier)
 
   protected fun <K : Any, V : Any> newMapBinder(
     keyType: TypeLiteral<K>,
     valueType: TypeLiteral<V>,
-    annotation: Annotation?
-  ): MapBinder<K, V>  = newMapBinder(keyType, valueType, annotation?.qualifier)
+    annotation: Annotation?,
+  ): MapBinder<K, V> = newMapBinder(keyType, valueType, annotation?.qualifier)
 
   protected fun <K : Any, V : Any> newMapBinder(
     keyType: TypeLiteral<K>,
     valueType: TypeLiteral<V>,
-    qualifier: BindingQualifier? = null
+    qualifier: BindingQualifier? = null,
   ): MapBinder<K, V> {
     val mapOfKV = mapOfType(keyType, valueType).toKey(qualifier)
     // As of Guice 5.1, Map<K, ? out V> is now bound.
@@ -184,31 +168,26 @@ abstract class KAbstractModule : AbstractModule() {
 
   private fun <T : Any> TypeLiteral<T>.subtype(): Type = Types.subtypeOf(type)
 
-  protected fun <T : Any> bindOptional(key: Key<T>): OptionalBinder<T> =
-    OptionalBinder.newOptionalBinder(binder(), key)
+  protected fun <T : Any> bindOptional(key: Key<T>): OptionalBinder<T> = OptionalBinder.newOptionalBinder(binder(), key)
 
   protected fun <T : Any> bindOptional(baseSwitchType: KClass<T>): OptionalBinder<T> =
     OptionalBinder.newOptionalBinder(binder(), baseSwitchType.java)
 
-  protected inline fun <reified T: Any> bindOptional(): OptionalBinder<T> = bindOptional(T::class)
+  protected inline fun <reified T : Any> bindOptional(): OptionalBinder<T> = bindOptional(T::class)
 
   protected fun <T : Any> bindOptionalDefault(key: Key<T>): LinkedBindingBuilder<T> =
-    OptionalBinder.newOptionalBinder(binder(), key)
-      .setDefault()
+    OptionalBinder.newOptionalBinder(binder(), key).setDefault()
 
   protected fun <T : Any> bindOptionalDefault(baseSwitchType: KClass<T>): LinkedBindingBuilder<T> =
-    OptionalBinder.newOptionalBinder(binder(), baseSwitchType.java)
-      .setDefault()
+    OptionalBinder.newOptionalBinder(binder(), baseSwitchType.java).setDefault()
 
-  protected inline fun <reified T: Any> bindOptionalDefault(): LinkedBindingBuilder<T> = bindOptionalDefault(T::class)
+  protected inline fun <reified T : Any> bindOptionalDefault(): LinkedBindingBuilder<T> = bindOptionalDefault(T::class)
 
   protected fun <T : Any> bindOptionalBinding(key: Key<T>): LinkedBindingBuilder<T> =
-    OptionalBinder.newOptionalBinder(binder(), key)
-      .setBinding()
+    OptionalBinder.newOptionalBinder(binder(), key).setBinding()
 
   protected fun <T : Any> bindOptionalBinding(baseSwitchType: KClass<T>): LinkedBindingBuilder<T> =
-    OptionalBinder.newOptionalBinder(binder(), baseSwitchType.java)
-      .setBinding()
+    OptionalBinder.newOptionalBinder(binder(), baseSwitchType.java).setBinding()
 
-  protected inline fun <reified T: Any> bindOptionalBinding(): LinkedBindingBuilder<T> = bindOptionalBinding(T::class)
+  protected inline fun <reified T : Any> bindOptionalBinding(): LinkedBindingBuilder<T> = bindOptionalBinding(T::class)
 }

@@ -1,18 +1,18 @@
 package misk.web.extractors
 
+import kotlin.reflect.KClass
+import kotlin.reflect.KParameter
 import misk.Action
 import misk.web.FeatureBinding
 import misk.web.FeatureBinding.Claimer
 import misk.web.FeatureBinding.Subject
 import misk.web.FormValue
 import misk.web.PathPattern
-import kotlin.reflect.KClass
-import kotlin.reflect.KParameter
 
 /** Binds parameters annotated [FormValue] to the request body using form encoding. */
 internal class FormValueFeatureBinding<T : Any>(
   private val parameter: KParameter,
-  private val formAdapter: FormAdapter<T>
+  private val formAdapter: FormAdapter<T>,
 ) : FeatureBinding {
   override fun beforeCall(subject: Subject) {
     val requestBody = subject.httpCall.takeRequestBody()!!
@@ -25,7 +25,7 @@ internal class FormValueFeatureBinding<T : Any>(
       action: Action,
       pathPattern: PathPattern,
       claimer: Claimer,
-      stringConverterFactories: List<StringConverter.Factory>
+      stringConverterFactories: List<StringConverter.Factory>,
     ): FeatureBinding? {
       val parameter = action.parameterAnnotatedOrNull<FormValue>() ?: return null
       if (parameter.type.classifier !is KClass<*>) return null

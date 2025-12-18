@@ -3,10 +3,9 @@ package misk
 import misk.config.Config
 
 @Suppress("PropertyName")
-data class ServiceManagerConfig @JvmOverloads constructor(
-  /**
-   * If true, writes the full graph of [ServiceModule] services and their dependencies to info-level
-   * logs.
-   */
+data class ServiceManagerConfig
+@JvmOverloads
+constructor(
+  /** If true, writes the full graph of [ServiceModule] services and their dependencies to info-level logs. */
   val debug_service_graph: Boolean = false
-): Config
+) : Config

@@ -2,37 +2,29 @@ package misk.aws2.s3
 
 import com.google.inject.util.Modules
 import jakarta.inject.Inject
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import misk.MiskTestingServiceModule
-import misk.aws2.s3.config.S3Config
 import misk.cloud.aws.AwsEnvironmentModule
 import misk.cloud.aws.FakeAwsEnvironmentModule
-import misk.inject.KAbstractModule
-import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
 import org.junit.jupiter.api.Test
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
-import software.amazon.awssdk.core.sync.RequestBody
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.S3AsyncClient
-import software.amazon.awssdk.services.s3.model.GetObjectRequest
-import software.amazon.awssdk.services.s3.model.PutObjectRequest
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import software.amazon.awssdk.services.s3.S3Client
 
 @MiskTest(startService = false)
 class S3ModuleTest {
   @MiskTestModule
-  val module = Modules.combine(
-    MiskTestingServiceModule(),
-    MockTracingBackendModule(),
-    AwsEnvironmentModule(),
-    FakeAwsEnvironmentModule(),
-    S3TestModule()
-  )
+  val module =
+    Modules.combine(
+      MiskTestingServiceModule(),
+      MockTracingBackendModule(),
+      AwsEnvironmentModule(),
+      FakeAwsEnvironmentModule(),
+      S3TestModule(),
+    )
 
   @Inject private lateinit var s3Client: S3Client
   @Inject private lateinit var s3AsyncClient: S3AsyncClient

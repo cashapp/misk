@@ -13,10 +13,7 @@ import misk.mcp.createTypedElicitation
 
 @Serializable
 data class GetNicknameRequest(
-  @Description(
-    "This will contain the user's nickname that they want to set."
-  )
-  val nickname: String
+  @Description("This will contain the user's nickname that they want to set.") val nickname: String
 )
 
 @OptIn(ExperimentalMiskApi::class)
@@ -26,16 +23,14 @@ class NicknameElicitationTool @Inject constructor() : McpTool<ToolSchema>() {
 
   override suspend fun handle(input: ToolSchema): ToolResult {
     val result = createTypedElicitation<GetNicknameRequest>("What nickname would you like to use?")
-    val response = when (result.action){
-      ElicitResult.Action.Accept -> "Hello, ${result.content?.nickname}!"
-      ElicitResult.Action.Decline -> "Sorry, don't know what to call you"
-      ElicitResult.Action.Cancel -> "Lets try again!"
-    }
+    val response =
+      when (result.action) {
+        ElicitResult.Action.Accept -> "Hello, ${result.content?.nickname}!"
+        ElicitResult.Action.Decline -> "Sorry, don't know what to call you"
+        ElicitResult.Action.Cancel -> "Lets try again!"
+      }
     return ToolResult(TextContent(response))
   }
 }
 
-suspend fun Client.callNicknameTool() = callTool(
-  name = "nickname",
-  arguments = emptyMap(),
-)
+suspend fun Client.callNicknameTool() = callTool(name = "nickname", arguments = emptyMap())

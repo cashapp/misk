@@ -8,22 +8,22 @@ import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCNotification
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCRequest
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCResponse
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.test.runTest
-import misk.annotation.ExperimentalMiskApi
-import misk.exceptions.BadRequestException
-import misk.exceptions.NotFoundException
-import misk.mcp.testing.InMemoryMcpSessionHandler
-import misk.mcp.McpJson
-import misk.mcp.McpSessionHandler
-import misk.mcp.action.SESSION_ID_HEADER
-import misk.web.HttpCall
-import misk.web.sse.ServerSentEvent
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.test.runTest
+import misk.annotation.ExperimentalMiskApi
+import misk.exceptions.BadRequestException
+import misk.exceptions.NotFoundException
+import misk.mcp.McpJson
+import misk.mcp.McpSessionHandler
+import misk.mcp.action.SESSION_ID_HEADER
+import misk.mcp.testing.InMemoryMcpSessionHandler
+import misk.web.HttpCall
+import misk.web.sse.ServerSentEvent
 
 @OptIn(ExperimentalMiskApi::class)
 class MiskStreamableHttpServerTransportTest {
@@ -35,19 +35,22 @@ class MiskStreamableHttpServerTransportTest {
   private fun buildTransport(sessionHandler: McpSessionHandler? = null) =
     MiskStreamableHttpServerTransport(httpCall, sessionHandler, sendChannel)
 
-  private val testRequest = McpJson.decodeFromString<JSONRPCRequest>(
-    """
+  private val testRequest =
+    McpJson.decodeFromString<JSONRPCRequest>(
+      """
       {
         "jsonrpc": "2.0",
         "id": "test-123",
         "method": "tools/list",
         "params": {}
       }
-    """.trimIndent(),
-  )
+      """
+        .trimIndent()
+    )
 
-  private val initializeRequest = McpJson.decodeFromString<JSONRPCRequest>(
-    """
+  private val initializeRequest =
+    McpJson.decodeFromString<JSONRPCRequest>(
+      """
       {
         "jsonrpc": "2.0",
         "id": "init-123",
@@ -61,21 +64,25 @@ class MiskStreamableHttpServerTransportTest {
           }
         }
       }
-    """.trimIndent(),
-  )
+      """
+        .trimIndent()
+    )
 
-  private val testNotification = McpJson.decodeFromString<JSONRPCNotification>(
-    """
+  private val testNotification =
+    McpJson.decodeFromString<JSONRPCNotification>(
+      """
       {
         "jsonrpc": "2.0",
         "method": "notifications/initialized",
         "params": {}
       }
-    """.trimIndent(),
-  )
+      """
+        .trimIndent()
+    )
 
-  private val testResponse = McpJson.decodeFromString<JSONRPCResponse>(
-    """
+  private val testResponse =
+    McpJson.decodeFromString<JSONRPCResponse>(
+      """
       {
         "jsonrpc": "2.0",
         "id": "test-123",
@@ -83,17 +90,16 @@ class MiskStreamableHttpServerTransportTest {
           "tools": []
         }
       }
-    """.trimIndent(),
-  )
+      """
+        .trimIndent()
+    )
 
   @Test
   fun `start() initializes transport and allows sending messages`() = runTest {
     val transport = buildTransport()
 
     // Verify initial state - transport should not be initialized
-    assertFailsWith<IllegalStateException> {
-      transport.send(testRequest)
-    }
+    assertFailsWith<IllegalStateException> { transport.send(testRequest) }
 
     // Call start() and verify it succeeds
     transport.start()
@@ -102,10 +108,7 @@ class MiskStreamableHttpServerTransportTest {
     transport.send(testRequest)
 
     // Verify that the message was sent to the channel
-    val expectedEvent = ServerSentEvent(
-      event = "message",
-      data = McpJson.encodeToString(testRequest)
-    )
+    val expectedEvent = ServerSentEvent(event = "message", data = McpJson.encodeToString(testRequest))
     coVerify { sendChannel.send(expectedEvent) }
   }
 
@@ -115,18 +118,14 @@ class MiskStreamableHttpServerTransportTest {
 
     transport.start()
 
-    assertFailsWith<IllegalStateException> {
-      transport.start()
-    }
+    assertFailsWith<IllegalStateException> { transport.start() }
   }
 
   @Test
   fun `send() throws error when not initialized`() = runTest {
     val transport = buildTransport()
 
-    assertFailsWith<IllegalStateException> {
-      transport.send(testRequest)
-    }
+    assertFailsWith<IllegalStateException> { transport.send(testRequest) }
   }
 
   @Test
@@ -144,9 +143,7 @@ class MiskStreamableHttpServerTransportTest {
     coVerify { sendChannel.close() }
 
     // Verify we can't send after closing
-    assertFailsWith<IllegalStateException> {
-      transport.send(testRequest)
-    }
+    assertFailsWith<IllegalStateException> { transport.send(testRequest) }
   }
 
   @Test
@@ -167,7 +164,7 @@ class MiskStreamableHttpServerTransportTest {
     transport.start()
 
     // Set up noop onMessage callback
-    transport.onMessage { }
+    transport.onMessage {}
 
     val responseHeaderSlot = slot<String>()
     every { httpCall.setResponseHeader(SESSION_ID_HEADER, capture(responseHeaderSlot)) } returns Unit
@@ -190,7 +187,7 @@ class MiskStreamableHttpServerTransportTest {
     transport.start()
 
     // Set up noop onMessage callback
-    transport.onMessage { }
+    transport.onMessage {}
 
     // First initialize a session
     val responseHeaderSlot = slot<String>()
@@ -211,13 +208,11 @@ class MiskStreamableHttpServerTransportTest {
     transport.start()
 
     // Set up noop onMessage callback
-    transport.onMessage { }
+    transport.onMessage {}
 
     every { httpCall.requestHeaders[SESSION_ID_HEADER] } returns null
 
-    assertFailsWith<BadRequestException> {
-      transport.handleMessage(testRequest)
-    }
+    assertFailsWith<BadRequestException> { transport.handleMessage(testRequest) }
   }
 
   @Test
@@ -226,13 +221,11 @@ class MiskStreamableHttpServerTransportTest {
     transport.start()
 
     // Set up noop onMessage callback
-    transport.onMessage { }
+    transport.onMessage {}
 
     every { httpCall.requestHeaders[SESSION_ID_HEADER] } returns "invalid-session-id"
 
-    assertFailsWith<NotFoundException> {
-      transport.handleMessage(testRequest)
-    }
+    assertFailsWith<NotFoundException> { transport.handleMessage(testRequest) }
   }
 
   @Test
@@ -241,7 +234,7 @@ class MiskStreamableHttpServerTransportTest {
     transport.start()
 
     // Set up noop onMessage callback
-    transport.onMessage { }
+    transport.onMessage {}
 
     // Should not throw even without session handler
     transport.handleMessage(testRequest)
@@ -253,11 +246,9 @@ class MiskStreamableHttpServerTransportTest {
     transport.start()
 
     // Set up noop onMessage callback
-    transport.onMessage { }
+    transport.onMessage {}
 
-    assertFailsWith<AcceptedResponseException> {
-      transport.handleMessage(testNotification)
-    }
+    assertFailsWith<AcceptedResponseException> { transport.handleMessage(testNotification) }
   }
 
   @Test
@@ -266,11 +257,9 @@ class MiskStreamableHttpServerTransportTest {
     transport.start()
 
     // Set up noop onMessage callback
-    transport.onMessage { }
+    transport.onMessage {}
 
-    assertFailsWith<AcceptedResponseException> {
-      transport.handleMessage(testResponse)
-    }
+    assertFailsWith<AcceptedResponseException> { transport.handleMessage(testResponse) }
   }
 
   @Test
@@ -279,9 +268,7 @@ class MiskStreamableHttpServerTransportTest {
     transport.start()
 
     var messageReceived: JSONRPCMessage? = null
-    transport.onMessage { message ->
-      messageReceived = message
-    }
+    transport.onMessage { message -> messageReceived = message }
 
     transport.handleMessage(testRequest)
 
@@ -299,9 +286,7 @@ class MiskStreamableHttpServerTransportTest {
     transport.onMessage { throw testException }
     transport.onError { error -> errorReceived = error }
 
-    assertFailsWith<RuntimeException> {
-      transport.handleMessage(testRequest)
-    }
+    assertFailsWith<RuntimeException> { transport.handleMessage(testRequest) }
 
     assertEquals(testException, errorReceived)
   }
@@ -322,7 +307,7 @@ class MiskStreamableHttpServerTransportTest {
     transport.start()
 
     // Set up noop onMessage callback
-    transport.onMessage { }
+    transport.onMessage {}
 
     // Initialize session
     val responseHeaderSlot = slot<String>()
@@ -340,9 +325,7 @@ class MiskStreamableHttpServerTransportTest {
     mcpSessionHandler.terminate(sessionId)
 
     // Verify session is no longer active
-    assertFailsWith<NotFoundException> {
-      transport.handleMessage(testRequest)
-    }
+    assertFailsWith<NotFoundException> { transport.handleMessage(testRequest) }
   }
 
   @Test
@@ -354,8 +337,8 @@ class MiskStreamableHttpServerTransportTest {
     transport2.start()
 
     // Set up onMessage callbacks to prevent hanging
-    transport1.onMessage { }
-    transport2.onMessage { }
+    transport1.onMessage {}
+    transport2.onMessage {}
 
     // Initialize first session
     val responseHeaderSlot1 = slot<String>()

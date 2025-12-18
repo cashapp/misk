@@ -1,9 +1,12 @@
 package misk.grpc
 
+import com.google.inject.Provider
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
 import grpc.reflection.v1alpha.ServerReflectionClient
 import grpc.reflection.v1alpha.ServerReflectionRequest
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -13,19 +16,17 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import routeguide.Feature
 import routeguide.Point
-import jakarta.inject.Inject
-import com.google.inject.Provider
-import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 class GrpcReflectNoProtoFoundTest {
   @MiskTestModule
-  val module = object : KAbstractModule() {
-    override fun configure() {
-      install(GrpcReflectTestingModule())
-      install(WebActionModule.create<FakeGetFeatureBlockingServerAction>())
+  val module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(GrpcReflectTestingModule())
+        install(WebActionModule.create<FakeGetFeatureBlockingServerAction>())
+      }
     }
-  }
 
   @Inject lateinit var clientProvider: Provider<ServerReflectionClient>
 
@@ -38,11 +39,7 @@ class GrpcReflectNoProtoFoundTest {
 
     responses.use {
       requests.use {
-        requests.write(
-          ServerReflectionRequest(
-            list_services = "*"
-          )
-        )
+        requests.write(ServerReflectionRequest(list_services = "*"))
 
         val firstResponse = responses.read()
         assertThat(firstResponse!!.list_services_response!!.service).isNotEmpty()
@@ -52,8 +49,7 @@ class GrpcReflectNoProtoFoundTest {
 
   /** Just an endpoint so we can have more sample data to reflect upon. */
   @Singleton
-  private class FakeGetFeatureBlockingServerAction @Inject constructor(
-  ) : FakeGetFeatureBlockingServer, WebAction {
+  private class FakeGetFeatureBlockingServerAction @Inject constructor() : FakeGetFeatureBlockingServer, WebAction {
     override fun GetFeature(request: Point): Feature = error("unsupported")
   }
 
@@ -63,7 +59,7 @@ class GrpcReflectNoProtoFoundTest {
       path = "/routeguide.RouteGuide/GetFeature",
       requestAdapter = "routeguide.Point#ADAPTER",
       responseAdapter = "routeguide.Feature#ADAPTER",
-      sourceFile = "fakerouteguide/RouteGuideProto.proto"
+      sourceFile = "fakerouteguide/RouteGuideProto.proto",
     )
     fun GetFeature(request: Point): Feature
   }

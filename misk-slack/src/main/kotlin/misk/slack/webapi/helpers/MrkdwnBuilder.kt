@@ -1,22 +1,22 @@
 package misk.slack.webapi.helpers
 
 /**
- * Mrkdwn is Slack's weird thing that isn't Markdown. This class attempts to implement proper
- * escaping and formatting.
+ * Mrkdwn is Slack's weird thing that isn't Markdown. This class attempts to implement proper escaping and formatting.
  *
  * [SlackApi.postMessage] and [SlackApi.postConfirmation] can both post JSON with markdown formatting.
  * [SlackJson.TextJson] allows you to set the type as plain text or markdown.
  *
  * Note that the Mrkdwn docs aren't particularly helpful here.
  *
- * Note that this implementation is more conservative about encoding than strictly necessary. For
- * example, it escapes things like the colon at the end of `Notice:`, even though colons only really
- * need to be escaped when they signal an emoji (`:smile:`).
+ * Note that this implementation is more conservative about encoding than strictly necessary. For example, it escapes
+ * things like the colon at the end of `Notice:`, even though colons only really need to be escaped when they signal an
+ * emoji (`:smile:`).
  *
  * https://api.slack.com/reference/surfaces/formatting#basics
  */
 class MrkdwnBuilder {
   private val delegate = StringBuilder()
+
   fun append(s: String) {
     for (codePoint in s.codePoints()) {
       when (codePoint) {
@@ -25,12 +25,16 @@ class MrkdwnBuilder {
         '<'.code -> delegate.append("&lt;")
         '>'.code -> delegate.append("&gt;")
 
-        '#'.code, '@'.code, ':'.code -> {
+        '#'.code,
+        '@'.code,
+        ':'.code -> {
           delegate.appendCodePoint(codePoint)
           delegate.append(zwsp)
         }
 
-        '*'.code, '_'.code, '~'.code -> {
+        '*'.code,
+        '_'.code,
+        '~'.code -> {
           delegate.append("$zwsp`")
           delegate.appendCodePoint(codePoint)
           delegate.append("`$zwsp")
@@ -70,8 +74,7 @@ fun buildMrkdwn(builderAction: MrkdwnBuilder.() -> Unit): String {
 }
 
 /**
- * Inserting a zero-width space is enough to prevent Slack from attempting to link a string like
- * :smile: as an emoji.
+ * Inserting a zero-width space is enough to prevent Slack from attempting to link a string like :smile: as an emoji.
  *
  * https://en.wikipedia.org/wiki/Zero-width_space
  */

@@ -2,39 +2,29 @@ package misk.moshi.wire
 
 import com.google.inject.Guice
 import com.squareup.moshi.Moshi
+import kotlin.reflect.KClass
 import misk.moshi.MoshiModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import kotlin.reflect.KClass
 
 /**
  * Migration phases:
  *
- * MISK_ONLY:
- *   Misk writes
- *   Misk reads
+ * MISK_ONLY: Misk writes Misk reads
  *
- * WIRE_READS:
- *   Misk writes
- *   Wire reads
- *   (deploy everything on this)
+ * WIRE_READS: Misk writes Wire reads (deploy everything on this)
  *
- * WIRE_ONLY:
- *   Wire writes
- *   Wire reads
+ * WIRE_ONLY: Wire writes Wire reads
  */
 internal class MiskWireJsonInteropTest {
-  private val wireOnlyMoshi: Moshi = Guice.createInjector(
-    MoshiModule(useWireToRead = true, useWireToWrite = true)
-  ).getInstance(Moshi::class.java)
+  private val wireOnlyMoshi: Moshi =
+    Guice.createInjector(MoshiModule(useWireToRead = true, useWireToWrite = true)).getInstance(Moshi::class.java)
 
-  private val wireReadsMoshi: Moshi = Guice.createInjector(
-    MoshiModule(useWireToRead = true, useWireToWrite = false)
-  ).getInstance(Moshi::class.java)
+  private val wireReadsMoshi: Moshi =
+    Guice.createInjector(MoshiModule(useWireToRead = true, useWireToWrite = false)).getInstance(Moshi::class.java)
 
-  private val miskOnlyMoshi: Moshi = Guice.createInjector(
-    MoshiModule(useWireToRead = false, useWireToWrite = false)
-  ).getInstance(Moshi::class.java)
+  private val miskOnlyMoshi: Moshi =
+    Guice.createInjector(MoshiModule(useWireToRead = false, useWireToWrite = false)).getInstance(Moshi::class.java)
 
   @Test
   fun simpleTypes() {
@@ -43,10 +33,7 @@ internal class MiskWireJsonInteropTest {
 
   @Test
   fun keywordAsFieldName() {
-    val value = KeywordKotlin.Builder()
-      .fun_(mapOf("a" to "apple"))
-      .when_(3)
-      .build()
+    val value = KeywordKotlin.Builder().fun_(mapOf("a" to "apple")).when_(3).build()
 
     testAllPhases(value, KeywordKotlin::class)
   }
@@ -55,12 +42,7 @@ internal class MiskWireJsonInteropTest {
   fun backwardsCompatibleOnUpgradeToWireWithKeywordThing() {
     val json = """{"fun":{"a":"apple"},"return":[],"enums":[],"when":3}"""
     val wireFromMisk = wireOnlyMoshi.adapter(KeywordKotlin::class.java).fromJson(json)
-    assertThat(wireFromMisk).isEqualTo(
-      KeywordKotlin.Builder()
-        .fun_(mapOf("a" to "apple"))
-        .when_(3)
-        .build()
-    )
+    assertThat(wireFromMisk).isEqualTo(KeywordKotlin.Builder().fun_(mapOf("a" to "apple")).when_(3).build())
   }
 
   private fun <T : Any> testAllPhases(message: T, type: KClass<T>) {
@@ -75,12 +57,7 @@ internal class MiskWireJsonInteropTest {
     testTransitioningToWirePhase(message, type, wireOnlyMoshi, wireOnlyMoshi)
   }
 
-  private fun <T : Any> testTransitioningToWirePhase(
-    message: T,
-    type: KClass<T>,
-    a: Moshi,
-    b: Moshi
-  ) {
+  private fun <T : Any> testTransitioningToWirePhase(message: T, type: KClass<T>, a: Moshi, b: Moshi) {
     val aAdapter = a.adapter(type.java)
     val bAdapter = b.adapter(type.java)
     val aWritesJson = aAdapter.toJson(message)

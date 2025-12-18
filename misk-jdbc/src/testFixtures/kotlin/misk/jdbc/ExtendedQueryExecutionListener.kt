@@ -1,12 +1,12 @@
 package misk.jdbc
 
+import java.util.Locale
 import mu.KotlinLogging
 import net.ttddyy.dsproxy.ExecutionInfo
 import net.ttddyy.dsproxy.QueryInfo
 import net.ttddyy.dsproxy.listener.MethodExecutionContext
 import net.ttddyy.dsproxy.listener.MethodExecutionListener
 import net.ttddyy.dsproxy.listener.QueryExecutionListener
-import java.util.Locale
 
 open class ExtendedQueryExecutionListener : QueryExecutionListener, MethodExecutionListener {
   override fun beforeMethod(executionContext: MethodExecutionContext) {
@@ -39,8 +39,7 @@ open class ExtendedQueryExecutionListener : QueryExecutionListener, MethodExecut
   private fun isRollbackTransaction(executionContext: MethodExecutionContext) =
     executionContext.method.name == "rollback"
 
-  private fun isCommitTransaction(executionContext: MethodExecutionContext) =
-    executionContext.method.name == "commit"
+  private fun isCommitTransaction(executionContext: MethodExecutionContext) = executionContext.method.name == "commit"
 
   final override fun beforeQuery(execInfo: ExecutionInfo?, queryInfoList: List<QueryInfo>?) {
     if (queryInfoList == null) return
@@ -82,8 +81,10 @@ open class ExtendedQueryExecutionListener : QueryExecutionListener, MethodExecut
       beforeEndTransaction()
       beforeRollbackTransaction()
     } catch (e: Exception) {
-      logger.error("Exception in before callback for rollback, " +
-        "logging error instead of propagating so rollback can proceed", e)
+      logger.error(
+        "Exception in before callback for rollback, " + "logging error instead of propagating so rollback can proceed",
+        e,
+      )
     }
   }
 
@@ -98,14 +99,23 @@ open class ExtendedQueryExecutionListener : QueryExecutionListener, MethodExecut
   }
 
   protected open fun beforeRollbackTransaction() {}
+
   protected open fun beforeCommitTransaction() {}
+
   protected open fun beforeEndTransaction() {}
+
   protected open fun beforeStartTransaction() {}
+
   protected open fun beforeQuery(query: String) {}
+
   protected open fun afterRollbackTransaction() {}
+
   protected open fun afterCommitTransaction() {}
+
   protected open fun afterEndTransaction() {}
+
   protected open fun afterStartTransaction() {}
+
   protected open fun afterQuery(query: String) {}
 
   companion object {

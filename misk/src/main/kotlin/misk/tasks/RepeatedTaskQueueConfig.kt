@@ -1,10 +1,12 @@
 package misk.tasks
 
+import java.time.Duration
 import misk.backoff.Backoff
 import misk.backoff.ExponentialBackoff
-import java.time.Duration
 
-data class RepeatedTaskQueueConfig @JvmOverloads constructor(
+data class RepeatedTaskQueueConfig
+@JvmOverloads
+constructor(
   /**
    * The default amount of jitter to use when scheduling backoffs.
    *
@@ -22,22 +24,19 @@ data class RepeatedTaskQueueConfig @JvmOverloads constructor(
   /**
    * The fixed number of parallel tasks to run.
    *
-   * If -1 then an unbounded number of parallel tasks are allowed. An unbounded number of tasks can
-   * be useful for an App that needs to dynamically compute the number of tasks at runtime. However,
-   * the App is then responsible for ensuring an upper bound for the number of tasks submitted.
+   * If -1 then an unbounded number of parallel tasks are allowed. An unbounded number of tasks can be useful for an App
+   * that needs to dynamically compute the number of tasks at runtime. However, the App is then responsible for ensuring
+   * an upper bound for the number of tasks submitted.
    */
-  val num_parallel_tasks: Int = 1
-
+  val num_parallel_tasks: Int = 1,
 ) {
 
-  /**
-   * Construct an [ExponentialBackoff] from the initial delay using the default configs.
-   */
+  /** Construct an [ExponentialBackoff] from the initial delay using the default configs. */
   fun defaultBackoff(initialDelay: Duration): Backoff {
     return ExponentialBackoff(
       initialDelay,
       Duration.ofSeconds(default_max_delay_sec),
-      Duration.ofMillis(default_jitter_ms)
+      Duration.ofMillis(default_jitter_ms),
     )
   }
 }

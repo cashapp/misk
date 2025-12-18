@@ -1,15 +1,12 @@
 package misk.clustering.fake
 
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
 import misk.clustering.Cluster
 import misk.clustering.ClusterResourceMapper
 import misk.clustering.NoMembersAvailableException
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicReference
 
-/**
- * An [ExplicitClusterResourceMapper] is a [ClusterResourceMapper] where the mapping
- * is explicit managed.
- */
+/** An [ExplicitClusterResourceMapper] is a [ClusterResourceMapper] where the mapping is explicit managed. */
 class ExplicitClusterResourceMapper : ClusterResourceMapper {
   private val mappings = ConcurrentHashMap<String, Cluster.Member>()
   private val defaultMapping = AtomicReference<Cluster.Member>()
@@ -34,8 +31,6 @@ class ExplicitClusterResourceMapper : ClusterResourceMapper {
     if (mappings.isEmpty()) {
       defaultMapping.get() ?: throw NoMembersAvailableException(resourceId)
     }
-    return mappings[resourceId] ?: defaultMapping.get() ?: throw IllegalStateException(
-      "no mapping for $resourceId"
-    )
+    return mappings[resourceId] ?: defaultMapping.get() ?: throw IllegalStateException("no mapping for $resourceId")
   }
 }

@@ -1,17 +1,18 @@
 package misk.security.authz
 
 import jakarta.inject.Inject
+import kotlin.reflect.KClass
 import misk.Action
 import misk.ApplicationInterceptor
 import misk.Chain
 import misk.MiskCaller
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
-import misk.scope.ActionScoped
 import misk.logging.getLogger
-import kotlin.reflect.KClass
+import misk.scope.ActionScoped
 
-class AccessInterceptor private constructor(
+class AccessInterceptor
+private constructor(
   val allowedServices: Set<String>,
   val allowedCapabilities: Set<String>,
   private val caller: ActionScoped<MiskCaller?>,
@@ -46,7 +47,9 @@ class AccessInterceptor private constructor(
     return caller.hasCapability(allowedCapabilities) || caller.isService(allowedServices)
   }
 
-  internal class Factory @Inject internal constructor(
+  internal class Factory
+  @Inject
+  internal constructor(
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
     private val registeredEntries: List<AccessAnnotationEntry>,
     @ExcludeFromAllowAnyService private val excludeFromAllowAnyService: List<String>,
@@ -64,13 +67,15 @@ class AccessInterceptor private constructor(
       // Do not intercept if this action is explicitly marked as unauthenticated.
       if (action.hasAnnotation<Unauthenticated>()) {
         check(actionEntries.isEmpty()) {
-          val otherAnnotations = actionEntries
-            .filterNot { it.annotation == Unauthenticated::class }
-            .map { "@${it.annotation.qualifiedName!!}" }
-            .sorted()
-            .joinToString()
+          val otherAnnotations =
+            actionEntries
+              .filterNot { it.annotation == Unauthenticated::class }
+              .map { "@${it.annotation.qualifiedName!!}" }
+              .sorted()
+              .joinToString()
           """${action.name}::${action.function.name}() is annotated with @${Unauthenticated::class.qualifiedName}, but also annotated with the following access annotations: $otherAnnotations. This is a contradiction.
-          """.trimIndent()
+          """
+            .trimIndent()
         }
         return null
       }
@@ -102,15 +107,21 @@ class AccessInterceptor private constructor(
           |   $requiredAnnotations
           |
           |
-          """.trimMargin()
+          """
+          .trimMargin()
       }
 
       if (actionEntries.size > 1) {
-        val (openAuthEntries, closedAuthEntries) = actionEntries.partition { it.services.isEmpty() && it.capabilities.isEmpty() }
+        val (openAuthEntries, closedAuthEntries) =
+          actionEntries.partition { it.services.isEmpty() && it.capabilities.isEmpty() }
         if (openAuthEntries.isNotEmpty() && closedAuthEntries.isNotEmpty()) {
-          val openAuthString = openAuthEntries.joinToString(separator = ",") { "@${it.annotation.simpleName.toString()}" }
-          val closedAuthString = closedAuthEntries.joinToString(separator = ",") { "@${it.annotation.simpleName.toString()}" }
-          logger.warn("Conflicting auth annotations on ${action.name}::${action.function.name}(), $openAuthString won't have any effect due to $closedAuthString")
+          val openAuthString =
+            openAuthEntries.joinToString(separator = ",") { "@${it.annotation.simpleName.toString()}" }
+          val closedAuthString =
+            closedAuthEntries.joinToString(separator = ",") { "@${it.annotation.simpleName.toString()}" }
+          logger.warn(
+            "Conflicting auth annotations on ${action.name}::${action.function.name}(), $openAuthString won't have any effect due to $closedAuthString"
+          )
         }
       }
 
@@ -120,7 +131,9 @@ class AccessInterceptor private constructor(
       val allowedCapabilities = actionEntries.flatMap { it.capabilities }.toSet()
 
       if (!allowAnyService && allowedServices.isEmpty() && !allowAnyUser && allowedCapabilities.isEmpty()) {
-        logger.warn { "${action.name}::${action.function.name}() has an empty set of allowed services and capabilities. Access will be denied. This method of allowing all services and users has been removed, use explicit boolean parameters allowAnyService or allowAnyUser instead." }
+        logger.warn {
+          "${action.name}::${action.function.name}() has an empty set of allowed services and capabilities. Access will be denied. This method of allowing all services and users has been removed, use explicit boolean parameters allowAnyService or allowAnyUser instead."
+        }
       }
 
       return AccessInterceptor(
@@ -133,13 +146,14 @@ class AccessInterceptor private constructor(
       )
     }
 
-    private fun Authenticated.toAccessAnnotationEntry() = AccessAnnotationEntry(
-      annotation = Authenticated::class,
-      services = services.toList(),
-      capabilities = capabilities.toList(),
-      allowAnyService = allowAnyService,
-      allowAnyUser = allowAnyUser
-    )
+    private fun Authenticated.toAccessAnnotationEntry() =
+      AccessAnnotationEntry(
+        annotation = Authenticated::class,
+        services = services.toList(),
+        capabilities = capabilities.toList(),
+        allowAnyService = allowAnyService,
+        allowAnyUser = allowAnyUser,
+      )
 
     private inline fun <reified T : Annotation> Action.hasAnnotation() =
       function.annotations.any { it.annotationClass == T::class }

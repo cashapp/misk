@@ -1,6 +1,9 @@
 package misk.client
 
+import com.google.inject.Provider
 import com.google.inject.Provides
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -11,14 +14,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import retrofit2.Call
 import retrofit2.http.GET
-import jakarta.inject.Inject
-import com.google.inject.Provider
-import jakarta.inject.Singleton
 
 @MiskTest
 internal class ConnectionReuseTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var helloService: HelloService
   @Inject private lateinit var helloServiceProvider: Provider<HelloService>
@@ -61,18 +60,11 @@ internal class ConnectionReuseTest {
     @Singleton
     fun provideHttpClientConfig(server: MockWebServer): HttpClientsConfig {
       val url = server.url("/")
-      return HttpClientsConfig(
-        endpoints = mapOf(
-          "hello" to HttpClientEndpointConfig(
-            url = url.toString()
-          )
-        )
-      )
+      return HttpClientsConfig(endpoints = mapOf("hello" to HttpClientEndpointConfig(url = url.toString())))
     }
   }
 
   interface HelloService {
-    @GET("/hello")
-    fun hello(): Call<String>
+    @GET("/hello") fun hello(): Call<String>
   }
 }

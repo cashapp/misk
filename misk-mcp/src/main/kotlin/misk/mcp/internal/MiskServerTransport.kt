@@ -1,15 +1,15 @@
 package misk.mcp.internal
 
-import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.shared.AbstractTransport
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import misk.web.HttpCall
 
 /**
  * Base class for Misk-specific MCP transport implementations.
  *
- * Extends the MCP Kotlin SDK's [AbstractTransport] to provide common functionality
- * for adapting Misk framework components to the pluggable transport system.
- * Concrete implementations handle different transport mechanisms (SSE, WebSocket).
+ * Extends the MCP Kotlin SDK's [AbstractTransport] to provide common functionality for adapting Misk framework
+ * components to the pluggable transport system. Concrete implementations handle different transport mechanisms (SSE,
+ * WebSocket).
  */
 abstract class MiskServerTransport : AbstractTransport() {
   /** The HTTP call context for this transport session */

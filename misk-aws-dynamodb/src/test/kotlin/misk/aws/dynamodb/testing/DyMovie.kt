@@ -12,8 +12,7 @@ import java.time.LocalDate
 
 @DynamoDBTable(tableName = "movies")
 class DyMovie {
-  @DynamoDBHashKey(attributeName = "name")
-  var name: String? = null
+  @DynamoDBHashKey(attributeName = "name") var name: String? = null
 
   @DynamoDBIndexRangeKey(globalSecondaryIndexName = "movies.release_date_index")
   @DynamoDBTypeConverted(converter = LocalDateTypeConverter::class)

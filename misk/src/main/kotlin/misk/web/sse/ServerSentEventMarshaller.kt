@@ -2,6 +2,7 @@ package misk.web.sse
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import kotlin.reflect.KType
 import misk.web.ResponseBody
 import misk.web.marshal.Marshaller
 import misk.web.marshal.Unmarshaller
@@ -10,7 +11,6 @@ import misk.web.toResponseBody
 import okhttp3.Headers
 import okhttp3.MediaType
 import okio.BufferedSource
-import kotlin.reflect.KType
 
 const val COLON: String = ":"
 
@@ -29,19 +29,16 @@ object ServerSentEventMarshaller : Marshaller<Any> {
     return encodedEvent.toResponseBody()
   }
 
-  private fun ServerSentEvent.encodeToString() =
-    buildString {
-      appendField("event", event)
-      appendField("data", data)
-      appendField("id", id)
-      appendField("retry", retry)
-      appendField("", comments)
-    }
+  private fun ServerSentEvent.encodeToString() = buildString {
+    appendField("event", event)
+    appendField("data", data)
+    appendField("id", id)
+    appendField("retry", retry)
+    appendField("", comments)
+  }
 
   private fun <T> StringBuilder.appendField(name: String, value: T?) {
-    value?.toString()
-      ?.split(END_OF_LINE_VARIANTS)
-      ?.forEach { append("$name$COLON$SPACE$it$END_OF_LINE") }
+    value?.toString()?.split(END_OF_LINE_VARIANTS)?.forEach { append("$name$COLON$SPACE$it$END_OF_LINE") }
   }
 
   @Singleton
@@ -103,7 +100,7 @@ object ServerSentEventUnmarshaller : Unmarshaller {
           if (comments == null) comments = mutableListOf()
           comments.add(value)
         }
-        // Unknown fields are ignored per SSE spec
+      // Unknown fields are ignored per SSE spec
       }
     }
 
