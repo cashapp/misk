@@ -18,7 +18,7 @@ Misk uses [`kotlin-formatter`](https://github.com/block/kotlin-formatter) for fo
 workflow by:
 
 1. Invoking `./bin/lefthook install` to install the formatting pre-commit hook.
-2. Installing the [gradle plugin](https://plugins.jetbrains.com/plugin/26482-kotlin-formatter).
+2. Installing the [IDE plugin](https://plugins.jetbrains.com/plugin/26482-kotlin-formatter).
     - This will change the
       IDE's formatting to use `kotlin-formatter` if `.idea/kotlin-formatter.properties` is present and configured as it
       is in Misk, so the plugin will not affect formatting in your other projects
