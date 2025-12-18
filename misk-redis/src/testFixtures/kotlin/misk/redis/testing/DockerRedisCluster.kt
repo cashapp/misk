@@ -41,6 +41,7 @@ object DockerRedisCluster : ExternalDependency {
     configuration_endpoint = redisNodeConfig,
     redis_auth_password = "",
     timeout_ms = 1_000,
+    user = "",
   )
   val config = RedisClusterConfig(mapOf("test-group" to replicationGroupConfig))
 
