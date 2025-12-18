@@ -61,6 +61,7 @@ bucket4jDynamoDbV1 = { module = "com.bucket4j:bucket4j-dynamodb-sdk-v1", version
 bucket4jMySQL = { module = "com.bucket4j:bucket4j-mysql", version.ref = "bucket4j" }
 bucket4jRedis = { module = "com.bucket4j:bucket4j-redis", version.ref = "bucket4j" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.2" }
+classGraph = { module = "io.github.classgraph:classgraph", version = "4.8.179" }
 concurrencyLimitsCore = { module = "com.netflix.concurrency-limits:concurrency-limits-core", version = "0.5.3" }
 cronUtils = { module = "com.cronutils:cron-utils", version = "9.2.1" }
 datasourceProxy = { module = "net.ttddyy:datasource-proxy", version = "1.11.0" }
