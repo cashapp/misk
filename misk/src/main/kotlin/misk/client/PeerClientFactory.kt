@@ -3,6 +3,11 @@ package misk.client
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.inject.Provides
+import jakarta.inject.Singleton
+import java.security.cert.X509Certificate
+import java.util.concurrent.TimeUnit
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLSession
 import misk.clustering.Cluster
 import misk.config.AppName
 import misk.inject.KAbstractModule
@@ -10,22 +15,19 @@ import misk.security.cert.X500Name
 import misk.web.WebConfig
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
-import java.security.cert.X509Certificate
-import java.util.concurrent.TimeUnit
-import jakarta.inject.Singleton
-import javax.net.ssl.HostnameVerifier
-import javax.net.ssl.SSLSession
 
 /**
- * Binds a [PeerClientFactory] that calls peers on the HTTPS port of this process's server,
- * as determined by the SSL port in the [WebConfig].
+ * Binds a [PeerClientFactory] that calls peers on the HTTPS port of this process's server, as determined by the SSL
+ * port in the [WebConfig].
  */
 class PeerClientModule : KAbstractModule() {
-  @Provides @Singleton fun peerClientFactory(
+  @Provides
+  @Singleton
+  fun peerClientFactory(
     @AppName appName: String,
     httpClientsConfig: HttpClientsConfig,
     httpClientFactory: HttpClientFactory,
-    webConfig: WebConfig
+    webConfig: WebConfig,
   ): PeerClientFactory {
     check(webConfig.ssl?.port ?: 0 > 0) { "server must have static HTTPS port" }
 
@@ -33,7 +35,7 @@ class PeerClientModule : KAbstractModule() {
       appName = appName,
       httpClientsConfig = httpClientsConfig,
       httpClientFactory = httpClientFactory,
-      httpsPort = webConfig.ssl!!.port
+      httpsPort = webConfig.ssl!!.port,
     )
   }
 }
@@ -41,28 +43,30 @@ class PeerClientModule : KAbstractModule() {
 /**
  * For testing.
  *
- * Binds a [PeerClientFactory] that calls peers on the HTTPS port of this process's server,
- * as determined by the Jetty server's port.
+ * Binds a [PeerClientFactory] that calls peers on the HTTPS port of this process's server, as determined by the Jetty
+ * server's port.
  */
 class JettyPortPeerClientModule : KAbstractModule() {
-  @Provides @Singleton fun peerClientFactory(
+  @Provides
+  @Singleton
+  fun peerClientFactory(
     @AppName appName: String,
     httpClientsConfig: HttpClientsConfig,
     httpClientFactory: HttpClientFactory,
-    jetty: JettyService
+    jetty: JettyService,
   ): PeerClientFactory {
     return PeerClientFactory(
       appName = appName,
       httpClientsConfig = httpClientsConfig,
       httpClientFactory = httpClientFactory,
-      httpsPort = jetty.httpsServerUrl!!.port
+      httpsPort = jetty.httpsServerUrl!!.port,
     )
   }
 }
 
 /**
- * Factory that creates [OkHttpClient]s for connecting to another instance of the same application
- * running in the same cluster.
+ * Factory that creates [OkHttpClient]s for connecting to another instance of the same application running in the same
+ * cluster.
  *
  * An [OkHttpClient] is cached for each peer.
  */
@@ -70,31 +74,35 @@ class PeerClientFactory(
   private val appName: String,
   private val httpClientsConfig: HttpClientsConfig,
   private val httpClientFactory: HttpClientFactory,
-  private val httpsPort: Int
+  private val httpsPort: Int,
 ) {
 
-  private val cache = CacheBuilder.newBuilder()
-    .expireAfterAccess(5, TimeUnit.MINUTES)
-    .build<Cluster.Member, OkHttpClient>(object : CacheLoader<Cluster.Member, OkHttpClient>() {
-      override fun load(peer: Cluster.Member): OkHttpClient {
-        val config = httpClientsConfig[appName].copy(
-          url = baseUrl(peer),
-          envoy = null
-        )
+  private val cache =
+    CacheBuilder.newBuilder()
+      .expireAfterAccess(5, TimeUnit.MINUTES)
+      .build<Cluster.Member, OkHttpClient>(
+        object : CacheLoader<Cluster.Member, OkHttpClient>() {
+          override fun load(peer: Cluster.Member): OkHttpClient {
+            val config = httpClientsConfig[appName].copy(url = baseUrl(peer), envoy = null)
 
-        return httpClientFactory.create(config, appName).newBuilder()
-          .hostnameVerifier(object : HostnameVerifier {
-            override fun verify(hostname: String?, session: SSLSession?): Boolean {
-              val ou =
-                (session?.peerCertificates?.firstOrNull() as? X509Certificate)?.let { peerCert ->
-                  X500Name.parse(peerCert.subjectX500Principal.name).organizationalUnit
+            return httpClientFactory
+              .create(config, appName)
+              .newBuilder()
+              .hostnameVerifier(
+                object : HostnameVerifier {
+                  override fun verify(hostname: String?, session: SSLSession?): Boolean {
+                    val ou =
+                      (session?.peerCertificates?.firstOrNull() as? X509Certificate)?.let { peerCert ->
+                        X500Name.parse(peerCert.subjectX500Principal.name).organizationalUnit
+                      }
+                    return appName == ou
+                  }
                 }
-              return appName == ou
-            }
-          })
-          .build()
-      }
-    })
+              )
+              .build()
+          }
+        }
+      )
 
   init {
     require(httpsPort > 0) { "port must be a positive integer " }
@@ -109,9 +117,8 @@ class PeerClientFactory(
   }
 
   /**
-   * Get a client to call the given peer cluster member.
-   * This client will fail when calling different services, as determined by the OU in the certificate
-   * returned by the called service.
+   * Get a client to call the given peer cluster member. This client will fail when calling different services, as
+   * determined by the OU in the certificate returned by the called service.
    */
   fun client(peer: Cluster.Member): OkHttpClient = cache[peer]
 }

@@ -22,39 +22,33 @@ import wisp.deployment.TESTING
 @MiskTest(startService = true)
 class MySQLRateLimitedActionTests : AbstractRateLimitedActionTests() {
   @Suppress("unused")
-  @MiskTestModule val module: Module = object : KAbstractModule() {
-    override fun configure() {
-      install(ExemplarTestModule())
-      install(DeploymentModule(TESTING))
-      val config = MiskConfig.load<RootConfig>("exemplar-testing", TESTING)
-      install(JdbcTestingModule(RateLimits::class))
-      install(
-        HibernateModule(
-          RateLimits::class,
-          RateLimitsReadOnly::class,
-          DataSourceClusterConfig(
-            writer = config.mysql_data_source,
-            reader = config.mysql_data_source
+  @MiskTestModule
+  val module: Module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(ExemplarTestModule())
+        install(DeploymentModule(TESTING))
+        val config = MiskConfig.load<RootConfig>("exemplar-testing", TESTING)
+        install(JdbcTestingModule(RateLimits::class))
+        install(
+          HibernateModule(
+            RateLimits::class,
+            RateLimitsReadOnly::class,
+            DataSourceClusterConfig(writer = config.mysql_data_source, reader = config.mysql_data_source),
           )
         )
-      )
-      install(
-        MySQLBucket4jRateLimiterModule(RateLimits::class, TABLE_NAME, ID_COLUMN, STATE_COLUMN)
-      )
-      bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
+        install(MySQLBucket4jRateLimiterModule(RateLimits::class, TABLE_NAME, ID_COLUMN, STATE_COLUMN))
+        bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
+      }
     }
-  }
 
-  @Inject @RateLimits
-  private lateinit var dataSourceService: DataSourceService
+  @Inject @RateLimits private lateinit var dataSourceService: DataSourceService
 
   override fun setException() {
     dataSourceService.stopAsync().awaitTerminated()
   }
 
-  private data class RootConfig(
-    val mysql_data_source: DataSourceConfig
-  ) : Config
+  private data class RootConfig(val mysql_data_source: DataSourceConfig) : Config
 
   companion object {
     private const val TABLE_NAME = "rate_limit_buckets"
@@ -63,10 +57,6 @@ class MySQLRateLimitedActionTests : AbstractRateLimitedActionTests() {
   }
 }
 
-@Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-internal annotation class RateLimits
+@Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) internal annotation class RateLimits
 
-@Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-internal annotation class RateLimitsReadOnly
+@Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) internal annotation class RateLimitsReadOnly

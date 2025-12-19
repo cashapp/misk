@@ -2,25 +2,21 @@ package misk.slack.webapi
 
 import com.google.common.util.concurrent.AbstractIdleService
 import com.squareup.moshi.Moshi
-import misk.slack.webapi.helpers.PostMessageRequest
-import misk.slack.webapi.helpers.UserData
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.slack.webapi.helpers.AddReactionResponse
 import misk.slack.webapi.helpers.GetChatPermalinkResponse
 import misk.slack.webapi.helpers.InviteResponse
+import misk.slack.webapi.helpers.PostMessageRequest
 import misk.slack.webapi.helpers.SetConversationTopicResponse
+import misk.slack.webapi.helpers.UserData
 import misk.slack.webapi.helpers.UserGroupResponse
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 
-/**
- * Wrap [MockWebServer] to pretend its a Slack server.
- */
+/** Wrap [MockWebServer] to pretend its a Slack server. */
 @Singleton
-class MockSlackServer @Inject constructor(
-  moshi: Moshi,
-) : AbstractIdleService() {
+class MockSlackServer @Inject constructor(moshi: Moshi) : AbstractIdleService() {
   private val server = MockWebServer()
 
   private val messageJsonAdapter = moshi.adapter(PostMessageRequest::class.java)
@@ -41,58 +37,36 @@ class MockSlackServer @Inject constructor(
 
   /** [SlackApi.postMessage] and [SlackApi.postConfirmation] return this */
   fun enqueueMessageResponse(postMessageJson: PostMessageRequest) {
-    server.enqueue(
-      MockResponse()
-        .setBody(messageJsonAdapter.toJson(postMessageJson))
-    )
+    server.enqueue(MockResponse().setBody(messageJsonAdapter.toJson(postMessageJson)))
   }
 
   /** [SlackApi.getUserByEmail] returns this */
   fun enqueueUserResponse(userData: UserData) {
-    server.enqueue(
-      MockResponse()
-        .setBody(userJsonAdapter.toJson(userData))
-    )
+    server.enqueue(MockResponse().setBody(userJsonAdapter.toJson(userData)))
   }
 
   /** [SlackApi.getPermalink] returns this */
   fun enqueueChatPermalinkResponse(chatPermalinkData: GetChatPermalinkResponse) {
-    server.enqueue(
-      MockResponse()
-        .setResponseCode(200)
-        .setBody(chatPermalinkData.toString())
-    )
+    server.enqueue(MockResponse().setResponseCode(200).setBody(chatPermalinkData.toString()))
   }
 
   /** [SlackApi.setConversationTopic] returns this */
   fun enqueueTopicResponse(conversationTopic: SetConversationTopicResponse) {
-    server.enqueue(
-      MockResponse()
-        .setBody(topicJsonAdapter.toJson(conversationTopic))
-    )
+    server.enqueue(MockResponse().setBody(topicJsonAdapter.toJson(conversationTopic)))
   }
 
   /** [SlackApi.inviteToConversation] returns this */
   fun enqueueInviteResponse(channel: InviteResponse) {
-    server.enqueue(
-      MockResponse()
-        .setBody(inviteJsonAdapter.toJson(channel))
-    )
+    server.enqueue(MockResponse().setBody(inviteJsonAdapter.toJson(channel)))
   }
 
   /** [SlackApi.updateUserGroup] returns this */
   fun enqueueUserGroupResponse(usergroup: UserGroupResponse) {
-    server.enqueue(
-      MockResponse()
-        .setBody(usergroupJsonAdapter.toJson(usergroup))
-    )
+    server.enqueue(MockResponse().setBody(usergroupJsonAdapter.toJson(usergroup)))
   }
 
   /** [SlackApi.addReaction] returns this */
   fun enqueueReactionResponse(reactionResponse: AddReactionResponse) {
-    server.enqueue(
-      MockResponse()
-        .setBody(reactionJsonAdapter.toJson(reactionResponse))
-    )
+    server.enqueue(MockResponse().setBody(reactionJsonAdapter.toJson(reactionResponse)))
   }
 }

@@ -9,10 +9,7 @@ import misk.annotation.ExperimentalMiskApi
 import misk.mcp.McpTool
 import misk.mcp.encode
 
-@Serializable
-data class VersionMetadata(
-  val version: String,
-)
+@Serializable data class VersionMetadata(val version: String)
 
 @OptIn(ExperimentalMiskApi::class)
 class KotlinSdkTool @Inject constructor() : McpTool<ToolSchema>() {

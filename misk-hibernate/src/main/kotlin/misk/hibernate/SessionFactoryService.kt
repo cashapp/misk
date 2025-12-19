@@ -3,8 +3,16 @@ package misk.hibernate
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Provider
+import javax.persistence.Column
+import javax.persistence.Table
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.jvm.jvmName
 import misk.jdbc.DataSourceService
 import misk.jdbc.DataSourceType
+import misk.logging.getLogger
 import okio.ByteString
 import org.hibernate.SessionFactory
 import org.hibernate.boot.Metadata
@@ -21,18 +29,8 @@ import org.hibernate.mapping.SimpleValue
 import org.hibernate.mapping.Value
 import org.hibernate.service.spi.SessionFactoryServiceRegistry
 import org.hibernate.usertype.UserType
-import misk.logging.getLogger
-import javax.persistence.Column
-import javax.persistence.Table
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.jvm.jvmName
 
-/**
- * Builds a bare connection to a Hibernate database. Doesn't do any schema migration or validation.
- */
+/** Builds a bare connection to a Hibernate database. Doesn't do any schema migration or validation. */
 internal class SessionFactoryService(
   private val qualifier: KClass<out Annotation>,
   private val dataSourceService: DataSourceService,
@@ -43,12 +41,13 @@ internal class SessionFactoryService(
   private var _sessionFactory: SessionFactory? = null
 
   val sessionFactory: SessionFactory
-    get() = _sessionFactory
-      ?: error("@${qualifier.simpleName} Hibernate not connected: did you forget to start the service?")
+    get() =
+      _sessionFactory ?: error("@${qualifier.simpleName} Hibernate not connected: did you forget to start the service?")
 
-  val threadInTransaction = object : ThreadLocal<Boolean>() {
-    override fun initialValue() = false
-  }
+  val threadInTransaction =
+    object : ThreadLocal<Boolean>() {
+      override fun initialValue() = false
+    }
 
   val threadLocalHibernateSession = ThreadLocal<org.hibernate.Session?>()
 
@@ -61,33 +60,33 @@ internal class SessionFactoryService(
     require(_sessionFactory == null)
 
     // Register event listeners.
-    val integrator = object : Integrator {
-      override fun integrate(
-        metadata: Metadata,
-        sessionFactory: SessionFactoryImplementor,
-        serviceRegistry: SessionFactoryServiceRegistry,
-      ) {
-        val eventListenerRegistry = serviceRegistry.getService(EventListenerRegistry::class.java)
-        val aggregateListener = AggregateListener(listenerRegistrations)
-        aggregateListener.registerAll(eventListenerRegistry)
+    val integrator =
+      object : Integrator {
+        override fun integrate(
+          metadata: Metadata,
+          sessionFactory: SessionFactoryImplementor,
+          serviceRegistry: SessionFactoryServiceRegistry,
+        ) {
+          val eventListenerRegistry = serviceRegistry.getService(EventListenerRegistry::class.java)
+          val aggregateListener = AggregateListener(listenerRegistrations)
+          aggregateListener.registerAll(eventListenerRegistry)
 
-        hibernateMetadata = metadata
-      }
+          hibernateMetadata = metadata
+        }
 
-      override fun disintegrate(
-        sessionFactory: SessionFactoryImplementor,
-        serviceRegistry: SessionFactoryServiceRegistry,
-      ) {
+        override fun disintegrate(
+          sessionFactory: SessionFactoryImplementor,
+          serviceRegistry: SessionFactoryServiceRegistry,
+        ) {}
       }
-    }
-    val bootstrapRegistryBuilder = BootstrapServiceRegistryBuilder().let {
-      it.applyIntegrator(integrator)
-      if (Thread.currentThread().contextClassLoader != null) {
-        it.applyClassLoader(Thread.currentThread().contextClassLoader)
+    val bootstrapRegistryBuilder =
+      BootstrapServiceRegistryBuilder().let {
+        it.applyIntegrator(integrator)
+        if (Thread.currentThread().contextClassLoader != null) {
+          it.applyClassLoader(Thread.currentThread().contextClassLoader)
+        }
+        it.build()
       }
-      it.build()
-    }
-
 
     val registryBuilder = StandardServiceRegistryBuilder(bootstrapRegistryBuilder)
     registryBuilder.addInitiator(hibernateInjectorAccess)
@@ -109,17 +108,10 @@ internal class SessionFactoryService(
         applySetting(AvailableSettings.CONNECTION_PROVIDER_DISABLES_AUTOCOMMIT, "true")
       }
       if (config.query_timeout != null) {
-        applySetting(
-          "javax.persistence.query.timeout",
-          Integer.valueOf(
-            config.query_timeout!!.toMillis().toInt()
-          )
-        )
+        applySetting("javax.persistence.query.timeout", Integer.valueOf(config.query_timeout!!.toMillis().toInt()))
       }
       if (config.jdbc_statement_batch_size != null) {
-        require(config.jdbc_statement_batch_size!! > 0) {
-          "Invalid jdbc_statement_batch_size: must be > 0."
-        }
+        require(config.jdbc_statement_batch_size!! > 0) { "Invalid jdbc_statement_batch_size: must be > 0." }
         applySetting(AvailableSettings.STATEMENT_BATCH_SIZE, config.jdbc_statement_batch_size)
       }
     }
@@ -146,8 +138,7 @@ internal class SessionFactoryService(
 
       val value: Value? = property.value
       if (value is SimpleValue) {
-        val typeName = value.typeName
-          ?: continue // This doesn't have a physical column; it's mapped to another table.
+        val typeName = value.typeName ?: continue // This doesn't have a physical column; it's mapped to another table.
         allPropertyTypes += kClassForName(typeName)
       }
     }
@@ -180,12 +171,10 @@ internal class SessionFactoryService(
 
   /**
    * When a type is annotated we customize it! For example, this is where we hookup support for
+   *
    * @JsonColumn.
    */
-  private fun processPropertyAnnotations(
-    persistentClass: Class<*>,
-    property: Property,
-  ) {
+  private fun processPropertyAnnotations(persistentClass: Class<*>, property: Property) {
     val value = property.value as? SimpleValue ?: return
 
     val field = field(persistentClass, property)
@@ -199,19 +188,18 @@ internal class SessionFactoryService(
       value.typeName = SecretColumnType::class.java.name
       value.setTypeParameter(
         SecretColumnType.FIELD_ENCRYPTION_KEY_NAME,
-        field.getAnnotation(SecretColumn::class.java).keyName
+        field.getAnnotation(SecretColumn::class.java).keyName,
       )
       value.setTypeParameter(
         SecretColumnType.FIELD_ENCRYPTION_INDEXABLE,
-        field.getAnnotation(SecretColumn::class.java).indexable.toString()
+        field.getAnnotation(SecretColumn::class.java).indexable.toString(),
       )
     } else if (BoxedStringType.isBoxedString(field.type.kotlin)) {
       value.typeName = BoxedStringType::class.java.name
       value.setTypeParameter("boxedStringField", field)
     } else {
       for (annotation: Annotation in field.annotations) {
-        val transformerAnnotation =
-          annotation.annotationClass.findAnnotation<TransformedType>() ?: continue
+        val transformerAnnotation = annotation.annotationClass.findAnnotation<TransformedType>() ?: continue
         value.typeName = TransformedColumnType::class.java.name
 
         val transformer = transformerAnnotation.transformer
@@ -226,11 +214,14 @@ internal class SessionFactoryService(
         value.setTypeParameter(TransformedColumnType.TARGET_TYPE, transformerAnnotation.targetType)
 
         val memberProperties = annotation.annotationClass.declaredMemberProperties
-        val argMap = memberProperties.mapNotNull { prop ->
-          @Suppress("UNCHECKED_CAST")
-          prop as? KProperty1<Annotation, Any> ?: return@mapNotNull null
-          prop.name to prop.get(annotation)
-        }.toMap()
+        val argMap =
+          memberProperties
+            .mapNotNull { prop ->
+              @Suppress("UNCHECKED_CAST")
+              prop as? KProperty1<Annotation, Any> ?: return@mapNotNull null
+              prop.name to prop.get(annotation)
+            }
+            .toMap()
         value.setTypeParameter(TransformedColumnType.ARGUMENTS, argMap)
       }
     }

@@ -6,16 +6,18 @@ import com.google.inject.Provider
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.healthchecks.HealthCheck
+import misk.logging.getLogger
 import misk.security.authz.Unauthenticated
 import misk.web.AvailableWhenDegraded
 import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
-import misk.logging.getLogger
 
 @Singleton
-class ReadinessCheckAction @Inject internal constructor(
+class ReadinessCheckAction
+@Inject
+internal constructor(
   private val serviceManagerProvider: Provider<ServiceManager>,
   private val healthChecks: List<HealthCheck>,
 ) : WebAction {
@@ -24,9 +26,7 @@ class ReadinessCheckAction @Inject internal constructor(
   @Unauthenticated
   @AvailableWhenDegraded
   fun readinessCheck(): Response<String> {
-    val servicesNotRunning = serviceManagerProvider.get().servicesByState().values().filterNot {
-      it.isRunning
-    }
+    val servicesNotRunning = serviceManagerProvider.get().servicesByState().values().filterNot { it.isRunning }
 
     for (service in servicesNotRunning) {
       // Only log failed services.
@@ -42,9 +42,7 @@ class ReadinessCheckAction @Inject internal constructor(
       return Response("", statusCode = 503)
     }
 
-    val failedHealthChecks = healthChecks
-      .map { it.status() }
-      .filter { !it.isHealthy }
+    val failedHealthChecks = healthChecks.map { it.status() }.filter { !it.isHealthy }
 
     if (failedHealthChecks.isEmpty()) {
       return Response("", statusCode = 200)

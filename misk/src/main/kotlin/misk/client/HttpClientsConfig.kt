@@ -2,15 +2,17 @@ package misk.client
 
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import misk.security.ssl.CertStoreConfig
-import misk.security.ssl.TrustStoreConfig
-import misk.config.Config
-import misk.logging.getLogger
 import java.net.URL
 import java.time.Duration
+import misk.config.Config
+import misk.logging.getLogger
+import misk.security.ssl.CertStoreConfig
+import misk.security.ssl.TrustStoreConfig
 
 @JsonDeserialize(converter = BackwardsCompatibleClientsConfigConverter::class)
-data class HttpClientsConfig @JvmOverloads constructor(
+data class HttpClientsConfig
+@JvmOverloads
+constructor(
   @JsonAlias("hosts")
   // Need to retain ordering, hence LinkedHashMap
   val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf(),
@@ -23,81 +25,67 @@ data class HttpClientsConfig @JvmOverloads constructor(
 
   /** @return The [HttpClientEndpointConfig] for the given client, populated with defaults as needed */
   operator fun get(clientName: String): HttpClientEndpointConfig {
-    val endpointConfig = requireNotNull(endpoints[clientName]) {
-      "no client configuration for endpoint $clientName"
-    }
+    val endpointConfig = requireNotNull(endpoints[clientName]) { "no client configuration for endpoint $clientName" }
 
-    val allMatchingConfigs = sequence {
-      yield(httpClientConfigDefaults)
-      yieldAll(
-        endpointConfig.url?.let { url ->
-          findUrlMatchingConfigs(url)
-        } ?: findWildcardConfigs()
-      )
-      yield(endpointConfig.clientConfig)
-    }.reduce { prev, cur -> cur.applyDefaults(prev) }
+    val allMatchingConfigs =
+      sequence {
+          yield(httpClientConfigDefaults)
+          yieldAll(endpointConfig.url?.let { url -> findUrlMatchingConfigs(url) } ?: findWildcardConfigs())
+          yield(endpointConfig.clientConfig)
+        }
+        .reduce { prev, cur -> cur.applyDefaults(prev) }
 
     return HttpClientEndpointConfig(
       url = endpointConfig.url,
       envoy = endpointConfig.envoy,
-      clientConfig = allMatchingConfigs
+      clientConfig = allMatchingConfigs,
     )
   }
 
   /** @return The [HttpClientEndpointConfig] for the given URL, populated with defaults as needed */
   operator fun get(url: URL): HttpClientEndpointConfig {
-    val allMatchingConfigs = sequence {
-      yield(httpClientConfigDefaults)
-      yieldAll(
-        findUrlMatchingConfigs(url.toString())
-      )
-    }.reduce { prev, cur -> cur.applyDefaults(prev) }
+    val allMatchingConfigs =
+      sequence {
+          yield(httpClientConfigDefaults)
+          yieldAll(findUrlMatchingConfigs(url.toString()))
+        }
+        .reduce { prev, cur -> cur.applyDefaults(prev) }
 
-    return HttpClientEndpointConfig(
-      url = url.toString(),
-      clientConfig = allMatchingConfigs
-    )
+    return HttpClientEndpointConfig(url = url.toString(), clientConfig = allMatchingConfigs)
   }
 
-  private fun validatePatterns() = try {
-    endpoints.keys
-      .map { it.toRegex(RegexOption.IGNORE_CASE) }
-      .forEach { it.matches("") }
-  } catch (e: Exception) {
-    throw IllegalArgumentException(
-      "Failed to initialize HttpClientsConfig, failed to parse Regexp patterns!",
-      e
-    )
-  }
+  private fun validatePatterns() =
+    try {
+      endpoints.keys.map { it.toRegex(RegexOption.IGNORE_CASE) }.forEach { it.matches("") }
+    } catch (e: Exception) {
+      throw IllegalArgumentException("Failed to initialize HttpClientsConfig, failed to parse Regexp patterns!", e)
+    }
 
-  private fun findWildcardConfigs() =
-    hostConfigs.filter { (k, _) -> k == ".*" }.values
+  private fun findWildcardConfigs() = hostConfigs.filter { (k, _) -> k == ".*" }.values
 
   private fun findUrlMatchingConfigs(url: String) =
-    hostConfigs.filter { (k, _) ->
-      k.toRegex(RegexOption.IGNORE_CASE).matches(URL(url).host)
-    }.values
+    hostConfigs.filter { (k, _) -> k.toRegex(RegexOption.IGNORE_CASE).matches(URL(url).host) }.values
 
   companion object {
     private val logger = getLogger<HttpClientsConfig>()
-    val httpClientConfigDefaults = HttpClientConfig(
-      maxRequests = 128,
-      maxRequestsPerHost = 32,
-      maxIdleConnections = 100,
-      keepAliveDuration = Duration.ofMinutes(5)
-    )
+    val httpClientConfigDefaults =
+      HttpClientConfig(
+        maxRequests = 128,
+        maxRequestsPerHost = 32,
+        maxIdleConnections = 100,
+        keepAliveDuration = Duration.ofMinutes(5),
+      )
   }
 
   /** Names of configured endpoints, all of which can be fetched using [get] */
   fun endpointNames(): Set<String> = endpoints.keys
 }
 
-data class HttpClientSSLConfig(
-  val cert_store: CertStoreConfig?,
-  val trust_store: TrustStoreConfig
-)
+data class HttpClientSSLConfig(val cert_store: CertStoreConfig?, val trust_store: TrustStoreConfig)
 
-data class HttpClientConfig @JvmOverloads constructor(
+data class HttpClientConfig
+@JvmOverloads
+constructor(
   val connectTimeout: Duration? = null,
   val writeTimeout: Duration? = null,
   val readTimeout: Duration? = null,
@@ -112,7 +100,7 @@ data class HttpClientConfig @JvmOverloads constructor(
   val protocols: List<String>? = null,
   val retryOnConnectionFailure: Boolean? = null,
   val followRedirects: Boolean? = null,
-  val followSslRedirects: Boolean? = null
+  val followSslRedirects: Boolean? = null,
 )
 
 fun HttpClientConfig.applyDefaults(other: HttpClientConfig) =
@@ -131,92 +119,66 @@ fun HttpClientConfig.applyDefaults(other: HttpClientConfig) =
     protocols = this.protocols ?: other.protocols,
     retryOnConnectionFailure = this.retryOnConnectionFailure ?: other.retryOnConnectionFailure,
     followRedirects = this.followRedirects ?: other.followRedirects,
-    followSslRedirects = this.followSslRedirects ?: other.followSslRedirects
+    followSslRedirects = this.followSslRedirects ?: other.followSslRedirects,
   )
 
-data class HttpClientEndpointConfig @JvmOverloads constructor(
+data class HttpClientEndpointConfig
+@JvmOverloads
+constructor(
   val url: String? = null,
   val envoy: HttpClientEnvoyConfig? = null,
-  val clientConfig: HttpClientConfig = HttpClientConfig()
+  val clientConfig: HttpClientConfig = HttpClientConfig(),
 ) {
   init {
     require(url == null || envoy == null) { "Cannot set both url and envoy configs" }
   }
-  
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.connectTimeout")
-  )
+
+  @Deprecated("Use clientConfig property", replaceWith = ReplaceWith("clientConfig.connectTimeout"))
   val connectTimeout
     get() = clientConfig.connectTimeout
 
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.writeTimeout")
-  )
+  @Deprecated("Use clientConfig property", replaceWith = ReplaceWith("clientConfig.writeTimeout"))
   val writeTimeout
     get() = clientConfig.writeTimeout
 
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.readTimeout")
-  )
+  @Deprecated("Use clientConfig property", replaceWith = ReplaceWith("clientConfig.readTimeout"))
   val readTimeout
     get() = clientConfig.readTimeout
 
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.pingInterval")
-  )
+  @Deprecated("Use clientConfig property", replaceWith = ReplaceWith("clientConfig.pingInterval"))
   val pingInterval
     get() = clientConfig.pingInterval
 
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.callTimeout")
-  )
+  @Deprecated("Use clientConfig property", replaceWith = ReplaceWith("clientConfig.callTimeout"))
   val callTimeout
     get() = clientConfig.callTimeout
 
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.maxRequests")
-  )
+  @Deprecated("Use clientConfig property", replaceWith = ReplaceWith("clientConfig.maxRequests"))
   val maxRequests
     get() = clientConfig.maxRequests
 
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.maxRequestsPerHost")
-  )
+  @Deprecated("Use clientConfig property", replaceWith = ReplaceWith("clientConfig.maxRequestsPerHost"))
   val maxRequestsPerHost
     get() = clientConfig.maxRequestsPerHost
 
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.maxIdleConnections")
-  )
+  @Deprecated("Use clientConfig property", replaceWith = ReplaceWith("clientConfig.maxIdleConnections"))
   val maxIdleConnections
     get() = clientConfig.maxIdleConnections
 
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.keepAliveDuration")
-  )
+  @Deprecated("Use clientConfig property", replaceWith = ReplaceWith("clientConfig.keepAliveDuration"))
   val keepAliveDuration
     get() = clientConfig.keepAliveDuration
 
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.ssl")
-  )
+  @Deprecated("Use clientConfig property", replaceWith = ReplaceWith("clientConfig.ssl"))
   val ssl
     get() = clientConfig.ssl
 }
 
-data class HttpClientEnvoyConfig @JvmOverloads constructor(
+data class HttpClientEnvoyConfig
+@JvmOverloads
+constructor(
   val app: String,
 
   /** Environment to target. If null, the same environment as the app is running in is assumed. */
-  val env: String? = null
+  val env: String? = null,
 )

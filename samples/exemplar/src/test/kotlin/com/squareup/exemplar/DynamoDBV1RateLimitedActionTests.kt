@@ -15,18 +15,16 @@ import misk.testing.MiskTestModule
 @MiskTest(startService = true)
 class DynamoDBV1RateLimitedActionTests : AbstractRateLimitedActionTests() {
   @Suppress("unused")
-  @MiskTestModule val module: Module = object : KAbstractModule() {
-    override fun configure() {
-      install(ExemplarTestModule())
-      install(
-        DockerDynamoDbModule(
-          DynamoDbTable(DyRateLimitBucket::class)
-        )
-      )
-      install(DynamoDbV1Bucket4jRateLimiterModule("rate_limit_buckets"))
-      bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
+  @MiskTestModule
+  val module: Module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(ExemplarTestModule())
+        install(DockerDynamoDbModule(DynamoDbTable(DyRateLimitBucket::class)))
+        install(DynamoDbV1Bucket4jRateLimiterModule("rate_limit_buckets"))
+        bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
+      }
     }
-  }
 
   @Inject private lateinit var dynamoDb: AmazonDynamoDB
 

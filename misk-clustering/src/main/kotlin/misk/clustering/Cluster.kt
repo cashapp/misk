@@ -4,22 +4,22 @@ package misk.clustering
 typealias ClusterWatch = (Cluster.Changes) -> Unit
 
 /**
- * A [Cluster] provides access to cluster membership for a service, allowing instances of a service
- * to monitor the state of its peers
+ * A [Cluster] provides access to cluster membership for a service, allowing instances of a service to monitor the state
+ * of its peers
  */
 interface Cluster {
   data class Member(val name: String, val ipAddress: String)
 
-  data class Changes @JvmOverloads constructor(
-    val snapshot: Snapshot,
-    val added: Set<Member> = setOf(),
-    val removed: Set<Member> = setOf()
-  ) {
+  data class Changes
+  @JvmOverloads
+  constructor(val snapshot: Snapshot, val added: Set<Member> = setOf(), val removed: Set<Member> = setOf()) {
     val hasDiffs = added.isNotEmpty() || removed.isNotEmpty()
   }
 
   /** [Snapshot] is a consistent moment-in-time view of the cluster state */
-  data class Snapshot @JvmOverloads constructor(
+  data class Snapshot
+  @JvmOverloads
+  constructor(
     /** The member representing this instance of the service */
     val self: Member,
 
@@ -30,7 +30,7 @@ interface Cluster {
     val selfReady: Boolean = readyMembers.any { it.name == self.name },
 
     /** A [ClusterResourceMapper] built from the ready members of this cluster */
-    val resourceMapper: ClusterResourceMapper
+    val resourceMapper: ClusterResourceMapper,
   ) {
     /** The of the ready peers; basically all of the ready cluster members except sel */
     val readyPeers: Set<Member> = readyMembers - self
@@ -43,6 +43,5 @@ interface Cluster {
   fun watch(watch: ClusterWatch)
 
   /** @return A new [ClusterResourceMapper] for the given set of ready members */
-  fun newResourceMapper(readyMembers: Set<Member>): ClusterResourceMapper =
-    HashRingClusterResourceMapper(readyMembers)
+  fun newResourceMapper(readyMembers: Set<Member>): ClusterResourceMapper = HashRingClusterResourceMapper(readyMembers)
 }

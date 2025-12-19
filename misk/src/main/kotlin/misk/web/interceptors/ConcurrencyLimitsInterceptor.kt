@@ -7,7 +7,17 @@ import com.netflix.concurrency.limits.Limiter
 import com.netflix.concurrency.limits.limit.VegasLimit
 import com.netflix.concurrency.limits.limiter.AbstractLimiter
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.net.HttpURLConnection
+import java.time.Clock
+import java.time.Duration
+import java.time.Instant
+import java.util.concurrent.TimeUnit
+import kotlin.reflect.full.findAnnotation
 import misk.Action
+import misk.logging.getLogger
+import misk.logging.log
 import misk.metrics.Metrics
 import misk.web.AvailableWhenDegraded
 import misk.web.NetworkChain
@@ -15,28 +25,17 @@ import misk.web.NetworkInterceptor
 import misk.web.WebConfig
 import misk.web.concurrencylimits.ConcurrencyLimiterFactory
 import org.slf4j.event.Level
-import misk.logging.getLogger
-import misk.logging.log
-import java.net.HttpURLConnection
-import java.time.Clock
-import java.time.Duration
-import java.time.Instant
-import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-import kotlin.reflect.full.findAnnotation
 
 /**
- * Detects degraded behavior and sheds requests accordingly. Internally this uses adaptive limiting
- * as implemented by Netflix's [concurrency-limits][concurrency_limits] library. It implements some
- * of the recommendations in [Using Load Shedding to Avoid Overload][avoid_overload].
+ * Detects degraded behavior and sheds requests accordingly. Internally this uses adaptive limiting as implemented by
+ * Netflix's [concurrency-limits][concurrency_limits] library. It implements some of the recommendations in
+ * [Using Load Shedding to Avoid Overload][avoid_overload].
  *
  * This annotation is applied to all actions by default. Opt-out with [AvailableWhenDegraded].
  *
- * Throughput predictions are made independently for each action. To bucket calls more finely, or to
- * bucket calls that span actions, use the Quota-Path HTTP header. Callers may optionally include
- * this HTTP header with a path-like string:
- *
+ * Throughput predictions are made independently for each action. To bucket calls more finely, or to bucket calls that
+ * span actions, use the Quota-Path HTTP header. Callers may optionally include this HTTP header with a path-like
+ * string:
  * ```
  * POST /squareup.event_consumer.service.HandleService/Handle HTTP/2
  * Content-Type: application/grpc
@@ -44,24 +43,24 @@ import kotlin.reflect.full.findAnnotation
  * ...
  * ```
  *
- * If a Quota-Path header is included, it replaces the action as the scope for concurrency limiting.
- * If the same Quota-Path header is used on different actions, the concurrency limits of these
- * actions are shared.
+ * If a Quota-Path header is included, it replaces the action as the scope for concurrency limiting. If the same
+ * Quota-Path header is used on different actions, the concurrency limits of these actions are shared.
  *
- * [concurrency_limits]: https://github.com/Netflix/concurrency-limits/
- * [avoid_overload]: https://aws.amazon.com/builders-library/using-load-shedding-to-avoid-overload/
+ * [concurrency_limits]: https://github.com/Netflix/concurrency-limits/ [avoid_overload]:
+ * https://aws.amazon.com/builders-library/using-load-shedding-to-avoid-overload/
  */
-internal class ConcurrencyLimitsInterceptor internal constructor(
+internal class ConcurrencyLimitsInterceptor
+internal constructor(
   private val factory: Factory,
   private val action: Action,
   private val defaultLimiter: Limiter<String>,
   private val clock: Clock,
   private val logLevel: Level,
-  private val enabledFeature: MiskConcurrencyLimiterFeature
+  private val enabledFeature: MiskConcurrencyLimiterFeature,
 ) : NetworkInterceptor {
   /**
-   * When this fails, it fails a lot. Log at most one error per minute per node and let the
-   * developers use metrics to see what the failure rate is.
+   * When this fails, it fails a lot. Log at most one error per minute per node and let the developers use metrics to
+   * see what the failure rate is.
    */
   private val durationBetweenErrorsMs = TimeUnit.MINUTES.toMillis(1)
   private var lastErrorLoggedAtMs = -1L
@@ -75,10 +74,11 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
 
     val quotaPath = chain.httpCall.requestHeaders["Quota-Path"]
     val metricsName = quotaPath ?: action.name
-    val limiter = when {
-      quotaPath != null -> factory.pickLimiter(action, quotaPath)
-      else -> defaultLimiter
-    }
+    val limiter =
+      when {
+        quotaPath != null -> factory.pickLimiter(action, quotaPath)
+        else -> defaultLimiter
+      }
 
     val listener: Limiter.Listener? = limiter.acquire(action.name).orElse(null)
 
@@ -86,9 +86,7 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
       factory.outcomeCounter.labels(metricsName, "rejected").inc()
       logShedRequest(limiter, quotaPath)
       chain.httpCall.statusCode = HttpURLConnection.HTTP_UNAVAILABLE
-      chain.httpCall.takeResponseBody()?.use { sink ->
-        sink.writeUtf8("service unavailable")
-      }
+      chain.httpCall.takeResponseBody()?.use { sink -> sink.writeUtf8("service unavailable") }
       return
     }
 
@@ -96,7 +94,6 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
       factory.limitGauge.labels(metricsName).set(limiter.limit.toDouble())
       factory.inFlightGauge.labels(metricsName).set(limiter.inflight.toDouble())
     }
-
 
     try {
       chain.proceed(chain.httpCall)
@@ -145,37 +142,41 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   }
 
   @Singleton
-  class Factory @Inject constructor(
+  class Factory
+  @Inject
+  constructor(
     private val clock: Clock,
     private val limiterFactories: List<ConcurrencyLimiterFactory>,
     private val config: WebConfig,
     private val enabledFeature: MiskConcurrencyLimiterFeature,
     metrics: Metrics,
   ) : NetworkInterceptor.Factory {
-    val outcomeCounter = metrics.counter(
-      name = "concurrency_limits_outcomes",
-      help = "what happened in a concurrency limited call?",
-      labelNames = listOf("quota_path", "outcome")
-    )
+    val outcomeCounter =
+      metrics.counter(
+        name = "concurrency_limits_outcomes",
+        help = "what happened in a concurrency limited call?",
+        labelNames = listOf("quota_path", "outcome"),
+      )
 
-    val limitGauge = metrics.gauge(
-      name = "concurrency_limits_limit",
-      help = "how many calls are permitted at once?",
-      labelNames = listOf("quota_path")
-    )
+    val limitGauge =
+      metrics.gauge(
+        name = "concurrency_limits_limit",
+        help = "how many calls are permitted at once?",
+        labelNames = listOf("quota_path"),
+      )
 
-    val inFlightGauge = metrics.gauge(
-      name = "concurrency_limits_inflight",
-      help = "how many calls are currently executing?",
-      labelNames = listOf("quota_path")
-    )
+    val inFlightGauge =
+      metrics.gauge(
+        name = "concurrency_limits_inflight",
+        help = "how many calls are currently executing?",
+        labelNames = listOf("quota_path"),
+      )
 
     /**
-     * Note that this cache is application-global. Multiple actions that use the same Quota-Path
-     * will be treated as a homogenous group for concurrency limiting.
+     * Note that this cache is application-global. Multiple actions that use the same Quota-Path will be treated as a
+     * homogenous group for concurrency limiting.
      */
-    private val quotaPathToLimiter: Cache<String, Limiter<String>> = CacheBuilder.newBuilder()
-      .build()
+    private val quotaPathToLimiter: Cache<String, Limiter<String>> = CacheBuilder.newBuilder().build()
 
     override fun create(action: Action): NetworkInterceptor? {
       if (action.function.findAnnotation<AvailableWhenDegraded>() != null) return null
@@ -184,17 +185,14 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
         action = action,
         defaultLimiter = createLimiterForAction(action, quotaPath = null),
         clock = clock,
-        logLevel = config.concurrency_limiter?.log_level
-          ?: config.concurrency_limiter_log_level,
-        enabledFeature = enabledFeature
+        logLevel = config.concurrency_limiter?.log_level ?: config.concurrency_limiter_log_level,
+        enabledFeature = enabledFeature,
       )
     }
 
     @VisibleForTesting
     internal fun createLimiterForAction(action: Action, quotaPath: String?): Limiter<String> {
-      return limiterFactories.asSequence()
-        .mapNotNull { it.create(action) }
-        .firstOrNull()
+      return limiterFactories.asSequence().mapNotNull { it.create(action) }.firstOrNull()
         ?: SimpleLimiter.Builder()
           .clock { Duration.between(Instant.EPOCH, clock.instant()).toNanos() }
           .limit(
@@ -220,18 +218,12 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   }
 }
 
-/**
- * Interface for a Feature flag that can dynamically enable/disable the concurrency limiter
- */
-interface MiskConcurrencyLimiterFeature{
+/** Interface for a Feature flag that can dynamically enable/disable the concurrency limiter */
+interface MiskConcurrencyLimiterFeature {
   fun enabled(): Boolean
 }
 
-/**
- * Simple implemenation of MiskConcurrencyLimiterFeature that always returns enabled=true
- */
-internal object  AlwaysEnabledMiskConcurrencyLimiterFeature : MiskConcurrencyLimiterFeature{
+/** Simple implemenation of MiskConcurrencyLimiterFeature that always returns enabled=true */
+internal object AlwaysEnabledMiskConcurrencyLimiterFeature : MiskConcurrencyLimiterFeature {
   override fun enabled(): Boolean = true
 }
-
-

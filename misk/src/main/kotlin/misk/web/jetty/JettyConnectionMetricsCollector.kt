@@ -1,15 +1,14 @@
 package misk.web.jetty
 
 import com.google.common.util.concurrent.AbstractScheduledService
-import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.TimeUnit
 
 @Singleton
-internal class JettyConnectionMetricsCollector @Inject internal constructor(
-  private val metrics: ConnectionMetrics
-) : AbstractScheduledService() {
+internal class JettyConnectionMetricsCollector @Inject internal constructor(private val metrics: ConnectionMetrics) :
+  AbstractScheduledService() {
   private val listeners = CopyOnWriteArrayList<ConnectionListener>()
 
   fun newConnectionListener(protocol: String, port: Int): ConnectionListener {

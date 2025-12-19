@@ -23,32 +23,18 @@ class VeneurDigestTest {
     val sourceVals: Array<Double> = emptyArray(),
     val destVals: Array<Double> = emptyArray(),
     val expectedMedian: Double = Double.NaN,
-    val expectedSum: Double = Double.NaN
+    val expectedSum: Double = Double.NaN,
   )
 
   @Test
   fun testVeneurDigest_MergeInto() {
-    val testCases: Array<VeneurDigestMergeTestClass> = arrayOf(
+    val testCases: Array<VeneurDigestMergeTestClass> =
+      arrayOf(
         VeneurDigestMergeTestClass(),
-        VeneurDigestMergeTestClass(
-            emptyArray(),
-            arrayOf(30.0, 40.0),
-            35.0,
-            70.0
-        ),
-        VeneurDigestMergeTestClass(
-            arrayOf(10.0, 20.0),
-            emptyArray(),
-            15.0,
-            30.0
-        ),
-        VeneurDigestMergeTestClass(
-            arrayOf(10.0, 20.0),
-            arrayOf(30.0, 40.0),
-            25.0,
-            100.0
-        )
-    )
+        VeneurDigestMergeTestClass(emptyArray(), arrayOf(30.0, 40.0), 35.0, 70.0),
+        VeneurDigestMergeTestClass(arrayOf(10.0, 20.0), emptyArray(), 15.0, 30.0),
+        VeneurDigestMergeTestClass(arrayOf(10.0, 20.0), arrayOf(30.0, 40.0), 25.0, 100.0),
+      )
 
     for (tc in testCases) {
       val src = VeneurDigest()
@@ -93,9 +79,7 @@ class VeneurDigestTest {
 
     assertThat(deserialized.sum()).isEqualTo(digest.sum())
     assertThat(deserialized.count()).isEqualTo(digest.count())
-    assertThat(deserialized.mergingDigest().quantile(0.1)).isEqualTo(
-        digest.mergingDigest().quantile(0.1))
-    assertThat(deserialized.mergingDigest().quantile(0.99)).isEqualTo(
-        digest.mergingDigest().quantile(0.99))
+    assertThat(deserialized.mergingDigest().quantile(0.1)).isEqualTo(digest.mergingDigest().quantile(0.1))
+    assertThat(deserialized.mergingDigest().quantile(0.99)).isEqualTo(digest.mergingDigest().quantile(0.99))
   }
 }

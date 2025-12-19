@@ -5,67 +5,52 @@ interface OpaPolicyEngine {
     document: String,
     input: T,
     inputType: Class<T>,
-    returnType: Class<R>
+    returnType: Class<R>,
   ): R
 
-  fun <R : OpaResponse> evaluateNoInput(
-    document: String,
-    returnType: Class<R>
-  ): R
+  fun <R : OpaResponse> evaluateNoInput(document: String, returnType: Class<R>): R
 
-  fun <R: OpaResponse> evaluateRawJsonInput(
-    document: String,
-    input: String,
-    returnType: Class<R>
-  ): R
+  fun <R : OpaResponse> evaluateRawJsonInput(document: String, input: String, returnType: Class<R>): R
 }
 
 /**
- * Evaluate / Query a document with no additional input.
- * This will connect to OPA via a retrofit interface and perform a /v1/data/{document} POST.
+ * Evaluate / Query a document with no additional input. This will connect to OPA via a retrofit interface and perform a
+ * /v1/data/{document} POST.
  *
  * @param document Name or Path of the OPA document to query.
+ * @return Response shape R from OPA.
  * @throws PolicyEngineException if the request to OPA failed or the response shape didn't match R.
  * @throws IllegalArgumentException if no document path was specified.
- * @return Response shape R from OPA.
  */
-inline fun <reified R : OpaResponse> OpaPolicyEngine.evaluate(
-  document: String
-): R {
+inline fun <reified R : OpaResponse> OpaPolicyEngine.evaluate(document: String): R {
   return evaluateNoInput(document, R::class.java)
 }
 
 /**
- * Evaluate / Query a document with given input of shape T.
- * This will connect to OPA via a retrofit interface and perform a /v1/data/{document} POST.
+ * Evaluate / Query a document with given input of shape T. This will connect to OPA via a retrofit interface and
+ * perform a /v1/data/{document} POST.
  *
  * @param document Name or Path of the OPA document to query.
  * @param input Input data to be supplied to OPA at evaluation time (the input global field).
+ * @return Response shape R from OPA.
  * @throws PolicyEngineException if the request to OPA failed or the response shape didn't match R.
  * @throws IllegalArgumentException if no document path was specified.
- * @return Response shape R from OPA.
  */
-inline fun <reified T : OpaRequest, reified R : OpaResponse> OpaPolicyEngine.evaluate(
-  document: String,
-  input: T
-): R {
+inline fun <reified T : OpaRequest, reified R : OpaResponse> OpaPolicyEngine.evaluate(document: String, input: T): R {
   return evaluateWithInput(document, input, T::class.java, R::class.java)
 }
+
 /**
- * Evaluate / Query a document with given input of raw JSON.
- * This will connect to OPA via a retrofit interface and perform a /v1/data/{document} POST.
- * This consumes raw JSON for corner cases where developers need to do queries that the automatic
- * JSON serialization doesn't support.
+ * Evaluate / Query a document with given input of raw JSON. This will connect to OPA via a retrofit interface and
+ * perform a /v1/data/{document} POST. This consumes raw JSON for corner cases where developers need to do queries that
+ * the automatic JSON serialization doesn't support.
  *
  * @param document Name or Path of the OPA document to query.
  * @param input Input data to be supplied to OPA at evaluation time. Must be valid JSON.
+ * @return Response shape R from OPA.
  * @throws PolicyEngineException if the request to OPA failed or the response shape didn't match R.
  * @throws IllegalArgumentException if no document path was specified.
- * @return Response shape R from OPA.
  */
-inline fun <reified R : OpaResponse> OpaPolicyEngine.evaluate(
-  document: String,
-  input: String
-): R {
+inline fun <reified R : OpaResponse> OpaPolicyEngine.evaluate(document: String, input: String): R {
   return evaluateRawJsonInput(document, input, R::class.java)
 }

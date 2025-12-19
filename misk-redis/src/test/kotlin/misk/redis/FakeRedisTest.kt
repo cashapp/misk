@@ -1,16 +1,7 @@
 package misk.redis
 
-import misk.MiskTestingServiceModule
-import misk.inject.KAbstractModule
-import misk.redis.testing.RedisTestModule
-import misk.testing.MiskTest
-import misk.testing.MiskTestModule
-import okio.ByteString.Companion.encodeUtf8
-import org.junit.jupiter.api.Test
-import misk.time.FakeClock
-import java.time.Duration
 import jakarta.inject.Inject
-import redis.clients.jedis.args.ListDirection
+import java.time.Duration
 import kotlin.random.Random
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -19,23 +10,34 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import misk.MiskTestingServiceModule
+import misk.inject.KAbstractModule
+import misk.redis.testing.RedisTestModule
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
+import misk.time.FakeClock
+import okio.ByteString.Companion.encodeUtf8
+import org.junit.jupiter.api.Test
+import redis.clients.jedis.args.ListDirection
 
 @MiskTest
-class FakeRedisTest: AbstractRedisTest() {
+class FakeRedisTest : AbstractRedisTest() {
   @Suppress("unused")
   @MiskTestModule
-  private val module = object: KAbstractModule() {
-    override fun configure() {
-      install(MiskTestingServiceModule())
-      // Hardcoded random seed for hrandfield* test determinism.
-      install(RedisTestModule(Random(1977)))
+  private val module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(MiskTestingServiceModule())
+        // Hardcoded random seed for hrandfield* test determinism.
+        install(RedisTestModule(Random(1977)))
+      }
     }
-  }
 
   @Inject lateinit var clock: FakeClock
   @Inject override lateinit var redis: Redis
 
-  @Test fun expireInOneSecond() {
+  @Test
+  fun expireInOneSecond() {
     // Setup
     redis["foo"] = "baz".encodeUtf8()
 
@@ -49,7 +51,8 @@ class FakeRedisTest: AbstractRedisTest() {
     assertNull(redis["foo"])
   }
 
-  @Test fun expireInOneSecondTimestamp() {
+  @Test
+  fun expireInOneSecondTimestamp() {
     // Setup
     redis["foo"] = "baz".encodeUtf8()
 
@@ -63,7 +66,8 @@ class FakeRedisTest: AbstractRedisTest() {
     assertNull(redis["foo"])
   }
 
-  @Test fun pExpireInOneMilliSecond() {
+  @Test
+  fun pExpireInOneMilliSecond() {
     // Setup
     redis["foo"] = "baz".encodeUtf8()
 
@@ -77,7 +81,8 @@ class FakeRedisTest: AbstractRedisTest() {
     assertNull(redis["foo"])
   }
 
-  @Test fun pExpireInOneMilliTimestamp() {
+  @Test
+  fun pExpireInOneMilliTimestamp() {
     // Setup
     redis["foo"] = "baz".encodeUtf8()
 
@@ -91,7 +96,8 @@ class FakeRedisTest: AbstractRedisTest() {
     assertNull(redis["foo"])
   }
 
-  @Test fun setWithExpiry() {
+  @Test
+  fun setWithExpiry() {
     val key = "key"
     val value = "value".encodeUtf8()
     val expirySec = 5L
@@ -113,8 +119,8 @@ class FakeRedisTest: AbstractRedisTest() {
     assertNull(redis[key], "Key should be expired")
   }
 
-
-  @Test fun setIfNotExistsWithExpiry() {
+  @Test
+  fun setIfNotExistsWithExpiry() {
     val key = "key"
     val value = "value".encodeUtf8()
     val value2 = "value2".encodeUtf8()
@@ -141,7 +147,8 @@ class FakeRedisTest: AbstractRedisTest() {
     assertNull(redis[key], "Key should be expired")
   }
 
-  @Test fun overridingResetsExpiry() {
+  @Test
+  fun overridingResetsExpiry() {
     val key = "key"
     val value = "value".encodeUtf8()
     val expirySec = 5L
@@ -162,7 +169,8 @@ class FakeRedisTest: AbstractRedisTest() {
     assertNull(redis[key], "Key did not expire")
   }
 
-  @Test fun `scan for all keys with default options`() {
+  @Test
+  fun `scan for all keys with default options`() {
     val expectedKeys = mutableSetOf<String>()
     for (i in 1..100) {
       expectedKeys.add(i.toString())
@@ -183,7 +191,8 @@ class FakeRedisTest: AbstractRedisTest() {
     assertEquals("0", scanResult.cursor)
   }
 
-  @Test fun `scan for keys matching a pattern`() {
+  @Test
+  fun `scan for keys matching a pattern`() {
     redis["test_tag:hello"] = "a".encodeUtf8()
     redis["different_tag:1"] = "b".encodeUtf8()
     redis["test_tag:2"] = "c".encodeUtf8()
@@ -193,8 +202,7 @@ class FakeRedisTest: AbstractRedisTest() {
 
     val expectedKeys = listOf("test_tag:hello", "test_tag:2")
 
-    assertTrue(scanResult.keys.containsAll(expectedKeys) &&
-      expectedKeys.containsAll(scanResult.keys))
+    assertTrue(scanResult.keys.containsAll(expectedKeys) && expectedKeys.containsAll(scanResult.keys))
     assertEquals(expectedKeys.size, scanResult.keys.size)
   }
 
@@ -218,34 +226,25 @@ class FakeRedisTest: AbstractRedisTest() {
     assertEquals(listOf("two", "one"), redis.lrange(key, 0, -1).map { it?.utf8() })
   }
 
-
-  @Test fun `cannot set same key multiple times with different data types`() {
+  @Test
+  fun `cannot set same key multiple times with different data types`() {
     val key = "mykey"
     val value = "value".encodeUtf8()
     redis[key] = value
 
     assertEquals(value, redis[key])
 
-    assertFails {
-      redis.hset(key, "field", value)
-    }.also { exception ->
-      assertContains(exception.message!!, "WRONGTYPE")
-    }
+    assertFails { redis.hset(key, "field", value) }
+      .also { exception -> assertContains(exception.message!!, "WRONGTYPE") }
 
-    assertFails {
-      redis.lpush(key, value)
-    }.also { exception ->
-      assertContains(exception.message!!, "WRONGTYPE")
-    }
+    assertFails { redis.lpush(key, value) }.also { exception -> assertContains(exception.message!!, "WRONGTYPE") }
 
-    assertFails {
-      redis.zadd(key, mapOf(value.toString() to 1.0))
-    }.also { exception ->
-      assertContains(exception.message!!, "WRONGTYPE")
-    }
+    assertFails { redis.zadd(key, mapOf(value.toString() to 1.0)) }
+      .also { exception -> assertContains(exception.message!!, "WRONGTYPE") }
   }
 
-  @Test fun listOperationsPreserveExpiry() {
+  @Test
+  fun listOperationsPreserveExpiry() {
     val key = "mylist"
     val expirySec = 5L
 
@@ -274,7 +273,8 @@ class FakeRedisTest: AbstractRedisTest() {
     assertNull(redis.lpop(key), "List should be expired")
   }
 
-  @Test fun lmovePreservesExpiryOnBothKeys() {
+  @Test
+  fun lmovePreservesExpiryOnBothKeys() {
     val sourceKey = "source"
     val destKey = "dest"
 

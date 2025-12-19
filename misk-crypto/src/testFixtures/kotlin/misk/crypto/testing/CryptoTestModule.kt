@@ -17,6 +17,7 @@ import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
+import java.security.Security
 import misk.config.MiskConfig
 import misk.crypto.CryptoConfig
 import misk.crypto.ExternalDataKeys
@@ -39,20 +40,15 @@ import misk.crypto.pgp.internal.PgpDecrypterProvider
 import misk.crypto.pgp.internal.PgpEncrypterProvider
 import misk.inject.KAbstractModule
 import org.bouncycastle.jce.provider.BouncyCastleProvider
-import java.security.Security
 
 /**
- * This module should be used for testing purposes only.
- * It generates random keys for each key name specified in the configuration
- * and uses [FakeKmsClient] instead of a real KMS service.
+ * This module should be used for testing purposes only. It generates random keys for each key name specified in the
+ * configuration and uses [FakeKmsClient] instead of a real KMS service.
  *
- * This module **will** read the exact same configuration files as the real application,
- * but **will not** use the key material specified in the configuration.
- * Instead, it'll generate a random keyset handle for each named key.
+ * This module **will** read the exact same configuration files as the real application, but **will not** use the key
+ * material specified in the configuration. Instead, it'll generate a random keyset handle for each named key.
  */
-class CryptoTestModule(
-  private val config: CryptoConfig? = null
-) : KAbstractModule() {
+class CryptoTestModule(private val config: CryptoConfig? = null) : KAbstractModule() {
   override fun configure() {
     bind<KmsClient>().toInstance(FakeKmsClient())
 
@@ -106,13 +102,11 @@ class CryptoTestModule(
         }
 
         KeyType.MAC -> {
-          bind<Mac>()
-            .annotatedWith(Names.named(key.key_name))
-            .toProvider(MacProvider(key.key_name))
-            .asEagerSingleton()
+          bind<Mac>().annotatedWith(Names.named(key.key_name)).toProvider(MacProvider(key.key_name)).asEagerSingleton()
         }
 
-        KeyType.DIGITAL_SIGNATURE, KeyType.SIGNATURE -> {
+        KeyType.DIGITAL_SIGNATURE,
+        KeyType.SIGNATURE -> {
           bind<PublicKeySign>()
             .annotatedWith(Names.named(key.key_name))
             .toProvider(DigitalSignatureSignerProvider(key.key_name))

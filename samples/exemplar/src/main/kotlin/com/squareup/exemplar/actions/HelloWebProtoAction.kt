@@ -2,6 +2,7 @@ package com.squareup.exemplar.actions
 
 import com.squareup.exemplar.protos.HelloWebRequest
 import com.squareup.exemplar.protos.HelloWebResponse
+import jakarta.inject.Inject
 import misk.security.authz.Unauthenticated
 import misk.web.Description
 import misk.web.Post
@@ -11,7 +12,6 @@ import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import jakarta.inject.Inject
 
 class HelloWebProtoAction @Inject constructor() : WebAction {
   @Post("/hello/proto/")
@@ -24,18 +24,16 @@ class HelloWebProtoAction @Inject constructor() : WebAction {
     return a suitable response.
   """
   )
-  fun hello(
-    @RequestBody request: HelloWebRequest
-  ): Response<HelloWebResponse> {
+  fun hello(@RequestBody request: HelloWebRequest): Response<HelloWebResponse> {
     return Response(
       HelloWebResponse(
         greeting = greeting(request),
-        name = (request.nick_name?.uppercase() ?: request.name.uppercase())
+        name = (request.nick_name?.uppercase() ?: request.name.uppercase()),
       )
     )
   }
 
-  private fun greeting(request: HelloWebRequest) : String {
+  private fun greeting(request: HelloWebRequest): String {
     return if (request.greetings.isNotEmpty()) {
       request.greetings.joinToString(separator = " ")
     } else {

@@ -1,6 +1,11 @@
 package misk.aws2.sqs.jobqueue
 
 import jakarta.inject.Inject
+import java.time.Duration
+import java.util.concurrent.CompletableFuture
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
@@ -14,11 +19,6 @@ import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Test
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
-import java.time.Duration
-import java.util.concurrent.CompletableFuture
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 
 @MiskTest(startService = true)
 class SubscriptionTest {
@@ -26,22 +26,19 @@ class SubscriptionTest {
   // creates queues before the tests start
   @MiskExternalDependency private val fakeQueueCreator = FakeQueueCreator(dockerSqs)
 
-  private val sqsConfig = SqsConfig(
-    per_queue_overrides = mapOf(
-      "external-test-queue" to SqsQueueConfig(
-        region = "us-west-2",
-        account_id = "1234567890",
-        install_retry_queue = false,
-      )
+  private val sqsConfig =
+    SqsConfig(
+      per_queue_overrides =
+        mapOf(
+          "external-test-queue" to
+            SqsQueueConfig(region = "us-west-2", account_id = "1234567890", install_retry_queue = false)
+        )
     )
-  )
   @MiskTestModule private val module = SqsJobHandlerTestModule(dockerSqs, sqsConfig)
 
-  @Inject
-  private lateinit var jobEnqueuer: SqsJobEnqueuer
+  @Inject private lateinit var jobEnqueuer: SqsJobEnqueuer
 
-  @Inject
-  private lateinit var handlers: Map<QueueName, JobHandler>
+  @Inject private lateinit var handlers: Map<QueueName, JobHandler>
 
   @Test
   fun `everything that is published via different APIs is consumed`() = runTest {
@@ -61,16 +58,18 @@ class SubscriptionTest {
       body = "message_2",
       idempotencyKey = "idempotency_key_2",
       deliveryDelay = Duration.ZERO,
-      attributes = emptyMap()
+      attributes = emptyMap(),
     )
 
-    jobEnqueuer.enqueueAsync(
-      queueName = queueName,
-      body = "message_3",
-      idempotencyKey = "idempotency_key_3",
-      deliveryDelay = Duration.ofSeconds(1),
-      attributes = emptyMap()
-    ).join()
+    jobEnqueuer
+      .enqueueAsync(
+        queueName = queueName,
+        body = "message_3",
+        idempotencyKey = "idempotency_key_3",
+        deliveryDelay = Duration.ofSeconds(1),
+        attributes = emptyMap(),
+      )
+      .join()
 
     val latch = handler.counter
     latch.await()
@@ -110,22 +109,24 @@ class SubscriptionTest {
     handler.resetCounter(5)
 
     // Test batchEnqueue (suspend)
-    val batchResult1 = jobEnqueuer.batchEnqueue(
-      queueName = queueName,
-      jobs = listOf(
-        JobEnqueuer.JobRequest(
-          body = "batch_message_1",
-          idempotencyKey = "batch_key_1",
-          deliveryDelay = Duration.ofMillis(100),
-          attributes = mapOf("batch" to "1")
-        ),
-        JobEnqueuer.JobRequest(
-          body = "batch_message_2",
-          idempotencyKey = "batch_key_2",
-          attributes = mapOf("batch" to "1")
-        )
+    val batchResult1 =
+      jobEnqueuer.batchEnqueue(
+        queueName = queueName,
+        jobs =
+          listOf(
+            JobEnqueuer.JobRequest(
+              body = "batch_message_1",
+              idempotencyKey = "batch_key_1",
+              deliveryDelay = Duration.ofMillis(100),
+              attributes = mapOf("batch" to "1"),
+            ),
+            JobEnqueuer.JobRequest(
+              body = "batch_message_2",
+              idempotencyKey = "batch_key_2",
+              attributes = mapOf("batch" to "1"),
+            ),
+          ),
       )
-    )
 
     assertTrue(batchResult1.isFullySuccessful)
     assertEquals(2, batchResult1.successfulIds.size)
@@ -133,38 +134,44 @@ class SubscriptionTest {
     assertEquals(0, batchResult1.retriableIds.size)
 
     // Test batchEnqueueBlocking
-    val batchResult2 = jobEnqueuer.batchEnqueueBlocking(
-      queueName = queueName,
-      jobs = listOf(
-        JobEnqueuer.JobRequest(
-          body = "batch_message_3",
-          idempotencyKey = "batch_key_3",
-          deliveryDelay = Duration.ZERO,
-          attributes = mapOf("batch" to "2")
-        )
+    val batchResult2 =
+      jobEnqueuer.batchEnqueueBlocking(
+        queueName = queueName,
+        jobs =
+          listOf(
+            JobEnqueuer.JobRequest(
+              body = "batch_message_3",
+              idempotencyKey = "batch_key_3",
+              deliveryDelay = Duration.ZERO,
+              attributes = mapOf("batch" to "2"),
+            )
+          ),
       )
-    )
 
     assertTrue(batchResult2.isFullySuccessful)
     assertEquals(1, batchResult2.successfulIds.size)
 
     // Test batchEnqueueAsync
-    val batchResult3 = jobEnqueuer.batchEnqueueAsync(
-      queueName = queueName,
-      jobs = listOf(
-        JobEnqueuer.JobRequest(
-          body = "batch_message_4",
-          idempotencyKey = "batch_key_4",
-          attributes = mapOf("batch" to "3")
-        ),
-        JobEnqueuer.JobRequest(
-          body = "batch_message_5",
-          idempotencyKey = "batch_key_5",
-          deliveryDelay = Duration.ofSeconds(1),
-          attributes = mapOf("batch" to "3")
+    val batchResult3 =
+      jobEnqueuer
+        .batchEnqueueAsync(
+          queueName = queueName,
+          jobs =
+            listOf(
+              JobEnqueuer.JobRequest(
+                body = "batch_message_4",
+                idempotencyKey = "batch_key_4",
+                attributes = mapOf("batch" to "3"),
+              ),
+              JobEnqueuer.JobRequest(
+                body = "batch_message_5",
+                idempotencyKey = "batch_key_5",
+                deliveryDelay = Duration.ofSeconds(1),
+                attributes = mapOf("batch" to "3"),
+              ),
+            ),
         )
-      )
-    ).join()
+        .join()
 
     assertTrue(batchResult3.isFullySuccessful)
     assertEquals(2, batchResult3.successfulIds.size)
@@ -188,32 +195,16 @@ class SubscriptionTest {
     handler.resetCounter(10)
 
     // Test that batches > 10 jobs are rejected
-    val tooManyJobs = (1..11).map { i ->
-      JobEnqueuer.JobRequest(
-        body = "message_$i",
-        idempotencyKey = "key_$i"
-      )
-    }
+    val tooManyJobs = (1..11).map { i -> JobEnqueuer.JobRequest(body = "message_$i", idempotencyKey = "key_$i") }
 
-    assertFailsWith<IllegalArgumentException> {
-      jobEnqueuer.batchEnqueue(queueName, tooManyJobs)
-    }
+    assertFailsWith<IllegalArgumentException> { jobEnqueuer.batchEnqueue(queueName, tooManyJobs) }
 
-    assertFailsWith<IllegalArgumentException> {
-      jobEnqueuer.batchEnqueueBlocking(queueName, tooManyJobs)
-    }
+    assertFailsWith<IllegalArgumentException> { jobEnqueuer.batchEnqueueBlocking(queueName, tooManyJobs) }
 
-    assertFailsWith<IllegalArgumentException> {
-      jobEnqueuer.batchEnqueueAsync(queueName, tooManyJobs)
-    }
+    assertFailsWith<IllegalArgumentException> { jobEnqueuer.batchEnqueueAsync(queueName, tooManyJobs) }
 
     // Test that exactly 10 jobs works
-    val maxJobs = (1..10).map { i ->
-      JobEnqueuer.JobRequest(
-        body = "message_$i",
-        idempotencyKey = "max_key_$i"
-      )
-    }
+    val maxJobs = (1..10).map { i -> JobEnqueuer.JobRequest(body = "message_$i", idempotencyKey = "max_key_$i") }
 
     val result = jobEnqueuer.batchEnqueue(queueName, maxJobs)
     assertTrue(result.isFullySuccessful)
@@ -228,25 +219,26 @@ class SubscriptionTest {
     // Reset counter for 3 jobs
     handler.resetCounter(3)
 
-    val mixedJobs = listOf(
-      JobEnqueuer.JobRequest(
-        body = "immediate_job",
-        idempotencyKey = "immediate_key",
-        deliveryDelay = Duration.ZERO,
-        attributes = mapOf("priority" to "high", "type" to "immediate")
-      ),
-      JobEnqueuer.JobRequest(
-        body = "delayed_job",
-        idempotencyKey = "delayed_key",
-        deliveryDelay = Duration.ofMillis(500),
-        attributes = mapOf("priority" to "normal", "type" to "delayed")
-      ),
-      JobEnqueuer.JobRequest(
-        body = "no_delay_job",
-        idempotencyKey = "no_delay_key",
-        attributes = mapOf("priority" to "low")
+    val mixedJobs =
+      listOf(
+        JobEnqueuer.JobRequest(
+          body = "immediate_job",
+          idempotencyKey = "immediate_key",
+          deliveryDelay = Duration.ZERO,
+          attributes = mapOf("priority" to "high", "type" to "immediate"),
+        ),
+        JobEnqueuer.JobRequest(
+          body = "delayed_job",
+          idempotencyKey = "delayed_key",
+          deliveryDelay = Duration.ofMillis(500),
+          attributes = mapOf("priority" to "normal", "type" to "delayed"),
+        ),
+        JobEnqueuer.JobRequest(
+          body = "no_delay_job",
+          idempotencyKey = "no_delay_key",
+          attributes = mapOf("priority" to "low"),
+        ),
       )
-    )
 
     val result = jobEnqueuer.batchEnqueue(queueName, mixedJobs)
 
@@ -275,18 +267,15 @@ class SubscriptionTest {
     val tooManyAttributes = (1..10).associate { "attr_$it" to "value_$it" }
     val validAttributes = (1..9).associate { "attr_$it" to "value_$it" }
 
-    val jobs = listOf(
-      JobEnqueuer.JobRequest(
-        body = "invalid_message",
-        idempotencyKey = "invalid_key",
-        attributes = tooManyAttributes
-      ),
-      JobEnqueuer.JobRequest(
-        body = "valid_message",
-        idempotencyKey = "valid_key",
-        attributes = validAttributes
+    val jobs =
+      listOf(
+        JobEnqueuer.JobRequest(
+          body = "invalid_message",
+          idempotencyKey = "invalid_key",
+          attributes = tooManyAttributes,
+        ),
+        JobEnqueuer.JobRequest(body = "valid_message", idempotencyKey = "valid_key", attributes = validAttributes),
       )
-    )
 
     // Should not throw an exception, but handle invalid jobs gracefully
     val result = jobEnqueuer.batchEnqueue(queueName, jobs)
@@ -321,18 +310,19 @@ class SubscriptionTest {
     // Create jobs with too many attributes
     val tooManyAttributes = (1..10).associate { "attr_$it" to "value_$it" }
 
-    val allInvalidJobs = listOf(
-      JobEnqueuer.JobRequest(
-        body = "invalid_message_1",
-        idempotencyKey = "invalid_key_1",
-        attributes = tooManyAttributes
-      ),
-      JobEnqueuer.JobRequest(
-        body = "invalid_message_2",
-        idempotencyKey = "invalid_key_2",
-        attributes = tooManyAttributes
+    val allInvalidJobs =
+      listOf(
+        JobEnqueuer.JobRequest(
+          body = "invalid_message_1",
+          idempotencyKey = "invalid_key_1",
+          attributes = tooManyAttributes,
+        ),
+        JobEnqueuer.JobRequest(
+          body = "invalid_message_2",
+          idempotencyKey = "invalid_key_2",
+          attributes = tooManyAttributes,
+        ),
       )
-    )
 
     val result = jobEnqueuer.batchEnqueue(queueName, allInvalidJobs)
 
@@ -355,12 +345,13 @@ class SubscriptionTest {
     val handler = handlers[queueName] as ExampleHandler
     handler.resetCounter(1)
 
-    val job = JobEnqueuer.JobRequest(
-      body = "buffered_job_request",
-      idempotencyKey = "buffered_job_key",
-      deliveryDelay = Duration.ofSeconds(1),
-      attributes = mapOf("type" to "job_request")
-    )
+    val job =
+      JobEnqueuer.JobRequest(
+        body = "buffered_job_request",
+        idempotencyKey = "buffered_job_key",
+        deliveryDelay = Duration.ofSeconds(1),
+        attributes = mapOf("type" to "job_request"),
+      )
 
     val startTime = System.currentTimeMillis()
     val result = jobEnqueuer.enqueueBufferedAsync(queueName, job).join()
@@ -384,13 +375,14 @@ class SubscriptionTest {
     handler.resetCounter(messageCount)
 
     // Fire off multiple messages concurrently - they should be batched automatically
-    val futures = (1..messageCount).map { i ->
-      jobEnqueuer.enqueueBufferedAsync(
-        queueName = queueName,
-        body = "concurrent_message_$i",
-        idempotencyKey = "concurrent_key_$i",
-      )
-    }
+    val futures =
+      (1..messageCount).map { i ->
+        jobEnqueuer.enqueueBufferedAsync(
+          queueName = queueName,
+          body = "concurrent_message_$i",
+          idempotencyKey = "concurrent_key_$i",
+        )
+      }
 
     // Wait for all futures to complete
     CompletableFuture.allOf(*futures.toTypedArray()).join()
@@ -409,27 +401,27 @@ class SubscriptionTest {
 private class FakeQueueCreator(private val dockerSqs: DockerSqs) : ExternalDependency {
   private val queues = listOf("test-queue-1", "test-queue-1_retryq", "test-queue-1_dlq", "external-test-queue")
 
-  override fun startup() {
-  }
+  override fun startup() {}
 
-  override fun shutdown() {
-  }
+  override fun shutdown() {}
 
   override fun beforeEach() {
     queues.forEach {
-      dockerSqs.client.createQueue(
-        CreateQueueRequest.builder().queueName(it)
-          .attributes(
-            mapOf(
-              QueueAttributeName.RECEIVE_MESSAGE_WAIT_TIME_SECONDS to "20",
-              QueueAttributeName.VISIBILITY_TIMEOUT to "20",
+      dockerSqs.client
+        .createQueue(
+          CreateQueueRequest.builder()
+            .queueName(it)
+            .attributes(
+              mapOf(
+                QueueAttributeName.RECEIVE_MESSAGE_WAIT_TIME_SECONDS to "20",
+                QueueAttributeName.VISIBILITY_TIMEOUT to "20",
+              )
             )
-          )
-          .build()
-      ).join()
+            .build()
+        )
+        .join()
     }
   }
 
-  override fun afterEach() {
-  }
+  override fun afterEach() {}
 }

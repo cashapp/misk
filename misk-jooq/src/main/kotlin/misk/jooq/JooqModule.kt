@@ -3,6 +3,8 @@ package misk.jooq
 import com.google.inject.Injector
 import com.google.inject.Provider
 import jakarta.inject.Inject
+import java.time.Clock
+import kotlin.reflect.KClass
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
@@ -18,10 +20,10 @@ import misk.jooq.config.CachedConfigurationFactory
 import misk.jooq.config.ConfigurationFactory
 import misk.jooq.listeners.JooqTimestampRecordListenerOptions
 import org.jooq.Configuration
-import java.time.Clock
-import kotlin.reflect.KClass
 
-class JooqModule @JvmOverloads constructor(
+class JooqModule
+@JvmOverloads
+constructor(
   private val qualifier: KClass<out Annotation>,
   private val dataSourceClusterConfig: DataSourceClusterConfig,
   private val jooqCodeGenSchemaName: String,
@@ -44,10 +46,11 @@ class JooqModule @JvmOverloads constructor(
         databasePool = databasePool,
         installHealthCheck = installHealthChecks,
         installSchemaMigrator = installSchemaMigrator,
-      ),
+      )
     )
 
-    bind<ConfigurationFactory>().annotatedWith(qualifier.java)
+    bind<ConfigurationFactory>()
+      .annotatedWith(qualifier.java)
       .toProvider(
         CachedConfigurationFactoryProvider(
           dataSourceConfig = dataSourceClusterConfig.writer,
@@ -55,11 +58,13 @@ class JooqModule @JvmOverloads constructor(
           jooqTimestampRecordListenerOptions = jooqTimestampRecordListenerOptions,
           jooqConfigExtension = jooqConfigExtension,
           qualifier = qualifier,
-        ),
-      ).asSingleton()
+        )
+      )
+      .asSingleton()
     bindTransacter(qualifier)
     if (readerQualifier != null && dataSourceClusterConfig.reader != null) {
-      bind<ConfigurationFactory>().annotatedWith(readerQualifier.java)
+      bind<ConfigurationFactory>()
+        .annotatedWith(readerQualifier.java)
         .toProvider(
           CachedConfigurationFactoryProvider(
             dataSourceConfig = dataSourceClusterConfig.reader!!,
@@ -67,8 +72,9 @@ class JooqModule @JvmOverloads constructor(
             jooqTimestampRecordListenerOptions = jooqTimestampRecordListenerOptions,
             jooqConfigExtension = jooqConfigExtension,
             qualifier = readerQualifier,
-          ),
-        ).asSingleton()
+          )
+        )
+        .asSingleton()
       bindTransacter(readerQualifier)
     }
 
@@ -77,26 +83,20 @@ class JooqModule @JvmOverloads constructor(
     multibind<HealthCheck>().to(healthCheckKey)
   }
 
-  private fun bindTransacter(
-    qualifier: KClass<out Annotation>,
-  ) {
+  private fun bindTransacter(qualifier: KClass<out Annotation>) {
     val configurationFactoryProvider = getProvider(keyOf<ConfigurationFactory>(qualifier))
     val transacterKey = JooqTransacter::class.toKey(qualifier)
-    bind(transacterKey).toProvider(
-      Provider {
-        JooqTransacter { options ->
-          configurationFactoryProvider.get().getConfiguration(options)
-        }
-      },
-    ).asSingleton()
+    bind(transacterKey)
+      .toProvider(
+        Provider { JooqTransacter { options -> configurationFactoryProvider.get().getConfiguration(options) } }
+      )
+      .asSingleton()
   }
 
   private class JooqHealthCheckProvider(private val qualifier: KClass<out Annotation>) : Provider<JooqHealthCheck> {
-    @Inject
-    private lateinit var clock: Clock
+    @Inject private lateinit var clock: Clock
 
-    @Inject
-    private lateinit var injector: Injector
+    @Inject private lateinit var injector: Injector
 
     override fun get(): JooqHealthCheck {
       val dataSourceServiceProvider = injector.getProvider(keyOf<DataSourceService>(qualifier))
@@ -115,13 +115,11 @@ class JooqModule @JvmOverloads constructor(
     private val jooqCodeGenSchemaName: String,
     private val jooqTimestampRecordListenerOptions: JooqTimestampRecordListenerOptions,
     private val jooqConfigExtension: Configuration.() -> Unit,
-    private val qualifier: KClass<out Annotation>
+    private val qualifier: KClass<out Annotation>,
   ) : Provider<CachedConfigurationFactory> {
-    @Inject
-    private lateinit var clock: Clock
+    @Inject private lateinit var clock: Clock
 
-    @Inject
-    private lateinit var injector: Injector
+    @Inject private lateinit var injector: Injector
 
     override fun get(): CachedConfigurationFactory {
       val readerDataSourceServiceProvider = injector.getProvider(keyOf<DataSourceService>(qualifier))
@@ -134,7 +132,5 @@ class JooqModule @JvmOverloads constructor(
         jooqConfigExtension = jooqConfigExtension,
       )
     }
-
   }
 }
-

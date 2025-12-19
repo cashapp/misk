@@ -3,6 +3,8 @@ package misk.aws2.dynamodb
 import com.google.inject.Injector
 import com.google.inject.Provider
 import jakarta.inject.Inject
+import java.net.URI
+import kotlin.reflect.KClass
 import misk.ReadyService
 import misk.ServiceModule
 import misk.cloud.aws.AwsRegion
@@ -17,8 +19,6 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClientBuilder
-import java.net.URI
-import kotlin.reflect.KClass
 
 /**
  * Install this module to have access to a DynamoDbClient.
@@ -42,7 +42,8 @@ import kotlin.reflect.KClass
  * ```
  */
 open class RealDynamoDbModule
-@JvmOverloads constructor(
+@JvmOverloads
+constructor(
   private val qualifier: KClass<out Annotation>? = null,
   private val clientOverrideConfig: ClientOverrideConfiguration = ClientOverrideConfiguration.builder().build(),
   private val requiredTables: List<RequiredDynamoDbTable> = listOf(),
@@ -60,28 +61,40 @@ open class RealDynamoDbModule
     requireBinding<AwsCredentialsProvider>()
     requireBinding<AwsRegion>()
 
-    bind(keyOf<DynamoDbClient>(qualifier)).toProvider(object : Provider<DynamoDbClient> {
-      @Inject lateinit var awsRegion: AwsRegion
-      @Inject lateinit var awsCredentialsProvider: AwsCredentialsProvider
-      override fun get(): DynamoDbClient = createDynamoDbClient(awsRegion, awsCredentialsProvider)
-    }).asSingleton()
+    bind(keyOf<DynamoDbClient>(qualifier))
+      .toProvider(
+        object : Provider<DynamoDbClient> {
+          @Inject lateinit var awsRegion: AwsRegion
+          @Inject lateinit var awsCredentialsProvider: AwsCredentialsProvider
 
-    bind(keyOf<DynamoDbStreamsClient>(qualifier)).toProvider(object : Provider<DynamoDbStreamsClient> {
-      @Inject lateinit var awsRegion: AwsRegion
-      @Inject lateinit var awsCredentialsProvider: AwsCredentialsProvider
-      override fun get(): DynamoDbStreamsClient = createDynamoDbStreamsClient(awsRegion, awsCredentialsProvider)
-    }).asSingleton()
+          override fun get(): DynamoDbClient = createDynamoDbClient(awsRegion, awsCredentialsProvider)
+        }
+      )
+      .asSingleton()
+
+    bind(keyOf<DynamoDbStreamsClient>(qualifier))
+      .toProvider(
+        object : Provider<DynamoDbStreamsClient> {
+          @Inject lateinit var awsRegion: AwsRegion
+          @Inject lateinit var awsCredentialsProvider: AwsCredentialsProvider
+
+          override fun get(): DynamoDbStreamsClient = createDynamoDbStreamsClient(awsRegion, awsCredentialsProvider)
+        }
+      )
+      .asSingleton()
 
     bind(keyOf<List<RequiredDynamoDbTable>>(qualifier)).toInstance(requiredTables)
 
-    bind(keyOf<RealDynamoDbService>(qualifier)).toProvider(object : Provider<RealDynamoDbService> {
-      @Inject lateinit var injector: Injector
-      override fun get(): RealDynamoDbService = RealDynamoDbService(
-        injector = injector,
-        requiredTables = requiredTables,
-        qualifier = qualifier
+    bind(keyOf<RealDynamoDbService>(qualifier))
+      .toProvider(
+        object : Provider<RealDynamoDbService> {
+          @Inject lateinit var injector: Injector
+
+          override fun get(): RealDynamoDbService =
+            RealDynamoDbService(injector = injector, requiredTables = requiredTables, qualifier = qualifier)
+        }
       )
-    }).asSingleton()
+      .asSingleton()
 
     bind(keyOf<DynamoDbService>(qualifier)).to(keyOf<RealDynamoDbService>(qualifier))
     install(ServiceModule<DynamoDbService>(qualifier).enhancedBy<ReadyService>())
@@ -93,10 +106,11 @@ open class RealDynamoDbModule
     awsRegion: AwsRegion,
     awsCredentialsProvider: AwsCredentialsProvider,
   ): DynamoDbClient {
-    val builder = DynamoDbClient.builder()
-      .region(Region.of(awsRegion.name))
-      .credentialsProvider(awsCredentialsProvider)
-      .overrideConfiguration(clientOverrideConfig)
+    val builder =
+      DynamoDbClient.builder()
+        .region(Region.of(awsRegion.name))
+        .credentialsProvider(awsCredentialsProvider)
+        .overrideConfiguration(clientOverrideConfig)
     if (endpointOverride != null) {
       builder.endpointOverride(endpointOverride)
     }
@@ -108,10 +122,11 @@ open class RealDynamoDbModule
     awsRegion: AwsRegion,
     awsCredentialsProvider: AwsCredentialsProvider,
   ): DynamoDbStreamsClient {
-    val builder = DynamoDbStreamsClient.builder()
-      .region(Region.of(awsRegion.name))
-      .credentialsProvider(awsCredentialsProvider)
-      .overrideConfiguration(clientOverrideConfig)
+    val builder =
+      DynamoDbStreamsClient.builder()
+        .region(Region.of(awsRegion.name))
+        .credentialsProvider(awsCredentialsProvider)
+        .overrideConfiguration(clientOverrideConfig)
     if (endpointOverride != null) {
       builder.endpointOverride(endpointOverride)
     }
@@ -120,5 +135,6 @@ open class RealDynamoDbModule
   }
 
   open fun configureClient(builder: DynamoDbClientBuilder) {}
+
   open fun configureClient(builder: DynamoDbStreamsClientBuilder) {}
 }

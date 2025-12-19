@@ -1,6 +1,13 @@
 package misk.hibernate
 
+import jakarta.inject.Inject
+import jakarta.inject.Qualifier
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.Table
 import misk.MiskTestingServiceModule
+import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
@@ -9,19 +16,11 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import misk.config.Config
 import wisp.deployment.TESTING
-import jakarta.inject.Inject
-import jakarta.inject.Qualifier
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Table
 
 @MiskTest(startService = true)
 class BoxedStringColumnTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject @TokenColumn lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
@@ -38,9 +37,7 @@ class BoxedStringColumnTest {
       session.save(DbTextToken("def", defToken, defOptionalToken))
     }
     transacter.transaction { session ->
-      val textHash = queryFactory.newQuery(TextTokenQuery::class)
-        .token(abcToken)
-        .uniqueResult(session)!!
+      val textHash = queryFactory.newQuery(TextTokenQuery::class).token(abcToken).uniqueResult(session)!!
       assertThat(textHash.text).isEqualTo("abc")
       assertThat(textHash.token).isEqualTo(abcToken)
       assertThat(textHash.optional_token).isEqualTo(abcOptionalToken)
@@ -50,13 +47,9 @@ class BoxedStringColumnTest {
   @Test
   fun nullOptionalToken() {
     val abcToken = GoodLuckToken("abc")
+    transacter.transaction { session -> session.save(DbTextToken("abc", abcToken)) }
     transacter.transaction { session ->
-      session.save(DbTextToken("abc", abcToken))
-    }
-    transacter.transaction { session ->
-      val textHash = queryFactory.newQuery(TextTokenQuery::class)
-        .token(abcToken)
-        .uniqueResult(session)!!
+      val textHash = queryFactory.newQuery(TextTokenQuery::class).token(abcToken).uniqueResult(session)!!
       assertThat(textHash.text).isEqualTo("abc")
       assertThat(textHash.token).isEqualTo(abcToken)
       assertThat(textHash.optional_token).isNull()
@@ -78,35 +71,14 @@ class BoxedStringColumnTest {
     }
 
     transacter.transaction { session ->
-      assertThat(
-        queryFactory.newQuery<TextTokenQuery>()
-          .tokenLessThan(v1.token)
-          .listAsTextAndToken(session)
-      )
-        .isEmpty()
-      assertThat(
-        queryFactory.newQuery<TextTokenQuery>()
-          .tokenLessThan(v2.token)
-          .listAsTextAndToken(session)
-      )
+      assertThat(queryFactory.newQuery<TextTokenQuery>().tokenLessThan(v1.token).listAsTextAndToken(session)).isEmpty()
+      assertThat(queryFactory.newQuery<TextTokenQuery>().tokenLessThan(v2.token).listAsTextAndToken(session))
         .containsExactly(v1)
-      assertThat(
-        queryFactory.newQuery<TextTokenQuery>()
-          .tokenLessThan(v3.token)
-          .listAsTextAndToken(session)
-      )
+      assertThat(queryFactory.newQuery<TextTokenQuery>().tokenLessThan(v3.token).listAsTextAndToken(session))
         .containsExactly(v1, v2)
-      assertThat(
-        queryFactory.newQuery<TextTokenQuery>()
-          .tokenLessThan(v4.token)
-          .listAsTextAndToken(session)
-      )
+      assertThat(queryFactory.newQuery<TextTokenQuery>().tokenLessThan(v4.token).listAsTextAndToken(session))
         .containsExactly(v1, v2, v3)
-      assertThat(
-        queryFactory.newQuery<TextTokenQuery>()
-          .tokenLessThan(GoodLuckToken("~"))
-          .listAsTextAndToken(session)
-      )
+      assertThat(queryFactory.newQuery<TextTokenQuery>().tokenLessThan(GoodLuckToken("~")).listAsTextAndToken(session))
         .containsExactly(v1, v2, v3, v4)
     }
   }
@@ -123,11 +95,10 @@ class BoxedStringColumnTest {
       session.save(DbTextToken(v3.text, v3.token))
     }
 
-    val tokenPrefixCount = transacter.transaction { session ->
-      queryFactory.newQuery<TextTokenQuery>()
-        .constraint { root -> like(root.get("token"), "token%") }
-        .count(session)
-    }
+    val tokenPrefixCount =
+      transacter.transaction { session ->
+        queryFactory.newQuery<TextTokenQuery>().constraint { root -> like(root.get("token"), "token%") }.count(session)
+      }
 
     assertThat(tokenPrefixCount).isEqualTo(2)
   }
@@ -140,11 +111,13 @@ class BoxedStringColumnTest {
       val config = MiskConfig.load<RootConfig>("boxedstring", TESTING)
       install(HibernateTestingModule(TokenColumn::class))
       install(HibernateModule(TokenColumn::class, config.data_source))
-      install(object : HibernateEntityModule(TokenColumn::class) {
-        override fun configureHibernate() {
-          addEntities(DbTextToken::class)
+      install(
+        object : HibernateEntityModule(TokenColumn::class) {
+          override fun configureHibernate() {
+            addEntities(DbTextToken::class)
+          }
         }
-      })
+      )
     }
   }
 
@@ -152,27 +125,20 @@ class BoxedStringColumnTest {
     override fun compareTo(other: GoodLuckToken) = string.compareTo(other.string)
   }
 
-  @Qualifier
-  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-  annotation class TokenColumn
+  @Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) annotation class TokenColumn
 
   data class RootConfig(val data_source: DataSourceConfig) : Config
 
   @Entity
   @Table(name = "text_tokens")
   class DbTextToken() : DbUnsharded<DbTextToken> {
-    @javax.persistence.Id
-    @GeneratedValue
-    override lateinit var id: Id<DbTextToken>
+    @javax.persistence.Id @GeneratedValue override lateinit var id: Id<DbTextToken>
 
-    @Column(nullable = false)
-    lateinit var text: String
+    @Column(nullable = false) lateinit var text: String
 
-    @Column(nullable = false)
-    lateinit var token: GoodLuckToken
+    @Column(nullable = false) lateinit var token: GoodLuckToken
 
-    @Column
-    var optional_token: GoodLuckToken? = null
+    @Column var optional_token: GoodLuckToken? = null
 
     constructor(text: String, token: GoodLuckToken, optionalToken: GoodLuckToken? = null) : this() {
       this.text = text
@@ -181,19 +147,13 @@ class BoxedStringColumnTest {
     }
   }
 
-  data class TextAndToken(
-    @Property("text") val text: String,
-    @Property("token") val token: GoodLuckToken
-  ) : Projection
+  data class TextAndToken(@Property("text") val text: String, @Property("token") val token: GoodLuckToken) : Projection
 
   interface TextTokenQuery : Query<DbTextToken> {
-    @Constraint(path = "token")
-    fun token(token: GoodLuckToken): TextTokenQuery
+    @Constraint(path = "token") fun token(token: GoodLuckToken): TextTokenQuery
 
-    @Constraint(path = "token", operator = Operator.LT)
-    fun tokenLessThan(token: GoodLuckToken): TextTokenQuery
+    @Constraint(path = "token", operator = Operator.LT) fun tokenLessThan(token: GoodLuckToken): TextTokenQuery
 
-    @Select
-    fun listAsTextAndToken(session: Session): List<TextAndToken>
+    @Select fun listAsTextAndToken(session: Session): List<TextAndToken>
   }
 }

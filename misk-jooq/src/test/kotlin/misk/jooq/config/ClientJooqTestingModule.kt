@@ -1,6 +1,7 @@
 package misk.jooq.config
 
 import jakarta.inject.Qualifier
+import kotlin.collections.addAll
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
@@ -19,7 +20,6 @@ import org.jooq.RecordListenerProvider
 import org.jooq.impl.DefaultExecuteListenerProvider
 import org.jooq.impl.DefaultRecordListenerProvider
 import wisp.deployment.TESTING
-import kotlin.collections.addAll
 
 class ClientJooqTestingModule : KAbstractModule() {
   override fun configure() {

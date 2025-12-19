@@ -1,25 +1,23 @@
 package misk.slack.webapi
 
-import misk.slack.webapi.helpers.AddReactionRequest
-import misk.slack.webapi.helpers.AddReactionResponse
-import misk.slack.webapi.helpers.PostMessageRequest
-import misk.slack.webapi.helpers.GetUserResponse
-import misk.slack.webapi.helpers.PostMessageResponse
-import retrofit2.Response
+import jakarta.inject.Inject
 import java.io.IOException
 import java.io.UncheckedIOException
-import jakarta.inject.Inject
+import misk.slack.webapi.helpers.AddReactionRequest
+import misk.slack.webapi.helpers.AddReactionResponse
 import misk.slack.webapi.helpers.GetChatPermalinkResponse
+import misk.slack.webapi.helpers.GetUserResponse
 import misk.slack.webapi.helpers.InviteRequest
 import misk.slack.webapi.helpers.InviteResponse
+import misk.slack.webapi.helpers.PostMessageRequest
+import misk.slack.webapi.helpers.PostMessageResponse
 import misk.slack.webapi.helpers.SetConversationTopicRequest
 import misk.slack.webapi.helpers.SetConversationTopicResponse
 import misk.slack.webapi.helpers.UserGroupRequest
 import misk.slack.webapi.helpers.UserGroupResponse
+import retrofit2.Response
 
-class RealSlackClient @Inject constructor(
-  private val slackApi: SlackApi,
-) : SlackClient {
+class RealSlackClient @Inject constructor(private val slackApi: SlackApi) : SlackClient {
   override fun postMessage(request: PostMessageRequest): PostMessageResponse {
     return callSlack { slackApi.postMessage(request).execute() }
   }

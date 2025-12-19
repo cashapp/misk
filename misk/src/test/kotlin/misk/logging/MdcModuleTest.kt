@@ -9,12 +9,9 @@ import org.junit.jupiter.api.Test
 
 @MiskTest(startService = false)
 internal class MdcModuleTest {
-  @MiskTestModule
-  val module = MiskTestingServiceModule()
+  @MiskTestModule val module = MiskTestingServiceModule()
 
-  @Inject
-  lateinit var mdc: Mdc
-
+  @Inject lateinit var mdc: Mdc
 
   @Test
   fun mdcIsInstalled() {

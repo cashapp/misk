@@ -11,6 +11,4 @@ package misk.web.metadata.all
  * )
  * ```
  */
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION)
-annotation class AllMetadataAccess
+@Retention(AnnotationRetention.RUNTIME) @Target(AnnotationTarget.FUNCTION) annotation class AllMetadataAccess

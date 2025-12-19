@@ -21,7 +21,8 @@ fun BlobId.compareTo(other: BlobId): Int {
 fun <T> Page<T>.toList(): List<T> = values.asSequence().toList()
 
 /** @return a list containing just the ids of the blobs in the page */
-val Page<Blob>.blobIds get() = toList().map { it.blobId }
+val Page<Blob>.blobIds
+  get() = toList().map { it.blobId }
 
 /** Runs the given block for each chunk on a given channel */
 fun ReadChannel.forEachChunk(buffer: ByteBuffer, action: (ByteBuffer, Int) -> Unit) {

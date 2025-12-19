@@ -1,18 +1,16 @@
 package misk.web.extractors
 
 import com.google.common.collect.ImmutableMultimap
+import java.net.URLDecoder
 import misk.exceptions.requireRequest
 import okio.BufferedSource
-import java.net.URLDecoder
 
 /**
  * An HTML form like `application/x-www-form-urlencoded`.
  *
  * TODO(jwilson): combine with OkHttp's FormBody.
  */
-internal data class FormData(
-  val map: ImmutableMultimap<String, String>
-) {
+internal data class FormData(val map: ImmutableMultimap<String, String>) {
   operator fun get(name: String): Collection<String> = map[name]
 
   companion object {

@@ -11,7 +11,7 @@ internal class RequestMatchTest {
     assertOrdering(
       match(PathPattern.parse("/org/admin/users"), "text/*", "text/*"),
       match(PathPattern.parse("/org/{folder}/{type}"), "text/plain", "text/plain"),
-      match(PathPattern.parse("{path:.*}"), "text/plain", "text/plain")
+      match(PathPattern.parse("{path:.*}"), "text/plain", "text/plain"),
     )
   }
 
@@ -26,25 +26,13 @@ internal class RequestMatchTest {
       match("text/*", "*/*"),
       match("*/*", "text/plain"),
       match("*/*", "text/*"),
-      match("*/*", "*/*")
+      match("*/*", "*/*"),
     )
   }
 
-  private fun match(
-    requestRange: String,
-    responseType: String
-  ) =
+  private fun match(requestRange: String, responseType: String) =
     match(PathPattern.parse("/a"), requestRange, responseType)
 
-  private fun match(
-    path: PathPattern,
-    requestRange: String,
-    responseType: String
-  ) =
-    RequestMatch(
-      path,
-      requestRange.asMediaRange(),
-      false,
-      responseType.toMediaTypeOrNull()!!
-    )
+  private fun match(path: PathPattern, requestRange: String, responseType: String) =
+    RequestMatch(path, requestRange.asMediaRange(), false, responseType.toMediaTypeOrNull()!!)
 }

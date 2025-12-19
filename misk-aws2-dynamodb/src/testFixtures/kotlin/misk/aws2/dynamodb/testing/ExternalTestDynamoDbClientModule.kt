@@ -23,13 +23,10 @@ import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
 
 /**
  * Unlike the InProcessDynamoDbModule and DockerDynamoDbModule classes, this module does not internally start DynamoDB,
- * and instead relies on an external DynamoDB server already running on the given port, e.g. using a Gradle task as
- * a dependency of the test task, which starts DynamoDB in a Docker container.
+ * and instead relies on an external DynamoDB server already running on the given port, e.g. using a Gradle task as a
+ * dependency of the test task, which starts DynamoDB in a Docker container.
  */
-class ExternalTestDynamoDbClientModule(
-  private val port: Int,
-  originalTables: List<DynamoDbTable>
-) : KAbstractModule() {
+class ExternalTestDynamoDbClientModule(private val port: Int, originalTables: List<DynamoDbTable>) : KAbstractModule() {
 
   private val tables = originalTables.map { it.copy(tableName = ParallelTestsTableNameMapper.mapName(it.tableName)) }
 
@@ -51,12 +48,14 @@ class ExternalTestDynamoDbClientModule(
 
   @Provides
   @Singleton
-  fun providesTestDynamoDbClient(): TestDynamoDbClient = DefaultTestDynamoDbClient(
-    tables = tables.map { table ->
-      TestTable.create(table.tableName, table.tableClass) { table.configureTable(it.toBuilder()).build() }
-    },
-    port,
-  )
+  fun providesTestDynamoDbClient(): TestDynamoDbClient =
+    DefaultTestDynamoDbClient(
+      tables =
+        tables.map { table ->
+          TestTable.create(table.tableName, table.tableClass) { table.configureTable(it.toBuilder()).build() }
+        },
+      port,
+    )
 
   @Provides
   @Singleton
@@ -64,22 +63,21 @@ class ExternalTestDynamoDbClientModule(
 
   @Provides
   @Singleton
-  fun providesAmazonDynamoDBStreams(testDynamoDbClient: TestDynamoDbClient):
-    DynamoDbStreamsClient = testDynamoDbClient.dynamoDbStreams
+  fun providesAmazonDynamoDBStreams(testDynamoDbClient: TestDynamoDbClient): DynamoDbStreamsClient =
+    testDynamoDbClient.dynamoDbStreams
 }
 
 @Singleton
-private class TestDynamoDbFixture @Inject constructor(
-  private val client: TestDynamoDbClient,
-  private val tables: List<DynamoDbTable>
-) : AbstractIdleService(), TestFixture {
+private class TestDynamoDbFixture
+@Inject
+constructor(private val client: TestDynamoDbClient, private val tables: List<DynamoDbTable>) :
+  AbstractIdleService(), TestFixture {
 
   override fun startUp() {
     reset()
   }
 
-  override fun shutDown() {
-  }
+  override fun shutDown() {}
 
   override fun reset() {
     for (tableName in tables.map { it.tableName }) {
@@ -89,9 +87,10 @@ private class TestDynamoDbFixture @Inject constructor(
         // Ignore if the table doesn't exist
       }
     }
-    for (table in tables.map { table ->
-      TestTable.create(table.tableName, table.tableClass) { table.configureTable(it.toBuilder()).build() }
-    }) {
+    for (table in
+      tables.map { table ->
+        TestTable.create(table.tableName, table.tableClass) { table.configureTable(it.toBuilder()).build() }
+      }) {
       client.dynamoDb.createTable(table)
     }
   }
@@ -100,18 +99,16 @@ private class TestDynamoDbFixture @Inject constructor(
 @Singleton
 private class TestDynamoDbService @Inject constructor() : AbstractService(), DynamoDbService {
   override fun doStart() = notifyStarted()
+
   override fun doStop() = notifyStopped()
 }
 
 /**
- * A [TableNameMapper] that appends a unique identifier for each test process ID to the table name.
- * This is used to ensure that multiple tests can run in parallel without clobbering each other's tables.
+ * A [TableNameMapper] that appends a unique identifier for each test process ID to the table name. This is used to
+ * ensure that multiple tests can run in parallel without clobbering each other's tables.
  */
 object ParallelTestsTableNameMapper : TableNameMapper {
   override fun mapName(tableName: String): String {
-    return tableName.updateForParallelTests { name, index ->
-      name + "_$index"
-    }
+    return tableName.updateForParallelTests { name, index -> name + "_$index" }
   }
 }
-

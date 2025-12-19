@@ -3,6 +3,7 @@ package misk.feature.launchdarkly
 import com.google.common.util.concurrent.AbstractIdleService
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.util.concurrent.Executor
 import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.FeatureFlags
@@ -14,16 +15,14 @@ import wisp.feature.EnumFeatureFlag
 import wisp.feature.IntFeatureFlag
 import wisp.feature.JsonFeatureFlag
 import wisp.feature.StringFeatureFlag
-import java.util.concurrent.Executor
 
 /**
- * Implementation of [FeatureFlags] using LaunchDarkly's Java SDK.
- * See https://docs.launchdarkly.com/docs/java-sdk-reference documentation.
+ * Implementation of [FeatureFlags] using LaunchDarkly's Java SDK. See
+ * https://docs.launchdarkly.com/docs/java-sdk-reference documentation.
  */
 @Singleton
-class LaunchDarklyFeatureFlags @Inject constructor(
-  private val delegate: wisp.launchdarkly.LaunchDarklyFeatureFlags,
-) : AbstractIdleService(), FeatureFlags, FeatureService {
+class LaunchDarklyFeatureFlags @Inject constructor(private val delegate: wisp.launchdarkly.LaunchDarklyFeatureFlags) :
+  AbstractIdleService(), FeatureFlags, FeatureService {
   override fun startUp() {
     delegate.startUp()
   }
@@ -33,10 +32,15 @@ class LaunchDarklyFeatureFlags @Inject constructor(
   }
 
   override fun get(flag: BooleanFeatureFlag): Boolean = delegate.get(flag)
+
   override fun get(flag: StringFeatureFlag): String = delegate.get(flag)
+
   override fun get(flag: IntFeatureFlag): Int = delegate.get(flag)
+
   override fun get(flag: DoubleFeatureFlag): Double = delegate.get(flag)
+
   override fun <T : Enum<T>> get(flag: EnumFeatureFlag<T>): T = delegate.get(flag)
+
   override fun <T : Any> get(flag: JsonFeatureFlag<T>): T = delegate.get(flag)
 
   override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean =
@@ -51,25 +55,13 @@ class LaunchDarklyFeatureFlags @Inject constructor(
   override fun getString(feature: Feature, key: String, attributes: Attributes): String =
     delegate.getString(feature, key, attributes)
 
-  override fun <T : Enum<T>> getEnum(
-    feature: Feature,
-    key: String,
-    clazz: Class<T>,
-    attributes: Attributes,
-  ): T = delegate.getEnum(feature, key, clazz, attributes)
+  override fun <T : Enum<T>> getEnum(feature: Feature, key: String, clazz: Class<T>, attributes: Attributes): T =
+    delegate.getEnum(feature, key, clazz, attributes)
 
-  override fun <T> getJson(
-    feature: Feature,
-    key: String,
-    clazz: Class<T>,
-    attributes: Attributes,
-  ): T = delegate.getJson(feature, key, clazz, attributes)
+  override fun <T> getJson(feature: Feature, key: String, clazz: Class<T>, attributes: Attributes): T =
+    delegate.getJson(feature, key, clazz, attributes)
 
-  override fun getJsonString(
-    feature: Feature,
-    key: String,
-    attributes: Attributes
-  ): String {
+  override fun getJsonString(feature: Feature, key: String, attributes: Attributes): String {
     return delegate.getJsonString(feature, key, attributes)
   }
 

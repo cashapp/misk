@@ -1,5 +1,6 @@
 package misk.web
 
+import javax.servlet.http.Cookie
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import okhttp3.Headers
@@ -9,9 +10,10 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okio.Buffer
 import okio.BufferedSink
 import okio.BufferedSource
-import javax.servlet.http.Cookie
 
-data class FakeHttpCall @JvmOverloads constructor(
+data class FakeHttpCall
+@JvmOverloads
+constructor(
   override val url: HttpUrl = "https://example.com/".toHttpUrl(),
   override val linkLayerLocalAddress: SocketAddress = SocketAddress.Network("1.2.3.4", 56789),
   override val dispatchMechanism: DispatchMechanism = DispatchMechanism.GET,

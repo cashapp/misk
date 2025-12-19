@@ -4,6 +4,8 @@ import com.google.inject.Guice
 import com.google.inject.Provides
 import com.squareup.protos.test.grpc.GreeterClient
 import com.squareup.protos.test.grpc.GrpcGreeterClient
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.client.GrpcClientModule
 import misk.client.HttpClientEndpointConfig
@@ -16,14 +18,11 @@ import misk.web.jetty.JettyService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 class GrpcBindingActionTest {
 
-  @MiskTestModule
-  val module = TestWebActionModule()
+  @MiskTestModule val module = TestWebActionModule()
 
   @Inject private lateinit var jetty: JettyService
 
@@ -31,11 +30,7 @@ class GrpcBindingActionTest {
 
   @BeforeEach
   fun beforeEach() {
-    val clientInjector = Guice.createInjector(
-      ClientModule(
-        jetty
-      )
-    )
+    val clientInjector = Guice.createInjector(ClientModule(jetty))
     grpcClient = clientInjector.getInstance()
   }
 
@@ -48,11 +43,7 @@ class GrpcBindingActionTest {
     @Provides
     @Singleton
     fun provideHttpClientConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
-        endpoints = mapOf(
-          "greeter" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-        )
-      )
+      return HttpClientsConfig(endpoints = mapOf("greeter" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())))
     }
   }
 

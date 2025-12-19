@@ -1,6 +1,8 @@
 package misk.web
 
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
+import kotlin.test.assertFailsWith
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -15,81 +17,66 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
-import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 internal class WebDispatchTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   data class HelloBye(val message: String)
 
-  @Inject
-  lateinit var moshi: Moshi
+  @Inject lateinit var moshi: Moshi
 
-  @Inject
-  lateinit var jettyService: JettyService
+  @Inject lateinit var jettyService: JettyService
 
-  private val helloByeJsonAdapter get() = moshi.adapter(HelloBye::class.java)
+  private val helloByeJsonAdapter
+    get() = moshi.adapter(HelloBye::class.java)
 
   @Test
   fun post() {
     val requestContent = helloByeJsonAdapter.toJson(HelloBye("my friend"))
     val httpClient = OkHttpClient()
-    val request = Request.Builder()
-      .post(requestContent.toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE))
-      .url(serverUrlBuilder().encodedPath("/hello").build())
-      .build()
+    val request =
+      Request.Builder()
+        .post(requestContent.toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE))
+        .url(serverUrlBuilder().encodedPath("/hello").build())
+        .build()
 
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
 
     val responseContent = response.body!!.source()
-    assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message).isEqualTo(
-      "post hello my friend"
-    )
+    assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message).isEqualTo("post hello my friend")
   }
 
   @Test
   fun get() {
     val httpClient = OkHttpClient()
-    val request = Request.Builder()
-      .get()
-      .url(serverUrlBuilder().encodedPath("/hello/my_friend").build())
-      .build()
+    val request = Request.Builder().get().url(serverUrlBuilder().encodedPath("/hello/my_friend").build()).build()
 
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
 
     val responseContent = response.body!!.source().readString(Charsets.UTF_8)
-    assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message)
-      .isEqualTo("get hello my_friend")
+    assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message).isEqualTo("get hello my_friend")
   }
 
   @Test
   fun getWithPathPrefix() {
     val httpClient = OkHttpClient()
-    val request = Request.Builder()
-      .get()
-      .url(serverUrlBuilder().encodedPath("/path/prefix/hello/my_friend").build())
-      .build()
+    val request =
+      Request.Builder().get().url(serverUrlBuilder().encodedPath("/path/prefix/hello/my_friend").build()).build()
 
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
 
     val responseContent = response.body!!.source().readString(Charsets.UTF_8)
-    assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message)
-      .isEqualTo("get hello my_friend")
+    assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message).isEqualTo("get hello my_friend")
   }
 
   @Test
   fun getNothing() {
     val httpClient = OkHttpClient()
-    val request = Request.Builder()
-      .get()
-      .url(serverUrlBuilder().encodedPath("/nothing").build())
-      .build()
+    val request = Request.Builder().get().url(serverUrlBuilder().encodedPath("/nothing").build()).build()
 
     val response = httpClient.newCall(request).execute()
 
@@ -102,29 +89,26 @@ internal class WebDispatchTest {
   fun multiMethod() {
     val httpClient = OkHttpClient()
 
-    val getResponse = httpClient.newCall(
-      Request.Builder()
-        .get()
-        .url(serverUrlBuilder().encodedPath("/multi/hello/my_friend").build())
-        .build()
-    ).execute()
+    val getResponse =
+      httpClient
+        .newCall(Request.Builder().get().url(serverUrlBuilder().encodedPath("/multi/hello/my_friend").build()).build())
+        .execute()
     assertThat(getResponse.code).isEqualTo(200)
-    assertThat(helloByeJsonAdapter.fromJson(getResponse.body!!.source())!!.message)
-      .isEqualTo("get hello my_friend")
+    assertThat(helloByeJsonAdapter.fromJson(getResponse.body!!.source())!!.message).isEqualTo("get hello my_friend")
 
-    val response = httpClient.newCall(
-      Request.Builder()
-        .post(
-          helloByeJsonAdapter
-            .toJson(HelloBye("my friend"))
-            .toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
+    val response =
+      httpClient
+        .newCall(
+          Request.Builder()
+            .post(
+              helloByeJsonAdapter.toJson(HelloBye("my friend")).toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
+            )
+            .url(serverUrlBuilder().encodedPath("/multi/hello").build())
+            .build()
         )
-        .url(serverUrlBuilder().encodedPath("/multi/hello").build())
-        .build()
-    ).execute()
+        .execute()
     assertThat(response.code).isEqualTo(200)
-    assertThat(helloByeJsonAdapter.fromJson(response.body!!.source())!!.message)
-      .isEqualTo("post hello my friend")
+    assertThat(helloByeJsonAdapter.fromJson(response.body!!.source())!!.message).isEqualTo("post hello my friend")
   }
 
   @Test
@@ -134,16 +118,12 @@ internal class WebDispatchTest {
 
   @Test
   fun entryFailsWithoutTrailingSlash() {
-    assertFailsWith<IllegalArgumentException> {
-      WebActionEntry(GetHello::class, "/bad/path")
-    }
+    assertFailsWith<IllegalArgumentException> { WebActionEntry(GetHello::class, "/bad/path") }
   }
 
   @Test
   fun entryFailsWithEmptyPathSegments() {
-    assertFailsWith<IllegalArgumentException> {
-      WebActionEntry(GetHello::class, "///")
-    }
+    assertFailsWith<IllegalArgumentException> { WebActionEntry(GetHello::class, "///") }
   }
 
   class TestModule : KAbstractModule() {
@@ -164,30 +144,26 @@ internal class WebDispatchTest {
     @Post("/hello")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun hello(@misk.web.RequestBody request: HelloBye) =
-      HelloBye("post hello ${request.message}")
+    fun hello(@misk.web.RequestBody request: HelloBye) = HelloBye("post hello ${request.message}")
   }
 
   class GetHello @Inject constructor() : WebAction {
     @Get("/hello/{message}")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun hello(@PathParam("message") message: String) =
-      HelloBye("get hello $message")
+    fun hello(@PathParam("message") message: String) = HelloBye("get hello $message")
   }
 
   class PostBye @Inject constructor() : WebAction {
     @Post("/bye")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun bye(@misk.web.RequestBody request: HelloBye) =
-      HelloBye("post bye ${request.message}")
+    fun bye(@misk.web.RequestBody request: HelloBye) = HelloBye("post bye ${request.message}")
   }
 
   class GetBye @Inject constructor() : WebAction {
     @Get("/bye/{message}")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun bye(@PathParam("message") message: String) =
-      HelloBye("get bye $message")
+    fun bye(@PathParam("message") message: String) = HelloBye("get bye $message")
   }
 
   class GetNothing @Inject constructor() : WebAction {
@@ -200,14 +176,12 @@ internal class WebDispatchTest {
   class MultiMethod @Inject constructor() : WebAction {
     @Get("/multi/hello/{message}")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun hello(@PathParam("message") message: String) =
-      HelloBye("get hello $message")
+    fun hello(@PathParam("message") message: String) = HelloBye("get hello $message")
 
     @Post("/multi/hello")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun hello(@misk.web.RequestBody request: HelloBye) =
-      HelloBye("post hello ${request.message}")
+    fun hello(@misk.web.RequestBody request: HelloBye) = HelloBye("post hello ${request.message}")
   }
 
   private fun serverUrlBuilder(): HttpUrl.Builder {

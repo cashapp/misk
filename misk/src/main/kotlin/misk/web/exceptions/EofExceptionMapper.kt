@@ -1,5 +1,6 @@
 package misk.web.exceptions
 
+import jakarta.inject.Inject
 import misk.exceptions.ClientClosedRequestException
 import misk.web.Response
 import misk.web.mediatype.MediaTypes
@@ -7,7 +8,6 @@ import misk.web.toResponseBody
 import okhttp3.Headers
 import org.eclipse.jetty.io.EofException
 import org.slf4j.event.Level
-import jakarta.inject.Inject
 
 internal class EofExceptionMapper @Inject internal constructor() : ExceptionMapper<EofException> {
   override fun toResponse(th: EofException) = CLIENT_CLOSED_REQUEST
@@ -15,10 +15,11 @@ internal class EofExceptionMapper @Inject internal constructor() : ExceptionMapp
   override fun loggingLevel(th: EofException): Level = Level.INFO
 
   companion object {
-    val CLIENT_CLOSED_REQUEST = Response(
-      "client closed request".toResponseBody(),
-      Headers.headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
-      ClientClosedRequestException().code
-    )
+    val CLIENT_CLOSED_REQUEST =
+      Response(
+        "client closed request".toResponseBody(),
+        Headers.headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
+        ClientClosedRequestException().code,
+      )
   }
 }

@@ -8,17 +8,9 @@ import misk.annotation.ExperimentalMiskApi
 import misk.mcp.Description
 import misk.mcp.StructuredMcpTool
 
-@Serializable
-data class EchoToolInput(
-  @Description("the name to echo back")
-  val name: String
-)
+@Serializable data class EchoToolInput(@Description("the name to echo back") val name: String)
 
-@Serializable
-data class EchoToolOutput(
-  @Description("greeting to respond with")
-  val greeting: String
-)
+@Serializable data class EchoToolOutput(@Description("greeting to respond with") val greeting: String)
 
 abstract class AbstractEchoTool : StructuredMcpTool<EchoToolInput, EchoToolOutput>() {
   override suspend fun handle(input: EchoToolInput): ToolResult {
@@ -26,6 +18,7 @@ abstract class AbstractEchoTool : StructuredMcpTool<EchoToolInput, EchoToolOutpu
   }
 
   override val name = "EchoTool"
+
   open fun buildGreeting(name: String) = "Hello, $name!"
 }
 

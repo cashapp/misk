@@ -16,9 +16,12 @@ import com.google.crypto.tink.hybrid.HybridConfig
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
-import jakarta.inject.Singleton
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
+import jakarta.inject.Singleton
+import java.security.GeneralSecurityException
+import java.security.Security
+import java.util.*
 import misk.crypto.internal.AeadEnvelopeProvider
 import misk.crypto.internal.DeterministicAeadProvider
 import misk.crypto.internal.DigitalSignatureSignerProvider
@@ -35,17 +38,12 @@ import misk.inject.KAbstractModule
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.bouncycastle.jce.provider.BouncyCastleProvider
-import java.security.GeneralSecurityException
-import java.security.Security
-import java.util.*
 
 /**
- * Configures and registers the keys listed in the configuration file.
- * Each key is read, decrypted, and then bound via Google Guice and added to a [MappedKeyManager].
+ * Configures and registers the keys listed in the configuration file. Each key is read, decrypted, and then bound via
+ * Google Guice and added to a [MappedKeyManager].
  */
-class CryptoModule(
-  private val config: CryptoConfig
-) : KAbstractModule() {
+class CryptoModule(private val config: CryptoConfig) : KAbstractModule() {
 
   override fun configure() {
     requireBinding<KmsClient>()
@@ -83,9 +81,7 @@ class CryptoModule(
 
       keyNames = keys.map { it.key_name }
       val duplicateNames = keyNames - keyNames.distinct().toList()
-      check(duplicateNames.isEmpty()) {
-        "Found duplicate keys: [$duplicateNames]"
-      }
+      check(duplicateNames.isEmpty()) { "Found duplicate keys: [$duplicateNames]" }
     }
 
     bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
@@ -108,8 +104,7 @@ class CryptoModule(
 
       val internalAndExternal = keyNames.intersect(externalDataKeys.keys)
       check(internalAndExternal.isEmpty()) {
-        "Found keys that are marked as both provided in resources, and provided externally: " +
-          "[$internalAndExternal]"
+        "Found keys that are marked as both provided in resources, and provided externally: " + "[$internalAndExternal]"
       }
 
       externalDataKeys.forEach { (alias, type) ->
@@ -134,12 +129,11 @@ class CryptoModule(
           .`in`(Singleton::class.java)
       }
       KeyType.MAC -> {
-        bind<Mac>()
-          .annotatedWith(Names.named(alias))
-          .toProvider(MacProvider(alias))
-          .`in`(Singleton::class.java)
+        bind<Mac>().annotatedWith(Names.named(alias)).toProvider(MacProvider(alias)).`in`(Singleton::class.java)
       }
-      KeyType.DIGITAL_SIGNATURE, KeyType.SIGNATURE -> {
+
+      KeyType.DIGITAL_SIGNATURE,
+      KeyType.SIGNATURE -> {
         bind<PublicKeySign>()
           .annotatedWith(Names.named(alias))
           .toProvider(DigitalSignatureSignerProvider(alias))
@@ -188,15 +182,13 @@ class CryptoModule(
 }
 
 /**
- * Extension function for convenient encryption of [ByteString]s.
- * This function also makes sure that no extra copies of the plaintext data are kept in memory.
+ * Extension function for convenient encryption of [ByteString]s. This function also makes sure that no extra copies of
+ * the plaintext data are kept in memory.
  */
 @Deprecated(
   message = "This method is marked for deletion, for now use the raw interface provided by Tink",
-  replaceWith = ReplaceWith(
-    expression = "aead.encrypt(ByteArray, ByteArray)"
-  ),
-  level = DeprecationLevel.HIDDEN
+  replaceWith = ReplaceWith(expression = "aead.encrypt(ByteArray, ByteArray)"),
+  level = DeprecationLevel.HIDDEN,
 )
 fun Aead.encrypt(plaintext: ByteString, aad: ByteArray? = null): ByteString {
   val plaintextBytes = plaintext.toByteArray()
@@ -206,15 +198,13 @@ fun Aead.encrypt(plaintext: ByteString, aad: ByteArray? = null): ByteString {
 }
 
 /**
- * Extension function for convenient decryption of [ByteString]s.
- * This function also makes sure that no extra copies of the plaintext data are kept in memory.
+ * Extension function for convenient decryption of [ByteString]s. This function also makes sure that no extra copies of
+ * the plaintext data are kept in memory.
  */
 @Deprecated(
   message = "This method is marked for deletion, for now use the raw interface provided by Tink",
-  replaceWith = ReplaceWith(
-    expression = "aead.decrypt(ByteArray, ByteArray)"
-  ),
-  level = DeprecationLevel.HIDDEN
+  replaceWith = ReplaceWith(expression = "aead.decrypt(ByteArray, ByteArray)"),
+  level = DeprecationLevel.HIDDEN,
 )
 fun Aead.decrypt(ciphertext: ByteString, aad: ByteArray? = null): ByteString {
   val decryptedBytes = this.decrypt(ciphertext.toByteArray(), aad)
@@ -224,20 +214,15 @@ fun Aead.decrypt(ciphertext: ByteString, aad: ByteArray? = null): ByteString {
 }
 
 /**
- * Extension function for convenient encryption of [ByteString]s.
- * This function also makes sure that no extra copies of the plaintext data are kept in memory.
+ * Extension function for convenient encryption of [ByteString]s. This function also makes sure that no extra copies of
+ * the plaintext data are kept in memory.
  */
 @Deprecated(
   message = "This method is marked for deletion, for now use the raw interface provided by Tink",
-  replaceWith = ReplaceWith(
-    expression = "daead.encryptDeterministically(ByteArray, ByteArray)"
-  ),
-  level = DeprecationLevel.HIDDEN
+  replaceWith = ReplaceWith(expression = "daead.encryptDeterministically(ByteArray, ByteArray)"),
+  level = DeprecationLevel.HIDDEN,
 )
-fun DeterministicAead.encryptDeterministically(
-  plaintext: ByteString,
-  aad: ByteArray? = null
-): ByteString {
+fun DeterministicAead.encryptDeterministically(plaintext: ByteString, aad: ByteArray? = null): ByteString {
   val plaintextBytes = plaintext.toByteArray()
   val encrypted = this.encryptDeterministically(plaintextBytes, aad ?: byteArrayOf())
   plaintextBytes.fill(0)
@@ -245,42 +230,36 @@ fun DeterministicAead.encryptDeterministically(
 }
 
 /**
- * Extension function for convenient decryption of [ByteString]s.
- * This function also makes sure that no extra copies of the plaintext data are kept in memory.
+ * Extension function for convenient decryption of [ByteString]s. This function also makes sure that no extra copies of
+ * the plaintext data are kept in memory.
  */
 @Deprecated(
   message = "This method is marked for deletion, for now use the raw interface provided by Tink",
-  replaceWith = ReplaceWith(
-    expression = "daead.decryptDeterministically(ByteArray, ByteArray)"
-  ),
-  level = DeprecationLevel.HIDDEN
+  replaceWith = ReplaceWith(expression = "daead.decryptDeterministically(ByteArray, ByteArray)"),
+  level = DeprecationLevel.HIDDEN,
 )
-fun DeterministicAead.decryptDeterministically(
-  ciphertext: ByteString,
-  aad: ByteArray? = null
-): ByteString {
+fun DeterministicAead.decryptDeterministically(ciphertext: ByteString, aad: ByteArray? = null): ByteString {
   val decryptedBytes = this.decryptDeterministically(ciphertext.toByteArray(), aad)
   val decrypted = decryptedBytes.toByteString()
   decryptedBytes.fill(0)
   return decrypted
 }
 
-/**
- * Extension function for conveniently computing an HMAC and encoding it with Base64.
- */
+/** Extension function for conveniently computing an HMAC and encoding it with Base64. */
 fun Mac.computeMac(data: String): String {
   return Base64.getEncoder().encode(this.computeMac(data.toByteArray())).toString(Charsets.UTF_8)
 }
 
 /**
- * Extension function for conveniently verifying a message's authenticity.
- * This function expects the [tag] string variable to contain a [Base64] encoded array of bytes.
+ * Extension function for conveniently verifying a message's authenticity. This function expects the [tag] string
+ * variable to contain a [Base64] encoded array of bytes.
  */
 fun Mac.verifyMac(tag: String, data: String) {
-  val decodedTag = try {
-    Base64.getDecoder().decode(tag)
-  } catch (e: IllegalArgumentException) {
-    throw GeneralSecurityException(String.format("invalid tag: %s", tag), e)
-  }
+  val decodedTag =
+    try {
+      Base64.getDecoder().decode(tag)
+    } catch (e: IllegalArgumentException) {
+      throw GeneralSecurityException(String.format("invalid tag: %s", tag), e)
+    }
   this.verifyMac(decodedTag, data.toByteArray())
 }

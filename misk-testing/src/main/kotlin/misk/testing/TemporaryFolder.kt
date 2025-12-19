@@ -1,13 +1,13 @@
 package misk.testing
 
 import com.google.inject.Provides
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.nio.file.Files
+import java.nio.file.Path
 import misk.inject.KAbstractModule
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
-import java.nio.file.Files
-import java.nio.file.Path
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 /** A temporary folder for use by a given test */
 class TemporaryFolder(val root: Path) {
@@ -43,9 +43,7 @@ class TemporaryFolderModule : KAbstractModule() {
     return TemporaryFolder(tempDir)
   }
 
-  class DeleteTempFolder @Inject constructor(
-    private val tempDir: TemporaryFolder
-  ) : AfterEachCallback {
+  class DeleteTempFolder @Inject constructor(private val tempDir: TemporaryFolder) : AfterEachCallback {
     override fun afterEach(context: ExtensionContext) {
       tempDir.delete()
     }

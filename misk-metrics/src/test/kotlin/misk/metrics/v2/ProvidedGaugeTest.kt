@@ -9,21 +9,15 @@ internal class ProvidedGaugeTest {
 
   @TestFactory
   fun `register provider for labeled gauge retrieve values`(): Iterable<DynamicTest> {
-    val gauge = ProvidedGauge.builder("testgauge", "for testing")
-      .labelNames("name","type")
-      .create()
-    return listOf(
-      arrayOf("label_one", "type_one"),
-      arrayOf("label_two", "type_two"),
-    ).map { labels ->
+    val gauge = ProvidedGauge.builder("testgauge", "for testing").labelNames("name", "type").create()
+    return listOf(arrayOf("label_one", "type_one"), arrayOf("label_two", "type_two")).map { labels ->
       val child = gauge.labels(*labels)
       dynamicTest("for labels '${labels.joinToString()}'") {
-        val gaugeProvider = object {
-          var value: Long = 0
-        }
-        child.registerProvider(gaugeProvider) {
-          value
-        }
+        val gaugeProvider =
+          object {
+            var value: Long = 0
+          }
+        child.registerProvider(gaugeProvider) { value }
 
         assertThat(child.get()).isEqualTo(gaugeProvider.value.toDouble())
 

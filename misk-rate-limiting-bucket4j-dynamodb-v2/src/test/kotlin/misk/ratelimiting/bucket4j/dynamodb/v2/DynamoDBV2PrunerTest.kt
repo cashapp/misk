@@ -3,6 +3,7 @@ package misk.ratelimiting.bucket4j.dynamodb.v2
 import com.google.inject.Module
 import io.micrometer.core.instrument.MeterRegistry
 import jakarta.inject.Inject
+import java.time.Duration
 import misk.ratelimiting.bucket4j.dynamodb.v2.modules.DynamoDbStringTestModule
 import misk.ratelimiting.bucket4j.dynamodb.v2.modules.DynamoDbStringTestModule.Companion.STRING_TABLE_NAME
 import misk.testing.MiskTest
@@ -16,13 +17,10 @@ import wisp.ratelimiting.RateLimitPruner
 import wisp.ratelimiting.RateLimitPrunerMetrics
 import wisp.ratelimiting.RateLimiter
 import wisp.ratelimiting.testing.TestRateLimitConfig
-import java.time.Duration
 
 @MiskTest(startService = true)
 class DynamoDBV2PrunerTest {
-  @Suppress("unused")
-  @MiskTestModule
-  private val module: Module = DynamoDbStringTestModule()
+  @Suppress("unused") @MiskTestModule private val module: Module = DynamoDbStringTestModule()
 
   @Inject private lateinit var dynamoDb: DynamoDbClient
 
@@ -34,27 +32,15 @@ class DynamoDBV2PrunerTest {
 
   @Inject private lateinit var pruner: RateLimitPruner
 
-  private val prunerMetrics by lazy {
-    RateLimitPrunerMetrics(meterRegistry)
-  }
+  private val prunerMetrics by lazy { RateLimitPrunerMetrics(meterRegistry) }
 
   @Test
   fun `pruning deletes only expired rows`() {
     // Create group of expired keys
-    val expiredBucketKeys = buildList {
-      repeat(10) {
-        add("expired-$it")
-      }
-    }
-    expiredBucketKeys.forEach { key ->
-      rateLimiter.consumeToken(key, TestRateLimitConfig)
-    }
+    val expiredBucketKeys = buildList { repeat(10) { add("expired-$it") } }
+    expiredBucketKeys.forEach { key -> rateLimiter.consumeToken(key, TestRateLimitConfig) }
 
-    val mixedBucketKeys = buildList {
-      repeat(10) {
-        add("maybeexpired-$it")
-      }
-    }
+    val mixedBucketKeys = buildList { repeat(10) { add("maybeexpired-$it") } }
 
     // Create group of interleaved short and long buckets
     mixedBucketKeys.forEachIndexed { idx, key ->
@@ -68,14 +54,8 @@ class DynamoDBV2PrunerTest {
     fakeClock.add(TestRateLimitConfig.refillPeriod)
 
     // Create group of non-expired keys
-    val nonExpiredShortBucketKeys = buildList {
-      repeat(10) {
-        add("nonexpired-short-$it")
-      }
-    }
-    nonExpiredShortBucketKeys.forEach { key ->
-      rateLimiter.consumeToken(key, TestRateLimitConfig)
-    }
+    val nonExpiredShortBucketKeys = buildList { repeat(10) { add("nonexpired-short-$it") } }
+    nonExpiredShortBucketKeys.forEach { key -> rateLimiter.consumeToken(key, TestRateLimitConfig) }
 
     pruner.prune()
 
@@ -84,29 +64,25 @@ class DynamoDBV2PrunerTest {
     //  sometimes in tests the time can be so fast it registers as 0, resulting in a flaky test
     Assertions.assertThat(prunerMetrics.pruningDuration.count()).isGreaterThan(0L)
 
-    val partitionedBucketKeys = mixedBucketKeys.withIndex().partition {
-      it.index % 2 == 0
-    }
+    val partitionedBucketKeys = mixedBucketKeys.withIndex().partition { it.index % 2 == 0 }
     val nonExpiredLongKeys = partitionedBucketKeys.first.map { it.value }
 
     val extantKeys = getAllKeysInTable()
 
     // We should have deleted only the short duration keys that were created before advancing time,
     // leaving the long duration keys and the short duration keys created after advancing time
-    Assertions.assertThat(extantKeys).containsExactlyInAnyOrderElementsOf(
-      nonExpiredLongKeys + nonExpiredShortBucketKeys
-    )
+    Assertions.assertThat(extantKeys)
+      .containsExactlyInAnyOrderElementsOf(nonExpiredLongKeys + nonExpiredShortBucketKeys)
   }
 
   private fun getAllKeysInTable(): List<String> {
-    val pager = dynamoDb.scanPaginator {
-      it.tableName(STRING_TABLE_NAME)
-      it.consistentRead(true)
-    }
+    val pager =
+      dynamoDb.scanPaginator {
+        it.tableName(STRING_TABLE_NAME)
+        it.consistentRead(true)
+      }
 
-    return pager.items().map { item ->
-      item["key"]!!.s()
-    }
+    return pager.items().map { item -> item["key"]!!.s() }
   }
 
   private object LongTestRateLimitConfig : RateLimitConfiguration {

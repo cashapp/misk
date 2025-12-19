@@ -5,18 +5,18 @@ import com.squareup.moshi.Moshi
 import com.squareup.wire.Message
 import com.squareup.wire.ProtoAdapter
 import com.squareup.wire.WireField
-import misk.moshi.adapter
-import okio.ByteString
-import okio.ByteString.Companion.decodeBase64
 import java.lang.reflect.Field
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import misk.moshi.adapter
+import okio.ByteString
+import okio.ByteString.Companion.decodeBase64
 
 internal class FieldBinding(
   wireField: WireField,
   builderType: Class<Message.Builder<*, *>>,
   private val messageField: Field,
-  moshi: Moshi
+  moshi: Moshi,
 ) {
   val name: String = messageField.name
 
@@ -27,18 +27,19 @@ internal class FieldBinding(
   private val builderMethod = getBuilderMethod(builderType, name, messageField.type)
 
   @Suppress("UNCHECKED_CAST")
-  val adapter: JsonAdapter<Any?> = when {
-    isList -> {
-      val elementAdapter = jsonAdapter(moshi, wireField.adapter, builderType) as JsonAdapter<Any?>
-      ListAdapter(elementAdapter) as JsonAdapter<Any?>
+  val adapter: JsonAdapter<Any?> =
+    when {
+      isList -> {
+        val elementAdapter = jsonAdapter(moshi, wireField.adapter, builderType) as JsonAdapter<Any?>
+        ListAdapter(elementAdapter) as JsonAdapter<Any?>
+      }
+      isMap -> {
+        val keyConverter = fromString(wireField.keyAdapter)
+        val valueAdapter = jsonAdapter(moshi, wireField.adapter, builderType) as JsonAdapter<Any?>
+        MapAdapter(keyConverter, valueAdapter) as JsonAdapter<Any?>
+      }
+      else -> moshi.adapter(messageField.type).nullSafe() as JsonAdapter<Any?>
     }
-    isMap -> {
-      val keyConverter = fromString(wireField.keyAdapter)
-      val valueAdapter = jsonAdapter(moshi, wireField.adapter, builderType) as JsonAdapter<Any?>
-      MapAdapter(keyConverter, valueAdapter) as JsonAdapter<Any?>
-    }
-    else -> moshi.adapter(messageField.type).nullSafe() as JsonAdapter<Any?>
-  }
 
   @Suppress("UNCHECKED_CAST")
   fun value(builder: Message.Builder<*, *>, value: Any) {
@@ -71,11 +72,12 @@ internal class FieldBinding(
     }
   }
 
-  fun get(message: Any): Any? = try {
-    messageField.get(message)
-  } catch (e: IllegalAccessException) {
-    throw AssertionError(e)
-  }
+  fun get(message: Any): Any? =
+    try {
+      messageField.get(message)
+    } catch (e: IllegalAccessException) {
+      throw AssertionError(e)
+    }
 
   private fun getFromBuilder(builder: Message.Builder<*, *>): Any {
     try {
@@ -86,10 +88,7 @@ internal class FieldBinding(
   }
 
   companion object {
-    private fun getBuilderField(
-      builderType: Class<Message.Builder<*, *>>,
-      name: String
-    ): Field {
+    private fun getBuilderField(builderType: Class<Message.Builder<*, *>>, name: String): Field {
       try {
         return builderType.getField(name)
       } catch (e: NoSuchFieldException) {
@@ -97,17 +96,11 @@ internal class FieldBinding(
       }
     }
 
-    private fun getBuilderMethod(
-      builderType: Class<Message.Builder<*, *>>,
-      name: String,
-      type: Class<*>
-    ): Method {
+    private fun getBuilderMethod(builderType: Class<Message.Builder<*, *>>, name: String, type: Class<*>): Method {
       try {
         return builderType.getMethod(name, type)
       } catch (e: NoSuchMethodException) {
-        throw AssertionError(
-          "No builder method ${builderType.simpleName}#$name (${type.name}"
-        )
+        throw AssertionError("No builder method ${builderType.simpleName}#$name (${type.name}")
       }
     }
 
@@ -119,16 +112,21 @@ internal class FieldBinding(
 
       val adapterFieldName = protoAdapterName.substringAfter("#")
       return when (adapterFieldName) {
-        "INT32", "UINT32", "SINT32", "FIXED32", "SFIXED32" -> toNumber { it.toInt() }
-        "INT64", "UINT64", "SINT64", "FIXED64", "SFIXED64" -> toNumber { it.toLong() }
+        "INT32",
+        "UINT32",
+        "SINT32",
+        "FIXED32",
+        "SFIXED32" -> toNumber { it.toInt() }
+        "INT64",
+        "UINT64",
+        "SINT64",
+        "FIXED64",
+        "SFIXED64" -> toNumber { it.toLong() }
         "BOOL" -> toNumber { it.toBoolean() }
         "FLOAT" -> toNumber { it.toFloat() }
         "DOUBLE" -> toNumber { it.toDouble() }
         "STRING" -> { s -> s }
-        "BYTES" -> { s ->
-          s.decodeBase64()
-            ?: throw IllegalArgumentException("could not parse $s as base 64")
-        }
+        "BYTES" -> { s -> s.decodeBase64() ?: throw IllegalArgumentException("could not parse $s as base 64") }
         else -> throw IllegalStateException("unknown type $adapterFieldName")
       }
     }
@@ -144,20 +142,30 @@ internal class FieldBinding(
     private fun jsonAdapter(
       moshi: Moshi,
       protoAdapterName: String,
-      declaringClass: Class<Message.Builder<*, *>>
+      declaringClass: Class<Message.Builder<*, *>>,
     ): JsonAdapter<*> {
       val typeName = protoAdapterName.substringBefore("#")
       val adapterFieldName = protoAdapterName.substringAfter("#")
-      return if (typeName == ProtoAdapter::class.java.name) when (adapterFieldName) {
-        "INT32", "UINT32", "SINT32", "FIXED32", "SFIXED32" -> moshi.adapter<Int>()
-        "INT64", "UINT64", "SINT64", "FIXED64", "SFIXED64" -> moshi.adapter<Long>()
-        "BOOL" -> moshi.adapter<Boolean>()
-        "FLOAT" -> moshi.adapter<Float>()
-        "DOUBLE" -> moshi.adapter<Double>()
-        "STRING" -> moshi.adapter<String>()
-        "BYTES" -> moshi.adapter<ByteString>()
-        else -> throw IllegalStateException("unknown type $adapterFieldName")
-      } else moshi.adapter(Class.forName(typeName, true, declaringClass.classLoader))
+      return if (typeName == ProtoAdapter::class.java.name)
+        when (adapterFieldName) {
+          "INT32",
+          "UINT32",
+          "SINT32",
+          "FIXED32",
+          "SFIXED32" -> moshi.adapter<Int>()
+          "INT64",
+          "UINT64",
+          "SINT64",
+          "FIXED64",
+          "SFIXED64" -> moshi.adapter<Long>()
+          "BOOL" -> moshi.adapter<Boolean>()
+          "FLOAT" -> moshi.adapter<Float>()
+          "DOUBLE" -> moshi.adapter<Double>()
+          "STRING" -> moshi.adapter<String>()
+          "BYTES" -> moshi.adapter<ByteString>()
+          else -> throw IllegalStateException("unknown type $adapterFieldName")
+        }
+      else moshi.adapter(Class.forName(typeName, true, declaringClass.classLoader))
     }
   }
 }

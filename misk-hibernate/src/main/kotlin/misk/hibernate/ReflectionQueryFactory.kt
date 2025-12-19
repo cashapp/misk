@@ -5,8 +5,6 @@ import com.google.common.cache.CacheLoader
 import com.google.inject.TypeLiteral
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import misk.inject.typeLiteral
-import misk.logging.getLogger
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -30,12 +28,14 @@ import kotlin.reflect.full.declaredMemberFunctions
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaMethod
+import misk.inject.typeLiteral
+import misk.logging.getLogger
 
 private val logger = getLogger<ReflectionQuery<*>>()
 
 /**
- * Implements the [Query] @[Constraint] methods using a dynamic proxy, and projections using
- * reflection to call the primary constructor.
+ * Implements the [Query] @[Constraint] methods using a dynamic proxy, and projections using reflection to call the
+ * primary constructor.
  */
 internal class ReflectionQuery<T : DbEntity<T>>(
   private val queryClass: KClass<*>,
@@ -44,7 +44,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   private val queryLimitsConfig: QueryLimitsConfig,
 
   /** True if this query only exists to collect predicates for an OR clause. */
-  private val predicatesOnly: Boolean = false
+  private val predicatesOnly: Boolean = false,
 ) : Query<T>, InvocationHandler {
   override var maxRows = -1
     set(value) {
@@ -71,12 +71,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   override fun <Q : Query<*>> clone(): Q {
-    val copy = ReflectionQuery(
-      this.queryClass,
-      this.rootEntityType,
-      this.queryMethodHandlers,
-      this.queryLimitsConfig
-    )
+    val copy = ReflectionQuery(this.queryClass, this.rootEntityType, this.queryMethodHandlers, this.queryLimitsConfig)
     copy.maxRows = this.maxRows
     copy.firstResult = this.firstResult
     copy.hints.addAll(this.hints)
@@ -112,21 +107,15 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         }
       }
       Operator.NE -> {
-        addConstraint { root, builder ->
-          builder.notEqual(root.traverse<Any?>(path), value)
-        }
+        addConstraint { root, builder -> builder.notEqual(root.traverse<Any?>(path), value) }
       }
       Operator.LT -> {
         val arg = value as Comparable<Comparable<*>?>?
-        addConstraint { root, builder ->
-          builder.lessThan(root.traverse(path), arg)
-        }
+        addConstraint { root, builder -> builder.lessThan(root.traverse(path), arg) }
       }
       Operator.LE -> {
         val arg = value as Comparable<Comparable<*>?>?
-        addConstraint { root, builder ->
-          builder.lessThanOrEqualTo(root.traverse(path), arg)
-        }
+        addConstraint { root, builder -> builder.lessThanOrEqualTo(root.traverse(path), arg) }
       }
       Operator.GE -> {
         addConstraint { root, builder ->
@@ -142,27 +131,19 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       }
       Operator.IN -> {
         val collection = value as Collection<*>
-        addConstraint { root, builder ->
-          builder.addInClause(root.traverse(path), collection)
-        }
+        addConstraint { root, builder -> builder.addInClause(root.traverse(path), collection) }
       }
       Operator.NOT_IN -> {
         val collection = value as Collection<*>
-        addConstraint { root, builder ->
-          builder.not(builder.addInClause(root.traverse(path), collection))
-        }
+        addConstraint { root, builder -> builder.not(builder.addInClause(root.traverse(path), collection)) }
       }
       Operator.IS_NOT_NULL -> {
-        addConstraint { root, builder ->
-          builder.isNotNull(root.traverse<Comparable<Comparable<*>>>(path))
-        }
+        addConstraint { root, builder -> builder.isNotNull(root.traverse<Comparable<Comparable<*>>>(path)) }
       }
       Operator.IS_NULL -> isNull(path)
       Operator.LIKE -> {
         val pattern = value as String
-        addConstraint { root, builder ->
-          builder.like(root.traverse<String>(path), pattern)
-        }
+        addConstraint { root, builder -> builder.like(root.traverse<String>(path), pattern) }
       }
     }
   }
@@ -179,9 +160,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   override fun dynamicAddFetch(path: String, joinType: JoinType) {
-    addFetch { root ->
-      root.fetch<Any?, Any?>(path, joinType)
-    }
+    addFetch { root -> root.fetch<Any?, Any?>(path, joinType) }
   }
 
   override fun uniqueResult(session: Session): T? {
@@ -196,7 +175,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
   override fun dynamicUniqueResult(
     session: Session,
-    selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>
+    selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>,
   ): List<Any?>? {
     val list = dynamicSelect(false, session, selection)
     return list.firstOrNull()
@@ -214,12 +193,9 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     val predicate = buildWherePredicate(queryRoot, criteriaBuilder)
     criteria.where(predicate)
 
-    val query = session.hibernateSession
-      .createQuery(criteria)
+    val query = session.hibernateSession.createQuery(criteria)
     hints.forEach { query.addQueryHint(it) }
-    return session.disableChecks(disabledChecks) {
-      query.executeUpdate()
-    }
+    return session.disableChecks(disabledChecks) { query.executeUpdate() }
   }
 
   override fun list(session: Session): List<T> {
@@ -232,7 +208,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
   override fun dynamicList(
     session: Session,
-    selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>
+    selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>,
   ): List<List<Any?>> {
     return dynamicSelect(true, session, selection)
   }
@@ -240,15 +216,11 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   private fun dynamicSelectWithProjectedPaths(
     returnList: Boolean,
     session: Session,
-    projectedPaths: List<String>
+    projectedPaths: List<String>,
   ): List<List<Any?>> {
     val splitProjectedPaths = projectedPaths.map { it.split('.') }
     return dynamicSelect(returnList, session) { criteriaBuilder, queryRoot ->
-      criteriaBuilder.array(
-        *splitProjectedPaths.map {
-          queryRoot.traverse<Any?>(it)
-        }.toTypedArray()
-      )
+      criteriaBuilder.array(*splitProjectedPaths.map { queryRoot.traverse<Any?>(it) }.toTypedArray())
     }
   }
 
@@ -256,7 +228,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   private fun dynamicSelect(
     returnList: Boolean,
     session: Session,
-    selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>
+    selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>,
   ): List<List<Any?>> {
     check(!predicatesOnly) { "cannot select on this query" }
 
@@ -280,16 +252,15 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     typedQuery.firstResult = firstResult
     typedQuery.maxResults = effectiveMaxRows(returnList)
     hints.forEach { typedQuery.addQueryHint(it) }
-    val rows = session.disableChecks(disabledChecks) {
-      typedQuery.list()
-    }
+    val rows = session.disableChecks(disabledChecks) { typedQuery.list() }
     checkRowCount(returnList, rows.size)
-    val result = rows.map {
-      when (it) { // If there's exactly one cell per row, Hibernate doesn't wrap it in an array
-        is Array<*> -> listOf(*it)
-        else -> listOf(it)
+    val result =
+      rows.map {
+        when (it) { // If there's exactly one cell per row, Hibernate doesn't wrap it in an array
+          is Array<*> -> listOf(*it)
+          else -> listOf(it)
+        }
       }
-    }
     return result
   }
 
@@ -314,9 +285,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     typedQuery.firstResult = firstResult
     typedQuery.maxResults = effectiveMaxRows(returnList)
     hints.forEach { typedQuery.addQueryHint(it) }
-    val rows = session.disableChecks(disabledChecks) {
-      typedQuery.list()
-    }
+    val rows = session.disableChecks(disabledChecks) { typedQuery.list() }
     checkRowCount(returnList, rows.size)
     return rows
   }
@@ -342,9 +311,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
     val typedQuery = session.hibernateSession.createQuery(query)
     hints.forEach { typedQuery.addQueryHint(it) }
-    return session.disableChecks(disabledChecks) {
-      typedQuery.singleResult
-    }
+    return session.disableChecks(disabledChecks) { typedQuery.singleResult }
   }
 
   private fun effectiveMaxRows(returnList: Boolean): Int {
@@ -366,16 +333,14 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         }
         rowCount > queryLimitsConfig.rowCountErrorLimit -> {
           logger.error(
-            "Unbounded query returned $rowCount rows. " +
-              "(Specify maxRows to suppress this error)",
-            Exception()
+            "Unbounded query returned $rowCount rows. " + "(Specify maxRows to suppress this error)",
+            Exception(),
           )
         }
         rowCount > queryLimitsConfig.rowCountWarningLimit -> {
           logger.warn(
-            "Unbounded query returned $rowCount rows. " +
-              "(Specify maxRows to suppress this warning)",
-            Exception()
+            "Unbounded query returned $rowCount rows. " + "(Specify maxRows to suppress this warning)",
+            Exception(),
           )
         }
       }
@@ -406,52 +371,40 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     val classLoader = queryClass.java.classLoader
 
     @Suppress("UNCHECKED_CAST") // The proxy implements the requested interface.
-    return Proxy.newProxyInstance(
-      classLoader, arrayOf<Class<*>>(queryClass.java), this
-    ) as Query<T>
+    return Proxy.newProxyInstance(classLoader, arrayOf<Class<*>>(queryClass.java), this) as Query<T>
   }
 
   @Singleton
-  internal class Factory @Inject internal constructor(
-    private var queryLimitsConfig: QueryLimitsConfig
-  ) : Query.Factory {
-    private val queryMethodHandlersCache = CacheBuilder.newBuilder()
-      .build(object : CacheLoader<KClass<*>, Map<Method, QueryMethodHandler>>() {
-        override fun load(key: KClass<*>) = queryMethodHandlers(key)
-      })
+  internal class Factory @Inject internal constructor(private var queryLimitsConfig: QueryLimitsConfig) :
+    Query.Factory {
+    private val queryMethodHandlersCache =
+      CacheBuilder.newBuilder()
+        .build(
+          object : CacheLoader<KClass<*>, Map<Method, QueryMethodHandler>>() {
+            override fun load(key: KClass<*>) = queryMethodHandlers(key)
+          }
+        )
 
     override fun <Q : Query<*>> newQuery(queryClass: KClass<Q>): Q {
       val queryMethodHandlers = queryMethodHandlersCache[queryClass]
       val queryType = queryClass.typeLiteral().getSupertype(Query::class.java)
 
       @Suppress("UNCHECKED_CAST") // Hack because we don't have a parameter for the runtime type.
-      val entityType =
-        (queryType.type as ParameterizedType).actualTypeArguments[0] as Class<DbPlaceholder>
+      val entityType = (queryType.type as ParameterizedType).actualTypeArguments[0] as Class<DbPlaceholder>
 
       @Suppress("UNCHECKED_CAST")
-      val reflectionQuery = ReflectionQuery(
-        queryClass as KClass<DbPlaceholder>,
-        entityType.kotlin,
-        queryMethodHandlers,
-        queryLimitsConfig
-      )
+      val reflectionQuery =
+        ReflectionQuery(queryClass as KClass<DbPlaceholder>, entityType.kotlin, queryMethodHandlers, queryLimitsConfig)
       @Suppress("UNCHECKED_CAST")
       return reflectionQuery.toProxy() as Q
     }
 
     override fun <E : DbEntity<E>> dynamicQuery(entityClass: KClass<E>): Query<E> {
-      val reflectionQuery = ReflectionQuery(
-        Query::class,
-        entityClass,
-        mapOf(),
-        queryLimitsConfig
-      )
+      val reflectionQuery = ReflectionQuery(Query::class, entityClass, mapOf(), queryLimitsConfig)
       return reflectionQuery.toProxy()
     }
 
-    private fun queryMethodHandlers(
-      queryClass: KClass<*>
-    ): Map<Method, QueryMethodHandler> {
+    private fun queryMethodHandlers(queryClass: KClass<*>): Map<Method, QueryMethodHandler> {
       val errors = mutableListOf<String>()
       val result = mutableMapOf<Method, QueryMethodHandler>()
       for (function in queryClass.declaredMemberFunctions) {
@@ -465,25 +418,20 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         }
       }
       require(errors.isEmpty()) {
-        "Query class ${queryClass.java.name} has problems:" +
-          "\n  ${errors.joinToString(separator = "\n  ")}"
+        "Query class ${queryClass.java.name} has problems:" + "\n  ${errors.joinToString(separator = "\n  ")}"
       }
       return result
     }
   }
 
-  data class QueryLimitsConfig(
-    var maxMaxRows: Int,
-    var rowCountErrorLimit: Int,
-    var rowCountWarningLimit: Int
-  )
+  data class QueryLimitsConfig(var maxMaxRows: Int, var rowCountErrorLimit: Int, var rowCountWarningLimit: Int)
 
   data class ParsedProperty(val path: List<String>, val aggregation: AggregationType)
 
   class SelectMethodHandler(
     private val returnList: Boolean,
     private val constructor: KFunction<*>?,
-    private val properties: List<ParsedProperty>
+    private val properties: List<ParsedProperty>,
   ) : QueryMethodHandler {
 
     override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
@@ -506,28 +454,28 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       reflectionQuery.hints.forEach { typedQuery.addQueryHint(it) }
       typedQuery.firstResult = reflectionQuery.firstResult
       typedQuery.maxResults = reflectionQuery.effectiveMaxRows(returnList)
-      val rows = session.disableChecks(reflectionQuery.disabledChecks) {
-        typedQuery.list()
-      }
+      val rows = session.disableChecks(reflectionQuery.disabledChecks) { typedQuery.list() }
       reflectionQuery.checkRowCount(returnList, rows.size)
       val list = rows.mapNotNull { toValue(it) }
       return if (returnList) list else list.firstOrNull()
     }
 
-    private fun select(
-      criteriaBuilder: CriteriaBuilder,
-      queryRoot: Root<*>
-    ) = criteriaBuilder.array(*properties.map {
-      when (it.aggregation) {
-        AggregationType.NONE -> queryRoot.traverse<Any?>(it.path)
-        AggregationType.AVG -> criteriaBuilder.avg(queryRoot.traverse<Number?>(it.path))
-        AggregationType.COUNT -> criteriaBuilder.count(queryRoot.traverse<Any?>(it.path))
-        AggregationType.COUNT_DISTINCT -> criteriaBuilder.countDistinct(queryRoot.traverse<Any?>(it.path))
-        AggregationType.MAX -> criteriaBuilder.max(queryRoot.traverse<Number?>(it.path))
-        AggregationType.MIN -> criteriaBuilder.min(queryRoot.traverse<Number?>(it.path))
-        AggregationType.SUM -> criteriaBuilder.sum(queryRoot.traverse<Number?>(it.path))
-      }
-    }.toTypedArray())
+    private fun select(criteriaBuilder: CriteriaBuilder, queryRoot: Root<*>) =
+      criteriaBuilder.array(
+        *properties
+          .map {
+            when (it.aggregation) {
+              AggregationType.NONE -> queryRoot.traverse<Any?>(it.path)
+              AggregationType.AVG -> criteriaBuilder.avg(queryRoot.traverse<Number?>(it.path))
+              AggregationType.COUNT -> criteriaBuilder.count(queryRoot.traverse<Any?>(it.path))
+              AggregationType.COUNT_DISTINCT -> criteriaBuilder.countDistinct(queryRoot.traverse<Any?>(it.path))
+              AggregationType.MAX -> criteriaBuilder.max(queryRoot.traverse<Number?>(it.path))
+              AggregationType.MIN -> criteriaBuilder.min(queryRoot.traverse<Number?>(it.path))
+              AggregationType.SUM -> criteriaBuilder.sum(queryRoot.traverse<Number?>(it.path))
+            }
+          }
+          .toTypedArray()
+      )
 
     private fun toValue(row: Any?): Any? {
       return when {
@@ -538,7 +486,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           val args = row as Array<*>
           // If we got back an array of null values, which can't be assigned to the constructor,
           // then we should return null.
-          if (args.all { it == null } && constructor.parameters.none { it.type.isMarkedNullable } ) return null
+          if (args.all { it == null } && constructor.parameters.none { it.type.isMarkedNullable }) return null
           // Now it's (probably!) safe to call the constructor.
           // There are very rare cases where this could still fail if the constructor is
           // expecting a non-nullable type for the property, but the query returned null.
@@ -562,11 +510,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
       private fun typeToString(type: Class<*>): String = "${type.simpleName}?"
 
-      fun create(
-        errors: MutableList<String>,
-        function: KFunction<*>,
-        result: MutableMap<Method, QueryMethodHandler>,
-      ) {
+      fun create(errors: MutableList<String>, function: KFunction<*>, result: MutableMap<Method, QueryMethodHandler>) {
         val constraint = function.findAnnotation<Constraint>()
         val select = function.findAnnotation<Select>()
         val order = function.findAnnotation<Order>()
@@ -610,7 +554,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         errors: MutableList<String>,
         function: KFunction<*>,
         result: MutableMap<Method, QueryMethodHandler>,
-        order: Order
+        order: Order,
       ) {
         if (!order.path.matches(PATH_PATTERN)) {
           errors.add("${function.name}() path is not valid: '${order.path}'")
@@ -628,26 +572,27 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           return
         }
 
-        result[javaMethod] = object : QueryMethodHandler {
-          override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-            check(!reflectionQuery.predicatesOnly) { "cannot define sort order on this query" }
+        result[javaMethod] =
+          object : QueryMethodHandler {
+            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+              check(!reflectionQuery.predicatesOnly) { "cannot define sort order on this query" }
 
-            return reflectionQuery.addOrderBy { root, builder ->
-              if (order.asc) {
-                builder.asc(root.traverse<Any?>(path))
-              } else {
-                builder.desc(root.traverse<Any?>(path))
+              return reflectionQuery.addOrderBy { root, builder ->
+                if (order.asc) {
+                  builder.asc(root.traverse<Any?>(path))
+                } else {
+                  builder.desc(root.traverse<Any?>(path))
+                }
               }
             }
           }
-        }
       }
 
       private fun createGroup(
         errors: MutableList<String>,
         function: KFunction<*>,
         result: MutableMap<Method, QueryMethodHandler>,
-        group: Group
+        group: Group,
       ) {
         if (!group.paths.all { it.matches(PATH_PATTERN) }) {
           errors.add("${function.name}() paths are not valid: '${group.paths}'")
@@ -665,20 +610,19 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           return
         }
 
-        result[javaMethod] = object : QueryMethodHandler {
-          override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-            return reflectionQuery.addGroupBy { root, _ ->
-              paths.map { root.traverse<Any?>(it) }
+        result[javaMethod] =
+          object : QueryMethodHandler {
+            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+              return reflectionQuery.addGroupBy { root, _ -> paths.map { root.traverse<Any?>(it) } }
             }
           }
-        }
       }
 
       private fun createFetch(
         errors: MutableList<String>,
         function: KFunction<*>,
         result: MutableMap<Method, QueryMethodHandler>,
-        fetch: Fetch
+        fetch: Fetch,
       ) {
         if (!fetch.path.matches(PATH_PATTERN)) {
           errors.add("${function.name}() path is not valid: '${fetch.path}'")
@@ -694,24 +638,25 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           return
         }
 
-        result[javaMethod] = object : QueryMethodHandler {
-          override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-            return reflectionQuery.addFetch { root ->
-              if (fetch.forProjection) {
-                root.join<Any?, Any?>(fetch.path, fetch.joinType)
-              } else {
-                root.fetch<Any?, Any?>(fetch.path, fetch.joinType)
+        result[javaMethod] =
+          object : QueryMethodHandler {
+            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+              return reflectionQuery.addFetch { root ->
+                if (fetch.forProjection) {
+                  root.join<Any?, Any?>(fetch.path, fetch.joinType)
+                } else {
+                  root.fetch<Any?, Any?>(fetch.path, fetch.joinType)
+                }
               }
             }
           }
-        }
       }
 
       private fun createConstraint(
         errors: MutableList<String>,
         function: KFunction<*>,
         result: MutableMap<Method, QueryMethodHandler>,
-        constraint: Constraint
+        constraint: Constraint,
       ) {
         if (!constraint.path.matches(PATH_PATTERN)) {
           errors.add("${function.name}() path is not valid: '${constraint.path}'")
@@ -730,11 +675,12 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
         // Functions accept 'this' as the first parameter.
         val actualParameterCount = function.parameters.size - 1
-        val expectedParameterCount = when (constraint.operator) {
-          Operator.IS_NOT_NULL -> 0
-          Operator.IS_NULL -> 0
-          else -> 1
-        }
+        val expectedParameterCount =
+          when (constraint.operator) {
+            Operator.IS_NOT_NULL -> 0
+            Operator.IS_NULL -> 0
+            else -> 1
+          }
         if (actualParameterCount != expectedParameterCount) {
           errors.add(
             "${function.name}() declares $actualParameterCount " +
@@ -743,127 +689,138 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           return
         }
 
-        val handler = when (constraint.operator) {
-          Operator.EQ -> object : QueryMethodHandler {
-            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-              return reflectionQuery.isEqual(path, args[0])
-            }
-          }
-          Operator.EQ_OR_IS_NULL -> object : QueryMethodHandler {
-            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-              return if (args[0] != null) {
-                reflectionQuery.isEqual(path, args[0])
-              } else {
-                reflectionQuery.isNull(path)
+        val handler =
+          when (constraint.operator) {
+            Operator.EQ ->
+              object : QueryMethodHandler {
+                override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+                  return reflectionQuery.isEqual(path, args[0])
+                }
               }
-            }
-          }
-          Operator.NE -> object : QueryMethodHandler {
-            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-              return reflectionQuery.addConstraint { root, builder ->
-                builder.notEqual(root.traverse<Any?>(path), args[0])
+            Operator.EQ_OR_IS_NULL ->
+              object : QueryMethodHandler {
+                override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+                  return if (args[0] != null) {
+                    reflectionQuery.isEqual(path, args[0])
+                  } else {
+                    reflectionQuery.isNull(path)
+                  }
+                }
               }
-            }
-          }
-          Operator.LT -> object : QueryMethodHandler {
-            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-              @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
-              val arg = args[0] as Comparable<Comparable<*>?>?
-              return reflectionQuery.addConstraint { root, builder ->
-                builder.lessThan(root.traverse(path), arg)
+            Operator.NE ->
+              object : QueryMethodHandler {
+                override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+                  return reflectionQuery.addConstraint { root, builder ->
+                    builder.notEqual(root.traverse<Any?>(path), args[0])
+                  }
+                }
               }
-            }
-          }
-          Operator.LE -> object : QueryMethodHandler {
-            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-              @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
-              val arg = args[0] as Comparable<Comparable<*>?>?
-              return reflectionQuery.addConstraint { root, builder ->
-                builder.lessThanOrEqualTo(root.traverse(path), arg)
+            Operator.LT ->
+              object : QueryMethodHandler {
+                override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+                  @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
+                  val arg = args[0] as Comparable<Comparable<*>?>?
+                  return reflectionQuery.addConstraint { root, builder -> builder.lessThan(root.traverse(path), arg) }
+                }
               }
-            }
-          }
-          Operator.GE -> object : QueryMethodHandler {
-            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-              return reflectionQuery.addConstraint { root, builder ->
-                @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
-                val arg = args[0] as Comparable<Comparable<*>?>?
-                builder.greaterThanOrEqualTo(root.traverse(path), arg)
+            Operator.LE ->
+              object : QueryMethodHandler {
+                override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+                  @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
+                  val arg = args[0] as Comparable<Comparable<*>?>?
+                  return reflectionQuery.addConstraint { root, builder ->
+                    builder.lessThanOrEqualTo(root.traverse(path), arg)
+                  }
+                }
               }
-            }
-          }
-          Operator.GT -> object : QueryMethodHandler {
-            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-              return reflectionQuery.addConstraint { root, builder ->
-                @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
-                val arg = args[0] as Comparable<Comparable<*>?>?
-                builder.greaterThan(root.traverse(path), arg)
+            Operator.GE ->
+              object : QueryMethodHandler {
+                override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+                  return reflectionQuery.addConstraint { root, builder ->
+                    @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
+                    val arg = args[0] as Comparable<Comparable<*>?>?
+                    builder.greaterThanOrEqualTo(root.traverse(path), arg)
+                  }
+                }
               }
-            }
-          }
-          Operator.IN -> {
-            val parameter = function.parameters[1]
+            Operator.GT ->
+              object : QueryMethodHandler {
+                override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+                  return reflectionQuery.addConstraint { root, builder ->
+                    @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
+                    val arg = args[0] as Comparable<Comparable<*>?>?
+                    builder.greaterThan(root.traverse(path), arg)
+                  }
+                }
+              }
+            Operator.IN -> {
+              val parameter = function.parameters[1]
 
-            val argToCollection: (Any) -> Collection<Any?> = when {
-              parameter.isVararg -> { arg -> (arg as Array<*>).toList() }
-              parameter.isAssignableTo(Collection::class) -> { arg -> (arg as Collection<*>) }
-              else -> {
-                errors.add("${function.name}() parameter must be a vararg or a collection")
-                return
-              }
-            }
+              val argToCollection: (Any) -> Collection<Any?> =
+                when {
+                  parameter.isVararg -> { arg -> (arg as Array<*>).toList() }
+                  parameter.isAssignableTo(Collection::class) -> { arg -> (arg as Collection<*>) }
+                  else -> {
+                    errors.add("${function.name}() parameter must be a vararg or a collection")
+                    return
+                  }
+                }
 
-            object : QueryMethodHandler {
-              override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-                return reflectionQuery.addConstraint { root, builder ->
-                  val collection = argToCollection(args[0])
-                  builder.addInClause(root.traverse(path), collection)
+              object : QueryMethodHandler {
+                override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+                  return reflectionQuery.addConstraint { root, builder ->
+                    val collection = argToCollection(args[0])
+                    builder.addInClause(root.traverse(path), collection)
+                  }
                 }
               }
             }
-          }
-          Operator.NOT_IN -> {
-            val parameter = function.parameters[1]
+            Operator.NOT_IN -> {
+              val parameter = function.parameters[1]
 
-            val argToCollection: (Any) -> Collection<Any?> = when {
-              parameter.isVararg -> { arg -> (arg as Array<*>).toList() }
-              parameter.isAssignableTo(Collection::class) -> { arg -> (arg as Collection<*>) }
-              else -> {
-                errors.add("${function.name}() parameter must be a vararg or a collection")
-                return
-              }
-            }
+              val argToCollection: (Any) -> Collection<Any?> =
+                when {
+                  parameter.isVararg -> { arg -> (arg as Array<*>).toList() }
+                  parameter.isAssignableTo(Collection::class) -> { arg -> (arg as Collection<*>) }
+                  else -> {
+                    errors.add("${function.name}() parameter must be a vararg or a collection")
+                    return
+                  }
+                }
 
-            object : QueryMethodHandler {
-              override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-                return reflectionQuery.addConstraint { root, builder ->
-                  val collection = argToCollection(args[0])
-                  builder.not(builder.addInClause(root.traverse(path), collection))
+              object : QueryMethodHandler {
+                override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+                  return reflectionQuery.addConstraint { root, builder ->
+                    val collection = argToCollection(args[0])
+                    builder.not(builder.addInClause(root.traverse(path), collection))
+                  }
                 }
               }
             }
-          }
-          Operator.IS_NOT_NULL -> object : QueryMethodHandler {
-            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-              return reflectionQuery.addConstraint { root, builder ->
-                builder.isNotNull(root.traverse<Comparable<Comparable<*>>>(path))
+            Operator.IS_NOT_NULL ->
+              object : QueryMethodHandler {
+                override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+                  return reflectionQuery.addConstraint { root, builder ->
+                    builder.isNotNull(root.traverse<Comparable<Comparable<*>>>(path))
+                  }
+                }
               }
-            }
-          }
-          Operator.IS_NULL -> object : QueryMethodHandler {
-            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-              return reflectionQuery.isNull(path)
-            }
-          }
-          Operator.LIKE -> object : QueryMethodHandler {
-            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-              val pattern = args[0] as String
-              return reflectionQuery.addConstraint { root, builder ->
-                builder.like(root.traverse<String>(path), pattern)
+            Operator.IS_NULL ->
+              object : QueryMethodHandler {
+                override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+                  return reflectionQuery.isNull(path)
+                }
               }
-            }
+            Operator.LIKE ->
+              object : QueryMethodHandler {
+                override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+                  val pattern = args[0] as String
+                  return reflectionQuery.addConstraint { root, builder ->
+                    builder.like(root.traverse<String>(path), pattern)
+                  }
+                }
+              }
           }
-        }
 
         result[javaMethod] = handler
       }
@@ -872,23 +829,22 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         errors: MutableList<String>,
         function: KFunction<*>,
         result: MutableMap<Method, QueryMethodHandler>,
-        select: Select
+        select: Select,
       ) {
-        if (function.parameters.size != 2 ||
-          function.parameters[1].type.classifier != Session::class
-        ) {
+        if (function.parameters.size != 2 || function.parameters[1].type.classifier != Session::class) {
           errors.add("${function.name}() must accept a single Session parameter")
           return
         }
 
         val returnType = function.returnType.typeLiteral()
         val isList = List::class.java.isAssignableFrom(returnType.rawType)
-        val elementType: TypeLiteral<*> = if (isList) {
-          val listType = returnType.getSupertype(List::class.java)
-          (listType.type as ParameterizedType).actualTypeArguments[0].typeLiteral()
-        } else {
-          returnType
-        }
+        val elementType: TypeLiteral<*> =
+          if (isList) {
+            val listType = returnType.getSupertype(List::class.java)
+            (listType.type as ParameterizedType).actualTypeArguments[0].typeLiteral()
+          } else {
+            returnType
+          }
 
         if (isList == function.returnType.isMarkedNullable) {
           errors.add("${function.name}() return type must be a non-null List or a nullable value")
@@ -900,7 +856,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
               aggregation = select.aggregation,
               elementType = elementType,
               propertyName = "${function.name}() return",
-            ))
+            )
+          )
           if (errors.isNotEmpty()) return
         }
 
@@ -916,12 +873,13 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           @Suppress("UNCHECKED_CAST") // The line above confirms that this cast is safe.
           val projectionClass = (elementType.rawType as Class<out Projection>).kotlin
           val constructor = projectionClass.primaryConstructor
-          val parameters = if (constructor != null) {
-            constructor.parameters
-          } else {
-            errors.add("${projectionClass.java.name} has no primary constructor")
-            return
-          }
+          val parameters =
+            if (constructor != null) {
+              constructor.parameters
+            } else {
+              errors.add("${projectionClass.java.name} has no primary constructor")
+              return
+            }
 
           val pathPrefix = if (select.path.isEmpty()) "" else "${select.path}."
           val properties = mutableListOf<ParsedProperty>()
@@ -929,16 +887,14 @@ internal class ReflectionQuery<T : DbEntity<T>>(
             val property = parameter.findAnnotation<Property>()
             if (property == null) {
               errors.add(
-                "${projectionClass.java.name} parameter ${parameter.index} " +
-                  "is missing a @Property annotation"
+                "${projectionClass.java.name} parameter ${parameter.index} " + "is missing a @Property annotation"
               )
               continue
             }
 
             if (!property.path.matches(PATH_PATTERN)) {
               errors.add(
-                "${projectionClass.java.name} parameter ${parameter.index} " +
-                  "path is not valid: '${property.path}'"
+                "${projectionClass.java.name} parameter ${parameter.index} " + "path is not valid: '${property.path}'"
               )
               continue
             }
@@ -949,7 +905,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
                   aggregation = property.aggregation,
                   elementType = parameter.type.typeLiteral(),
                   propertyName = "${projectionClass.java.name}#${parameter.name}",
-                ))
+                )
+              )
               if (errors.isNotEmpty()) {
                 continue
               }
@@ -973,37 +930,49 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         aggregation: AggregationType,
         elementType: TypeLiteral<*>,
         propertyName: String,
-      ) : MutableList<String> {
+      ): MutableList<String> {
         val errors = mutableListOf<String>()
         when (aggregation) {
           AggregationType.AVG -> {
             if (!doubleType.isAssignableFrom(elementType.rawType)) {
-              errors.add("$propertyName element type must be ${typeToString(doubleType)} for AVG aggregations, but was $elementType")
+              errors.add(
+                "$propertyName element type must be ${typeToString(doubleType)} for AVG aggregations, but was $elementType"
+              )
             }
           }
           AggregationType.COUNT -> {
             if (!longType.isAssignableFrom(elementType.rawType)) {
-              errors.add("$propertyName element type must be ${typeToString(longType)} for COUNT aggregations, but was $elementType")
+              errors.add(
+                "$propertyName element type must be ${typeToString(longType)} for COUNT aggregations, but was $elementType"
+              )
             }
           }
           AggregationType.COUNT_DISTINCT -> {
             if (!longType.isAssignableFrom(elementType.rawType)) {
-              errors.add("$propertyName element type must be ${typeToString(longType)} for COUNT_DISTINCT aggregations, but was $elementType")
+              errors.add(
+                "$propertyName element type must be ${typeToString(longType)} for COUNT_DISTINCT aggregations, but was $elementType"
+              )
             }
           }
           AggregationType.MAX -> {
             if (!Comparable::class.java.isAssignableFrom(elementType.rawType)) {
-              errors.add("$propertyName element type must be out ${typeToString(Comparable::class.java)} for MAX aggregations, but was $elementType")
+              errors.add(
+                "$propertyName element type must be out ${typeToString(Comparable::class.java)} for MAX aggregations, but was $elementType"
+              )
             }
           }
           AggregationType.MIN -> {
             if (!Comparable::class.java.isAssignableFrom(elementType.rawType)) {
-              errors.add("$propertyName element type must be out ${typeToString(Comparable::class.java)} for MIN aggregations, but was $elementType")
+              errors.add(
+                "$propertyName element type must be out ${typeToString(Comparable::class.java)} for MIN aggregations, but was $elementType"
+              )
             }
           }
           AggregationType.SUM -> {
             if (!numberType.isAssignableFrom(elementType.rawType)) {
-              errors.add("$propertyName element type must be out ${typeToString(Number::class.java)} for SUM aggregations, but was $elementType")
+              errors.add(
+                "$propertyName element type must be out ${typeToString(Number::class.java)} for SUM aggregations, but was $elementType"
+              )
             }
           }
           else -> error("Unexpected AggregationType: $aggregation on $propertyName")
@@ -1043,20 +1012,14 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   /**
-   * Root: the table root, like 'm' in 'SELECT * FROM movies m ORDER BY m.release_date'
-   * CriteriaBuilder: factory for asc, desc
+   * Root: the table root, like 'm' in 'SELECT * FROM movies m ORDER BY m.release_date' CriteriaBuilder: factory for
+   * asc, desc
    */
-  private fun buildOrderBys(
-    root: Root<*>,
-    criteriaBuilder: CriteriaBuilder
-  ): List<javax.persistence.criteria.Order> {
+  private fun buildOrderBys(root: Root<*>, criteriaBuilder: CriteriaBuilder): List<javax.persistence.criteria.Order> {
     return orderFactories.map { it(root, criteriaBuilder) }
   }
 
-  private fun buildGroupBys(
-    root: Root<*>,
-    criteriaBuilder: CriteriaBuilder
-  ): List<List<Expression<*>>> {
+  private fun buildGroupBys(root: Root<*>, criteriaBuilder: CriteriaBuilder): List<List<Expression<*>>> {
     return groupFactories.map { it(root, criteriaBuilder) }
   }
 
@@ -1071,22 +1034,15 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     return orPredicateFactory
   }
 
-  /**
-   * Accept options by creating subqueries, and then aggregate them into a Hibernate predicate.
-   */
+  /** Accept options by creating subqueries, and then aggregate them into a Hibernate predicate. */
   inner class OrClausePredicateFactory<Q : Query<*>> : PredicateFactory, OrBuilder<Q> {
     /** Model each option as a query. */
     val options = mutableListOf<ReflectionQuery<T>>()
 
     /** Builds a single option. */
     override fun option(lambda: Q.() -> Unit) {
-      val queryForOption = ReflectionQuery(
-        queryClass,
-        rootEntityType,
-        queryMethodHandlers,
-        queryLimitsConfig,
-        predicatesOnly = true
-      )
+      val queryForOption =
+        ReflectionQuery(queryClass, rootEntityType, queryMethodHandlers, queryLimitsConfig, predicatesOnly = true)
       @Suppress("UNCHECKED_CAST") // Q is the query type that we're implementing reflectively.
       (queryForOption.toProxy() as Q).lambda()
       options += queryForOption
@@ -1095,32 +1051,28 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     /** Return the full set of options. */
     override fun invoke(root: Root<*>, criteriaBuilder: CriteriaBuilder): Predicate {
       check(options.isNotEmpty()) { "or clause with no options" }
-      val choices: List<Predicate?> = options.map { option ->
-        check(option.constraints.isNotEmpty()) { "or option with no constraints" }
-        option.buildWherePredicate(root, criteriaBuilder)
-      }
+      val choices: List<Predicate?> =
+        options.map { option ->
+          check(option.constraints.isNotEmpty()) { "or option with no constraints" }
+          option.buildWherePredicate(root, criteriaBuilder)
+        }
       return criteriaBuilder.or(*choices.toTypedArray())
     }
   }
 
   companion object {
     private fun ReflectionQuery<*>.isEqual(path: List<String>, value: Any?) =
-      this.addConstraint { root, builder ->
-        builder.equal(root.traverse<Any?>(path), value)
-      }
+      this.addConstraint { root, builder -> builder.equal(root.traverse<Any?>(path), value) }
 
     private fun ReflectionQuery<*>.isNull(path: List<String>) =
-      this.addConstraint { root, builder ->
-        builder.isNull(root.traverse<Comparable<Comparable<*>>>(path))
-      }
+      this.addConstraint { root, builder -> builder.isNull(root.traverse<Comparable<Comparable<*>>>(path)) }
   }
 }
 
 /** Creates a predicate. This allows us to defer attaching the predicate to the session. */
 private typealias PredicateFactory = (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> Predicate
 
-private typealias OrderFactory =
-  (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> javax.persistence.criteria.Order
+private typealias OrderFactory = (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> javax.persistence.criteria.Order
 
 private typealias GroupFactory = (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> List<Expression<*>>
 
@@ -1130,7 +1082,8 @@ private val PATH_PATTERN = Regex("""\w+(\.\w+)*""")
 
 /** This placeholder exists so we can create an Id<*>() without a type parameter. */
 private class DbPlaceholder : DbEntity<DbPlaceholder> {
-  override val id: Id<DbPlaceholder> get() = throw IllegalStateException("unreachable")
+  override val id: Id<DbPlaceholder>
+    get() = throw IllegalStateException("unreachable")
 }
 
 private fun <T> Path<*>.traverse(chain: List<String>): Path<T> {
@@ -1144,13 +1097,9 @@ private fun <T> Path<*>.traverse(chain: List<String>): Path<T> {
 
 private fun KParameter.isAssignableTo(supertype: KClass<*>) = type.isAssignableTo(supertype)
 
-private fun KType.isAssignableTo(supertype: KClass<*>) =
-  supertype.java.isAssignableFrom(typeLiteral().rawType)
+private fun KType.isAssignableTo(supertype: KClass<*>) = supertype.java.isAssignableFrom(typeLiteral().rawType)
 
-private fun CriteriaBuilder.addInClause(
-  expression: Path<Any>,
-  collection: Collection<Any?>
-): Predicate {
+private fun CriteriaBuilder.addInClause(expression: Path<Any>, collection: Collection<Any?>): Predicate {
   return when {
     collection.isEmpty() -> {
       // The JDBC API forbids empty IN clauses so we use `WHERE 1 = 0` instead to
@@ -1166,4 +1115,3 @@ private fun CriteriaBuilder.addInClause(
     }
   }
 }
-

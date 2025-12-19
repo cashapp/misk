@@ -122,7 +122,7 @@ private constructor(
                       }
                     }
                   }
-                },
+                }
               )
             },
             5,
@@ -156,9 +156,7 @@ private constructor(
 
     if (!config.type.isVitess) {
       return transactionWithRetriesInternal {
-        replicaReadWithoutTransactionInternalSession { session ->
-          block(session)
-        }
+        replicaReadWithoutTransactionInternalSession { session -> block(session) }
       }
     }
 
@@ -169,15 +167,16 @@ private constructor(
     // Use connection holding to prevent connection changes during nested target operations
     return transactionWithRetriesInternal {
       val connectionHandlingMode = PhysicalConnectionHandlingMode.IMMEDIATE_ACQUISITION_AND_HOLD
-      
+
       withNewHibernateSession(reader(), connectionHandlingMode) { hibernateSession ->
-        val session = RealSession(
-          hibernateSession = hibernateSession,
-          readOnly = true,
-          config = config,
-          disabledChecks = options.disabledChecks,
-          transacter = this
-        )
+        val session =
+          RealSession(
+            hibernateSession = hibernateSession,
+            readOnly = true,
+            config = config,
+            disabledChecks = options.disabledChecks,
+            transacter = this,
+          )
 
         session.use {
           useSession(session) {
@@ -216,9 +215,7 @@ private constructor(
 
       if (config.type.isVitess && previousTarget != primaryTarget) {
         // Restore previous destination if it is not primary already.
-        hibernateSession.doReturningWork { conn ->
-          conn.catalog = previousTarget
-        }
+        hibernateSession.doReturningWork { conn -> conn.catalog = previousTarget }
       }
 
       val blockResult = runCatching { block() }
@@ -236,9 +233,7 @@ private constructor(
         hibernateSession.tryReleaseLock(lockKey)
         if (config.type.isVitess && previousTarget != primaryTarget) {
           // Restore to the same destination the lock was acquired on.
-          hibernateSession.doReturningWork { conn ->
-            conn.catalog = previousTarget
-          }
+          hibernateSession.doReturningWork { conn -> conn.catalog = previousTarget }
         }
       } catch (e: Throwable) {
         val originalFailure = blockResult.exceptionOrNull()?.apply { addSuppressed(e) }
@@ -366,7 +361,7 @@ private constructor(
       "No reader is configured for replica reads, pass in both a writer and reader qualifier " +
         "and the full DataSourceClustersConfig into HibernateModule, like this:\n" +
         "\tinstall(HibernateModule(AppDb::class, AppReaderDb::class, " +
-        "config.data_source_clusters[\"name\"]))",
+        "config.data_source_clusters[\"name\"]))"
     )
   }
 

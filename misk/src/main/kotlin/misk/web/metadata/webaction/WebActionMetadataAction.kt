@@ -19,9 +19,7 @@ class WebActionMetadataAction @Inject constructor() : WebAction {
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess
   fun getAll(): Response {
-    return Response(
-      webActionMetadata = provider.get().webActions
-    )
+    return Response(webActionMetadata = provider.get().webActions)
   }
 
   data class Response(val webActionMetadata: List<WebActionMetadata>)

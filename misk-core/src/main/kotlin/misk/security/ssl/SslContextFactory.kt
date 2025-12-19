@@ -1,7 +1,7 @@
 package misk.security.ssl
 
-import java.security.KeyStore
 import jakarta.inject.Inject
+import java.security.KeyStore
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.TrustManagerFactory
@@ -23,12 +23,8 @@ class SslContextFactory @Inject constructor(private val sslLoader: SslLoader) {
   @JvmOverloads
   fun create(certStore: CertStore?, pin: CharArray?, trustStore: TrustStore? = null): SSLContext {
     val sslContext = SSLContext.getInstance("TLS", "SunJSSE")
-    val trustManagers = trustStore?.keyStore?.let {
-      loadTrustManagers(it)
-    } ?: arrayOf()
-    val keyManagers = certStore?.keyStore?.let {
-      arrayOf(KeyStoreX509KeyManager(pin!!, it))
-    } ?: arrayOf()
+    val trustManagers = trustStore?.keyStore?.let { loadTrustManagers(it) } ?: arrayOf()
+    val keyManagers = certStore?.keyStore?.let { arrayOf(KeyStoreX509KeyManager(pin!!, it)) } ?: arrayOf()
     sslContext.init(keyManagers, trustManagers, null)
     return sslContext
   }

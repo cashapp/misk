@@ -1,5 +1,6 @@
 package misk.jooq.config
 
+import java.time.Clock
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceService
 import misk.jdbc.DataSourceType
@@ -19,7 +20,6 @@ import org.jooq.impl.DefaultTransactionProvider
 import org.jooq.kotlin.renderMapping
 import org.jooq.kotlin.schemata
 import org.jooq.kotlin.settings
-import java.time.Clock
 
 internal abstract class ConfigurationFactory {
   abstract fun getConfiguration(options: JooqTransacter.TransacterOptions): Configuration
@@ -30,24 +30,19 @@ internal abstract class ConfigurationFactory {
     dataSourceService: DataSourceService,
     jooqCodeGenSchemaName: String,
     jooqTimestampRecordListenerOptions: JooqTimestampRecordListenerOptions,
-    options: JooqTransacter.TransacterOptions
+    options: JooqTransacter.TransacterOptions,
   ): Configuration {
     val settings = settings {
       isExecuteWithOptimisticLocking = true
       renderMapping {
-        schemata {
-          add(
-            MappedSchema()
-              .withInput(jooqCodeGenSchemaName)
-              .withOutput(dataSourceConfig.database),
-          )
-        }
+        schemata { add(MappedSchema().withInput(jooqCodeGenSchemaName).withOutput(dataSourceConfig.database)) }
       }
     }
-    val connectionProvider = IsolationLevelAwareConnectionProvider(
-      dataSourceConnectionProvider = DataSourceConnectionProvider(dataSourceService.dataSource),
-      transacterOptions = options,
-    )
+    val connectionProvider =
+      IsolationLevelAwareConnectionProvider(
+        dataSourceConnectionProvider = DataSourceConnectionProvider(dataSourceService.dataSource),
+        transacterOptions = options,
+      )
     return DefaultConfiguration().apply {
       set(settings)
       set(dataSourceConfig.type.toSqlDialect())
@@ -66,18 +61,19 @@ internal abstract class ConfigurationFactory {
             clock = clock,
             createdAtColumnName = jooqTimestampRecordListenerOptions.createdAtColumnName,
             updatedAtColumnName = jooqTimestampRecordListenerOptions.updatedAtColumnName,
-          ),
+          )
         )
       }
     }
   }
 
-  protected fun DataSourceType.toSqlDialect() = when (this) {
-    DataSourceType.MYSQL -> SQLDialect.MYSQL
-    DataSourceType.HSQLDB -> SQLDialect.HSQLDB
-    DataSourceType.VITESS_MYSQL -> SQLDialect.MYSQL
-    DataSourceType.POSTGRESQL -> SQLDialect.POSTGRES
-    DataSourceType.TIDB -> SQLDialect.MYSQL
-    else -> throw IllegalArgumentException("no SQLDialect for " + this.name)
-  }
+  protected fun DataSourceType.toSqlDialect() =
+    when (this) {
+      DataSourceType.MYSQL -> SQLDialect.MYSQL
+      DataSourceType.HSQLDB -> SQLDialect.HSQLDB
+      DataSourceType.VITESS_MYSQL -> SQLDialect.MYSQL
+      DataSourceType.POSTGRESQL -> SQLDialect.POSTGRES
+      DataSourceType.TIDB -> SQLDialect.MYSQL
+      else -> throw IllegalArgumentException("no SQLDialect for " + this.name)
+    }
 }

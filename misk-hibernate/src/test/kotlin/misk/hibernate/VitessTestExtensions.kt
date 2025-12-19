@@ -15,25 +15,15 @@ object VitessTestExtensions {
     return shards.find { it.contains(this.shardKey()) }!!
   }
 
-  fun Transacter.createInSeparateShard(
-    id: Id<DbMovie>,
-    factory: () -> DbMovie,
-  ): Id<DbMovie> {
-    val createdRecordId = createUntil(factory) { session, newId ->
-      newId.shard(session) != id.shard(session)
-    }
+  fun Transacter.createInSeparateShard(id: Id<DbMovie>, factory: () -> DbMovie): Id<DbMovie> {
+    val createdRecordId = createUntil(factory) { session, newId -> newId.shard(session) != id.shard(session) }
     return createdRecordId
   }
 
   class NotThereYetException : RuntimeException()
 
-  fun Transacter.createInSameShard(
-    id: Id<DbMovie>,
-    factory: () -> DbMovie,
-  ): Id<DbMovie> {
-    val createdRecordId = createUntil(factory) { session, newId ->
-      newId.shard(session) == id.shard(session)
-    }
+  fun Transacter.createInSameShard(id: Id<DbMovie>, factory: () -> DbMovie): Id<DbMovie> {
+    val createdRecordId = createUntil(factory) { session, newId -> newId.shard(session) == id.shard(session) }
     return createdRecordId
   }
 

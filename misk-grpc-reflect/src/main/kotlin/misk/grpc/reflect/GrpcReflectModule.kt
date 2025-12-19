@@ -7,52 +7,50 @@ import com.squareup.wire.reflector.SchemaReflector
 import com.squareup.wire.schema.Location
 import com.squareup.wire.schema.Schema
 import com.squareup.wire.schema.SchemaLoader
-import misk.inject.KAbstractModule
-import misk.web.WebActionModule
-import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
-import okio.FileSystem
-import okio.Path.Companion.toPath
-import misk.logging.getLogger
 import jakarta.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.functions
 import kotlin.reflect.full.isSubclassOf
+import misk.inject.KAbstractModule
+import misk.logging.getLogger
+import misk.web.WebActionModule
+import misk.web.actions.WebAction
+import misk.web.actions.WebActionEntry
+import okio.FileSystem
+import okio.Path.Companion.toPath
 
 /**
  * Implements gRPC reflect for all gRPC actions installed in this Misk application.
  *
- * This relies on `.proto` files being included in the `.jar` file. If they're missing, reflection
- * won't work for them.
+ * This relies on `.proto` files being included in the `.jar` file. If they're missing, reflection won't work for them.
  */
 class GrpcReflectModule : KAbstractModule() {
   override fun configure() {
     install(WebActionModule.create<ServerReflectionApi>())
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun provideServiceReflector(schema: Schema): SchemaReflector {
     return SchemaReflector(schema)
   }
 
   /** Interrogate the installed gRPC actions and create a Wire schema from that. */
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun provideSchema(webActions: List<WebActionEntry>): Schema {
     val fileSystem = FileSystem.RESOURCES
     val schemaLoader = SchemaLoader(fileSystem)
     schemaLoader.initRoots(
       sourcePath = toSourceLocations(fileSystem, webActions).toList(),
-      protoPath = listOf(Location.get("."))
+      protoPath = listOf(Location.get(".")),
     )
     schemaLoader.loadExhaustively = true
     return schemaLoader.loadSchema()
   }
 
-  private fun toSourceLocations(
-    fileSystem: FileSystem,
-    webActions: List<WebActionEntry>
-  ): Set<Location> {
+  private fun toSourceLocations(fileSystem: FileSystem, webActions: List<WebActionEntry>): Set<Location> {
     val result = mutableSetOf<Location>()
     for (webAction in webActions) {
       val wireRpcAnnotation = getWireRpcAnnotation(webAction.actionClass) ?: continue

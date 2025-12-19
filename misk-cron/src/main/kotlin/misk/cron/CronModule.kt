@@ -5,6 +5,7 @@ import com.google.inject.Key
 import com.google.inject.Provides
 import jakarta.inject.Qualifier
 import jakarta.inject.Singleton
+import java.time.ZoneId
 import misk.ReadyService
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceModule
@@ -14,25 +15,26 @@ import misk.inject.KInstallOnceModule
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
 import wisp.lease.LeaseManager
-import java.time.ZoneId
 
 /**
  * Provides cron scheduling functionality for Misk services.
  *
- * @param useMultipleLeases Controls lease coordination strategy. Changing this value may cause
- *   overlapping task execution during deployments.
+ * @param useMultipleLeases Controls lease coordination strategy. Changing this value may cause overlapping task
+ *   execution during deployments.
  *
- *   Example: switching false→true means old pods use cluster-wide leases while new pods use
- *   per-task leases, potentially running the same task on both.
+ *   Example: switching false→true means old pods use cluster-wide leases while new pods use per-task leases,
+ *   potentially running the same task on both.
  *
  *   Deploy during downtime or ensure tasks are idempotent.
  */
-class CronModule @JvmOverloads constructor(
+class CronModule
+@JvmOverloads
+constructor(
   private val zoneId: ZoneId,
   private val threadPoolSize: Int = 10,
   private val dependencies: List<Key<out Service>> = listOf(),
   private val installDashboardTab: Boolean = true,
-  private val useMultipleLeases: Boolean = false
+  private val useMultipleLeases: Boolean = false,
 ) : KInstallOnceModule() {
   override fun configure() {
     install(
@@ -46,15 +48,10 @@ class CronModule @JvmOverloads constructor(
     )
 
     install(
-      ServiceModule<RepeatedTaskQueue, ForMiskCron>()
-        .conditionalOn<AsyncSwitch>("cron")
-        .dependsOn<ReadyService>()
+      ServiceModule<RepeatedTaskQueue, ForMiskCron>().conditionalOn<AsyncSwitch>("cron").dependsOn<ReadyService>()
     )
     install(
-      ServiceModule<CronTask>()
-        .conditionalOn<AsyncSwitch>("cron")
-        .dependsOn(dependencies)
-        .dependsOn<ReadyService>()
+      ServiceModule<CronTask>().conditionalOn<AsyncSwitch>("cron").dependsOn(dependencies).dependsOn<ReadyService>()
     )
   }
 
@@ -65,7 +62,9 @@ class CronModule @JvmOverloads constructor(
     queueFactory.new("misk.cron.task-queue")
 }
 
-class FakeCronModule @JvmOverloads constructor(
+class FakeCronModule
+@JvmOverloads
+constructor(
   private val zoneId: ZoneId,
   private val threadPoolSize: Int = 10,
   private val dependencies: List<Key<out Service>> = listOf(),
@@ -74,17 +73,8 @@ class FakeCronModule @JvmOverloads constructor(
 ) : KInstallOnceModule() {
   override fun configure() {
     bind<ZoneId>().annotatedWith<ForMiskCron>().toInstance(zoneId)
-    install(
-      ExecutorServiceModule.withFixedThreadPool<ForMiskCron>(
-        "misk-cron-cronjob-%d",
-        threadPoolSize,
-      ),
-    )
-    install(
-      ServiceModule<CronService>()
-        .dependsOn(dependencies)
-        .dependsOn<ReadyService>()
-    )
+    install(ExecutorServiceModule.withFixedThreadPool<ForMiskCron>("misk-cron-cronjob-%d", threadPoolSize))
+    install(ServiceModule<CronService>().dependsOn(dependencies).dependsOn<ReadyService>())
     install(DefaultAsyncSwitchModule())
 
     if (installDashboardTab) {

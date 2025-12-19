@@ -5,6 +5,9 @@ package misk.mcp
 import com.google.inject.Provider
 import com.google.inject.TypeLiteral
 import jakarta.inject.Inject
+import java.util.Optional
+import kotlin.jvm.optionals.getOrNull
+import kotlin.reflect.KClass
 import kotlinx.coroutines.channels.SendChannel
 import misk.annotation.ExperimentalMiskApi
 import misk.inject.BindingQualifier
@@ -26,18 +29,13 @@ import misk.web.HttpCall
 import misk.web.actions.WebSocket
 import misk.web.marshal.Unmarshaller
 import misk.web.sse.ServerSentEvent
-import java.util.Optional
-import kotlin.jvm.optionals.getOrNull
-import kotlin.reflect.KClass
-
 
 /**
  * Guice module for configuring MCP (Model Context Protocol) server functionality.
  *
- * This module sets up the necessary bindings for MCP tools, resources, prompts,
- * and transport mechanisms (WebSocket and Server-Sent Events). It provides factory
- * methods for creating configured MCP server instances with different transport options
- * and optional component grouping via [BindingQualifier] annotations.
+ * This module sets up the necessary bindings for MCP tools, resources, prompts, and transport mechanisms (WebSocket and
+ * Server-Sent Events). It provides factory methods for creating configured MCP server instances with different
+ * transport options and optional component grouping via [BindingQualifier] annotations.
  *
  * The module automatically configures:
  * - Multi-binders for tools, resources, and prompts
@@ -49,21 +47,19 @@ import kotlin.reflect.KClass
  * ## Basic Usage
  *
  * Create a single MCP server without component grouping:
- *
  * ```kotlin
  * install(McpServerModule.create("my-server", mcpConfig))
  * ```
  *
  * ## Component Grouping with BindingQualifiers
  *
- * Use [BindingQualifier] annotations to create multiple MCP servers with different sets of
- * tools, resources, and prompts. This is useful for:
+ * Use [BindingQualifier] annotations to create multiple MCP servers with different sets of tools, resources, and
+ * prompts. This is useful for:
  * - Separating admin and public APIs
  * - Creating tenant-specific MCP servers
  * - Organizing tools by domain or service
  *
  * Define qualifier annotations:
- *
  * ```kotlin
  * @Qualifier
  * @Retention(AnnotationRetention.RUNTIME)
@@ -75,7 +71,6 @@ import kotlin.reflect.KClass
  * ```
  *
  * Create servers with qualifiers:
- *
  * ```kotlin
  * class MyApplicationModule : KAbstractModule() {
  *   override fun configure() {
@@ -97,7 +92,6 @@ import kotlin.reflect.KClass
  * ```
  *
  * You can also use annotation instances for dynamic grouping:
- *
  * ```kotlin
  * val adminAnnotation = AdminMcp()
  * install(McpServerModule.create("admin_server", "1.0.0", config.mcp, adminAnnotation))
@@ -105,9 +99,8 @@ import kotlin.reflect.KClass
  *
  * ## Multi-Tenant Architecture
  *
- * The qualifier-based approach enables multi-tenant architectures where each tenant
- * has its own MCP server with isolated tools and resources:
- *
+ * The qualifier-based approach enables multi-tenant architectures where each tenant has its own MCP server with
+ * isolated tools and resources:
  * ```kotlin
  * @Qualifier annotation class TenantA
  * @Qualifier annotation class TenantB
@@ -124,7 +117,6 @@ import kotlin.reflect.KClass
  * @param config The MCP configuration containing server settings
  * @param instructionsProvider Optional provider for server instructions/documentation
  * @param qualifier The [BindingQualifier] used to group tools, resources, and prompts with this server
- *
  * @see MiskMcpServer
  * @see McpConfig
  * @see McpToolModule
@@ -133,7 +125,8 @@ import kotlin.reflect.KClass
  * @see BindingQualifier
  */
 @ExperimentalMiskApi
-class McpServerModule private constructor(
+class McpServerModule
+private constructor(
   private val name: String,
   private val version: String?,
   private val config: McpConfig,
@@ -148,17 +141,20 @@ class McpServerModule private constructor(
     newMultibinder<McpResource>(qualifier)
     newMultibinder<McpTool<*>>(qualifier)
 
-    val serverConfig = config[name]
-      ?: throw IllegalArgumentException("No MCP server configuration found for [name=$name] in [config=$config]")
+    val serverConfig =
+      config[name]
+        ?: throw IllegalArgumentException("No MCP server configuration found for [name=$name] in [config=$config]")
 
     // bind the Optional McpSessionHandler and get the optional provider
     bindOptional(keyOf<McpSessionHandler>(qualifier))
-    val mcpSessionHandlerProvider: Provider<Optional<McpSessionHandler>> = binder().run {
-      @Suppress("UNCHECKED_CAST")
-      val optionalType = parameterizedType<Optional<*>>(McpSessionHandler::class.java)
-        .typeLiteral() as TypeLiteral<Optional<McpSessionHandler>>
-      getProvider(optionalType.toKey(qualifier))
-    }
+    val mcpSessionHandlerProvider: Provider<Optional<McpSessionHandler>> =
+      binder().run {
+        @Suppress("UNCHECKED_CAST")
+        val optionalType =
+          parameterizedType<Optional<*>>(McpSessionHandler::class.java).typeLiteral()
+            as TypeLiteral<Optional<McpSessionHandler>>
+        getProvider(optionalType.toKey(qualifier))
+      }
 
     // Get the providers for tools, resources, and prompts
     val promptsProvider = binder().getProvider(setOfType<McpPrompt>().toKey(qualifier))
@@ -169,40 +165,37 @@ class McpServerModule private constructor(
 
     // Bind the factories for the transports
     val streamableHttpServerTransportFactoryKey = keyOf<MiskStreamableHttpServerTransport.Factory>(qualifier)
-    bind(streamableHttpServerTransportFactoryKey).toProvider(
-      object : Provider<MiskStreamableHttpServerTransport.Factory> {
-        @Inject
-        lateinit var httpCall: ActionScoped<HttpCall>
+    bind(streamableHttpServerTransportFactoryKey)
+      .toProvider(
+        object : Provider<MiskStreamableHttpServerTransport.Factory> {
+          @Inject lateinit var httpCall: ActionScoped<HttpCall>
 
-        override fun get() =
-          object : MiskStreamableHttpServerTransport.Factory {
-            override fun create(sendChannel: SendChannel<ServerSentEvent>) =
-              MiskStreamableHttpServerTransport(
-                call = httpCall.get(),
-                mcpSessionHandler = mcpSessionHandlerProvider.get().getOrNull(),
-                sendChannel = sendChannel,
-              )
-          }
-      }
-    )
+          override fun get() =
+            object : MiskStreamableHttpServerTransport.Factory {
+              override fun create(sendChannel: SendChannel<ServerSentEvent>) =
+                MiskStreamableHttpServerTransport(
+                  call = httpCall.get(),
+                  mcpSessionHandler = mcpSessionHandlerProvider.get().getOrNull(),
+                  sendChannel = sendChannel,
+                )
+            }
+        }
+      )
     val streamableHttpServerTransportFactoryProvider = binder().getProvider(streamableHttpServerTransportFactoryKey)
 
     val webSocketServerTransportFactoryKey = keyOf<MiskWebSocketServerTransport.Factory>(qualifier)
-    bind(keyOf<MiskWebSocketServerTransport.Factory>(qualifier)).toProvider(
-      object : Provider<MiskWebSocketServerTransport.Factory> {
-        @Inject
-        lateinit var httpCall: ActionScoped<HttpCall>
+    bind(keyOf<MiskWebSocketServerTransport.Factory>(qualifier))
+      .toProvider(
+        object : Provider<MiskWebSocketServerTransport.Factory> {
+          @Inject lateinit var httpCall: ActionScoped<HttpCall>
 
-        override fun get() =
-          object : MiskWebSocketServerTransport.Factory {
-            override fun create(webSocket: WebSocket) =
-              MiskWebSocketServerTransport(
-                call = httpCall.get(),
-                webSocket = webSocket
-              )
-          }
-      }
-    )
+          override fun get() =
+            object : MiskWebSocketServerTransport.Factory {
+              override fun create(webSocket: WebSocket) =
+                MiskWebSocketServerTransport(call = httpCall.get(), webSocket = webSocket)
+            }
+        }
+      )
     val webSocketServerTransportFactoryProvider = binder().getProvider(webSocketServerTransportFactoryKey)
 
     // Create a qualified binding for the MiskMcpServer
@@ -223,23 +216,24 @@ class McpServerModule private constructor(
 
     // Create a qualified binding for the McpStreamManager
     val streamManagerKey = keyOf<McpStreamManager>(qualifier)
-    bind(streamManagerKey).toProvider(
-      Provider {
-        McpStreamManager(
-          streamableHttpServerTransportFactoryProvider.get(),
-          webSocketServerTransportFactoryProvider.get(),
-          mcpServer = mcpServerProvider.get()
-        )
-      },
-    )
+    bind(streamManagerKey)
+      .toProvider(
+        Provider {
+          McpStreamManager(
+            streamableHttpServerTransportFactoryProvider.get(),
+            webSocketServerTransportFactoryProvider.get(),
+            mcpServer = mcpServerProvider.get(),
+          )
+        }
+      )
   }
 
   companion object {
     /**
      * Creates an [McpServerModule] for the given [McpConfig] with an optional group annotation.
      *
-     * This is the base factory method that accepts a [KClass] for the group annotation.
-     * Use the reified generic versions for more convenient type-safe creation.
+     * This is the base factory method that accepts a [KClass] for the group annotation. Use the reified generic
+     * versions for more convenient type-safe creation.
      *
      * @param name The name of the MCP server configuration to use from the config
      * @param config The MCP configuration containing server settings
@@ -259,8 +253,8 @@ class McpServerModule private constructor(
     /**
      * Creates an [McpServerModule] with an annotation instance for dynamic grouping.
      *
-     * Use this when you need to create group annotations dynamically at runtime
-     * rather than using compile-time annotation classes.
+     * Use this when you need to create group annotations dynamically at runtime rather than using compile-time
+     * annotation classes.
      *
      * @param name The name of the MCP server configuration to use from the config
      * @param config The MCP configuration containing server settings
@@ -280,9 +274,8 @@ class McpServerModule private constructor(
     /**
      * Creates an [McpServerModule] with a reified group annotation type.
      *
-     * This is the recommended way to create grouped MCP servers with compile-time
-     * type safety. The annotation type is used to group tools, resources, and prompts
-     * that should be exposed through this server.
+     * This is the recommended way to create grouped MCP servers with compile-time type safety. The annotation type is
+     * used to group tools, resources, and prompts that should be exposed through this server.
      *
      * Example:
      * ```kotlin
@@ -298,14 +291,14 @@ class McpServerModule private constructor(
     inline fun <reified GA : Annotation> create(
       name: String,
       config: McpConfig,
-      instructionsProvider: Provider<String>? = null
+      instructionsProvider: Provider<String>? = null,
     ) = create(name, config, instructionsProvider, GA::class)
 
     /**
      * Creates an [McpServerModule] without any group annotation.
      *
-     * Use this when you only need a single MCP server and don't need to organize
-     * tools, resources, and prompts into separate groups.
+     * Use this when you only need a single MCP server and don't need to organize tools, resources, and prompts into
+     * separate groups.
      *
      * Example:
      * ```kotlin

@@ -7,18 +7,15 @@ import io.lettuce.core.cluster.api.sync.RedisClusterCommands
 import misk.redis.lettuce.ConnectionProvider
 import misk.redis.lettuce.suspendingUse
 
-/**
- * A specialized [ConnectionProvider] for [StatefulRedisClusterConnection]s.
- */
+/** A specialized [ConnectionProvider] for [StatefulRedisClusterConnection]s. */
 interface StatefulRedisClusterConnectionProvider<K : Any, V : Any> :
   ConnectionProvider<K, V, StatefulRedisClusterConnection<K, V>>
 
 /**
  * Type alias for a string-based cluster connection provider.
  *
- * This is a convenience type for the common case of using string keys and values
- * with a Redis Cluster connection. It's particularly useful when working with
- * simple string-based data across a cluster.
+ * This is a convenience type for the common case of using string keys and values with a Redis Cluster connection. It's
+ * particularly useful when working with simple string-based data across a cluster.
  */
 typealias ClusterConnectionProvider = StatefulRedisClusterConnectionProvider<String, String>
 
@@ -47,7 +44,7 @@ typealias ClusterConnectionProvider = StatefulRedisClusterConnectionProvider<Str
  */
 suspend inline fun <K : Any, V : Any, T> StatefulRedisClusterConnectionProvider<K, V>.withConnection(
   exclusive: Boolean = false,
-  block: RedisClusterCoroutinesCommands<K, V>.() -> T
+  block: RedisClusterCoroutinesCommands<K, V>.() -> T,
 ): T = acquire(exclusive).suspendingUse { block(it.coroutines()) }
 
 /**
@@ -76,5 +73,5 @@ suspend inline fun <K : Any, V : Any, T> StatefulRedisClusterConnectionProvider<
  */
 inline fun <K : Any, V : Any, T> StatefulRedisClusterConnectionProvider<K, V>.withConnectionBlocking(
   exclusive: Boolean = false,
-  block: RedisClusterCommands<K, V>.() -> T
+  block: RedisClusterCommands<K, V>.() -> T,
 ): T = acquireBlocking(exclusive).use { connection -> block(connection.sync()) }

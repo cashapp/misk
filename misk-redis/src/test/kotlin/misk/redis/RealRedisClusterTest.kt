@@ -16,14 +16,15 @@ import wisp.deployment.TESTING
 class RealRedisClusterTest : AbstractRedisClusterTest() {
   @Suppress("unused")
   @MiskTestModule
-  private val module: Module = object : KAbstractModule() {
-    override fun configure() {
-      install(RedisClusterModule(DockerRedisCluster.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
-      install(MiskTestingServiceModule())
-      install(DeploymentModule(TESTING))
-      install(RedisTestFlushModule())
+  private val module: Module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(RedisClusterModule(DockerRedisCluster.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
+        install(MiskTestingServiceModule())
+        install(DeploymentModule(TESTING))
+        install(RedisTestFlushModule())
+      }
     }
-  }
 
   @Inject override lateinit var redis: Redis
 }

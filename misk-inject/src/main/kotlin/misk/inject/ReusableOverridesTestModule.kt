@@ -4,14 +4,14 @@ import com.google.inject.util.Modules
 import java.util.SortedSet
 
 /**
-  * Allows overriding reusable test modules when reusing injectors in Misk tests.
-  *
-  * Usage:
-  * ```
-  * @MiskTestModule
-  * val module = overrideReusable(OriginalReusableTestModule()).with(OverrideTestModuleOne(), OverrideTestModuleOne(), ...)
-  * ```
-  */
+ * Allows overriding reusable test modules when reusing injectors in Misk tests.
+ *
+ * Usage:
+ * ```
+ * @MiskTestModule
+ * val module = overrideReusable(OriginalReusableTestModule()).with(OverrideTestModuleOne(), OverrideTestModuleOne(), ...)
+ * ```
+ */
 fun overrideReusable(vararg modules: ReusableTestModule) =
   ReusableOverriddenModuleBuilder(modules = modules.toSortedSet(ReusableTestModuleComparator))
 
@@ -32,8 +32,9 @@ private object ReusableTestModuleComparator : Comparator<ReusableTestModule> {
 
 class ReusableOverriddenModuleBuilder(private val modules: SortedSet<ReusableTestModule>) {
 
-  fun with(vararg overrides: ReusableTestModule) = ReusableOverridesTestModule(
-    originalTestModules = modules,
-    overrides = overrides.toSortedSet(ReusableTestModuleComparator)
-  )
+  fun with(vararg overrides: ReusableTestModule) =
+    ReusableOverridesTestModule(
+      originalTestModules = modules,
+      overrides = overrides.toSortedSet(ReusableTestModuleComparator),
+    )
 }

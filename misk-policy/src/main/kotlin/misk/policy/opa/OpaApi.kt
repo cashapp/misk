@@ -3,10 +3,10 @@ package misk.policy.opa
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.Body
-import retrofit2.http.Query
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface OpaApi {
   @Headers("Content-Type: application/json")
@@ -15,6 +15,6 @@ interface OpaApi {
     @Path(value = "documentPath", encoded = true) documentPath: String,
     @Body input: String,
     @Query("provenance") provenance: Boolean,
-    @Query("metrics") metrics: Boolean
+    @Query("metrics") metrics: Boolean,
   ): Call<ResponseBody>
 }

@@ -2,11 +2,11 @@ package misk.hibernate
 
 import jakarta.inject.Qualifier
 import misk.MiskTestingServiceModule
+import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
-import misk.config.Config
 import wisp.deployment.TESTING
 
 class PrimitivesDbTestModule : KAbstractModule() {
@@ -17,18 +17,16 @@ class PrimitivesDbTestModule : KAbstractModule() {
     val config = MiskConfig.load<RootConfig>("primitivecolumns", TESTING)
     install(HibernateTestingModule(PrimitivesDb::class))
     install(HibernateModule(PrimitivesDb::class, config.data_source))
-    install(object : HibernateEntityModule(PrimitivesDb::class) {
-      override fun configureHibernate() {
-        addEntities(DbPrimitiveTour::class)
+    install(
+      object : HibernateEntityModule(PrimitivesDb::class) {
+        override fun configureHibernate() {
+          addEntities(DbPrimitiveTour::class)
+        }
       }
-    })
+    )
   }
 }
 
 data class RootConfig(val data_source: DataSourceConfig) : Config
 
-
-@Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-annotation class PrimitivesDb
-
+@Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) annotation class PrimitivesDb

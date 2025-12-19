@@ -3,6 +3,9 @@ package misk.client
 import com.squareup.wire.GrpcMethod
 import com.squareup.wire.ProtoAdapter
 import jakarta.inject.Inject
+import java.time.Clock
+import java.time.Instant
+import kotlin.reflect.full.createType
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.scope.ActionScoped
@@ -19,14 +22,10 @@ import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.Clock
-import java.time.Instant
-import kotlin.reflect.full.createType
 
 @MiskTest(startService = false)
 class DeadlinePropagationInterceptorTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var metrics: RequestDeadlineMetrics
   private val fixedClock = Clock.fixed(Instant.parse("2024-01-01T12:00:00Z"), java.time.ZoneOffset.UTC)
@@ -57,9 +56,7 @@ class DeadlinePropagationInterceptorTest {
 
     val chain = TestInterceptorChain()
 
-    val exception = assertThrows<DeadlineExceededException> {
-      interceptor.intercept(chain)
-    }
+    val exception = assertThrows<DeadlineExceededException> { interceptor.intercept(chain) }
 
     assertThat(exception.message).contains("Deadline already expired")
   }
@@ -74,9 +71,7 @@ class DeadlinePropagationInterceptorTest {
 
     val chain = TestInterceptorChain()
 
-    val exception = assertThrows<DeadlineExceededException> {
-      interceptor.intercept(chain)
-    }
+    val exception = assertThrows<DeadlineExceededException> { interceptor.intercept(chain) }
 
     assertThat(exception.message).contains("Deadline already expired")
   }
@@ -339,6 +334,7 @@ class DeadlinePropagationInterceptorTest {
   // Test implementations
   private class TestActionScope(private val deadline: RequestDeadline?) : ActionScoped<RequestDeadline> {
     override fun get(): RequestDeadline = deadline ?: throw IllegalStateException("No deadline in scope")
+
     override fun getIfInScope(): RequestDeadline? = deadline
   }
 
@@ -349,7 +345,7 @@ class DeadlinePropagationInterceptorTest {
       name = "TestClient.testMethod",
       function = dummyFunction,
       parameterTypes = emptyList(),
-      returnType = String::class.createType()
+      returnType = String::class.createType(),
     )
   }
 
@@ -358,22 +354,27 @@ class DeadlinePropagationInterceptorTest {
     private val callTimeoutMillis: Int = 0,
     grpcRequest: Boolean = false,
   ) : Interceptor.Chain {
-    private val originalRequest = Request.Builder()
-      .url("http://test.example.com")
-      .apply {
-        if (grpcRequest) {
-          tag(GrpcMethod::class.java, GrpcMethod(
-            path = "/TestService/TestMethod",
-            requestAdapter = ProtoAdapter.STRING,
-            responseAdapter = ProtoAdapter.STRING
-          ))
+    private val originalRequest =
+      Request.Builder()
+        .url("http://test.example.com")
+        .apply {
+          if (grpcRequest) {
+            tag(
+              GrpcMethod::class.java,
+              GrpcMethod(
+                path = "/TestService/TestMethod",
+                requestAdapter = ProtoAdapter.STRING,
+                responseAdapter = ProtoAdapter.STRING,
+              ),
+            )
+          }
         }
-      }
-      .build()
+        .build()
     var builtRequest: Request? = null
     var proceededWithOriginalRequest = false
 
     override fun readTimeoutMillis(): Int = readTimeoutMillis
+
     override fun request(): Request = originalRequest
 
     override fun proceed(request: Request): Response {
@@ -382,30 +383,40 @@ class DeadlinePropagationInterceptorTest {
       } else {
         builtRequest = request
       }
-      return Response.Builder()
-        .request(request)
-        .protocol(okhttp3.Protocol.HTTP_1_1)
-        .code(200)
-        .message("OK")
-        .build()
+      return Response.Builder().request(request).protocol(okhttp3.Protocol.HTTP_1_1).code(200).message("OK").build()
     }
 
     override fun call(): okhttp3.Call = TestCall(callTimeoutMillis)
+
     override fun connectTimeoutMillis(): Int = throw NotImplementedError("Not needed for test")
-    override fun withConnectTimeout(timeout: Int, unit: java.util.concurrent.TimeUnit): Interceptor.Chain = throw NotImplementedError("Not needed for test")
-    override fun withReadTimeout(timeout: Int, unit: java.util.concurrent.TimeUnit): Interceptor.Chain = throw NotImplementedError("Not needed for test")
-    override fun withWriteTimeout(timeout: Int, unit: java.util.concurrent.TimeUnit): Interceptor.Chain = throw NotImplementedError("Not needed for test")
+
+    override fun withConnectTimeout(timeout: Int, unit: java.util.concurrent.TimeUnit): Interceptor.Chain =
+      throw NotImplementedError("Not needed for test")
+
+    override fun withReadTimeout(timeout: Int, unit: java.util.concurrent.TimeUnit): Interceptor.Chain =
+      throw NotImplementedError("Not needed for test")
+
+    override fun withWriteTimeout(timeout: Int, unit: java.util.concurrent.TimeUnit): Interceptor.Chain =
+      throw NotImplementedError("Not needed for test")
+
     override fun writeTimeoutMillis(): Int = throw NotImplementedError("Not needed for test")
+
     override fun connection(): okhttp3.Connection? = null
   }
 
   private class TestCall(private val callTimeoutMillis: Int) : okhttp3.Call {
     override fun request(): Request = throw NotImplementedError("Not needed for test")
+
     override fun execute(): Response = throw NotImplementedError("Not needed for test")
+
     override fun enqueue(responseCallback: okhttp3.Callback) = throw NotImplementedError("Not needed for test")
+
     override fun cancel() = throw NotImplementedError("Not needed for test")
+
     override fun isExecuted(): Boolean = throw NotImplementedError("Not needed for test")
+
     override fun isCanceled(): Boolean = throw NotImplementedError("Not needed for test")
+
     override fun clone(): okhttp3.Call = throw NotImplementedError("Not needed for test")
 
     override fun timeout(): okio.Timeout = TestTimeout(callTimeoutMillis)

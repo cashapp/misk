@@ -2,25 +2,26 @@ package misk.ratelimiting.bucket4j.dynamodb.v2.transaction
 
 import io.github.bucket4j.distributed.proxy.generic.compare_and_swap.CompareAndSwapOperation
 import io.github.bucket4j.distributed.remote.RemoteBucketState
+import java.util.Optional
+import kotlin.collections.getValue
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException
-import java.util.Optional
-import kotlin.collections.getValue
 
-internal abstract class BaseDynamoDBTransaction(
-  private val dynamoDB: DynamoDbClient,
-  private val table: String
-) : CompareAndSwapOperation {
+internal abstract class BaseDynamoDBTransaction(private val dynamoDB: DynamoDbClient, private val table: String) :
+  CompareAndSwapOperation {
   override fun getStateData(): Optional<ByteArray> {
     val attributes = mapOf(DEFAULT_KEY_NAME to getKeyAttributeValue())
 
-    val result = dynamoDB.getItem {
-      it.tableName(table)
-      it.key(attributes)
-      it.consistentRead(true)
-    }.item()
+    val result =
+      dynamoDB
+        .getItem {
+          it.tableName(table)
+          it.key(attributes)
+          it.consistentRead(true)
+        }
+        .item()
     if (result == null || !result.containsKey(DEFAULT_STATE_NAME)) {
       return Optional.empty()
     }
@@ -35,19 +36,14 @@ internal abstract class BaseDynamoDBTransaction(
     return Optional.of(state.b().asByteArray())
   }
 
-  override fun compareAndSwap(
-    originalData: ByteArray?,
-    newData: ByteArray,
-    newState: RemoteBucketState?
-  ): Boolean {
+  override fun compareAndSwap(originalData: ByteArray?, newData: ByteArray, newState: RemoteBucketState?): Boolean {
     val item =
       mapOf(
         DEFAULT_KEY_NAME to getKeyAttributeValue(),
         DEFAULT_STATE_NAME to AttributeValue.fromB(newData.toSdkBytes()),
       )
-    val attributes = mapOf(
-      ":expected" to AttributeValue.fromB(originalData?.toSdkBytes() ?: SdkBytes.fromUtf8String(""))
-    )
+    val attributes =
+      mapOf(":expected" to AttributeValue.fromB(originalData?.toSdkBytes() ?: SdkBytes.fromUtf8String("")))
     val names = mapOf("#st" to DEFAULT_STATE_NAME)
 
     return try {
@@ -64,10 +60,7 @@ internal abstract class BaseDynamoDBTransaction(
     }
   }
 
-  /**
-   * @return The key wrapped in an [AttributeValue].
-   * The type of the key depends on the implementation
-   */
+  /** @return The key wrapped in an [AttributeValue]. The type of the key depends on the implementation */
   protected abstract fun getKeyAttributeValue(): AttributeValue
 
   companion object {

@@ -1,5 +1,7 @@
 package misk.web.metadata
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.config.AppName
 import misk.security.authz.Unauthenticated
 import misk.web.Get
@@ -8,17 +10,11 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import wisp.deployment.Deployment
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
-/**
- * Service Metadata used for front end dashboards including App Name and Misk.Deployment name
- */
+/** Service Metadata used for front end dashboards including App Name and Misk.Deployment name */
 // TODO replace this with a MetadataModule binding instead of separate web action
 @Singleton
-class ServiceMetadataAction @Inject constructor(
-  private val optionalBinder: OptionalBinder,
-) : WebAction {
+class ServiceMetadataAction @Inject constructor(private val optionalBinder: OptionalBinder) : WebAction {
   @Get("/api/service/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -26,16 +22,11 @@ class ServiceMetadataAction @Inject constructor(
   fun getAll(): Response {
     // Misk-web expects an UPPERCASE environment. Since this action could get a serviceMetadata
     // object from anywhere, it must be transformed here.
-    val metadata = with(optionalBinder.serviceMetadata) {
-      copy(environment = this.environment.uppercase())
-    }
+    val metadata = with(optionalBinder.serviceMetadata) { copy(environment = this.environment.uppercase()) }
     return Response(serviceMetadata = metadata)
   }
 
-  data class ServiceMetadata(
-    val app_name: String,
-    val environment: String,
-  )
+  data class ServiceMetadata(val app_name: String, val environment: String)
 
   data class Response(val serviceMetadata: ServiceMetadata)
 

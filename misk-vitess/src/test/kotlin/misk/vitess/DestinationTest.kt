@@ -61,9 +61,7 @@ class DestinationTest {
 
   @Test
   fun parseInvalidDestinationQualifier() {
-    val exception = Assertions.catchThrowable {
-      Destination.parse("@invalid")
-    }
+    val exception = Assertions.catchThrowable { Destination.parse("@invalid") }
     assertThat(exception)
       .isInstanceOf(IllegalArgumentException::class.java)
       .hasMessageContaining("Invalid destination qualifier")

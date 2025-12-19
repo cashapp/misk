@@ -29,7 +29,9 @@ import misk.web.mediatype.MediaTypes
 import misk.web.v2.DashboardPageLayout
 
 @Singleton
-class GuiceTabIndexAction @Inject constructor(
+class GuiceTabIndexAction
+@Inject
+constructor(
   private val dashboardPageLayout: DashboardPageLayout,
   private val guiceMetadataProvider: GuiceMetadataProvider,
   private val guiceSourceUrlProvider: GuiceSourceUrlProvider,
@@ -37,82 +39,75 @@ class GuiceTabIndexAction @Inject constructor(
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @AdminDashboardAccess
-  fun get(): String = dashboardPageLayout
-    .newBuilder()
-    .headBlock {
-      val controllers = listOf(
-        "guice_search_bar_controller",
-      )
-      controllers.forEach {
-        script {
-          type = "module"
-          src = "/static/controllers/$it.js"
+  fun get(): String =
+    dashboardPageLayout
+      .newBuilder()
+      .headBlock {
+        val controllers = listOf("guice_search_bar_controller")
+        controllers.forEach {
+          script {
+            type = "module"
+            src = "/static/controllers/$it.js"
+          }
+        }
+        style {
+          unsafe {
+            raw(
+              """
+              .tooltip {
+                visibility: hidden;
+              }
+
+              .has-tooltip:hover .tooltip {
+                opacity: 1;
+                visibility: visible;
+              }
+              """
+                .trimIndent()
+            )
+          }
         }
       }
-      style {
-        unsafe {
-          raw("""
-            .tooltip {
-              visibility: hidden;
-            }
-            
-            .has-tooltip:hover .tooltip {
-              opacity: 1;
-              visibility: visible;
-            }
-          """.trimIndent())
-        }
-      }
-    }
-    .build { _, _, _ ->
-      val bindings = guiceMetadataProvider.get().guice.bindingMetadata
+      .build { _, _, _ ->
+        val bindings = guiceMetadataProvider.get().guice.bindingMetadata
 
-      div("container mx-auto p-8") {
-        h1("text-3xl font-bold mb-4") {
-          +"""Guice"""
-        }
-        AlertInfoHighlight(
-          "Explore the dependency injection Guice bindings for your application.",
-          "Guice Docs",
-          "https://github.com/google/guice/wiki/GettingStarted"
-        )
-
-        div {
-          attributes["data-controller"] = "search-bar"
+        div("container mx-auto p-8") {
+          h1("text-3xl font-bold mb-4") { +"""Guice""" }
+          AlertInfoHighlight(
+            "Explore the dependency injection Guice bindings for your application.",
+            "Guice Docs",
+            "https://github.com/google/guice/wiki/GettingStarted",
+          )
 
           div {
-            input(
-              type = InputType.search,
-              classes = "flex h-10 w-full bg-gray-100 hover:bg-gray-200 duration-500 border-none rounded-lg text-sm"
-            ) {
-              attributes["data-action"] = "input->search-bar#search"
-              placeholder =
-                "Search dependency injection types like AccessAnnotationEntry, DataSourceService, or RealTokenGenerator..."
-            }
-          }
+            attributes["data-controller"] = "search-bar"
 
-          div("lg:col-start-3 lg:row-end-1 py-4") {
-            bindings
-              .groupBy { it.typePackage }
-              .toSortedMap()
-              .map { (typePackage, binding) ->
-                div("binding-group") {
-                  ToggleContainer(
-                    buttonText = typePackage,
-                    classes = "py-2",
-                    borderless = true,
-                    marginless = true,
-                  ) {
-                    div("grid grid-cols-1 gap-y-4") {
-                      binding.map { BindingCard(it) }
+            div {
+              input(
+                type = InputType.search,
+                classes = "flex h-10 w-full bg-gray-100 hover:bg-gray-200 duration-500 border-none rounded-lg text-sm",
+              ) {
+                attributes["data-action"] = "input->search-bar#search"
+                placeholder =
+                  "Search dependency injection types like AccessAnnotationEntry, DataSourceService, or RealTokenGenerator..."
+              }
+            }
+
+            div("lg:col-start-3 lg:row-end-1 py-4") {
+              bindings
+                .groupBy { it.typePackage }
+                .toSortedMap()
+                .map { (typePackage, binding) ->
+                  div("binding-group") {
+                    ToggleContainer(buttonText = typePackage, classes = "py-2", borderless = true, marginless = true) {
+                      div("grid grid-cols-1 gap-y-4") { binding.map { BindingCard(it) } }
                     }
                   }
                 }
-              }
+            }
           }
         }
       }
-    }
 
   private fun TagConsumer<*>.BindingCard(binding: GuiceMetadataProvider.BindingMetadata) {
     val truncateLength = 85
@@ -131,20 +126,19 @@ class GuiceTabIndexAction @Inject constructor(
           }
         }
         if (binding.source.isNotBlank() && binding.source != "[unknown source]") {
-          val source = if (binding.source.length > truncateLength) {
-            val leadingLength = 32
-            binding.source.take(leadingLength) + "..." + binding.source.takeLast(truncateLength - leadingLength)
-          } else {
-            binding.source
-          }
+          val source =
+            if (binding.source.length > truncateLength) {
+              val leadingLength = 32
+              binding.source.take(leadingLength) + "..." + binding.source.takeLast(truncateLength - leadingLength)
+            } else {
+              binding.source
+            }
           CardRow("Source", Heroicons.OUTLINE_ARROW_TOP_RIGHT_ON_SQUARE) {
             val sourceUrl = guiceSourceUrlProvider.urlForSource(binding.source)
             if (sourceUrl != null) {
-              a(
-                classes = "underline text-gray-500 hover:text-gray-900",
-                href = sourceUrl,
-                target = "_blank"
-              ) { +source }
+              a(classes = "underline text-gray-500 hover:text-gray-900", href = sourceUrl, target = "_blank") {
+                +source
+              }
             } else {
               +source
             }
@@ -164,10 +158,14 @@ class GuiceTabIndexAction @Inject constructor(
                   if (binding.provider.split(" ").any { it.length > truncateLength }) {
                     // Add some spaces so text can wrap for long package names and other cases
                     +binding.provider
-                      .split("[").joinToString("[ ") { it }
-                      .split("(").joinToString("( ") { it }
-                      .split("$").joinToString("$ ") { it }
-                      .split("Provider<").joinToString("Provider< ") { it }
+                      .split("[")
+                      .joinToString("[ ") { it }
+                      .split("(")
+                      .joinToString("( ") { it }
+                      .split("$")
+                      .joinToString("$ ") { it }
+                      .split("Provider<")
+                      .joinToString("Provider< ") { it }
                   } else {
                     +binding.provider
                   }
@@ -178,11 +176,7 @@ class GuiceTabIndexAction @Inject constructor(
         }
         if (!binding.subElements.isNullOrEmpty()) {
           CardRow("Binder Elements", Heroicons.OUTLINE_QUEUE_LIST) {
-            ToggleContainer(
-              buttonText = "Binder Elements",
-              borderless = true,
-              marginless = true,
-            ) {
+            ToggleContainer(buttonText = "Binder Elements", borderless = true, marginless = true) {
               binding.subElements!!.map { BindingCard(it) }
             }
           }
@@ -191,13 +185,11 @@ class GuiceTabIndexAction @Inject constructor(
     }
   }
 
-  private fun TagConsumer<*>.CardTag(
-    label: String,
-    color: String,
-    content: TagConsumer<*>.() -> Unit
-  ) {
+  private fun TagConsumer<*>.CardTag(label: String, color: String, content: TagConsumer<*>.() -> Unit) {
     dt("sr-only") { +label }
-    dd("inline-flex items-center rounded-md bg-$color-50 px-2 py-1 text-xs font-medium text-$color-700 ring-1 ring-inset ring-$color-600/20") {
+    dd(
+      "inline-flex items-center rounded-md bg-$color-50 px-2 py-1 text-xs font-medium text-$color-700 ring-1 ring-inset ring-$color-600/20"
+    ) {
       content()
     }
   }
@@ -205,7 +197,9 @@ class GuiceTabIndexAction @Inject constructor(
   private fun TagConsumer<*>.Tooltip(tooltip: String, content: TagConsumer<*>.() -> Unit) {
     div("has-tooltip") {
       content()
-      div("tooltip absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700") {
+      div(
+        "tooltip absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700"
+      ) {
         id = "tooltip-default"
         role = "tooltip"
         +tooltip
@@ -213,21 +207,13 @@ class GuiceTabIndexAction @Inject constructor(
     }
   }
 
-  private fun TagConsumer<*>.CardRow(
-    label: String,
-    icon: Heroicons,
-    content: TagConsumer<*>.() -> Unit
-  ) {
+  private fun TagConsumer<*>.CardRow(label: String, icon: Heroicons, content: TagConsumer<*>.() -> Unit) {
     div("flex w-full flex-none gap-x-4 border-t border-gray-900/5 px-6 py-6") {
       dt("flex-none") {
         span("sr-only") { +label }
-        Tooltip(label) {
-          heroicon(icon)
-        }
+        Tooltip(label) { heroicon(icon) }
       }
-      dd("text-sm font-medium leading-6 text-gray-900") {
-        content()
-      }
+      dd("text-sm font-medium leading-6 text-gray-900") { content() }
     }
   }
 

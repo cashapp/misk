@@ -19,16 +19,14 @@ class LogLevelExtension : BeforeEachCallback {
     if (context == null || context.element.isEmpty) {
       return Level.INFO
     }
-    return context.element.get().annotations.firstNotNullOfOrNull { it as? LogLevel }
-      ?.let { mapLevel(it.level) }
+    return context.element.get().annotations.firstNotNullOfOrNull { it as? LogLevel }?.let { mapLevel(it.level) }
       ?: findParent(context)
       ?: Level.INFO
   }
 
   private fun findParent(context: ExtensionContext): Level? {
     return context.requiredTestInstances.allInstances.firstNotNullOfOrNull { instance ->
-      instance::class.annotations.firstNotNullOfOrNull { it as? LogLevel }
-        ?.let { mapLevel(it.level) }
+      instance::class.annotations.firstNotNullOfOrNull { it as? LogLevel }?.let { mapLevel(it.level) }
     }
   }
 

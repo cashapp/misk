@@ -7,6 +7,11 @@ import com.github.dockerjava.api.model.Ports
 import com.github.dockerjava.core.async.ResultCallbackTemplate
 import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
+import java.sql.Connection
+import java.sql.SQLException
+import java.time.Duration
+import java.util.Properties
+import java.util.concurrent.atomic.AtomicBoolean
 import misk.backoff.DontRetryException
 import misk.backoff.ExponentialBackoff
 import misk.backoff.RetryConfig
@@ -17,27 +22,14 @@ import misk.jdbc.uniqueInt
 import misk.resources.ResourceLoader
 import mu.KotlinLogging
 import wisp.deployment.TESTING
-import java.sql.Connection
-import java.sql.SQLException
-import java.time.Duration
-import java.util.Properties
-import java.util.concurrent.atomic.AtomicBoolean
 
-class CockroachCluster(
-  val name: String,
-  val config: DataSourceConfig
-) {
-  /**
-   * Connect to vtgate.
-   */
+class CockroachCluster(val name: String, val config: DataSourceConfig) {
+  /** Connect to vtgate. */
   fun openConnection(): Connection = dataSource().connection
 
   private fun dataSource(): DriverDataSource {
     val jdbcUrl = config.withDefaults().buildJdbcUrl(TESTING)
-    return DriverDataSource(
-      jdbcUrl, config.type.driverClassName, Properties(),
-      config.username, config.password
-    )
+    return DriverDataSource(jdbcUrl, config.type.driverClassName, Properties(), config.username, config.password)
   }
 
   val externalHttpPort = 26258
@@ -50,7 +42,7 @@ class DockerCockroachCluster(
   val moshi: Moshi,
   val resourceLoader: ResourceLoader,
   val config: DataSourceConfig,
-  val docker: DockerClient
+  val docker: DockerClient,
 ) : DatabaseServer {
   val cluster: CockroachCluster
 
@@ -61,10 +53,7 @@ class DockerCockroachCluster(
   private var startupFailure: Exception? = null
 
   init {
-    cluster = CockroachCluster(
-      name = name,
-      config = config
-    )
+    cluster = CockroachCluster(name = name, config = config)
   }
 
   override fun start() {
@@ -102,9 +91,7 @@ class DockerCockroachCluster(
           return
         }
 
-        if (runCommand(
-            "docker images --digests | grep -q $SHA || docker pull $IMAGE"
-          ) != 0) {
+        if (runCommand("docker images --digests | grep -q $SHA || docker pull $IMAGE") != 0) {
           logger.warn("Failed to pull Cockroach docker image. Proceeding regardless.")
         }
         imagePulled.set(true)
@@ -132,18 +119,12 @@ class DockerCockroachCluster(
     ports.bind(httpPort, Ports.Binding.bindPort(cluster.externalHttpPort))
     ports.bind(postgresPort, Ports.Binding.bindPort(postgresPort.port))
 
-    val cmd = arrayOf(
-      "start-single-node",
-      "--insecure"
-    )
+    val cmd = arrayOf("start-single-node", "--insecure")
 
     val containerName = "$CONTAINER_NAME"
 
-    val runningContainer = docker.listContainersCmd()
-      .withNameFilter(listOf(containerName))
-      .withLimit(1)
-      .exec()
-      .firstOrNull()
+    val runningContainer =
+      docker.listContainersCmd().withNameFilter(listOf(containerName)).withLimit(1).exec().firstOrNull()
     if (runningContainer != null) {
       if (runningContainer.state != "running") {
         logger.info(
@@ -159,19 +140,21 @@ class DockerCockroachCluster(
     }
 
     if (containerId == null) {
-      logger.info(
-        "Starting Cockroach cluster with command: ${cmd.joinToString(" ")}"
-      )
-      containerId = docker.createContainerCmd(IMAGE)
-        .withCmd(cmd.toList())
-        .withExposedPorts(httpPort, postgresPort)
-        .withPortBindings(ports)
-        .withTty(true)
-        .withName(containerName)
-        .exec().id!!
+      logger.info("Starting Cockroach cluster with command: ${cmd.joinToString(" ")}")
+      containerId =
+        docker
+          .createContainerCmd(IMAGE)
+          .withCmd(cmd.toList())
+          .withExposedPorts(httpPort, postgresPort)
+          .withPortBindings(ports)
+          .withTty(true)
+          .withName(containerName)
+          .exec()
+          .id!!
       val containerId = containerId!!
       docker.startContainerCmd(containerId).exec()
-      docker.logContainerCmd(containerId)
+      docker
+        .logContainerCmd(containerId)
         .withStdErr(true)
         .withStdOut(true)
         .withFollowStream(true)
@@ -187,16 +170,10 @@ class DockerCockroachCluster(
 
   private fun waitUntilHealthy() {
     try {
-      val retryConfig = RetryConfig.Builder(
-        20, ExponentialBackoff(
-        Duration.ofSeconds(1),
-        Duration.ofSeconds(5)
-      )
-      )
+      val retryConfig = RetryConfig.Builder(20, ExponentialBackoff(Duration.ofSeconds(1), Duration.ofSeconds(5)))
       retry(retryConfig.build()) {
         cluster.openConnection().use { c ->
-          val result =
-            c.createStatement().executeQuery("SELECT 1").uniqueInt()
+          val result = c.createStatement().executeQuery("SELECT 1").uniqueInt()
           check(result == 1)
         }
       }

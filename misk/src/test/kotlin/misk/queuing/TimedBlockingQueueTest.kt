@@ -1,6 +1,5 @@
 package misk.queuing
 
-import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.ArrayList
 import java.util.NoSuchElementException
@@ -11,23 +10,24 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 internal class TimedBlockingQueueTest {
   private val queueSize = 10
 
-  @Test fun shouldCallDelayHandlerAndRemoveSingleItem() {
+  @Test
+  fun shouldCallDelayHandlerAndRemoveSingleItem() {
     val value = 1
     val delays = ArrayList<Long>()
-    val queue = TimedBlockingQueue<Int>(
-      queueSize
-    ) { delay: Duration -> delays.add(delay.toMillis()) }
-    val removeList = listOf(
-      { queue.take() },
-      { queue.remove() },
-      { queue.poll() },
-      { queue.poll(1, TimeUnit.SECONDS) },
-      { queue.remove(value) }
-    )
+    val queue = TimedBlockingQueue<Int>(queueSize) { delay: Duration -> delays.add(delay.toMillis()) }
+    val removeList =
+      listOf(
+        { queue.take() },
+        { queue.remove() },
+        { queue.poll() },
+        { queue.poll(1, TimeUnit.SECONDS) },
+        { queue.remove(value) },
+      )
     for (lambda in removeList) {
       assertTrue(queue.isEmpty())
       queue.add(value)
@@ -42,19 +42,19 @@ internal class TimedBlockingQueueTest {
     }
   }
 
-  @Test fun shouldCallDelayHandlerAndRemoveMultipleItems() {
+  @Test
+  fun shouldCallDelayHandlerAndRemoveMultipleItems() {
     val values = listOf(1, 2)
     val delays = ArrayList<Long>()
-    val queue = TimedBlockingQueue<Int>(
-      queueSize
-    ) { delay: Duration -> delays.add(delay.toMillis()) }
-    val removeList = listOf(
-      { queue.removeAll(values) },
-      { queue.retainAll(listOf(0)) },
-      { queue.drainTo(mutableListOf()) },
-      { queue.drainTo(mutableListOf(), 2) },
-      { queue.clear() }
-    )
+    val queue = TimedBlockingQueue<Int>(queueSize) { delay: Duration -> delays.add(delay.toMillis()) }
+    val removeList =
+      listOf(
+        { queue.removeAll(values) },
+        { queue.retainAll(listOf(0)) },
+        { queue.drainTo(mutableListOf()) },
+        { queue.drainTo(mutableListOf(), 2) },
+        { queue.clear() },
+      )
     for (lambda in removeList) {
       assertTrue(queue.isEmpty())
       queue.addAll(values)
@@ -71,18 +71,18 @@ internal class TimedBlockingQueueTest {
     }
   }
 
-  @Test fun shouldAddSingleItem() {
+  @Test
+  fun shouldAddSingleItem() {
     val value = 1
     val delays = ArrayList<Long>()
-    val queue = TimedBlockingQueue<Int>(
-      queueSize
-    ) { delay: Duration -> delays.add(delay.toMillis()) }
-    val addList = listOf(
-      { queue.add(value) },
-      { queue.put(value) },
-      { queue.offer(value) },
-      { queue.offer(value, 1, TimeUnit.SECONDS) }
-    )
+    val queue = TimedBlockingQueue<Int>(queueSize) { delay: Duration -> delays.add(delay.toMillis()) }
+    val addList =
+      listOf(
+        { queue.add(value) },
+        { queue.put(value) },
+        { queue.offer(value) },
+        { queue.offer(value, 1, TimeUnit.SECONDS) },
+      )
     for (lambda in addList) {
       assertTrue(queue.isEmpty())
       lambda()
@@ -92,12 +92,11 @@ internal class TimedBlockingQueueTest {
     }
   }
 
-  @Test fun readOperationsShouldBehaveExactlyAsArrayBlockingQueue() {
+  @Test
+  fun readOperationsShouldBehaveExactlyAsArrayBlockingQueue() {
     val values = listOf(1, 2, 3, 4, 5, 6, 7)
     val delays = ArrayList<Long>()
-    val timedQueue = TimedBlockingQueue<Int>(
-      queueSize
-    ) { delay: Duration -> delays.add(delay.toMillis()) }
+    val timedQueue = TimedBlockingQueue<Int>(queueSize) { delay: Duration -> delays.add(delay.toMillis()) }
     val arrayQueue = ArrayBlockingQueue<Int>(queueSize)
     timedQueue.addAll(values)
     arrayQueue.addAll(values)
@@ -135,9 +134,10 @@ internal class TimedBlockingQueueTest {
     assertEquals(arrayQueue.poll(1, TimeUnit.SECONDS), timedQueue.poll(1, TimeUnit.SECONDS))
   }
 
-  @Test fun draintToShouldAppendToInput() {
+  @Test
+  fun draintToShouldAppendToInput() {
     val values = listOf(1, 2, 3)
-    val queue = TimedBlockingQueue<Int>(queueSize) { }
+    val queue = TimedBlockingQueue<Int>(queueSize) {}
     queue.addAll(values)
     val mutableList = mutableListOf<Int>()
     queue.drainTo(mutableList)
@@ -151,8 +151,9 @@ internal class TimedBlockingQueueTest {
     assertEquals(listOf(1, 2), mutableList)
   }
 
-  @Test fun nullReturnsShouldNotThrow() {
-    val queue = TimedBlockingQueue<Int>(queueSize) { }
+  @Test
+  fun nullReturnsShouldNotThrow() {
+    val queue = TimedBlockingQueue<Int>(queueSize) {}
     assertNull(queue.poll())
     assertNull(queue.poll(1, TimeUnit.SECONDS))
   }

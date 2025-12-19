@@ -1,33 +1,28 @@
 package wisp.feature
 
 sealed interface FeatureFlag<T : Any> {
-    /**
-     * Feature name of the feature flag
-     */
-    val feature: Feature
+  /** Feature name of the feature flag */
+  val feature: Feature
 
-    /**
-     * Unique primary key for the entity the flag should be evaluated against.
-     */
-    val key: String
+  /** Unique primary key for the entity the flag should be evaluated against. */
+  val key: String
 
-    /**
-     * The attributes of this feature flag, provided during flag evaluation
-     */
-    val attributes: Attributes
-      get() = Attributes()
+  /** The attributes of this feature flag, provided during flag evaluation */
+  val attributes: Attributes
+    get() = Attributes()
 }
 
 interface StringFeatureFlag : FeatureFlag<String>
+
 interface BooleanFeatureFlag : FeatureFlag<Boolean>
+
 interface IntFeatureFlag : FeatureFlag<Int>
+
 interface DoubleFeatureFlag : FeatureFlag<Double>
 
-/**
- * A Enumeration feature flag, when evaluated returns [T]
- */
+/** A Enumeration feature flag, when evaluated returns [T] */
 interface EnumFeatureFlag<T : Enum<T>> : FeatureFlag<T> {
-    val returnType: Class<T>
+  val returnType: Class<T>
 }
 
 /**
@@ -36,7 +31,6 @@ interface EnumFeatureFlag<T : Enum<T>> : FeatureFlag<T> {
  * It is expected that a Moshi type adapter is registered for [T].
  *
  * Example definition:
- *
  * ```
  * // Step 1: Define the object we expect to get from the JSON flag
  * data class PaymentConfiguration(
@@ -60,5 +54,5 @@ interface EnumFeatureFlag<T : Enum<T>> : FeatureFlag<T> {
  * ```
  */
 interface JsonFeatureFlag<T : Any> : FeatureFlag<T> {
-    val returnType: Class<out T>
+  val returnType: Class<out T>
 }

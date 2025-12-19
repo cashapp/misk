@@ -6,6 +6,8 @@ import com.google.inject.Key
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import helpers.protos.Dinosaur
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.clustering.Cluster
 import misk.clustering.ClusterWatch
@@ -34,8 +36,6 @@ import org.junit.jupiter.api.Test
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 internal class TypedPeerHttpClientTest {
@@ -54,9 +54,8 @@ internal class TypedPeerHttpClientTest {
 
   @Test
   fun useTypedClient() {
-    val clientFactory = clientInjector.getInstance(
-      Key.get(object : TypeLiteral<TypedPeerClientFactory<ReturnADinosaur>>() {})
-    )
+    val clientFactory =
+      clientInjector.getInstance(Key.get(object : TypeLiteral<TypedPeerClientFactory<ReturnADinosaur>>() {}))
 
     val snapshot = cluster.snapshot
     val client: ReturnADinosaur = clientFactory.client(snapshot.self)
@@ -68,21 +67,18 @@ internal class TypedPeerHttpClientTest {
   }
 
   interface ReturnADinosaur {
-    @POST("/cooldinos")
-    fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
+    @POST("/cooldinos") fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
   }
 
   class ReturnADinosaurAction @Inject constructor() : WebAction {
     @Post("/cooldinos")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun getDinosaur(@RequestBody request: Dinosaur):
-      Dinosaur = request.newBuilder().name("super${request.name}").build()
+    fun getDinosaur(@RequestBody request: Dinosaur): Dinosaur =
+      request.newBuilder().name("super${request.name}").build()
   }
 
-  class FakeCluster @Inject constructor(
-    memberIp: String = "127.0.0.1"
-  ) : Cluster {
+  class FakeCluster @Inject constructor(memberIp: String = "127.0.0.1") : Cluster {
 
     override val snapshot: Cluster.Snapshot
 
@@ -92,12 +88,8 @@ internal class TypedPeerHttpClientTest {
 
       resourceMapper.setDefaultMapping(self)
 
-      snapshot = Cluster.Snapshot(
-        self = self,
-        readyMembers = setOf(),
-        selfReady = true,
-        resourceMapper = resourceMapper
-      )
+      snapshot =
+        Cluster.Snapshot(self = self, readyMembers = setOf(), selfReady = true, resourceMapper = resourceMapper)
     }
 
     override fun watch(watch: ClusterWatch) {
@@ -114,19 +106,19 @@ internal class TypedPeerHttpClientTest {
             port = 0,
             idle_timeout = 500000,
             host = "127.0.0.1",
-            ssl = WebSslConfig(
-              0,
-              cert_store = CertStoreConfig(
-                resource = "classpath:/ssl/server_cert_key_combo.pem",
-                passphrase = "serverpassword",
-                format = SslLoader.FORMAT_PEM
+            ssl =
+              WebSslConfig(
+                0,
+                cert_store =
+                  CertStoreConfig(
+                    resource = "classpath:/ssl/server_cert_key_combo.pem",
+                    passphrase = "serverpassword",
+                    format = SslLoader.FORMAT_PEM,
+                  ),
+                trust_store =
+                  TrustStoreConfig(resource = "classpath:/ssl/client_cert.pem", format = SslLoader.FORMAT_PEM),
+                mutual_auth = WebSslConfig.MutualAuth.REQUIRED,
               ),
-              trust_store = TrustStoreConfig(
-                resource = "classpath:/ssl/client_cert.pem",
-                format = SslLoader.FORMAT_PEM
-              ),
-              mutual_auth = WebSslConfig.MutualAuth.REQUIRED
-            )
           )
         )
       )
@@ -154,24 +146,27 @@ internal class TypedPeerHttpClientTest {
     @Singleton
     fun provideHttpClientConfig(): HttpClientsConfig {
       return HttpClientsConfig(
-        endpoints = mapOf(
-          "Server" to HttpClientEndpointConfig(
-            url = jetty.httpsServerUrl!!.toString(),
-            clientConfig = HttpClientConfig(
-              ssl = HttpClientSSLConfig(
-                cert_store = CertStoreConfig(
-                  resource = "classpath:/ssl/client_cert_key_combo.pem",
-                  passphrase = "clientpassword",
-                  format = SslLoader.FORMAT_PEM
-                ),
-                trust_store = TrustStoreConfig(
-                  resource = "classpath:/ssl/server_cert.pem",
-                  format = SslLoader.FORMAT_PEM
-                )
+        endpoints =
+          mapOf(
+            "Server" to
+              HttpClientEndpointConfig(
+                url = jetty.httpsServerUrl!!.toString(),
+                clientConfig =
+                  HttpClientConfig(
+                    ssl =
+                      HttpClientSSLConfig(
+                        cert_store =
+                          CertStoreConfig(
+                            resource = "classpath:/ssl/client_cert_key_combo.pem",
+                            passphrase = "clientpassword",
+                            format = SslLoader.FORMAT_PEM,
+                          ),
+                        trust_store =
+                          TrustStoreConfig(resource = "classpath:/ssl/server_cert.pem", format = SslLoader.FORMAT_PEM),
+                      )
+                  ),
               )
-            )
           )
-        )
       )
     }
   }

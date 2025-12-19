@@ -33,8 +33,7 @@ import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
 class MetricsInterceptorNoSummaryTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
   val httpClient = OkHttpClient()
 
   @Inject private lateinit var metricsInterceptorFactory: MetricsInterceptor.Factory
@@ -77,18 +76,10 @@ class MetricsInterceptorNoSummaryTest {
     }
   }
 
-  fun invoke(
-    desiredStatusCode: Int,
-    service: String? = null,
-    user: String? = null
-  ): okhttp3.Response {
-    val url = jettyService.httpServerUrl.newBuilder()
-      .encodedPath("/call/$desiredStatusCode")
-      .build()
+  fun invoke(desiredStatusCode: Int, service: String? = null, user: String? = null): okhttp3.Response {
+    val url = jettyService.httpServerUrl.newBuilder().encodedPath("/call/$desiredStatusCode").build()
 
-    val request = okhttp3.Request.Builder()
-      .url(url)
-      .get()
+    val request = okhttp3.Request.Builder().url(url).get()
     service?.let { request.addHeader(SERVICE_HEADER, it) }
     user?.let { request.addHeader(USER_HEADER, it) }
     return httpClient.newCall(request.build()).execute().also {

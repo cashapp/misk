@@ -21,10 +21,10 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":misk-jobqueue"))
   api(project(":wisp:wisp-deployment"))
+
   implementation(libs.loggingApi)
   implementation(libs.moshiCore)
   implementation(libs.openTracing)
-  implementation(libs.openTracingDatadog)
   implementation(libs.prometheusClient)
   implementation(libs.slf4jApi)
   implementation(project(":misk-api"))
@@ -36,6 +36,9 @@ dependencies {
   implementation(project(":misk-metrics"))
   implementation(project(":misk-service"))
   implementation(project(":misk-transactional-jobqueue"))
+
+  runtimeOnly(libs.openTracingDatadog)
+
   testImplementation(libs.assertj)
   testImplementation(libs.awaitility)
   testImplementation(libs.dockerApi)
@@ -54,6 +57,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGfm")),
   )
 }

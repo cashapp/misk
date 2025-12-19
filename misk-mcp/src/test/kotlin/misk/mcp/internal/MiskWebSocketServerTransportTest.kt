@@ -8,14 +8,14 @@ import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCNotification
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCRequest
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCResponse
-import kotlinx.coroutines.test.runTest
-import misk.mcp.McpJson
-import misk.web.HttpCall
-import misk.web.actions.WebSocket
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
+import misk.mcp.McpJson
+import misk.web.HttpCall
+import misk.web.actions.WebSocket
 
 class MiskWebSocketServerTransportTest {
 
@@ -29,29 +29,34 @@ class MiskWebSocketServerTransportTest {
     return MiskWebSocketServerTransport(httpCall, webSocket)
   }
 
-  private val testRequest = McpJson.decodeFromString<JSONRPCRequest>(
-    """
+  private val testRequest =
+    McpJson.decodeFromString<JSONRPCRequest>(
+      """
       {
         "jsonrpc": "2.0",
         "id": "test-123",
         "method": "tools/list",
         "params": {}
       }
-    """.trimIndent(),
-  )
+      """
+        .trimIndent()
+    )
 
-  private val testNotification = McpJson.decodeFromString<JSONRPCNotification>(
-    """
+  private val testNotification =
+    McpJson.decodeFromString<JSONRPCNotification>(
+      """
       {
         "jsonrpc": "2.0",
         "method": "notifications/initialized",
         "params": {}
       }
-    """.trimIndent(),
-  )
+      """
+        .trimIndent()
+    )
 
-  private val testResponse = McpJson.decodeFromString<JSONRPCResponse>(
-    """
+  private val testResponse =
+    McpJson.decodeFromString<JSONRPCResponse>(
+      """
       {
         "jsonrpc": "2.0",
         "id": "test-123",
@@ -59,8 +64,9 @@ class MiskWebSocketServerTransportTest {
           "tools": []
         }
       }
-    """.trimIndent(),
-  )
+      """
+        .trimIndent()
+    )
 
   @Test
   fun `start() initializes transport and validates subprotocol`() = runTest {
@@ -70,9 +76,7 @@ class MiskWebSocketServerTransportTest {
     every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns "mcp"
 
     // Verify initial state - transport should not be initialized
-    assertFailsWith<IllegalStateException> {
-      transport.send(testRequest)
-    }
+    assertFailsWith<IllegalStateException> { transport.send(testRequest) }
 
     // Call start() and verify it succeeds
     transport.start()
@@ -90,9 +94,7 @@ class MiskWebSocketServerTransportTest {
     // Mock invalid subprotocol header BEFORE calling buildTransport
     every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns "invalid"
 
-    assertFailsWith<IllegalArgumentException> {
-      MiskWebSocketServerTransport(httpCall, webSocket)
-    }
+    assertFailsWith<IllegalArgumentException> { MiskWebSocketServerTransport(httpCall, webSocket) }
   }
 
   @Test
@@ -100,9 +102,7 @@ class MiskWebSocketServerTransportTest {
     // Mock missing subprotocol header BEFORE calling buildTransport
     every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns null
 
-    assertFailsWith<IllegalArgumentException> {
-      MiskWebSocketServerTransport(httpCall, webSocket)
-    }
+    assertFailsWith<IllegalArgumentException> { MiskWebSocketServerTransport(httpCall, webSocket) }
   }
 
   @Test
@@ -114,18 +114,14 @@ class MiskWebSocketServerTransportTest {
 
     transport.start()
 
-    assertFailsWith<IllegalStateException> {
-      transport.start()
-    }
+    assertFailsWith<IllegalStateException> { transport.start() }
   }
 
   @Test
   fun `send() throws error when not initialized`() = runTest {
     val transport = buildTransport()
 
-    assertFailsWith<IllegalStateException> {
-      transport.send(testRequest)
-    }
+    assertFailsWith<IllegalStateException> { transport.send(testRequest) }
   }
 
   @Test
@@ -166,9 +162,7 @@ class MiskWebSocketServerTransportTest {
     verify { webSocket.close(1000, null) }
 
     // Verify we can't send after closing
-    assertFailsWith<IllegalStateException> {
-      transport.send(testRequest)
-    }
+    assertFailsWith<IllegalStateException> { transport.send(testRequest) }
   }
 
   @Test
@@ -211,9 +205,7 @@ class MiskWebSocketServerTransportTest {
     transport.start()
 
     var messageReceived: JSONRPCMessage? = null
-    transport.onMessage { message ->
-      messageReceived = message
-    }
+    transport.onMessage { message -> messageReceived = message }
 
     transport.handleMessage(testRequest)
 
@@ -234,9 +226,7 @@ class MiskWebSocketServerTransportTest {
     transport.onMessage { throw testException }
     transport.onError { error -> errorReceived = error }
 
-    assertFailsWith<RuntimeException> {
-      transport.handleMessage(testRequest)
-    }
+    assertFailsWith<RuntimeException> { transport.handleMessage(testRequest) }
 
     assertEquals(testException, errorReceived)
   }
@@ -250,9 +240,7 @@ class MiskWebSocketServerTransportTest {
     transport.start()
 
     val messagesReceived = mutableListOf<JSONRPCMessage>()
-    transport.onMessage { message ->
-      messagesReceived.add(message)
-    }
+    transport.onMessage { message -> messagesReceived.add(message) }
 
     // Handle different message types
     transport.handleMessage(testRequest)
@@ -300,9 +288,7 @@ class MiskWebSocketServerTransportTest {
     every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns "mcp"
 
     // Initially not connected
-    assertFailsWith<IllegalStateException> {
-      transport.send(testRequest)
-    }
+    assertFailsWith<IllegalStateException> { transport.send(testRequest) }
 
     // After start, should be connected
     transport.start()
@@ -311,9 +297,7 @@ class MiskWebSocketServerTransportTest {
 
     // After close, should not be connected
     transport.close()
-    assertFailsWith<IllegalStateException> {
-      transport.send(testRequest)
-    }
+    assertFailsWith<IllegalStateException> { transport.send(testRequest) }
   }
 
   @Test
@@ -325,15 +309,11 @@ class MiskWebSocketServerTransportTest {
 
     // Test case sensitivity - should fail during construction
     every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns "MCP"
-    assertFailsWith<IllegalArgumentException> {
-      MiskWebSocketServerTransport(httpCall, webSocket)
-    }
+    assertFailsWith<IllegalArgumentException> { MiskWebSocketServerTransport(httpCall, webSocket) }
 
     // Test with extra whitespace - should fail during construction
     every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns " mcp "
-    assertFailsWith<IllegalArgumentException> {
-      MiskWebSocketServerTransport(httpCall, webSocket)
-    }
+    assertFailsWith<IllegalArgumentException> { MiskWebSocketServerTransport(httpCall, webSocket) }
   }
 
   @Test
@@ -384,16 +364,18 @@ class MiskWebSocketServerTransportTest {
 
     // Test that multiple send operations work
     repeat(10) { i ->
-      val request = McpJson.decodeFromString<JSONRPCRequest>(
-        """
+      val request =
+        McpJson.decodeFromString<JSONRPCRequest>(
+          """
           {
             "jsonrpc": "2.0",
             "id": "test-$i",
             "method": "tools/list",
             "params": {}
           }
-        """.trimIndent(),
-      )
+        """
+            .trimIndent()
+        )
       transport.send(request)
     }
 
@@ -416,9 +398,7 @@ class MiskWebSocketServerTransportTest {
     transport.onError { error -> errorCaught = error }
 
     // Verify the exception is both caught by onError and re-thrown
-    val thrownException = assertFailsWith<IllegalArgumentException> {
-      transport.handleMessage(testRequest)
-    }
+    val thrownException = assertFailsWith<IllegalArgumentException> { transport.handleMessage(testRequest) }
 
     assertEquals(customException, thrownException)
     assertEquals(customException, errorCaught)
@@ -487,9 +467,7 @@ class MiskWebSocketServerTransportTest {
     every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns null
 
     // Attempt to create transport - this should fail during init
-    assertFailsWith<IllegalArgumentException> {
-      MiskWebSocketServerTransport(httpCall, webSocket)
-    }
+    assertFailsWith<IllegalArgumentException> { MiskWebSocketServerTransport(httpCall, webSocket) }
 
     // Verify that the response header was NOT set before the exception was thrown
     verify(exactly = 0) { httpCall.setResponseHeader("Sec-WebSocket-Protocol", any()) }
@@ -501,9 +479,7 @@ class MiskWebSocketServerTransportTest {
     every { httpCall.requestHeaders["Sec-WebSocket-Protocol"] } returns "invalid"
 
     // Attempt to create transport - this should fail during init
-    assertFailsWith<IllegalArgumentException> {
-      MiskWebSocketServerTransport(httpCall, webSocket)
-    }
+    assertFailsWith<IllegalArgumentException> { MiskWebSocketServerTransport(httpCall, webSocket) }
 
     // Verify that the response header was NOT set before the exception was thrown
     verify(exactly = 0) { httpCall.setResponseHeader("Sec-WebSocket-Protocol", any()) }

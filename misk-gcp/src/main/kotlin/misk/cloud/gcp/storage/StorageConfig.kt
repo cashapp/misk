@@ -4,10 +4,12 @@ import misk.cloud.gcp.TransportConfig
 import misk.config.Config
 
 /** Configuration for talking to Google Cloud Storage */
-data class StorageConfig @JvmOverloads constructor(
+data class StorageConfig
+@JvmOverloads
+constructor(
   val use_local_storage: Boolean = false,
   val local_storage: LocalStorageConfig? = null,
-  val transport: TransportConfig = TransportConfig()
+  val transport: TransportConfig = TransportConfig(),
 ) : Config
 
 /** Configuration for local (emulated) storage */

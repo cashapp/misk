@@ -29,7 +29,8 @@ class TracingLoggingEnhancerTest {
     tracer.reset()
   }
 
-  @Test fun enhanceDatadogTracer() {
+  @Test
+  fun enhanceDatadogTracer() {
     val tracer = GlobalTracer.get()
     tracer.traceWithSpan("test span") {
       val logEntryBuilder = LogEntry.newBuilder(Payload.StringPayload.of("payload"))
@@ -37,19 +38,15 @@ class TracingLoggingEnhancerTest {
       TracingLoggingEnhancer().enhanceLogEntry(tracer, logEntryBuilder)
 
       val logEntry = logEntryBuilder.build()
-      assertThat(logEntry.labels).isEqualTo(
-        mapOf(
-          "appengine.googleapis.com/trace_id" to
-            tracer.activeSpan().context().toTraceId()
-        )
-      )
+      assertThat(logEntry.labels)
+        .isEqualTo(mapOf("appengine.googleapis.com/trace_id" to tracer.activeSpan().context().toTraceId()))
     }
   }
 
-  @Test fun noopTracer() {
+  @Test
+  fun noopTracer() {
     val logEntryBuilder = LogEntry.newBuilder(Payload.StringPayload.of("payload"))
-    TracingLoggingEnhancer()
-      .enhanceLogEntry(NoopTracerFactory.create(), logEntryBuilder)
+    TracingLoggingEnhancer().enhanceLogEntry(NoopTracerFactory.create(), logEntryBuilder)
     val logEntry = logEntryBuilder.build()
 
     assertThat(logEntry.labels).isEmpty()

@@ -1,6 +1,14 @@
 package misk.hibernate
 
+import jakarta.inject.Inject
+import jakarta.inject.Qualifier
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.Table
+import kotlin.test.assertNull
 import misk.MiskTestingServiceModule
+import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
@@ -9,20 +17,11 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import misk.config.Config
 import wisp.deployment.TESTING
-import jakarta.inject.Inject
-import jakarta.inject.Qualifier
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Table
-import kotlin.test.assertNull
 
 @MiskTest(startService = true)
 class JsonColumnTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject @WillFerrellDb lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
@@ -31,17 +30,16 @@ class JsonColumnTest {
   fun happyPath() {
     transacter.transaction { session ->
       session.save(
-        DbWillFerrellMovie(
-          "Anchorman", listOf("Vince Vaughn", "Christina Applegate"),
-          Setting("San Diego", "1970")
-        )
+        DbWillFerrellMovie("Anchorman", listOf("Vince Vaughn", "Christina Applegate"), Setting("San Diego", "1970"))
       )
     }
     transacter.transaction { session ->
-      val movie = queryFactory.newQuery(WillFerrellMovieQuery::class)
-        .allowTableScan()
-        .name("Anchorman")
-        .nameAndCameosAndSetting(session)[0]
+      val movie =
+        queryFactory
+          .newQuery(WillFerrellMovieQuery::class)
+          .allowTableScan()
+          .name("Anchorman")
+          .nameAndCameosAndSetting(session)[0]
       assertThat(movie.name).isEqualTo("Anchorman")
       assertThat(movie.cameos).isEqualTo(listOf("Vince Vaughn", "Christina Applegate"))
       assertThat(movie.setting).isEqualTo(Setting("San Diego", "1970"))
@@ -56,12 +54,14 @@ class JsonColumnTest {
       val config = MiskConfig.load<RootConfig>("jsoncolumn", TESTING)
       install(HibernateTestingModule(WillFerrellDb::class))
       install(HibernateModule(WillFerrellDb::class, config.data_source))
-      install(object : HibernateEntityModule(WillFerrellDb::class) {
-        override fun configureHibernate() {
-          addEntities(DbWillFerrellMovie::class)
-          addEntities(DbWillFerrellMovieLegacy::class)
+      install(
+        object : HibernateEntityModule(WillFerrellDb::class) {
+          override fun configureHibernate() {
+            addEntities(DbWillFerrellMovie::class)
+            addEntities(DbWillFerrellMovieLegacy::class)
+          }
         }
-      })
+      )
     }
   }
 
@@ -71,10 +71,12 @@ class JsonColumnTest {
       session.save(DbWillFerrellMovie("Anchorman", listOf("Vince Vaughn", "Christina Applegate")))
     }
     transacter.transaction { session ->
-      val movie = queryFactory.newQuery(WillFerrellMovieQuery::class)
-        .allowTableScan()
-        .name("Anchorman")
-        .nameAndCameosAndSetting(session)[0]
+      val movie =
+        queryFactory
+          .newQuery(WillFerrellMovieQuery::class)
+          .allowTableScan()
+          .name("Anchorman")
+          .nameAndCameosAndSetting(session)[0]
       assertThat(movie.name).isEqualTo("Anchorman")
       assertThat(movie.cameos).isEqualTo(listOf("Vince Vaughn", "Christina Applegate"))
       assertNull(movie.setting)
@@ -85,48 +87,36 @@ class JsonColumnTest {
   fun rollbackAdditiveChangesTest() {
     transacter.transaction { session ->
       session.save(
-        DbWillFerrellMovie(
-          "Anchorman",
-          listOf("Vince Vaughn", "Christina Applegate"),
-          Setting("San Diego", "1970")
-        )
+        DbWillFerrellMovie("Anchorman", listOf("Vince Vaughn", "Christina Applegate"), Setting("San Diego", "1970"))
       )
     }
     transacter.transaction { session ->
-      val movie = queryFactory.newQuery(WillFerrellMovieLegacyQuery::class)
-        .allowTableScan()
-        .name("Anchorman")
-        .nameAndCameosAndSetting(session)[0]
+      val movie =
+        queryFactory
+          .newQuery(WillFerrellMovieLegacyQuery::class)
+          .allowTableScan()
+          .name("Anchorman")
+          .nameAndCameosAndSetting(session)[0]
       assertThat(movie.name).isEqualTo("Anchorman")
       assertThat(movie.cameos).isEqualTo(listOf("Vince Vaughn", "Christina Applegate"))
       assertThat(movie.setting).isEqualTo(SettingLegacy("San Diego"))
-
     }
   }
 
-  @Qualifier
-  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-  annotation class WillFerrellDb
+  @Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) annotation class WillFerrellDb
 
   data class RootConfig(val data_source: DataSourceConfig) : Config
 
   @Entity
   @Table(name = "will_ferrell_movies")
   class DbWillFerrellMovie : DbUnsharded<DbWillFerrellMovie> {
-    @javax.persistence.Id
-    @GeneratedValue
-    override lateinit var id: Id<DbWillFerrellMovie>
+    @javax.persistence.Id @GeneratedValue override lateinit var id: Id<DbWillFerrellMovie>
 
-    @Column(nullable = false)
-    lateinit var name: String
+    @Column(nullable = false) lateinit var name: String
 
-    @Column(nullable = false)
-    @JsonColumn
-    lateinit var cameos: List<String>
+    @Column(nullable = false) @JsonColumn lateinit var cameos: List<String>
 
-    @Column
-    @JsonColumn
-    var setting: Setting? = null
+    @Column @JsonColumn var setting: Setting? = null
 
     constructor(name: String, cameos: List<String>, setting: Setting? = null) {
       this.name = name
@@ -138,20 +128,13 @@ class JsonColumnTest {
   @Entity
   @Table(name = "will_ferrell_movies")
   class DbWillFerrellMovieLegacy : DbUnsharded<DbWillFerrellMovieLegacy> {
-    @javax.persistence.Id
-    @GeneratedValue
-    override lateinit var id: Id<DbWillFerrellMovieLegacy>
+    @javax.persistence.Id @GeneratedValue override lateinit var id: Id<DbWillFerrellMovieLegacy>
 
-    @Column(nullable = false)
-    lateinit var name: String
+    @Column(nullable = false) lateinit var name: String
 
-    @Column(nullable = false)
-    @JsonColumn
-    lateinit var cameos: List<String>
+    @Column(nullable = false) @JsonColumn lateinit var cameos: List<String>
 
-    @Column
-    @JsonColumn
-    var setting: SettingLegacy? = null
+    @Column @JsonColumn var setting: SettingLegacy? = null
 
     constructor(name: String, cameos: List<String>, setting: SettingLegacy? = null) {
       this.name = name
@@ -161,33 +144,30 @@ class JsonColumnTest {
   }
 
   data class Setting(val place: String, val year: String)
+
   data class SettingLegacy(val place: String)
 
   data class NameAndCameos(
     @Property("name") val name: String,
     @Property("cameos") val cameos: List<String>,
-    @Property("setting") val setting: Setting?
+    @Property("setting") val setting: Setting?,
   ) : Projection
 
   data class NameAndCameosLegacy(
     @Property("name") val name: String,
     @Property("cameos") val cameos: List<String>,
-    @Property("setting") val setting: SettingLegacy?
+    @Property("setting") val setting: SettingLegacy?,
   ) : Projection
 
   interface WillFerrellMovieQuery : Query<DbWillFerrellMovie> {
-    @Constraint(path = "name")
-    fun name(name: String): WillFerrellMovieQuery
+    @Constraint(path = "name") fun name(name: String): WillFerrellMovieQuery
 
-    @Select
-    fun nameAndCameosAndSetting(session: Session): List<NameAndCameos>
+    @Select fun nameAndCameosAndSetting(session: Session): List<NameAndCameos>
   }
 
   interface WillFerrellMovieLegacyQuery : Query<DbWillFerrellMovieLegacy> {
-    @Constraint(path = "name")
-    fun name(name: String): WillFerrellMovieLegacyQuery
+    @Constraint(path = "name") fun name(name: String): WillFerrellMovieLegacyQuery
 
-    @Select
-    fun nameAndCameosAndSetting(session: Session): List<NameAndCameosLegacy>
+    @Select fun nameAndCameosAndSetting(session: Session): List<NameAndCameosLegacy>
   }
 }

@@ -2,30 +2,32 @@ package misk.web.actions
 
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
+import com.google.inject.Provider
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.time.Clock
+import java.time.Instant
 import misk.DelegatingService
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
+import misk.logging.getLogger
 import misk.security.authz.Unauthenticated
 import misk.web.AvailableWhenDegraded
 import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
-import misk.logging.getLogger
-import java.time.Clock
-import java.time.Instant
-import jakarta.inject.Inject
-import com.google.inject.Provider
-import jakarta.inject.Singleton
 
 /**
- * Returns the current status of the service for programmatic tools that want to
- * query for the current state of the server
+ * Returns the current status of the service for programmatic tools that want to query for the current state of the
+ * server
  */
 @Singleton
-class StatusAction @Inject internal constructor(
+class StatusAction
+@Inject
+internal constructor(
   private val serviceManagerProvider: Provider<ServiceManager>,
   private val clock: Clock,
-  @JvmSuppressWildcards private val healthChecks: List<HealthCheck>
+  @JvmSuppressWildcards private val healthChecks: List<HealthCheck>,
 ) : WebAction {
   private var lastUnhealthyAt: Instant? = null
 
@@ -35,12 +37,15 @@ class StatusAction @Inject internal constructor(
   @AvailableWhenDegraded
   fun getStatus(): ServerStatus {
     val services = serviceManagerProvider.get().servicesByState().values().asList()
-    val serviceStatus = services.map {
-      when (it) {
-        is DelegatingService -> it.service.javaClass.simpleName to it.state()
-        else -> it.javaClass.simpleName to it.state()
-      }
-    }.toMap()
+    val serviceStatus =
+      services
+        .map {
+          when (it) {
+            is DelegatingService -> it.service.javaClass.simpleName to it.state()
+            else -> it.javaClass.simpleName to it.state()
+          }
+        }
+        .toMap()
     val healthCheckStatus = healthChecks.map { it.javaClass.simpleName to it.status() }.toMap()
     maybeLog(healthCheckStatus)
     return ServerStatus(serviceStatus, healthCheckStatus)
@@ -58,7 +63,7 @@ class StatusAction @Inject internal constructor(
 
   data class ServerStatus(
     val serviceStatus: Map<String, Service.State>,
-    val healthCheckStatus: Map<String, HealthStatus>
+    val healthCheckStatus: Map<String, HealthStatus>,
   )
 
   companion object {

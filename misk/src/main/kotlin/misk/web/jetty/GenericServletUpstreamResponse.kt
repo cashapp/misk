@@ -1,18 +1,17 @@
 package misk.web.jetty
 
+import javax.servlet.http.HttpServletResponse
 import misk.web.ServletHttpCall
 import misk.web.actions.WebSocketListener
 import okhttp3.Headers
 import okhttp3.Headers.Companion.headersOf
-import javax.servlet.http.HttpServletResponse
 
 /**
- * A generic implementation of ServletHttpCall.UpstreamResponse that works with
- * standard HttpServletResponse instead of requiring Jetty's specific Response class.
+ * A generic implementation of ServletHttpCall.UpstreamResponse that works with standard HttpServletResponse instead of
+ * requiring Jetty's specific Response class.
  */
-internal class GenericServletUpstreamResponse(
-  private val response: HttpServletResponse
-) : ServletHttpCall.UpstreamResponse {
+internal class GenericServletUpstreamResponse(private val response: HttpServletResponse) :
+  ServletHttpCall.UpstreamResponse {
   private var sendTrailers = false
   private var trailers = headersOf()
 
@@ -49,9 +48,7 @@ internal class GenericServletUpstreamResponse(
 
   override fun setTrailer(name: String, value: String) {
     check(sendTrailers)
-    trailers = trailers.newBuilder()
-      .set(name, value)
-      .build()
+    trailers = trailers.newBuilder().set(name, value).build()
   }
 
   override fun initWebSocketListener(webSocketListener: WebSocketListener) =
