@@ -4,37 +4,6 @@ import com.google.inject.Injector
 import com.google.inject.Provider
 import jakarta.inject.Inject
 import kotlin.reflect.KClass
-import misk.annotation.ExperimentalMiskApi
-
-/**
- * This class should be extended by modules that want to contribute tasks to which involve async processing. For
- * example, background jobs, job queues, eventing, message pub/sub.
- *
- * At service build time, these modules can be optionally filtered out before the Guice injector is created, in cases
- * where async processing is not desired, such as in separated main and jobs deployments.
- */
-@Deprecated(message = "Use AsyncSwitch directly or conditionalOn ServiceModule or ConditionalProvider.")
-open class AsyncKAbstractModule : AsyncModule, KAbstractModule() {
-  /**
-   * Returns a module that would be installed when async tasks are disabled. By default, this is a module that calls
-   * [configureWhenAsyncDisabled]. Subclasses can override this method to provide a different module if needed.
-   */
-  @ExperimentalMiskApi override fun moduleWhenAsyncDisabled(): KAbstractModule? = null
-}
-
-/**
- * This interface should be implemented by modules that want to contribute tasks which involve async processing. For
- * example, background jobs, job queues, eventing, message pub/sub.
- *
- * At service build time, these modules can be optionally filtered out before the Guice injector is created, in cases
- * where async processing is not desired, such as in separated main and jobs deployments.
- */
-@Deprecated("Use AsyncSwitch directly or conditionalOn ServiceModule or ConditionalProvider.")
-interface AsyncModule {
-  @ExperimentalMiskApi
-  @Deprecated("Use AsyncSwitch directly or conditionalOn ServiceModule or ConditionalProvider.")
-  fun moduleWhenAsyncDisabled(): KAbstractModule? = null
-}
 
 /** A simple abstraction which can be used to enable or disable parts of the dependency injection graph. */
 interface Switch {
@@ -68,6 +37,7 @@ class DefaultAsyncSwitchModule : KInstallOnceModule() {
   }
 }
 
+/** Uses the result from a provided switch to chooes between enabled and disabled instances for Guice bindings. */
 inline fun <
   reified S : Switch,
   reified Output : Any,
@@ -90,6 +60,7 @@ inline fun <
     transformer = transformer as (Any?) -> Output,
   )
 
+/** Uses the result from a provided switch to chooes between enabled and disabled instances for Guice bindings. */
 class ConditionalProvider<S : Switch, Output : Any, Input>
 @JvmOverloads
 constructor(
@@ -135,6 +106,7 @@ constructor(
   }
 }
 
+/** Uses the result from a provided switch to chooes between enabled and disabled types for Guice bindings. */
 inline fun <
   reified S : Switch,
   reified Output : Any,
@@ -152,6 +124,7 @@ inline fun <
     transformer,
   )
 
+/** Uses the result from a provided switch to chooes between enabled and disabled types for Guice bindings. */
 inline fun <
   reified S : Switch,
   reified Output : Any,
@@ -160,6 +133,7 @@ inline fun <
 > ConditionalTypedProvider(switchKey: String) =
   ConditionalTypedProvider(switchKey, S::class, Output::class, Output::class, Enabled::class, Disabled::class)
 
+/** Uses the result from a provided switch to chooes between enabled and disabled types for Guice bindings. */
 class ConditionalTypedProvider<S : Switch, Output : Any, Input : Any, Enabled : Input, Disabled : Input>
 @JvmOverloads
 constructor(
