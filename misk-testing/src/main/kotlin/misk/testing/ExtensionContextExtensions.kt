@@ -21,8 +21,8 @@ inline fun <reified T> ExtensionContext.retrieve(name: String): T {
 }
 
 /**
- * Retrieve value of [storeKey] from the [ExtensionContext] store. If no value exists, compute using
- * [creator], save in store and return the new value.
+ * Retrieve value of [storeKey] from the [ExtensionContext] store. If no value exists, compute using [creator], save in
+ * store and return the new value.
  */
 internal inline fun <reified T> ExtensionContext.getFromStoreOrCompute(
   storeKey: String,
@@ -43,16 +43,12 @@ internal inline fun <reified A : Annotation, T> ExtensionContext.fieldsAnnotated
   fieldsAnnotatedBy(A::class.java)
 
 /** Find [annotation]-annotated [T]s on the outermost test class and recursively on base classes. */
-private fun <T> ExtensionContext.fieldsAnnotatedBy(
-  annotation: Class<out Annotation>
-): Iterable<T> {
+private fun <T> ExtensionContext.fieldsAnnotatedBy(annotation: Class<out Annotation>): Iterable<T> {
   val rootRequiredTestInstance = rootRequiredTestInstance
   @Suppress("UNCHECKED_CAST")
   return generateSequence(rootRequiredTestInstance.javaClass) { c -> c.superclass }
     .flatMap { it.declaredFields.asSequence() }
-    .filter {
-      it.isAnnotationPresent(annotation)
-    }
+    .filter { it.isAnnotationPresent(annotation) }
     .map {
       it.isAccessible = true
       it.get(rootRequiredTestInstance) as T

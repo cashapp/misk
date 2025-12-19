@@ -6,17 +6,13 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbParti
 
 @DynamoDbBean
 internal class DyClusterMember {
-  @get:DynamoDbPartitionKey
-  var name: String? = null
+  @get:DynamoDbPartitionKey var name: String? = null
 
   // Stored as epoch ms
-  @get:DynamoDbAttribute("updated_at")
-  var updated_at: Long? = null
+  @get:DynamoDbAttribute("updated_at") var updated_at: Long? = null
 
-  @get:DynamoDbAttribute("pod_name")
-  var pod_name: String? = null
+  @get:DynamoDbAttribute("pod_name") var pod_name: String? = null
 
   // Stored as epoch sec
-  @get:DynamoDbAttribute("expires_at")
-  var expires_at: Long? = null
+  @get:DynamoDbAttribute("expires_at") var expires_at: Long? = null
 }

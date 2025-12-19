@@ -2,29 +2,30 @@ package misk.hibernate
 
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
+import com.google.inject.Provider
+import java.util.Collections
+import kotlin.reflect.KClass
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
-import java.util.Collections
-import com.google.inject.Provider
-import kotlin.reflect.KClass
 
-internal class SchemaValidatorService internal constructor(
+internal class SchemaValidatorService
+internal constructor(
   private val qualifier: KClass<out Annotation>,
   private val sessionFactoryServiceProvider: Provider<SessionFactoryService>,
-  private val transacterProvider: Provider<Transacter>
+  private val transacterProvider: Provider<Transacter>,
 ) : AbstractIdleService(), HealthCheck {
   private lateinit var report: ValidationReport
 
   override fun startUp() {
-    report = reports.computeIfAbsent(qualifier) {
-      val validator = SchemaValidator()
-      val sessionFactoryService = sessionFactoryServiceProvider.get()
-      validator.validate(transacterProvider.get(), sessionFactoryService.hibernateMetadata)
-    }
+    report =
+      reports.computeIfAbsent(qualifier) {
+        val validator = SchemaValidator()
+        val sessionFactoryService = sessionFactoryServiceProvider.get()
+        validator.validate(transacterProvider.get(), sessionFactoryService.hibernateMetadata)
+      }
   }
 
-  override fun shutDown() {
-  }
+  override fun shutDown() {}
 
   override fun status(): HealthStatus {
     val state = state()

@@ -50,18 +50,14 @@ class TestWebActionModule : KAbstractModule() {
     install(WebActionModule.create<AllowAnyUserAccessAction>())
     install(WebActionModule.create<AuthenticatedServiceWithCustomAnnotations>())
 
-    multibind<AccessAnnotationEntry>().toInstance(
-      AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments"))
-    )
-    multibind<AccessAnnotationEntry>().toInstance(
-      AccessAnnotationEntry<CustomServiceAccess2>(services = listOf("some_other_service"))
-    )
-    multibind<AccessAnnotationEntry>().toInstance(
-      AccessAnnotationEntry<CustomCapabilityAccess>(capabilities = listOf("admin"))
-    )
-    multibind<AccessAnnotationEntry>().toInstance(
-      AccessAnnotationEntry<CustomCapabilityAccess2>(capabilities = listOf("some_other_group"))
-    )
+    multibind<AccessAnnotationEntry>()
+      .toInstance(AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments")))
+    multibind<AccessAnnotationEntry>()
+      .toInstance(AccessAnnotationEntry<CustomServiceAccess2>(services = listOf("some_other_service")))
+    multibind<AccessAnnotationEntry>()
+      .toInstance(AccessAnnotationEntry<CustomCapabilityAccess>(capabilities = listOf("admin")))
+    multibind<AccessAnnotationEntry>()
+      .toInstance(AccessAnnotationEntry<CustomCapabilityAccess2>(capabilities = listOf("some_other_group")))
     multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
 
     multibind<String, ExcludeFromAllowAnyService>().toInstance("web-proxy")
@@ -73,15 +69,14 @@ class TestWebActionModule : KAbstractModule() {
     @WireRpc(
       path = "/test/GetDestinationWarehouse",
       requestAdapter = "com.squareup.protos.test.parsing.Shipment#ADAPTER",
-      responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER"
+      responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER",
     )
     fun GetDestinationWarehouse(requestType: Shipment): Warehouse
   }
 }
 
 class CustomServiceAccessAction @Inject constructor() : WebAction {
-  @Inject
-  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+  @Inject lateinit var scopedCaller: ActionScoped<MiskCaller?>
 
   @Get("/custom_service_access")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
@@ -90,17 +85,12 @@ class CustomServiceAccessAction @Inject constructor() : WebAction {
   fun get() = "${scopedCaller.get()} authorized as custom service".toResponseBody()
 }
 
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION)
-annotation class CustomServiceAccess
+@Retention(AnnotationRetention.RUNTIME) @Target(AnnotationTarget.FUNCTION) annotation class CustomServiceAccess
 
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION)
-annotation class CustomServiceAccess2
+@Retention(AnnotationRetention.RUNTIME) @Target(AnnotationTarget.FUNCTION) annotation class CustomServiceAccess2
 
 class CustomCapabilityAccessAction @Inject constructor() : WebAction {
-  @Inject
-  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+  @Inject lateinit var scopedCaller: ActionScoped<MiskCaller?>
 
   @Get("/custom_capability_access")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
@@ -109,13 +99,9 @@ class CustomCapabilityAccessAction @Inject constructor() : WebAction {
   fun get() = "${scopedCaller.get()} authorized with custom capability".toResponseBody()
 }
 
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION)
-annotation class CustomCapabilityAccess
+@Retention(AnnotationRetention.RUNTIME) @Target(AnnotationTarget.FUNCTION) annotation class CustomCapabilityAccess
 
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION)
-annotation class CustomCapabilityAccess2
+@Retention(AnnotationRetention.RUNTIME) @Target(AnnotationTarget.FUNCTION) annotation class CustomCapabilityAccess2
 
 class RequestTypeAction @Inject constructor() : WebAction {
   @Post("/request_type")
@@ -129,26 +115,19 @@ class GreetServiceWebAction @Inject constructor() : WebAction, GreeterGreetBlock
   @Unauthenticated
   @LogRequestResponse
   override fun Greet(request: Unit): GreetResponse {
-    return GreetResponse.Builder()
-      .message("Hola")
-      .build()
+    return GreetResponse.Builder().message("Hola").build()
   }
 }
 
-class GrpcAction @Inject constructor() :
-  TestWebActionModule.ShippingGetDestinationWarehouseBlockingServer,
-  WebAction {
+class GrpcAction @Inject constructor() : TestWebActionModule.ShippingGetDestinationWarehouseBlockingServer, WebAction {
   @Unauthenticated
   override fun GetDestinationWarehouse(requestType: Shipment): Warehouse {
-    return Warehouse.Builder()
-      .warehouse_id(7777L)
-      .build()
+    return Warehouse.Builder().warehouse_id(7777L).build()
   }
 }
 
 class EmptyAuthenticatedAccessAction @Inject constructor() : WebAction {
-  @Inject
-  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+  @Inject lateinit var scopedCaller: ActionScoped<MiskCaller?>
 
   @Get("/empty_authorized_access")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
@@ -157,8 +136,7 @@ class EmptyAuthenticatedAccessAction @Inject constructor() : WebAction {
 }
 
 class EmptyAuthenticatedWithCustomAnnototationAccessAction @Inject constructor() : WebAction {
-  @Inject
-  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+  @Inject lateinit var scopedCaller: ActionScoped<MiskCaller?>
 
   @Get("/empty_authorized_and_custom_capability_access")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
@@ -168,8 +146,7 @@ class EmptyAuthenticatedWithCustomAnnototationAccessAction @Inject constructor()
 }
 
 class AuthenticatedServiceWithCustomAnnotations @Inject constructor() : WebAction {
-  @Inject
-  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+  @Inject lateinit var scopedCaller: ActionScoped<MiskCaller?>
 
   @Get("/auth-and-custom-capability")
   @Authenticated(services = ["dingo"])
@@ -178,8 +155,7 @@ class AuthenticatedServiceWithCustomAnnotations @Inject constructor() : WebActio
 }
 
 class AllowAnyServiceAccessAction @Inject constructor() : WebAction {
-  @Inject
-  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+  @Inject lateinit var scopedCaller: ActionScoped<MiskCaller?>
 
   @Get("/allow_any_service_access")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
@@ -188,8 +164,7 @@ class AllowAnyServiceAccessAction @Inject constructor() : WebAction {
 }
 
 class AllowAnyServicePlusAuthenticatedAccessAction @Inject constructor() : WebAction {
-  @Inject
-  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+  @Inject lateinit var scopedCaller: ActionScoped<MiskCaller?>
 
   @Get("/allow_any_service_plus_authenticated")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
@@ -198,8 +173,7 @@ class AllowAnyServicePlusAuthenticatedAccessAction @Inject constructor() : WebAc
 }
 
 class AllowAnyUserAccessAction @Inject constructor() : WebAction {
-  @Inject
-  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+  @Inject lateinit var scopedCaller: ActionScoped<MiskCaller?>
 
   @Get("/allow_any_user_access")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)

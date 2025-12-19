@@ -2,17 +2,15 @@ package misk.hibernate
 
 import com.google.common.util.concurrent.Service
 import com.google.inject.Provider
-import misk.healthchecks.HealthCheck
-import misk.healthchecks.HealthStatus
-import misk.logging.getLogger
 import java.sql.Timestamp
 import java.time.Clock
 import java.time.Duration
 import kotlin.reflect.KClass
+import misk.healthchecks.HealthCheck
+import misk.healthchecks.HealthStatus
+import misk.logging.getLogger
 
-/**
- * HealthCheck to confirm database connectivity and defend against clock skew.
- */
+/** HealthCheck to confirm database connectivity and defend against clock skew. */
 internal class HibernateHealthCheck(
   private val qualifier: KClass<out Annotation>,
   // Lazily provide since the SessionFactory construction relies on Service startup.
@@ -26,19 +24,21 @@ internal class HibernateHealthCheck(
       return HealthStatus.unhealthy("Hibernate: ${qualifier.simpleName} database service is $state")
     }
 
-    val databaseInstant = try {
-      val sessionFactory = sessionFactoryService.get().sessionFactory
-      sessionFactory.openSession().use { session ->
-        session.createNativeQuery("SELECT SYSDATE()").uniqueResult() as Timestamp
-      }.toInstant()
-    } catch (e: Exception) {
-      logger.error(e) { "error performing hibernate health check" }
-      return HealthStatus.unhealthy("Hibernate: failed to query ${qualifier.simpleName} database")
-    }
+    val databaseInstant =
+      try {
+        val sessionFactory = sessionFactoryService.get().sessionFactory
+        sessionFactory
+          .openSession()
+          .use { session -> session.createNativeQuery("SELECT SYSDATE()").uniqueResult() as Timestamp }
+          .toInstant()
+      } catch (e: Exception) {
+        logger.error(e) { "error performing hibernate health check" }
+        return HealthStatus.unhealthy("Hibernate: failed to query ${qualifier.simpleName} database")
+      }
 
     val delta = Duration.between(clock.instant(), databaseInstant).abs()
-    val driftMessage = "Hibernate: host and ${qualifier.simpleName} database " +
-      "clocks have drifted ${delta.seconds}s apart"
+    val driftMessage =
+      "Hibernate: host and ${qualifier.simpleName} database " + "clocks have drifted ${delta.seconds}s apart"
 
     return when {
       delta > CLOCK_SKEW_UNHEALTHY_THRESHOLD -> {

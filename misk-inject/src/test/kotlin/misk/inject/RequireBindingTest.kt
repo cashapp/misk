@@ -9,30 +9,36 @@ import org.junit.jupiter.api.assertThrows
 class RequireBindingTest {
   @Test
   fun `throws exception if requested binding is missing`() {
-    assertThrows<CreationException> {
-      Guice.createInjector(RequireBindingTestingModule()).injectMembers(this)
-    }
+    assertThrows<CreationException> { Guice.createInjector(RequireBindingTestingModule()).injectMembers(this) }
   }
 
   @Test
   fun `throws exception if requested binding with wrong annotation is provided`() {
     assertThrows<CreationException> {
-      Guice.createInjector(RequireBindingTestingModule(), object : KAbstractModule() {
-        override fun configure() {
-          bind<Color>().annotatedWith<TestAnnotation2>().to<Red>()
-        }
-      }).injectMembers(this)
+      Guice.createInjector(
+          RequireBindingTestingModule(),
+          object : KAbstractModule() {
+            override fun configure() {
+              bind<Color>().annotatedWith<TestAnnotation2>().to<Red>()
+            }
+          },
+        )
+        .injectMembers(this)
     }
   }
 
   @Test
   fun `does not throws exception if requested binding with correct annotation is provided`() {
     assertDoesNotThrow {
-      Guice.createInjector(RequireBindingTestingModule(), object : KAbstractModule() {
-        override fun configure() {
-          bind<Color>().annotatedWith<TestAnnotation>().to<Blue>()
-        }
-      }).injectMembers(this)
+      Guice.createInjector(
+          RequireBindingTestingModule(),
+          object : KAbstractModule() {
+            override fun configure() {
+              bind<Color>().annotatedWith<TestAnnotation>().to<Blue>()
+            }
+          },
+        )
+        .injectMembers(this)
     }
   }
 }

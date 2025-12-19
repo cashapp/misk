@@ -4,10 +4,7 @@ import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 
-data class RequestDeadline(
-  val clock: Clock,
-  val deadline: Instant?
-) {
+data class RequestDeadline(val clock: Clock, val deadline: Instant?) {
   fun expired(): Boolean {
     return deadline?.let { clock.instant().isAfter(deadline) } ?: false
   }

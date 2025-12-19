@@ -3,6 +3,7 @@ package misk.clustering.dynamo
 import com.google.inject.Provides
 import jakarta.inject.Qualifier
 import jakarta.inject.Singleton
+import java.util.UUID
 import misk.ReadyService
 import misk.ServiceModule
 import misk.clustering.Cluster
@@ -13,9 +14,9 @@ import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
-import java.util.UUID
 
-class DynamoClusterModule @JvmOverloads constructor(private val config: DynamoClusterConfig = DynamoClusterConfig()) : KAbstractModule() {
+class DynamoClusterModule @JvmOverloads constructor(private val config: DynamoClusterConfig = DynamoClusterConfig()) :
+  KAbstractModule() {
   override fun configure() {
     val defaultCluster = DefaultCluster(Cluster.Member(UUID.randomUUID().toString(), "invalid-ip"))
     bind<DynamoClusterConfig>().toInstance(config)

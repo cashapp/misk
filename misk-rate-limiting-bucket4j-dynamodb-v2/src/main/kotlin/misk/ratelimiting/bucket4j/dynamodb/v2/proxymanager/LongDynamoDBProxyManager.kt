@@ -3,17 +3,14 @@ package misk.ratelimiting.bucket4j.dynamodb.v2.proxymanager
 import io.github.bucket4j.distributed.proxy.ClientSideConfig
 import io.github.bucket4j.distributed.proxy.generic.compare_and_swap.AsyncCompareAndSwapOperation
 import io.github.bucket4j.distributed.proxy.generic.compare_and_swap.CompareAndSwapOperation
+import java.util.concurrent.CompletableFuture
 import misk.ratelimiting.bucket4j.dynamodb.v2.transaction.BaseDynamoDBTransaction.Companion.DEFAULT_KEY_NAME
 import misk.ratelimiting.bucket4j.dynamodb.v2.transaction.LongDynamoDBTransaction
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import java.util.concurrent.CompletableFuture
 
-internal class LongDynamoDBProxyManager(
-  dynamoDb: DynamoDbClient,
-  table: String,
-  config: ClientSideConfig
-) : BaseDynamoDBProxyManager<Long>(dynamoDb, table, config) {
+internal class LongDynamoDBProxyManager(dynamoDb: DynamoDbClient, table: String, config: ClientSideConfig) :
+  BaseDynamoDBProxyManager<Long>(dynamoDb, table, config) {
   override fun beginCompareAndSwapOperation(key: Long): CompareAndSwapOperation =
     LongDynamoDBTransaction(key, dynamoDb, table)
 

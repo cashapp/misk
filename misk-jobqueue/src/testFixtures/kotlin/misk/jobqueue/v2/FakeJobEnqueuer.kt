@@ -3,14 +3,6 @@ package misk.jobqueue.v2
 import com.google.inject.Provider
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import kotlinx.coroutines.future.await
-import kotlinx.coroutines.runBlocking
-import misk.backoff.FlatBackoff
-import misk.backoff.RetryConfig
-import misk.backoff.retry
-import misk.jobqueue.QueueName
-import misk.testing.FakeFixture
-import misk.tokens.TokenGenerator
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -20,6 +12,14 @@ import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.PriorityBlockingQueue
 import kotlin.math.min
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.runBlocking
+import misk.backoff.FlatBackoff
+import misk.backoff.RetryConfig
+import misk.backoff.retry
+import misk.jobqueue.QueueName
+import misk.testing.FakeFixture
+import misk.tokens.TokenGenerator
 
 /**
  * A fake implementation of [JobEnqueuer] intended for testing.
@@ -36,7 +36,9 @@ import kotlin.math.min
  * ```
  */
 @Singleton
-class FakeJobEnqueuer @Inject constructor(
+class FakeJobEnqueuer
+@Inject
+constructor(
   private val clock: Clock,
   private val individualHandlers: Provider<Map<QueueName, JobHandler>>,
   private val tokenGenerator: TokenGenerator,
@@ -47,16 +49,12 @@ class FakeJobEnqueuer @Inject constructor(
   private val failureJobQueue by resettable { LinkedBlockingQueue<Exception>() }
 
   /**
-   * pushFailure is used to cause the next enqueue/batchEnqueue call to the job queue to throw.
-   * When queueName is omitted, any enqueue will fail. Otherwise, only enqueues to the specific
-   * queueName will throw the pushed exception.
+   * pushFailure is used to cause the next enqueue/batchEnqueue call to the job queue to throw. When queueName is
+   * omitted, any enqueue will fail. Otherwise, only enqueues to the specific queueName will throw the pushed exception.
    *
    * pushFailure can be used multiple times to queue up multiple failures
    */
-  fun pushFailure(
-    e: Exception,
-    queueName: QueueName? = null
-  ) {
+  fun pushFailure(e: Exception, queueName: QueueName? = null) {
     queueName?.let { failureJobQueues.getOrPut(it, ::LinkedBlockingQueue).add(e) } ?: failureJobQueue.add(e)
   }
 
@@ -65,7 +63,7 @@ class FakeJobEnqueuer @Inject constructor(
     body: String,
     idempotencyKey: String?,
     deliveryDelay: Duration?,
-    attributes: Map<String, String>
+    attributes: Map<String, String>,
   ) {
     enqueueAsync(queueName, body, idempotencyKey, deliveryDelay, attributes).await()
   }
@@ -75,7 +73,7 @@ class FakeJobEnqueuer @Inject constructor(
     body: String,
     idempotencyKey: String?,
     deliveryDelay: Duration?,
-    attributes: Map<String, String>
+    attributes: Map<String, String>,
   ) {
     enqueueAsync(queueName, body, idempotencyKey, deliveryDelay, attributes).join()
   }
@@ -85,33 +83,35 @@ class FakeJobEnqueuer @Inject constructor(
     body: String,
     idempotencyKey: String?,
     deliveryDelay: Duration?,
-    attributes: Map<String, String>
+    attributes: Map<String, String>,
   ): CompletableFuture<Boolean> {
     throwIfQueuedFailure(queueName)
     val id = tokenGenerator.generate("fakeJobQueue")
     val resolvedIdempotencyKey = idempotencyKey ?: tokenGenerator.generate("fakeJobIdempotence")
-    val job = FakeJob(
-      queueName = queueName,
-      id = id,
-      idempotenceKey = resolvedIdempotencyKey,
-      body = body,
-      attributes = attributes,
-      enqueuedAt = clock.instant(),
-      deliveryDelay= deliveryDelay)
+    val job =
+      FakeJob(
+        queueName = queueName,
+        id = id,
+        idempotenceKey = resolvedIdempotencyKey,
+        body = body,
+        attributes = attributes,
+        enqueuedAt = clock.instant(),
+        deliveryDelay = deliveryDelay,
+      )
     jobQueues.getOrPut(queueName, ::PriorityBlockingQueue).add(job)
     return CompletableFuture.supplyAsync { true }
   }
 
   override suspend fun batchEnqueue(
     queueName: QueueName,
-    jobs: List<JobEnqueuer.JobRequest>
+    jobs: List<JobEnqueuer.JobRequest>,
   ): JobEnqueuer.BatchEnqueueResult {
     return batchEnqueueAsync(queueName, jobs).await()
   }
 
   override fun batchEnqueueBlocking(
     queueName: QueueName,
-    jobs: List<JobEnqueuer.JobRequest>
+    jobs: List<JobEnqueuer.JobRequest>,
   ): JobEnqueuer.BatchEnqueueResult {
     return batchEnqueueAsync(queueName, jobs).join()
   }
@@ -121,15 +121,12 @@ class FakeJobEnqueuer @Inject constructor(
     body: String,
     idempotencyKey: String?,
     deliveryDelay: Duration?,
-    attributes: Map<String, String>
+    attributes: Map<String, String>,
   ): Boolean {
     return enqueueBufferedAsync(queueName, body, idempotencyKey, deliveryDelay, attributes).await()
   }
 
-  override suspend fun enqueueBuffered(
-    queueName: QueueName,
-    job: JobEnqueuer.JobRequest,
-  ): Boolean {
+  override suspend fun enqueueBuffered(queueName: QueueName, job: JobEnqueuer.JobRequest): Boolean {
     return enqueueBufferedAsync(queueName, job).await()
   }
 
@@ -138,7 +135,7 @@ class FakeJobEnqueuer @Inject constructor(
     body: String,
     idempotencyKey: String?,
     deliveryDelay: Duration?,
-    attributes: Map<String, String>
+    attributes: Map<String, String>,
   ): CompletableFuture<Boolean> {
     // For fake implementation, just delegate to enqueueAsync since batching is not relevant in tests
     return enqueueAsync(queueName, body, idempotencyKey, deliveryDelay, attributes)
@@ -146,7 +143,7 @@ class FakeJobEnqueuer @Inject constructor(
 
   override fun batchEnqueueAsync(
     queueName: QueueName,
-    jobs: List<JobEnqueuer.JobRequest>
+    jobs: List<JobEnqueuer.JobRequest>,
   ): CompletableFuture<JobEnqueuer.BatchEnqueueResult> {
     require(jobs.size <= JobEnqueuer.SQS_MAX_BATCH_ENQUEUE_JOB_SIZE) {
       "a maximum of 10 jobs can be batched (got ${jobs.size})"
@@ -162,15 +159,16 @@ class FakeJobEnqueuer @Inject constructor(
         jobs.forEach { jobRequest ->
           val id = tokenGenerator.generate("fakeJobQueue")
           val resolvedIdempotencyKey = jobRequest.idempotencyKey ?: tokenGenerator.generate("fakeJobIdempotence")
-          val fakeJob = FakeJob(
-            queueName = queueName,
-            id = id,
-            idempotenceKey = resolvedIdempotencyKey,
-            body = jobRequest.body,
-            attributes = jobRequest.attributes,
-            enqueuedAt = clock.instant(),
-            deliveryDelay = jobRequest.deliveryDelay
-          )
+          val fakeJob =
+            FakeJob(
+              queueName = queueName,
+              id = id,
+              idempotenceKey = resolvedIdempotencyKey,
+              body = jobRequest.body,
+              attributes = jobRequest.attributes,
+              enqueuedAt = clock.instant(),
+              deliveryDelay = jobRequest.deliveryDelay,
+            )
           jobQueue.add(fakeJob)
           successful.add(resolvedIdempotencyKey)
         }
@@ -179,7 +177,7 @@ class FakeJobEnqueuer @Inject constructor(
           isFullySuccessful = true,
           successfulIds = successful,
           invalidIds = emptyList(),
-          retriableIds = emptyList()
+          retriableIds = emptyList(),
         )
       } catch (e: Exception) {
         // If there's a failure, treat all jobs as retriable (server error)
@@ -188,7 +186,7 @@ class FakeJobEnqueuer @Inject constructor(
           isFullySuccessful = false,
           successfulIds = emptyList(),
           invalidIds = emptyList(),
-          retriableIds = jobIds
+          retriableIds = jobIds,
         )
       }
     }
@@ -200,7 +198,7 @@ class FakeJobEnqueuer @Inject constructor(
 
   @Throws
   private fun throwIfQueuedFailure(queueName: QueueName?) {
-    nextFailure(queueName)?.let { throw(it) }
+    nextFailure(queueName)?.let { throw (it) }
   }
 
   fun peekJobs(queueName: QueueName): List<Job> {
@@ -218,19 +216,14 @@ class FakeJobEnqueuer @Inject constructor(
     queueName: QueueName,
     assertAcknowledged: Boolean = true,
     retries: Int = 1,
-    considerDelays: Boolean = false
+    considerDelays: Boolean = false,
   ): List<FakeJob> {
     val jobs = jobQueues[queueName] ?: return listOf()
-    return processJobs(assertAcknowledged, retries, false) {
-      pollNextJob(jobs, considerDelays)
-    }
+    return processJobs(assertAcknowledged, retries, false) { pollNextJob(jobs, considerDelays) }
   }
 
   /** Returns all jobs that were handled. */
-  fun handleJobs(
-    assertAcknowledged: Boolean = true,
-    considerDelays: Boolean = false
-  ): List<FakeJob> {
+  fun handleJobs(assertAcknowledged: Boolean = true, considerDelays: Boolean = false): List<FakeJob> {
     val result = mutableListOf<FakeJob>()
     for (queueName in jobQueues.keys) {
       result += handleJobs(queueName, assertAcknowledged, considerDelays = considerDelays)
@@ -239,37 +232,25 @@ class FakeJobEnqueuer @Inject constructor(
   }
 
   /** Returns true if job was handled. */
-  fun handleJob(
-    job: Job,
-    assertAcknowledged: Boolean = true,
-    retries: Int = 1
-  ): Boolean {
+  fun handleJob(job: Job, assertAcknowledged: Boolean = true, retries: Int = 1): Boolean {
     return processJobs(assertAcknowledged, retries, false) {
-      if (jobQueues[job.queueName]?.remove(job) == true) job as FakeJob else null
-    }.isNotEmpty()
+        if (jobQueues[job.queueName]?.remove(job) == true) job as FakeJob else null
+      }
+      .isNotEmpty()
   }
 
   /** Returns all jobs that were handled. */
-  fun reprocessDeadlettered(
-    queueName: QueueName,
-    assertAcknowledged: Boolean = true,
-    retries: Int = 1
-  ): List<FakeJob> {
+  fun reprocessDeadlettered(queueName: QueueName, assertAcknowledged: Boolean = true, retries: Int = 1): List<FakeJob> {
     val jobs = deadletteredJobs[queueName] ?: return listOf()
-    return processJobs(assertAcknowledged, retries, true) {
-      jobs.poll()
-    }
+    return processJobs(assertAcknowledged, retries, true) { jobs.poll() }
   }
 
   /** Returns true if job was handled. */
-  fun reprocessDeadlettered(
-    job: Job,
-    assertAcknowledged: Boolean = true,
-    retries: Int = 1
-  ): Boolean {
+  fun reprocessDeadlettered(job: Job, assertAcknowledged: Boolean = true, retries: Int = 1): Boolean {
     return processJobs(assertAcknowledged, retries, true) {
-      if (deadletteredJobs[job.queueName]?.remove(job) == true) job as FakeJob else null
-    }.isNotEmpty()
+        if (deadletteredJobs[job.queueName]?.remove(job) == true) job as FakeJob else null
+      }
+      .isNotEmpty()
   }
 
   /** jobsSupplier must remove jobs from the underlying deque. */
@@ -277,7 +258,7 @@ class FakeJobEnqueuer @Inject constructor(
     assertAcknowledged: Boolean,
     retries: Int,
     deadletter: Boolean,
-    jobsSupplier: () -> FakeJob?
+    jobsSupplier: () -> FakeJob?,
   ): List<FakeJob> {
     val individualHandlers = individualHandlers.get()
     val resultedJobs = mutableListOf<FakeJob>()
@@ -299,17 +280,16 @@ class FakeJobEnqueuer @Inject constructor(
           // we re-enqueue jobs if the backoff delayed time was called
           jobsToQueueBack.addAll(jobs.filter { it.delayedForBackoff })
           // we have to check which jobs in the batch were not processed in the previous try
-          val validJobs = jobs.filter {
-            !it.delayedForBackoff && !it.deadLettered && !it.acknowledged
-          }
+          val validJobs = jobs.filter { !it.delayedForBackoff && !it.deadLettered && !it.acknowledged }
 
           if (validJobs.isNotEmpty()) {
             val job = validJobs.single()
-            val jobStatus = when (jobHandler) {
-              is SuspendingJobHandler -> runBlocking { jobHandler.handleJob(validJobs.single())}
-              is BlockingJobHandler -> jobHandler.handleJob(validJobs.single())
-              else -> error("Unknown job handler type $jobHandler")
-            }
+            val jobStatus =
+              when (jobHandler) {
+                is SuspendingJobHandler -> runBlocking { jobHandler.handleJob(validJobs.single()) }
+                is BlockingJobHandler -> jobHandler.handleJob(validJobs.single())
+                else -> error("Unknown job handler type $jobHandler")
+              }
             when (jobStatus) {
               JobStatus.OK -> job.acknowledged = true
               JobStatus.DEAD_LETTER -> job.deadLettered = true
@@ -322,13 +302,13 @@ class FakeJobEnqueuer @Inject constructor(
           }
         }
       } catch (e: Throwable) {
-        deadletteredJobs.getOrPut(queueName, ::ConcurrentLinkedDeque)
-          .addAll(jobs.filter { !it.acknowledged })
+        deadletteredJobs.getOrPut(queueName, ::ConcurrentLinkedDeque).addAll(jobs.filter { !it.acknowledged })
         throw e
       }
 
       // If a job was not added to jobsToQueueBack, the job has been handled.
-      jobs.asSequence()
+      jobs
+        .asSequence()
         .filter { !jobsToQueueBack.contains(it) }
         .forEach { job ->
           resultedJobs += job
@@ -366,8 +346,7 @@ class FakeJobEnqueuer @Inject constructor(
     while (true) {
       // [jobs] queue is sorted by [deliverAt].
       val job = jobs.peek()
-      if (job == null
-        || (job.deliveryDelay != null && job.deliverAt.isAfter(now))) {
+      if (job == null || (job.deliveryDelay != null && job.deliverAt.isAfter(now))) {
         return null
       }
       // If remove() is false, then we lost race to another worker and should retry.
@@ -378,10 +357,9 @@ class FakeJobEnqueuer @Inject constructor(
   }
 
   /**
-   * The sequence fetches jobs from the supplier and yields the jobs in batches. If the
-   * corresponding queue's handler is JobHandler, the queue will yield a series of 1-job
-   * batches. If the queue's handler is BatchJobHandler, the queue will yield one batch once
-   * the supplier is exhausted. The batch will consist of all jobs from that queue.
+   * The sequence fetches jobs from the supplier and yields the jobs in batches. If the corresponding queue's handler is
+   * JobHandler, the queue will yield a series of 1-job batches. If the queue's handler is BatchJobHandler, the queue
+   * will yield one batch once the supplier is exhausted. The batch will consist of all jobs from that queue.
    */
   private fun (() -> FakeJob?).asJobBatchSequence(): Sequence<Pair<QueueName, List<FakeJob>>> {
     val jobSupplier = this
@@ -421,6 +399,7 @@ data class FakeJob(
   }
   var acknowledged: Boolean = false
     internal set
+
   var deadLettered: Boolean = false
     internal set
 
@@ -431,11 +410,10 @@ data class FakeJob(
     internal set
 
   fun delayWithBackoff() {
-    delayedForBackoff  = true
+    delayedForBackoff = true
 
-    delayDuration = min((delayDuration ?: misk.jobqueue.FakeJob.MIN_DElAY_DURATION) * 2,
-      misk.jobqueue.FakeJob.MAX_DELAY_DURATION
-    )
+    delayDuration =
+      min((delayDuration ?: misk.jobqueue.FakeJob.MIN_DElAY_DURATION) * 2, misk.jobqueue.FakeJob.MAX_DELAY_DURATION)
     deliveryDelay = Duration.ofMillis(delayDuration!!)
   }
 

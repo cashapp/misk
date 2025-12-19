@@ -2,6 +2,9 @@ package misk.hibernate.pagination
 
 import ch.qos.logback.classic.Level
 import jakarta.inject.Inject
+import java.sql.Timestamp
+import java.time.Instant
+import java.time.LocalDate
 import misk.hibernate.CharacterQuery
 import misk.hibernate.DbCharacter
 import misk.hibernate.DbMovie
@@ -17,19 +20,15 @@ import misk.hibernate.queryHint
 import misk.hibernate.withSqlLogging
 import misk.jdbc.DataSourceType
 import misk.jdbc.ScaleSafetyChecks
+import misk.logging.LogCollector
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import misk.logging.LogCollector
-import java.sql.Timestamp
-import java.time.Instant
-import java.time.LocalDate
 
 @MiskTest(startService = true)
 class RealPagerTest {
-  @MiskTestModule
-  val module = MoviesTestModule(DataSourceType.MYSQL)
+  @MiskTestModule val module = MoviesTestModule(DataSourceType.MYSQL)
 
   @Inject @Movies private lateinit var sessionFactoryService: SessionFactoryService
   @Inject @Movies private lateinit var transacter: Transacter
@@ -40,17 +39,16 @@ class RealPagerTest {
   fun idAscPagination() {
     val movieId = givenStarWarsMovie()
     givenStormtrooperCharacters(movieId, count = 100)
-    val expectedCharacterIds = transacter.transaction { session ->
-      queryFactory.newQuery(CharacterQuery::class)
-        .movieId(movieId)
-        .idAsc()
-        .list(session)
-        .map { it.id }
-    }
-    val actualCharacterIds = queryFactory.newQuery(CharacterQuery::class)
-      .movieId(movieId)
-      .newPager(idAscPaginator(), pageSize = 3)
-      .listAll(transacter) { it.id }
+    val expectedCharacterIds =
+      transacter.transaction { session ->
+        queryFactory.newQuery(CharacterQuery::class).movieId(movieId).idAsc().list(session).map { it.id }
+      }
+    val actualCharacterIds =
+      queryFactory.newQuery(CharacterQuery::class).movieId(movieId).newPager(idAscPaginator(), pageSize = 3).listAll(
+        transacter
+      ) {
+        it.id
+      }
     assertThat(actualCharacterIds).containsExactlyElementsOf(expectedCharacterIds)
   }
 
@@ -58,17 +56,16 @@ class RealPagerTest {
   fun idDescPagination() {
     val movieId = givenStarWarsMovie()
     givenStormtrooperCharacters(movieId, count = 100)
-    val expectedCharacterIds = transacter.transaction { session ->
-      queryFactory.newQuery(CharacterQuery::class)
-        .movieId(movieId)
-        .idDesc()
-        .list(session)
-        .map { it.id }
-    }
-    val actualCharacterIds = queryFactory.newQuery(CharacterQuery::class)
-      .movieId(movieId)
-      .newPager(idDescPaginator(), pageSize = 4)
-      .listAll(transacter) { it.id }
+    val expectedCharacterIds =
+      transacter.transaction { session ->
+        queryFactory.newQuery(CharacterQuery::class).movieId(movieId).idDesc().list(session).map { it.id }
+      }
+    val actualCharacterIds =
+      queryFactory.newQuery(CharacterQuery::class).movieId(movieId).newPager(idDescPaginator(), pageSize = 4).listAll(
+        transacter
+      ) {
+        it.id
+      }
     assertThat(actualCharacterIds).containsExactlyElementsOf(expectedCharacterIds)
   }
 
@@ -80,18 +77,16 @@ class RealPagerTest {
     givenStormtrooperCharacters(movieId, initialOperatingNumber = 4, count = 20)
     // More rows with duplicate names.
     givenStormtrooperCharacters(movieId, initialOperatingNumber = 24, count = 20)
-    val expectedCharacterNames = transacter.transaction { session ->
-      queryFactory.newQuery(CharacterQuery::class)
+    val expectedCharacterNames =
+      transacter.transaction { session ->
+        queryFactory.newQuery(CharacterQuery::class).movieId(movieId).nameDesc().idAsc().list(session).map { it.name }
+      }
+    val actualCharacterNames =
+      queryFactory
+        .newQuery(CharacterQuery::class)
         .movieId(movieId)
-        .nameDesc()
-        .idAsc()
-        .list(session)
-        .map { it.name }
-    }
-    val actualCharacterNames = queryFactory.newQuery(CharacterQuery::class)
-      .movieId(movieId)
-      .newPager(CharacterNameDescIdAscPaginator, pageSize = 5)
-      .listAll(transacter) { it.name }
+        .newPager(CharacterNameDescIdAscPaginator, pageSize = 5)
+        .listAll(transacter) { it.name }
     assertThat(actualCharacterNames).containsExactlyElementsOf(expectedCharacterNames)
   }
 
@@ -103,21 +98,19 @@ class RealPagerTest {
     givenStormtrooperCharacters(movieId, initialOperatingNumber = 4, count = 20)
     // More rows with duplicate names.
     givenStormtrooperCharacters(movieId, initialOperatingNumber = 24, count = 20)
-    val expectedCharacterNames = transacter.transaction { session ->
-      queryFactory.newQuery(CharacterQuery::class)
-        .movieId(movieId)
-        .nameDesc()
-        .idAsc()
-        .list(session)
-        .map { it.name }
-    }
+    val expectedCharacterNames =
+      transacter.transaction { session ->
+        queryFactory.newQuery(CharacterQuery::class).movieId(movieId).nameDesc().idAsc().list(session).map { it.name }
+      }
     withSqlLogging {
       logCollector.takeMessages(null, Level.DEBUG, Regex("/* select.*from characters"))
-      val actualCharacterNames = queryFactory.newQuery(CharacterQuery::class)
-        .queryHint("movie_id_idx")
-        .movieId(movieId)
-        .newPager(CharacterNameDescIdAscPaginator, pageSize = 5)
-        .listAll(transacter) { it.name }
+      val actualCharacterNames =
+        queryFactory
+          .newQuery(CharacterQuery::class)
+          .queryHint("movie_id_idx")
+          .movieId(movieId)
+          .newPager(CharacterNameDescIdAscPaginator, pageSize = 5)
+          .listAll(transacter) { it.name }
 
       assertThat(logCollector.takeMessage(null, Level.DEBUG, Regex("/* select.*from characters")))
         .contains("use index (movie_id_idx)")
@@ -129,18 +122,16 @@ class RealPagerTest {
   @Test
   fun `hasNext always true on first page`() {
     val movieId = givenStarWarsMovie()
-    val emptyListPager = queryFactory.newQuery(CharacterQuery::class)
-      .movieId(movieId)
-      .newPager(idDescPaginator(), pageSize = 4)
+    val emptyListPager =
+      queryFactory.newQuery(CharacterQuery::class).movieId(movieId).newPager(idDescPaginator(), pageSize = 4)
 
     // Even when the the first page is empty.
     assertThat(emptyListPager.hasNext()).isTrue
 
     // Add some entries.
     givenStormtrooperCharacters(movieId, count = 3)
-    val pagerWithContents = queryFactory.newQuery(CharacterQuery::class)
-      .movieId(movieId)
-      .newPager(idDescPaginator(), pageSize = 4)
+    val pagerWithContents =
+      queryFactory.newQuery(CharacterQuery::class).movieId(movieId).newPager(idDescPaginator(), pageSize = 4)
     assertThat(pagerWithContents.hasNext()).isTrue
   }
 
@@ -151,9 +142,8 @@ class RealPagerTest {
     val movieId = givenStarWarsMovie()
     givenStormtrooperCharacters(movieId, count = pageCount * pageSize)
 
-    val pager = queryFactory.newQuery(CharacterQuery::class)
-      .movieId(movieId)
-      .newPager(idDescPaginator(), pageSize = pageSize)
+    val pager =
+      queryFactory.newQuery(CharacterQuery::class).movieId(movieId).newPager(idDescPaginator(), pageSize = pageSize)
 
     transacter.transaction { session -> pager.nextPage(session) }
     // 2 pages left
@@ -171,13 +161,10 @@ class RealPagerTest {
     val movieId = givenStarWarsMovie()
     givenStormtrooperCharacters(movieId, count = pageCount * pageSize)
 
-    val pager = queryFactory.newQuery(CharacterQuery::class)
-      .movieId(movieId)
-      .newPager(idDescPaginator(), pageSize = pageSize)
+    val pager =
+      queryFactory.newQuery(CharacterQuery::class).movieId(movieId).newPager(idDescPaginator(), pageSize = pageSize)
     // Go through all the pages.
-    repeat(pageCount) {
-      transacter.transaction { session -> pager.nextPage(session) }
-    }
+    repeat(pageCount) { transacter.transaction { session -> pager.nextPage(session) } }
 
     val nextPage = transacter.transaction { session -> pager.nextPage(session) }
     assertThat(nextPage).isNull()
@@ -190,14 +177,11 @@ class RealPagerTest {
     val movieId = givenStarWarsMovie()
     givenStormtrooperCharacters(movieId, count = pageCount * pageSize)
 
-    val pager = queryFactory.newQuery(CharacterQuery::class)
-      .movieId(movieId)
-      .newPager(idDescPaginator(), pageSize = pageSize)
+    val pager =
+      queryFactory.newQuery(CharacterQuery::class).movieId(movieId).newPager(idDescPaginator(), pageSize = pageSize)
 
     sessionFactoryService.sessionFactory.openSession().use { session ->
-      session.doWork { connection ->
-        ScaleSafetyChecks.turnOnSqlGeneralLogging(connection)
-      }
+      session.doWork { connection -> ScaleSafetyChecks.turnOnSqlGeneralLogging(connection) }
     }
 
     val start = Timestamp.from(Instant.now())
@@ -208,15 +192,13 @@ class RealPagerTest {
       pager.nextPage(session)
     }
 
-    val queries = sessionFactoryService.sessionFactory.openSession().use { session ->
-      session.doReturningWork { connection ->
-        ScaleSafetyChecks.extractQueriesSince(connection, start)
+    val queries =
+      sessionFactoryService.sessionFactory.openSession().use { session ->
+        session.doReturningWork { connection -> ScaleSafetyChecks.extractQueriesSince(connection, start) }
       }
-    }
 
-    val pageQueries = queries.reversed().filter { it.contains("select") }.map {
-      Regex("""/\* (.*) \*/""").find(it)!!.groups[1]!!.value
-    }
+    val pageQueries =
+      queries.reversed().filter { it.contains("select") }.map { Regex("""/\* (.*) \*/""").find(it)!!.groups[1]!!.value }
     assertThat(pageQueries).hasSize(3)
     // The first page doesn't have an (id > ?) condition
     assertThat(countClauses(pageQueries[0])).isEqualTo(Clauses(1, 1))
@@ -227,13 +209,15 @@ class RealPagerTest {
 
   private fun countClauses(query: String): Clauses {
     val whereMatches = Regex("where (.*) order by").find(query)
-    val whereCount = if (whereMatches != null) {
-      whereMatches.groups[1]!!.value.split(" and ").size
-    } else 0
+    val whereCount =
+      if (whereMatches != null) {
+        whereMatches.groups[1]!!.value.split(" and ").size
+      } else 0
     val orderByMatches = Regex("order by (.*)").find(query)
-    val orderByCount = if (orderByMatches != null) {
-      orderByMatches.groups[1]!!.value.split(",").size
-    } else 0
+    val orderByCount =
+      if (orderByMatches != null) {
+        orderByMatches.groups[1]!!.value.split(",").size
+      } else 0
 
     return Clauses(whereCount, orderByCount)
   }
@@ -247,13 +231,10 @@ class RealPagerTest {
     val movieId = givenStarWarsMovie()
     givenStormtrooperCharacters(movieId, count = pageCount * pageSize)
 
-    val pager = queryFactory.newQuery(CharacterQuery::class)
-      .movieId(movieId)
-      .newPager(idDescPaginator(), pageSize = pageSize)
+    val pager =
+      queryFactory.newQuery(CharacterQuery::class).movieId(movieId).newPager(idDescPaginator(), pageSize = pageSize)
     // Go through all the pages.
-    repeat(pageCount) {
-      transacter.transaction { session -> pager.nextPage(session) }
-    }
+    repeat(pageCount) { transacter.transaction { session -> pager.nextPage(session) } }
     assertThat(pager.hasNext()).isFalse
   }
 
@@ -265,11 +246,7 @@ class RealPagerTest {
     }
   }
 
-  private fun givenStormtrooperCharacters(
-    movieId: Id<DbMovie>,
-    initialOperatingNumber: Int = 1,
-    count: Int,
-  ) {
+  private fun givenStormtrooperCharacters(movieId: Id<DbMovie>, initialOperatingNumber: Int = 1, count: Int) {
     return transacter.transaction { session ->
       val movie = session.load(movieId)
       for (i in initialOperatingNumber..count) {
@@ -296,12 +273,8 @@ private object CharacterNameDescIdAscPaginator : Paginator<DbCharacter, Characte
     }
     val (name, id) = decodeOffset(offset)
     query.or {
-      option {
-        nameLessThan(name)
-      }
-      option {
-        name(name).idMoreThan(id)
-      }
+      option { nameLessThan(name) }
+      option { name(name).idMoreThan(id) }
     }
   }
 

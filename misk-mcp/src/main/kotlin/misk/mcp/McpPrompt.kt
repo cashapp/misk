@@ -8,15 +8,13 @@ import misk.annotation.ExperimentalMiskApi
 /**
  * Abstraction for a prompt in the Model Context Protocol (MCP) specification.
  *
- * This interface represents a prompt template that can be exposed through an MCP server,
- * allowing AI models and other clients to discover and retrieve structured prompt content.
- * Prompts are one of the core primitives in MCP, enabling models to access pre-defined
- * prompt templates with dynamic arguments for consistent and reusable interactions.
+ * This interface represents a prompt template that can be exposed through an MCP server, allowing AI models and other
+ * clients to discover and retrieve structured prompt content. Prompts are one of the core primitives in MCP, enabling
+ * models to access pre-defined prompt templates with dynamic arguments for consistent and reusable interactions.
  *
- * The MCP specification defines prompts as reusable templates that can be parameterized
- * with arguments to generate contextual content for AI models. Each prompt must have a
- * unique name within its server context and can define optional arguments that customize
- * the prompt's behavior or content.
+ * The MCP specification defines prompts as reusable templates that can be parameterized with arguments to generate
+ * contextual content for AI models. Each prompt must have a unique name within its server context and can define
+ * optional arguments that customize the prompt's behavior or content.
  *
  * ## Implementation Requirements
  *
@@ -29,7 +27,6 @@ import misk.annotation.ExperimentalMiskApi
  * ## Registration
  *
  * Prompts should be registered with an MCP server using [McpPromptModule]:
- *
  * ```kotlin
  * // In your Guice module configuration
  * install(McpPromptModule.create<MyCustomPrompt>("myServerName"))
@@ -71,15 +68,15 @@ import misk.annotation.ExperimentalMiskApi
  *       Please review the following $language code and provide feedback focusing on $focus:
  *
  *       ```$language
- *       $code
- *       ```
  *
+ * $code
+ *
+ *       ```
  *       Please provide:
  *       1. Overall assessment
  *       2. Specific issues or improvements
  *       3. Best practice recommendations
  *     """.trimIndent()
- *
  *     return GetPromptResult(
  *       description = "Code review prompt for $language code",
  *       messages = listOf(
@@ -90,7 +87,9 @@ import misk.annotation.ExperimentalMiskApi
  *       )
  *     )
  *   }
+ *
  * }
+ *
  * ```
  *
  * @see <a href="https://modelcontextprotocol.io/specification/2025-06-18">MCP Specification</a>
@@ -101,36 +100,33 @@ interface McpPrompt {
   /**
    * The unique identifier for this prompt within the MCP server context.
    *
-   * Must be unique among all prompts registered with the same server instance.
-   * Should use lowercase letters, numbers, and underscores for consistency.
+   * Must be unique among all prompts registered with the same server instance. Should use lowercase letters, numbers,
+   * and underscores for consistency.
    */
   val name: String
 
   /**
    * Human-readable description of what this prompt does.
    *
-   * This description is exposed to clients and AI models to help them understand
-   * the purpose and expected use case of this prompt template. Should be clear
-   * and concise, explaining what kind of content the prompt generates.
+   * This description is exposed to clients and AI models to help them understand the purpose and expected use case of
+   * this prompt template. Should be clear and concise, explaining what kind of content the prompt generates.
    */
   val description: String
 
   /**
    * List of arguments that this prompt accepts for customization.
    *
-   * These arguments define the parameters that can be passed to the prompt
-   * to customize its behavior or content. Each argument specifies its name,
-   * description, and whether it's required. Arguments allow prompts to be
-   * flexible and reusable across different contexts.
+   * These arguments define the parameters that can be passed to the prompt to customize its behavior or content. Each
+   * argument specifies its name, description, and whether it's required. Arguments allow prompts to be flexible and
+   * reusable across different contexts.
    */
   val arguments: List<PromptArgument>
 
   /**
    * Handles incoming prompt generation requests.
    *
-   * This suspend function processes the prompt request, extracts any provided
-   * arguments, generates the appropriate prompt content, and returns structured
-   * results. The function should handle missing or invalid arguments gracefully
+   * This suspend function processes the prompt request, extracts any provided arguments, generates the appropriate
+   * prompt content, and returns structured results. The function should handle missing or invalid arguments gracefully
    * and provide meaningful default behavior when possible.
    *
    * @param request The incoming prompt request containing arguments and metadata

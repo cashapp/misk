@@ -19,29 +19,18 @@ abstract class AbstractRateLimitedActionTests {
 
   @Inject private lateinit var rateLimitedAction: RateLimitedAction
 
-  private val metrics by lazy {
-    RateLimiterMetrics(metricRegistry)
-  }
+  private val metrics by lazy { RateLimiterMetrics(metricRegistry) }
 
   private val consumedMetrics by lazy {
-    metrics.consumptionAttempts(
-      ExampleRateLimitConfiguration,
-      RateLimiterMetrics.ConsumptionResult.SUCCESS
-    )
+    metrics.consumptionAttempts(ExampleRateLimitConfiguration, RateLimiterMetrics.ConsumptionResult.SUCCESS)
   }
 
   private val rejectedMetrics by lazy {
-    metrics.consumptionAttempts(
-      ExampleRateLimitConfiguration,
-      RateLimiterMetrics.ConsumptionResult.REJECTED
-    )
+    metrics.consumptionAttempts(ExampleRateLimitConfiguration, RateLimiterMetrics.ConsumptionResult.REJECTED)
   }
 
   private val exceptionMetrics by lazy {
-    metrics.consumptionAttempts(
-      ExampleRateLimitConfiguration,
-      RateLimiterMetrics.ConsumptionResult.EXCEPTION
-    )
+    metrics.consumptionAttempts(ExampleRateLimitConfiguration, RateLimiterMetrics.ConsumptionResult.EXCEPTION)
   }
 
   abstract fun setException()
@@ -49,29 +38,21 @@ abstract class AbstractRateLimitedActionTests {
   @Test
   fun `should throw when we reach limit`() {
     repeat(ExampleRateLimitConfiguration.capacity.toInt()) {
-      val response = assertDoesNotThrow {
-        rateLimitedAction.rateLimitedExample()
-      }
+      val response = assertDoesNotThrow { rateLimitedAction.rateLimitedExample() }
       Assertions.assertThat(response.number).isNotNull()
       Assertions.assertThat(consumedMetrics.count()).isEqualTo(it.toDouble() + 1.0)
       Assertions.assertThat(rejectedMetrics.count()).isZero()
       Assertions.assertThat(exceptionMetrics.count()).isZero()
     }
-    assertThrows<TooManyRequestsException> {
-      rateLimitedAction.rateLimitedExample()
-    }
+    assertThrows<TooManyRequestsException> { rateLimitedAction.rateLimitedExample() }
     Assertions.assertThat(consumedMetrics.count()).isEqualTo(ExampleRateLimitConfiguration.capacity.toDouble())
     Assertions.assertThat(rejectedMetrics.count()).isOne()
     Assertions.assertThat(exceptionMetrics.count()).isZero()
 
     fakeClock.add(ExampleRateLimitConfiguration.refillPeriod)
 
-    val response = assertDoesNotThrow {
-      rateLimitedAction.rateLimitedExample()
-    }
-    Assertions.assertThat(consumedMetrics.count()).isEqualTo(
-      ExampleRateLimitConfiguration.capacity.toDouble() + 1.0
-    )
+    val response = assertDoesNotThrow { rateLimitedAction.rateLimitedExample() }
+    Assertions.assertThat(consumedMetrics.count()).isEqualTo(ExampleRateLimitConfiguration.capacity.toDouble() + 1.0)
     Assertions.assertThat(rejectedMetrics.count()).isOne()
     Assertions.assertThat(exceptionMetrics.count()).isZero()
 
@@ -83,9 +64,7 @@ abstract class AbstractRateLimitedActionTests {
     rateLimitedAction.rateLimitedExample()
     // Force exception
     setException()
-    assertThrows<Throwable> {
-      rateLimitedAction.rateLimitedExample()
-    }
+    assertThrows<Throwable> { rateLimitedAction.rateLimitedExample() }
     Assertions.assertThat(consumedMetrics.count()).isOne()
     Assertions.assertThat(rejectedMetrics.count()).isZero()
     Assertions.assertThat(exceptionMetrics.count()).isOne()

@@ -24,19 +24,22 @@ import wisp.deployment.TESTING
 @MiskTest
 class RedisClientMetricsTest {
   @Suppress("unused")
-  @MiskTestModule private val module = object : KAbstractModule() {
-    override fun configure() {
-      install(DeploymentModule(TESTING))
-      install(MiskTestingServiceModule())
-      install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
-      install(RedisTestFlushModule())
+  @MiskTestModule
+  private val module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(DeploymentModule(TESTING))
+        install(MiskTestingServiceModule())
+        install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
+        install(RedisTestFlushModule())
+      }
     }
-  }
 
   @Inject private lateinit var collectorRegistry: CollectorRegistry
   @Inject private lateinit var redis: Redis
 
-  @Test fun `connections are counted`() {
+  @Test
+  fun `connections are counted`() {
     // Creating a redis client creates a connection.
     assertThat(collectorRegistry[ACTIVE_CONNECTIONS]).isEqualTo(1.0)
     assertThat(collectorRegistry[IDLE_CONNECTIONS]).isEqualTo(0.0)
@@ -58,29 +61,23 @@ class RedisClientMetricsTest {
     assertThat(collectorRegistry[DESTROYED_CONNECTIONS_TOTAL]).isEqualTo(1.0)
   }
 
-  @Test fun `operations are timed`() {
+  @Test
+  fun `operations are timed`() {
     redis["hello"] = "world".encodeUtf8()
     assertThat(redis["hello"]?.utf8()).isEqualTo("world")
 
     // No metric for commands that aren't executed.
-    assertThat(collectorRegistry.getHistoCount(OPERATION_TIME, listOf("command" to "lolwut")))
-      .isNull()
+    assertThat(collectorRegistry.getHistoCount(OPERATION_TIME, listOf("command" to "lolwut"))).isNull()
 
     // A histogram bucket is recorded for the commands that were run.
-    assertThat(collectorRegistry.getHistoCount(OPERATION_TIME, listOf("command" to "get")))
-      .isOne()
+    assertThat(collectorRegistry.getHistoCount(OPERATION_TIME, listOf("command" to "get"))).isOne()
 
-    assertThat(collectorRegistry.getHistoCount(OPERATION_TIME, listOf("command" to "set")))
-      .isOne()
+    assertThat(collectorRegistry.getHistoCount(OPERATION_TIME, listOf("command" to "set"))).isOne()
   }
 
-  private operator fun CollectorRegistry.get(metric: String): Double? =
-    getSampleValue(metric)
+  private operator fun CollectorRegistry.get(metric: String): Double? = getSampleValue(metric)
 
-  private fun CollectorRegistry.getHistoCount(
-    metric: String,
-    labels: List<Pair<String, String>>
-  ): Double? {
+  private fun CollectorRegistry.getHistoCount(metric: String, labels: List<Pair<String, String>>): Double? {
     return getSampleValue(
       "${metric}_count",
       arrayOf(*labels.map { it.first }.toTypedArray()),

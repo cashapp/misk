@@ -1,8 +1,5 @@
 package misk.hibernate
 
-import org.hibernate.engine.spi.SharedSessionContractImplementor
-import org.hibernate.usertype.ParameterizedType
-import org.hibernate.usertype.UserType
 import java.io.Serializable
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -13,21 +10,21 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
+import org.hibernate.engine.spi.SharedSessionContractImplementor
+import org.hibernate.usertype.ParameterizedType
+import org.hibernate.usertype.UserType
 
 /**
- * Binds any data class that wraps a String to a varchar in MySQL. This is most useful to enforce
- * additional type-safety on identifier columns.
+ * Binds any data class that wraps a String to a varchar in MySQL. This is most useful to enforce additional type-safety
+ * on identifier columns.
  *
- * To use, create a data class with a single non-null `String` property. The name of this property
- * is not significant.
+ * To use, create a data class with a single non-null `String` property. The name of this property is not significant.
  *
  * ```
  * data class MovieToken(val token: String)
  * ```
  *
- * To use with comparison operators (ie. WHERE clauses with `<` or `>`) you must also implement
- * `Comparable`:
- *
+ * To use with comparison operators (ie. WHERE clauses with `<` or `>`) you must also implement `Comparable`:
  * ```
  * data class MovieToken(val token: String) : Comparable<MovieToken> {
  *   override fun compareTo(other: MovieToken) = token.compareTo(other.token)
@@ -56,19 +53,15 @@ internal class BoxedStringType<T : Any> : UserType, ParameterizedType {
   override fun assemble(cached: Serializable, owner: Any?) = boxer.box(cached as String)
 
   @Suppress("UNCHECKED_CAST") // Hibernate promises to call us only with the types we support.
-  override fun disassemble(value: Any) = when (value) {
-    // In the case where we're trying to do a LIKE query, we may receive a String here, in which
-    // case we just return it
-    is String -> value
-    else -> boxer.unbox(value as T)
-  }
+  override fun disassemble(value: Any) =
+    when (value) {
+      // In the case where we're trying to do a LIKE query, we may receive a String here, in which
+      // case we just return it
+      is String -> value
+      else -> boxer.unbox(value as T)
+    }
 
-  override fun nullSafeSet(
-    st: PreparedStatement,
-    value: Any?,
-    index: Int,
-    session: SharedSessionContractImplementor?
-  ) {
+  override fun nullSafeSet(st: PreparedStatement, value: Any?, index: Int, session: SharedSessionContractImplementor?) {
     if (value == null) {
       st.setNull(index, Types.VARCHAR)
     } else {
@@ -80,7 +73,7 @@ internal class BoxedStringType<T : Any> : UserType, ParameterizedType {
     rs: ResultSet,
     names: Array<out String>,
     session: SharedSessionContractImplementor?,
-    owner: Any?
+    owner: Any?,
   ): Any? {
     val result = rs.getString(names[0])
     return if (result != null) assemble(result, owner) else null
@@ -95,10 +88,7 @@ internal class BoxedStringType<T : Any> : UserType, ParameterizedType {
       return boxer(propertyType) != null
     }
 
-    /**
-     * Returns a boxer if `propertyType` is a data class with a single string property. Otherwise
-     * this returns null.
-     */
+    /** Returns a boxer if `propertyType` is a data class with a single string property. Otherwise this returns null. */
     private fun <T : Any> boxer(propertyType: KClass<T>): Boxer<T>? {
       if (!propertyType.isData) return null
 
@@ -120,10 +110,7 @@ internal class BoxedStringType<T : Any> : UserType, ParameterizedType {
   }
 
   /** Puts a string in a box and takes it out again. */
-  data class Boxer<T>(
-    val property: KProperty1<T, String>,
-    val constructor: KFunction<T>
-  ) {
+  data class Boxer<T>(val property: KProperty1<T, String>, val constructor: KFunction<T>) {
     val returnedClass: Class<*>
       get() = constructor.returnType.javaClass
 

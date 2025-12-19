@@ -9,26 +9,23 @@ import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import kotlin.reflect.KClass
 import misk.ServiceModule
 import misk.dynamodb.DynamoDbService
 import misk.dynamodb.RequiredDynamoDbTable
 import misk.inject.KAbstractModule
 import misk.testing.TestFixture
-import kotlin.reflect.KClass
 
 /**
- * Executes a DynamoDB service in-process per test. It clears the table content before each test
- * starts.
+ * Executes a DynamoDB service in-process per test. It clears the table content before each test starts.
  *
- * Note that this may not be used alongside [DockerDynamoDbModule] and
- * `@MiskExternalDependency DockerDynamoDb`. DynamoDB may execute in Docker or in-process, but never
- * both.
+ * Note that this may not be used alongside [DockerDynamoDbModule] and `@MiskExternalDependency DockerDynamoDb`.
+ * DynamoDB may execute in Docker or in-process, but never both.
  */
-class InProcessDynamoDbModule(
-  private val tables: List<DynamoDbTable>,
-) : KAbstractModule() {
+class InProcessDynamoDbModule(private val tables: List<DynamoDbTable>) : KAbstractModule() {
 
   constructor(vararg tables: DynamoDbTable) : this(tables.toList())
+
   constructor(vararg tables: KClass<*>) : this(tables.map { DynamoDbTable(it) })
 
   override fun configure() {
@@ -48,7 +45,7 @@ class InProcessDynamoDbModule(
       TestDynamoDbService.create(
         serverFactory = JvmDynamoDbServer.Factory,
         tables = tables.map { TestTable.create(it.tableClass, it.configureTable) },
-        port = null
+        port = null,
       )
     )
   }
@@ -67,14 +64,13 @@ class InProcessDynamoDbModule(
 
   @Provides
   @Singleton
-  fun provideRequiredTables(): List<RequiredDynamoDbTable> =
-    tables.map { RequiredDynamoDbTable(it.tableName) }
+  fun provideRequiredTables(): List<RequiredDynamoDbTable> = tables.map { RequiredDynamoDbTable(it.tableName) }
 
   /** This service does nothing; depending on Tempest's [TestDynamoDb] is sufficient. */
   @Singleton
-  private class InProcessDynamoDbService @Inject constructor(
-  ) : AbstractService(), DynamoDbService {
+  private class InProcessDynamoDbService @Inject constructor() : AbstractService(), DynamoDbService {
     override fun doStart() = notifyStarted()
+
     override fun doStop() = notifyStopped()
   }
 }

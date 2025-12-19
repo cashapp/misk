@@ -6,28 +6,31 @@ import misk.Action
 import misk.ApplicationInterceptor
 import misk.Chain
 import misk.MiskCaller
+import misk.logging.getLogger
 import misk.scope.ActionScoped
 import misk.web.interceptors.hooks.RequestResponseHook
 import misk.web.interceptors.hooks.RequestResponseLoggingHook
 import okhttp3.Headers
-import misk.logging.getLogger
 
 private val logger = getLogger<RequestBodyLoggingInterceptor>()
 
 /**
- * Stores request and response information for an action in a ThreadLocal, to be logged
- * in [RequestLoggingInterceptor]
+ * Stores request and response information for an action in a ThreadLocal, to be logged in [RequestLoggingInterceptor]
  *
  * Timing information doesn't count time writing the response to the remote client.
  */
-class RequestBodyLoggingInterceptor @Inject internal constructor(
+class RequestBodyLoggingInterceptor
+@Inject
+internal constructor(
   private val action: Action,
   private val caller: ActionScoped<MiskCaller?>,
   private val bodyCapture: RequestResponseCapture,
 ) : ApplicationInterceptor {
 
   @Singleton
-  class Factory @Inject internal constructor(
+  class Factory
+  @Inject
+  internal constructor(
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
     private val bodyCapture: RequestResponseCapture,
     private val requestResponseHookFactories: List<RequestResponseHook.Factory>,
@@ -55,11 +58,7 @@ class RequestBodyLoggingInterceptor @Inject internal constructor(
         }
       }
 
-      return RequestBodyLoggingInterceptor(
-        action = action,
-        caller = caller,
-        bodyCapture = bodyCapture
-      )
+      return RequestBodyLoggingInterceptor(action = action, caller = caller, bodyCapture = bodyCapture)
     }
   }
 
@@ -69,13 +68,16 @@ class RequestBodyLoggingInterceptor @Inject internal constructor(
     // Only log some request headers.
     val redactedRequestHeaders = HeadersCapture(chain.httpCall.requestHeaders)
     // Since we already log headers separately, no need to log them if they are in args.
-    val args = chain.args.filter { it !is Headers }.let {
-      when {
-        it.isEmpty() -> null
-        it.size == 1 -> it[0]
-        else -> it
-      }
-    }
+    val args =
+      chain.args
+        .filter { it !is Headers }
+        .let {
+          when {
+            it.isEmpty() -> null
+            it.size == 1 -> it[0]
+            else -> it
+          }
+        }
 
     bodyCapture.set(
       RequestResponseBody(
@@ -83,7 +85,7 @@ class RequestBodyLoggingInterceptor @Inject internal constructor(
         response = null,
         requestHeaders = redactedRequestHeaders.headers,
         responseHeaders = null,
-      ),
+      )
     )
 
     val result = chain.proceed(chain.args)
@@ -94,19 +96,19 @@ class RequestBodyLoggingInterceptor @Inject internal constructor(
         response = result,
         requestHeaders = redactedRequestHeaders.headers,
         responseHeaders = redactedResponseHeaders.headers,
-      ),
+      )
     )
     return result
   }
 }
 
-internal data class HeadersCapture(
-  val headers: Map<String, List<String>>
-) {
-  constructor(okHttpHeaders: Headers) : this(
-    okHttpHeaders.toMultimap()
-      .filter { (key, _) ->
-        key.lowercase() in listOf(
+internal data class HeadersCapture(val headers: Map<String, List<String>>) {
+  constructor(
+    okHttpHeaders: Headers
+  ) : this(
+    okHttpHeaders.toMultimap().filter { (key, _) ->
+      key.lowercase() in
+        listOf(
           "accept",
           "accept-encoding",
           "connection",
@@ -123,7 +125,7 @@ internal data class HeadersCapture(
           "x-datadog-sampling-priority",
           "x-request-id",
         )
-      }
+    }
   )
 }
 
@@ -143,19 +145,16 @@ internal class RequestResponseCapture @Inject constructor() {
   }
 }
 
-data class RequestResponseBody @JvmOverloads constructor(
-  val request: Any?,
-  val response: Any?,
-  val requestHeaders: Any? = null,
-  val responseHeaders: Any? = null,
-)
+data class RequestResponseBody
+@JvmOverloads
+constructor(val request: Any?, val response: Any?, val requestHeaders: Any? = null, val responseHeaders: Any? = null)
 
 /**
- * Transforms request and/or response bodies before they get logged by [RequestLoggingInterceptor].
- * Useful for things like stripping out noisy data.
+ * Transforms request and/or response bodies before they get logged by [RequestLoggingInterceptor]. Useful for things
+ * like stripping out noisy data.
  *
- * Note that the order in which `RequestLoggingTransformer`s get applied is considered undefined
- * and cannot be reliably controlled.
+ * Note that the order in which `RequestLoggingTransformer`s get applied is considered undefined and cannot be reliably
+ * controlled.
  */
 interface RequestLoggingTransformer {
   fun transform(requestResponseBody: RequestResponseBody?): RequestResponseBody?

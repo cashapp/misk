@@ -1,11 +1,11 @@
 package misk.concurrent
 
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
-import misk.time.FakeClock
 import java.time.Duration
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import misk.time.FakeClock
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 
 class FakeSleeperTest {
   @Test
@@ -14,9 +14,10 @@ class FakeSleeperTest {
     val sleeper = FakeSleeper(clock)
     val awake = CountDownLatch(1)
     Thread {
-      sleeper.sleep(Duration.ofMillis(1000))
-      awake.countDown()
-    }.start()
+        sleeper.sleep(Duration.ofMillis(1000))
+        awake.countDown()
+      }
+      .start()
 
     sleeper.waitForSleep(1)
 
@@ -33,13 +34,15 @@ class FakeSleeperTest {
     val sleeper = FakeSleeper(clock)
     val awake = CountDownLatch(2)
     Thread {
-      sleeper.sleep(Duration.ofMillis(1000))
-      awake.countDown()
-    }.start()
+        sleeper.sleep(Duration.ofMillis(1000))
+        awake.countDown()
+      }
+      .start()
     Thread {
-      sleeper.sleep(Duration.ofMillis(1000))
-      awake.countDown()
-    }.start()
+        sleeper.sleep(Duration.ofMillis(1000))
+        awake.countDown()
+      }
+      .start()
 
     sleeper.waitForSleep(2)
 
@@ -57,13 +60,15 @@ class FakeSleeperTest {
     val awake1 = CountDownLatch(1)
     val awake2 = CountDownLatch(1)
     Thread {
-      sleeper.sleep(Duration.ofMillis(1000))
-      awake1.countDown()
-    }.start()
+        sleeper.sleep(Duration.ofMillis(1000))
+        awake1.countDown()
+      }
+      .start()
     Thread {
-      sleeper.sleep(Duration.ofMillis(2000))
-      awake2.countDown()
-    }.start()
+        sleeper.sleep(Duration.ofMillis(2000))
+        awake2.countDown()
+      }
+      .start()
 
     sleeper.waitForSleep(2)
     clock.add(Duration.ofMillis(1000))

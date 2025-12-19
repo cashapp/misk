@@ -1,9 +1,9 @@
 package misk.vitess.testing.internal
 
-import misk.vitess.testing.TransactionIsolationLevel
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+import misk.vitess.testing.TransactionIsolationLevel
 
 internal class VitessMyCnf(
   containerName: String,

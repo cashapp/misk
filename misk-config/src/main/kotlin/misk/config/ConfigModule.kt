@@ -2,11 +2,8 @@ package misk.config
 
 import misk.inject.KAbstractModule
 
-class ConfigModule<T : Config>(
-  private val configClass: Class<T>,
-  private val appName: String,
-  private val config: T
-) : KAbstractModule() {
+class ConfigModule<T : Config>(private val configClass: Class<T>, private val appName: String, private val config: T) :
+  KAbstractModule() {
   @Suppress("UNCHECKED_CAST")
   override fun configure() {
     install(AppNameModule(appName))
@@ -15,7 +12,6 @@ class ConfigModule<T : Config>(
   }
 
   companion object {
-    inline fun <reified T : Config> create(appName: String, config: T) =
-      ConfigModule(T::class.java, appName, config)
+    inline fun <reified T : Config> create(appName: String, config: T) = ConfigModule(T::class.java, appName, config)
   }
 }

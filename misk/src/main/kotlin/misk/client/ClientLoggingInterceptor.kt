@@ -1,16 +1,16 @@
 package misk.client
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import misk.logging.getLogger
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
-import misk.logging.getLogger
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
-@Singleton internal class ClientLoggingInterceptor @Inject constructor(): Interceptor {
+@Singleton
+internal class ClientLoggingInterceptor @Inject constructor() : Interceptor {
   // Optional so it defaults to not logging requests when no config is available.
-  @com.google.inject.Inject(optional = true)
-  private val httpClientsConfig: HttpClientsConfig = HttpClientsConfig()
+  @com.google.inject.Inject(optional = true) private val httpClientsConfig: HttpClientsConfig = HttpClientsConfig()
 
   override fun intercept(chain: Interceptor.Chain): Response {
     val result = chain.proceed(chain.request())
@@ -24,27 +24,26 @@ import jakarta.inject.Singleton
   }
 
   private fun headers(request: Request): Map<String, String> =
-    request.headers
-      .filter { (key, _) -> LOGGED_HEADERS.contains(key.lowercase()) }
-      .toMap()
+    request.headers.filter { (key, _) -> LOGGED_HEADERS.contains(key.lowercase()) }.toMap()
 
   companion object {
     private val logger = getLogger<ClientLoggingInterceptor>()
 
-    val LOGGED_HEADERS = listOf(
-      "content-type",
-      "user-agent",
-      "content-length",
-      // Also show tracing headers. These are also in logs, but showing them in the headers
-      // gives us more confidence that traces were sent from service to service.
-      "x-b3-traceid",
-      "x-b3-spanid",
-      "x-ddtrace-parent_trace_id",
-      "x-ddtrace-parent_span_id",
-      "x-datadog-parent-id",
-      "x-datadog-trace-id",
-      "x-datadog-span-id",
-      "x-request-id",
-    )
+    val LOGGED_HEADERS =
+      listOf(
+        "content-type",
+        "user-agent",
+        "content-length",
+        // Also show tracing headers. These are also in logs, but showing them in the headers
+        // gives us more confidence that traces were sent from service to service.
+        "x-b3-traceid",
+        "x-b3-spanid",
+        "x-ddtrace-parent_trace_id",
+        "x-ddtrace-parent_span_id",
+        "x-datadog-parent-id",
+        "x-datadog-trace-id",
+        "x-datadog-span-id",
+        "x-request-id",
+      )
   }
 }

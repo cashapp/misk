@@ -18,6 +18,11 @@ import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.TextResourceContents
 import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Inject
+import kotlin.test.Test
+import kotlin.test.assertContains
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
 import misk.MiskTestingServiceModule
@@ -60,12 +65,6 @@ import misk.web.sse.ServerSentEvent
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import kotlin.test.Test
-import kotlin.test.assertContains
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
-
 
 internal abstract class McpServerActionTest {
 
@@ -83,18 +82,12 @@ internal abstract class McpServerActionTest {
 
     @Suppress("unused")
     @MiskTestModule
-    val module: Module = Modules.combine(
-      mcpServerTestModule,
-      WebActionModule.create<McpServerActionTestPostAction>()
-    )
+    val module: Module = Modules.combine(mcpServerTestModule, WebActionModule.create<McpServerActionTestPostAction>())
 
     @BeforeEach
     fun setUp() = runBlocking {
-      mcpClient = OkHttpClient().asMcpStreamableHttpClient(
-        jettyService.httpServerUrl,
-        "/mcp",
-        supportsElicitation = true
-      )
+      mcpClient =
+        OkHttpClient().asMcpStreamableHttpClient(jettyService.httpServerUrl, "/mcp", supportsElicitation = true)
     }
   }
 
@@ -102,27 +95,19 @@ internal abstract class McpServerActionTest {
   class McpWebSocketServerActionTest : McpServerActionTest() {
     @OptIn(ExperimentalMiskApi::class)
     @Suppress("unused")
-    class McpWebSocketServerActionTestAction @Inject constructor(
-      private val mcpStreamManager: McpStreamManager
-    ) : WebAction {
-      @McpWebSocket
-      fun handle(webSocket: WebSocket) = mcpStreamManager.withWebSocket(webSocket)
+    class McpWebSocketServerActionTestAction @Inject constructor(private val mcpStreamManager: McpStreamManager) :
+      WebAction {
+      @McpWebSocket fun handle(webSocket: WebSocket) = mcpStreamManager.withWebSocket(webSocket)
     }
 
     @Suppress("unused")
     @MiskTestModule
-    val module: Module = Modules.combine(
-      mcpServerTestModule,
-      WebActionModule.create<McpWebSocketServerActionTestAction>()
-    )
+    val module: Module =
+      Modules.combine(mcpServerTestModule, WebActionModule.create<McpWebSocketServerActionTestAction>())
 
     @BeforeEach
     fun setUp() = runBlocking {
-      mcpClient = OkHttpClient().asMcpWebSocketClient(
-        jettyService.httpServerUrl,
-        "/mcp",
-        supportsElicitation = true
-      )
+      mcpClient = OkHttpClient().asMcpWebSocketClient(jettyService.httpServerUrl, "/mcp", supportsElicitation = true)
     }
 
     @Test
@@ -130,10 +115,7 @@ internal abstract class McpServerActionTest {
       val nickName = "Test Man"
 
       mcpClient.setElicitationHandler {
-        ElicitResult(
-          action = ElicitResult.Action.Accept,
-          content = GetNicknameRequest(nickName).encode(),
-        )
+        ElicitResult(action = ElicitResult.Action.Accept, content = GetNicknameRequest(nickName).encode())
       }
 
       val response = mcpClient.callNicknameTool()
@@ -145,11 +127,7 @@ internal abstract class McpServerActionTest {
 
     @Test
     fun `test nickname tool with decline elicitation action`(): Unit = runBlocking {
-      mcpClient.setElicitationHandler {
-        ElicitResult(
-          action = ElicitResult.Action.Decline,
-        )
-      }
+      mcpClient.setElicitationHandler { ElicitResult(action = ElicitResult.Action.Decline) }
 
       val response = mcpClient.callNicknameTool()
       assertNotNull(response)
@@ -160,11 +138,7 @@ internal abstract class McpServerActionTest {
 
     @Test
     fun `test nickname tool with cancel elicitation action`(): Unit = runBlocking {
-      mcpClient.setElicitationHandler {
-        ElicitResult(
-          action = ElicitResult.Action.Cancel,
-        )
-      }
+      mcpClient.setElicitationHandler { ElicitResult(action = ElicitResult.Action.Cancel) }
 
       val response = mcpClient.callNicknameTool()
       assertNotNull(response)
@@ -174,39 +148,28 @@ internal abstract class McpServerActionTest {
     }
   }
 
+  @Inject lateinit var jettyService: JettyService
+  @Inject private lateinit var registry: CollectorRegistry
 
-  @Inject
-  lateinit var jettyService: JettyService
-  @Inject
-  private lateinit var registry: CollectorRegistry
+  protected val mcpServerTestConfig = McpConfig(buildMap { put(SERVER_NAME, McpServerConfig(version = "1.0.0")) })
 
-  protected val mcpServerTestConfig = McpConfig(
-    buildMap {
-      put(
-        SERVER_NAME,
-        McpServerConfig(
-          version = "1.0.0",
-        ),
-      )
-    },
-  )
+  val mcpServerTestModule =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(McpServerModule.create(SERVER_NAME, mcpServerTestConfig))
 
-  val mcpServerTestModule = object : KAbstractModule() {
-    override fun configure() {
-      install(McpServerModule.create(SERVER_NAME, mcpServerTestConfig))
+        install(McpToolModule.create<CalculatorTool>())
+        install(McpToolModule.create<KotlinSdkTool>())
+        install(McpToolModule.create<ThrowingTool>())
+        install(McpToolModule.create<HierarchicalTool>())
+        install(McpToolModule.create<NicknameElicitationTool>())
+        install(McpPromptModule.create<KotlinDeveloperPrompt>())
+        install(McpResourceModule.create<WebSearchResource>())
 
-      install(McpToolModule.create<CalculatorTool>())
-      install(McpToolModule.create<KotlinSdkTool>())
-      install(McpToolModule.create<ThrowingTool>())
-      install(McpToolModule.create<HierarchicalTool>())
-      install(McpToolModule.create<NicknameElicitationTool>())
-      install(McpPromptModule.create<KotlinDeveloperPrompt>())
-      install(McpResourceModule.create<WebSearchResource>())
-
-      install(WebServerTestingModule())
-      install(MiskTestingServiceModule())
+        install(WebServerTestingModule())
+        install(MiskTestingServiceModule())
+      }
     }
-  }
 
   lateinit var mcpClient: Client
 
@@ -214,11 +177,7 @@ internal abstract class McpServerActionTest {
   fun `test ListTools`() = runBlocking {
     val request = ListToolsRequest()
     val response = mcpClient.listTools(request)
-    assertEquals(
-      expected = 5,
-      actual = response.tools.size,
-      message = "Expecting four tools to be registered",
-    )
+    assertEquals(expected = 5, actual = response.tools.size, message = "Expecting four tools to be registered")
 
     // Check calculator tool
     val calculatorTool = response.tools.find { it.name == "calculator" }
@@ -229,10 +188,13 @@ internal abstract class McpServerActionTest {
       message = "Expected the calculator tool name to be 'calculator'",
     )
     assertEquals(
-      expected = """A simple calculator that can perform basic arithmetic operations such as 
-      |addition, subtraction, multiplication, and division on two integers. In the input, 
-      |the operation will be interpreted as `firstTerm <operation> secondTerm`. 
-      |""".trimMargin(),
+      expected =
+        """
+        |A simple calculator that can perform basic arithmetic operations such as 
+        |addition, subtraction, multiplication, and division on two integers. In the input, 
+        |the operation will be interpreted as `firstTerm <operation> secondTerm`. 
+        |"""
+          .trimMargin(),
       actual = calculatorTool.description,
       message = "Expected the correct description for calculator tool",
     )
@@ -298,11 +260,7 @@ internal abstract class McpServerActionTest {
     val request = ListPromptsRequest()
     val response = mcpClient.listPrompts(request)
 
-    assertEquals(
-      expected = 1,
-      actual = response.prompts.size,
-      message = "Expecting one prompt to be registered",
-    )
+    assertEquals(expected = 1, actual = response.prompts.size, message = "Expecting one prompt to be registered")
 
     val kotlinDeveloperPrompt = response.prompts.firstOrNull()
     assertNotNull(kotlinDeveloperPrompt)
@@ -333,25 +291,16 @@ internal abstract class McpServerActionTest {
 
   @Test
   fun `test GetPrompt with arguments`() = runBlocking {
-    val request = GetPromptRequest(
-      GetPromptRequestParams(
-      name = "Kotlin Developer",
-      arguments = mapOf("Project Name" to "TestProject"),
-      ),
-    )
+    val request =
+      GetPromptRequest(
+        GetPromptRequestParams(name = "Kotlin Developer", arguments = mapOf("Project Name" to "TestProject"))
+      )
     val response = mcpClient.getPrompt(request)
 
     assertNotNull(response)
-    assertEquals(
-      expected = "Description for Kotlin Developer",
-      actual = response.description,
-    )
+    assertEquals(expected = "Description for Kotlin Developer", actual = response.description)
 
-    assertEquals(
-      expected = 1,
-      actual = response.messages.size,
-      message = "Expected one message in the prompt response",
-    )
+    assertEquals(expected = 1, actual = response.messages.size, message = "Expected one message in the prompt response")
 
     val message = response.messages.firstOrNull()
     assertNotNull(message)
@@ -371,11 +320,7 @@ internal abstract class McpServerActionTest {
     val request = ListResourcesRequest()
     val response = mcpClient.listResources(request)
 
-    assertEquals(
-      expected = 1,
-      actual = response.resources.size,
-      message = "Expecting one resource to be registered",
-    )
+    assertEquals(expected = 1, actual = response.resources.size, message = "Expecting one resource to be registered")
 
     val webSearchResource = response.resources.firstOrNull()
     assertNotNull(webSearchResource)
@@ -433,13 +378,14 @@ internal abstract class McpServerActionTest {
 
     assertEquals(
       expected = 1.0,
-      actual = registry.summaryCount(
-        "mcp_tool_handler_latency",
-        "server_name" to "mcp-server-action-test-server",
-        "server_version" to "1.0.0",
-        "tool_name" to "calculator",
-        "tool_outcome" to "Success",
-      )
+      actual =
+        registry.summaryCount(
+          "mcp_tool_handler_latency",
+          "server_name" to "mcp-server-action-test-server",
+          "server_version" to "1.0.0",
+          "tool_name" to "calculator",
+          "tool_outcome" to "Success",
+        ),
     )
   }
 
@@ -453,12 +399,12 @@ internal abstract class McpServerActionTest {
       expected = 1.0,
       actual =
         registry.summaryCount(
-        "mcp_tool_handler_latency",
-        "server_name" to "mcp-server-action-test-server",
-        "server_version" to "1.0.0",
-        "tool_name" to "calculator",
-        "tool_outcome" to "Error",
-      )
+          "mcp_tool_handler_latency",
+          "server_name" to "mcp-server-action-test-server",
+          "server_version" to "1.0.0",
+          "tool_name" to "calculator",
+          "tool_outcome" to "Error",
+        ),
     )
   }
 
@@ -469,13 +415,14 @@ internal abstract class McpServerActionTest {
 
     assertEquals(
       expected = 1.0,
-      actual = registry.summaryCount(
-        "mcp_tool_handler_latency",
-        "server_name" to "mcp-server-action-test-server",
-        "server_version" to "1.0.0",
-        "tool_name" to "throwing",
-        "tool_outcome" to "Exception",
-      )
+      actual =
+        registry.summaryCount(
+          "mcp_tool_handler_latency",
+          "server_name" to "mcp-server-action-test-server",
+          "server_version" to "1.0.0",
+          "tool_name" to "throwing",
+          "tool_outcome" to "Exception",
+        ),
     )
   }
 

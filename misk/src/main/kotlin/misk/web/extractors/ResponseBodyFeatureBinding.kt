@@ -3,6 +3,8 @@ package misk.web.extractors
 import com.squareup.wire.MessageSink
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.typeOf
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.RENDEZVOUS
@@ -21,8 +23,6 @@ import misk.web.interceptors.ResponseBodyMarshallerFactory
 import misk.web.marshal.Marshaller
 import misk.web.mediatype.MediaTypes
 import misk.web.sse.ServerSentEvent
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.typeOf
 
 internal class ResponseBodyFeatureBinding(
   private val responseBodyMarshaller: Marshaller<Any>,
@@ -33,22 +33,17 @@ internal class ResponseBodyFeatureBinding(
     if (streamingResponseParameter == null) return
 
     val responseBody = subject.takeResponseBody()
-    val eventSink = ResponseSink(
-      sink = responseBody,
-      httpCall = subject.httpCall,
-      responseBodyMarshaller = responseBodyMarshaller,
-    )
-    val param = if (isSuspend) {
-      ResponseSinkChannel(
-        channel = Channel(
-          capacity = RENDEZVOUS,
-          onBufferOverflow = BufferOverflow.SUSPEND,
-        ),
-        sink = eventSink,
-      )
-    } else {
-      eventSink
-    }
+    val eventSink =
+      ResponseSink(sink = responseBody, httpCall = subject.httpCall, responseBodyMarshaller = responseBodyMarshaller)
+    val param =
+      if (isSuspend) {
+        ResponseSinkChannel(
+          channel = Channel(capacity = RENDEZVOUS, onBufferOverflow = BufferOverflow.SUSPEND),
+          sink = eventSink,
+        )
+      } else {
+        eventSink
+      }
 
     subject.setParameter(streamingResponseParameter, param)
     with(subject.httpCall) {
@@ -75,17 +70,20 @@ internal class ResponseBodyFeatureBinding(
   }
 
   @Singleton
-  class Factory @Inject internal constructor(
-    private val responseBodyMarshallerFactory: ResponseBodyMarshallerFactory
-  ) : FeatureBinding.Factory {
+  class Factory @Inject internal constructor(private val responseBodyMarshallerFactory: ResponseBodyMarshallerFactory) :
+    FeatureBinding.Factory {
     override fun create(
       action: Action,
       pathPattern: PathPattern,
       claimer: Claimer,
-      stringConverterFactories: List<StringConverter.Factory>
+      stringConverterFactories: List<StringConverter.Factory>,
     ): FeatureBinding? {
-      if (action.dispatchMechanism == DispatchMechanism.GRPC && action.function.findAnnotation<Grpc>() == null) return null
-      if (action.responseContentType != MediaTypes.SERVER_EVENT_STREAM_TYPE && action.returnType.classifier == Unit::class) return null
+      if (action.dispatchMechanism == DispatchMechanism.GRPC && action.function.findAnnotation<Grpc>() == null)
+        return null
+      if (
+        action.responseContentType != MediaTypes.SERVER_EVENT_STREAM_TYPE && action.returnType.classifier == Unit::class
+      )
+        return null
       if (action.returnType.classifier == WebSocketListener::class) return null
 
       claimer.claimResponseBody()
@@ -93,15 +91,14 @@ internal class ResponseBodyFeatureBinding(
       // If the action response type is 'text/event-stream' and the return type is Unit, then we expect a streaming
       // response parameter of type ResponseSink or SendChannel.
       return if (action.responseContentType == MediaTypes.SERVER_EVENT_STREAM_TYPE) {
-        check(action.returnType.classifier == Unit::class) {
-          "Actions using SSE should not have a return type"
-        }
-        val streamingResponseParam = action.parameters.singleOrNull { param ->
-          param.type.classifier.let {
-            it == MessageSink::class || it == SendChannel::class
+        check(action.returnType.classifier == Unit::class) { "Actions using SSE should not have a return type" }
+        val streamingResponseParam =
+          action.parameters.singleOrNull { param ->
+            param.type.classifier.let { it == MessageSink::class || it == SendChannel::class }
           }
-        }
-          ?: error("Actions using SSE need a single ResponseSink(blocking) or SendChannel(suspending) parameter: $action")
+            ?: error(
+              "Actions using SSE need a single ResponseSink(blocking) or SendChannel(suspending) parameter: $action"
+            )
 
         check(streamingResponseParam.type.arguments.singleOrNull()?.type == typeOf<ServerSentEvent>()) {
           "SSE streaming parameters need to be of ServerSentEvent: $action"
@@ -110,10 +107,11 @@ internal class ResponseBodyFeatureBinding(
         val streamingResponseParameterIndex = action.parameters.indexOf(streamingResponseParam)
         claimer.claimParameter(streamingResponseParameterIndex)
 
-        val responseBodyMarshaller = responseBodyMarshallerFactory.create(
-          responseMediaType = MediaTypes.SERVER_EVENT_STREAM_TYPE,
-          type = typeOf<ServerSentEvent>(),
-        )
+        val responseBodyMarshaller =
+          responseBodyMarshallerFactory.create(
+            responseMediaType = MediaTypes.SERVER_EVENT_STREAM_TYPE,
+            type = typeOf<ServerSentEvent>(),
+          )
 
         ResponseBodyFeatureBinding(
           responseBodyMarshaller = responseBodyMarshaller,

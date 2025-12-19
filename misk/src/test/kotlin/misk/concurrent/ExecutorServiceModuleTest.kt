@@ -2,16 +2,16 @@ package misk.concurrent
 
 import com.google.inject.Injector
 import com.google.inject.Key
+import jakarta.inject.Inject
+import jakarta.inject.Qualifier
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.ThreadPoolExecutor
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.ThreadPoolExecutor
-import jakarta.inject.Inject
-import jakarta.inject.Qualifier
 
 @MiskTest(startService = true)
 internal class ExecutorServiceModuleTest {
@@ -46,13 +46,7 @@ internal class ExecutorServiceModuleTest {
     }
   }
 
-  @Qualifier
-  @Target(AnnotationTarget.FIELD)
-  @Retention(AnnotationRetention.RUNTIME)
-  annotation class Fixed
+  @Qualifier @Target(AnnotationTarget.FIELD) @Retention(AnnotationRetention.RUNTIME) annotation class Fixed
 
-  @Qualifier
-  @Target(AnnotationTarget.FIELD)
-  @Retention(AnnotationRetention.RUNTIME)
-  annotation class Unbound
+  @Qualifier @Target(AnnotationTarget.FIELD) @Retention(AnnotationRetention.RUNTIME) annotation class Unbound
 }

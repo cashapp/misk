@@ -4,9 +4,9 @@ import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.google.inject.Provides
+import jakarta.inject.Singleton
 import misk.cloud.aws.AwsRegion
 import misk.inject.KAbstractModule
-import jakarta.inject.Singleton
 
 open class RealS3Module : KAbstractModule() {
   override fun configure() {
@@ -14,12 +14,10 @@ open class RealS3Module : KAbstractModule() {
     requireBinding<AwsRegion>()
   }
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   fun provideS3(awsRegion: AwsRegion, awsCredentialsProvider: AWSCredentialsProvider): AmazonS3 {
-    val builder = AmazonS3ClientBuilder
-      .standard()
-      .withRegion(awsRegion.name)
-      .withCredentials(awsCredentialsProvider)
+    val builder = AmazonS3ClientBuilder.standard().withRegion(awsRegion.name).withCredentials(awsCredentialsProvider)
     configureClient(builder)
     return builder.build()
   }

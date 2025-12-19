@@ -2,6 +2,8 @@ package misk.web.v2
 
 import com.google.inject.Provider
 import jakarta.inject.Inject
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import misk.inject.toKey
 import misk.scope.ActionScope
 import misk.testing.MiskTest
@@ -11,13 +13,10 @@ import misk.web.HttpCall
 import misk.web.metadata.MetadataTestingModule
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 @MiskTest
 class DashboardPageLayoutTest {
-  @MiskTestModule
-  private val module = MetadataTestingModule()
+  @MiskTestModule private val module = MetadataTestingModule()
 
   @Inject lateinit var actionScope: ActionScope
   @Inject lateinit var layout: Provider<DashboardPageLayout>
@@ -37,20 +36,17 @@ class DashboardPageLayoutTest {
     actionScope.enter(mapOf(HttpCall::class.toKey() to fakeHttpCall)).use {
       // Fresh builder must have newBuilder() called
       val e1 = assertFailsWith<IllegalStateException> { layout.get().build() }
-      assertEquals(
-        "You must call newBuilder() before calling build() to prevent builder reuse.", e1.message
-      )
+      assertEquals("You must call newBuilder() before calling build() to prevent builder reuse.", e1.message)
 
       // No builder reuse
-      val e2 = assertFailsWith<IllegalStateException> {
-        val newBuilder = layout.get().newBuilder()
-        newBuilder.build()
-        // Not allowed to call build() twice on same builder
-        newBuilder.build()
-      }
-      assertEquals(
-        "You must call newBuilder() before calling build() to prevent builder reuse.", e2.message
-      )
+      val e2 =
+        assertFailsWith<IllegalStateException> {
+          val newBuilder = layout.get().newBuilder()
+          newBuilder.build()
+          // Not allowed to call build() twice on same builder
+          newBuilder.build()
+        }
+      assertEquals("You must call newBuilder() before calling build() to prevent builder reuse.", e2.message)
     }
   }
 }

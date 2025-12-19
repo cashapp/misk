@@ -3,27 +3,23 @@ package misk.inject
 import com.google.inject.Injector
 import com.google.inject.Provider
 import jakarta.inject.Inject
-import misk.annotation.ExperimentalMiskApi
 import kotlin.reflect.KClass
+import misk.annotation.ExperimentalMiskApi
 
 /**
- * This class should be extended by modules that want to contribute tasks to which involve async processing.
- * For example, background jobs, job queues, eventing, message pub/sub.
+ * This class should be extended by modules that want to contribute tasks to which involve async processing. For
+ * example, background jobs, job queues, eventing, message pub/sub.
  *
- * At service build time, these modules can be optionally filtered out before the Guice injector is created,
- * in cases where async processing is not desired, such as in separated main and jobs deployments.
+ * At service build time, these modules can be optionally filtered out before the Guice injector is created, in cases
+ * where async processing is not desired, such as in separated main and jobs deployments.
  */
-@Deprecated(
-  message = "Use AsyncSwitch directly or conditionalOn ServiceModule or ConditionalProvider.",
-)
+@Deprecated(message = "Use AsyncSwitch directly or conditionalOn ServiceModule or ConditionalProvider.")
 open class AsyncKAbstractModule : AsyncModule, KAbstractModule() {
   /**
-   * Returns a module that would be installed when async tasks are disabled.
-   * By default, this is a module that calls [configureWhenAsyncDisabled].
-   * Subclasses can override this method to provide a different module if needed.
+   * Returns a module that would be installed when async tasks are disabled. By default, this is a module that calls
+   * [configureWhenAsyncDisabled]. Subclasses can override this method to provide a different module if needed.
    */
-  @ExperimentalMiskApi
-  override fun moduleWhenAsyncDisabled(): KAbstractModule? = null
+  @ExperimentalMiskApi override fun moduleWhenAsyncDisabled(): KAbstractModule? = null
 }
 
 /**
@@ -78,12 +74,13 @@ inline fun <
   reified Input,
   reified Enabled : Input,
   reified Disabled : Input,
-  > ConditionalProvider(
-    switchKey: String,
-    enabledInstance: Enabled,
-    disabledInstance: Disabled,
-    noinline transformer: (Input) -> Output = { it as Output }
-  ) = ConditionalProvider(
+> ConditionalProvider(
+  switchKey: String,
+  enabledInstance: Enabled,
+  disabledInstance: Disabled,
+  noinline transformer: (Input) -> Output = { it as Output },
+) =
+  ConditionalProvider(
     switchKey = switchKey,
     switchType = S::class,
     outputType = Output::class,
@@ -93,7 +90,9 @@ inline fun <
     transformer = transformer as (Any?) -> Output,
   )
 
-class ConditionalProvider<S : Switch, Output : Any, Input> @JvmOverloads constructor(
+class ConditionalProvider<S : Switch, Output : Any, Input>
+@JvmOverloads
+constructor(
   val switchKey: String,
   val switchType: KClass<out S>,
   val outputType: KClass<out Output>,
@@ -102,8 +101,7 @@ class ConditionalProvider<S : Switch, Output : Any, Input> @JvmOverloads constru
   val disabledInstance: Input,
   val transformer: (Input) -> Output = { it as Output },
 ) : Provider<Output> {
-  @Inject
-  lateinit var injector: Injector
+  @Inject lateinit var injector: Injector
 
   override fun get(): Output {
     val switch = injector.getInstance(switchType.java)
@@ -143,7 +141,7 @@ inline fun <
   reified Input : Any,
   reified Enabled : Input,
   reified Disabled : Input,
-  > ConditionalTypedProvider(switchKey: String, noinline transformer: (Input) -> Output = { it as Output }) =
+> ConditionalTypedProvider(switchKey: String, noinline transformer: (Input) -> Output = { it as Output }) =
   ConditionalTypedProvider(
     switchKey,
     S::class,
@@ -151,7 +149,7 @@ inline fun <
     Input::class,
     Enabled::class,
     Disabled::class,
-    transformer
+    transformer,
   )
 
 inline fun <
@@ -159,17 +157,12 @@ inline fun <
   reified Output : Any,
   reified Enabled : Output,
   reified Disabled : Output,
-  > ConditionalTypedProvider(switchKey: String) =
-  ConditionalTypedProvider(
-    switchKey,
-    S::class,
-    Output::class,
-    Output::class,
-    Enabled::class,
-    Disabled::class,
-  )
+> ConditionalTypedProvider(switchKey: String) =
+  ConditionalTypedProvider(switchKey, S::class, Output::class, Output::class, Enabled::class, Disabled::class)
 
-class ConditionalTypedProvider<S : Switch, Output : Any, Input : Any, Enabled : Input, Disabled : Input> @JvmOverloads constructor(
+class ConditionalTypedProvider<S : Switch, Output : Any, Input : Any, Enabled : Input, Disabled : Input>
+@JvmOverloads
+constructor(
   val switchKey: String,
   val switchType: KClass<out S>,
   val outputType: KClass<out Output>,
@@ -178,8 +171,7 @@ class ConditionalTypedProvider<S : Switch, Output : Any, Input : Any, Enabled : 
   val disabledType: KClass<out Disabled>,
   val transformer: (Input) -> Output = { it as Output },
 ) : Provider<Output> {
-  @Inject
-  lateinit var injector: Injector
+  @Inject lateinit var injector: Injector
 
   override fun get(): Output {
     val switch = injector.getInstance(switchType.java)

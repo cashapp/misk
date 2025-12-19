@@ -1,5 +1,6 @@
 package misk.web.marshal
 
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -23,36 +24,31 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okio.Buffer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class MultipartRequestTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var jettyService: JettyService
 
   @Test
   fun `happy path`() {
-    val multipartBody = MultipartBody.Builder()
-      .addPart(
-        headersOf("a", "apple", "b", "banana"),
-        "fruit salad!\n".toRequestBody("text/plain".toMediaType())
-      )
-      .addFormDataPart("d", "good doggo")
-      .build()
+    val multipartBody =
+      MultipartBody.Builder()
+        .addPart(headersOf("a", "apple", "b", "banana"), "fruit salad!\n".toRequestBody("text/plain".toMediaType()))
+        .addFormDataPart("d", "good doggo")
+        .build()
 
-    val request = Builder()
-      .url(jettyService.httpServerUrl.resolve("/echo-multipart")!!)
-      .post(multipartBody)
+    val request = Builder().url(jettyService.httpServerUrl.resolve("/echo-multipart")!!).post(multipartBody)
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request.build()).execute()
 
     assertThat(response.code).isEqualTo(200)
     assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
     val body = response.body?.string()!!
-    assertThat(body).isEqualTo(
-      """
+    assertThat(body)
+      .isEqualTo(
+        """
         |part 0:
         |  a: apple
         |  b: banana
@@ -62,15 +58,17 @@ internal class MultipartRequestTest {
         |part 1:
         |  Content-Disposition: form-data; name="d"
         |good doggo
-        |""".trimMargin()
-    )
+        |"""
+          .trimMargin()
+      )
   }
 
   @Test
   fun `missing boundary parameter`() {
-    val request = Builder()
-      .url(jettyService.httpServerUrl.resolve("/echo-multipart")!!)
-      .post("not actually multipart!".toRequestBody("multipart/mixed".toMediaType()))
+    val request =
+      Builder()
+        .url(jettyService.httpServerUrl.resolve("/echo-multipart")!!)
+        .post("not actually multipart!".toRequestBody("multipart/mixed".toMediaType()))
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request.build()).execute()
 

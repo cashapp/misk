@@ -1,22 +1,17 @@
 package misk.aws2.sqs.jobqueue
 
-import com.google.inject.Provides
 import misk.MiskTestingServiceModule
 import misk.annotation.ExperimentalMiskApi
 import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.cloud.aws.AwsEnvironmentModule
-import misk.cloud.aws.AwsRegion
 import misk.cloud.aws.FakeAwsEnvironmentModule
-import misk.inject.KAbstractModule
 import misk.inject.ReusableTestModule
 import misk.testing.MockTracingBackendModule
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.regions.Region
 
 @OptIn(ExperimentalMiskApi::class)
-class SqsJobQueueTestModule(
-  private val dockerSqs: DockerSqs,
-) : ReusableTestModule() {
+class SqsJobQueueTestModule(private val dockerSqs: DockerSqs) : ReusableTestModule() {
   override fun configure() {
     install(MiskTestingServiceModule())
     install(MockTracingBackendModule())

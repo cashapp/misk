@@ -21,8 +21,8 @@ internal class ResolvedQueue(
     get() = name.value
 
   /**
-   * Invokes the lambda with this queue's [AmazonSQS] client. Exceptions thrown by the client
-   * are wrapped in a [SQSException].
+   * Invokes the lambda with this queue's [AmazonSQS] client. Exceptions thrown by the client are wrapped in a
+   * [SQSException].
    */
   fun <T> call(lambda: (AmazonSQS) -> T): T {
     try {
@@ -33,11 +33,6 @@ internal class ResolvedQueue(
   }
 
   /** Wraps AWS client errors, adding queue metadata to the exception message */
-  class SQSException(
-    cause: AmazonClientException,
-    queue: ResolvedQueue
-  ) : RuntimeException(
-    "${cause.message} (sqsQueue=${queue.sqsQueueName} region=${queue.region})",
-    cause
-  )
+  class SQSException(cause: AmazonClientException, queue: ResolvedQueue) :
+    RuntimeException("${cause.message} (sqsQueue=${queue.sqsQueueName} region=${queue.region})", cause)
 }

@@ -19,8 +19,8 @@ import misk.redis.lettuce.suspendingUse
 /**
  * Creates a new [RedisClient] with the specified configuration.
  *
- * This is a convenience wrapper around [RedisClient.create] that supports optional URI
- * and applies client options after creation. It delegates to either:
+ * This is a convenience wrapper around [RedisClient.create] that supports optional URI and applies client options after
+ * creation. It delegates to either:
  * - [RedisClient.create(ClientResources, RedisURI)] when URI is provided
  * - [RedisClient.create(ClientResources)] when URI is null
  *
@@ -80,22 +80,21 @@ import misk.redis.lettuce.suspendingUse
 fun redisClient(
   redisURI: RedisURI? = null,
   clientResources: ClientResources = DefaultClientResources.create(),
-  clientOptions: ClientOptions = ClientOptions.create()
+  clientOptions: ClientOptions = ClientOptions.create(),
 ): RedisClient =
   if (redisURI != null) {
-    RedisClient.create(clientResources, redisURI)
-  } else {
-    RedisClient.create(clientResources)
-  }.apply {
-    options = clientOptions
-  }
+      RedisClient.create(clientResources, redisURI)
+    } else {
+      RedisClient.create(clientResources)
+    }
+    .apply { options = clientOptions }
 
 /**
  * Executes a block with a Redis connection and automatically closes it afterward.
  *
- * This suspending function creates a connection using [RedisClient.connectAsync],
- * executes the provided block, and ensures the connection is closed properly using
- * Kotlin's [use] function. It supports custom key and value types through the codec.
+ * This suspending function creates a connection using [RedisClient.connectAsync], executes the provided block, and
+ * ensures the connection is closed properly using Kotlin's [use] function. It supports custom key and value types
+ * through the codec.
  *
  * Example with transaction:
  * ```kotlin
@@ -138,15 +137,14 @@ fun redisClient(
 suspend inline fun <K, V, T> RedisClient.withConnection(
   codec: RedisCodec<K, V>,
   uri: RedisURI,
-  block: StatefulRedisConnection<K, V>.() -> T
+  block: StatefulRedisConnection<K, V>.() -> T,
 ): T = connectAsync(codec, uri).await().suspendingUse(block)
 
 /**
  * Executes a block with a Redis connection using UTF-8 String codec.
  *
- * This is a convenience wrapper around [withConnection] that uses [StringCodec.UTF8]
- * for both keys and values. It delegates to [RedisClient.connectAsync] with the
- * UTF-8 String codec.
+ * This is a convenience wrapper around [withConnection] that uses [StringCodec.UTF8] for both keys and values. It
+ * delegates to [RedisClient.connectAsync] with the UTF-8 String codec.
  *
  * Example with Lua script:
  * ```kotlin
@@ -197,15 +195,14 @@ suspend inline fun <K, V, T> RedisClient.withConnection(
  */
 suspend inline fun <T> RedisClient.withConnection(
   uri: RedisURI,
-  block: StatefulRedisConnection<String, String>.() -> T
+  block: StatefulRedisConnection<String, String>.() -> T,
 ): T = withConnection(StringCodec.UTF8, uri, block)
 
 /**
  * Executes a block with a blocking Redis connection and automatically closes it.
  *
- * This function uses [RedisClient.connect] for synchronous connection creation.
- * It supports custom key and value types through the codec and handles proper
- * connection cleanup using Kotlin's [use] function.
+ * This function uses [RedisClient.connect] for synchronous connection creation. It supports custom key and value types
+ * through the codec and handles proper connection cleanup using Kotlin's [use] function.
  *
  * Example with custom type and batch operations:
  * ```kotlin
@@ -238,15 +235,14 @@ suspend inline fun <T> RedisClient.withConnection(
 inline fun <K, V, T> RedisClient.withConnectionBlocking(
   codec: RedisCodec<K, V>,
   uri: RedisURI? = null,
-  block: StatefulRedisConnection<K, V>.() -> T
+  block: StatefulRedisConnection<K, V>.() -> T,
 ): T = (uri?.let { connect(codec, uri) } ?: connect(codec)).use(block)
 
 /**
  * Executes a block with a blocking Redis connection using UTF-8 String codec.
  *
- * This is a convenience wrapper around [withConnectionBlocking] that uses
- * [StringCodec.UTF8] for both keys and values. It delegates to [RedisClient.connect]
- * with the UTF-8 String codec.
+ * This is a convenience wrapper around [withConnectionBlocking] that uses [StringCodec.UTF8] for both keys and values.
+ * It delegates to [RedisClient.connect] with the UTF-8 String codec.
  *
  * Example with pub/sub:
  * ```kotlin
@@ -273,14 +269,14 @@ inline fun <K, V, T> RedisClient.withConnectionBlocking(
  */
 inline fun <T> RedisClient.withConnectionBlocking(
   uri: RedisURI? = null,
-  block: StatefulRedisConnection<String, String>.() -> T
+  block: StatefulRedisConnection<String, String>.() -> T,
 ): T = withConnectionBlocking(StringCodec.UTF8, uri, block)
 
 /**
  * Creates [ClientResources] using a builder pattern.
  *
- * This function provides a Kotlin-friendly wrapper around [ClientResources.builder].
- * It allows configuration of client resources using a more idiomatic builder syntax.
+ * This function provides a Kotlin-friendly wrapper around [ClientResources.builder]. It allows configuration of client
+ * resources using a more idiomatic builder syntax.
  *
  * Example with metrics and event bus:
  * ```kotlin
@@ -303,16 +299,14 @@ inline fun <T> RedisClient.withConnectionBlocking(
  * @param builder Lambda with receiver for configuring the [ClientResources.Builder]
  * @return Configured [ClientResources] instance
  */
-inline fun clientResources(
-  builder: ClientResources.Builder.() -> Unit
-): ClientResources =
+inline fun clientResources(builder: ClientResources.Builder.() -> Unit): ClientResources =
   ClientResources.builder().apply(builder).build()
 
 /**
  * Creates [ClientOptions] using a builder pattern.
  *
- * This function provides a Kotlin-friendly wrapper around [ClientOptions.builder].
- * It allows configuration of client options using a more idiomatic builder syntax.
+ * This function provides a Kotlin-friendly wrapper around [ClientOptions.builder]. It allows configuration of client
+ * options using a more idiomatic builder syntax.
  *
  * Example with comprehensive configuration:
  * ```kotlin
@@ -346,16 +340,14 @@ inline fun clientResources(
  * @param builder Lambda with receiver for configuring the [ClientOptions.Builder]
  * @return Configured [ClientOptions] instance
  */
-inline fun clientOptions(
-  builder: ClientOptions.Builder.() -> Unit
-): ClientOptions =
+inline fun clientOptions(builder: ClientOptions.Builder.() -> Unit): ClientOptions =
   ClientOptions.builder().apply(builder).build()
 
 /**
  * Creates [SocketOptions] using a builder pattern.
  *
- * This function provides a Kotlin-friendly wrapper around [SocketOptions.builder].
- * It allows configuration of socket options using a more idiomatic builder syntax.
+ * This function provides a Kotlin-friendly wrapper around [SocketOptions.builder]. It allows configuration of socket
+ * options using a more idiomatic builder syntax.
  *
  * Example:
  * ```kotlin
@@ -371,16 +363,14 @@ inline fun clientOptions(
  * @param builder Lambda with receiver for configuring the [SocketOptions.Builder]
  * @return Configured [SocketOptions] instance
  */
-inline fun socketOptions(
-  builder: SocketOptions.Builder.() -> Unit
-): SocketOptions =
+inline fun socketOptions(builder: SocketOptions.Builder.() -> Unit): SocketOptions =
   SocketOptions.builder().apply(builder).build()
 
 /**
  * Configures socket options for a [ClientOptions.Builder].
  *
- * This extension function provides a Kotlin-friendly way to configure socket options
- * within a client options builder. It delegates to [ClientOptions.Builder.socketOptions].
+ * This extension function provides a Kotlin-friendly way to configure socket options within a client options builder.
+ * It delegates to [ClientOptions.Builder.socketOptions].
  *
  * Example:
  * ```kotlin
@@ -396,16 +386,14 @@ inline fun socketOptions(
  * @param builder Lambda with receiver for configuring the [SocketOptions.Builder]
  * @return The [ClientOptions.Builder] for method chaining
  */
-inline fun ClientOptions.Builder.socketOptions(
-  builder: SocketOptions.Builder.() -> Unit
-): ClientOptions.Builder =
+inline fun ClientOptions.Builder.socketOptions(builder: SocketOptions.Builder.() -> Unit): ClientOptions.Builder =
   this@socketOptions.socketOptions(misk.redis.lettuce.standalone.socketOptions(builder))
 
 /**
  * Creates [SslOptions] using a builder pattern.
  *
- * This function provides a Kotlin-friendly wrapper around [SslOptions.builder].
- * It allows configuration of SSL options using a more idiomatic builder syntax.
+ * This function provides a Kotlin-friendly wrapper around [SslOptions.builder]. It allows configuration of SSL options
+ * using a more idiomatic builder syntax.
  *
  * Example:
  * ```kotlin
@@ -420,16 +408,13 @@ inline fun ClientOptions.Builder.socketOptions(
  * @param builder Lambda with receiver for configuring the [SslOptions.Builder]
  * @return Configured [SslOptions] instance
  */
-inline fun sslOptions(
-  builder: SslOptions.Builder.() -> Unit
-): SslOptions =
-  SslOptions.builder().apply(builder).build()
+inline fun sslOptions(builder: SslOptions.Builder.() -> Unit): SslOptions = SslOptions.builder().apply(builder).build()
 
 /**
  * Configures SSL options for a [ClientOptions.Builder].
  *
- * This extension function provides a Kotlin-friendly way to configure SSL options
- * within a client options builder. It delegates to [ClientOptions.Builder.sslOptions].
+ * This extension function provides a Kotlin-friendly way to configure SSL options within a client options builder. It
+ * delegates to [ClientOptions.Builder.sslOptions].
  *
  * Example:
  * ```kotlin
@@ -445,16 +430,14 @@ inline fun sslOptions(
  * @param builder Lambda with receiver for configuring the [SslOptions.Builder]
  * @return The [ClientOptions.Builder] for method chaining
  */
-inline fun ClientOptions.Builder.sslOptions(
-  builder: SslOptions.Builder.() -> Unit
-): ClientOptions.Builder =
+inline fun ClientOptions.Builder.sslOptions(builder: SslOptions.Builder.() -> Unit): ClientOptions.Builder =
   this@sslOptions.sslOptions(misk.redis.lettuce.standalone.sslOptions(builder))
 
 /**
  * Creates [TimeoutOptions] using a builder pattern.
  *
- * This function provides a Kotlin-friendly wrapper around [TimeoutOptions.builder].
- * It allows configuration of timeout options using a more idiomatic builder syntax.
+ * This function provides a Kotlin-friendly wrapper around [TimeoutOptions.builder]. It allows configuration of timeout
+ * options using a more idiomatic builder syntax.
  *
  * Example:
  * ```kotlin
@@ -467,16 +450,14 @@ inline fun ClientOptions.Builder.sslOptions(
  * @param builder Lambda with receiver for configuring the [TimeoutOptions.Builder]
  * @return Configured [TimeoutOptions] instance
  */
-inline fun timeoutOptions(
-  builder: TimeoutOptions.Builder.() -> Unit
-): TimeoutOptions =
+inline fun timeoutOptions(builder: TimeoutOptions.Builder.() -> Unit): TimeoutOptions =
   TimeoutOptions.builder().apply(builder).build()
 
 /**
  * Configures timeout options for a [ClientOptions.Builder].
  *
- * This extension function provides a Kotlin-friendly way to configure timeout options
- * within a client options builder. It delegates to [ClientOptions.Builder.timeoutOptions].
+ * This extension function provides a Kotlin-friendly way to configure timeout options within a client options builder.
+ * It delegates to [ClientOptions.Builder.timeoutOptions].
  *
  * Example:
  * ```kotlin
@@ -491,8 +472,5 @@ inline fun timeoutOptions(
  * @param builder Lambda with receiver for configuring the [TimeoutOptions.Builder]
  * @return The [ClientOptions.Builder] for method chaining
  */
-inline fun ClientOptions.Builder.timeoutOptions(
-  builder: TimeoutOptions.Builder.() -> Unit
-): ClientOptions.Builder =
+inline fun ClientOptions.Builder.timeoutOptions(builder: TimeoutOptions.Builder.() -> Unit): ClientOptions.Builder =
   this@timeoutOptions.timeoutOptions(misk.redis.lettuce.standalone.timeoutOptions(builder))
-

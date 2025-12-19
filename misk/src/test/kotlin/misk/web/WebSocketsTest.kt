@@ -1,7 +1,10 @@
 package misk.web
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
+import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -16,14 +19,10 @@ import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import misk.logging.LogCollector
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 internal class WebSocketsTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject lateinit var jettyService: JettyService
   @Inject lateinit var logCollector: LogCollector
@@ -34,9 +33,7 @@ internal class WebSocketsTest {
   fun basicWebSocket() {
     val client = OkHttpClient()
 
-    val request = Request.Builder()
-      .url(jettyService.httpServerUrl.resolve("/echo")!!)
-      .build()
+    val request = Request.Builder().url(jettyService.httpServerUrl.resolve("/echo")!!).build()
 
     val webSocket = client.newWebSocket(request, listener)
 
@@ -44,19 +41,18 @@ internal class WebSocketsTest {
     assertEquals("ACK hello", listener.takeMessage())
 
     // Confirm interceptors were invoked.
-    assertThat(logCollector.takeMessage(RequestLoggingInterceptor::class)).matches(
-      "EchoWebSocket principal=unknown time=0.000 ns code=200 " +
-        "request=JettyWebSocket\\[.* to /echo] response=EchoListener"
-    )
+    assertThat(logCollector.takeMessage(RequestLoggingInterceptor::class))
+      .matches(
+        "EchoWebSocket principal=unknown time=0.000 ns code=200 " +
+          "request=JettyWebSocket\\[.* to /echo] response=EchoListener"
+      )
   }
 
   @Test
   fun loggingDisabledByEnv() {
     val client = OkHttpClient()
 
-    val request = Request.Builder()
-      .url(jettyService.httpServerUrl.resolve("/echo-logging-disabled-by-env")!!)
-      .build()
+    val request = Request.Builder().url(jettyService.httpServerUrl.resolve("/echo-logging-disabled-by-env")!!).build()
 
     val webSocket = client.newWebSocket(request, listener)
 
@@ -92,11 +88,7 @@ class EchoWebSocket @Inject constructor() : WebAction {
   }
 
   @ConnectWebSocket("/echo-logging-disabled-by-env")
-  @LogRequestResponse(
-    bodySampling = 1.0,
-    errorBodySampling = 1.0,
-    excludedEnvironments = ["testing"]
-  )
+  @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0, excludedEnvironments = ["testing"])
   fun echoLoggingDisabledByEnv(@Suppress("UNUSED_PARAMETER") webSocket: WebSocket): WebSocketListener {
     return object : WebSocketListener() {
       override fun onMessage(webSocket: WebSocket, text: String) {

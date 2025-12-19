@@ -2,6 +2,8 @@ package misk.web.interceptors
 
 import io.prometheus.client.Histogram
 import jakarta.inject.Inject
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.milliseconds
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessControlModule
@@ -24,13 +26,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Offset
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
-import java.util.concurrent.TimeUnit
-import kotlin.time.Duration.Companion.milliseconds
 
 @MiskTest(startService = true)
 class ExclusiveTimingInterceptorTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
   val httpClient = OkHttpClient()
 
   @Inject private lateinit var exclusiveTimingInterceptorFactory: ExclusiveTimingInterceptor.Factory
@@ -52,15 +51,15 @@ class ExclusiveTimingInterceptorTest {
       val requestDuration = metricsInterceptorFactory.requestDurationSummary!!
       val exclusiveRequestDuration = exclusiveTimingInterceptorFactory.requestDurationHistogram
       val difference =
-        requestDuration.labels(*labels(200)).get().sum -
-          exclusiveRequestDuration.labels(*labels(200)).get().sum
+        requestDuration.labels(*labels(200)).get().sum - exclusiveRequestDuration.labels(*labels(200)).get().sum
 
       // Verify that the sleep time was excluded
       // (but leave some room for small differences due to execution time.)
-      assertThat(difference).isCloseTo(
-        /* expected = */ ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble(),
-        /* offset = */ Offset.offset(ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble() / 2)
-      )
+      assertThat(difference)
+        .isCloseTo(
+          /* expected = */ ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble(),
+          /* offset = */ Offset.offset(ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble() / 2),
+        )
     }
   }
 
@@ -94,18 +93,10 @@ class ExclusiveTimingInterceptorTest {
     }
   }
 
-  fun invoke(
-    desiredStatusCode: Int,
-    service: String? = null,
-    user: String? = null,
-  ): okhttp3.Response {
-    val url = jettyService.httpServerUrl.newBuilder()
-      .encodedPath("/call/$desiredStatusCode")
-      .build()
+  fun invoke(desiredStatusCode: Int, service: String? = null, user: String? = null): okhttp3.Response {
+    val url = jettyService.httpServerUrl.newBuilder().encodedPath("/call/$desiredStatusCode").build()
 
-    val request = okhttp3.Request.Builder()
-      .url(url)
-      .get()
+    val request = okhttp3.Request.Builder().url(url).get()
     service?.let { request.addHeader(SERVICE_HEADER, it) }
     user?.let { request.addHeader(USER_HEADER, it) }
     return httpClient.newCall(request.build()).execute().also {
@@ -131,7 +122,8 @@ class ExclusiveTimingInterceptorTest {
 }
 
 internal class ExclusiveTimingInterceptorTestAction
-@Inject constructor(private val excludedTime: ThreadLocal<ExcludedTime>) : WebAction {
+@Inject
+constructor(private val excludedTime: ThreadLocal<ExcludedTime>) : WebAction {
   @Get("/call/{desiredStatusCode}")
   @Unauthenticated
   fun call(@PathParam desiredStatusCode: Int): Response<String> {

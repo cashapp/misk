@@ -18,14 +18,16 @@ internal abstract class BaseSchemaMigrator(
     val migrationFilesForShard = mutableListOf<MigrationFile>()
 
     for (migrationResource in migrationResources) {
-      val migrationFiles = resourceLoader.walk(migrationResource)
-        .filter { it.endsWith(".sql") }
-        .filter { resource ->
-          connector.config().migrations_resources_exclusion?.none { excludedResource ->
-            resource.contains(excludedResource)
-          } ?: true
-        }
-        .map { MigrationFile(it, migrationResource) }
+      val migrationFiles =
+        resourceLoader
+          .walk(migrationResource)
+          .filter { it.endsWith(".sql") }
+          .filter { resource ->
+            connector.config().migrations_resources_exclusion?.none { excludedResource ->
+              resource.contains(excludedResource)
+            } ?: true
+          }
+          .map { MigrationFile(it, migrationResource) }
       migrationFiles.forEach {
         if (!validateMigrationFile(it)) {
           throw IllegalArgumentException("unexpected resource: ${it.filename}")

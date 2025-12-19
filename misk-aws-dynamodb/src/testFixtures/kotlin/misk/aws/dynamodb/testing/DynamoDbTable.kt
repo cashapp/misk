@@ -6,11 +6,11 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 
 /**
- * Use this with [DockerDynamoDbModule] or [InProcessDynamoDbModule] to configure your DynamoDB
- * tables for each test execution.
+ * Use this with [DockerDynamoDbModule] or [InProcessDynamoDbModule] to configure your DynamoDB tables for each test
+ * execution.
  *
- * Use [configureTable] to customize the table creation request for testing, such as to configure
- * the secondary indexes required by `ProjectionType.ALL`.
+ * Use [configureTable] to customize the table creation request for testing, such as to configure the secondary indexes
+ * required by `ProjectionType.ALL`.
  */
 data class DynamoDbTable(
   val tableClass: KClass<*>,
@@ -18,8 +18,9 @@ data class DynamoDbTable(
 ) {
   val tableName: String
     get() {
-      val annotation = tableClass.findAnnotation<DynamoDBTable>()
-        ?: throw IllegalStateException("Expected @DynamoDBTable on $tableClass")
+      val annotation =
+        tableClass.findAnnotation<DynamoDBTable>()
+          ?: throw IllegalStateException("Expected @DynamoDBTable on $tableClass")
       return annotation.tableName
     }
 }

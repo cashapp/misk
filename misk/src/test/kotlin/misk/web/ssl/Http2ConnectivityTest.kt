@@ -5,6 +5,12 @@ import com.google.inject.Guice
 import com.google.inject.Provides
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.io.IOException
+import java.net.SocketTimeoutException
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.TimeUnit
+import javax.servlet.http.HttpServletRequest
+import kotlin.test.assertFailsWith
 import misk.Action
 import misk.MiskDefault
 import misk.MiskTestingServiceModule
@@ -15,6 +21,7 @@ import misk.client.HttpClientSSLConfig
 import misk.client.HttpClientsConfig
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
+import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.scope.ActionScoped
 import misk.security.ssl.SslLoader
@@ -45,18 +52,10 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import misk.logging.LogCollector
-import java.io.IOException
-import java.net.SocketTimeoutException
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.TimeUnit
-import javax.servlet.http.HttpServletRequest
-import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 class Http2ConnectivityTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var logCollector: LogCollector
@@ -77,11 +76,7 @@ class Http2ConnectivityTest {
 
   @Test
   fun happyPath() {
-    val call = client.newCall(
-      Request.Builder()
-        .url(jetty.httpsServerUrl!!.resolve("/hello")!!)
-        .build()
-    )
+    val call = client.newCall(Request.Builder().url(jetty.httpsServerUrl!!.resolve("/hello")!!).build())
     val response = call.execute()
     response.use {
       assertThat(response.protocol).isEqualTo(Protocol.HTTP_2)
@@ -91,15 +86,9 @@ class Http2ConnectivityTest {
 
   @Test
   fun http1ForClientsThatPreferIt() {
-    val http1Client = client.newBuilder()
-      .protocols(listOf(Protocol.HTTP_1_1))
-      .build()
+    val http1Client = client.newBuilder().protocols(listOf(Protocol.HTTP_1_1)).build()
 
-    val call = http1Client.newCall(
-      Request.Builder()
-        .url(jetty.httpsServerUrl!!.resolve("/hello")!!)
-        .build()
-    )
+    val call = http1Client.newCall(Request.Builder().url(jetty.httpsServerUrl!!.resolve("/hello")!!).build())
     val response = call.execute()
     response.use {
       assertThat(response.protocol).isEqualTo(Protocol.HTTP_1_1)
@@ -109,11 +98,7 @@ class Http2ConnectivityTest {
 
   @Test
   fun http1ForCleartext() {
-    val call = client.newCall(
-      Request.Builder()
-        .url(jetty.httpServerUrl.resolve("/hello")!!)
-        .build()
-    )
+    val call = client.newCall(Request.Builder().url(jetty.httpServerUrl.resolve("/hello")!!).build())
     val response = call.execute()
     response.use {
       assertThat(response.protocol).isEqualTo(Protocol.HTTP_1_1)
@@ -125,142 +110,118 @@ class Http2ConnectivityTest {
   @Test
   @Disabled
   fun disconnectWithEmptyResponse() {
-    client = client.newBuilder()
-      .retryOnConnectionFailure(false)
-      .build()
-    val call = client.newCall(
-      Request.Builder()
-        .url(jetty.httpsServerUrl!!.resolve("/disconnect/empty")!!)
-        .build()
-    )
-    assertFailsWith<IOException> {
-      call.execute()
-    }
+    client = client.newBuilder().retryOnConnectionFailure(false).build()
+    val call = client.newCall(Request.Builder().url(jetty.httpsServerUrl!!.resolve("/disconnect/empty")!!).build())
+    assertFailsWith<IOException> { call.execute() }
   }
 
   /** Confirm we don't page oncall when HTTP calls fail due to connectivity problems. */
   @Test
   @Disabled("Too flaky; sometimes returns a 499 instead")
   fun disconnectWithLargeResponse() {
-    client = client.newBuilder()
-      .retryOnConnectionFailure(false)
-      .build()
-    val call = client.newCall(
-      Request.Builder()
-        .url(jetty.httpsServerUrl!!.resolve("/disconnect/large")!!)
-        .build()
-    )
-    assertFailsWith<IOException> {
-      call.execute()
-    }
+    client = client.newBuilder().retryOnConnectionFailure(false).build()
+    val call = client.newCall(Request.Builder().url(jetty.httpsServerUrl!!.resolve("/disconnect/large")!!).build())
+    assertFailsWith<IOException> { call.execute() }
 
     val code = module.lockInterceptorFactory.queue.take()
     assertThat(code).isEqualTo(500)
 
     val requestDuration = metricsInterceptorFactory.requestDurationSummary!!
     assertThat(
-      requestDuration.labels(
-        "Http2ConnectivityTest.DisconnectWithLargeResponseAction",
-        "unknown",
-        "500"
-      ).get().count.toInt()
-    ).isEqualTo(1)
+        requestDuration
+          .labels("Http2ConnectivityTest.DisconnectWithLargeResponseAction", "unknown", "500")
+          .get()
+          .count
+          .toInt()
+      )
+      .isEqualTo(1)
   }
 
-  /** Confirm we don't page oncall and we record a 499 in the metrics. **/
+  /** Confirm we don't page oncall and we record a 499 in the metrics. * */
   @Test
   @Disabled("Too flaky")
   fun clientTimeoutWritingTheRequest() {
-    val http1Client = client.newBuilder()
-      .protocols(listOf(Protocol.HTTP_1_1))
-      .writeTimeout(1, TimeUnit.MILLISECONDS)
-      .build()
+    val http1Client =
+      client.newBuilder().protocols(listOf(Protocol.HTTP_1_1)).writeTimeout(1, TimeUnit.MILLISECONDS).build()
 
-    val requestBody = object : RequestBody() {
-      override fun contentType() = "text/plain;charset=utf-8".toMediaType()
+    val requestBody =
+      object : RequestBody() {
+        override fun contentType() = "text/plain;charset=utf-8".toMediaType()
 
-      override fun writeTo(sink: BufferedSink) {
-        Thread.sleep(1000L)
-        for (i in 0 until 1024 * 1024) {
-          sink.writeUtf8("impossible: $i\n")
+        override fun writeTo(sink: BufferedSink) {
+          Thread.sleep(1000L)
+          for (i in 0 until 1024 * 1024) {
+            sink.writeUtf8("impossible: $i\n")
+          }
+          throw IOException("boom")
         }
-        throw IOException("boom")
       }
-    }
 
-    val call = http1Client.newCall(
-      Request.Builder()
-        .url(jetty.httpsServerUrl!!.resolve("/large/request")!!)
-        .post(requestBody)
-        .build()
-    )
+    val call =
+      http1Client.newCall(
+        Request.Builder().url(jetty.httpsServerUrl!!.resolve("/large/request")!!).post(requestBody).build()
+      )
 
-    assertFailsWith<SocketTimeoutException> {
-      call.execute()
-    }
+    assertFailsWith<SocketTimeoutException> { call.execute() }
 
     val code = module.lockInterceptorFactory.queue.take()
     assertThat(code).isEqualTo(499)
 
     val requestDuration = metricsInterceptorFactory.requestDurationSummary!!
     assertThat(
-      requestDuration.labels(
-        "Http2ConnectivityTest.DisconnectWithLargeRequestAction",
-        "unknown",
-        "499"
-      ).get().count.toInt()
-    ).isEqualTo(1)
+        requestDuration
+          .labels("Http2ConnectivityTest.DisconnectWithLargeRequestAction", "unknown", "499")
+          .get()
+          .count
+          .toInt()
+      )
+      .isEqualTo(1)
   }
 
   @Test
   fun clientCancelsWritingTheRequest() {
-    val http1Client = client.newBuilder()
-      .build()
+    val http1Client = client.newBuilder().build()
 
-    val requestBody = object : RequestBody() {
-      override fun contentType() = "text/plain;charset=utf-8".toMediaType()
+    val requestBody =
+      object : RequestBody() {
+        override fun contentType() = "text/plain;charset=utf-8".toMediaType()
 
-      override fun writeTo(sink: BufferedSink) {
-        for (i in 0 until 1024 * 1024) {
-          sink.writeUtf8("impossible: $i\n")
+        override fun writeTo(sink: BufferedSink) {
+          for (i in 0 until 1024 * 1024) {
+            sink.writeUtf8("impossible: $i\n")
+          }
+          throw IOException("boom")
         }
-        throw IOException("boom")
       }
-    }
 
-    val call = http1Client.newCall(
-      Request.Builder()
-        .url(jetty.httpsServerUrl!!.resolve("/large/request")!!)
-        .post(requestBody)
-        .build()
-    )
+    val call =
+      http1Client.newCall(
+        Request.Builder().url(jetty.httpsServerUrl!!.resolve("/large/request")!!).post(requestBody).build()
+      )
 
-    assertFailsWith<IOException> {
-      call.execute()
-    }
+    assertFailsWith<IOException> { call.execute() }
 
     val code = module.lockInterceptorFactory.queue.take()
     assertThat(code).isEqualTo(499)
 
     val requestDuration = metricsInterceptorFactory.requestDurationSummary!!
     assertThat(
-      requestDuration.labels(
-        "Http2ConnectivityTest.DisconnectWithLargeRequestAction",
-        "unknown",
-        "499"
-      ).get().count.toInt()
-    ).isEqualTo(1)
+        requestDuration
+          .labels("Http2ConnectivityTest.DisconnectWithLargeRequestAction", "unknown", "499")
+          .get()
+          .count
+          .toInt()
+      )
+      .isEqualTo(1)
   }
 
   class HelloAction @Inject constructor() : WebAction {
-    @Get("/hello")
-    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun sayHello() = "hello"
+    @Get("/hello") @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8) fun sayHello() = "hello"
   }
 
-  class DisconnectWithEmptyResponseAction @Inject constructor(
-    private val actionScopedServletRequest: ActionScoped<HttpServletRequest>
-  ) : WebAction {
+  class DisconnectWithEmptyResponseAction
+  @Inject
+  constructor(private val actionScopedServletRequest: ActionScoped<HttpServletRequest>) : WebAction {
     @Get("/disconnect/empty")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun disconnect(): Response<String> {
@@ -272,9 +233,9 @@ class Http2ConnectivityTest {
   }
 
   /** Large responses fail later. */
-  class DisconnectWithLargeResponseAction @Inject constructor(
-    private val actionScopedServletRequest: ActionScoped<HttpServletRequest>
-  ) : WebAction {
+  class DisconnectWithLargeResponseAction
+  @Inject
+  constructor(private val actionScopedServletRequest: ActionScoped<HttpServletRequest>) : WebAction {
     @Get("/disconnect/large")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun disconnect(): ResponseBody {
@@ -302,16 +263,12 @@ class Http2ConnectivityTest {
 
   class TestModule : KAbstractModule() {
     val lockInterceptorFactory = LockInterceptor.Factory()
+
     override fun configure() {
-      multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-        .toInstance(lockInterceptorFactory)
+      multibind<NetworkInterceptor.Factory>(MiskDefault::class).toInstance(lockInterceptorFactory)
 
       install(LogCollectorModule())
-      install(
-        WebServerTestingModule(
-          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG
-        )
-      )
+      install(WebServerTestingModule(webConfig = WebServerTestingModule.TESTING_WEB_CONFIG))
       install(MiskTestingServiceModule())
       install(WebActionModule.create<HelloAction>())
       install(WebActionModule.create<DisconnectWithEmptyResponseAction>())
@@ -322,12 +279,13 @@ class Http2ConnectivityTest {
 
   class LockInterceptor constructor(val queue: ArrayBlockingQueue<Int>) : NetworkInterceptor {
     override fun intercept(chain: NetworkChain) {
-      val statusCode = try {
-        chain.proceed(chain.httpCall)
-        chain.httpCall.statusCode
-      } catch (e: Exception) {
-        -1
-      }
+      val statusCode =
+        try {
+          chain.proceed(chain.httpCall)
+          chain.httpCall.statusCode
+        } catch (e: Exception) {
+          -1
+        }
       queue.add(statusCode)
     }
 
@@ -338,7 +296,6 @@ class Http2ConnectivityTest {
       override fun create(action: Action): NetworkInterceptor? {
         return LockInterceptor(queue)
       }
-
     }
   }
 
@@ -354,20 +311,22 @@ class Http2ConnectivityTest {
     @Singleton
     fun provideHttpClientsConfig(): HttpClientsConfig {
       return HttpClientsConfig(
-        endpoints = mapOf(
-          "default" to HttpClientEndpointConfig(
-            url = "http://example.com/",
-            clientConfig = HttpClientConfig(
-              ssl = HttpClientSSLConfig(
-                cert_store = null,
-                trust_store = TrustStoreConfig(
-                  resource = "classpath:/ssl/server_cert.pem",
-                  format = SslLoader.FORMAT_PEM
-                )
+        endpoints =
+          mapOf(
+            "default" to
+              HttpClientEndpointConfig(
+                url = "http://example.com/",
+                clientConfig =
+                  HttpClientConfig(
+                    ssl =
+                      HttpClientSSLConfig(
+                        cert_store = null,
+                        trust_store =
+                          TrustStoreConfig(resource = "classpath:/ssl/server_cert.pem", format = SslLoader.FORMAT_PEM),
+                      )
+                  ),
               )
-            )
           )
-        )
       )
     }
   }

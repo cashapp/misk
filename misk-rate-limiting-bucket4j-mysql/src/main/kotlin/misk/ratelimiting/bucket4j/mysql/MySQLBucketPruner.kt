@@ -1,18 +1,20 @@
 package misk.ratelimiting.bucket4j.mysql
 
 import io.micrometer.core.instrument.MeterRegistry
-import misk.logging.getLogger
-import wisp.ratelimiting.RateLimitPrunerMetrics
-import wisp.ratelimiting.bucket4j.Bucket4jPruner
-import wisp.ratelimiting.bucket4j.ClockTimeMeter
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.time.Clock
 import javax.sql.DataSource
 import kotlin.system.measureTimeMillis
+import misk.logging.getLogger
+import wisp.ratelimiting.RateLimitPrunerMetrics
+import wisp.ratelimiting.bucket4j.Bucket4jPruner
+import wisp.ratelimiting.bucket4j.ClockTimeMeter
 
-class MySQLBucketPruner @JvmOverloads constructor(
+class MySQLBucketPruner
+@JvmOverloads
+constructor(
   clock: Clock,
   private val dataSource: DataSource,
   private val idColumn: String,
@@ -20,47 +22,48 @@ class MySQLBucketPruner @JvmOverloads constructor(
   private val stateColumn: String,
   tableName: String,
   isMySQL8: Boolean = false,
-  pageSize: Long = 1000
+  pageSize: Long = 1000,
 ) : Bucket4jPruner() {
   override val clockTimeMeter = ClockTimeMeter(clock)
 
-  private val deleteStatement = """
+  private val deleteStatement =
+    """
     DELETE FROM $tableName
     WHERE $idColumn = ?
-  """.trimIndent()
+  """
+      .trimIndent()
 
-  private val lockingClause = if (isMySQL8) {
-    "FOR UPDATE SKIP LOCKED"
-  } else {
-    "FOR UPDATE"
-  }
+  private val lockingClause =
+    if (isMySQL8) {
+      "FOR UPDATE SKIP LOCKED"
+    } else {
+      "FOR UPDATE"
+    }
   /**
    * Notes about this query:
    * * We use `SKIP LOCKED` because that indicates bucket4j is currently using the row
-   * * We use cursor based pagination because it's faster and because OFFSET based pagination
-   * requires extra bookkeeping when deleting rows
+   * * We use cursor based pagination because it's faster and because OFFSET based pagination requires extra bookkeeping
+   *   when deleting rows
    */
-  private val pageStatement = """
+  private val pageStatement =
+    """
     SELECT $idColumn, $stateColumn
     FROM $tableName
     WHERE $idColumn > ?
     ORDER BY $idColumn
     LIMIT $pageSize
     $lockingClause
-  """.trimIndent()
+  """
+      .trimIndent()
 
   private val prunerMetrics = RateLimitPrunerMetrics(meterRegistry)
 
-  /**
-   * Prunes the rate limit table, returning the number of rows pruned.
-   */
+  /** Prunes the rate limit table, returning the number of rows pruned. */
   override fun prune() {
     val connection = dataSource.connection
     try {
       connection.autoCommit = false
-      val millisTaken = measureTimeMillis {
-        pruneLoop(connection)
-      }
+      val millisTaken = measureTimeMillis { pruneLoop(connection) }
       prunerMetrics.pruningDuration.record(millisTaken.toDouble())
     } catch (e: Exception) {
       connection.rollback()
@@ -86,12 +89,13 @@ class MySQLBucketPruner @JvmOverloads constructor(
       while (true) {
         val key = resultSet.getString(idColumn)
         val stateBytes = resultSet.getBytes(stateColumn)
-        val state = try {
-          deserializeState(stateBytes)
-        } catch (e: Exception) {
-          logger.warn(e) { "Failed to deserialize state column for key $key" }
-          continue
-        }
+        val state =
+          try {
+            deserializeState(stateBytes)
+          } catch (e: Exception) {
+            logger.warn(e) { "Failed to deserialize state column for key $key" }
+            continue
+          }
 
         if (isBucketStale(state)) {
           val deleteBucketStatement = connection.prepareStatement(deleteStatement)
@@ -113,9 +117,7 @@ class MySQLBucketPruner @JvmOverloads constructor(
     }
   }
 
-  /**
-   * Advances the result set, returning `true` if there were no more rows
-   */
+  /** Advances the result set, returning `true` if there were no more rows */
   private fun isResultSetEmpty(resultSet: ResultSet): Boolean {
     return try {
       !resultSet.next()

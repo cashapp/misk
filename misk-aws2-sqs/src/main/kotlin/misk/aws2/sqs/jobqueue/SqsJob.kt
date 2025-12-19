@@ -15,9 +15,11 @@ class SqsJob(
 ) : Job {
   override val body: String = message.body()
   override val attributes: Map<String, String> by lazy {
-    message.messageAttributes()
+    message
+      .messageAttributes()
       .filter { (key, _) -> key != JOBQUEUE_METADATA_ATTR }
-      .map { (key, value) -> key to value.stringValue() }.toMap()
+      .map { (key, value) -> key to value.stringValue() }
+      .toMap()
       .plus(message.attributes().map { (key, value) -> key.toString() to value })
   }
   override val id: String = message.messageId()
@@ -27,34 +29,26 @@ class SqsJob(
   }
 
   private val jobqueueMetadata: Map<String, String> by lazy {
-    val metadata = message.messageAttributes()[JOBQUEUE_METADATA_ATTR]
-      ?: throw IllegalStateException(JOBQUEUE_METADATA_ATTR + " not found in messageAttributes")
+    val metadata =
+      message.messageAttributes()[JOBQUEUE_METADATA_ATTR]
+        ?: throw IllegalStateException(JOBQUEUE_METADATA_ATTR + " not found in messageAttributes")
     moshi.adapter<Map<String, String>>().fromJson(metadata.stringValue())!!
   }
 
   companion object {
-    /**
-     * Message attribute used to store metadata specific to jobqueue functionality.
-     * JSON-encoded.
-     */
+    /** Message attribute used to store metadata specific to jobqueue functionality. JSON-encoded. */
     const val JOBQUEUE_METADATA_ATTR = "_jobqueue-metadata"
 
     /**
-     * The name of the queue the job was originally submitted to.
-     * Used when operating with a global dead-letter queue,
+     * The name of the queue the job was originally submitted to. Used when operating with a global dead-letter queue,
      * so that jobs can be returned to their original (or retry) queue when reprocessing.
      */
     const val JOBQUEUE_METADATA_ORIGIN_QUEUE = "origin_queue"
 
-    /**
-     * Client-assigned identifier, useful to detect duplicate messages.
-     */
+    /** Client-assigned identifier, useful to detect duplicate messages. */
     const val JOBQUEUE_METADATA_IDEMPOTENCE_KEY = "idempotence_key"
 
-    /**
-     * Name attribute used to pass the original trace id, so that we
-     * can track from enqueueing to handling.
-     */
+    /** Name attribute used to pass the original trace id, so that we can track from enqueueing to handling. */
     const val JOBQUEUE_METADATA_ORIGINAL_TRACE_ID = "original_trace_id"
   }
 }

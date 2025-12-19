@@ -15,11 +15,7 @@ class MiskCallerExtension : BeforeTestExecutionCallback, AfterTestExecutionCallb
     val injector = context.retrieve<Injector>("injector")
     val actionScopeProvider = injector.getBinding(ActionScope::class.java)
     val actionScope = actionScopeProvider.provider.get()
-    actionScope.enter(
-      mapOf(
-        keyOf<MiskCaller>() to context.getPrincipal()
-      )
-    )
+    actionScope.enter(mapOf(keyOf<MiskCaller>() to context.getPrincipal()))
   }
 
   override fun afterTestExecution(context: ExtensionContext) {
@@ -30,8 +26,7 @@ class MiskCallerExtension : BeforeTestExecutionCallback, AfterTestExecutionCallb
 
   private fun ExtensionContext.getPrincipal(): MiskCaller {
     val annotation =
-      requiredTestInstances.allInstances.last().javaClass
-        .getAnnotationsByType(WithMiskCaller::class.java)[0]
+      requiredTestInstances.allInstances.last().javaClass.getAnnotationsByType(WithMiskCaller::class.java)[0]
     return when {
       annotation.user.isNotBlank() -> MiskCaller(user = annotation.user)
       annotation.service.isNotBlank() -> MiskCaller(service = annotation.service)
@@ -48,4 +43,3 @@ class MiskCallerExtension : BeforeTestExecutionCallback, AfterTestExecutionCallb
 @Target(AnnotationTarget.CLASS)
 @ExtendWith(MiskCallerExtension::class)
 annotation class WithMiskCaller(val user: String = "", val service: String = "")
-

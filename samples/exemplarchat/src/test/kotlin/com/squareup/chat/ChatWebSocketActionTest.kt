@@ -2,36 +2,38 @@ package com.squareup.chat
 
 import com.google.inject.util.Modules
 import com.squareup.chat.actions.ChatWebSocketAction
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.redis.RedisModule
 import misk.redis.testing.DockerRedis
+import misk.redis.testing.RedisTestFlushModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.FakeWebSocket
 import misk.web.WebActionModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import wisp.deployment.TESTING
-import jakarta.inject.Inject
-import misk.redis.testing.RedisTestFlushModule
 import redis.clients.jedis.ConnectionPoolConfig
+import wisp.deployment.TESTING
 
 @MiskTest(startService = true)
 class ChatWebSocketActionTest {
   @Suppress("unused")
   @MiskTestModule
-  private val module = Modules.combine(
-    MiskTestingServiceModule(),
-    DeploymentModule(TESTING),
-    RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false),
-    RedisTestFlushModule(),
-    WebActionModule.create<ChatWebSocketAction>()
-  )
+  private val module =
+    Modules.combine(
+      MiskTestingServiceModule(),
+      DeploymentModule(TESTING),
+      RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false),
+      RedisTestFlushModule(),
+      WebActionModule.create<ChatWebSocketAction>(),
+    )
 
   @Inject lateinit var chatWebSocketAction: ChatWebSocketAction
 
-  @Test fun happyPath() {
+  @Test
+  fun happyPath() {
     val sandyWebSocket = FakeWebSocket()
     val randyWebSocket = FakeWebSocket()
     val sandyListener = chatWebSocketAction.chat("discuss", sandyWebSocket)

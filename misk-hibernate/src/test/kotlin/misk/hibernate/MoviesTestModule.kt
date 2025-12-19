@@ -18,39 +18,29 @@ class MoviesTestModule(
   private val type: DataSourceType = DataSourceType.VITESS_MYSQL,
   private val allowScatters: Boolean = true,
   private val scaleSafetyChecks: Boolean = false,
-  private val entitiesModule: HibernateEntityModule = object :
-    HibernateEntityModule(Movies::class) {
-    override fun configureHibernate() {
-      addEntities(DbMovie::class, DbActor::class, DbCharacter::class)
-    }
-  },
+  private val entitiesModule: HibernateEntityModule =
+    object : HibernateEntityModule(Movies::class) {
+      override fun configureHibernate() {
+        addEntities(DbMovie::class, DbActor::class, DbCharacter::class)
+      }
+    },
   private val installHealthChecks: Boolean = true,
 ) : KAbstractModule() {
   override fun configure() {
     install(LogCollectorModule())
-    install(
-      Modules.override(MiskTestingServiceModule()).with(
-        FakeClockModule(),
-        MockTracingBackendModule()
-      )
-    )
+    install(Modules.override(MiskTestingServiceModule()).with(FakeClockModule(), MockTracingBackendModule()))
     install(DeploymentModule(TESTING))
 
     val config = MiskConfig.load<MoviesConfig>("moviestestmodule", TESTING)
     val writerConfig = selectDataSourceConfig(config)
     val readerConfig = selectReaderDataSourceConfig(config)
-    install(
-      HibernateTestingModule(
-        Movies::class,
-        scaleSafetyChecks = scaleSafetyChecks
-      )
-    )
+    install(HibernateTestingModule(Movies::class, scaleSafetyChecks = scaleSafetyChecks))
     install(
       HibernateModule(
         qualifier = Movies::class,
         readerQualifier = MoviesReader::class,
         cluster = DataSourceClusterConfig(writer = writerConfig, reader = readerConfig),
-        installHealthChecks = installHealthChecks
+        installHealthChecks = installHealthChecks,
       )
     )
     install(entitiesModule)
@@ -70,7 +60,7 @@ class MoviesTestModule(
       DataSourceType.HSQLDB -> throw RuntimeException("Not supported (yet?)")
     }
   }
-  
+
   internal fun selectReaderDataSourceConfig(config: MoviesConfig): DataSourceConfig {
     if (!allowScatters && type == DataSourceType.VITESS_MYSQL) {
       return config.vitess_mysql_no_scatter_data_source

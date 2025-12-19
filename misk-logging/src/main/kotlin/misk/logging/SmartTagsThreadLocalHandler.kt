@@ -4,27 +4,20 @@ object SmartTagsThreadLocalHandler {
   private val threadLocalMdcContext = ThreadLocal<ThreadLocalSmartTagsMdcContext>()
 
   /**
-   * Retrieves all the logging MDC tags that were added to the logger via `withSmartTags()` and
-   * clears the thread local storage.
+   * Retrieves all the logging MDC tags that were added to the logger via `withSmartTags()` and clears the thread local
+   * storage.
    *
-   * Note: the thread local storage is only populated when an exception is thrown within a
-   * `withSmartTags()` block.
+   * Note: the thread local storage is only populated when an exception is thrown within a `withSmartTags()` block.
    */
-  fun popThreadLocalSmartTags() = peekThreadLocalSmartTags()
-    .also { clearSmartTags() }
+  fun popThreadLocalSmartTags() = peekThreadLocalSmartTags().also { clearSmartTags() }
 
   /**
-   * Retrieves all the logging MDC tags that were added to the logger via `withSmartTags()` but
-   * leaves them in place. Useful for catching and logging exceptions within a nested withSmartTags
-   * block.
+   * Retrieves all the logging MDC tags that were added to the logger via `withSmartTags()` but leaves them in place.
+   * Useful for catching and logging exceptions within a nested withSmartTags block.
    *
-   * Note: the thread local storage is only populated when an exception is thrown within a
-   * `withSmartTags()` block.
+   * Note: the thread local storage is only populated when an exception is thrown within a `withSmartTags()` block.
    */
-  fun peekThreadLocalSmartTags() = threadLocalMdcContext
-    .get()
-    ?.tags
-    ?: emptySet()
+  fun peekThreadLocalSmartTags() = threadLocalMdcContext.get()?.tags ?: emptySet()
 
   private fun clearSmartTags() = threadLocalMdcContext.remove()
 
@@ -56,13 +49,9 @@ object SmartTagsThreadLocalHandler {
     }
   }
 
-  private data class ThreadLocalSmartTagsMdcContext(
-    val triggeringException: Exception,
-    val tags: Set<Tag>
-  ) {
+  private data class ThreadLocalSmartTagsMdcContext(val triggeringException: Exception, val tags: Set<Tag>) {
     fun wasTriggeredBy(throwable: Throwable): Boolean {
-      if (triggeringException == throwable)
-        return true
+      if (triggeringException == throwable) return true
 
       return if (throwable.cause != null) {
         wasTriggeredBy(throwable.cause!!)

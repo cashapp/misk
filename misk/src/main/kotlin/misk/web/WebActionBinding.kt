@@ -1,42 +1,35 @@
 package misk.web
 
+import jakarta.inject.Inject
+import java.util.regex.Matcher
+import kotlin.reflect.KParameter
 import misk.Action
 import misk.web.actions.WebAction
+import misk.web.extractors.StringConverter
 import okio.BufferedSink
 import okio.BufferedSource
-import java.util.regex.Matcher
-import jakarta.inject.Inject
-import misk.web.extractors.StringConverter
-import kotlin.reflect.KParameter
 
 /** HTTP binding as specified by [FeatureBinding]. */
-class WebActionBinding @Inject constructor(
+class WebActionBinding
+@Inject
+constructor(
   private val action: Action,
   private val beforeCallBindings: Set<FeatureBinding>,
   private val afterCallBindings: Set<FeatureBinding>,
   private var requestBodyClaimer: FeatureBinding?,
   private val parameterClaimers: List<FeatureBinding>,
   private val responseBodyClaimer: FeatureBinding?,
-  private val returnValueClaimer: FeatureBinding?
+  private val returnValueClaimer: FeatureBinding?,
 ) {
   /** Returns the parameters for the call. */
-  fun beforeCall(
-    webAction: WebAction,
-    httpCall: HttpCall,
-    pathMatcher: Matcher
-  ): List<Any?> {
+  fun beforeCall(webAction: WebAction, httpCall: HttpCall, pathMatcher: Matcher): List<Any?> {
     val execution = Execution(beforeCallBindings, webAction, httpCall, pathMatcher)
     execution.executeBeforeCall()
     return execution.parameters.toList()
   }
 
   /** Accepts the returned value from the call. */
-  fun afterCall(
-    webAction: WebAction,
-    httpCall: HttpCall,
-    pathMatcher: Matcher,
-    returnValue: Any?
-  ) {
+  fun afterCall(webAction: WebAction, httpCall: HttpCall, pathMatcher: Matcher, returnValue: Any?) {
     val execution = Execution(afterCallBindings, webAction, httpCall, pathMatcher)
     execution.returnValue = returnValue
     execution.executeAfterCall()
@@ -47,7 +40,7 @@ class WebActionBinding @Inject constructor(
     private val bindings: Set<FeatureBinding>,
     override val webAction: WebAction,
     override val httpCall: HttpCall,
-    override val pathMatcher: Matcher
+    override val pathMatcher: Matcher,
   ) : FeatureBinding.Subject {
     internal val parameters = MutableList<Any?>(action.parameterTypes.size) { null }
     internal var returnValue: Any? = null
@@ -82,8 +75,7 @@ class WebActionBinding @Inject constructor(
       parameters[index] = value
     }
 
-    override fun setParameter(parameter: KParameter, value: Any?) =
-      setParameter(parameter.index - 1, value)
+    override fun setParameter(parameter: KParameter, value: Any?) = setParameter(parameter.index - 1, value)
 
     override fun takeRequestBody(): BufferedSource {
       require(current == requestBodyClaimer) { "request body not claimed by $current" }
@@ -105,6 +97,7 @@ class WebActionBinding @Inject constructor(
     /** Claims are taken by this placeholder until we get the actual FeatureBinding. */
     private object Placeholder : FeatureBinding {
       override fun beforeCall(subject: FeatureBinding.Subject) = throw AssertionError()
+
       override fun afterCall(subject: FeatureBinding.Subject) = throw AssertionError()
     }
 
@@ -119,9 +112,7 @@ class WebActionBinding @Inject constructor(
 
     override fun claimRequestBody() {
       check(requestBody == null) { "already claimed by $requestBody" }
-      check(
-        action.dispatchMechanism != DispatchMechanism.GET
-      ) {
+      check(action.dispatchMechanism != DispatchMechanism.GET) {
         "cannot claim request body of ${action.dispatchMechanism.name}"
       }
       requestBody = Placeholder
@@ -193,9 +184,10 @@ class WebActionBinding @Inject constructor(
 
       val nonNullParameters = mutableListOf<FeatureBinding>()
       for (i in 0 until parameters.size) {
-        nonNullParameters += checkNotNull(parameters[i]) {
-          "$action parameter $i not claimed (did you forget @RequestBody ? Did you use correct /path/{param} syntax for your path parameter?)"
-        }
+        nonNullParameters +=
+          checkNotNull(parameters[i]) {
+            "$action parameter $i not claimed (did you forget @RequestBody ? Did you use correct /path/{param} syntax for your path parameter?)"
+          }
       }
 
       if (action.dispatchMechanism != DispatchMechanism.WEBSOCKET) {
@@ -213,20 +205,19 @@ class WebActionBinding @Inject constructor(
         requestBody,
         nonNullParameters.toList(),
         responseBody,
-        returnValue
+        returnValue,
       )
     }
   }
 
   /** Creates feature bindings for use before and after a web call. */
-  class Factory @Inject constructor(
+  class Factory
+  @Inject
+  constructor(
     private val featureBindingFactories: List<FeatureBinding.Factory>,
     private val stringConverterFactories: List<StringConverter.Factory>,
   ) {
-    fun create(
-      action: Action,
-      pathPattern: PathPattern
-    ): WebActionBinding {
+    fun create(action: Action, pathPattern: PathPattern): WebActionBinding {
       val claimer = RealClaimer(action)
       for (factory in featureBindingFactories) {
         val binding = factory.create(action, pathPattern, claimer, stringConverterFactories)

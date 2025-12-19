@@ -3,13 +3,13 @@ package misk.cron
 import com.google.common.util.concurrent.AbstractIdleService
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.time.Clock
+import java.time.Duration
 import misk.clustering.weights.ClusterWeightProvider
 import misk.inject.AsyncSwitch
 import misk.logging.getLogger
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
-import java.time.Clock
-import java.time.Duration
 
 @Singleton
 internal class CronTask @Inject constructor() : AbstractIdleService() {

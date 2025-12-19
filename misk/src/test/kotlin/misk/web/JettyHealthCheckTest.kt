@@ -1,13 +1,25 @@
 package misk.web
 
 import com.google.inject.util.Modules
+import jakarta.inject.Inject
+import jakarta.inject.Qualifier
+import java.io.IOException
+import java.util.concurrent.Callable
+import java.util.concurrent.Future
+import java.util.concurrent.Phaser
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import misk.MiskTestingServiceModule
 import misk.concurrent.ExecutorServiceFactory
+import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
+import misk.web.jetty.JettyThreadPoolHealthCheck
 import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -18,18 +30,6 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.eclipse.jetty.util.thread.ExecutorThreadPool
 import org.eclipse.jetty.util.thread.ThreadPool
 import org.junit.jupiter.api.Test
-import java.io.IOException
-import java.util.concurrent.Callable
-import java.util.concurrent.Future
-import java.util.concurrent.Phaser
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
-import jakarta.inject.Qualifier
-import misk.healthchecks.HealthCheck
-import misk.web.actions.ReadinessCheckAction
-import misk.web.jetty.JettyThreadPoolHealthCheck
 
 @MiskTest(startService = true)
 internal class JettyHealthCheckTest {
@@ -41,31 +41,23 @@ internal class JettyHealthCheckTest {
   @Inject lateinit var executorFactory: ExecutorServiceFactory
   @Inject lateinit var threadPool: ThreadPool
 
-  @Test fun health() {
+  @Test
+  fun health() {
     val executor = executorFactory.unbounded("testing")
     val httpClient = OkHttpClient()
-    val request = Request.Builder()
-      .get()
-      .url(httpUrlBuilder().encodedPath("/block").build())
-      .build()
-    val healthRequest = Request.Builder()
-      .get()
-      .url(healthUrlBuilder().encodedPath("/health").build())
-      .build()
-    val readinessRequest = Request.Builder()
-      .get()
-      .url(healthUrlBuilder().encodedPath("/_readiness").build())
-      .build()
+    val request = Request.Builder().get().url(httpUrlBuilder().encodedPath("/block").build()).build()
+    val healthRequest = Request.Builder().get().url(healthUrlBuilder().encodedPath("/health").build()).build()
+    val readinessRequest = Request.Builder().get().url(healthUrlBuilder().encodedPath("/_readiness").build()).build()
 
     // make sure readiness passes when the threadpool is not low
-    var readinessResponse = executor.submit(Callable { httpClient.newCall(readinessRequest).execute() }).get(5, TimeUnit.SECONDS)
+    var readinessResponse =
+      executor.submit(Callable { httpClient.newCall(readinessRequest).execute() }).get(5, TimeUnit.SECONDS)
     assertThat(readinessResponse.code).isEqualTo(200)
 
     // exhaust the thread pool
     val responses = mutableListOf<Future<Response>>()
     // Unfortunately the # of threads vary locally vs CI and it's not clear why, so dynamically compute.
-    val parallelRequests =
-      (threadPool as ExecutorThreadPool).maxThreads - threadPool.threads + threadPool.idleThreads
+    val parallelRequests = (threadPool as ExecutorThreadPool).maxThreads - threadPool.threads + threadPool.idleThreads
     requestsPhaser.bulkRegister(parallelRequests + 1)
     // Jetty can be flaky on rejecting a request, so ensure we have exhausted the thread pool.
     while (requestsPhaser.arrivedParties < parallelRequests) {
@@ -76,8 +68,7 @@ internal class JettyHealthCheckTest {
     requestsPhaser.awaitAdvanceInterruptibly(0, 5, TimeUnit.SECONDS)
 
     // verify all threads are busy
-    assertThatThrownBy { httpClient.newCall(request).execute() }
-      .isInstanceOf(IOException::class.java)
+    assertThatThrownBy { httpClient.newCall(request).execute() }.isInstanceOf(IOException::class.java)
 
     val healthResponses = mutableListOf<Future<Response>>()
     // make sure we can check liveness and readiness in parallel
@@ -93,22 +84,24 @@ internal class JettyHealthCheckTest {
     }
 
     // make sure readiness fails when the threadpool is low
-    readinessResponse = executor.submit(Callable { httpClient.newCall(readinessRequest).execute() }).get(5, TimeUnit.SECONDS)
+    readinessResponse =
+      executor.submit(Callable { httpClient.newCall(readinessRequest).execute() }).get(5, TimeUnit.SECONDS)
     assertThat(readinessResponse.code).isEqualTo(503)
 
     // release the blocking threads
     requestsPhaser.arrive()
 
     // double check these requests were successfully processed
-    val successes = responses.mapNotNull {
-      try {
-        it.get(5, TimeUnit.SECONDS)
-      } catch (e: Exception) {
-        // Jetty can be flaky on rejecting a request, so just ensure we have the expected #
-        // of successful responses, not a specific order.
-        null
+    val successes =
+      responses.mapNotNull {
+        try {
+          it.get(5, TimeUnit.SECONDS)
+        } catch (e: Exception) {
+          // Jetty can be flaky on rejecting a request, so just ensure we have the expected #
+          // of successful responses, not a specific order.
+          null
+        }
       }
-    }
 
     successes.forEach {
       assertThat(it.code).isEqualTo(200)
@@ -117,7 +110,8 @@ internal class JettyHealthCheckTest {
     assertThat(successes).hasSize(parallelRequests)
 
     // make sure readiness passes when the threadpool is not low
-    readinessResponse = executor.submit(Callable { httpClient.newCall(readinessRequest).execute() }).get(5, TimeUnit.SECONDS)
+    readinessResponse =
+      executor.submit(Callable { httpClient.newCall(readinessRequest).execute() }).get(5, TimeUnit.SECONDS)
     assertThat(readinessResponse.code).isEqualTo(200)
 
     executor.shutdown()
@@ -126,24 +120,27 @@ internal class JettyHealthCheckTest {
   internal class TestModule : KAbstractModule() {
     override fun configure() {
       install(
-        Modules.override(WebServerTestingModule()).with(
-          object : KAbstractModule() {
-            override fun configure() {
-              val pool = ExecutorThreadPool(
-                ThreadPoolExecutor(
-                  // There is some flakiness in Jetty startup when it eagerly creates core threads
-                  // and those core threads are not available to be used. Just lazily create for tests.
-                  0,
-                  10,
-                  60, TimeUnit.SECONDS,
-                  SynchronousQueue()
-                ),
-                0
-              )
-              bind<ThreadPool>().toInstance(pool)
+        Modules.override(WebServerTestingModule())
+          .with(
+            object : KAbstractModule() {
+              override fun configure() {
+                val pool =
+                  ExecutorThreadPool(
+                    ThreadPoolExecutor(
+                      // There is some flakiness in Jetty startup when it eagerly creates core threads
+                      // and those core threads are not available to be used. Just lazily create for tests.
+                      0,
+                      10,
+                      60,
+                      TimeUnit.SECONDS,
+                      SynchronousQueue(),
+                    ),
+                    0,
+                  )
+                bind<ThreadPool>().toInstance(pool)
+              }
             }
-          }
-        )
+          )
       )
       install(MiskTestingServiceModule())
 
@@ -156,21 +153,15 @@ internal class JettyHealthCheckTest {
     }
   }
 
-  @Qualifier
-  internal annotation class Requests
+  @Qualifier internal annotation class Requests
 
-  @Qualifier
-  internal annotation class Waiting
+  @Qualifier internal annotation class Waiting
 
-  @Qualifier
-  internal annotation class HealthBlocking
+  @Qualifier internal annotation class HealthBlocking
 
-  @Qualifier
-  internal annotation class Health
+  @Qualifier internal annotation class Health
 
-  internal class BlockingAction @Inject constructor(
-    @Requests private val phaser: Phaser
-  ) : WebAction {
+  internal class BlockingAction @Inject constructor(@Requests private val phaser: Phaser) : WebAction {
     @Get("/block")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun block(): String {
@@ -182,9 +173,7 @@ internal class JettyHealthCheckTest {
     }
   }
 
-  internal class HealthAction @Inject constructor(
-    @Health private val phaser: Phaser
-  ) : WebAction {
+  internal class HealthAction @Inject constructor(@Health private val phaser: Phaser) : WebAction {
     @Get("/health")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun check(): String {

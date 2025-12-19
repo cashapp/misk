@@ -15,7 +15,7 @@ internal fun UnifiedJedis.flushAllWithClusterSupport(logger: KLogger) {
         pool.resource.use { conn ->
           try {
             Jedis(conn).use { jedis -> jedis.flushAll() }
-          } catch (e : Exception) {
+          } catch (e: Exception) {
             logger.error(e) { "Error flushing node $node: + ${e.message}" }
           }
         }

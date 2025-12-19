@@ -1,9 +1,9 @@
 package misk.jobqueue.sqs
 
 import com.google.inject.ImplementedBy
-import misk.jobqueue.QueueName
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.jobqueue.QueueName
 
 /**
  * Interface for a provider of dead-letter queue names.
@@ -28,5 +28,6 @@ class DefaultDeadLetterQueueProvider @Inject constructor() : DeadLetterQueueProv
  */
 class StaticDeadLetterQueueProvider(queue: String) : DeadLetterQueueProvider {
   private val dlq = QueueName(queue)
+
   override fun deadLetterQueueFor(queue: QueueName): QueueName = dlq
 }

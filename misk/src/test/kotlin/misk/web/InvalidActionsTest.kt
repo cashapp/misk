@@ -7,6 +7,9 @@ import com.squareup.protos.test.grpc.HelloReply
 import com.squareup.protos.test.grpc.HelloRequest
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.time.Duration
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.web.actions.WebAction
@@ -14,19 +17,21 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.Duration
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 class InvalidActionsTest {
-  @Test fun failIdenticalActions() {
-    val exception = assertThrows<IllegalStateException>("Should throw an exception") {
-      Guice.createInjector(IdenticalActionsModule()).getInstance(ServiceManager::class.java)
-        .startAsync().awaitHealthy(Duration.ofSeconds(5))
-    }
-    assertThat(exception.message).contains(
-      "Actions [InvalidActionsTest.SomeAction, InvalidActionsTest.IdenticalAction] have identical routing annotations."
-    )
+  @Test
+  fun failIdenticalActions() {
+    val exception =
+      assertThrows<IllegalStateException>("Should throw an exception") {
+        Guice.createInjector(IdenticalActionsModule())
+          .getInstance(ServiceManager::class.java)
+          .startAsync()
+          .awaitHealthy(Duration.ofSeconds(5))
+      }
+    assertThat(exception.message)
+      .contains(
+        "Actions [InvalidActionsTest.SomeAction, InvalidActionsTest.IdenticalAction] have identical routing annotations."
+      )
   }
 
   class IdenticalActionsModule : KAbstractModule() {
@@ -53,25 +58,19 @@ class InvalidActionsTest {
   }
 
   // TODO (r3mariano): Fail with errors for real.
-  @Disabled @Test fun failGrpcWithHttp2Disabled() {
-    val exception = assertThrows<ProvisionException>("Should throw an exception") {
-      Guice.createInjector(GrpcActionsModule()).getInstance(ServiceManager::class.java)
-        .startAsync().awaitHealthy()
-    }
-    assertThat(exception.message).contains(
-      "HTTP/2 must be enabled if any gRPC actions are bound."
-    )
+  @Disabled
+  @Test
+  fun failGrpcWithHttp2Disabled() {
+    val exception =
+      assertThrows<ProvisionException>("Should throw an exception") {
+        Guice.createInjector(GrpcActionsModule()).getInstance(ServiceManager::class.java).startAsync().awaitHealthy()
+      }
+    assertThat(exception.message).contains("HTTP/2 must be enabled if any gRPC actions are bound.")
   }
 
   class GrpcActionsModule : KAbstractModule() {
     override fun configure() {
-      install(
-        WebServerTestingModule(
-          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
-            http2 = false
-          )
-        )
-      )
+      install(WebServerTestingModule(webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(http2 = false)))
       install(MiskTestingServiceModule())
       install(WebActionModule.create<HelloRpcAction>())
     }
@@ -80,9 +79,7 @@ class InvalidActionsTest {
   @Singleton
   class HelloRpcAction @Inject constructor() : WebAction, GreeterSayHello {
     override fun sayHello(request: HelloRequest): HelloReply {
-      return HelloReply.Builder()
-        .message("howdy, ${request.name}")
-        .build()
+      return HelloReply.Builder().message("howdy, ${request.name}").build()
     }
   }
 
@@ -90,7 +87,7 @@ class InvalidActionsTest {
     @WireRpc(
       path = "/helloworld.Greeter/SayHello",
       requestAdapter = "com.squareup.protos.test.grpc.HelloRequest.ADAPTER",
-      responseAdapter = "com.squareup.protos.test.grpc.HelloReply.ADAPTER"
+      responseAdapter = "com.squareup.protos.test.grpc.HelloReply.ADAPTER",
     )
     fun sayHello(request: HelloRequest): HelloReply
   }

@@ -9,9 +9,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit.MILLISECONDS
 
 @Singleton
-internal class ReloadSignalService @Inject constructor(
-  private val clock: Clock,
-) : AbstractIdleService() {
+internal class ReloadSignalService @Inject constructor(private val clock: Clock) : AbstractIdleService() {
   @Volatile var lastLoadTimestamp: Instant = Instant.EPOCH
   @Volatile private var shutdownLatch = CountDownLatch(1)
 

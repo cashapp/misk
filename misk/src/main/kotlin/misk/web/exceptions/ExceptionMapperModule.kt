@@ -2,15 +2,14 @@ package misk.web.exceptions
 
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
-import misk.inject.KAbstractModule
 import kotlin.reflect.KClass
+import misk.inject.KAbstractModule
 
 /**
  * Binds a [Throwable] to an [ExceptionMapper].
  *
- * When an Exception occurs dispatching an Action, the bound ExceptionMapper is called to handle
- * the Exception. If there is not an explicit binding for the thrown Exception, the mapper for the
- * closest superclass is used.
+ * When an Exception occurs dispatching an Action, the bound ExceptionMapper is called to handle the Exception. If there
+ * is not an explicit binding for the thrown Exception, the mapper for the closest superclass is used.
  *
  * Given the example code
  *
@@ -22,12 +21,12 @@ import kotlin.reflect.KClass
  * class MyOtherActionException : ActionException {}
  * ```
  *
- * MyActionException maps to the specific MyActionExceptionMapper and MyOtherActionException
- * maps to the ActionExceptionMapper since uses the binding of the closest bound superclass.
+ * MyActionException maps to the specific MyActionExceptionMapper and MyOtherActionException maps to the
+ * ActionExceptionMapper since uses the binding of the closest bound superclass.
  */
 class ExceptionMapperModule<M : ExceptionMapper<T>, in T : Throwable>(
   private val exceptionClass: KClass<T>,
-  private val mapperClass: KClass<M>
+  private val mapperClass: KClass<M>,
 ) : KAbstractModule() {
   override fun configure() {
     MapBinder.newMapBinder(binder(), exceptionTypeLiteral, exceptionMapperTypeLiteral)
@@ -37,9 +36,7 @@ class ExceptionMapperModule<M : ExceptionMapper<T>, in T : Throwable>(
 
   companion object {
     inline fun <reified T : Throwable, reified M : ExceptionMapper<T>> create() =
-      ExceptionMapperModule(
-        T::class, M::class
-      )
+      ExceptionMapperModule(T::class, M::class)
 
     private val exceptionMapperTypeLiteral = object : TypeLiteral<ExceptionMapper<*>>() {}
     private val exceptionTypeLiteral = object : TypeLiteral<KClass<*>>() {}

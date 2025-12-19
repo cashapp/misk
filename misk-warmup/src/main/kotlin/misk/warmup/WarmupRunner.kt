@@ -2,33 +2,34 @@ package misk.warmup
 
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.ServiceManager
+import com.google.inject.Provider
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.runBlocking
+import misk.annotation.ExperimentalMiskApi
 import misk.concurrent.ExecutorServiceFactory
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
 import misk.logging.getLogger
-import java.util.concurrent.atomic.AtomicInteger
-import jakarta.inject.Inject
-import com.google.inject.Provider
-import jakarta.inject.Singleton
-import kotlinx.coroutines.runBlocking
-import misk.annotation.ExperimentalMiskApi
 
 /**
  * This class is a health check to defer production traffic until all warmup tasks have completed.
  *
- * Once the [ServiceManager] reports that all services have started, it runs all warmup tasks in
- * parallel. (It doesn't start earlier so warmup tasks have access to all services when they are
- * created).
+ * Once the [ServiceManager] reports that all services have started, it runs all warmup tasks in parallel. (It doesn't
+ * start earlier so warmup tasks have access to all services when they are created).
  *
- * Note that if a warmup task fails by throwing an exception, that is not fatal. This will report
- * itself as healthy, and early call latency might not be as low as it should be.
+ * Note that if a warmup task fails by throwing an exception, that is not fatal. This will report itself as healthy, and
+ * early call latency might not be as low as it should be.
  */
 @OptIn(ExperimentalMiskApi::class)
 @Singleton
-internal class WarmupRunner @Inject constructor(
+internal class WarmupRunner
+@Inject
+constructor(
   private val executorServiceFactory: ExecutorServiceFactory,
   /** Inject providers because task dependencies won't be ready when this runner is created. */
-  private val taskProviders: Map<String, @JvmSuppressWildcards Provider<WarmupTask>>
+  private val taskProviders: Map<String, @JvmSuppressWildcards Provider<WarmupTask>>,
 ) : HealthCheck, ServiceManager.Listener() {
   private val warmingUpCount = AtomicInteger(taskProviders.size)
 
@@ -40,9 +41,7 @@ internal class WarmupRunner @Inject constructor(
         val stopwatch = Stopwatch.createStarted()
         try {
           when (val task = taskProvider.get()) {
-            is SuspendingWarmupTask -> runBlocking {
-              task.executeSuspending()
-            }
+            is SuspendingWarmupTask -> runBlocking { task.executeSuspending() }
             else -> task.execute()
           }
           logger.info { "Warmup task $name completed after $stopwatch" }

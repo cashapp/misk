@@ -1,25 +1,27 @@
 package wisp.resources
 
+import java.io.IOException
 import okio.Buffer
 import okio.BufferedSource
 import okio.source
-import java.io.IOException
 
 /**
  * Read-only resources that are fetched from the 1password-cli (`op`) tool.
  *
  * To use, please:
  * 1. ensure the 1password-cli is installed with `hermit install op` or `brew install 1password-cli`.
- * 2. make sure to enable the cli integration in the 1password app: https://developer.1password.com/docs/cli/app-integration/#step-1-turn-on-the-app-integration.
- * 3. check that the secret being accessed is available. You can get the secret-reference by following: https://developer.1password.com/docs/cli/secret-references/#step-1-get-secret-references
+ * 2. make sure to enable the cli integration in the 1password app:
+ *    https://developer.1password.com/docs/cli/app-integration/#step-1-turn-on-the-app-integration.
+ * 3. check that the secret being accessed is available. You can get the secret-reference by following:
+ *    https://developer.1password.com/docs/cli/secret-references/#step-1-get-secret-references
  *
- * This uses the scheme `1password:`. Secret-references from 1password can therefore be used after
- * copy-pasting and replacing "op" like so: "1password://secretRef/goes/here". To use a specific
- * account, add the accountId like so "1password:accountId@//secretRef/goes/here".
+ * This uses the scheme `1password:`. Secret-references from 1password can therefore be used after copy-pasting and
+ * replacing "op" like so: "1password://secretRef/goes/here". To use a specific account, add the accountId like so
+ * "1password:accountId@//secretRef/goes/here".
  */
 @Deprecated(
   message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
-  ReplaceWith(expression = "OnePasswordResourceLoaderBackend","misk.resources.OnePasswordResourceLoaderBackend")
+  ReplaceWith(expression = "OnePasswordResourceLoaderBackend", "misk.resources.OnePasswordResourceLoaderBackend"),
 )
 object OnePasswordResourceLoaderBackend : ResourceLoader.Backend() {
   const val SCHEME = "1password:"
@@ -70,18 +72,18 @@ object OnePasswordResourceLoaderBackend : ResourceLoader.Backend() {
 }
 
 /**
- * Represents a 1password secret-reference, with an optional extra account identifier to differentiate
- * if there are multiple 1password accounts. The secret-reference schema is documented at
- * https://developer.1password.com/docs/cli/secret-reference-syntax/. The only change for this use
- * case is the "op:" prefix is not present as the ResourceLoader implementation strips the schema.
+ * Represents a 1password secret-reference, with an optional extra account identifier to differentiate if there are
+ * multiple 1password accounts. The secret-reference schema is documented at
+ * https://developer.1password.com/docs/cli/secret-reference-syntax/. The only change for this use case is the "op:"
+ * prefix is not present as the ResourceLoader implementation strips the schema.
  */
 class OnePasswordResourcePath private constructor(val account: String?, val secretReference: String) {
   override fun toString(): String {
     return account?.let { "$it@$secretReference" } ?: secretReference
   }
 
- @JvmOverloads
- fun asCliArgs(attribute: String? = null): List<String> {
+  @JvmOverloads
+  fun asCliArgs(attribute: String? = null): List<String> {
     // For checking a specific attribute of the secret rather than the value (default)
     val attributeField = attribute?.let { "?attribute=$it" } ?: ""
     // Add `op:` prefix for the 1password-cli

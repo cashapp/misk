@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Inject
 import com.google.inject.Injector
+import java.util.concurrent.TimeUnit
 import misk.MiskTestingServiceModule
 import misk.inject.KInstallOnceModule
 import misk.inject.getInstance
@@ -20,7 +21,6 @@ import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.concurrent.TimeUnit
 
 internal class Guice7IntegrationTest {
   private lateinit var injector: Injector
@@ -44,21 +44,19 @@ internal class Guice7IntegrationTest {
 
   @Test
   fun `simple actions with guice 7`() {
-    val injector = Guice.createInjector(
-      WebServerTestingModule(),
-      MiskTestingServiceModule(),
-      WebActionModule.create<CountHypeAction>(),
-    )
+    val injector =
+      Guice.createInjector(
+        WebServerTestingModule(),
+        MiskTestingServiceModule(),
+        WebActionModule.create<CountHypeAction>(),
+      )
 
     val serviceManager = injector.getInstance<ServiceManager>()
     serviceManager.startAsync().awaitHealthy(30, TimeUnit.SECONDS)
 
     try {
       val webTestClient = injector.getInstance<WebTestClient>()
-      val response = webTestClient.post(
-        path = "/count",
-        body = "[\"foo\",\"miskhype\",\"miskhype\"]",
-      ).response
+      val response = webTestClient.post(path = "/count", body = "[\"foo\",\"miskhype\",\"miskhype\"]").response
       assertThat(response.body?.string()?.toInt()).isEqualTo(2)
     } finally {
       serviceManager.stopAsync().awaitStopped(60, TimeUnit.SECONDS)
@@ -79,10 +77,7 @@ private object Guice7TestModule : KInstallOnceModule() {
   }
 }
 
-private class WithMultibind @Inject constructor(
-  val multiboundInstances: List<Guice7TestInterface.Multibind>,
-)
-
+private class WithMultibind @Inject constructor(val multiboundInstances: List<Guice7TestInterface.Multibind>)
 
 internal open class CountHypeAction @Inject constructor() : WebAction {
   @Post("/count")

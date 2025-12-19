@@ -1,7 +1,7 @@
 package misk.client
 
-import okhttp3.Dns
 import java.net.InetAddress
+import okhttp3.Dns
 
 internal object NoOpDns : Dns {
   private val loopback = listOf(InetAddress.getLoopbackAddress())

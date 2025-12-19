@@ -1,6 +1,12 @@
 package misk.hibernate.actions
 
 import jakarta.inject.Inject
+import java.time.LocalDate
+import javax.persistence.Transient
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.jvm.javaField
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import misk.audit.FakeAuditClient
 import misk.exceptions.UnauthorizedException
 import misk.hibernate.DbActor
@@ -16,32 +22,20 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import javax.persistence.Transient
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.jvm.javaField
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 class HibernateDatabaseQueryStaticActionTest {
-  @MiskTestModule
-  val module = HibernateDatabaseQueryTestingModule()
+  @MiskTestModule val module = HibernateDatabaseQueryTestingModule()
 
   @Inject
   private lateinit var realActionRequestExecuter:
-    RealActionRequestExecuter<
-      HibernateDatabaseQueryStaticAction.Request,
-      HibernateDatabaseQueryStaticAction.Response
-      >
+    RealActionRequestExecuter<HibernateDatabaseQueryStaticAction.Request, HibernateDatabaseQueryStaticAction.Response>
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var auditClient: FakeAuditClient
 
   @BeforeEach
   fun before() {
-    realActionRequestExecuter.requestPath(
-      HibernateDatabaseQueryStaticAction.HIBERNATE_QUERY_STATIC_WEBACTION_PATH
-    )
+    realActionRequestExecuter.requestPath(HibernateDatabaseQueryStaticAction.HIBERNATE_QUERY_STATIC_WEBACTION_PATH)
 
     // Insert some movies, characters and actors.
     transacter.allowCowrites().transaction { session ->
@@ -63,140 +57,128 @@ class HibernateDatabaseQueryStaticActionTest {
         HibernateDatabaseQueryStaticAction.Request(
           entityClass = DbMovie::class.simpleName!!,
           queryClass = OperatorsMovieQuery::class.simpleName!!,
-          query = mapOf("Select/OperatorsMovieQuery/uniqueName" to true)
+          query = mapOf("Select/OperatorsMovieQuery/uniqueName" to true),
         ),
         user = "joey",
         // Lacks OPERATORS_MOVIE_QUERY_ACCESS_ENTRY
-        capabilities = "admin_console"
+        capabilities = "admin_console",
       )
     }
   }
 
   @Test
   fun `default request`() {
-    val results = realActionRequestExecuter.executeRequest(
-      HibernateDatabaseQueryStaticAction.Request(
-        entityClass = DbMovie::class.simpleName!!,
-        queryClass = OperatorsMovieQuery::class.simpleName!!,
-        query = mapOf()
-      ),
-      user = "joey",
-      capabilities = AUTHORIZED_CAPABILITIES
-    )
+    val results =
+      realActionRequestExecuter.executeRequest(
+        HibernateDatabaseQueryStaticAction.Request(
+          entityClass = DbMovie::class.simpleName!!,
+          queryClass = OperatorsMovieQuery::class.simpleName!!,
+          query = mapOf(),
+        ),
+        user = "joey",
+        capabilities = AUTHORIZED_CAPABILITIES,
+      )
     assertEquals(3, results.results.size)
-    assertThat(results.results.map { (it as Map<String, Any>).keys }.first()).containsAll(
-      DbMovie::class.declaredMemberProperties.filter {
-        it.javaField?.getAnnotation(Transient::class.java) == null
-      }.map { it.name }
-    )
+    assertThat(results.results.map { (it as Map<String, Any>).keys }.first())
+      .containsAll(
+        DbMovie::class
+          .declaredMemberProperties
+          .filter { it.javaField?.getAnnotation(Transient::class.java) == null }
+          .map { it.name }
+      )
   }
 
   @Test
   fun `static select`() {
-    val results = realActionRequestExecuter.executeRequest(
-      HibernateDatabaseQueryStaticAction.Request(
-        entityClass = DbMovie::class.simpleName!!,
-        queryClass = OperatorsMovieQuery::class.simpleName!!,
-        query = mapOf("Select/OperatorsMovieQuery/uniqueName" to true)
-      ),
-      user = "joey",
-      capabilities = AUTHORIZED_CAPABILITIES
-    )
-    assertThat(results.results).containsAll(
-      listOf(
-        mapOf("name" to "Jurassic Park"),
-        mapOf("name" to "Pulp Fiction"),
-        mapOf("name" to "Die Hard"),
+    val results =
+      realActionRequestExecuter.executeRequest(
+        HibernateDatabaseQueryStaticAction.Request(
+          entityClass = DbMovie::class.simpleName!!,
+          queryClass = OperatorsMovieQuery::class.simpleName!!,
+          query = mapOf("Select/OperatorsMovieQuery/uniqueName" to true),
+        ),
+        user = "joey",
+        capabilities = AUTHORIZED_CAPABILITIES,
       )
-    )
+    assertThat(results.results)
+      .containsAll(
+        listOf(mapOf("name" to "Jurassic Park"), mapOf("name" to "Pulp Fiction"), mapOf("name" to "Die Hard"))
+      )
   }
 
   @Test
   fun `static select with maxRows`() {
-    val results = realActionRequestExecuter.executeRequest(
-      HibernateDatabaseQueryStaticAction.Request(
-        entityClass = DbMovie::class.simpleName!!,
-        queryClass = OperatorsMovieQuery::class.simpleName!!,
-        query = mapOf(
-          "Query/Config" to mapOf(
-            "maxRows" to 2
-          ),
-          "Select/OperatorsMovieQuery/uniqueName" to true
-        )
-      ),
-      user = "joey",
-      capabilities = AUTHORIZED_CAPABILITIES
-    )
-    assertThat(results.results).containsAll(
-      listOf(
-        mapOf("name" to "Jurassic Park"),
-        mapOf("name" to "Pulp Fiction"),
+    val results =
+      realActionRequestExecuter.executeRequest(
+        HibernateDatabaseQueryStaticAction.Request(
+          entityClass = DbMovie::class.simpleName!!,
+          queryClass = OperatorsMovieQuery::class.simpleName!!,
+          query = mapOf("Query/Config" to mapOf("maxRows" to 2), "Select/OperatorsMovieQuery/uniqueName" to true),
+        ),
+        user = "joey",
+        capabilities = AUTHORIZED_CAPABILITIES,
       )
-    )
+    assertThat(results.results).containsAll(listOf(mapOf("name" to "Jurassic Park"), mapOf("name" to "Pulp Fiction")))
   }
 
   @Test
   fun `static constraints`() {
-    val results = realActionRequestExecuter.executeRequest(
-      HibernateDatabaseQueryStaticAction.Request(
-        entityClass = DbMovie::class.simpleName!!,
-        queryClass = OperatorsMovieQuery::class.simpleName!!,
-        query = mapOf(
-          // TODO(adrw) remove limit select paths once it can handle LocalDate
-          "Select/OperatorsMovieQuery/uniqueName" to true,
-          "Constraint/OperatorsMovieQuery/name" to mapOf(
-            "name" to "Die Hard"
-          )
+    val results =
+      realActionRequestExecuter.executeRequest(
+        HibernateDatabaseQueryStaticAction.Request(
+          entityClass = DbMovie::class.simpleName!!,
+          queryClass = OperatorsMovieQuery::class.simpleName!!,
+          query =
+            mapOf(
+              // TODO(adrw) remove limit select paths once it can handle LocalDate
+              "Select/OperatorsMovieQuery/uniqueName" to true,
+              "Constraint/OperatorsMovieQuery/name" to mapOf("name" to "Die Hard"),
+            ),
         ),
-      ),
-      user = "joey",
-      capabilities = AUTHORIZED_CAPABILITIES
-    )
-    assertEquals(
-      listOf(
-        mapOf("name" to "Die Hard"),
-      ),
-      results.results
-    )
+        user = "joey",
+        capabilities = AUTHORIZED_CAPABILITIES,
+      )
+    assertEquals(listOf(mapOf("name" to "Die Hard")), results.results)
   }
 
   @Test
   fun `static orders`() {
-    val results = realActionRequestExecuter.executeRequest(
-      HibernateDatabaseQueryStaticAction.Request(
-        entityClass = DbMovie::class.simpleName!!,
-        queryClass = OperatorsMovieQuery::class.simpleName!!,
-        query = mapOf(
-          // TODO(adrw) remove limit select paths once it can handle LocalDate
-          "Select/OperatorsMovieQuery/uniqueName" to true,
-          "Order/OperatorsMovieQuery/releaseDateAsc" to true
-        )
-      ),
-      user = "joey",
-      capabilities = AUTHORIZED_CAPABILITIES
-    )
+    val results =
+      realActionRequestExecuter.executeRequest(
+        HibernateDatabaseQueryStaticAction.Request(
+          entityClass = DbMovie::class.simpleName!!,
+          queryClass = OperatorsMovieQuery::class.simpleName!!,
+          query =
+            mapOf(
+              // TODO(adrw) remove limit select paths once it can handle LocalDate
+              "Select/OperatorsMovieQuery/uniqueName" to true,
+              "Order/OperatorsMovieQuery/releaseDateAsc" to true,
+            ),
+        ),
+        user = "joey",
+        capabilities = AUTHORIZED_CAPABILITIES,
+      )
     assertEquals(
-      listOf(
-        mapOf("name" to "Die Hard"),
-        mapOf("name" to "Jurassic Park"),
-        mapOf("name" to "Pulp Fiction"),
-      ),
-      results.results
+      listOf(mapOf("name" to "Die Hard"), mapOf("name" to "Jurassic Park"), mapOf("name" to "Pulp Fiction")),
+      results.results,
     )
 
-    assertEquals(FakeAuditClient.FakeAuditEvent(
-      eventSource = "test-app",
-      eventTarget = "HibernateDatabaseQueryStaticAction",
-      timestampSent = 2147483647,
-      applicationName = "test-app",
-      approverLDAP = null,
-      automatedChange = false,
-      description = "HibernateDatabaseQueryStaticAction principal=joey",
-      richDescription = "HibernateDatabaseQueryStaticAction principal=joey time=0.000 ns code=200",
-      environment = "testing",
-      detailURL = null,
-      region = "us-west-2",
-      requestorLDAP = "joey"
-    ), auditClient.sentEvents.take())
+    assertEquals(
+      FakeAuditClient.FakeAuditEvent(
+        eventSource = "test-app",
+        eventTarget = "HibernateDatabaseQueryStaticAction",
+        timestampSent = 2147483647,
+        applicationName = "test-app",
+        approverLDAP = null,
+        automatedChange = false,
+        description = "HibernateDatabaseQueryStaticAction principal=joey",
+        richDescription = "HibernateDatabaseQueryStaticAction principal=joey time=0.000 ns code=200",
+        environment = "testing",
+        detailURL = null,
+        region = "us-west-2",
+        requestorLDAP = "joey",
+      ),
+      auditClient.sentEvents.take(),
+    )
   }
 }

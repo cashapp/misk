@@ -1,16 +1,14 @@
 package misk.slack
 
-import misk.logging.getLogger
 import jakarta.inject.Inject
+import misk.logging.getLogger
 
-class RealSlackClient @Inject constructor(
-  private val slackWebHookApi: SlackWebhookApi,
-  private val config: SlackConfig,
-) : SlackClient() {
+class RealSlackClient
+@Inject
+constructor(private val slackWebHookApi: SlackWebhookApi, private val config: SlackConfig) : SlackClient() {
   /**
-   * Post a message as the specified bot username and icon emoji in the channel.
-   * If no channel is provided, the default channel configured by the service is used.
-   * Does not throw on IO exceptions.
+   * Post a message as the specified bot username and icon emoji in the channel. If no channel is provided, the default
+   * channel configured by the service is used. Does not throw on IO exceptions.
    */
   override fun postMessage(
     username: String,
@@ -23,12 +21,8 @@ class RealSlackClient @Inject constructor(
       logger.info("No default Slack channel configured, message not sent!")
       return null
     }
-    val request = SlackWebhookRequest(
-      channel = resolvedChannel,
-      username = username,
-      text = message,
-      icon_emoji = iconEmoji
-    )
+    val request =
+      SlackWebhookRequest(channel = resolvedChannel, username = username, text = message, icon_emoji = iconEmoji)
     return try {
       val response = postMessage(request)
       if (response != SlackWebhookResponse.ok) {
@@ -49,9 +43,7 @@ class RealSlackClient @Inject constructor(
     if (response.code() == 500) {
       return SlackWebhookResponse.valueOf(response.errorBody()!!.string())
     }
-    throw IllegalStateException(
-      "Unexpected HTTP response posting message to slack: " + response.code()
-    )
+    throw IllegalStateException("Unexpected HTTP response posting message to slack: " + response.code())
   }
 
   companion object {

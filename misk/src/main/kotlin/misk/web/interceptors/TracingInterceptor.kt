@@ -1,26 +1,23 @@
 package misk.web.interceptors
 
 import com.google.inject.Inject
-import jakarta.inject.Singleton
 import io.opentracing.Span
 import io.opentracing.SpanContext
 import io.opentracing.Tracer
 import io.opentracing.propagation.Format
 import io.opentracing.tag.Tags
 import io.opentracing.tag.Tags.SPAN_KIND_SERVER
+import jakarta.inject.Singleton
 import misk.Action
+import misk.logging.getLogger
 import misk.tracing.interceptors.TextMultimapExtractAdapter
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import misk.logging.getLogger
 
 private val logger = getLogger<TracingInterceptor>()
 
-/**
- * Enables distributed tracing on all web actions, if a client has installed a tracer.
- */
-internal class TracingInterceptor internal constructor(private val tracer: Tracer) :
-  NetworkInterceptor {
+/** Enables distributed tracing on all web actions, if a client has installed a tracer. */
+internal class TracingInterceptor internal constructor(private val tracer: Tracer) : NetworkInterceptor {
   @Singleton
   class Factory @Inject constructor() : NetworkInterceptor.Factory {
     @Inject(optional = true) var tracer: Tracer? = null
@@ -31,10 +28,12 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
   }
 
   override fun intercept(chain: NetworkChain) {
-    val spanBuilder = tracer.buildSpan("http.action")
-      .withTag(Tags.HTTP_METHOD.key, chain.httpCall.dispatchMechanism.method)
-      .withTag(Tags.HTTP_URL.key, chain.httpCall.url.toString())
-      .withTag(Tags.SPAN_KIND.key, SPAN_KIND_SERVER)
+    val spanBuilder =
+      tracer
+        .buildSpan("http.action")
+        .withTag(Tags.HTTP_METHOD.key, chain.httpCall.dispatchMechanism.method)
+        .withTag(Tags.HTTP_URL.key, chain.httpCall.url.toString())
+        .withTag(Tags.SPAN_KIND.key, SPAN_KIND_SERVER)
 
     val parentSpan: Span? = tracer.activeSpan()
     if (parentSpan != null) {
@@ -42,19 +41,20 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
       // one if that happened.
       spanBuilder.asChildOf(parentSpan)
     } else {
-      val parentContext: SpanContext? = try {
-        tracer.extract(
-          Format.Builtin.HTTP_HEADERS,
-          TextMultimapExtractAdapter(chain.httpCall.requestHeaders.toMultimap())
-        )
-      } catch (e: Exception) {
-        logger.warn(
-          "Failure attempting to extract span context. Existing context, if any," +
-            " will be ignored in creation of span",
-          e
-        )
-        null
-      }
+      val parentContext: SpanContext? =
+        try {
+          tracer.extract(
+            Format.Builtin.HTTP_HEADERS,
+            TextMultimapExtractAdapter(chain.httpCall.requestHeaders.toMultimap()),
+          )
+        } catch (e: Exception) {
+          logger.warn(
+            "Failure attempting to extract span context. Existing context, if any," +
+              " will be ignored in creation of span",
+            e,
+          )
+          null
+        }
 
       if (parentContext != null) {
         spanBuilder.asChildOf(parentContext)

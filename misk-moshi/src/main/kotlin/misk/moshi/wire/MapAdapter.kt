@@ -5,16 +5,12 @@ import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 
 /** Handles JSON marshalling / unmarshalling for type-safe maps */
-internal class MapAdapter(
-  private val keyConverter: (String) -> Any,
-  private val valueAdapter: JsonAdapter<Any?>
-) : JsonAdapter<Map<Any, Any>>() {
+internal class MapAdapter(private val keyConverter: (String) -> Any, private val valueAdapter: JsonAdapter<Any?>) :
+  JsonAdapter<Map<Any, Any>>() {
   override fun fromJson(reader: JsonReader): Map<Any, Any>? {
     val nextToken = reader.peek()
     if (nextToken == JsonReader.Token.NULL) return reader.nextNull()
-    check(nextToken == JsonReader.Token.BEGIN_OBJECT) {
-      "expected {, found $nextToken"
-    }
+    check(nextToken == JsonReader.Token.BEGIN_OBJECT) { "expected {, found $nextToken" }
 
     val results = mutableMapOf<Any, Any>()
     reader.beginObject()

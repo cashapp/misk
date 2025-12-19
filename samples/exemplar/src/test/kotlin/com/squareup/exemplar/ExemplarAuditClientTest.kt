@@ -9,6 +9,7 @@ import misk.audit.AuditClientConfig
 import misk.config.AppNameModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
+import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.security.authz.AccessControlModule
 import misk.testing.MiskTest
@@ -22,7 +23,6 @@ import okhttp3.mockwebserver.RecordedRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
-import misk.logging.LogCollector
 
 @MiskTest(startService = true)
 @WithMiskCaller
@@ -35,51 +35,34 @@ class ExemplarAuditClientTest {
 
   @Test
   fun `happy path`() {
-    mockWebServer.enqueue(
-      MockResponse()
-        .setResponseCode(200)
-    )
-    client.logEvent(
-      target = "the-database-001",
-      description = "description",
-    )
+    mockWebServer.enqueue(MockResponse().setResponseCode(200))
+    client.logEvent(target = "the-database-001", description = "description")
     assertThat(logCollector.takeMessages(ExemplarAuditClient::class)).isEmpty()
   }
 
   @Test
   fun `logs error on 400`() {
-    mockWebServer.enqueue(
-      MockResponse()
-        .setResponseCode(400)
-    )
-    client.logEvent(
-      target = "the-database-001",
-      description = "description",
-    )
+    mockWebServer.enqueue(MockResponse().setResponseCode(400))
+    client.logEvent(target = "the-database-001", description = "description")
     assertThat(logCollector.takeMessage(ExemplarAuditClient::class).dropLast(8) + "12345/}]")
-      .isEqualTo("""Failed to send audit event [event=Event(eventSource=test-app, eventTarget=the-database-001, timestampSent=2147483647, applicationName=test-app, applicationTier=null, approverLDAP=default-user, automatedChange=false, description=description, richDescription=null, environment=testing, detailURL=null, region=us-west-2, requestorLDAP=default-user)][response=Response{protocol=http/1.1, code=400, message=Client Error, url=http://localhost:12345/}]""")
+      .isEqualTo(
+        """Failed to send audit event [event=Event(eventSource=test-app, eventTarget=the-database-001, timestampSent=2147483647, applicationName=test-app, applicationTier=null, approverLDAP=default-user, automatedChange=false, description=description, richDescription=null, environment=testing, detailURL=null, region=us-west-2, requestorLDAP=default-user)][response=Response{protocol=http/1.1, code=400, message=Client Error, url=http://localhost:12345/}]"""
+      )
   }
 
   @Test
   fun `logs error on 500`() {
-    mockWebServer.enqueue(
-      MockResponse()
-        .setResponseCode(500)
-    )
-    client.logEvent(
-      target = "the-database-001",
-      description = "description",
-    )
+    mockWebServer.enqueue(MockResponse().setResponseCode(500))
+    client.logEvent(target = "the-database-001", description = "description")
     assertThat(logCollector.takeMessage(ExemplarAuditClient::class).dropLast(8) + "12345/}]")
-      .isEqualTo("""Failed to send audit event [event=Event(eventSource=test-app, eventTarget=the-database-001, timestampSent=2147483647, applicationName=test-app, applicationTier=null, approverLDAP=default-user, automatedChange=false, description=description, richDescription=null, environment=testing, detailURL=null, region=us-west-2, requestorLDAP=default-user)][response=Response{protocol=http/1.1, code=500, message=Server Error, url=http://localhost:12345/}]""")
+      .isEqualTo(
+        """Failed to send audit event [event=Event(eventSource=test-app, eventTarget=the-database-001, timestampSent=2147483647, applicationName=test-app, applicationTier=null, approverLDAP=default-user, automatedChange=false, description=description, richDescription=null, environment=testing, detailURL=null, region=us-west-2, requestorLDAP=default-user)][response=Response{protocol=http/1.1, code=500, message=Server Error, url=http://localhost:12345/}]"""
+      )
   }
 
   @Test
   fun `set parameters override defaults`() {
-    mockWebServer.enqueue(
-      MockResponse()
-        .setResponseCode(200)
-    )
+    mockWebServer.enqueue(MockResponse().setResponseCode(200))
     client.logEvent(
       target = "the-database-001",
       description = "description",
@@ -116,9 +99,7 @@ class ExemplarAuditClientTest {
     @Singleton
     fun provideAuditCLientConfig(server: MockWebServer): AuditClientConfig {
       val url = server.url("/")
-      return AuditClientConfig(
-        url = url.toString()
-      )
+      return AuditClientConfig(url = url.toString())
     }
   }
 }

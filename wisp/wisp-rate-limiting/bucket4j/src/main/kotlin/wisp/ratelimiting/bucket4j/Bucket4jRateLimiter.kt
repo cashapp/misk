@@ -9,44 +9,48 @@ import io.github.bucket4j.distributed.BucketProxy
 import io.github.bucket4j.distributed.proxy.ProxyManager
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Metrics
+import java.time.Clock
+import kotlin.system.measureTimeMillis
 import wisp.ratelimiting.RateLimitBucketRefillStrategy
 import wisp.ratelimiting.RateLimitConfiguration
 import wisp.ratelimiting.RateLimiter
 import wisp.ratelimiting.RateLimiterMetrics
 import wisp.ratelimiting.RateLimiterMetrics.ConsumptionResult
-import java.time.Clock
-import kotlin.system.measureTimeMillis
 
-class Bucket4jRateLimiter @JvmOverloads constructor(
+class Bucket4jRateLimiter
+@JvmOverloads
+constructor(
   private val bucketProxy: ProxyManager<String>,
   private val clock: Clock,
-  meterRegistry: MeterRegistry = Metrics.globalRegistry
+  meterRegistry: MeterRegistry = Metrics.globalRegistry,
 ) : RateLimiter {
   private val metrics = RateLimiterMetrics(meterRegistry)
 
   override fun consumeToken(
     key: String,
     configuration: RateLimitConfiguration,
-    amount: Long
+    amount: Long,
   ): RateLimiter.ConsumptionData {
-    val result = try {
-      var consumptionProbe: ConsumptionProbe
-      val millisTaken = measureTimeMillis {
-        val bucket = getBucketProxy(key, configuration)
-        consumptionProbe = bucket.tryConsumeAndReturnRemaining(amount)
-      }
-      metrics.limitConsumptionDuration(configuration).record(millisTaken.toDouble())
+    val result =
+      try {
+        var consumptionProbe: ConsumptionProbe
+        val millisTaken = measureTimeMillis {
+          val bucket = getBucketProxy(key, configuration)
+          consumptionProbe = bucket.tryConsumeAndReturnRemaining(amount)
+        }
+        metrics.limitConsumptionDuration(configuration).record(millisTaken.toDouble())
 
-      consumptionProbe
-    } catch (e: Exception) {
-      metrics.consumptionAttempts(configuration, ConsumptionResult.EXCEPTION).increment()
-      throw e
-    }
-    val metricResult = if (result.isConsumed) {
-      ConsumptionResult.SUCCESS
-    } else {
-      ConsumptionResult.REJECTED
-    }
+        consumptionProbe
+      } catch (e: Exception) {
+        metrics.consumptionAttempts(configuration, ConsumptionResult.EXCEPTION).increment()
+        throw e
+      }
+    val metricResult =
+      if (result.isConsumed) {
+        ConsumptionResult.SUCCESS
+      } else {
+        ConsumptionResult.REJECTED
+      }
     metrics.consumptionAttempts(configuration, metricResult).increment()
     if (metricResult == ConsumptionResult.SUCCESS) {
       metrics.tokensConsumed(configuration).increment(amount.toDouble())
@@ -54,14 +58,14 @@ class Bucket4jRateLimiter @JvmOverloads constructor(
     return RateLimiter.ConsumptionData(
       didConsume = result.isConsumed,
       remaining = result.remainingTokens,
-      resetTime = clock.instant().plusNanos(result.nanosToWaitForReset)
+      resetTime = clock.instant().plusNanos(result.nanosToWaitForReset),
     )
   }
 
   override fun testConsumptionAttempt(
     key: String,
     configuration: RateLimitConfiguration,
-    amount: Long
+    amount: Long,
   ): RateLimiter.TestConsumptionResult {
     var estimationProbe: EstimationProbe
     val millisTaken = measureTimeMillis {
@@ -73,7 +77,7 @@ class Bucket4jRateLimiter @JvmOverloads constructor(
     return RateLimiter.TestConsumptionResult(
       couldHaveConsumed = estimationProbe.canBeConsumed(),
       remaining = estimationProbe.remainingTokens,
-      resetTime = clock.instant().plusNanos(estimationProbe.nanosToWaitForRefill)
+      resetTime = clock.instant().plusNanos(estimationProbe.nanosToWaitForRefill),
     )
   }
 
@@ -104,26 +108,22 @@ class Bucket4jRateLimiter @JvmOverloads constructor(
   }
 
   private fun getBucketProxy(key: String, configuration: RateLimitConfiguration): BucketProxy {
-    val bucketConfig = BucketConfiguration.builder()
-      .addLimit(configuration.toBandwidth())
-      .build()
+    val bucketConfig = BucketConfiguration.builder().addLimit(configuration.toBandwidth()).build()
 
-    return bucketProxy.builder().apply {
-      configuration.version?.let {
-        this.withImplicitConfigurationReplacement(it, TokensInheritanceStrategy.PROPORTIONALLY)
+    return bucketProxy
+      .builder()
+      .apply {
+        configuration.version?.let {
+          this.withImplicitConfigurationReplacement(it, TokensInheritanceStrategy.PROPORTIONALLY)
+        }
       }
-    }.build(key, bucketConfig)
+      .build(key, bucketConfig)
   }
 
   private fun RateLimitConfiguration.toBandwidth(): Bandwidth {
     return if (refillStrategy == RateLimitBucketRefillStrategy.GREEDY) {
-      Bandwidth.builder()
-        .capacity(capacity)
-        .refillGreedy(refillAmount, refillPeriod)
-        .initialTokens(capacity)
-        .build()
-    }
-    else {
+      Bandwidth.builder().capacity(capacity).refillGreedy(refillAmount, refillPeriod).initialTokens(capacity).build()
+    } else {
       Bandwidth.builder()
         .capacity(capacity)
         .refillIntervally(refillAmount, refillPeriod)

@@ -2,21 +2,19 @@ package misk.web
 
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
+import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
-import misk.inject.KAbstractModule
 import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
 internal class UrlMatcherTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
-  @Inject
-  lateinit var urlMatcher: UrlMatcher
+  @Inject lateinit var urlMatcher: UrlMatcher
 
   @Test
   fun matchesExistingStaticPath() {
@@ -65,9 +63,7 @@ internal class UrlMatcherTest {
   }
 
   class HelloAction @Inject constructor() : WebAction {
-    @Get("/hello")
-    @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun hello() = "hello"
+    @Get("/hello") @ResponseContentType(MediaTypes.APPLICATION_JSON) fun hello() = "hello"
   }
 
   class UserAction @Inject constructor() : WebAction {

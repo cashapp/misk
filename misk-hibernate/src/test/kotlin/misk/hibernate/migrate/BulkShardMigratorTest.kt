@@ -38,13 +38,14 @@ abstract class BulkShardMigratorTest {
 
   @Test
   fun sameShardMigrate() {
-    val sourceId = transacter.transaction { session ->
-      val movie = DbMovie("Jurassic Park")
-      session.save(movie)
-      session.save(DbCharacter("Ellie Sattler", movie))
-      session.save(DbCharacter("Ian Malcolm", movie))
-      movie.id
-    }
+    val sourceId =
+      transacter.transaction { session ->
+        val movie = DbMovie("Jurassic Park")
+        session.save(movie)
+        session.save(DbCharacter("Ellie Sattler", movie))
+        session.save(DbCharacter("Ian Malcolm", movie))
+        movie.id
+      }
 
     val targetId = transacter.createInSameShard(sourceId) { DbMovie("Star Wars") }
 
@@ -61,12 +62,8 @@ abstract class BulkShardMigratorTest {
 
     // It is expected that we would work on two root entities while merging though on the same shard
     // for this case. The vitess safey checks throw, disabling it for now.
-    bulkShardMigratorFactory.create(
-      transacter,
-      sessionFactoryService.sessionFactory,
-      DbMovie::class,
-      DbCharacter::class
-    )
+    bulkShardMigratorFactory
+      .create(transacter, sessionFactoryService.sessionFactory, DbMovie::class, DbCharacter::class)
       .rootColumn("movie_id")
       .source(sourceId)
       .target(targetId)
@@ -83,43 +80,25 @@ abstract class BulkShardMigratorTest {
   }
 
   fun executeStatement(session: Session, sql: String): Boolean {
-    return session.hibernateSession.doReturningWork { connection ->
-      connection.prepareStatement(sql).execute()
-    }
+    return session.hibernateSession.doReturningWork { connection -> connection.prepareStatement(sql).execute() }
   }
 
   fun assertMovieNamesInShard(shard: Shard): ListAssert<String> {
     return transacter.transaction(shard) { session ->
-      ListAssert(
-        queryFactory.newQuery(MovieQuery::class)
-          .allowTableScan()
-          .list(session)
-          .map { it.name }
-          .toList()
-      )
+      ListAssert(queryFactory.newQuery(MovieQuery::class).allowTableScan().list(session).map { it.name }.toList())
     }
   }
 
   fun assertCharacterNamesInShard(shard: Shard): ListAssert<String> {
     return transacter.transaction(shard) { session ->
-      ListAssert(
-        queryFactory.newQuery(CharacterQuery::class)
-          .allowTableScan()
-          .list(session)
-          .map { it.name }
-          .toList()
-      )
+      ListAssert(queryFactory.newQuery(CharacterQuery::class).allowTableScan().list(session).map { it.name }.toList())
     }
   }
 
   fun assertRowCount(movieId: Id<DbMovie>, vararg names: String): IntegerAssert {
     return IntegerAssert(
       transacter.transaction { session ->
-        queryFactory.newQuery(CharacterQuery::class)
-          .names(names.asList())
-          .movieId(movieId)
-          .list(session)
-          .size
+        queryFactory.newQuery(CharacterQuery::class).names(names.asList()).movieId(movieId).list(session).size
       }
     )
   }
@@ -127,11 +106,9 @@ abstract class BulkShardMigratorTest {
 
 @MiskTest(startService = true)
 class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
-  @MiskExternalDependency
-  private val dockerVitess = DockerVitess()
+  @MiskExternalDependency private val dockerVitess = DockerVitess()
 
-  @MiskTestModule
-  val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
+  @MiskTestModule val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
 
   @BeforeEach
   fun setup() {
@@ -139,20 +116,19 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
     assertThat(movieShards).hasSize(3)
   }
 
-  /** Create a root entity and some child entities on one shard and migrate them to another.  */
+  /** Create a root entity and some child entities on one shard and migrate them to another. */
   @Test
   fun distinctShardsMigration() {
-    val sourceId = transacter.transaction { session ->
-      val movie = DbMovie("Jurassic Park")
-      session.save(movie)
-      session.save(DbCharacter("Ellie Sattler", movie))
-      session.save(DbCharacter("Ian Malcolm", movie))
-      movie.id
-    }
+    val sourceId =
+      transacter.transaction { session ->
+        val movie = DbMovie("Jurassic Park")
+        session.save(movie)
+        session.save(DbCharacter("Ellie Sattler", movie))
+        session.save(DbCharacter("Ian Malcolm", movie))
+        movie.id
+      }
 
-    val targetId = transacter.createInSeparateShard(sourceId) {
-      DbMovie("Star Wars")
-    }
+    val targetId = transacter.createInSeparateShard(sourceId) { DbMovie("Star Wars") }
 
     val sourceShard = transacter.transaction { sourceId.shard(it) }
     val targetShard = transacter.transaction { targetId.shard(it) }
@@ -168,12 +144,8 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
     assertRowCount(sourceId, "Ellie Sattler", "Ian Malcolm").isEqualTo(2)
     assertRowCount(targetId, "Ellie Sattler", "Ian Malcolm").isEqualTo(0)
 
-    bulkShardMigratorFactory.create(
-      transacter,
-      sessionFactoryService.sessionFactory,
-      DbMovie::class,
-      DbCharacter::class
-    )
+    bulkShardMigratorFactory
+      .create(transacter, sessionFactoryService.sessionFactory, DbMovie::class, DbCharacter::class)
       .rootColumn("movie_id")
       .source(sourceId)
       .target(targetId)
@@ -193,17 +165,16 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
 
   @Test
   fun bulkMigrateDuringSchemaChange() {
-    val sourceId = transacter.transaction { session ->
-      val movie = DbMovie("Jurassic Park")
-      session.save(movie)
-      session.save(DbCharacter("Ellie Sattler", movie))
-      session.save(DbCharacter("Ian Malcolm", movie))
-      movie.id
-    }
+    val sourceId =
+      transacter.transaction { session ->
+        val movie = DbMovie("Jurassic Park")
+        session.save(movie)
+        session.save(DbCharacter("Ellie Sattler", movie))
+        session.save(DbCharacter("Ian Malcolm", movie))
+        movie.id
+      }
 
-    val targetId = transacter.createInSeparateShard(sourceId) {
-      DbMovie("Star Wars")
-    }
+    val targetId = transacter.createInSeparateShard(sourceId) { DbMovie("Star Wars") }
 
     val sourceShard = transacter.transaction { sourceId.shard(it) }
     val targetShard = transacter.transaction { targetId.shard(it) }
@@ -228,10 +199,8 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
         }
       }
 
-      bulkShardMigratorFactory.create(
-        transacter, sessionFactoryService.sessionFactory, DbMovie::class,
-        DbCharacter::class
-      )
+      bulkShardMigratorFactory
+        .create(transacter, sessionFactoryService.sessionFactory, DbMovie::class, DbCharacter::class)
         .rootColumn("movie_id")
         .source(sourceId)
         .target(targetId)
@@ -251,26 +220,23 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
       // Remove the age column that was added. The drop assumes that age column was successfully
       // added which is fine for now.
       for (shard in listOf(sourceShard, targetShard)) {
-        transacter.transaction(shard) { session ->
-          executeStatement(session, "ALTER TABLE characters DROP COLUMN age")
-        }
+        transacter.transaction(shard) { session -> executeStatement(session, "ALTER TABLE characters DROP COLUMN age") }
       }
     }
   }
 
   @Test
   fun batchingTest() {
-    val sourceId = transacter.transaction { session ->
-      val movie = DbMovie("Jurassic Park")
-      session.save(movie)
-      session.save(DbCharacter("Ellie Sattler", movie))
-      session.save(DbCharacter("Ian Malcolm", movie))
-      movie.id
-    }
+    val sourceId =
+      transacter.transaction { session ->
+        val movie = DbMovie("Jurassic Park")
+        session.save(movie)
+        session.save(DbCharacter("Ellie Sattler", movie))
+        session.save(DbCharacter("Ian Malcolm", movie))
+        movie.id
+      }
 
-    val targetId = transacter.createInSeparateShard(sourceId) {
-      DbMovie("Star Wars")
-    }
+    val targetId = transacter.createInSeparateShard(sourceId) { DbMovie("Star Wars") }
 
     val sourceShard = transacter.transaction { sourceId.shard(it) }
     val targetShard = transacter.transaction { targetId.shard(it) }
@@ -295,9 +261,8 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
       }
 
       // First batch is been moved
-      bulkShardMigratorFactory.create(
-        transacter, sessionFactoryService.sessionFactory, DbMovie::class, DbCharacter::class
-      )
+      bulkShardMigratorFactory
+        .create(transacter, sessionFactoryService.sessionFactory, DbMovie::class, DbCharacter::class)
         .rootColumn("movie_id")
         .source(sourceId)
         .target(targetId)
@@ -318,9 +283,8 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
       assertRowCount(targetId, "Ellie Sattler", "Ian Malcolm").isEqualTo(1)
 
       // Second batch is been moved
-      bulkShardMigratorFactory.create(
-        transacter, sessionFactoryService.sessionFactory, DbMovie::class, DbCharacter::class
-      )
+      bulkShardMigratorFactory
+        .create(transacter, sessionFactoryService.sessionFactory, DbMovie::class, DbCharacter::class)
         .rootColumn("movie_id")
         .source(sourceId)
         .target(targetId)
@@ -343,9 +307,7 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
       // Remove the age column that was added. The drop assumes that age column was successfully
       // added which is fine for now.
       for (shard in listOf(sourceShard, targetShard)) {
-        transacter.transaction(shard) { session ->
-          executeStatement(session, "ALTER TABLE characters DROP COLUMN age")
-        }
+        transacter.transaction(shard) { session -> executeStatement(session, "ALTER TABLE characters DROP COLUMN age") }
       }
     }
   }
@@ -353,12 +315,10 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
 
 @MiskTest(startService = true)
 class BulkShardMigratorMySqlTest : BulkShardMigratorTest() {
-  @MiskTestModule
-  val module = MoviesTestModule(type = DataSourceType.MYSQL)
+  @MiskTestModule val module = MoviesTestModule(type = DataSourceType.MYSQL)
 }
 
 @MiskTest(startService = true)
 class BulkShardMigratorTidbTest : BulkShardMigratorTest() {
-  @MiskTestModule
-  val module = MoviesTestModule(type = DataSourceType.TIDB)
+  @MiskTestModule val module = MoviesTestModule(type = DataSourceType.TIDB)
 }

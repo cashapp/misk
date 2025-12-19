@@ -1,11 +1,11 @@
 package misk.client
 
 import jakarta.inject.Inject
+import java.time.Duration
+import java.util.concurrent.TimeUnit
 import okhttp3.ConnectionPool
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient.Builder
-import java.time.Duration
-import java.util.concurrent.TimeUnit
 
 class OkHttpClientCommonConfigurator @Inject constructor() {
   fun configure(builder: Builder, config: HttpClientEndpointConfig): Builder {
@@ -31,11 +31,12 @@ class OkHttpClientCommonConfigurator @Inject constructor() {
   }
 
   private fun configureConnectionPool(builder: Builder, config: HttpClientEndpointConfig) {
-    val connectionPool = ConnectionPool(
-      config.clientConfig.maxIdleConnections ?: maxIdleConnections,
-      (config.clientConfig.keepAliveDuration ?: keepAliveDuration).toMillis(),
-      TimeUnit.MILLISECONDS
-    )
+    val connectionPool =
+      ConnectionPool(
+        config.clientConfig.maxIdleConnections ?: maxIdleConnections,
+        (config.clientConfig.keepAliveDuration ?: keepAliveDuration).toMillis(),
+        TimeUnit.MILLISECONDS,
+      )
     builder.connectionPool(connectionPool)
   }
 
@@ -58,31 +59,16 @@ class OkHttpClientCommonConfigurator @Inject constructor() {
     config.clientConfig.writeTimeout?.let { builder.writeTimeout(it) }
   }
 
-  private fun configureRetryOnConnectionFailure(
-    builder: Builder,
-    config: HttpClientEndpointConfig,
-  ) {
-    builder.retryOnConnectionFailure(
-      config.clientConfig.retryOnConnectionFailure ?: retryOnConnectionFailure
-    )
+  private fun configureRetryOnConnectionFailure(builder: Builder, config: HttpClientEndpointConfig) {
+    builder.retryOnConnectionFailure(config.clientConfig.retryOnConnectionFailure ?: retryOnConnectionFailure)
   }
 
-  private fun configureFollowRedirects(
-    builder: Builder,
-    config: HttpClientEndpointConfig,
-  ) {
-    builder.followRedirects(
-      config.clientConfig.followRedirects ?: followRedirects
-    )
+  private fun configureFollowRedirects(builder: Builder, config: HttpClientEndpointConfig) {
+    builder.followRedirects(config.clientConfig.followRedirects ?: followRedirects)
   }
 
-  private fun configureFollowSslRedirects(
-    builder: Builder,
-    config: HttpClientEndpointConfig,
-  ) {
-    builder.followSslRedirects(
-      config.clientConfig.followSslRedirects ?: followSslRedirects
-    )
+  private fun configureFollowSslRedirects(builder: Builder, config: HttpClientEndpointConfig) {
+    builder.followSslRedirects(config.clientConfig.followSslRedirects ?: followSslRedirects)
   }
 
   companion object {

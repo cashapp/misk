@@ -1,10 +1,10 @@
 package misk.concurrent
 
 import com.google.common.base.Ticker
-import java.time.Duration
-import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.time.Duration
+import java.util.concurrent.TimeUnit
 import misk.testing.TestFixture
 
 @Singleton

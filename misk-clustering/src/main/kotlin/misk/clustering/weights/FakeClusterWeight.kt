@@ -4,9 +4,7 @@ import misk.inject.KAbstractModule
 import misk.testing.FakeFixture
 import misk.testing.TestFixture
 
-/**
- * A [ClusterWeightProvider] for testing
- */
+/** A [ClusterWeightProvider] for testing */
 class FakeClusterWeight : ClusterWeightProvider, FakeFixture() {
 
   private var weight by resettable { 100 }
@@ -20,9 +18,7 @@ class FakeClusterWeight : ClusterWeightProvider, FakeFixture() {
   }
 }
 
-/**
- * Provides a [FakeClusterWeight] for testing
- */
+/** Provides a [FakeClusterWeight] for testing */
 class FakeClusterWeightModule : KAbstractModule() {
   override fun configure() {
     val fake = FakeClusterWeight()

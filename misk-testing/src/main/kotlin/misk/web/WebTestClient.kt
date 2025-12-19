@@ -1,16 +1,16 @@
 package misk.web
 
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
+import kotlin.reflect.KClass
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import jakarta.inject.Inject
-import okhttp3.HttpUrl.Companion.toHttpUrl
-import kotlin.reflect.KClass
 
 /**
  * Use WebTestClient to test calls to the application at the integration level.
@@ -21,89 +21,47 @@ import kotlin.reflect.KClass
  * * Add `WebTestingModule` to the module under test: `install(WebTestingModule())`
  * * Inject `WebTestClient` in the test class
  */
-class WebTestClient @Inject constructor(
-  private val moshi: Moshi,
-  private val jettyService: JettyService
-) {
+class WebTestClient @Inject constructor(private val moshi: Moshi, private val jettyService: JettyService) {
   fun get(path: String): WebTestResponse = call(path) { get() }
 
-  /**
-   * Performs a POST request with a JSON request body created from the input.
-   */
-  fun <T : Any> post(path: String, body: T, tClass: KClass<T>): WebTestResponse = call(path) {
-    post(
-      moshi.adapter(tClass.java).toJson(body)
-        .toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
-    )
-  }
+  /** Performs a POST request with a JSON request body created from the input. */
+  fun <T : Any> post(path: String, body: T, tClass: KClass<T>): WebTestResponse =
+    call(path) { post(moshi.adapter(tClass.java).toJson(body).toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)) }
 
-  /**
-   * Performs a POST request with a JSON request body created from the input.
-   */
+  /** Performs a POST request with a JSON request body created from the input. */
   inline fun <reified T : Any> post(path: String, body: T) = post(path, body, T::class)
 
-  /**
-   * Performs a POST request.
-   */
+  /** Performs a POST request. */
   @JvmOverloads
-  fun post(
-    path: String,
-    body: String,
-    mediaType: MediaType = MediaTypes.APPLICATION_JSON_MEDIA_TYPE
-  ) = call(path) { post(body.toRequestBody(mediaType)) }
+  fun post(path: String, body: String, mediaType: MediaType = MediaTypes.APPLICATION_JSON_MEDIA_TYPE) =
+    call(path) { post(body.toRequestBody(mediaType)) }
 
-  /**
-   * Performs a DELETE request with a JSON request body created from the input.
-   */
-  fun <T : Any> delete(path: String, body: T, tClass: KClass<T>): WebTestResponse = call(path) {
-    delete(
-      moshi.adapter(tClass.java).toJson(body)
-        .toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
-    )
-  }
+  /** Performs a DELETE request with a JSON request body created from the input. */
+  fun <T : Any> delete(path: String, body: T, tClass: KClass<T>): WebTestResponse =
+    call(path) { delete(moshi.adapter(tClass.java).toJson(body).toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)) }
 
-  /**
-   * Performs a DELETE request with a JSON request body created from the input.
-   */
+  /** Performs a DELETE request with a JSON request body created from the input. */
   inline fun <reified T : Any> delete(path: String, body: T) = delete(path, body, T::class)
 
-  /**
-   * Performs a DELETE request.
-   */
+  /** Performs a DELETE request. */
   @JvmOverloads
-  fun delete(
-    path: String,
-    body: String,
-    mediaType: MediaType = MediaTypes.APPLICATION_JSON_MEDIA_TYPE
-  ) = call(path) { delete(body.toRequestBody(mediaType)) }
+  fun delete(path: String, body: String, mediaType: MediaType = MediaTypes.APPLICATION_JSON_MEDIA_TYPE) =
+    call(path) { delete(body.toRequestBody(mediaType)) }
 
-  /**
-   * Performs a call to the started service. Allows the caller to customize the action before it's
-   * sent through.
-   */
+  /** Performs a call to the started service. Allows the caller to customize the action before it's sent through. */
   fun call(path: String, action: Request.Builder.() -> Unit): WebTestResponse {
     val fullUrl = jettyService.httpServerUrl.toUrl().toString() + path.trimStart('/')
-    return Request.Builder()
-      .url(fullUrl.toHttpUrl())
-      .apply(action)
-      .let { performRequest(it) }
+    return Request.Builder().url(fullUrl.toHttpUrl()).apply(action).let { performRequest(it) }
   }
 
   private fun performRequest(request: Request.Builder): WebTestResponse {
     request.header("Accept", MediaTypes.ALL)
     val httpClient = OkHttpClient()
-    return WebTestResponse(
-      response = httpClient.newCall(request.build()).execute(),
-      moshi = moshi
-    )
+    return WebTestResponse(response = httpClient.newCall(request.build()).execute(), moshi = moshi)
   }
 
-  data class WebTestResponse(
-    val response: Response,
-    private val moshi: Moshi
-  ) {
-    fun <T : Any> parseJson(tClass: KClass<T>): T = moshi.adapter(tClass.java)
-      .fromJson(response.body!!.source())!!
+  data class WebTestResponse(val response: Response, private val moshi: Moshi) {
+    fun <T : Any> parseJson(tClass: KClass<T>): T = moshi.adapter(tClass.java).fromJson(response.body!!.source())!!
 
     inline fun <reified T : Any> parseJson(): T = this.parseJson(T::class)
   }

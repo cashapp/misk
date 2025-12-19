@@ -11,7 +11,6 @@ dependencies {
   api(libs.slf4jApi)
   api(project(":misk-sampling")) // TODO remove once all usages depend on misk-sampling directly
   implementation(libs.kotlinStdLibJdk8)
-  implementation(project(":misk-api"))
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
@@ -34,6 +33,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGfm")),
   )
 }

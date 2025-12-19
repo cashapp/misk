@@ -1,6 +1,8 @@
 package misk.web
 
 import com.google.inject.Provides
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.client.HttpClientConfig
 import misk.client.HttpClientEndpointConfig
@@ -22,33 +24,27 @@ import okhttp3.internal.closeQuietly
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
-abstract class AbstractRebalancingTest(
-  val percent: Double
-) {
+abstract class AbstractRebalancingTest(val percent: Double) {
   /**
-   * To avoid races, we minimize the number of Jetty threads. Jetty's ThreadPoolBudget enforces an
-   * unspecified minimum number of threads so we can't use just 1 or 2.
+   * To avoid races, we minimize the number of Jetty threads. Jetty's ThreadPoolBudget enforces an unspecified minimum
+   * number of threads so we can't use just 1 or 2.
    */
   private val jettyMaxThreadPoolSize = 10
 
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
-  @Inject
-  lateinit var jettyService: JettyService
+  @Inject lateinit var jettyService: JettyService
 
-  @Inject
-  lateinit var okHttpClient: OkHttpClient
+  @Inject lateinit var okHttpClient: OkHttpClient
 
   @Test
   fun http1() {
     test(Protocol.HTTP_1_1)
   }
 
-  @Test @Disabled
+  @Test
+  @Disabled
   fun http2() {
     test(Protocol.HTTP_2)
   }
@@ -61,30 +57,26 @@ abstract class AbstractRebalancingTest(
       protocolsList += Protocol.HTTP_1_1 // OkHttp insists on including HTTP/1 in this list.
     }
 
-    val httpClient = okHttpClient.newBuilder()
-      .retryOnConnectionFailure(true)
-      .protocols(protocolsList)
-      .addNetworkInterceptor {
-        connections += it.connection()!!
-        it.proceed(it.request())
-      }
-      .build()
+    val httpClient =
+      okHttpClient
+        .newBuilder()
+        .retryOnConnectionFailure(true)
+        .protocols(protocolsList)
+        .addNetworkInterceptor {
+          connections += it.connection()!!
+          it.proceed(it.request())
+        }
+        .build()
 
-    val request = Request.Builder()
-      .url(jettyService.httpsServerUrl!!)
-      .build()
+    val request = Request.Builder().url(jettyService.httpsServerUrl!!).build()
 
     val response1 = httpClient.newCall(request).execute()
-    response1.use {
-      assertThat(it.protocol).isEqualTo(protocol)
-    }
+    response1.use { assertThat(it.protocol).isEqualTo(protocol) }
 
     // Make a request for every thread in Jetty's thread pool to defeat races. Otherwise this test
     // will be flaky because a thread could be pre-empted before it sends the close.
     for (i in 1 until jettyMaxThreadPoolSize) {
-      httpClient.newCall(request).execute().use {
-        assertThat(it.protocol).isEqualTo(protocol)
-      }
+      httpClient.newCall(request).execute().use { assertThat(it.protocol).isEqualTo(protocol) }
     }
 
     checkResponse(response1, connections)
@@ -97,10 +89,11 @@ abstract class AbstractRebalancingTest(
     override fun configure() {
       install(
         WebServerTestingModule(
-          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
-            close_connection_percent = percent,
-            jetty_max_thread_pool_size = jettyMaxThreadPoolSize
-          )
+          webConfig =
+            WebServerTestingModule.TESTING_WEB_CONFIG.copy(
+              close_connection_percent = percent,
+              jetty_max_thread_pool_size = jettyMaxThreadPoolSize,
+            )
         )
       )
       install(MiskTestingServiceModule())
@@ -111,20 +104,22 @@ abstract class AbstractRebalancingTest(
     @Singleton
     fun provideHttpClientsConfig(): HttpClientsConfig {
       return HttpClientsConfig(
-        endpoints = mapOf(
-          "default" to HttpClientEndpointConfig(
-            url = "http://example.com/",
-            clientConfig = HttpClientConfig(
-              ssl = HttpClientSSLConfig(
-                cert_store = null,
-                trust_store = TrustStoreConfig(
-                  resource = "classpath:/ssl/server_cert.pem",
-                  format = SslLoader.FORMAT_PEM
-                )
+        endpoints =
+          mapOf(
+            "default" to
+              HttpClientEndpointConfig(
+                url = "http://example.com/",
+                clientConfig =
+                  HttpClientConfig(
+                    ssl =
+                      HttpClientSSLConfig(
+                        cert_store = null,
+                        trust_store =
+                          TrustStoreConfig(resource = "classpath:/ssl/server_cert.pem", format = SslLoader.FORMAT_PEM),
+                      )
+                  ),
               )
-            )
           )
-        )
       )
     }
   }

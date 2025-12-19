@@ -2,8 +2,8 @@
 
 package misk.redis.lettuce
 
-import misk.config.Redact
 import misk.config.Config
+import misk.config.Redact
 
 /** Default timeout in milliseconds for Redis operations */
 const val DEFAULT_TIMEOUT_MS = 10000
@@ -29,17 +29,17 @@ const val DEFAULT_POOL_TEST_ON_RELEASE = false
 /**
  * Base configuration interface for Redis deployments.
  *
- * This interface serves as a common base for both standalone Redis and Redis Cluster
- * configurations, allowing for polymorphic handling of Redis configurations.
+ * This interface serves as a common base for both standalone Redis and Redis Cluster configurations, allowing for
+ * polymorphic handling of Redis configurations.
  */
 sealed interface AbstractRedisConfig : Config
 
 /**
  * Configuration for standalone Redis deployments.
  *
- * This class maps replication group IDs to their configurations, supporting multiple
- * Redis replication groups in a single application. Each replication group can have
- * its own primary and replica nodes, connection settings, and authentication.
+ * This class maps replication group IDs to their configurations, supporting multiple Redis replication groups in a
+ * single application. Each replication group can have its own primary and replica nodes, connection settings, and
+ * authentication.
  *
  * Example YAML configuration:
  * ```yaml
@@ -61,16 +61,14 @@ sealed interface AbstractRedisConfig : Config
  *
  * @see [RedisReplicationGroupConfig] for individual group configuration
  */
-class RedisConfig @JvmOverloads constructor(
-  m: Map<String, RedisReplicationGroupConfig> = emptyMap()
-) : java.util.LinkedHashMap<String, RedisReplicationGroupConfig>(m), AbstractRedisConfig
+class RedisConfig @JvmOverloads constructor(m: Map<String, RedisReplicationGroupConfig> = emptyMap()) :
+  java.util.LinkedHashMap<String, RedisReplicationGroupConfig>(m), AbstractRedisConfig
 
 /**
  * Configuration for a Redis replication group in standalone mode.
  *
- * A replication group consists of a primary node and optional replica nodes,
- * along with connection and pool settings. This configuration supports both
- * read-write operations to the primary and read-only operations to replicas.
+ * A replication group consists of a primary node and optional replica nodes, along with connection and pool settings.
+ * This configuration supports both read-write operations to the primary and read-only operations to replicas.
  *
  * @property client_name Optional client identifier used in Redis monitoring
  * @property writer_endpoint Configuration for the primary Redis node that handles write operations
@@ -80,7 +78,9 @@ class RedisConfig @JvmOverloads constructor(
  * @property timeout_ms Connection and operation timeout in milliseconds (default: 10000ms)
  * @property connection_pool Connection pool settings for this group (default: pooling disabled)
  */
-data class RedisReplicationGroupConfig @JvmOverloads constructor(
+data class RedisReplicationGroupConfig
+@JvmOverloads
+constructor(
   val client_name: String? = null,
   val writer_endpoint: RedisNodeConfig,
   val reader_endpoint: RedisNodeConfig? = null,
@@ -94,9 +94,8 @@ data class RedisReplicationGroupConfig @JvmOverloads constructor(
 /**
  * Configuration for Redis Cluster deployments.
  *
- * This class maps cluster group IDs to their configurations, supporting multiple
- * Redis clusters in a single application. Each cluster group uses a configuration
- * endpoint to discover the cluster topology.
+ * This class maps cluster group IDs to their configurations, supporting multiple Redis clusters in a single
+ * application. Each cluster group uses a configuration endpoint to discover the cluster topology.
  *
  * Example YAML configuration:
  * ```yaml
@@ -115,15 +114,14 @@ data class RedisReplicationGroupConfig @JvmOverloads constructor(
  *
  * @see [RedisClusterGroupConfig] for individual group configuration
  */
-class RedisClusterConfig @JvmOverloads constructor(
-  m: Map<String, RedisClusterGroupConfig> = emptyMap()
-) : java.util.LinkedHashMap<String, RedisClusterGroupConfig>(m), AbstractRedisConfig
+class RedisClusterConfig @JvmOverloads constructor(m: Map<String, RedisClusterGroupConfig> = emptyMap()) :
+  java.util.LinkedHashMap<String, RedisClusterGroupConfig>(m), AbstractRedisConfig
 
 /**
  * Configuration for a Redis Cluster group.
  *
- * A cluster group represents a complete Redis Cluster deployment, accessed through
- * a configuration endpoint that provides cluster topology information.
+ * A cluster group represents a complete Redis Cluster deployment, accessed through a configuration endpoint that
+ * provides cluster topology information.
  *
  * @property client_name Optional client identifier used in Redis monitoring (default: null)
  * @property configuration_endpoint Endpoint for cluster topology discovery
@@ -132,7 +130,9 @@ class RedisClusterConfig @JvmOverloads constructor(
  * @property timeout_ms Connection and operation timeout in milliseconds (default: 10000ms)
  * @property connection_pool Connection pool settings for this cluster (default: pooling disabled)
  */
-data class RedisClusterGroupConfig @JvmOverloads constructor(
+data class RedisClusterGroupConfig
+@JvmOverloads
+constructor(
   val client_name: String? = null,
   val configuration_endpoint: RedisNodeConfig,
   @Redact val redis_auth_password: String,
@@ -145,9 +145,8 @@ data class RedisClusterGroupConfig @JvmOverloads constructor(
 /**
  * Configuration for Redis connection pooling.
  *
- * This class configures connection pool behavior, including pool size limits
- * and connection testing policies. It supports both basic connection management
- * and advanced connection validation.
+ * This class configures connection pool behavior, including pool size limits and connection testing policies. It
+ * supports both basic connection management and advanced connection validation.
  *
  * @property max_total Maximum total connections in the pool (default: 8)
  * @property max_idle Maximum number of idle connections to maintain (default: 8)
@@ -156,7 +155,9 @@ data class RedisClusterGroupConfig @JvmOverloads constructor(
  * @property test_on_acquire Whether to test connections when acquired from pool (default: false)
  * @property test_on_release Whether to test connections when returned to pool (default: false)
  */
-data class RedisConnectionPoolConfig @JvmOverloads constructor(
+data class RedisConnectionPoolConfig
+@JvmOverloads
+constructor(
   val max_total: Int = DEFAULT_POOL_MAX_TOTAL,
   val max_idle: Int = DEFAULT_POOL_MAX_IDLE,
   val min_idle: Int = DEFAULT_POOL_MIN_IDLE,
@@ -168,13 +169,10 @@ data class RedisConnectionPoolConfig @JvmOverloads constructor(
 /**
  * Configuration for a Redis node endpoint.
  *
- * This class represents the network location of a Redis node, whether it's
- * a standalone server, primary/replica node, or cluster node.
+ * This class represents the network location of a Redis node, whether it's a standalone server, primary/replica node,
+ * or cluster node.
  *
  * @property hostname The hostname or IP address of the Redis node
  * @property port The port number where Redis is listening
  */
-data class RedisNodeConfig(
-  val hostname: String,
-  val port: Int
-)
+data class RedisNodeConfig(val hostname: String, val port: Int)

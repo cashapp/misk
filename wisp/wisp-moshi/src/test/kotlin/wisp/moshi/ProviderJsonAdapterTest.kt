@@ -1,10 +1,10 @@
 package wisp.moshi
 
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 import com.google.inject.Provider as GuiceProvider
-import javax.inject.Provider as JavaxProvider
 import jakarta.inject.Provider as JakartaProvider
+import javax.inject.Provider as JavaxProvider
+import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 class ProviderJsonAdapterTest {
 
@@ -12,11 +12,7 @@ class ProviderJsonAdapterTest {
   fun `happy path`() {
     val adapter = buildMoshi(listOf(ProviderJsonAdapterFactory())).adapter<Alpha>()
 
-    val fromModel = Alpha(
-      guice = { "bingo" },
-      javax = { "charlie" },
-      jakarta = { "delta" },
-    )
+    val fromModel = Alpha(guice = { "bingo" }, javax = { "charlie" }, jakarta = { "delta" })
     val toJson = """{"guice":"bingo","javax":"charlie","jakarta":"delta"}"""
     val actualJson = adapter.toJson(fromModel)
     assertEquals(toJson, actualJson)
@@ -32,5 +28,4 @@ class ProviderJsonAdapterTest {
     val javax: JavaxProvider<String>,
     val jakarta: JakartaProvider<String>,
   )
-
 }

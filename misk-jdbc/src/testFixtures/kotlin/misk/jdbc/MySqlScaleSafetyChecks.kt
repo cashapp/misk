@@ -1,20 +1,18 @@
 package misk.jdbc
 
 import com.zaxxer.hikari.util.DriverDataSource
-import net.ttddyy.dsproxy.proxy.ProxyConfig
-import net.ttddyy.dsproxy.support.ProxyDataSource
-import wisp.deployment.TESTING
+import jakarta.inject.Singleton
 import java.sql.Connection
 import java.sql.SQLException
 import java.sql.Timestamp
 import java.util.Properties
-import jakarta.inject.Singleton
 import javax.sql.DataSource
+import net.ttddyy.dsproxy.proxy.ProxyConfig
+import net.ttddyy.dsproxy.support.ProxyDataSource
+import wisp.deployment.TESTING
 
 @Singleton
-class MySqlScaleSafetyChecks(
-  val config: DataSourceConfig,
-) : DataSourceDecorator {
+class MySqlScaleSafetyChecks(val config: DataSourceConfig) : DataSourceDecorator {
   private val connection: Connection by lazy { connect() }
   private val fullTableScanDetector = TableScanDetector()
 
@@ -24,9 +22,7 @@ class MySqlScaleSafetyChecks(
     val proxy = ProxyDataSource(dataSource)
     ScaleSafetyChecks.turnOnSqlGeneralLogging(connection)
 
-    proxy.proxyConfig = ProxyConfig.Builder()
-      .methodListener(fullTableScanDetector)
-      .build()
+    proxy.proxyConfig = ProxyConfig.Builder().methodListener(fullTableScanDetector).build()
     proxy.addListener(fullTableScanDetector)
     return proxy
   }
@@ -34,20 +30,20 @@ class MySqlScaleSafetyChecks(
   fun connect(): Connection {
     return try {
       DriverDataSource(
-        config.buildJdbcUrl(TESTING),
-        config.getDriverClassName(),
-        Properties(),
-        config.username,
-        config.password
-      ).connection
+          config.buildJdbcUrl(TESTING),
+          config.getDriverClassName(),
+          Properties(),
+          config.username,
+          config.password,
+        )
+        .connection
     } catch (e: SQLException) {
       throw IllegalStateException("Could not connect to test MySQL server!", e)
     }
   }
 
   inner class TableScanDetector : ExtendedQueryExecutionListener() {
-    private val mysqlTimeBeforeQuery: ThreadLocal<Timestamp?> =
-      ThreadLocal.withInitial { null }
+    private val mysqlTimeBeforeQuery: ThreadLocal<Timestamp?> = ThreadLocal.withInitial { null }
 
     override fun beforeQuery(query: String) {
       if (!CheckDisabler.isCheckEnabled(Check.TABLE_SCAN)) return

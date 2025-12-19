@@ -1,5 +1,6 @@
 package misk.web.marshal
 
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -17,14 +18,12 @@ import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class JsonResponseTest {
   data class Packet(val message: String)
 
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject lateinit var webTestClient: WebTestClient
 
@@ -69,9 +68,7 @@ internal class JsonResponseTest {
   }
 
   class ReturnAsObject @Inject constructor() : WebAction {
-    @Get("/response/as-object")
-    @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun call() = Packet("as-object")
+    @Get("/response/as-object") @ResponseContentType(MediaTypes.APPLICATION_JSON) fun call() = Packet("as-object")
   }
 
   class ReturnAsString @Inject constructor() : WebAction {
@@ -131,9 +128,12 @@ internal class JsonResponseTest {
     }
   }
 
-  private fun get(path: String): Packet = webTestClient.get(path)
-    .apply {
-      assertThat(response.code).isEqualTo(200)
-      assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.APPLICATION_JSON)
-    }.parseJson()
+  private fun get(path: String): Packet =
+    webTestClient
+      .get(path)
+      .apply {
+        assertThat(response.code).isEqualTo(200)
+        assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.APPLICATION_JSON)
+      }
+      .parseJson()
 }

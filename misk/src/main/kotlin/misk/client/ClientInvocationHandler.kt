@@ -1,12 +1,19 @@
 package misk.client
 
+import com.google.inject.Provider
 import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import io.opentracing.contrib.okhttp3.TracingCallFactory
+import java.lang.reflect.InvocationHandler
+import java.lang.reflect.Method
+import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.functions
+import kotlin.reflect.full.memberFunctions
 import misk.web.mediatype.MediaTypes
 import okhttp3.Call
 import okhttp3.EventListener
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -21,14 +28,6 @@ import retrofit2.http.OPTIONS
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
-import java.lang.reflect.InvocationHandler
-import java.lang.reflect.Method
-import com.google.inject.Provider
-import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.functions
-import kotlin.reflect.full.memberFunctions
 
 internal class ClientInvocationHandler(
   private val interfaceType: KClass<*>,
@@ -43,82 +42,83 @@ internal class ClientInvocationHandler(
   callFactoryWrappers: Provider<List<CallFactoryWrapper>> = Provider<List<CallFactoryWrapper>> { emptyList() },
 ) : InvocationHandler {
 
-  private val actionsByMethod = interfaceType.functions
-    .filter { it.isRetrofitMethod }
-    .map { ClientAction(clientName, it) }
-    .map { it.function.name to it }
-    .toMap()
+  private val actionsByMethod =
+    interfaceType.functions
+      .filter { it.isRetrofitMethod }
+      .map { ClientAction(clientName, it) }
+      .map { it.function.name to it }
+      .toMap()
 
   // Each method might have a different set of network interceptors, so sadly we potentially
   // need to create a separate OkHttpClient and retrofit proxy per method
-  private val proxiesByMethod: Map<String, Any> = actionsByMethod.map { (methodName, action) ->
-    val applicationInterceptors = applicationInterceptorFactories.get().mapNotNull { it.create(action) }
-    val networkInterceptors = networkInterceptorFactories.get().mapNotNull { it.create(action) }
-    val clientBuilder = okHttpTemplate.newBuilder()
-    applicationInterceptors.forEach { clientBuilder.addInterceptor(it) }
-    networkInterceptors.forEach {
-      clientBuilder.addNetworkInterceptor(NetworkInterceptorWrapper(action, it))
-    }
-    if (eventListenerFactory != null) {
-      clientBuilder.eventListenerFactory(eventListenerFactory)
-    }
-    val actionSpecificClient = clientBuilder.build()
+  private val proxiesByMethod: Map<String, Any> =
+    actionsByMethod
+      .map { (methodName, action) ->
+        val applicationInterceptors = applicationInterceptorFactories.get().mapNotNull { it.create(action) }
+        val networkInterceptors = networkInterceptorFactories.get().mapNotNull { it.create(action) }
+        val clientBuilder = okHttpTemplate.newBuilder()
+        applicationInterceptors.forEach { clientBuilder.addInterceptor(it) }
+        networkInterceptors.forEach { clientBuilder.addNetworkInterceptor(NetworkInterceptorWrapper(action, it)) }
+        if (eventListenerFactory != null) {
+          clientBuilder.eventListenerFactory(eventListenerFactory)
+        }
+        val actionSpecificClient = clientBuilder.build()
 
-    val retrofitBuilder = retrofit.newBuilder()
+        val retrofitBuilder = retrofit.newBuilder()
 
-    val initialCallFactory: Call.Factory = if (tracer != null) {
-      TracingCallFactory(actionSpecificClient, tracer)
-    } else {
-      actionSpecificClient
-    }
+        val initialCallFactory: Call.Factory =
+          if (tracer != null) {
+            TracingCallFactory(actionSpecificClient, tracer)
+          } else {
+            actionSpecificClient
+          }
 
-    val callFactoryWrapped = callFactoryWrappers.get().fold(initialCallFactory) { callFactory, callFactoryWrapper ->
-       callFactoryWrapper.wrap(action, callFactory) ?: callFactory
-    }
+        val callFactoryWrapped =
+          callFactoryWrappers.get().fold(initialCallFactory) { callFactory, callFactoryWrapper ->
+            callFactoryWrapper.wrap(action, callFactory) ?: callFactory
+          }
 
-    retrofitBuilder.callFactory(callFactoryWrapped)
+        retrofitBuilder.callFactory(callFactoryWrapped)
 
-    val mediaTypes = getEndpointMediaTypes(methodName)
-    if (mediaTypes.contains(MediaTypes.APPLICATION_PROTOBUF)) {
-      retrofitBuilder.addConverterFactory(WireConverterFactory.create())
-      retrofitBuilder.addConverterFactory(ProtoConverterFactory.create())
-    }
-    // Always add JSON as default. Ensure it's added last so that other converters get a chance since
-    // JSON converter will accept any object.
-    retrofitBuilder.addConverterFactory(MoshiConverterFactory.create(moshi))
+        val mediaTypes = getEndpointMediaTypes(methodName)
+        if (mediaTypes.contains(MediaTypes.APPLICATION_PROTOBUF)) {
+          retrofitBuilder.addConverterFactory(WireConverterFactory.create())
+          retrofitBuilder.addConverterFactory(ProtoConverterFactory.create())
+        }
+        // Always add JSON as default. Ensure it's added last so that other converters get a chance since
+        // JSON converter will accept any object.
+        retrofitBuilder.addConverterFactory(MoshiConverterFactory.create(moshi))
 
-    methodName to retrofitBuilder
-      .build()
-      .create(interfaceType.java)
-  }.toMap()
+        methodName to retrofitBuilder.build().create(interfaceType.java)
+      }
+      .toMap()
 
   init {
-    require(actionsByMethod.isNotEmpty()) {
-      "$interfaceType is not a Retrofit interface (no @POST or @GET methods)"
-    }
+    require(actionsByMethod.isNotEmpty()) { "$interfaceType is not a Retrofit interface (no @POST or @GET methods)" }
   }
 
   private fun getEndpointMediaTypes(methodName: String): List<String> {
     val headers =
-      interfaceType.memberFunctions.find { it.name == methodName }?.findAnnotation<Headers>()
-        ?: return emptyList()
+      interfaceType.memberFunctions.find { it.name == methodName }?.findAnnotation<Headers>() ?: return emptyList()
 
-    return headers.value.mapNotNull {
-      val (headerKey, headerValue) = it.split(":").map { it.trim() }
-      if (headerKey.equals("Accept", true) || headerKey.equals("Content-type", true)) {
-        headerValue.lowercase()
-      } else {
-        null
+    return headers.value
+      .mapNotNull {
+        val (headerKey, headerValue) = it.split(":").map { it.trim() }
+        if (headerKey.equals("Accept", true) || headerKey.equals("Content-type", true)) {
+          headerValue.lowercase()
+        } else {
+          null
+        }
       }
-    }.filterNot { it == MediaTypes.APPLICATION_JSON }
+      .filterNot { it == MediaTypes.APPLICATION_JSON }
   }
 
   override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
     val argsList = args?.toList() ?: listOf()
 
-    val retrofitProxy = proxiesByMethod[method.name] ?: throw IllegalStateException(
-      "no action corresponding to ${interfaceType.qualifiedName}#${method.name}"
-    )
+    val retrofitProxy =
+      proxiesByMethod[method.name]
+        ?: throw IllegalStateException("no action corresponding to ${interfaceType.qualifiedName}#${method.name}")
 
     return method.invoke(retrofitProxy, *argsList.toTypedArray())
   }
@@ -127,7 +127,6 @@ internal class ClientInvocationHandler(
 private val KFunction<*>.isRetrofitMethod: Boolean
   get() {
     return annotations.any {
-      it is GET || it is POST || it is HEAD || it is PUT || it is PATCH || it is OPTIONS ||
-        it is DELETE || it is HTTP
+      it is GET || it is POST || it is HEAD || it is PUT || it is PATCH || it is OPTIONS || it is DELETE || it is HTTP
     }
   }

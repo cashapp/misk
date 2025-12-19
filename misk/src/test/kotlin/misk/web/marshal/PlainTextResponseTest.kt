@@ -1,5 +1,6 @@
 package misk.web.marshal
 
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -17,12 +18,10 @@ import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class PlainTextResponseTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var webTestClient: WebTestClient
 
@@ -73,9 +72,7 @@ internal class PlainTextResponseTest {
   }
 
   class ReturnAsString @Inject constructor() : WebAction {
-    @Get("/response/as-string")
-    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun call() = "as-string"
+    @Get("/response/as-string") @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8) fun call() = "as-string"
   }
 
   class ReturnAsByteString @Inject constructor() : WebAction {
@@ -129,11 +126,16 @@ internal class PlainTextResponseTest {
     }
   }
 
-  fun get(path: String): String = webTestClient.get(path)
-    .apply {
-      assertThat(response.code).isEqualTo(200)
-      assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    }.response.body!!.string()
+  fun get(path: String): String =
+    webTestClient
+      .get(path)
+      .apply {
+        assertThat(response.code).isEqualTo(200)
+        assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
+      }
+      .response
+      .body!!
+      .string()
 
   class MessageWrapper(private val message: String) {
     override fun toString() = message

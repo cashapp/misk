@@ -3,9 +3,7 @@ package misk.hibernate.vitess
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
-/**
- * Test suite that verifies Vitess query hints are correctly added to SQL queries.
- */
+/** Test suite that verifies Vitess query hints are correctly added to SQL queries. */
 class VitessQueryHintHandlerTest {
   private val queryHintHandler: VitessQueryHintHandler = VitessQueryHintHandler()
 
@@ -33,7 +31,8 @@ class VitessQueryHintHandlerTest {
     val hints = "vt+ RANGE_OPT=[a:b],vt+ ANOTHER,vt+ ANOTHER_WITH_VAL=val,vt+ AND_ONE_WITH_EQ==,unq_token_idx"
 
     val result = queryHintHandler.addQueryHints(query, hints)
-    Assertions.assertThat(result).isEqualTo("select /*vt+ RANGE_OPT=[a:b] ANOTHER ANOTHER_WITH_VAL=val AND_ONE_WITH_EQ== */ * from customers;")
+    Assertions.assertThat(result)
+      .isEqualTo("select /*vt+ RANGE_OPT=[a:b] ANOTHER ANOTHER_WITH_VAL=val AND_ONE_WITH_EQ== */ * from customers;")
   }
 
   @Test

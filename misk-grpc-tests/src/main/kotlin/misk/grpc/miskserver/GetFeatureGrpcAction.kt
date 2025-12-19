@@ -2,6 +2,8 @@ package misk.grpc.miskserver
 
 import com.squareup.wire.AnyMessage
 import com.squareup.wire.GrpcStatus
+import jakarta.inject.Inject
+import java.net.HttpURLConnection.HTTP_BAD_REQUEST
 import misk.exceptions.WebActionException
 import misk.web.actions.WebAction
 import misk.web.interceptors.LogRequestResponse
@@ -9,11 +11,14 @@ import routeguide.Feature
 import routeguide.Point
 import routeguide.Rectangle
 import routeguide.RouteGuideGetFeatureBlockingServer
-import java.net.HttpURLConnection.HTTP_BAD_REQUEST
-import jakarta.inject.Inject
 
 class GetFeatureGrpcAction @Inject constructor() : WebAction, RouteGuideGetFeatureBlockingServer {
-  @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0, includeRequestHeaders = true, includeResponseHeaders = true)
+  @LogRequestResponse(
+    bodySampling = 1.0,
+    errorBodySampling = 1.0,
+    includeRequestHeaders = true,
+    includeResponseHeaders = true,
+  )
   override fun GetFeature(request: Point): Feature {
     if (request.latitude == -1) {
       throw WebActionException(request.longitude ?: 500, "unexpected latitude error!")
@@ -26,15 +31,11 @@ class GetFeatureGrpcAction @Inject constructor() : WebAction, RouteGuideGetFeatu
         responseBody = "invalid coordinates",
         message = "invalid coordinates",
         grpcStatus = GrpcStatus.INVALID_ARGUMENT,
-        details = listOf(
-          AnyMessage.pack(
-            Rectangle(
-              lo = Point(-90, -180),
-              hi = Point(90, 180)
-            )
+        details =
+          listOf(
+            AnyMessage.pack(Rectangle(lo = Point(-90, -180), hi = Point(90, 180))),
+            AnyMessage.pack(Point(latitude, longitude)),
           ),
-          AnyMessage.pack(Point(latitude, longitude))
-        )
       )
     }
     return Feature(name = "maple tree", location = request)

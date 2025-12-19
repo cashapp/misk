@@ -1,37 +1,25 @@
 package misk.web.jetty
 
-import org.eclipse.jetty.util.thread.QueuedThreadPool
 import java.util.concurrent.ThreadPoolExecutor
+import org.eclipse.jetty.util.thread.QueuedThreadPool
 
-/**
- * A common interface that can emit metrics about a thread pool.
- */
+/** A common interface that can emit metrics about a thread pool. */
 interface MeasuredThreadPool {
 
-  /**
-   * The current size of the thread pool.
-   */
+  /** The current size of the thread pool. */
   fun poolSize(): Int
 
-  /**
-   * The number of active threads.
-   */
+  /** The number of active threads. */
   fun activeCount(): Int
 
-  /**
-   * The maximum size the pool can grow to.
-   */
+  /** The maximum size the pool can grow to. */
   fun maxPoolSize(): Int
 
-  /**
-   * The current number of tasks in the queue waiting to be processed by the thread pool.
-   */
+  /** The current number of tasks in the queue waiting to be processed by the thread pool. */
   fun queueSize(): Int
 }
 
-/**
- * A [MeasuredThreadPool] for a [QueuedThreadPool]
- */
+/** A [MeasuredThreadPool] for a [QueuedThreadPool] */
 class MeasuredQueuedThreadPool(private val threadPool: QueuedThreadPool) : MeasuredThreadPool {
   override fun poolSize(): Int = threadPool.threads
 
@@ -42,9 +30,7 @@ class MeasuredQueuedThreadPool(private val threadPool: QueuedThreadPool) : Measu
   override fun queueSize(): Int = threadPool.queueSize
 }
 
-/**
- * A [MeasuredThreadPool] for a [ThreadPoolExecutor]
- */
+/** A [MeasuredThreadPool] for a [ThreadPoolExecutor] */
 class MeasuredThreadPoolExecutor(private val threadPool: ThreadPoolExecutor) : MeasuredThreadPool {
   override fun poolSize(): Int = threadPool.poolSize
 

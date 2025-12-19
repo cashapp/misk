@@ -21,46 +21,47 @@ import misk.web.v2.DashboardPageLayout
 import wisp.moshi.defaultKotlinMoshi
 
 @Singleton
-class ServiceGraphTabIndexAction @Inject constructor(
+class ServiceGraphTabIndexAction
+@Inject
+constructor(
   private val dashboardPageLayout: DashboardPageLayout,
   private val serviceGraphMetadataProvider: Provider<ServiceGraphMetadata>,
 ) : WebAction {
-  val adapter = defaultKotlinMoshi
-    .adapter<List<ServiceGraphMetadata.GraphPairs>>()
+  val adapter = defaultKotlinMoshi.adapter<List<ServiceGraphMetadata.GraphPairs>>()
 
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @AdminDashboardAccess
-  fun get(): String = dashboardPageLayout
-    .newBuilder()
-    .headBlock {
-      // TODO store a copy of this in the repo so it works locally
-      script {
-        src = "https://cdn.jsdelivr.net/npm/d3@7"
-        type = "text/javascript"
-      }
-    }
-    .build { _, _, _ ->
-      val metadataArray = adapter
-        .toFormattedJson(serviceGraphMetadataProvider.get().graphVisual)
-
-      div("container mx-auto p-8") {
-        h1("text-3xl font-bold mb-8") {
-          +"""Service Graph"""
-        }
-        AlertInfoHighlight(
-          "Explore the directed Guava service graph for your application.  If the graph doesn't show below, try reloading the page.",
-          "Guava Docs",
-          "https://github.com/google/guava/wiki/ServiceExplained",
-        )
-        AlertInfo("Understanding the Graph: A directed arrow from Service A to Service B shows that Service B requires Service A to already be running before it can start. Services that always need to be running are configured to be required by the misk.ReadyService.")
-
-        div("svg-container") { }
-
-        // JavaScript code in a block
+  fun get(): String =
+    dashboardPageLayout
+      .newBuilder()
+      .headBlock {
+        // TODO store a copy of this in the repo so it works locally
         script {
-          unsafe {
-            +"""
+          src = "https://cdn.jsdelivr.net/npm/d3@7"
+          type = "text/javascript"
+        }
+      }
+      .build { _, _, _ ->
+        val metadataArray = adapter.toFormattedJson(serviceGraphMetadataProvider.get().graphVisual)
+
+        div("container mx-auto p-8") {
+          h1("text-3xl font-bold mb-8") { +"""Service Graph""" }
+          AlertInfoHighlight(
+            "Explore the directed Guava service graph for your application.  If the graph doesn't show below, try reloading the page.",
+            "Guava Docs",
+            "https://github.com/google/guava/wiki/ServiceExplained",
+          )
+          AlertInfo(
+            "Understanding the Graph: A directed arrow from Service A to Service B shows that Service B requires Service A to already be running before it can start. Services that always need to be running are configured to be required by the misk.ReadyService."
+          )
+
+          div("svg-container") {}
+
+          // JavaScript code in a block
+          script {
+            unsafe {
+              +"""
                 var metadata = $metadataArray;
                 
                 var linkColor = "steelblue" // Define a single color for all links
@@ -174,11 +175,12 @@ class ServiceGraphTabIndexAction @Inject constructor(
                 });
                 
                 Object.assign(svg.node(), {scales: {linkColor}});
-            """.trimIndent()
+            """
+                .trimIndent()
+            }
           }
         }
       }
-    }
 
   companion object {
     const val PATH = "/_admin/service-graph/"

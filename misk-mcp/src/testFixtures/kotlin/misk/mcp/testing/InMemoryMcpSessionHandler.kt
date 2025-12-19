@@ -2,9 +2,9 @@ package misk.mcp.testing
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import misk.mcp.McpSessionHandler
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import misk.mcp.McpSessionHandler
 
 @Singleton
 class InMemoryMcpSessionHandler @Inject constructor() : McpSessionHandler {

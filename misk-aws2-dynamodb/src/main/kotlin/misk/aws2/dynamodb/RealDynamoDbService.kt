@@ -4,10 +4,10 @@ import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Injector
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import kotlin.reflect.KClass
 import misk.inject.keyOf
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.DescribeTableRequest
-import kotlin.reflect.KClass
 
 @Singleton
 class RealDynamoDbService : AbstractIdleService, DynamoDbService {
@@ -25,24 +25,16 @@ class RealDynamoDbService : AbstractIdleService, DynamoDbService {
 
   // Backward-compatible constructor (unqualified)
   @Inject
-  constructor(
-    dynamoDb: DynamoDbClient,
-    requiredTables: List<RequiredDynamoDbTable>,
-  ) {
+  constructor(dynamoDb: DynamoDbClient, requiredTables: List<RequiredDynamoDbTable>) {
     this.dynamoDb = dynamoDb
     this.requiredTables = requiredTables
   }
 
   override fun startUp() {
     for (table in requiredTables) {
-      dynamoDb.describeTable(
-        DescribeTableRequest.builder()
-          .tableName(table.name)
-          .build()
-      )
+      dynamoDb.describeTable(DescribeTableRequest.builder().tableName(table.name).build())
     }
   }
 
-  override fun shutDown() {
-  }
+  override fun shutDown() {}
 }

@@ -1,43 +1,46 @@
 package misk.clustering
 
 import com.google.common.util.concurrent.AbstractExecutionThreadService
-import misk.logging.getLogger
+import jakarta.inject.Singleton
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
-import jakarta.inject.Singleton
+import misk.logging.getLogger
 
 /**
- * A [DefaultCluster] is the default implementation of the [Cluster], which relies on an outside
- * source such as a cluster watcher to inform it as members become ready or not ready. The
- * [DefaultCluster] handles computing the actual cluster changes, and managing application watches
- * that need to be triggered as the cluster changes.
+ * A [DefaultCluster] is the default implementation of the [Cluster], which relies on an outside source such as a
+ * cluster watcher to inform it as members become ready or not ready. The [DefaultCluster] handles computing the actual
+ * cluster changes, and managing application watches that need to be triggered as the cluster changes.
  */
 @Singleton
-class DefaultCluster @JvmOverloads constructor(
+class DefaultCluster
+@JvmOverloads
+constructor(
   self: Cluster.Member,
-  private val newResourceMapperFn: (members: Set<Cluster.Member>) -> ClusterResourceMapper =
-    { HashRingClusterResourceMapper(it) }
+  private val newResourceMapperFn: (members: Set<Cluster.Member>) -> ClusterResourceMapper = {
+    HashRingClusterResourceMapper(it)
+  },
 ) : AbstractExecutionThreadService(), Cluster, ClusterService {
-  private val snapshotRef = AtomicReference<Cluster.Snapshot>(
-    Cluster.Snapshot(
-      self = self,
-      selfReady = false,
-      readyMembers = setOf(),
-      resourceMapper = newResourceMapper(setOf())
+  private val snapshotRef =
+    AtomicReference<Cluster.Snapshot>(
+      Cluster.Snapshot(
+        self = self,
+        selfReady = false,
+        readyMembers = setOf(),
+        resourceMapper = newResourceMapper(setOf()),
+      )
     )
-  )
   private val running = AtomicBoolean(false)
   private val actions = LinkedBlockingQueue<(MutableSet<ClusterWatch>) -> Unit>()
 
-  override val snapshot: Cluster.Snapshot get() = snapshotRef.get()
+  override val snapshot: Cluster.Snapshot
+    get() = snapshotRef.get()
 
   /**
-   * Runs the internal event loop that handles requests to add watches or cluster changes. We use
-   * a single threaded event loop to ensure that watches get consistent diffs for the cluster
-   * without being racy or requiring locks that span application code (which might result in
-   * deadlocks). When a watch is registered, it is provided with the cluster membership as it
-   * is known at that time, and then receives diffs as they arrive.
+   * Runs the internal event loop that handles requests to add watches or cluster changes. We use a single threaded
+   * event loop to ensure that watches get consistent diffs for the cluster without being racy or requiring locks that
+   * span application code (which might result in deadlocks). When a watch is registered, it is provided with the
+   * cluster membership as it is known at that time, and then receives diffs as they arrive.
    */
   override fun run() {
     log.info { "cluster manager worker running" }
@@ -77,7 +80,7 @@ class DefaultCluster @JvmOverloads constructor(
   @JvmOverloads
   fun clusterChanged(
     membersBecomingReady: Set<Cluster.Member> = setOf(),
-    membersBecomingNotReady: Set<Cluster.Member> = setOf()
+    membersBecomingNotReady: Set<Cluster.Member> = setOf(),
   ) {
     actions.add { watches ->
       val changeTracker = ClusterChangeTracker(this)
@@ -99,23 +102,22 @@ class DefaultCluster @JvmOverloads constructor(
   }
 
   /**
-   * Triggers a callback once all of the actions on the queue have been processed. Useful
-   * for writing deterministic tests
+   * Triggers a callback once all of the actions on the queue have been processed. Useful for writing deterministic
+   * tests
    */
   fun syncPoint(callback: () -> Unit) {
     actions.add { _ -> callback() }
   }
 
-  override fun newResourceMapper(readyMembers: Set<Cluster.Member>) =
-    newResourceMapperFn(readyMembers)
+  override fun newResourceMapper(readyMembers: Set<Cluster.Member>) = newResourceMapperFn(readyMembers)
 
   /**
-   * [ClusterChangeTracker] is an internal helper class used to track diffs to a cluster as
-   * members become ready or not ready
+   * [ClusterChangeTracker] is an internal helper class used to track diffs to a cluster as members become ready or not
+   * ready
    */
   private class ClusterChangeTracker(
     private val cluster: Cluster,
-    private val snapshot: Cluster.Snapshot = cluster.snapshot
+    private val snapshot: Cluster.Snapshot = cluster.snapshot,
   ) {
     private val readyMembers = snapshot.readyMembers.map { it.name to it }.toMap().toMutableMap()
     private val membersAdded = mutableSetOf<Cluster.Member>()
@@ -145,9 +147,10 @@ class DefaultCluster @JvmOverloads constructor(
           self = snapshot.self,
           selfReady = readyMembers.containsKey(snapshot.self.name),
           readyMembers = newReadyMembers,
-          resourceMapper = cluster.newResourceMapper(newReadyMembers)
+          resourceMapper = cluster.newResourceMapper(newReadyMembers),
         ),
-        added = membersAdded.toSet(), removed = membersRemoved.toSet()
+        added = membersAdded.toSet(),
+        removed = membersRemoved.toSet(),
       )
     }
   }
