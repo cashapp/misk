@@ -46,6 +46,7 @@ internal abstract class ConfigurationFactory {
     return DefaultConfiguration().apply {
       set(settings)
       set(dataSourceConfig.type.toSqlDialect())
+      set(connectionProvider)
       set(DefaultTransactionProvider(connectionProvider, false))
       val executeListeners = buildList {
         add(DefaultExecuteListenerProvider(AvoidUsingSelectStarListener()))

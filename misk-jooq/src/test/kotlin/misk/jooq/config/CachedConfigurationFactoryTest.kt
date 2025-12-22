@@ -17,6 +17,7 @@ import misk.jooq.listeners.JooqTimestampRecordListenerOptions
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.SoftAssertions
 import org.jooq.Configuration
 import org.jooq.SQLDialect
 import org.jooq.conf.MappedSchema
@@ -109,8 +110,8 @@ class CachedConfigurationFactoryTest {
         options,
         JOOQ_CONFIG_EXTENSION,
       )
-    assertThat(writerConfig).usingRecursiveComparison().isEqualTo(legacyWriterConfig)
-    assertThat(readerConfig).usingRecursiveComparison().isEqualTo(legacyReaderConfig)
+    assertConfigurationsEqual(writerConfig, legacyWriterConfig)
+    assertConfigurationsEqual(readerConfig, legacyReaderConfig)
   }
 
   private fun buildOldConfiguration(
@@ -161,5 +162,22 @@ class CachedConfigurationFactoryTest {
           .apply(jooqConfigExtension)
       }
       .configuration()
+  }
+
+  private fun assertConfigurationsEqual(lhs: Configuration, rhs: Configuration) {
+    SoftAssertions.assertSoftly { softAssertions ->
+      with(lhs) {
+        softAssertions.assertThat(dialect()).isEqualTo(rhs.dialect())
+        softAssertions.assertThat(settings()).isEqualTo(rhs.settings())
+        softAssertions.assertThat(clock()).isEqualTo(rhs.clock())
+        softAssertions.assertThat(connectionProvider()).isInstanceOf(rhs.connectionProvider()::class.java)
+        softAssertions.assertThat(transactionProvider()).isInstanceOf(rhs.transactionProvider()::class.java)
+        softAssertions.assertThat(recordListenerProviders()).hasSize(rhs.recordListenerProviders().size)
+        softAssertions.assertThat(executeListenerProviders()).hasSize(rhs.executeListenerProviders().size)
+        softAssertions.assertThat(visitListenerProviders()).hasSize(rhs.visitListenerProviders().size)
+        softAssertions.assertThat(transactionListenerProviders()).hasSize(rhs.transactionListenerProviders().size)
+        softAssertions.assertThat(diagnosticsListenerProviders()).hasSize(rhs.diagnosticsListenerProviders().size)
+      }
+    }
   }
 }

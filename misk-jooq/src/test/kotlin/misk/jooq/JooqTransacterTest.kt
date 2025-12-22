@@ -16,7 +16,6 @@ import misk.jooq.testgen.tables.records.MovieRecord
 import misk.jooq.testgen.tables.references.MOVIE
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.time.FakeClock
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
@@ -29,10 +28,9 @@ import org.junit.jupiter.api.assertThrows
 
 @MiskTest(startService = true)
 internal class JooqTransacterTest {
-  @MiskTestModule private var module = ClientJooqTestingModule()
+  @MiskTestModule @Suppress("unused") private var module = ClientJooqTestingModule()
   @Inject @JooqDBIdentifier private lateinit var transacter: JooqTransacter
   @Inject @JooqDBReadOnlyIdentifier private lateinit var readTransacter: JooqTransacter
-  @Inject private lateinit var clock: FakeClock
 
   @Test
   fun `retries to the max number of retries in case of a data access exception`() {
@@ -242,6 +240,29 @@ internal class JooqTransacterTest {
   }
 
   @Test
+  fun `refreshing a record works as expected`() {
+    val movieRecord =
+      transacter.transaction { session ->
+        session.ctx
+          .newRecord(MOVIE)
+          .apply {
+            this.genre = Genre.COMEDY.name
+            this.name = "Dumb and dumber"
+          }
+          .also { it.store() }
+      }
+    assertThat(movieRecord.genre).isEqualTo("COMEDY")
+
+    transacter.transaction { (ctx) ->
+      ctx.fetchSingle(MOVIE, MOVIE.ID.eq(movieRecord.id!!)).apply { genre = Genre.HORROR.name }.also { it.update() }
+    }
+    assertThat(movieRecord.genre).isEqualTo("COMEDY")
+
+    movieRecord.refresh()
+    assertThat(movieRecord.genre).isEqualTo("HORROR")
+  }
+
+  @Test
   fun `post commit hooks execute`() {
     var postCommitHook1Executed = false
     var postCommitHook2Executed = false
@@ -278,7 +299,7 @@ internal class JooqTransacterTest {
 
     // Happy path.
     transacter.transaction { session ->
-      session.onRollback { error ->
+      session.onRollback {
         rollbackHooksTriggered.add("never")
         error("this should never have happened")
       }
