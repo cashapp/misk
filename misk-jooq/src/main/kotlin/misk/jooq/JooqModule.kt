@@ -33,21 +33,24 @@ constructor(
     JooqTimestampRecordListenerOptions(install = false),
   private val installHealthChecks: Boolean = true,
   private val installSchemaMigrator: Boolean = true,
+  private val jdbcModuleAlreadySetup: Boolean = false,
   private val jooqConfigExtension: Configuration.() -> Unit = {},
 ) : KAbstractModule() {
 
   override fun configure() {
-    install(
-      JdbcModule(
-        qualifier = qualifier,
-        config = dataSourceClusterConfig.writer,
-        readerQualifier = readerQualifier,
-        readerConfig = dataSourceClusterConfig.reader,
-        databasePool = databasePool,
-        installHealthCheck = installHealthChecks,
-        installSchemaMigrator = installSchemaMigrator,
+    if (!jdbcModuleAlreadySetup) {
+      install(
+        JdbcModule(
+          qualifier = qualifier,
+          config = dataSourceClusterConfig.writer,
+          readerQualifier = readerQualifier,
+          readerConfig = dataSourceClusterConfig.reader,
+          databasePool = databasePool,
+          installHealthCheck = installHealthChecks,
+          installSchemaMigrator = installSchemaMigrator,
+        )
       )
-    )
+    }
 
     bind<ConfigurationFactory>()
       .annotatedWith(qualifier.java)
