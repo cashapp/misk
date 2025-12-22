@@ -42,6 +42,8 @@ import misk.mcp.testing.tools.CalculatorTool
 import misk.mcp.testing.tools.CalculatorToolInput.Operation
 import misk.mcp.testing.tools.CalculatorToolOutput
 import misk.mcp.testing.tools.GetNicknameRequest
+import misk.mcp.testing.tools.HelloWorldTool
+import misk.mcp.testing.tools.HelloWorldToolOutput
 import misk.mcp.testing.tools.HierarchicalTool
 import misk.mcp.testing.tools.HierarchicalToolOutput
 import misk.mcp.testing.tools.KotlinSdkTool
@@ -49,6 +51,7 @@ import misk.mcp.testing.tools.NicknameElicitationTool
 import misk.mcp.testing.tools.ThrowingTool
 import misk.mcp.testing.tools.VersionMetadata
 import misk.mcp.testing.tools.callCalculatorTool
+import misk.mcp.testing.tools.callHelloWorld
 import misk.mcp.testing.tools.callHierarchicalTool
 import misk.mcp.testing.tools.callNicknameTool
 import misk.mcp.testing.tools.callThrowingTool
@@ -163,6 +166,7 @@ internal abstract class McpServerActionTest {
         install(McpToolModule.create<ThrowingTool>())
         install(McpToolModule.create<HierarchicalTool>())
         install(McpToolModule.create<NicknameElicitationTool>())
+        install(McpToolModule.create<HelloWorldTool>())
         install(McpPromptModule.create<KotlinDeveloperPrompt>())
         install(McpResourceModule.create<WebSearchResource>())
 
@@ -177,7 +181,7 @@ internal abstract class McpServerActionTest {
   fun `test ListTools`() = runBlocking {
     val request = ListToolsRequest()
     val response = mcpClient.listTools(request)
-    assertEquals(expected = 5, actual = response.tools.size, message = "Expecting four tools to be registered")
+    assertEquals(expected = 6, actual = response.tools.size, message = "Expecting four tools to be registered")
 
     // Check calculator tool
     val calculatorTool = response.tools.find { it.name == "calculator" }
@@ -240,6 +244,16 @@ internal abstract class McpServerActionTest {
 
     // Check kotlin-sdk-tool meta
     assertEquals("1.2.3", kotlinSdkTool.meta?.decode<VersionMetadata>()?.version)
+
+    // Check HelloWorldTool
+    val helloWorldTool = response.tools.find { it.name == "HelloWorldTool" }
+    assertNotNull(helloWorldTool)
+    assertNotNull(helloWorldTool.inputSchema)
+    assertEquals(
+      expected = "object",
+      actual = helloWorldTool.inputSchema.type,
+      message = "Expected input schema type to be 'object'",
+    )
   }
 
   @Test
@@ -252,6 +266,19 @@ internal abstract class McpServerActionTest {
       expected = 8,
       actual = structuredResult.result,
       message = "Expected the calculator tool to return the correct addition result",
+    )
+  }
+
+  @Test
+  fun `test hello world tool`() = runBlocking {
+    val response = mcpClient.callHelloWorld()
+    assertNotNull(response)
+    val structuredResult = assertNotNull(response.structuredContent).decode<HelloWorldToolOutput>()
+
+    assertEquals(
+      expected = "Hello, world!",
+      actual = structuredResult.greeting,
+      message = "Expected the HelloWorld tool to return the correct greeting",
     )
   }
 

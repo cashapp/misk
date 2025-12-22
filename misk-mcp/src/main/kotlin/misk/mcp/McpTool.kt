@@ -12,6 +12,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.allSupertypes
 import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -531,6 +532,149 @@ abstract class StructuredMcpTool<I : Any, O : Any> : McpTool<I>() {
       .type!!
   }
 }
+
+/**
+ * Convenience base class for MCP tools that require no input parameters.
+ *
+ * This abstract class extends [McpTool] with no input type, providing a simplified API for tools that
+ * don't accept any input arguments. Subclasses implement a simpler `handle()` method with no parameters.
+ *
+ * ## When to Use McpToolEmptyInput
+ *
+ * Use this class when:
+ * - Your tool doesn't need any input parameters from the client
+ * - The tool performs a fixed operation (e.g., health check, status query)
+ * - All necessary context is available through dependency injection
+ * - You want a cleaner API without unused input parameters
+ *
+ * Use regular [McpTool] when:
+ * - Your tool requires input parameters
+ * - The operation needs configuration or arguments from the client
+ *
+ * ## Example Implementation
+ *
+ * ```kotlin
+ * @Singleton
+ * class ServerStatusTool @Inject constructor(
+ *   private val healthChecker: HealthChecker
+ * ) : McpToolEmptyInput() {
+ *   override val name = "server_status"
+ *   override val description = "Get current server health and status"
+ *   override val readOnlyHint = true
+ *
+ *   override suspend fun handle(): ToolResult {
+ *     val status = healthChecker.checkStatus()
+ *
+ *     return ToolResult(
+ *       TextContent(
+ *         "Server Status: ${status.state}\n" +
+ *         "Uptime: ${status.uptimeSeconds}s\n" +
+ *         "Active Connections: ${status.activeConnections}"
+ *       )
+ *     )
+ *   }
+ * }
+ * ```
+ *
+ * ## Registration
+ *
+ * Registration is the same as for regular [McpTool]:
+ * ```kotlin
+ * install(McpToolModule.create<ServerStatusTool>("myServerName"))
+ * ```
+ *
+ * @see McpTool for the base tool implementation
+ * @see StructuredMcpToolEmptyInput for inputless tools with structured output
+ */
+@OptIn(ExperimentalMiskApi::class)
+abstract class McpToolEmptyInput : McpTool<EmptyInput>() {
+  final override suspend fun handle(input: EmptyInput): ToolResult = handle()
+
+  abstract suspend fun handle(): ToolResult
+}
+
+
+/**
+ * Convenience base class for structured MCP tools that require no input parameters.
+ *
+ * This abstract class extends [StructuredMcpTool] with no input type, providing a simplified API for
+ * tools that return structured output but don't accept any input arguments. Subclasses implement a simpler `handle()`
+ * method with no parameters.
+ *
+ * ## When to Use StructuredMcpToolEmptyInput
+ *
+ * Use this class when:
+ * - Your tool returns structured, typed output but requires no input
+ * - The tool performs a fixed query or data retrieval operation
+ * - All necessary context is available through dependency injection
+ * - You want both the clean API of no inputs and the type safety of structured outputs
+ *
+ * Use [McpToolEmptyInput] when:
+ * - Your tool needs no input and returns simple text/media content
+ * - The output doesn't have a well-defined schema
+ *
+ * Use [StructuredMcpTool] when:
+ * - Your tool requires input parameters
+ * - The operation needs configuration from the client
+ *
+ * ## Example Implementation
+ *
+ * ```kotlin
+ * @Serializable
+ * data class SystemMetricsOutput(
+ *   val cpuUsagePercent: Double,
+ *   val memoryUsedMb: Long,
+ *   val memoryTotalMb: Long,
+ *   val diskUsagePercent: Double,
+ *   val activeThreads: Int,
+ *   val timestamp: String
+ * )
+ *
+ * @Singleton
+ * class SystemMetricsTool @Inject constructor(
+ *   private val metricsCollector: MetricsCollector
+ * ) : StructuredMcpToolEmptyInput<SystemMetricsOutput>() {
+ *   override val name = "get_system_metrics"
+ *   override val description = "Retrieve current system resource utilization metrics"
+ *   override val readOnlyHint = true
+ *
+ *   override suspend fun handle(): ToolResult {
+ *     val metrics = metricsCollector.collect()
+ *
+ *     return ToolResult(
+ *       SystemMetricsOutput(
+ *         cpuUsagePercent = metrics.cpu.usagePercent,
+ *         memoryUsedMb = metrics.memory.usedBytes / (1024 * 1024),
+ *         memoryTotalMb = metrics.memory.totalBytes / (1024 * 1024),
+ *         diskUsagePercent = metrics.disk.usagePercent,
+ *         activeThreads = metrics.threads.active,
+ *         timestamp = Instant.now().toString()
+ *       )
+ *     )
+ *   }
+ * }
+ * ```
+ *
+ * ## Registration
+ *
+ * Registration is the same as for regular [StructuredMcpTool]:
+ * ```kotlin
+ * install(McpToolModule.create<SystemMetricsTool>("myServerName"))
+ * ```
+ *
+ * @param O The output type for this tool, must be a serializable data class
+ * @see StructuredMcpTool for the base structured tool implementation
+ * @see McpToolEmptyInput for inputless tools with prompt content output
+ */
+@OptIn(ExperimentalMiskApi::class)
+abstract class StructuredMcpToolEmptyInput<O : Any> : StructuredMcpTool<EmptyInput, O>() {
+  final override suspend fun handle(input: EmptyInput): ToolResult = handle()
+
+  abstract suspend fun handle(): ToolResult
+}
+
+@Serializable
+data object EmptyInput
 
 /**
  * Extracts the typed result from a [McpTool.ToolResult].
