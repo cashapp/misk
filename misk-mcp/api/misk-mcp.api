@@ -689,8 +689,8 @@ public final class misk/mcp/testing/tools/KotlinSdkTool : misk/mcp/McpTool {
 	public fun getDescription ()Ljava/lang/String;
 	public fun getMeta ()Lkotlinx/serialization/json/JsonObject;
 	public fun getName ()Ljava/lang/String;
-	public fun handle (Lio/modelcontextprotocol/kotlin/sdk/types/ToolSchema;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public synthetic fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun handle (Ljava/lang/Void;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/testing/tools/NicknameElicitationTool : misk/mcp/McpTool {
