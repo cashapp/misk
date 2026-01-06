@@ -2,7 +2,7 @@ package misk
 
 import misk.concurrent.FakeSleeperModule
 import misk.environment.FakeEnvVarModule
-import misk.inject.KAbstractModule
+import misk.inject.ReusableTestModule
 import misk.metrics.FakeMetricsModule
 import misk.random.FakeRandomModule
 import misk.resources.TestingResourceLoaderModule
@@ -18,7 +18,7 @@ import misk.tokens.FakeTokenGeneratorModule
  * dependencies).
  */
 class MiskTestingServiceModule @JvmOverloads constructor(private val installFakeMetrics: Boolean = false) :
-  KAbstractModule() {
+  ReusableTestModule() {
   override fun configure() {
     install(TestingResourceLoaderModule())
     install(FakeEnvVarModule())
