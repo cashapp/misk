@@ -8,7 +8,7 @@ import misk.jdbc.PostCommitHookFailedException
 import misk.jdbc.Session
 import org.jooq.DSLContext
 
-class JooqSession(val ctx: DSLContext) : Session {
+class JooqSession internal constructor(val ctx: DSLContext) : Session {
   private val hooks: ConcurrentMap<HookType, List<() -> Unit>> = ConcurrentHashMap()
   private val rollbackHooks: ConcurrentLinkedQueue<(error: Throwable) -> Unit> = ConcurrentLinkedQueue()
 
