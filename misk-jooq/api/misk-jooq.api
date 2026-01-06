@@ -37,7 +37,6 @@ public final class misk/jooq/JooqModule : misk/inject/KAbstractModule {
 }
 
 public final class misk/jooq/JooqSession : misk/jdbc/Session {
-	public fun <init> (Lorg/jooq/DSLContext;)V
 	public final fun add (Ljava/util/concurrent/ConcurrentMap;Lmisk/jooq/JooqSession$HookType;Lkotlin/jvm/functions/Function0;)V
 	public final fun component1 ()Lorg/jooq/DSLContext;
 	public final fun executePostCommitHooks ()V
@@ -63,7 +62,6 @@ public final class misk/jooq/JooqSession$HookType : java/lang/Enum {
 
 public final class misk/jooq/JooqTransacter {
 	public static final field Companion Lmisk/jooq/JooqTransacter$Companion;
-	public fun <init> (Lkotlin/jvm/functions/Function1;)V
 	public final fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public final fun transaction (Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public static synthetic fun transaction$default (Lmisk/jooq/JooqTransacter;Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
