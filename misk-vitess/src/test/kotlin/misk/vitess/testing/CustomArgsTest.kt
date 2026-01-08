@@ -51,8 +51,8 @@ class CustomArgsTest {
           sqlMode = DB1_SQL_MODE,
           transactionIsolationLevel = DB1_TXN_ISO_LEVEL,
           transactionTimeoutSeconds = Duration.ofSeconds(5),
-          vitessImage = "vitess/vttestserver:v21.0.4-mysql80",
-          vitessVersion = 21,
+          vitessImage = "vitess/vttestserver:v23.0.0-mysql80",
+          vitessVersion = 23,
         )
 
       testDb2 =
