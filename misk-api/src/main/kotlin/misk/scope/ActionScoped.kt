@@ -8,8 +8,9 @@ interface ActionScoped<out T> {
 
   companion object {
     /** @return an [ActionScoped] hard-coded to a specific value, useful for tests */
-    fun <T> of(value: T) = object : ActionScoped<T> {
-      override fun get() = value
-    }
+    fun <T> of(value: T) =
+      object : ActionScoped<T> {
+        override fun get() = value
+      }
   }
 }

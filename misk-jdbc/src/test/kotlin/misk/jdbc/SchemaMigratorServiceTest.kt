@@ -4,6 +4,7 @@ import com.google.inject.util.Modules
 import jakarta.inject.Inject
 import jakarta.inject.Qualifier
 import misk.MiskTestingServiceModule
+import misk.config.Config
 import misk.config.MiskConfig
 import misk.database.StartDatabaseService
 import misk.environment.DeploymentModule
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import misk.config.Config
 import wisp.deployment.TESTING
 
 @MiskTest(startService = false)
@@ -37,12 +37,13 @@ internal abstract class SchemaMigratorServiceTest(val type: DataSourceType) {
   val config = selectDataSourceConfig(appConfig)
 
   @MiskTestModule
-  val module = Modules.combine(
-    deploymentModule,
-    MiskTestingServiceModule(),
-    JdbcModule(Movies::class, config),
-    JdbcModule(Movies2::class, config),
-  )
+  val module =
+    Modules.combine(
+      deploymentModule,
+      MiskTestingServiceModule(),
+      JdbcModule(Movies::class, config),
+      JdbcModule(Movies2::class, config),
+    )
 
   private fun selectDataSourceConfig(config: RootConfig): DataSourceConfig {
     return when (type) {
@@ -124,10 +125,6 @@ internal abstract class SchemaMigratorServiceTest(val type: DataSourceType) {
   ) : Config
 }
 
-@Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-internal annotation class Movies
+@Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) internal annotation class Movies
 
-@Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-internal annotation class Movies2
+@Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) internal annotation class Movies2

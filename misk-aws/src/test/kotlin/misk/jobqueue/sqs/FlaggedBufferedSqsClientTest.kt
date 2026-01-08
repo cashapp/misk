@@ -17,12 +17,9 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 internal class FlaggedBufferedSqsClientTest {
-  @Test fun `dynamically switches between underlying clients based on feature status`() {
-    val flags = FakeFeatureFlags(
-      wisp.feature.testing.FakeFeatureFlags(
-        Moshi.Builder().build()
-      )
-    )
+  @Test
+  fun `dynamically switches between underlying clients based on feature status`() {
+    val flags = FakeFeatureFlags(wisp.feature.testing.FakeFeatureFlags(Moshi.Builder().build()))
     flags.override(FlaggedBufferedSqsClient.FEATURE, false)
 
     val unbuffered = mock<AmazonSQS>()
@@ -35,12 +32,8 @@ internal class FlaggedBufferedSqsClientTest {
       whenever(client.deleteMessage(anyString(), anyString())).thenReturn(DeleteMessageResult())
     }
 
-    val sendRequest = SendMessageRequest()
-      .withQueueUrl("queueUrl")
-      .withMessageBody("body")
-    val deleteRequest = DeleteMessageRequest()
-      .withQueueUrl("queueUrl")
-      .withReceiptHandle("receipt")
+    val sendRequest = SendMessageRequest().withQueueUrl("queueUrl").withMessageBody("body")
+    val deleteRequest = DeleteMessageRequest().withQueueUrl("queueUrl").withReceiptHandle("receipt")
     val client = FlaggedBufferedSqsClient(unbuffered, buffered, "test-app", flags)
     val executeRequests = {
       client.sendMessage(sendRequest)

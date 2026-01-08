@@ -8,8 +8,8 @@ import java.net.URI
 /**
  * Kotlin DSL for creating Redis URIs with a builder pattern.
  *
- * This function provides a type-safe builder pattern for configuring [RedisURI]
- * instances, supporting all Redis connection parameters.
+ * This function provides a type-safe builder pattern for configuring [RedisURI] instances, supporting all Redis
+ * connection parameters.
  *
  * Example usage:
  * ```kotlin
@@ -25,14 +25,13 @@ import java.net.URI
  * @param builder Lambda with receiver for configuring the [RedisURI.Builder]
  * @return Configured [RedisURI] instance
  */
-inline fun redisUri(builder: RedisURI.Builder.() -> Unit): RedisURI =
-  RedisURI.builder().apply(builder).build()
+inline fun redisUri(builder: RedisURI.Builder.() -> Unit): RedisURI = RedisURI.builder().apply(builder).build()
 
 /**
  * Creates a Redis URI with host and optional port, supporting additional configuration.
  *
- * This function provides a convenient way to create a [RedisURI] with basic connection
- * details while still allowing for additional configuration through the builder pattern.
+ * This function provides a convenient way to create a [RedisURI] with basic connection details while still allowing for
+ * additional configuration through the builder pattern.
  *
  * Example usage:
  * ```kotlin
@@ -51,22 +50,16 @@ inline fun redisUri(builder: RedisURI.Builder.() -> Unit): RedisURI =
  * @param builder Optional lambda for additional configuration
  * @return Configured [RedisURI] instance
  */
-inline fun redisUri(
-  host: String,
-  port: Int? = null,
-  builder: RedisURI.Builder.() -> Unit = {}
-): RedisURI =
-  redisUri {
-    withHost(host)
-    port?.let { withPort(port) }
-    builder()
-  }
+inline fun redisUri(host: String, port: Int? = null, builder: RedisURI.Builder.() -> Unit = {}): RedisURI = redisUri {
+  withHost(host)
+  port?.let { withPort(port) }
+  builder()
+}
 
 /**
  * Creates a Redis URI from a URI string.
  *
- * This function parses a string URI into a [RedisURI], supporting both Redis
- * and RedisS (SSL) schemes.
+ * This function parses a string URI into a [RedisURI], supporting both Redis and RedisS (SSL) schemes.
  *
  * Example usage:
  * ```kotlin
@@ -82,14 +75,13 @@ inline fun redisUri(
  * @return Parsed [RedisURI] instance
  * @throws IllegalArgumentException if the URI format is invalid
  */
-fun redisUri(uri: String): RedisURI =
-  RedisURI.create(uri)
+fun redisUri(uri: String): RedisURI = RedisURI.create(uri)
 
 /**
  * Creates a Redis URI from a [URI] object.
  *
- * This function converts a standard Java [URI] into a Redis-specific [RedisURI],
- * supporting both Redis and RedisS (SSL) schemes.
+ * This function converts a standard Java [URI] into a Redis-specific [RedisURI], supporting both Redis and RedisS (SSL)
+ * schemes.
  *
  * Example usage:
  * ```kotlin
@@ -101,9 +93,4 @@ fun redisUri(uri: String): RedisURI =
  * @return Converted [RedisURI] instance
  * @throws IllegalArgumentException if the URI scheme is not supported
  */
-fun redisUri(uri: URI): RedisURI =
-  RedisURI.create(uri)
-
-
-
-
+fun redisUri(uri: URI): RedisURI = RedisURI.create(uri)

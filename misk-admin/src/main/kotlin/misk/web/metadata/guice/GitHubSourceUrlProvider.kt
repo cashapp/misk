@@ -3,14 +3,13 @@ package misk.web.metadata.guice
 import com.google.inject.Inject
 import java.net.URLEncoder
 
-/**
- * @GuiceSourceUrlProvider implementation that provides GitHub query URLs
- */
-
+/** @GuiceSourceUrlProvider implementation that provides GitHub query URLs */
 open class GitHubSourceUrlProvider @Inject constructor() : GuiceSourceUrlProvider {
   private val sourceWithLineNumberRegex = Regex("""^([\w.]+)\.((?:\w+\$?)+)\.(\w+)\(.*:(\d+)\)$""")
   private val classRegex = Regex("""class\s+([a-zA-Z0-9_.$]+)""")
-  private val functionRegex = Regex("""(?:\w+\s+)?(?:\w+\s+)?(?:\w+\s+)?([a-zA-Z0-9_.$]+)\.([a-zA-Z0-9_.$]+)\(([^)]*)\)""")
+  private val functionRegex =
+    Regex("""(?:\w+\s+)?(?:\w+\s+)?(?:\w+\s+)?([a-zA-Z0-9_.$]+)\.([a-zA-Z0-9_.$]+)\(([^)]*)\)""")
+
   protected data class SourceLocation(
     val packageName: String,
     val className: String,
@@ -18,6 +17,7 @@ open class GitHubSourceUrlProvider @Inject constructor() : GuiceSourceUrlProvide
     val functionName: String?,
     val lineNumber: Int?,
   )
+
   override fun urlForSource(source: String): String? {
     val sourceLocation = maybeSourceLocation(source) ?: return null
     return githubSearchUrl(sourceLocation)
@@ -42,16 +42,16 @@ open class GitHubSourceUrlProvider @Inject constructor() : GuiceSourceUrlProvide
   }
 
   private fun maybeSourceLocation(source: String): SourceLocation? {
-    sourceWithLineNumberRegex.matchEntire(source)?.let {matchResult ->
+    sourceWithLineNumberRegex.matchEntire(source)?.let { matchResult ->
       val (packageName, className, functionName, lineNumberStr) = matchResult.destructured
       val (innerClassName, outerClassName) = parseClass(className)
       val lineNumber = lineNumberStr.toInt()
       return SourceLocation(
-        packageName =  packageName,
+        packageName = packageName,
         className = outerClassName,
         innerClassName = innerClassName,
         functionName = functionName,
-        lineNumber = lineNumber
+        lineNumber = lineNumber,
       )
     }
 
@@ -65,11 +65,11 @@ open class GitHubSourceUrlProvider @Inject constructor() : GuiceSourceUrlProvide
         className = outerClassName,
         innerClassName = innerClassName,
         functionName = null,
-        lineNumber = null
+        lineNumber = null,
       )
     }
 
-    functionRegex.find(source)?.let {matchResult ->
+    functionRegex.find(source)?.let { matchResult ->
       val fullClassName = matchResult.groupValues[1]
       val functionName = matchResult.groupValues[2].substringBefore('$')
       val packageName = fullClassName.substringBeforeLast('.')
@@ -80,7 +80,7 @@ open class GitHubSourceUrlProvider @Inject constructor() : GuiceSourceUrlProvide
         className = outerClassName,
         innerClassName = innerClassName,
         functionName = functionName,
-        lineNumber = null
+        lineNumber = null,
       )
     }
 

@@ -54,9 +54,10 @@ import misk.tasks.RepeatedTaskQueueFactory
 class DynamicLogLevelModule(val config: DynamicLoggingConfig) : KAbstractModule() {
   override fun configure() {
     install(ServiceModule<RepeatedTaskQueue>(DynamicLogLevel::class))
-    install(ServiceModule<DynamicLogLevelService>()
-      .dependsOn<RepeatedTaskQueue>(DynamicLogLevel::class)
-      .dependsOn<ReadyService>()
+    install(
+      ServiceModule<DynamicLogLevelService>()
+        .dependsOn<RepeatedTaskQueue>(DynamicLogLevel::class)
+        .dependsOn<ReadyService>()
     )
     bind<DynamicLoggingConfig>().toInstance(config)
   }

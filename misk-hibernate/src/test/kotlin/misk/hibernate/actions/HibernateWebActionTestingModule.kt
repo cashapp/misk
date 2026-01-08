@@ -1,6 +1,7 @@
 package misk.hibernate.actions
 
 import misk.MiskCaller
+import misk.config.Config
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.security.authz.AccessControlModule
@@ -11,7 +12,6 @@ import misk.web.MiskWebModule
 import misk.web.WebTestingModule.Companion.TESTING_WEB_CONFIG
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.metadata.database.NoAdminDashboardDatabaseAccess
-import misk.config.Config
 
 class HibernateWebActionTestingModule : KAbstractModule() {
   override fun configure() {
@@ -19,21 +19,20 @@ class HibernateWebActionTestingModule : KAbstractModule() {
     install(MiskWebModule(TESTING_WEB_CONFIG))
     install(AccessControlModule())
 
-    bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
+    bind<MiskCaller>()
+      .annotatedWith<DevelopmentOnly>()
       .toInstance(MiskCaller(user = "development", capabilities = setOf("users")))
-    multibind<AccessAnnotationEntry>().toInstance(
-      AccessAnnotationEntry<AdminDashboardAccess>(
-        capabilities = listOf(
-          "admin_access", "admin_console", "users"
+    multibind<AccessAnnotationEntry>()
+      .toInstance(
+        AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("admin_access", "admin_console", "users"))
+      )
+    // Default access that doesn't allow any queries for unconfigured DbEntities
+    multibind<AccessAnnotationEntry>()
+      .toInstance(
+        AccessAnnotationEntry<NoAdminDashboardDatabaseAccess>(
+          capabilities = listOf("no_admin_dashboard_database_access")
         )
       )
-    )
-    // Default access that doesn't allow any queries for unconfigured DbEntities
-    multibind<AccessAnnotationEntry>().toInstance(
-      AccessAnnotationEntry<NoAdminDashboardDatabaseAccess>(
-        capabilities = listOf("no_admin_dashboard_database_access")
-      )
-    )
     multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
   }
 

@@ -13,11 +13,7 @@ import wisp.deployment.TESTING
 
 class DynamoDbStringTestModule : ReusableTestModule() {
   override fun configure() {
-    install(
-      DockerDynamoDbModule(
-        DynamoDbTable(STRING_TABLE_NAME, DyStringRateLimitBucket::class)
-      )
-    )
+    install(DockerDynamoDbModule(DynamoDbTable(STRING_TABLE_NAME, DyStringRateLimitBucket::class)))
     install(DynamoDbV2Bucket4jRateLimiterModule(STRING_TABLE_NAME))
     install(MiskTestingServiceModule())
     install(DeploymentModule(TESTING))

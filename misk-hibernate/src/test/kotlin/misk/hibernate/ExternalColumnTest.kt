@@ -1,16 +1,5 @@
 package misk.hibernate
 
-import misk.MiskTestingServiceModule
-import misk.config.MiskConfig
-import misk.environment.DeploymentModule
-import misk.inject.KAbstractModule
-import misk.jdbc.DataSourceConfig
-import misk.testing.MiskTest
-import misk.testing.MiskTestModule
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
-import misk.config.Config
-import wisp.deployment.TESTING
 import jakarta.inject.Inject
 import jakarta.inject.Qualifier
 import javax.persistence.Column
@@ -20,15 +9,24 @@ import javax.persistence.GeneratedValue
 import javax.persistence.JoinColumn
 import javax.persistence.OneToOne
 import javax.persistence.Table
+import misk.MiskTestingServiceModule
+import misk.config.Config
+import misk.config.MiskConfig
+import misk.environment.DeploymentModule
+import misk.inject.KAbstractModule
+import misk.jdbc.DataSourceConfig
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import wisp.deployment.TESTING
 
 /**
- * Confirm we do the right thing when an entity is linked to another entity via a column in that
- * other entity's table.
+ * Confirm we do the right thing when an entity is linked to another entity via a column in that other entity's table.
  */
 @MiskTest(startService = true)
 class ExternalColumnTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject @ExternalColumnDb lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
@@ -41,13 +39,9 @@ class ExternalColumnTest {
       session.save(DbDriver("jesse", mustang, mustangId))
     }
     transacter.transaction { session ->
-      val onlyCar = queryFactory.dynamicQuery(DbCar::class)
-        .allowTableScan()
-        .uniqueResult(session)
+      val onlyCar = queryFactory.dynamicQuery(DbCar::class).allowTableScan().uniqueResult(session)
       assertThat(onlyCar?.driver?.name).isEqualTo("jesse")
-      val onlyDriver = queryFactory.dynamicQuery(DbDriver::class)
-        .allowTableScan()
-        .uniqueResult(session)
+      val onlyDriver = queryFactory.dynamicQuery(DbDriver::class).allowTableScan().uniqueResult(session)
       assertThat(onlyDriver?.car?.model).isEqualTo("mustang")
     }
   }
@@ -60,29 +54,26 @@ class ExternalColumnTest {
       val config = MiskConfig.load<RootConfig>("externalcolumn", TESTING)
       install(HibernateTestingModule(ExternalColumnDb::class))
       install(HibernateModule(ExternalColumnDb::class, config.data_source))
-      install(object : HibernateEntityModule(ExternalColumnDb::class) {
-        override fun configureHibernate() {
-          addEntities(DbCar::class)
-          addEntities(DbDriver::class)
+      install(
+        object : HibernateEntityModule(ExternalColumnDb::class) {
+          override fun configureHibernate() {
+            addEntities(DbCar::class)
+            addEntities(DbDriver::class)
+          }
         }
-      })
+      )
     }
   }
 
-  @Qualifier
-  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-  annotation class ExternalColumnDb
+  @Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) annotation class ExternalColumnDb
 
   data class RootConfig(val data_source: DataSourceConfig) : Config
 
   @Entity
   @Table(name = "cars")
   class DbCar(
-    @Column(nullable = false)
-    var model: String? = null,
-
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "car")
-    var driver: DbDriver? = null,
+    @Column(nullable = false) var model: String? = null,
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "car") var driver: DbDriver? = null,
   ) : DbUnsharded<DbCar> {
     @javax.persistence.Id @GeneratedValue override lateinit var id: Id<DbCar>
   }
@@ -90,15 +81,11 @@ class ExternalColumnTest {
   @Entity
   @Table(name = "drivers")
   class DbDriver(
-    @Column(nullable = false)
-    var name: String? = null,
-
+    @Column(nullable = false) var name: String? = null,
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_id", updatable = false, insertable = false)
     var car: DbCar,
-
-    @Column(updatable = false)
-    var car_id: Id<DbCar>
+    @Column(updatable = false) var car_id: Id<DbCar>,
   ) : DbUnsharded<DbDriver> {
     @javax.persistence.Id @GeneratedValue override lateinit var id: Id<DbDriver>
   }

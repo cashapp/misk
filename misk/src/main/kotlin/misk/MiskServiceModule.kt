@@ -19,13 +19,12 @@ import misk.web.metadata.guice.GuiceMetadataProvider
 /**
  * Install this module in real environments.
  *
- * The vast majority of Service bindings belong in [MiskCommonServiceModule], in order to share
- * with [MiskTestingServiceModule]. Only bindings that are not suitable for a unit testing
- * environment belong here.
+ * The vast majority of Service bindings belong in [MiskCommonServiceModule], in order to share with
+ * [MiskTestingServiceModule]. Only bindings that are not suitable for a unit testing environment belong here.
  */
-class MiskRealServiceModule @JvmOverloads constructor(
-  private val serviceManagerConfig: ServiceManagerConfig = ServiceManagerConfig(),
-) : KAbstractModule() {
+class MiskRealServiceModule
+@JvmOverloads
+constructor(private val serviceManagerConfig: ServiceManagerConfig = ServiceManagerConfig()) : KAbstractModule() {
   override fun configure() {
     install(ResourceLoaderModule(isReal = true))
     install(RealEnvVarModule())
@@ -37,12 +36,12 @@ class MiskRealServiceModule @JvmOverloads constructor(
   }
 }
 
-/**
- * This module has common bindings for all environments (both real and testing).
- */
-class MiskCommonServiceModule @JvmOverloads constructor(
+/** This module has common bindings for all environments (both real and testing). */
+class MiskCommonServiceModule
+@JvmOverloads
+constructor(
   private val serviceManagerConfig: ServiceManagerConfig = ServiceManagerConfig(),
-  private val installMetrics: Boolean = true
+  private val installMetrics: Boolean = true,
 ) : KAbstractModule() {
   override fun configure() {
     binder().disableCircularProxies()

@@ -14,12 +14,17 @@ import com.google.inject.CreationException
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.util.Modules
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.security.GeneralSecurityException
+import java.util.Base64
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.config.Secret
 import misk.crypto.testing.CryptoTestModule
 import misk.crypto.testing.FakeMasterEncryptionKey
 import misk.environment.DeploymentModule
+import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.logging.LogCollectorService
 import misk.testing.MiskTest
@@ -31,20 +36,10 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
-import misk.logging.LogCollector
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.security.GeneralSecurityException
-import java.util.Base64
 
 @MiskTest(startService = true)
 class CryptoModuleTest {
-  @Suppress("unused")
-  @MiskTestModule
-  val module = Modules.combine(
-    MiskTestingServiceModule(),
-    CryptoTestModule()
-  )
+  @Suppress("unused") @MiskTestModule val module = Modules.combine(MiskTestingServiceModule(), CryptoTestModule())
 
   @Test
   fun testImportAeadKey() {
@@ -72,14 +67,12 @@ class CryptoModuleTest {
 
     val data = "sign this".toByteArray()
     val signature = signer.sign(data)
-    assertThatCode { verifier.verify(signature, data) }
-      .doesNotThrowAnyException()
+    assertThatCode { verifier.verify(signature, data) }.doesNotThrowAnyException()
   }
 
   @Test
   fun testImportHybridKey() {
-    val keyHandle =
-      KeysetHandle.generateNew(HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
+    val keyHandle = KeysetHandle.generateNew(HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
     val injector = getInjector(listOf(Pair("test-hybrid", keyHandle)))
     val hybridEncryptKeyManager = injector.getInstance(HybridEncryptKeyManager::class.java)
     val hybridDecryptKeyManager = injector.getInstance(HybridDecryptKeyManager::class.java)
@@ -100,9 +93,8 @@ class CryptoModuleTest {
 
   @Test
   fun testImportOnlyPublicHybridKey() {
-    val keysetHandle = KeysetHandle.generateNew(
-      HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
-    ).publicKeysetHandle
+    val keysetHandle =
+      KeysetHandle.generateNew(HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM).publicKeysetHandle
     val injector = getInjector(listOf(Pair("test-hybrid", keysetHandle)))
     val hybridEncryptKeyManager = injector.getInstance(HybridEncryptKeyManager::class.java)
     assertThat(hybridEncryptKeyManager).isNotNull
@@ -112,27 +104,26 @@ class CryptoModuleTest {
   @Test
   fun testImportUnencryptedHybridPublicKey() {
     val keysetHandle =
-      KeysetHandle.generateNew(HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
-        .publicKeysetHandle
+      KeysetHandle.generateNew(HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM).publicKeysetHandle
     val keyStream = ByteArrayOutputStream()
     val writer = JsonKeysetWriter.withOutputStream(keyStream)
     CleartextKeysetHandle.write(keysetHandle, writer)
-    val key = Key(
-      "test-hybrid", KeyType.HYBRID_ENCRYPT,
-      object : Secret<String> {
-        override val value: String
-          get() = keyStream.toString(Charsets.UTF_8)
-      }
-    )
+    val key =
+      Key(
+        "test-hybrid",
+        KeyType.HYBRID_ENCRYPT,
+        object : Secret<String> {
+          override val value: String
+            get() = keyStream.toString(Charsets.UTF_8)
+        },
+      )
     val config = CryptoConfig(listOf(key), "test_master_key")
     val deploymentModule = DeploymentModule(TESTING)
 
     val injector = Guice.createInjector(CryptoTestModule(config), deploymentModule)
     val externalKeyManager = LocalConfigKeyResolver(config.keys!!, config.kms_uri)
     val hybridEncryptKeyManager = injector.getInstance(HybridEncryptKeyManager::class.java)
-    assertThat(externalKeyManager.getKeyByAlias("test-hybrid"))
-      .extracting("kms_uri")
-      .isNull()
+    assertThat(externalKeyManager.getKeyByAlias("test-hybrid")).extracting("kms_uri").isNull()
     assertThat(hybridEncryptKeyManager).isNotNull
     assertThat(hybridEncryptKeyManager["test-hybrid"]).isNotNull
   }
@@ -194,28 +185,23 @@ class CryptoModuleTest {
     val plaintext = "Hello world!".toByteArray(Charsets.UTF_8)
     var ciphertext = testKey.encrypt(plaintext, encryptionContext)
     assertThat(testKey.decrypt(ciphertext, encryptionContext)).isEqualTo(plaintext)
-    assertThatThrownBy { testKey.decrypt(ciphertext, byteArrayOf()) }
-      .hasMessage("decryption failed")
-    assertThatThrownBy { testKey.decrypt(ciphertext, null) }
-      .hasMessage("decryption failed")
-    assertThatThrownBy { testKey.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }
-      .hasMessage("decryption failed")
+    assertThatThrownBy { testKey.decrypt(ciphertext, byteArrayOf()) }.hasMessage("decryption failed")
+    assertThatThrownBy { testKey.decrypt(ciphertext, null) }.hasMessage("decryption failed")
+    assertThatThrownBy { testKey.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }.hasMessage("decryption failed")
 
     // test with empty encryption context
     encryptionContext = byteArrayOf()
     ciphertext = testKey.encrypt(plaintext, encryptionContext)
     assertThat(testKey.decrypt(ciphertext, encryptionContext)).isEqualTo(plaintext)
     assertThat(testKey.decrypt(ciphertext, null)).isEqualTo(plaintext)
-    assertThatThrownBy { testKey.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }
-      .hasMessage("decryption failed")
+    assertThatThrownBy { testKey.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }.hasMessage("decryption failed")
 
     // test with no encryption context
     encryptionContext = null
     ciphertext = testKey.encrypt(plaintext, encryptionContext)
     assertThat(testKey.decrypt(ciphertext, encryptionContext)).isEqualTo(plaintext)
     assertThat(testKey.decrypt(ciphertext, byteArrayOf())).isEqualTo(plaintext)
-    assertThatThrownBy { testKey.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }
-      .hasMessage("decryption failed")
+    assertThatThrownBy { testKey.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }.hasMessage("decryption failed")
   }
 
   @Test
@@ -228,8 +214,7 @@ class CryptoModuleTest {
     var encryptionContext: ByteArray? = byteArrayOf(1, 2, 3, 4)
     var ciphertext = daead.encryptDeterministically(plaintext, encryptionContext)
     assertThat(daead.decryptDeterministically(ciphertext, encryptionContext)).isEqualTo(plaintext)
-    assertThatThrownBy { daead.decryptDeterministically(ciphertext, byteArrayOf()) }
-      .hasMessage("decryption failed")
+    assertThatThrownBy { daead.decryptDeterministically(ciphertext, byteArrayOf()) }.hasMessage("decryption failed")
     assertThatThrownBy { daead.decryptDeterministically(ciphertext, byteArrayOf(4, 3, 2, 1)) }
       .hasMessage("decryption failed")
 
@@ -243,8 +228,7 @@ class CryptoModuleTest {
 
   @Test
   fun testHybridExtensionMethods() {
-    val keyHandle =
-      KeysetHandle.generateNew(HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
+    val keyHandle = KeysetHandle.generateNew(HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
     val injector = getInjector(listOf(Pair("test", keyHandle)))
     val hybridEncrypt = injector.getInstance(HybridEncryptKeyManager::class.java)["test"]
     val hybridDecrypt = injector.getInstance(HybridDecryptKeyManager::class.java)["test"]
@@ -253,28 +237,23 @@ class CryptoModuleTest {
     var encryptionContext: ByteArray? = byteArrayOf(1, 2, 3, 4)
     var ciphertext = hybridEncrypt.encrypt(plaintext, encryptionContext)
     assertThat(hybridDecrypt.decrypt(ciphertext, encryptionContext)).isEqualTo(plaintext)
-    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, byteArrayOf()) }
-      .hasMessage("decryption failed")
-    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, null) }
-      .hasMessage("decryption failed")
-    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }
-      .hasMessage("decryption failed")
+    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, byteArrayOf()) }.hasMessage("decryption failed")
+    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, null) }.hasMessage("decryption failed")
+    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }.hasMessage("decryption failed")
 
     // test with empty encryption context
     encryptionContext = byteArrayOf()
     ciphertext = hybridEncrypt.encrypt(plaintext, encryptionContext)
     assertThat(hybridDecrypt.decrypt(ciphertext, encryptionContext)).isEqualTo(plaintext)
     assertThat(hybridDecrypt.decrypt(ciphertext, null)).isEqualTo(plaintext)
-    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }
-      .hasMessage("decryption failed")
+    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }.hasMessage("decryption failed")
 
     // test with no encryption context
     encryptionContext = null
     ciphertext = hybridEncrypt.encrypt(plaintext, encryptionContext)
     assertThat(hybridDecrypt.decrypt(ciphertext, encryptionContext)).isEqualTo(plaintext)
     assertThat(hybridDecrypt.decrypt(ciphertext, byteArrayOf())).isEqualTo(plaintext)
-    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }
-      .hasMessage("decryption failed")
+    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }.hasMessage("decryption failed")
   }
 
   @Test
@@ -285,11 +264,9 @@ class CryptoModuleTest {
     val message = "hello!"
     val tag = hmac.computeMac(message)
     assertThatCode { hmac.verifyMac(tag, message) }.doesNotThrowAnyException()
-    assertThatThrownBy { hmac.verifyMac("not a base64 string", message) }
-      .hasMessageContaining("invalid tag:")
-    assertThatThrownBy {
-      hmac.verifyMac(Base64.getEncoder().encodeToString("wrong tag!".toByteArray()), message)
-    }.hasMessage("invalid MAC")
+    assertThatThrownBy { hmac.verifyMac("not a base64 string", message) }.hasMessageContaining("invalid tag:")
+    assertThatThrownBy { hmac.verifyMac(Base64.getEncoder().encodeToString("wrong tag!".toByteArray()), message) }
+      .hasMessage("invalid MAC")
   }
 
   @Test
@@ -349,38 +326,41 @@ class CryptoModuleTest {
     val kr = injector.getInstance(KeyReader::class.java)
 
     assertThatThrownBy {
-      // kr.env = Environment.STAGING
-      kr.readKey(plainKey.key_name)
-    }.isInstanceOf(GeneralSecurityException::class.java)
+        // kr.env = Environment.STAGING
+        kr.readKey(plainKey.key_name)
+      }
+      .isInstanceOf(GeneralSecurityException::class.java)
 
     assertThatThrownBy {
-      // kr.env = Environment.PRODUCTION
-      kr.readKey(plainKey.key_name)
-    }.isInstanceOf(GeneralSecurityException::class.java)
+        // kr.env = Environment.PRODUCTION
+        kr.readKey(plainKey.key_name)
+      }
+      .isInstanceOf(GeneralSecurityException::class.java)
   }
 
   private fun getInjector(
     keyMap: List<Pair<String, KeysetHandle>>,
-    external: Map<KeyAlias, KeyType>? = null
+    external: Map<KeyAlias, KeyType>? = null,
   ): Injector {
-    val keys = keyMap.map {
-      var keyType = KeyType.AEAD
-      val keyTypeUrl = it.second.keysetInfo.getKeyInfo(0).typeUrl
-      if (keyTypeUrl.endsWith("HmacKey")) {
-        keyType = KeyType.MAC
-      } else if (keyTypeUrl.endsWith("Ed25519PrivateKey")) {
-        keyType = KeyType.DIGITAL_SIGNATURE
-      } else if (keyTypeUrl.endsWith("EciesAeadHkdfPrivateKey")) {
-        keyType = KeyType.HYBRID_ENCRYPT_DECRYPT
-      } else if (keyTypeUrl.endsWith("EciesAeadHkdfPublicKey")) {
-        keyType = KeyType.HYBRID_ENCRYPT
-      } else if (keyTypeUrl.endsWith("AesSivKey")) {
-        keyType = KeyType.DAEAD
-      } else if (keyTypeUrl.endsWith("AesGcmHkdfStreamingKey")) {
-        keyType = KeyType.STREAMING_AEAD
+    val keys =
+      keyMap.map {
+        var keyType = KeyType.AEAD
+        val keyTypeUrl = it.second.keysetInfo.getKeyInfo(0).typeUrl
+        if (keyTypeUrl.endsWith("HmacKey")) {
+          keyType = KeyType.MAC
+        } else if (keyTypeUrl.endsWith("Ed25519PrivateKey")) {
+          keyType = KeyType.DIGITAL_SIGNATURE
+        } else if (keyTypeUrl.endsWith("EciesAeadHkdfPrivateKey")) {
+          keyType = KeyType.HYBRID_ENCRYPT_DECRYPT
+        } else if (keyTypeUrl.endsWith("EciesAeadHkdfPublicKey")) {
+          keyType = KeyType.HYBRID_ENCRYPT
+        } else if (keyTypeUrl.endsWith("AesSivKey")) {
+          keyType = KeyType.DAEAD
+        } else if (keyTypeUrl.endsWith("AesGcmHkdfStreamingKey")) {
+          keyType = KeyType.STREAMING_AEAD
+        }
+        Key(it.first, keyType, generateEncryptedKey(it.second), "aws-kms://uri")
       }
-      Key(it.first, keyType, generateEncryptedKey(it.second), "aws-kms://uri")
-    }
     val config = CryptoConfig(keys, "test_master_key", external.orEmpty())
     val deploymentModule = DeploymentModule(TESTING)
 
@@ -390,10 +370,7 @@ class CryptoModuleTest {
   private fun getInjectorWithKeys(keys: List<Key>): Injector {
     val config = CryptoConfig(keys, "test_master_key", mapOf())
     val deploymentModule = DeploymentModule(TESTING)
-    return Guice.createInjector(
-      deploymentModule, CryptoTestModule(config),
-      LogCollectorModule()
-    )
+    return Guice.createInjector(deploymentModule, CryptoTestModule(config), LogCollectorModule())
   }
 
   private fun generateEncryptedKey(keyHandle: KeysetHandle): Secret<String> {

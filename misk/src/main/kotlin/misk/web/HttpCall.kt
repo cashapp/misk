@@ -1,5 +1,6 @@
 package misk.web
 
+import javax.servlet.http.Cookie
 import misk.api.HttpRequest
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
@@ -11,32 +12,31 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.BufferedSink
 import okio.BufferedSource
-import javax.servlet.http.Cookie
 
-/**
- * Information about the socket on which a HTTP call arrived.
- */
+/** Information about the socket on which a HTTP call arrived. */
 sealed class SocketAddress {
   class Network(val ipAddress: String, val port: Int) : SocketAddress()
+
   class Unix(val path: String) : SocketAddress()
 }
 
-/**
- * A live HTTP call from a client for use by a chain of network interceptors.
- */
-interface HttpCall: HttpRequest {
+/** A live HTTP call from a client for use by a chain of network interceptors. */
+interface HttpCall : HttpRequest {
 
   val linkLayerLocalAddress: SocketAddress?
 
   /** Cookies derived from request's "Cookie" header, if any */
   var cookies: List<Cookie>
 
-  /** Meaningful HTTP status about what actually happened. Not sent over the wire in the case
-   * of gRPC, which always returns HTTP 200 even for errors. */
+  /**
+   * Meaningful HTTP status about what actually happened. Not sent over the wire in the case of gRPC, which always
+   * returns HTTP 200 even for errors.
+   */
   var statusCode: Int
 
-  /** The HTTP status code actually sent over the network. For gRPC, this is always 200, even
-   * for errors, per the spec. **/
+  /**
+   * The HTTP status code actually sent over the network. For gRPC, this is always 200, even for errors, per the spec. *
+   */
   val networkStatusCode: Int
 
   val responseHeaders: Headers
@@ -44,55 +44,48 @@ interface HttpCall: HttpRequest {
   /** Timestamp when the request was received (milliseconds since epoch) */
   val requestReceivedTimestamp: Long
 
-  /** Set both the raw network status code and the meaningful status code that's
-   * recorded in metrics */
+  /** Set both the raw network status code and the meaningful status code that's recorded in metrics */
   fun setStatusCodes(statusCode: Int, networkStatusCode: Int)
 
   fun setResponseHeader(name: String, value: String)
+
   fun addResponseHeaders(headers: Headers)
 
   /**
-   * Call this before the response body is written to make sure it is encoded in a way that'll
-   * permit trailers to be sent. This will do chunked encoding for HTTP/1. For HTTP/2 trailers are
-   * always permitted. It is an error to call this for web socket calls.
+   * Call this before the response body is written to make sure it is encoded in a way that'll permit trailers to be
+   * sent. This will do chunked encoding for HTTP/1. For HTTP/2 trailers are always permitted. It is an error to call
+   * this for web socket calls.
    */
   fun requireTrailers()
 
-  /**
-   * Add a trailer. This requires that [requireTrailers] was called before the response body is
-   * written.
-   */
+  /** Add a trailer. This requires that [requireTrailers] was called before the response body is written. */
   fun setResponseTrailer(name: String, value: String)
 
   /**
-   * Claim ownership of the request body stream. Returns null if the stream has already been
-   * claimed. Callers should read the HTTP request body or call [putRequestBody] to create a new
-   * chain with a request body that is unclaimed.
+   * Claim ownership of the request body stream. Returns null if the stream has already been claimed. Callers should
+   * read the HTTP request body or call [putRequestBody] to create a new chain with a request body that is unclaimed.
    */
   fun takeRequestBody(): BufferedSource?
 
   /**
-   * Changes this call so that the next call to [takeRequestBody] returns [requestBody]. Use this
-   * to apply filters such as decompression or metrics.
+   * Changes this call so that the next call to [takeRequestBody] returns [requestBody]. Use this to apply filters such
+   * as decompression or metrics.
    *
-   * This may only be called on calls whose request body has been taken. Otherwise that would be
-   * leaked.
+   * This may only be called on calls whose request body has been taken. Otherwise that would be leaked.
    */
   fun putRequestBody(requestBody: BufferedSource)
 
   /**
-   * Claim ownership of the response body stream. Returns null if the stream has already been
-   * claimed. Callers should write the HTTP response body or call [putRequestBody] to create a new
-   * chain with a response body that is unclaimed.
+   * Claim ownership of the response body stream. Returns null if the stream has already been claimed. Callers should
+   * write the HTTP response body or call [putRequestBody] to create a new chain with a response body that is unclaimed.
    */
   fun takeResponseBody(): BufferedSink?
 
   /**
-   * Changes this call so that the next call to [takeResponseBody] returns [responseBody]. Use this
-   * to apply filters such as decompression or metrics.
+   * Changes this call so that the next call to [takeResponseBody] returns [responseBody]. Use this to apply filters
+   * such as decompression or metrics.
    *
-   * This may only be called on calls whose response body has been taken. Otherwise that would be
-   * leaked.
+   * This may only be called on calls whose response body has been taken. Otherwise that would be leaked.
    */
   fun putResponseBody(responseBody: BufferedSink)
 
@@ -100,18 +93,14 @@ interface HttpCall: HttpRequest {
   fun takeWebSocket(): WebSocket?
 
   /**
-   * Changes this call so that the next call to [takeWebSocket] returns [webSocket]. Use this to
-   * apply filters such as decompression or metrics.
+   * Changes this call so that the next call to [takeWebSocket] returns [webSocket]. Use this to apply filters such as
+   * decompression or metrics.
    *
-   * This may only be called on calls whose web socket has been taken. Otherwise that would be
-   * leaked.
+   * This may only be called on calls whose web socket has been taken. Otherwise that would be leaked.
    */
   fun putWebSocket(webSocket: WebSocket)
 
-  /**
-   * Set the call's web socket listener. This should only be called once, and only for web socket
-   * calls.
-   */
+  /** Set the call's web socket listener. This should only be called once, and only for web socket calls. */
   fun initWebSocketListener(webSocketListener: WebSocketListener)
 
   fun contentType(): MediaType? {
@@ -119,57 +108,53 @@ interface HttpCall: HttpRequest {
     return contentType.toMediaTypeOrNull()
   }
 
-  /**
-   * Set or replaces an existing HTTP request header.
-   */
+  /** Set or replaces an existing HTTP request header. */
   fun computeRequestHeader(name: String, computeFn: (String?) -> Pair<String, String>?) {
     val newHeader = computeFn(requestHeaders[name])
     val builder = requestHeaders.newBuilder().removeAll(name)
-    requestHeaders = if (newHeader == null) {
-      builder.build()
-    } else {
-      builder.add(newHeader.first, newHeader.second).build()
-    }
+    requestHeaders =
+      if (newHeader == null) {
+        builder.build()
+      } else {
+        builder.add(newHeader.first, newHeader.second).build()
+      }
   }
 
   fun accepts(): List<MediaRange> {
     // If no media types are valid we'll use MediaRange.ALL_MEDIA.
-    val accepts = requestHeaders.values("Accept").flatMap {
-      MediaRange.parseRanges(it, swallowExceptions = true)
-    }
+    val accepts = requestHeaders.values("Accept").flatMap { MediaRange.parseRanges(it, swallowExceptions = true) }
 
-    return accepts.ifEmpty {
-      listOf(MediaRange.ALL_MEDIA)
-    }
+    return accepts.ifEmpty { listOf(MediaRange.ALL_MEDIA) }
   }
+
   fun asOkHttpRequest(): okhttp3.Request {
     // TODO(adrw) https://github.com/square/misk/issues/279
-    val okRequestBody = when (dispatchMechanism) {
-      DispatchMechanism.GET -> null
-      DispatchMechanism.WEBSOCKET -> null
-      else -> {
-        val requestBody = takeRequestBody()!!
-        if (requestBody.request(MAX_BUFFERED_REQUEST_BODY_BYTES)) {
-          // If we were able to successfully buffer this much, this request might be huge! Let's
-          // just stream it. (This is one-shot, if the call breaks for any reason it cannot be
-          // retried later!)
-          object : RequestBody() {
-            override fun contentType(): MediaType? = null
+    val okRequestBody =
+      when (dispatchMechanism) {
+        DispatchMechanism.GET -> null
+        DispatchMechanism.WEBSOCKET -> null
+        else -> {
+          val requestBody = takeRequestBody()!!
+          if (requestBody.request(MAX_BUFFERED_REQUEST_BODY_BYTES)) {
+            // If we were able to successfully buffer this much, this request might be huge! Let's
+            // just stream it. (This is one-shot, if the call breaks for any reason it cannot be
+            // retried later!)
+            object : RequestBody() {
+              override fun contentType(): MediaType? = null
 
-            override fun isOneShot() = true // Don't stream the request body 2x.
+              override fun isOneShot() = true // Don't stream the request body 2x.
 
-            override fun writeTo(sink: BufferedSink) {
-              sink.writeAll(requestBody)
+              override fun writeTo(sink: BufferedSink) {
+                sink.writeAll(requestBody)
+              }
             }
+          } else {
+            // This request is short. Let's not stream it. That way we can retry if the HTTP request
+            // out fails.
+            requestBody.readByteString().toRequestBody()
           }
-
-        } else {
-          // This request is short. Let's not stream it. That way we can retry if the HTTP request
-          // out fails.
-          requestBody.readByteString().toRequestBody()
         }
       }
-    }
 
     return okhttp3.Request.Builder()
       .url(url)

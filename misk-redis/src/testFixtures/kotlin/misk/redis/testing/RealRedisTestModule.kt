@@ -11,11 +11,8 @@ import misk.redis.RedisReplicationGroupConfig
 import misk.testing.parallelTestIndex
 import redis.clients.jedis.ConnectionPoolConfig
 import redis.clients.jedis.UnifiedJedis
-import wisp.deployment.Deployment
 
-/**
- * Installs a real redis for testing with support for parallel tests.
- */
+/** Installs a real redis for testing with support for parallel tests. */
 class RealRedisTestModule(
   private val redisReplicationGroupConfig: RedisReplicationGroupConfig,
   private val connectionPoolConfig: ConnectionPoolConfig,
@@ -23,9 +20,8 @@ class RealRedisTestModule(
 ) : KAbstractModule() {
   override fun configure() {
     install(
-      Modules.override(
-        RedisModule(redisReplicationGroupConfig, connectionPoolConfig, useSsl)
-      ).with(TestUnifiedJedisModule(connectionPoolConfig, useSsl))
+      Modules.override(RedisModule(redisReplicationGroupConfig, connectionPoolConfig, useSsl))
+        .with(TestUnifiedJedisModule(connectionPoolConfig, useSsl))
     )
     install(RedisTestFlushModule())
   }
@@ -35,7 +31,8 @@ private class TestUnifiedJedisModule(
   private val connectionPoolConfig: ConnectionPoolConfig,
   private val useSsl: Boolean = true,
 ) : KAbstractModule() {
-  @Provides @Singleton
+  @Provides
+  @Singleton
   internal fun provideUnifiedJedis(
     clientMetrics: RedisClientMetrics,
     redisReplicationGroupConfig: RedisReplicationGroupConfig,
@@ -47,7 +44,7 @@ private class TestUnifiedJedisModule(
       replicationGroupConfig = redisReplicationGroupConfig,
       ssl = useSsl,
       requiresPassword = false,
-      database = database
+      database = database,
     )
   }
 }

@@ -1,5 +1,6 @@
 package misk.aws2.dynamodb
 
+import java.util.function.Consumer
 import software.amazon.awssdk.enhanced.dynamodb.Document
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable
@@ -11,32 +12,24 @@ import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteResult
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactGetItemsEnhancedRequest
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedResponse
-import java.util.function.Consumer
 
 /**
- * Mapping dynamodb table names at runtime.
- * Used in parallel tests for using isolated tables per parallel test process.
+ * Mapping dynamodb table names at runtime. Used in parallel tests for using isolated tables per parallel test process.
  */
 interface TableNameMapper {
   fun mapName(tableName: String): String = tableName
 }
 
-fun DynamoDbEnhancedClient.withTableNameMapper(
-  tableNameMapper: TableNameMapper,
-): DynamoDbEnhancedClient = MappedDynamoDbEnhancedClient(
-  client = this,
-  tableNameMapper = tableNameMapper,
-)
+fun DynamoDbEnhancedClient.withTableNameMapper(tableNameMapper: TableNameMapper): DynamoDbEnhancedClient =
+  MappedDynamoDbEnhancedClient(client = this, tableNameMapper = tableNameMapper)
 
 internal class MappedDynamoDbEnhancedClient(
   private val client: DynamoDbEnhancedClient,
   private val tableNameMapper: TableNameMapper,
 ) : DynamoDbEnhancedClient {
 
-  override fun <T : Any?> table(name: String?, schema: TableSchema<T>?): DynamoDbTable<T> = client.table(
-    name?.let { tableNameMapper.mapName(it) },
-    schema,
-  )
+  override fun <T : Any?> table(name: String?, schema: TableSchema<T>?): DynamoDbTable<T> =
+    client.table(name?.let { tableNameMapper.mapName(it) }, schema)
 
   override fun transactWriteItems(request: TransactWriteItemsEnhancedRequest): Void? {
     return client.transactWriteItems(request)
@@ -50,7 +43,9 @@ internal class MappedDynamoDbEnhancedClient(
     return client.batchGetItem(request)
   }
 
-  override fun batchGetItem(requestConsumer: Consumer<BatchGetItemEnhancedRequest.Builder>?): BatchGetResultPageIterable {
+  override fun batchGetItem(
+    requestConsumer: Consumer<BatchGetItemEnhancedRequest.Builder>?
+  ): BatchGetResultPageIterable {
     return client.batchGetItem(requestConsumer)
   }
 
@@ -66,15 +61,21 @@ internal class MappedDynamoDbEnhancedClient(
     return client.transactGetItems(request)
   }
 
-  override fun transactGetItems(requestConsumer: Consumer<TransactGetItemsEnhancedRequest.Builder>?): MutableList<Document> {
+  override fun transactGetItems(
+    requestConsumer: Consumer<TransactGetItemsEnhancedRequest.Builder>?
+  ): MutableList<Document> {
     return client.transactGetItems(requestConsumer)
   }
 
-  override fun transactWriteItemsWithResponse(request: TransactWriteItemsEnhancedRequest?): TransactWriteItemsEnhancedResponse {
+  override fun transactWriteItemsWithResponse(
+    request: TransactWriteItemsEnhancedRequest?
+  ): TransactWriteItemsEnhancedResponse {
     return client.transactWriteItemsWithResponse(request)
   }
 
-  override fun transactWriteItemsWithResponse(requestConsumer: Consumer<TransactWriteItemsEnhancedRequest.Builder>?): TransactWriteItemsEnhancedResponse {
+  override fun transactWriteItemsWithResponse(
+    requestConsumer: Consumer<TransactWriteItemsEnhancedRequest.Builder>?
+  ): TransactWriteItemsEnhancedResponse {
     return client.transactWriteItemsWithResponse(requestConsumer)
   }
 }

@@ -7,13 +7,7 @@ import misk.web.exceptions.ExceptionMapperModule
 
 class DynamoDbExceptionMapperModule : KInstallOnceModule() {
   override fun configure() {
-    install(
-      ExceptionMapperModule.create<ClientExecutionTimeoutException,
-        ClientExecutionTimeoutExceptionMapper>()
-    )
-    install(
-      ExceptionMapperModule.create<TransactionCanceledException,
-        TransactionCanceledExceptionMapper>()
-    )
+    install(ExceptionMapperModule.create<ClientExecutionTimeoutException, ClientExecutionTimeoutExceptionMapper>())
+    install(ExceptionMapperModule.create<TransactionCanceledException, TransactionCanceledExceptionMapper>())
   }
 }

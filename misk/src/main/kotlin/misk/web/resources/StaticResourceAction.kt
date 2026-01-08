@@ -2,6 +2,8 @@ package misk.web.resources
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.net.HttpURLConnection
+import misk.logging.getLogger
 import misk.resources.ResourceLoader
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
@@ -20,17 +22,14 @@ import okhttp3.Headers.Companion.headersOf
 import okhttp3.HttpUrl
 import okio.BufferedSink
 import okio.BufferedSource
-import misk.logging.getLogger
-import java.net.HttpURLConnection
 
 /**
  * StaticResourceAction
  *
- * Sensitive resources with code file extensions like .class will not be returned by this action
- *   to prevent security vulnerabilities.
+ * Sensitive resources with code file extensions like .class will not be returned by this action to prevent security
+ * vulnerabilities.
  *
- * This data class is used with Guice multibindings. Register instances by calling `multibind()`
- * in a `KAbstractModule`:
+ * This data class is used with Guice multibindings. Register instances by calling `multibind()` in a `KAbstractModule`:
  * ```
  * multibind<StaticResourceEntry>()
  *   .toInstance(
@@ -43,10 +42,12 @@ import java.net.HttpURLConnection
  * ```
  */
 @Singleton
-class StaticResourceAction @Inject constructor(
+class StaticResourceAction
+@Inject
+constructor(
   @JvmSuppressWildcards private val clientHttpCall: ActionScoped<HttpCall>,
   private val resourceLoader: ResourceLoader,
-  private val resourceEntryFinder: ResourceEntryFinder
+  private val resourceEntryFinder: ResourceEntryFinder,
 ) : WebAction {
   @Get("/{path:.*}")
   @Post("/{path:.*}")
@@ -59,9 +60,9 @@ class StaticResourceAction @Inject constructor(
   }
 
   fun getResponse(url: HttpUrl): Response<ResponseBody> {
-    val staticResourceEntry = resourceEntryFinder
-      .staticResource(url) as StaticResourceEntry?
-      ?: return NotFoundAction.response(url.encodedPath.drop(1))
+    val staticResourceEntry =
+      resourceEntryFinder.staticResource(url) as StaticResourceEntry?
+        ?: return NotFoundAction.response(url.encodedPath.drop(1))
     return MatchedResource(staticResourceEntry).getResponse(url)
   }
 
@@ -82,15 +83,15 @@ class StaticResourceAction @Inject constructor(
     fun getResponse(url: HttpUrl): Response<ResponseBody> {
       val urlPath = url.encodedPath
       return when (getMatchResult(urlPath)) {
-        MatchResult.NO_MATCH -> when {
-          !urlPath.endsWith("/") -> redirectResponse(normalizePathWithQuery(url))
-          // actually return the resource, don't redirect. Path must stay the same since this will be handled by React router
-          urlPath.endsWith("/") -> resourceResponse(
-            normalizePath(matchedEntry.url_path_prefix),
-          )
+        MatchResult.NO_MATCH ->
+          when {
+            !urlPath.endsWith("/") -> redirectResponse(normalizePathWithQuery(url))
+            // actually return the resource, don't redirect. Path must stay the same since this will be handled by React
+            // router
+            urlPath.endsWith("/") -> resourceResponse(normalizePath(matchedEntry.url_path_prefix))
 
-          else -> null
-        }
+            else -> null
+          }
 
         MatchResult.RESOURCE -> resourceResponse(urlPath)
         MatchResult.RESOURCE_DIRECTORY -> resourceResponse(normalizePathWithQuery(url))
@@ -133,29 +134,28 @@ class StaticResourceAction @Inject constructor(
       }
     }
 
-    private fun normalizePathWithQuery(url: HttpUrl): String = when {
-      url.encodedQuery.isNullOrEmpty() -> normalizePath(url.encodedPath)
-      else -> normalizePath(url.encodedPath) + "?" + url.encodedQuery
-    }
+    private fun normalizePathWithQuery(url: HttpUrl): String =
+      when {
+        url.encodedQuery.isNullOrEmpty() -> normalizePath(url.encodedPath)
+        else -> normalizePath(url.encodedPath) + "?" + url.encodedQuery
+      }
 
     private fun resourceResponse(urlPath: String): Response<ResponseBody>? {
       return when (getMatchResult(urlPath)) {
         MatchResult.RESOURCE -> {
-          val responseBody = object : ResponseBody {
-            override fun writeTo(sink: BufferedSink) {
-              open(urlPath)!!.use {
-                sink.writeAll(it)
+          val responseBody =
+            object : ResponseBody {
+              override fun writeTo(sink: BufferedSink) {
+                open(urlPath)!!.use { sink.writeAll(it) }
               }
             }
-          }
           Response(
             body = responseBody,
-            headers = headersOf(
-              "Content-Type",
-              MediaTypes.fromFileExtension(
-                urlPath.substring(urlPath.lastIndexOf('.') + 1),
-              ).toString(),
-            ),
+            headers =
+              headersOf(
+                "Content-Type",
+                MediaTypes.fromFileExtension(urlPath.substring(urlPath.lastIndexOf('.') + 1)).toString(),
+              ),
           )
         }
 

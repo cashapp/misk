@@ -1,13 +1,11 @@
 package misk.testing
 
-/**
- * Provides helper methods for supporting tests running in parallel.
- */
+/** Provides helper methods for supporting tests running in parallel. */
 internal object ParallelTests {
 
   /**
-   * Can be used for determining if tests are running in parallel (with Gradle's `maxParallelForks`),
-   * and returns a unique numeric partition ID for the current test process.
+   * Can be used for determining if tests are running in parallel (with Gradle's `maxParallelForks`), and returns a
+   * unique numeric partition ID for the current test process.
    *
    * This assumes that the environment variable `MAX_TEST_PARALLEL_FORKS` is set to the number of `maxParallelForks`.
    */
@@ -25,16 +23,17 @@ internal object ParallelTests {
 
 internal sealed interface PartitionedTest {
   data object NotPartitioned : PartitionedTest
+
   data class Partitioned(val partitionId: Int) : PartitionedTest
 }
 
 /**
- * Applies the `update` lambda to the given `T`, if the tests are running in parallel
- * (with Gradle's `maxParallelForks`).
+ * Applies the `update` lambda to the given `T`, if the tests are running in parallel (with Gradle's
+ * `maxParallelForks`).
  *
- * This can be used for updating configurations for the purpose of providing isolation between
- * tests running across different parallel processes, such as appending the partition ID to the database name,
- * so that it's unique for each process.
+ * This can be used for updating configurations for the purpose of providing isolation between tests running across
+ * different parallel processes, such as appending the partition ID to the database name, so that it's unique for each
+ * process.
  *
  * This assumes that the environment variable `MAX_TEST_PARALLEL_FORKS` is set to the number of `maxParallelForks`.
  */

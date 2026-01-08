@@ -1,10 +1,10 @@
 package misk.jdbc
 
-import misk.resources.ResourceLoader
-import misk.logging.getLogger
 import java.io.File
 import java.nio.file.Files
 import kotlin.reflect.KClass
+import misk.logging.getLogger
+import misk.resources.ResourceLoader
 
 internal class SkeemaWrapper(
   private val qualifier: KClass<out Annotation>,
@@ -15,9 +15,10 @@ internal class SkeemaWrapper(
   private val logger = getLogger<SkeemaWrapper>()
 
   private fun skeemaPush(workDir: File): String {
-    val processBuilder = ProcessBuilder(listOf(
-      SKEEMA_BINARY, "push", "--allow-unsafe", "--allow-auto-inc", "int unsigned, bigint unsigned, bigint",
-    ))
+    val processBuilder =
+      ProcessBuilder(
+        listOf(SKEEMA_BINARY, "push", "--allow-unsafe", "--allow-auto-inc", "int unsigned, bigint unsigned, bigint")
+      )
     processBuilder.redirectErrorStream(true) // Combine stderr and stdout
     processBuilder.directory(workDir)
 
@@ -50,13 +51,16 @@ internal class SkeemaWrapper(
       file.writeText(resourceLoader.utf8(it.filename)!!)
     }
     val skeemaFile = File(tempDir, ".skeema")
-    skeemaFile.writeText("""
+    skeemaFile.writeText(
+      """
       host=${dataSourceConfig.host}
       port=${dataSourceConfig.port}
       user=${dataSourceConfig.username}
       password=${dataSourceConfig.password}
       schema=${dataSourceConfig.database}
-    """.trimIndent())
+    """
+        .trimIndent()
+    )
 
     return tempDir
   }

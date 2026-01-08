@@ -41,9 +41,9 @@ class VitessTestDbTest {
   fun `test truncate succeeds`() {
     val insertCustomersSql =
       """
-        INSERT INTO customers (email, token)
-        VALUES ("jack@xyz.com", "test-token");
-    """
+      INSERT INTO customers (email, token)
+      VALUES ("jack@xyz.com", "test-token");
+      """
         .trimIndent()
 
     val insertCustomersResultCount = vitessTestDb.executeUpdate(insertCustomersSql)
@@ -51,9 +51,9 @@ class VitessTestDbTest {
 
     val insertGamesSql =
       """
-        INSERT INTO games (title)
-        VALUES ("Catan");
-    """
+      INSERT INTO games (title)
+      VALUES ("Catan");
+      """
         .trimIndent()
 
     val insertGamesResultCount = vitessTestDb.executeUpdate(insertGamesSql)
@@ -164,9 +164,7 @@ class VitessTestDbTest {
   @Test
   fun `explicit exception thrown on query errors`() {
     val executeQueryException =
-      assertThrows<VitessQueryExecutorException> {
-        vitessTestDb.executeQuery("SELECT * FROM non_existent_table")
-      }
+      assertThrows<VitessQueryExecutorException> { vitessTestDb.executeQuery("SELECT * FROM non_existent_table") }
     assertEquals("Failed to run executeQuery on query: SELECT * FROM non_existent_table", executeQueryException.message)
 
     val executeException =

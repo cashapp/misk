@@ -1,38 +1,34 @@
 package misk.jdbc
 
 import com.zaxxer.hikari.util.DriverDataSource
-import wisp.deployment.TESTING
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.sql.Connection
 import java.sql.SQLException
 import java.util.Properties
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import javax.sql.DataSource
+import wisp.deployment.TESTING
 
-/**
- * Implementation of [TestDatabasePool.Backend] for SQL databases.
- */
+/** Implementation of [TestDatabasePool.Backend] for SQL databases. */
 @Singleton
-class MySqlTestDatabasePoolBackend @Inject constructor(
-  val config: DataSourceConfig
-) : TestDatabasePool.Backend {
+class MySqlTestDatabasePoolBackend @Inject constructor(val config: DataSourceConfig) : TestDatabasePool.Backend {
   internal val connection: Connection by lazy {
     try {
       DriverDataSource(
-        config.buildJdbcUrl(TESTING),
-        config.getDriverClassName(),
-        Properties(),
-        config.username,
-        config.password
-      ).connect()
+          config.buildJdbcUrl(TESTING),
+          config.getDriverClassName(),
+          Properties(),
+          config.username,
+          config.password,
+        )
+        .connect()
     } catch (e: SQLException) {
       throw IllegalStateException("Could not connect to test MySQL server!", e)
     }
   }
 
   /** Kotlin think's that getConnection is a val, but it's really a function. */
-  @Suppress("UsePropertyAccessSyntax")
-  private fun DataSource.connect() = this.getConnection()
+  @Suppress("UsePropertyAccessSyntax") private fun DataSource.connect() = this.getConnection()
 
   override fun showDatabases(): Set<String> {
     return connection.showDatabases()
@@ -48,21 +44,15 @@ class MySqlTestDatabasePoolBackend @Inject constructor(
 
   private fun Connection.showDatabases(): Set<String> {
     return createStatement().use { statement ->
-      statement.executeQuery("SHOW DATABASES")
-        .map { resultSet -> resultSet.getString(1) }
-        .toSet()
+      statement.executeQuery("SHOW DATABASES").map { resultSet -> resultSet.getString(1) }.toSet()
     }
   }
 
   private fun Connection.createDatabase(name: String) {
-    return createStatement().use { statement ->
-      statement.execute("CREATE DATABASE $name")
-    }
+    return createStatement().use { statement -> statement.execute("CREATE DATABASE $name") }
   }
 
   private fun Connection.dropDatabase(name: String) {
-    return createStatement().use { statement ->
-      statement.execute("DROP DATABASE $name")
-    }
+    return createStatement().use { statement -> statement.execute("DROP DATABASE $name") }
   }
 }

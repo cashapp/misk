@@ -38,7 +38,8 @@ constructor(
   }
 
   // Field-injected so ClientLoggingInterceptor remains internal.
-  // TODO: note since ClientLoggingInterceptor is internal, this can now only be used from dependency injection, not direct construction
+  // TODO: note since ClientLoggingInterceptor is internal, this can now only be used from dependency injection, not
+  // direct construction
   @Inject private var clientLoggingInterceptor: ClientLoggingInterceptor? = null
 
   @Inject private var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory? = null
@@ -90,9 +91,7 @@ constructor(
     config.clientConfig.protocols?.map { Protocol.get(it) }?.let { builder.protocols(it) }
 
     config.envoy?.let {
-      builder.socketFactory(
-        UnixDomainSocketFactory(envoyClientEndpointProvider!!.unixSocket(config.envoy))
-      )
+      builder.socketFactory(UnixDomainSocketFactory(envoyClientEndpointProvider!!.unixSocket(config.envoy)))
       // No DNS lookup needed since we're just sending the request over a socket.
       builder.dns(NoOpDns)
       // Proxy config not supported

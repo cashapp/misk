@@ -1,5 +1,7 @@
 package misk.gradle.schemamigrator
 
+import java.io.File
+import java.time.Clock
 import misk.MiskCommonServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
@@ -10,8 +12,6 @@ import misk.jdbc.MigrationsFormat
 import misk.jdbc.RealDatabasePool
 import misk.resources.ResourceLoaderModule
 import wisp.deployment.TESTING
-import java.io.File
-import java.time.Clock
 
 class SchemaMigratorModule(
   private val database: String,
@@ -21,20 +21,21 @@ class SchemaMigratorModule(
   private val username: String,
   private val password: String,
   private val schemaDir: File,
-  private val migrationsFormat: String
-): KAbstractModule() {
+  private val migrationsFormat: String,
+) : KAbstractModule() {
 
   override fun configure() {
-    val schemaMigratorClusterConfig = DataSourceConfig(
-      host = host,
-      port = port,
-      type = DataSourceType.valueOf(dbType),
-      migrations_resource = "filesystem:$schemaDir",
-      database = database,
-      username = username,
-      password = password,
-      migrations_format = MigrationsFormat.valueOf(migrationsFormat),
-    )
+    val schemaMigratorClusterConfig =
+      DataSourceConfig(
+        host = host,
+        port = port,
+        type = DataSourceType.valueOf(dbType),
+        migrations_resource = "filesystem:$schemaDir",
+        database = database,
+        username = username,
+        password = password,
+        migrations_format = MigrationsFormat.valueOf(migrationsFormat),
+      )
 
     bind<Clock>().toInstance(Clock.systemUTC())
     install(ResourceLoaderModule())
@@ -44,7 +45,7 @@ class SchemaMigratorModule(
       JdbcModule(
         qualifier = SchemaMigratorDatabase::class,
         config = schemaMigratorClusterConfig,
-        databasePool = RealDatabasePool
+        databasePool = RealDatabasePool,
       )
     )
   }

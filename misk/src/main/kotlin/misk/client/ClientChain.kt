@@ -8,5 +8,6 @@ interface ClientChain {
   val args: List<*>
   val call: Call<Any>
   val callback: Callback<Any>
+
   fun proceed(args: List<*>, callback: Callback<Any>)
 }

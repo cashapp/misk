@@ -2,12 +2,12 @@ package misk
 
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
+import kotlin.reflect.KClass
 import misk.inject.ConditionalProvider
 import misk.inject.KAbstractModule
 import misk.inject.Switch
 import misk.inject.asSingleton
 import misk.inject.toKey
-import kotlin.reflect.KClass
 
 /**
  * # Misk Services
@@ -74,7 +74,7 @@ import kotlin.reflect.KClass
  */
 class ServiceModule
 // TODO re-enable JVM overloads and remove the alternative constructors once downstream usages have been migrated
-//@JvmOverloads
+// @JvmOverloads
 @Suppress("detekt:AnnotatePublicApisWithJvmOverloads")
 constructor(
   val key: Key<out Service>,
@@ -116,7 +116,8 @@ constructor(
           ) {
             OptionalServiceEntry(key, switchKey, switchType, it)
           }
-        ).asSingleton()
+        )
+        .asSingleton()
     } else {
       // TODO remove this branch and rely solely on ConditionalProvider after further testing in all cases
       multibind<ServiceEntry>().toInstance(ServiceEntry(key))
@@ -136,7 +137,8 @@ constructor(
             ) {
               OptionalDependencyEdge(key, switchKey, switchType, it)
             }
-          ).asSingleton()
+          )
+          .asSingleton()
       } else {
         // TODO remove this branch and rely solely on ConditionalProvider after further testing in all cases
         multibind<DependencyEdge>().toInstance(DependencyEdge(dependent = key, dependsOn = dependsOnKey))
@@ -156,7 +158,8 @@ constructor(
             ) {
               OptionalEnhancementEdge(key, switchKey, switchType, it)
             }
-          ).asSingleton()
+          )
+          .asSingleton()
       } else {
         // TODO remove this branch and rely solely on ConditionalProvider after further testing in all cases
         multibind<EnhancementEdge>().toInstance(EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey))
@@ -167,17 +170,20 @@ constructor(
   fun conditionalOn(switchKey: String, switchType: KClass<out Switch>) =
     ServiceModule(key, dependsOn, enhancedBy, switchKey, switchType)
 
-  fun dependsOn(upstream: Key<out Service>) = ServiceModule(key, dependsOn + upstream, enhancedBy, switchKey, switchType)
+  fun dependsOn(upstream: Key<out Service>) =
+    ServiceModule(key, dependsOn + upstream, enhancedBy, switchKey, switchType)
 
-  fun dependsOn(upstream: List<Key<out Service>>) = ServiceModule(key, dependsOn + upstream, enhancedBy, switchKey, switchType)
+  fun dependsOn(upstream: List<Key<out Service>>) =
+    ServiceModule(key, dependsOn + upstream, enhancedBy, switchKey, switchType)
 
-  fun enhancedBy(enhancement: Key<out Service>) = ServiceModule(key, dependsOn, enhancedBy + enhancement, switchKey, switchType)
+  fun enhancedBy(enhancement: Key<out Service>) =
+    ServiceModule(key, dependsOn, enhancedBy + enhancement, switchKey, switchType)
 
-  fun enhancedBy(enhancement: List<Key<out Service>>) = ServiceModule(key, dependsOn, enhancedBy + enhancement, switchKey, switchType)
+  fun enhancedBy(enhancement: List<Key<out Service>>) =
+    ServiceModule(key, dependsOn, enhancedBy + enhancement, switchKey, switchType)
 
   @JvmOverloads
-  inline fun <reified T : Switch> conditionalOn(switchKey: String = "default") =
-    conditionalOn(switchKey, T::class)
+  inline fun <reified T : Switch> conditionalOn(switchKey: String = "default") = conditionalOn(switchKey, T::class)
 
   @JvmOverloads
   inline fun <reified T : Service> dependsOn(qualifier: KClass<out Annotation>? = null) =
@@ -216,8 +222,7 @@ constructor(
 inline fun <reified T : Service> ServiceModule(qualifier: KClass<out Annotation>? = null) =
   ServiceModule(T::class.toKey(qualifier))
 
-inline fun <reified T : Service, reified Q : Annotation> ServiceModule(
-) = ServiceModule(T::class.toKey(Q::class))
+inline fun <reified T : Service, reified Q : Annotation> ServiceModule() = ServiceModule(T::class.toKey(Q::class))
 
 internal data class EnhancementEdge(val toBeEnhanced: Key<*>, val enhancement: Key<*>)
 
@@ -232,17 +237,19 @@ internal data class OptionalServiceEntry(
   val serviceKey: Key<out Service>,
   val switchKey: String,
   val switchType: KClass<out Switch>,
-  val entry: ServiceEntry?
+  val entry: ServiceEntry?,
 )
+
 internal data class OptionalDependencyEdge(
   val serviceKey: Key<out Service>,
   val switchKey: String,
   val switchType: KClass<out Switch>,
-  val edge: DependencyEdge?
+  val edge: DependencyEdge?,
 )
+
 internal data class OptionalEnhancementEdge(
   val serviceKey: Key<out Service>,
   val switchKey: String,
   val switchType: KClass<out Switch>,
-  val edge: EnhancementEdge?
+  val edge: EnhancementEdge?,
 )

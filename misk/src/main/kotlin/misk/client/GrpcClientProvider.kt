@@ -1,31 +1,29 @@
 package misk.client
 
+import com.google.inject.Provider
 import com.squareup.wire.GrpcCall
 import com.squareup.wire.GrpcClient
+import com.squareup.wire.GrpcClientStreamingCall
+import com.squareup.wire.GrpcServerStreamingCall
 import com.squareup.wire.GrpcStreamingCall
 import com.squareup.wire.Service
-import okhttp3.Call
-import okhttp3.OkHttpClient
-import okhttp3.Protocol
+import jakarta.inject.Inject
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Proxy
-import jakarta.inject.Inject
-import com.google.inject.Provider
-import com.squareup.wire.GrpcClientStreamingCall
-import com.squareup.wire.GrpcServerStreamingCall
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.reflect.full.createType
 import kotlin.reflect.jvm.kotlinFunction
+import okhttp3.Call
+import okhttp3.OkHttpClient
+import okhttp3.Protocol
 
 /**
- * Creates an instance of a Wire gRPC client using Misk's HTTP configuration and client
- * interceptors.
+ * Creates an instance of a Wire gRPC client using Misk's HTTP configuration and client interceptors.
  *
  * This assumes a Wire-generated service interface (`T`) like the following:
- *
  * ```
  * interface RouteGuideClient : Service {
  *   fun GetFeature(): GrpcCall<Point, Feature>
@@ -34,7 +32,6 @@ import kotlin.reflect.jvm.kotlinFunction
  * ```
  *
  * It also assumes a Wire-generated service implementation (`G`) like the following:
- *
  * ```
  * class GrpcRouteGuideClient(
  *   private val client: GrpcClient
@@ -44,28 +41,25 @@ import kotlin.reflect.jvm.kotlinFunction
  * }
  * ```
  *
- * It creates an [OkHttpClient] and [GrpcClient] following Misk's configuration. But instead of
- * creating a single instance of the `G` type, it creates a different instance per method, each with
- * its own interceptor stack. Then it aggregates this set with a dynamic proxy.
+ * It creates an [OkHttpClient] and [GrpcClient] following Misk's configuration. But instead of creating a single
+ * instance of the `G` type, it creates a different instance per method, each with its own interceptor stack. Then it
+ * aggregates this set with a dynamic proxy.
  */
 internal class GrpcClientProvider<T : Service, G : T>(
   private val kclass: KClass<T>,
   private val grpcClientClass: KClass<G>,
   private val name: String,
   private val httpClientProvider: Provider<OkHttpClient>,
-  private val minMessageToCompress: Long
+  private val minMessageToCompress: Long,
 ) : Provider<T> {
   /** Use a provider because we don't know the test client's URL until its test server starts. */
   @Inject private lateinit var httpClientsConfigProvider: Provider<HttpClientsConfig>
   @Inject private lateinit var httpClientConfigUrlProvider: HttpClientConfigUrlProvider
   @Inject private lateinit var okHttpClientCommonConfigurator: OkHttpClientCommonConfigurator
 
-  @Inject
-  private lateinit var interceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>
-  @Inject
-  private lateinit var appInterceptorFactories:Provider<List<ClientApplicationInterceptorFactory>>
-  @Inject
-  private lateinit var callFactoryWrappers: Provider<List<CallFactoryWrapper>>
+  @Inject private lateinit var interceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>
+  @Inject private lateinit var appInterceptorFactories: Provider<List<ClientApplicationInterceptorFactory>>
+  @Inject private lateinit var callFactoryWrappers: Provider<List<CallFactoryWrapper>>
 
   override fun get(): T {
     val endpointConfig: HttpClientEndpointConfig = httpClientsConfigProvider.get()[name]
@@ -75,7 +69,7 @@ internal class GrpcClientProvider<T : Service, G : T>(
       httpClient = httpClient,
       interceptorFactories = interceptorFactories.get(),
       appInterceptorFactories = appInterceptorFactories.get(),
-      callFactoryWrappers = callFactoryWrappers.get()
+      callFactoryWrappers = callFactoryWrappers.get(),
     )
   }
 
@@ -89,57 +83,55 @@ internal class GrpcClientProvider<T : Service, G : T>(
     val baseUrl = httpClientConfigUrlProvider.getUrl(endpointConfig)
 
     // Since gRPC uses HTTP/2, force h2c when calling an unencrypted endpoint
-    val protocols = when {
-      baseUrl.startsWith("http://") -> listOf(Protocol.H2_PRIOR_KNOWLEDGE)
-      else -> listOf(Protocol.HTTP_2, Protocol.HTTP_1_1)
-    }
+    val protocols =
+      when {
+        baseUrl.startsWith("http://") -> listOf(Protocol.H2_PRIOR_KNOWLEDGE)
+        else -> listOf(Protocol.HTTP_2, Protocol.HTTP_1_1)
+      }
 
-    val clientPrototype = httpClient.newBuilder()
-      .protocols(protocols)
-      .build()
+    val clientPrototype = httpClient.newBuilder().protocols(protocols).build()
 
     val handlers = mutableMapOf<String, MethodInvocationHandler<T, G>>()
     for (method in kclass.java.methods) {
-      val handler = methodHandler(
-        method = method,
-        clientPrototype = clientPrototype,
-        baseUrl = baseUrl,
-        interceptorFactories = interceptorFactories,
-        appInterceptorFactories = appInterceptorFactories,
-        endpointConfig = endpointConfig,
-        callFactoryWrappers
-      ) ?: continue
+      val handler =
+        methodHandler(
+          method = method,
+          clientPrototype = clientPrototype,
+          baseUrl = baseUrl,
+          interceptorFactories = interceptorFactories,
+          appInterceptorFactories = appInterceptorFactories,
+          endpointConfig = endpointConfig,
+          callFactoryWrappers,
+        ) ?: continue
       handlers[method.name] = handler
     }
 
-    val invocationHandler = object : InvocationHandler {
-      override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
-        val args = args ?: arrayOf()
-        val handler = handlers[method.name]
-        return if (handler != null) {
-          handler.method.invoke(handler.delegate, *args)
-        } else {
-          method.invoke(this, *args) // equals(), hashCode(), etc.
+    val invocationHandler =
+      object : InvocationHandler {
+        override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
+          val args = args ?: arrayOf()
+          val handler = handlers[method.name]
+          return if (handler != null) {
+            handler.method.invoke(handler.delegate, *args)
+          } else {
+            method.invoke(this, *args) // equals(), hashCode(), etc.
+          }
         }
+
+        override fun toString() = "GrpcClient:${kclass.qualifiedName}"
       }
 
-      override fun toString() = "GrpcClient:${kclass.qualifiedName}"
-    }
-
     return kclass.cast(
-      Proxy.newProxyInstance(
-        Thread.currentThread().contextClassLoader,
-        arrayOf(kclass.java),
-        invocationHandler
-      )
+      Proxy.newProxyInstance(Thread.currentThread().contextClassLoader, arrayOf(kclass.java), invocationHandler)
     )
   }
 
   private fun toClientAction(method: Method): ClientAction? {
-    if (method.returnType !== GrpcCall::class.java &&
-      method.returnType !== GrpcStreamingCall::class.java &&
-      method.returnType !== GrpcClientStreamingCall::class.java &&
-      method.returnType !== GrpcServerStreamingCall::class.java
+    if (
+      method.returnType !== GrpcCall::class.java &&
+        method.returnType !== GrpcStreamingCall::class.java &&
+        method.returnType !== GrpcClientStreamingCall::class.java &&
+        method.returnType !== GrpcServerStreamingCall::class.java
     ) {
       return null
     }
@@ -154,7 +146,7 @@ internal class GrpcClientProvider<T : Service, G : T>(
       name = "$name.${method.name}",
       function = kotlinFunction,
       parameterTypes = listOf(requestType.kotlin.createType()),
-      returnType = responseType.kotlin.createType()
+      returnType = responseType.kotlin.createType(),
     )
   }
 
@@ -171,10 +163,7 @@ internal class GrpcClientProvider<T : Service, G : T>(
 
     val clientBuilder = clientPrototype.newBuilder()
 
-    okHttpClientCommonConfigurator.configure(
-      builder = clientBuilder,
-      config = endpointConfig
-    )
+    okHttpClientCommonConfigurator.configure(builder = clientBuilder, config = endpointConfig)
 
     for (factory in appInterceptorFactories) {
       val interceptor = factory.create(action) ?: continue
@@ -190,11 +179,12 @@ internal class GrpcClientProvider<T : Service, G : T>(
         callFactoryWrapper.wrap(action, callFactory) ?: callFactory
       }
 
-    val grpcClient = GrpcClient.Builder()
-      .callFactory(callFactoryWrapped)
-      .baseUrl(baseUrl)
-      .minMessageToCompress(minMessageToCompress)
-      .build()
+    val grpcClient =
+      GrpcClient.Builder()
+        .callFactory(callFactoryWrapped)
+        .baseUrl(baseUrl)
+        .minMessageToCompress(minMessageToCompress)
+        .build()
 
     // There should be *exactly one constructor* that takes in a grpcClient
     val delegate: G = grpcClientClass.constructors.first().call(grpcClient)
@@ -202,8 +192,5 @@ internal class GrpcClientProvider<T : Service, G : T>(
     return MethodInvocationHandler(delegate, method)
   }
 
-  private class MethodInvocationHandler<T : Service, G : T>(
-    val delegate: G,
-    val method: Method
-  )
+  private class MethodInvocationHandler<T : Service, G : T>(val delegate: G, val method: Method)
 }

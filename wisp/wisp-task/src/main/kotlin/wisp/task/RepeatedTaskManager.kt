@@ -9,68 +9,54 @@ import io.micrometer.core.instrument.Metrics
 import wisp.task.exception.NoTaskFoundException
 import wisp.task.exception.TaskAlreadyExistsException
 
-/**
- * Basic management of repeated tasks.
- */
-class RepeatedTaskManager @JvmOverloads constructor(
-    private val meterRegistry: MeterRegistry = Metrics.globalRegistry
-) {
-    private val repeatedTasks = mutableMapOf<String, RepeatedTask>()
+/** Basic management of repeated tasks. */
+class RepeatedTaskManager @JvmOverloads constructor(private val meterRegistry: MeterRegistry = Metrics.globalRegistry) {
+  private val repeatedTasks = mutableMapOf<String, RepeatedTask>()
 
-    /**
-     * Creates the repeated task with the details supplied.  If the repeated task already
-     * exists, a [TaskAlreadyExistsException] is thrown.
-     *
-     * Does not start the task.
-     */
-    @JvmOverloads
-    fun createTask(
-        name: String,
-        meterRegistry: MeterRegistry = this.meterRegistry,
-        repeatedTaskConfig: RepeatedTaskConfig = RepeatedTaskConfig(),
-        retryPolicy: suspend RetryFailure<Throwable>.() -> RetryInstruction =
-            defaultThrowableRetryPolicy +
-                    binaryExponentialBackoff(
-                        base = repeatedTaskConfig.defaultJitterMs,
-                        max = repeatedTaskConfig.defaultMaxDelayMs
-                    ),
-        taskConfig: TaskConfig = TaskConfig(),
-        task: (name: String, taskConfig: TaskConfig) -> Status
-    ): RepeatedTask {
-        if (taskExists(name)) {
-            throw TaskAlreadyExistsException(name)
-        }
-
-        val repeatedTask = RepeatedTask(
-            name,
-            meterRegistry,
-            repeatedTaskConfig,
-            retryPolicy,
-            taskConfig,
-            task
-        )
-
-        repeatedTasks[name] = repeatedTask
-        return repeatedTask
+  /**
+   * Creates the repeated task with the details supplied. If the repeated task already exists, a
+   * [TaskAlreadyExistsException] is thrown.
+   *
+   * Does not start the task.
+   */
+  @JvmOverloads
+  fun createTask(
+    name: String,
+    meterRegistry: MeterRegistry = this.meterRegistry,
+    repeatedTaskConfig: RepeatedTaskConfig = RepeatedTaskConfig(),
+    retryPolicy: suspend RetryFailure<Throwable>.() -> RetryInstruction =
+      defaultThrowableRetryPolicy +
+        binaryExponentialBackoff(base = repeatedTaskConfig.defaultJitterMs, max = repeatedTaskConfig.defaultMaxDelayMs),
+    taskConfig: TaskConfig = TaskConfig(),
+    task: (name: String, taskConfig: TaskConfig) -> Status,
+  ): RepeatedTask {
+    if (taskExists(name)) {
+      throw TaskAlreadyExistsException(name)
     }
 
-    fun getTask(taskName: String): RepeatedTask {
-        return repeatedTasks[taskName] ?: throw NoTaskFoundException(taskName)
-    }
+    val repeatedTask = RepeatedTask(name, meterRegistry, repeatedTaskConfig, retryPolicy, taskConfig, task)
 
-    fun taskExists(taskName: String): Boolean {
-        return repeatedTasks.containsKey(taskName)
-    }
+    repeatedTasks[name] = repeatedTask
+    return repeatedTask
+  }
 
-    /**
-     * Returns true if a repeated task with the name supplied is running.
-     * If the task does not exist or is not running, return false.
-     */
-    fun isTaskRunning(taskName: String): Boolean {
-        return repeatedTasks[taskName]?.isRunning() ?: false
-    }
+  fun getTask(taskName: String): RepeatedTask {
+    return repeatedTasks[taskName] ?: throw NoTaskFoundException(taskName)
+  }
 
-    fun shutDown() {
-        repeatedTasks.values.forEach { it.shutDown() }
-    }
+  fun taskExists(taskName: String): Boolean {
+    return repeatedTasks.containsKey(taskName)
+  }
+
+  /**
+   * Returns true if a repeated task with the name supplied is running. If the task does not exist or is not running,
+   * return false.
+   */
+  fun isTaskRunning(taskName: String): Boolean {
+    return repeatedTasks[taskName]?.isRunning() ?: false
+  }
+
+  fun shutDown() {
+    repeatedTasks.values.forEach { it.shutDown() }
+  }
 }

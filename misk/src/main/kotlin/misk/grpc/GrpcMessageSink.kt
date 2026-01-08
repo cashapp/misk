@@ -8,12 +8,10 @@ import okio.BufferedSink
 /**
  * Writes a sequence of gRPC messages as an HTTP/2 stream.
  *
- * This is derived from Wire's GrpcMessageSink.kt.
- * https://github.com/square/wire/search?q=GrpcMessageSink&type=Code
+ * This is derived from Wire's GrpcMessageSink.kt. https://github.com/square/wire/search?q=GrpcMessageSink&type=Code
  *
  * @param sink the HTTP/2 stream body.
- * @param minMessageToCompress the minimum message size for compression
- *   when [grpcEncoding] is not "identity".
+ * @param minMessageToCompress the minimum message size for compression when [grpcEncoding] is not "identity".
  * @param messageAdapter a proto adapter for each message.
  * @param grpcEncoding the content coding for the stream body.
  */
@@ -21,9 +19,10 @@ internal class GrpcMessageSink<T : Any>(
   private val sink: BufferedSink,
   private val minMessageToCompress: Long,
   private val messageAdapter: ProtoAdapter<T>,
-  private val grpcEncoding: String
+  private val grpcEncoding: String,
 ) : MessageSink<T> {
   private var closed = false
+
   override fun write(message: T) {
     check(!closed) { "closed" }
 
@@ -36,9 +35,7 @@ internal class GrpcMessageSink<T : Any>(
       sink.writeAll(encodedMessage)
     } else {
       val compressedMessage = Buffer()
-      grpcEncoding.toGrpcEncoder().encode(compressedMessage).use { sink ->
-        sink.writeAll(encodedMessage)
-      }
+      grpcEncoding.toGrpcEncoder().encode(compressedMessage).use { sink -> sink.writeAll(encodedMessage) }
       sink.writeByte(1) // 1 = Compressed.
       sink.writeInt(compressedMessage.size.toInt())
       sink.writeAll(compressedMessage)

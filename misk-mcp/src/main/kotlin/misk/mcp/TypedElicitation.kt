@@ -14,8 +14,8 @@ import misk.mcp.internal.generateJsonSchema
 /**
  * Type-safe result wrapper for MCP elicitation responses.
  *
- * Provides a strongly-typed alternative to the raw [ElicitResult] from the MCP Kotlin SDK.
- * Automatically deserializes the response content to the specified type [T].
+ * Provides a strongly-typed alternative to the raw [ElicitResult] from the MCP Kotlin SDK. Automatically deserializes
+ * the response content to the specified type [T].
  *
  * @param T The expected type of the elicitation response content, must be serializable
  * @property action The client's response action (accept, decline, or cancel)
@@ -31,9 +31,8 @@ data class TypedCreateElicitationResult<T : Any>(
 /**
  * Creates a type-safe elicitation request to gather structured input from the client.
  *
- * Provides a strongly-typed wrapper around the MCP Kotlin SDK's [ServerSession.createElicitation] method.
- * Automatically generates the JSON schema from the specified Kotlin type [T] and deserializes the client's
- * response to that type.
+ * Provides a strongly-typed wrapper around the MCP Kotlin SDK's [ServerSession.createElicitation] method. Automatically
+ * generates the JSON schema from the specified Kotlin type [T] and deserializes the client's response to that type.
  *
  * @param T The expected type of the elicitation response content, must be a serializable data class
  * @param message Human-readable message explaining what information is being requested
@@ -44,25 +43,24 @@ data class TypedCreateElicitationResult<T : Any>(
 suspend inline fun <reified T : Any> createTypedElicitation(
   message: String,
   options: RequestOptions? = null,
-): TypedCreateElicitationResult<T> = currentServerSession()
-  .createElicitation(
-    message = message,
-    requestedSchema = generateJsonSchema<T>().let { schema ->
-      ElicitRequestParams.RequestedSchema(
-        properties = requireNotNull(schema["properties"] as? JsonObject) {
-          "RequestedSchema must have properties defined"
+): TypedCreateElicitationResult<T> =
+  currentServerSession()
+    .createElicitation(
+      message = message,
+      requestedSchema =
+        generateJsonSchema<T>().let { schema ->
+          ElicitRequestParams.RequestedSchema(
+            properties =
+              requireNotNull(schema["properties"] as? JsonObject) { "RequestedSchema must have properties defined" },
+            required =
+              requireNotNull(schema["required"] as? JsonArray) {
+                  "RequestedSchema must have required properties defined"
+                }
+                .map { it.jsonPrimitive.content },
+          )
         },
-        required = requireNotNull(schema["required"] as? JsonArray) {
-          "RequestedSchema must have required properties defined"
-        }.map { it.jsonPrimitive.content },
-      )
-    },
-    options = options
-  )
-  .let { result ->
-    TypedCreateElicitationResult(
-      action = result.action,
-      content = result.content?.decode<T>(),
-      _meta = result.meta,
+      options = options,
     )
-  }
+    .let { result ->
+      TypedCreateElicitationResult(action = result.action, content = result.content?.decode<T>(), _meta = result.meta)
+    }

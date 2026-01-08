@@ -7,6 +7,14 @@ public synthetic class misk/mcp/Description$Impl : misk/mcp/Description {
 	public final synthetic fun value ()Ljava/lang/String;
 }
 
+public final class misk/mcp/EmptyInput {
+	public static final field INSTANCE Lmisk/mcp/EmptyInput;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/mcp/JsonKt {
 	public static final fun decode (Ljava/lang/String;Lkotlinx/serialization/DeserializationStrategy;)Ljava/lang/Object;
 	public static final fun decode (Lkotlinx/serialization/json/JsonObject;Lkotlinx/serialization/DeserializationStrategy;)Ljava/lang/Object;
@@ -119,6 +127,13 @@ public abstract interface class misk/mcp/McpTool$ToolResult {
 	public abstract fun isError ()Z
 }
 
+public abstract class misk/mcp/McpToolEmptyInput : misk/mcp/McpTool {
+	public fun <init> ()V
+	public synthetic fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun handle (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun handle (Lmisk/mcp/EmptyInput;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public final class misk/mcp/McpToolModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/mcp/McpToolModule$Companion;
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/inject/BindingQualifier;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -152,6 +167,13 @@ public final class misk/mcp/StructuredMcpTool$StructuredToolResult : misk/mcp/Mc
 	public fun hashCode ()I
 	public fun isError ()Z
 	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class misk/mcp/StructuredMcpToolEmptyInput : misk/mcp/StructuredMcpTool {
+	public fun <init> ()V
+	public synthetic fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun handle (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun handle (Lmisk/mcp/EmptyInput;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/TypedCreateElicitationResult {
@@ -547,6 +569,43 @@ public synthetic class misk/mcp/testing/tools/GetNicknameRequest$$serializer : k
 }
 
 public final class misk/mcp/testing/tools/GetNicknameRequest$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class misk/mcp/testing/tools/HelloWorldTool : misk/mcp/StructuredMcpToolEmptyInput {
+	public fun <init> ()V
+	public fun getDescription ()Ljava/lang/String;
+	public fun getName ()Ljava/lang/String;
+	public fun handle (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/testing/tools/HelloWorldToolKt {
+	public static final fun callHelloWorld (Lio/modelcontextprotocol/kotlin/sdk/client/Client;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/testing/tools/HelloWorldToolOutput {
+	public static final field Companion Lmisk/mcp/testing/tools/HelloWorldToolOutput$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/mcp/testing/tools/HelloWorldToolOutput;
+	public static synthetic fun copy$default (Lmisk/mcp/testing/tools/HelloWorldToolOutput;Ljava/lang/String;ILjava/lang/Object;)Lmisk/mcp/testing/tools/HelloWorldToolOutput;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGreeting ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public synthetic class misk/mcp/testing/tools/HelloWorldToolOutput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lmisk/mcp/testing/tools/HelloWorldToolOutput$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lmisk/mcp/testing/tools/HelloWorldToolOutput;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/HelloWorldToolOutput;)V
+}
+
+public final class misk/mcp/testing/tools/HelloWorldToolOutput$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 

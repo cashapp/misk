@@ -1,46 +1,41 @@
 package misk.concurrent
 
 import com.google.inject.Provider
+import jakarta.inject.Inject
+import java.util.concurrent.ExecutorService
+import kotlin.reflect.KClass
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
-import java.util.concurrent.ExecutorService
-import jakarta.inject.Inject
-import kotlin.reflect.KClass
 
 /**
- * Install this to bind an executor service with [annotation]. The executor service will be
- * automatically shut down when the service shuts down.
+ * Install this to bind an executor service with [annotation]. The executor service will be automatically shut down when
+ * the service shuts down.
  */
 class ExecutorServiceModule(
   private val annotation: KClass<out Annotation>,
-  private val createFunction: (ExecutorServiceFactory) -> ExecutorService
+  private val createFunction: (ExecutorServiceFactory) -> ExecutorService,
 ) : KAbstractModule() {
   override fun configure() {
     bind<ExecutorService>()
       .annotatedWith(annotation.java)
-      .toProvider(object : Provider<ExecutorService> {
-        @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
+      .toProvider(
+        object : Provider<ExecutorService> {
+          @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
 
-        override fun get() = createFunction(executorServiceFactory)
-      })
+          override fun get() = createFunction(executorServiceFactory)
+        }
+      )
       .asSingleton()
   }
 
   companion object {
-    fun withFixedThreadPool(
-      annotation: KClass<out Annotation>,
-      nameFormat: String,
-      nThreads: Int
-    ) = ExecutorServiceModule(annotation) { it.fixed(nameFormat, nThreads) }
+    fun withFixedThreadPool(annotation: KClass<out Annotation>, nameFormat: String, nThreads: Int) =
+      ExecutorServiceModule(annotation) { it.fixed(nameFormat, nThreads) }
 
-    inline fun <reified T : Annotation> withFixedThreadPool(
-      nameFormat: String,
-      nThreads: Int
-    ) = withFixedThreadPool(T::class, nameFormat, nThreads)
+    inline fun <reified T : Annotation> withFixedThreadPool(nameFormat: String, nThreads: Int) =
+      withFixedThreadPool(T::class, nameFormat, nThreads)
 
-    fun withUnboundThreadPool(
-      annotation: KClass<out Annotation>,
-      nameFormat: String
-    ) = ExecutorServiceModule(annotation) { it.unbounded(nameFormat) }
+    fun withUnboundThreadPool(annotation: KClass<out Annotation>, nameFormat: String) =
+      ExecutorServiceModule(annotation) { it.unbounded(nameFormat) }
   }
 }

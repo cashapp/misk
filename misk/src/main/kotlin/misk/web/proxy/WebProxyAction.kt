@@ -1,6 +1,9 @@
 package misk.web.proxy
 
 import com.google.inject.Inject
+import jakarta.inject.Named
+import jakarta.inject.Singleton
+import java.io.IOException
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
@@ -18,18 +21,13 @@ import misk.web.resources.StaticResourceAction
 import misk.web.toMisk
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
-import java.io.IOException
-import jakarta.inject.Named
-import jakarta.inject.Singleton
 
 /**
  * WebProxyAction
  *
  * Guidelines
- * - Overlapping entry prefixes will resolve to the longest match
- *     Example
- *     Entries: `/_admin/config/`, `/_admin/config/subtab/`
- *     Request: `/_admin/config/subtab/app.js` will resolve to the `/_admin/config/subtab/` entry
+ * - Overlapping entry prefixes will resolve to the longest match Example Entries: `/_admin/config/`,
+ *   `/_admin/config/subtab/` Request: `/_admin/config/subtab/app.js` will resolve to the `/_admin/config/subtab/` entry
  * - url_path_prefix starts with "/"
  * - url_path_prefix ends with "/"
  * - web_proxy_url ends with "/" and doesn't contain any path segments
@@ -40,13 +38,14 @@ import jakarta.inject.Singleton
  * - If findEntryFromUrl found, incoming request path is appended to host + port of StaticResourceEntry.server_url
  * - Else, 404
  */
-
 @Singleton
-class WebProxyAction @Inject constructor(
+class WebProxyAction
+@Inject
+constructor(
   private val optionalBinder: OptionalBinder,
   @JvmSuppressWildcards private val clientHttpCall: ActionScoped<HttpCall>,
   private val staticResourceAction: StaticResourceAction,
-  private val resourceEntryFinder: ResourceEntryFinder
+  private val resourceEntryFinder: ResourceEntryFinder,
 ) : WebAction {
   @Get("/{path:.*}")
   @Post("/{path:.*}")
@@ -59,12 +58,9 @@ class WebProxyAction @Inject constructor(
   }
 
   fun getResponse(url: HttpUrl): Response<ResponseBody> {
-    val matchedEntry = resourceEntryFinder.webProxy(url) as WebProxyEntry?
-      ?: return NotFoundAction.response(url.toString())
-    val proxyUrl = matchedEntry.web_proxy_url.newBuilder()
-      .encodedPath(url.encodedPath)
-      .query(url.query)
-      .build()
+    val matchedEntry =
+      resourceEntryFinder.webProxy(url) as WebProxyEntry? ?: return NotFoundAction.response(url.toString())
+    val proxyUrl = matchedEntry.web_proxy_url.newBuilder().encodedPath(url.encodedPath).query(url.query).build()
     return forwardRequestTo(proxyUrl)
   }
 
@@ -88,7 +84,7 @@ class WebProxyAction @Inject constructor(
             .scheme(this.url.scheme)
             .host(this.url.host)
             .port(this.url.port)
-        }"
+        }",
       )
       .url(newUrl)
       .build()
@@ -100,7 +96,5 @@ class WebProxyAction @Inject constructor(
  */
 @Singleton
 class OptionalBinder @Inject constructor() {
-  @Inject(optional = true)
-  @field:Named("web_proxy_action")
-  var proxyClient: OkHttpClient = OkHttpClient()
+  @Inject(optional = true) @field:Named("web_proxy_action") var proxyClient: OkHttpClient = OkHttpClient()
 }

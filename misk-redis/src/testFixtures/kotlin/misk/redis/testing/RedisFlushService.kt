@@ -11,8 +11,8 @@ import misk.testing.TestFixture
 /**
  * Flushes all Redis databases on startup.
  *
- * Note: If your test does not use `@MiskTest(startService = true)`,
- * you will need instead to manually flush redis via `@BeforeEach`. See examples in `RealRedisTest`
+ * Note: If your test does not use `@MiskTest(startService = true)`, you will need instead to manually flush redis via
+ * `@BeforeEach`. See examples in `RealRedisTest`
  */
 @Singleton
 class RedisFlushService @Inject constructor() : AbstractIdleService(), TestFixture {

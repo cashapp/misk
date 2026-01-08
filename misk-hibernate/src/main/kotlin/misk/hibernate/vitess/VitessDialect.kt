@@ -1,5 +1,7 @@
 package misk.hibernate.vitess
 
+import java.sql.SQLException
+import java.util.Optional
 import misk.vitess.CowriteException
 import org.hibernate.cfg.Environment
 import org.hibernate.dialect.Dialect
@@ -9,26 +11,17 @@ import org.hibernate.exception.ConstraintViolationException
 import org.hibernate.exception.GenericJDBCException
 import org.hibernate.exception.spi.SQLExceptionConversionDelegate
 import org.hibernate.type.StandardBasicTypes
-import java.sql.SQLException
-import java.util.Optional
 
 class VitessDialect : MySQL8Dialect() {
-  private val vitessShardExceptionParser
-    : VitessShardExceptionParser = VitessShardExceptionParser()
+  private val vitessShardExceptionParser: VitessShardExceptionParser = VitessShardExceptionParser()
 
   init {
     // Statement batching is not implemented yet
-    getDefaultProperties().setProperty(
-      Environment.STATEMENT_BATCH_SIZE,
-      Dialect.NO_BATCH
-    )
+    getDefaultProperties().setProperty(Environment.STATEMENT_BATCH_SIZE, Dialect.NO_BATCH)
 
     registerKeyword("virtual")
     registerKeyword("status")
-    registerFunction(
-      "current_timestamp",
-      NoArgSQLFunction("current_timestamp", StandardBasicTypes.TIMESTAMP)
-    )
+    registerFunction("current_timestamp", NoArgSQLFunction("current_timestamp", StandardBasicTypes.TIMESTAMP))
   }
 
   override fun useInputStreamToInsertBlob(): Boolean {
@@ -39,12 +32,7 @@ class VitessDialect : MySQL8Dialect() {
     return SQLExceptionConversionDelegate { sqlException: SQLException, message: String, sql: String? ->
       val exceptionMessage = sqlException.message
       if (exceptionMessage != null && exceptionMessage.contains("Duplicate entry")) {
-        return@SQLExceptionConversionDelegate ConstraintViolationException(
-          message,
-          sqlException,
-          sql,
-          null
-        )
+        return@SQLExceptionConversionDelegate ConstraintViolationException(message, sqlException, sql, null)
       } else if (exceptionMessage != null && exceptionMessage.contains("plan includes scatter, which is disallowed")) {
         return@SQLExceptionConversionDelegate ScatterQueryException(sqlException)
       } else if (exceptionMessage != null && exceptionMessage.contains("multi-db transaction attempted")) {
@@ -57,11 +45,7 @@ class VitessDialect : MySQL8Dialect() {
         if (vitessShardException.isPresent()) {
           return@SQLExceptionConversionDelegate VitessShardException(vitessShardException.get())
         }
-        return@SQLExceptionConversionDelegate GenericJDBCException(
-          sqlException.message,
-          sqlException,
-          sql
-        )
+        return@SQLExceptionConversionDelegate GenericJDBCException(sqlException.message, sqlException, sql)
       }
     }
   }
@@ -70,12 +54,8 @@ class VitessDialect : MySQL8Dialect() {
     val vitessQuery = VitessQueryHintHandler.getQueryStringWithHints(query, hints)
 
     // After we process Vitess query hints, we need to pass any non-Vitess query hints to the MySQL handler.
-    val nonVitessHints = hints.split(",")
-      .map { it.trim() }
-      .filter { !it.startsWith("vt+") }
-      .joinToString(",")
+    val nonVitessHints = hints.split(",").map { it.trim() }.filter { !it.startsWith("vt+") }.joinToString(",")
 
     return super.getQueryHintString(vitessQuery, nonVitessHints)
   }
 }
-

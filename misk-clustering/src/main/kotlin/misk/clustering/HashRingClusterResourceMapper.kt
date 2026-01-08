@@ -6,10 +6,12 @@ import java.util.Arrays
 import java.util.Objects
 
 /** A [HashRingClusterResourceMapper] maps resources to cluster members based on a consistent hash */
-class HashRingClusterResourceMapper @JvmOverloads constructor(
+class HashRingClusterResourceMapper
+@JvmOverloads
+constructor(
   members: Set<Cluster.Member>,
   private val hashFn: HashFunction = Hashing.murmur3_32_fixed(),
-  private val vnodesCount: Int = 16
+  private val vnodesCount: Int = 16,
 ) : ClusterResourceMapper {
   private val vnodes: IntArray
   private val vnodesToMembers: Map<Int, Cluster.Member>
@@ -41,9 +43,7 @@ class HashRingClusterResourceMapper @JvmOverloads constructor(
 
     val resourceHash = hashFn.hashBytes(resourceId.toByteArray()).asInt()
     val vnode = vnodes.firstOrNull { it >= resourceHash } ?: vnodes[0]
-    return vnodesToMembers[vnode] ?: throw IllegalStateException(
-      "no member corresponding to vnode hash $vnode"
-    )
+    return vnodesToMembers[vnode] ?: throw IllegalStateException("no member corresponding to vnode hash $vnode")
   }
 
   override fun equals(other: Any?): Boolean {

@@ -1,6 +1,7 @@
 package misk.web
 
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -13,7 +14,6 @@ import okhttp3.Request
 import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class CorsFilterTest {
@@ -23,36 +23,34 @@ class CorsFilterTest {
   @Inject lateinit var moshi: Moshi
 
   // All cross-origin requests are allowed.
-  @Test fun `Preflight with cors allowed origin`() {
+  @Test
+  fun `Preflight with cors allowed origin`() {
     val response = preflight("/cors-allow/16")
 
-    assertThat(response.headers.get("Access-Control-Allow-Origin"))
-      .isEqualTo("https://localhost:8080")
+    assertThat(response.headers.get("Access-Control-Allow-Origin")).isEqualTo("https://localhost:8080")
 
     val response2 = preflight("/cors-allow/16", "https://misk.net")
-    assertThat(response2.headers.get("Access-Control-Allow-Origin"))
-      .isEqualTo("https://misk.net")
+    assertThat(response2.headers.get("Access-Control-Allow-Origin")).isEqualTo("https://misk.net")
   }
 
   // Policy that allows localhost, disallow other domains.
-  @Test fun `Preflight to endpoint with more restrictive CORs policy`() {
+  @Test
+  fun `Preflight to endpoint with more restrictive CORs policy`() {
     val response = preflight("/restrictive")
 
-    assertThat(response.headers.get("Access-Control-Allow-Origin"))
-      .isEqualTo("https://localhost:8080")
+    assertThat(response.headers.get("Access-Control-Allow-Origin")).isEqualTo("https://localhost:8080")
 
     // No response headers should be returned.
     val responseNoHeaders = preflight("/restricted", "https://stealyourdata.com")
-    assertThat(responseNoHeaders.headers.get("Access-Control-Allow-Origin"))
-      .isNull()
+    assertThat(responseNoHeaders.headers.get("Access-Control-Allow-Origin")).isNull()
   }
 
   // Does not allow cors on any domain.
-  @Test fun `Preflight to path without cors`() {
+  @Test
+  fun `Preflight to path without cors`() {
     val response = preflight("/no-cors")
 
-    assertThat(response.headers.get("Access-Control-Allow-Origin"))
-      .isNull()
+    assertThat(response.headers.get("Access-Control-Allow-Origin")).isNull()
   }
 
   class CorsAllowGetAction @Inject constructor() : WebAction {
@@ -62,9 +60,7 @@ class CorsFilterTest {
   }
 
   class RestrictiveCORsAction @Inject constructor() : WebAction {
-    @Post("/restrictive")
-    @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun doPost() = miskHype(10)
+    @Post("/restrictive") @ResponseContentType(MediaTypes.APPLICATION_JSON) fun doPost() = miskHype(10)
   }
 
   class NoCorsPolicyAction @Inject constructor() : WebAction {
@@ -93,17 +89,14 @@ class CorsFilterTest {
     override fun configure() {
       install(
         WebServerTestingModule(
-          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
-            cors = mapOf(
-              Pair("/cors-allow/*", CorsConfig()),
-              Pair(
-                "/restrictive",
-                CorsConfig(
-                  allowedOrigins = arrayOf("https://localhost:*")
+          webConfig =
+            WebServerTestingModule.TESTING_WEB_CONFIG.copy(
+              cors =
+                mapOf(
+                  Pair("/cors-allow/*", CorsConfig()),
+                  Pair("/restrictive", CorsConfig(allowedOrigins = arrayOf("https://localhost:*"))),
                 )
-              )
             )
-          )
         )
       )
       install(MiskTestingServiceModule())

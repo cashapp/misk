@@ -1,12 +1,12 @@
 package misk.concurrent
 
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
-import misk.time.FakeClock
 import java.time.Duration
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import misk.time.FakeClock
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 
 class FakeScheduledExecutorServiceTest {
   @Test
@@ -16,13 +16,15 @@ class FakeScheduledExecutorServiceTest {
     val done = CountDownLatch(1)
     val result = 5
 
-    val task = executor.schedule<Int>(
-      {
-        done.countDown()
-        result
-      },
-      10, TimeUnit.SECONDS
-    )
+    val task =
+      executor.schedule<Int>(
+        {
+          done.countDown()
+          result
+        },
+        10,
+        TimeUnit.SECONDS,
+      )
 
     clock.add(Duration.ofSeconds(10))
     executor.tick()
@@ -37,12 +39,7 @@ class FakeScheduledExecutorServiceTest {
     val executor = FakeScheduledExecutorService(clock)
     val done = AtomicInteger(0)
 
-    executor.scheduleWithFixedDelay(
-      {
-        done.getAndAdd(1)
-      },
-      10, 10, TimeUnit.MILLISECONDS
-    )
+    executor.scheduleWithFixedDelay({ done.getAndAdd(1) }, 10, 10, TimeUnit.MILLISECONDS)
 
     clock.add(Duration.ofMillis(30))
     executor.tick()

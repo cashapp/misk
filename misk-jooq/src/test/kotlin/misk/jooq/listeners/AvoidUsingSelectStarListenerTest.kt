@@ -15,36 +15,39 @@ import org.junit.jupiter.api.Test
 @MiskTest(startService = true)
 class AvoidUsingSelectStarListenerTest {
   @SuppressWarnings("unused") @MiskTestModule private var module = ClientJooqTestingModule()
-  @Inject
-  @JooqDBIdentifier private lateinit var transacter: JooqTransacter
+  @Inject @JooqDBIdentifier private lateinit var transacter: JooqTransacter
 
-  @Test fun `using select star throws an exception`() {
+  @Test
+  fun `using select star throws an exception`() {
     transacter.transaction { (ctx) ->
-      ctx.newRecord(MOVIE).apply {
-        this.genre = Genre.COMEDY.name
-        this.name = "Enter the dragon"
-      }.also { it.store() }
+      ctx
+        .newRecord(MOVIE)
+        .apply {
+          this.genre = Genre.COMEDY.name
+          this.name = "Enter the dragon"
+        }
+        .also { it.store() }
     }
 
     assertThatExceptionOfType(AvoidUsingSelectStarException::class.java).isThrownBy {
-      transacter.transaction {
-        (ctx) -> ctx.select(MOVIE.asterisk()).from(MOVIE).fetchOne()
-      }
+      transacter.transaction { (ctx) -> ctx.select(MOVIE.asterisk()).from(MOVIE).fetchOne() }
     }
   }
 
-  @Test fun `selecting all the fields does not throw an exception`() {
+  @Test
+  fun `selecting all the fields does not throw an exception`() {
     transacter.transaction { (ctx) ->
-      ctx.newRecord(MOVIE).apply {
-        this.genre = Genre.COMEDY.name
-        this.name = "Enter the dragon"
-      }.also { it.store() }
+      ctx
+        .newRecord(MOVIE)
+        .apply {
+          this.genre = Genre.COMEDY.name
+          this.name = "Enter the dragon"
+        }
+        .also { it.store() }
     }
 
     assertThatNoException().isThrownBy {
-      transacter.transaction {
-        (ctx) -> ctx.select(*MOVIE.fields()).from(MOVIE).fetchOne()
-      }
+      transacter.transaction { (ctx) -> ctx.select(*MOVIE.fields()).from(MOVIE).fetchOne() }
     }
   }
 }

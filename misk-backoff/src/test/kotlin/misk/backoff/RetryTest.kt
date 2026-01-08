@@ -1,10 +1,5 @@
 package misk.backoff
 
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.concurrent.CompletableFuture.completedFuture
 import java.util.concurrent.CompletableFuture.failedFuture
@@ -13,7 +8,11 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-import kotlin.time.Duration.Companion.seconds
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 internal class RetryTest {
 
@@ -31,10 +30,11 @@ internal class RetryTest {
     fun deprecatedFunction() {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
-      val result = retry(3, backoff) { retry ->
-        if (retry < 2) throw IllegalStateException("this failed")
-        "succeeded on retry $retry"
-      }
+      val result =
+        retry(3, backoff) { retry ->
+          if (retry < 2) throw IllegalStateException("this failed")
+          "succeeded on retry $retry"
+        }
 
       assertThat(result).isEqualTo("succeeded on retry 2")
     }
@@ -44,10 +44,11 @@ internal class RetryTest {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
       val retryConfig = RetryConfig.Builder(3, backoff)
-      val result = retry(retryConfig.build()) { retry: Int ->
-        if (retry < 2) throw IllegalStateException("this failed")
-        "succeeded on retry $retry"
-      }
+      val result =
+        retry(retryConfig.build()) { retry: Int ->
+          if (retry < 2) throw IllegalStateException("this failed")
+          "succeeded on retry $retry"
+        }
 
       assertThat(result).isEqualTo("succeeded on retry 2")
     }
@@ -97,10 +98,11 @@ internal class RetryTest {
     fun resetsBackoffAfterSuccess() {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
       val retryConfig = RetryConfig.Builder(3, backoff)
-      val result = retry(retryConfig.build()) { retry: Int ->
-        if (retry < 2) throw IllegalStateException("this failed")
-        "hello"
-      }
+      val result =
+        retry(retryConfig.build()) { retry: Int ->
+          if (retry < 2) throw IllegalStateException("this failed")
+          "hello"
+        }
 
       assertThat(result).isEqualTo("hello")
 
@@ -113,9 +115,7 @@ internal class RetryTest {
       var retryCount = 0
       var retried = 0
       // simply counts the number of times it was called
-      val onRetryFunction: (retries: Int, exception: Exception) -> Unit = { _, _ ->
-        retried = retried.inc()
-      }
+      val onRetryFunction: (retries: Int, exception: Exception) -> Unit = { _, _ -> retried = retried.inc() }
 
       // f is a function that throws an exception twice in a row
       val retryConfig = RetryConfig.Builder(3, FlatBackoff()).onRetry(onRetryFunction)
@@ -132,13 +132,10 @@ internal class RetryTest {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
       val customMessage = "Custom message for DontRetryException"
       assertFailsWith<DontRetryException> {
-        val retryConfig = RetryConfig.Builder(3, backoff)
-        retry(retryConfig.build()) {
-          throw DontRetryException(customMessage)
+          val retryConfig = RetryConfig.Builder(3, backoff)
+          retry(retryConfig.build()) { throw DontRetryException(customMessage) }
         }
-      }.also { exception ->
-        assertThat(exception.message).isEqualTo(customMessage)
-      }
+        .also { exception -> assertThat(exception.message).isEqualTo(customMessage) }
     }
 
     @Test
@@ -146,14 +143,11 @@ internal class RetryTest {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
       val cause = IllegalStateException("Underlying exception")
       assertFailsWith<DontRetryException> {
-        val retryConfig = RetryConfig.Builder(3, backoff)
+          val retryConfig = RetryConfig.Builder(3, backoff)
 
-        retry(retryConfig.build()) {
-          throw DontRetryException(cause)
+          retry(retryConfig.build()) { throw DontRetryException(cause) }
         }
-      }.also { exception ->
-        assertThat(exception.cause).isEqualTo(cause)
-      }
+        .also { exception -> assertThat(exception.cause).isEqualTo(cause) }
     }
 
     @Test
@@ -162,14 +156,13 @@ internal class RetryTest {
       val customMessage = "Custom message for DontRetryException"
       val cause = IllegalStateException("Underlying exception")
       assertFailsWith<DontRetryException> {
-        val retryConfig = RetryConfig.Builder(3, backoff)
-        retry(retryConfig.build()) {
-          throw DontRetryException(customMessage, cause)
+          val retryConfig = RetryConfig.Builder(3, backoff)
+          retry(retryConfig.build()) { throw DontRetryException(customMessage, cause) }
         }
-      }.also { exception ->
-        assertThat(exception.message).isEqualTo(customMessage)
-        assertThat(exception.cause).isEqualTo(cause)
-      }
+        .also { exception ->
+          assertThat(exception.message).isEqualTo(customMessage)
+          assertThat(exception.cause).isEqualTo(cause)
+        }
     }
 
     @Test
@@ -202,7 +195,6 @@ internal class RetryTest {
     }
   }
 
-
   @Nested
   inner class AsynchronousRetryTest {
 
@@ -211,13 +203,15 @@ internal class RetryTest {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
       val retryConfig = RetryConfig.Builder(3, backoff)
-      val result = retryableFuture(retryConfig.build()) { retry: Int ->
-        if (retry < 2) {
-          failedFuture(IllegalStateException("this failed"))
-        } else {
-          completedFuture("succeeded on retry $retry")
-        }
-      }.get()
+      val result =
+        retryableFuture(retryConfig.build()) { retry: Int ->
+            if (retry < 2) {
+              failedFuture(IllegalStateException("this failed"))
+            } else {
+              completedFuture("succeeded on retry $retry")
+            }
+          }
+          .get()
       assertThat(result).isEqualTo("succeeded on retry 2")
     }
 
@@ -226,11 +220,10 @@ internal class RetryTest {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
       assertFailsWith<ExecutionException> {
-        val retryConfig = RetryConfig.Builder(3, backoff)
-        retryableFuture(retryConfig.build()) { failedFuture<Void>(IllegalStateException("this failed")) }.get()
-      }.also { e ->
-        assertTrue(e.cause is IllegalStateException)
-      }
+          val retryConfig = RetryConfig.Builder(3, backoff)
+          retryableFuture(retryConfig.build()) { failedFuture<Void>(IllegalStateException("this failed")) }.get()
+        }
+        .also { e -> assertTrue(e.cause is IllegalStateException) }
     }
 
     @Test
@@ -238,11 +231,10 @@ internal class RetryTest {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
       assertFailsWith<ExecutionException> {
-        val retryConfig = RetryConfig.Builder(3, backoff)
-        retryableFuture(retryConfig.build()) { failedFuture<Void>(IllegalStateException("this failed")) }.get()
-      }.also { e ->
-        assertTrue(e.cause is IllegalStateException)
-      }
+          val retryConfig = RetryConfig.Builder(3, backoff)
+          retryableFuture(retryConfig.build()) { failedFuture<Void>(IllegalStateException("this failed")) }.get()
+        }
+        .also { e -> assertTrue(e.cause is IllegalStateException) }
 
       // Backoff should have advanced
       assertThat(backoff.nextRetry()).isEqualTo(Duration.ofMillis(40))
@@ -258,11 +250,10 @@ internal class RetryTest {
       backoff.nextRetry()
 
       assertFailsWith<ExecutionException> {
-        val retryConfig = RetryConfig.Builder(3, backoff)
-        retryableFuture(retryConfig.build()) { failedFuture<Void>(IllegalStateException("this failed")) }.get()
-      }.also { e ->
-        assertTrue(e.cause is IllegalStateException)
-      }
+          val retryConfig = RetryConfig.Builder(3, backoff)
+          retryableFuture(retryConfig.build()) { failedFuture<Void>(IllegalStateException("this failed")) }.get()
+        }
+        .also { e -> assertTrue(e.cause is IllegalStateException) }
 
       // resets backoff prior to use
       assertThat(backoff.nextRetry()).isEqualTo(Duration.ofMillis(40))
@@ -272,13 +263,15 @@ internal class RetryTest {
     fun resetsBackoffAfterSuccess() {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
       val retryConfig = RetryConfig.Builder(3, backoff)
-      val result = retryableFuture(retryConfig.build()) { retry: Int ->
-        if (retry < 2) {
-          failedFuture (IllegalStateException("this failed"))
-        } else {
-          completedFuture("hello")
-        }
-      }.get()
+      val result =
+        retryableFuture(retryConfig.build()) { retry: Int ->
+            if (retry < 2) {
+              failedFuture(IllegalStateException("this failed"))
+            } else {
+              completedFuture("hello")
+            }
+          }
+          .get()
 
       assertThat(result).isEqualTo("hello")
 
@@ -291,20 +284,19 @@ internal class RetryTest {
       var retryCount = 0
       var retried = 0
       // simply counts the number of times it was called
-      val onRetryFunction: (retries: Int, exception: Exception) -> Unit = { _, _ ->
-        retried = retried.inc()
-      }
+      val onRetryFunction: (retries: Int, exception: Exception) -> Unit = { _, _ -> retried = retried.inc() }
 
       // f is a function that throws an exception twice in a row
       val retryConfig = RetryConfig.Builder(3, FlatBackoff()).onRetry(onRetryFunction)
       retryableFuture(retryConfig.build()) {
-        retryCount = retryCount.inc()
-        if (retryCount < 3) {
-          failedFuture<Void>(Exception("a failure that triggers a retry"))
-        } else{
-          completedFuture(null)
+          retryCount = retryCount.inc()
+          if (retryCount < 3) {
+            failedFuture<Void>(Exception("a failure that triggers a retry"))
+          } else {
+            completedFuture(null)
+          }
         }
-      }.join()
+        .join()
 
       assertThat(retried).isEqualTo(2)
     }
@@ -314,15 +306,14 @@ internal class RetryTest {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
       val customMessage = "Custom message for DontRetryException"
       assertFailsWith<ExecutionException> {
-        val retryConfig = RetryConfig.Builder(3, backoff)
-        retryableFuture(retryConfig.build()) {
-          failedFuture<Void> (DontRetryException(customMessage))
-        }.get()
-      }.also { exception ->
-        assertThat(exception.cause).isInstanceOf(DontRetryException::class.java)
-        val dontRetryException = exception.cause as DontRetryException
-        assertThat(dontRetryException.message).isEqualTo(customMessage)
-      }
+          val retryConfig = RetryConfig.Builder(3, backoff)
+          retryableFuture(retryConfig.build()) { failedFuture<Void>(DontRetryException(customMessage)) }.get()
+        }
+        .also { exception ->
+          assertThat(exception.cause).isInstanceOf(DontRetryException::class.java)
+          val dontRetryException = exception.cause as DontRetryException
+          assertThat(dontRetryException.message).isEqualTo(customMessage)
+        }
     }
 
     @Test
@@ -330,16 +321,15 @@ internal class RetryTest {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
       val cause = IllegalStateException("Underlying exception")
       assertFailsWith<ExecutionException> {
-        val retryConfig = RetryConfig.Builder(3, backoff)
+          val retryConfig = RetryConfig.Builder(3, backoff)
 
-        retryableFuture(retryConfig.build()) {
-          failedFuture<Void> (DontRetryException(cause))
-        }.get()
-      }.also { exception ->
-        assertThat(exception.cause).isInstanceOf(DontRetryException::class.java)
-        val dontRetryException = exception.cause as DontRetryException
-        assertThat(dontRetryException.cause).isEqualTo(cause)
-      }
+          retryableFuture(retryConfig.build()) { failedFuture<Void>(DontRetryException(cause)) }.get()
+        }
+        .also { exception ->
+          assertThat(exception.cause).isInstanceOf(DontRetryException::class.java)
+          val dontRetryException = exception.cause as DontRetryException
+          assertThat(dontRetryException.cause).isEqualTo(cause)
+        }
     }
 
     @Test
@@ -348,16 +338,15 @@ internal class RetryTest {
       val customMessage = "Custom message for DontRetryException"
       val cause = IllegalStateException("Underlying exception")
       assertFailsWith<ExecutionException> {
-        val retryConfig = RetryConfig.Builder(3, backoff)
-        retryableFuture(retryConfig.build()) {
-          failedFuture<Void> (DontRetryException(customMessage, cause))
-        }.get()
-      }.also { exception ->
-        assertThat(exception.cause).isInstanceOf(DontRetryException::class.java)
-        val dontRetryException = exception.cause as DontRetryException
-        assertThat(dontRetryException.message).isEqualTo(customMessage)
-        assertThat(dontRetryException.cause).isEqualTo(cause)
-      }
+          val retryConfig = RetryConfig.Builder(3, backoff)
+          retryableFuture(retryConfig.build()) { failedFuture<Void>(DontRetryException(customMessage, cause)) }.get()
+        }
+        .also { exception ->
+          assertThat(exception.cause).isInstanceOf(DontRetryException::class.java)
+          val dontRetryException = exception.cause as DontRetryException
+          assertThat(dontRetryException.message).isEqualTo(customMessage)
+          assertThat(dontRetryException.cause).isEqualTo(cause)
+        }
     }
 
     @Test
@@ -366,9 +355,10 @@ internal class RetryTest {
 
       assertFailsWith<ExecutionException> {
         retryableFuture(RetryConfig.Builder(100, FlatBackoff()).shouldRetry { false }.build()) {
-          retryCount = retryCount.inc()
-          failedFuture<Void> (IllegalStateException())
-        }.get()
+            retryCount = retryCount.inc()
+            failedFuture<Void>(IllegalStateException())
+          }
+          .get()
       }
 
       assertThat(retryCount).isEqualTo(1)
@@ -379,33 +369,34 @@ internal class RetryTest {
       var retryCount = 0
 
       assertFailsWith<ExecutionException> {
-        retryableFuture(RetryConfig.Builder(100, FlatBackoff()).shouldRetry { e -> e is IllegalArgumentException }.build()) {
-          retryCount = retryCount.inc()
-          if (retryCount == 1) {
-            failedFuture<Void> (IllegalArgumentException())// We want to retry on this error
-          } else {
-            failedFuture(IllegalStateException())
-          }
-        }.get()
-      }.also { exception ->
-        assertThat(exception.cause).isInstanceOf(IllegalStateException::class.java)
-      }
+          retryableFuture(
+              RetryConfig.Builder(100, FlatBackoff()).shouldRetry { e -> e is IllegalArgumentException }.build()
+            ) {
+              retryCount = retryCount.inc()
+              if (retryCount == 1) {
+                failedFuture<Void>(IllegalArgumentException()) // We want to retry on this error
+              } else {
+                failedFuture(IllegalStateException())
+              }
+            }
+            .get()
+        }
+        .also { exception -> assertThat(exception.cause).isInstanceOf(IllegalStateException::class.java) }
 
       assertThat(retryCount).isEqualTo(2)
     }
   }
+
   @Test
   fun willProperlyTimeout() {
     val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
     assertFailsWith<ExecutionException> {
-      val retryConfig = RetryConfig.Builder(Int.MAX_VALUE, backoff)
-      retryableFuture(retryConfig.build()) {
-        failedFuture<Void>(IllegalStateException("this failed"))
-      }.orTimeout(50, TimeUnit.MILLISECONDS)
-        .get()
-    }.also { e ->
-      assertTrue(e.cause is TimeoutException)
-    }
+        val retryConfig = RetryConfig.Builder(Int.MAX_VALUE, backoff)
+        retryableFuture(retryConfig.build()) { failedFuture<Void>(IllegalStateException("this failed")) }
+          .orTimeout(50, TimeUnit.MILLISECONDS)
+          .get()
+      }
+      .also { e -> assertTrue(e.cause is TimeoutException) }
   }
 }

@@ -1,14 +1,14 @@
 package misk.jobqueue
 
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
+import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import misk.logging.LogCollector
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class DevelopmentJobQueueTest {
@@ -20,26 +20,21 @@ internal class DevelopmentJobQueueTest {
   @Test
   fun basic() {
     exampleJobEnqueuer.enqueueRed("stop sign")
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
-      "received RED job with message: stop sign"
-    )
+    assertThat(logCollector.takeMessages(ExampleJobHandler::class))
+      .containsExactlyInAnyOrder("received RED job with message: stop sign")
     exampleJobEnqueuer.enqueueGreen("dinosaur")
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
-      "received GREEN job with message: dinosaur"
-    )
+    assertThat(logCollector.takeMessages(ExampleJobHandler::class))
+      .containsExactlyInAnyOrder("received GREEN job with message: dinosaur")
     exampleJobEnqueuer.enqueueGreen("android")
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
-      "received GREEN job with message: android"
-    )
+    assertThat(logCollector.takeMessages(ExampleJobHandler::class))
+      .containsExactlyInAnyOrder("received GREEN job with message: android")
   }
 
   @Test
   fun batch() {
     exampleJobEnqueuer.batchEnqueueRed(listOf("stop sign", "apple"))
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
-      "received RED job with message: stop sign",
-      "received RED job with message: apple"
-    )
+    assertThat(logCollector.takeMessages(ExampleJobHandler::class))
+      .containsExactlyInAnyOrder("received RED job with message: stop sign", "received RED job with message: apple")
   }
 }
 

@@ -1,7 +1,7 @@
 package misk.hibernate
 
-import misk.vitess.Shard
 import java.io.Serializable
+import misk.vitess.Shard
 
 /** Type-safe persistent identifier, mapped to a long column. */
 data class Id<T : DbEntity<T>>(val id: Long) : Serializable, Comparable<Id<T>> {

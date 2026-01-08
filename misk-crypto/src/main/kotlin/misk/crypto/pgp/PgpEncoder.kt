@@ -1,18 +1,13 @@
 package misk.crypto.pgp
 
-/**
- * A [PgpEncrypter] is tied to a public PGP key which it uses to encrypt
- * messages.
- */
+/** A [PgpEncrypter] is tied to a public PGP key which it uses to encrypt messages. */
 interface PgpEncrypter {
   /**
-   * Encrypts the given byte array. Armored refers to whether to output in
-   * a text format or not.
+   * Encrypts the given byte array. Armored refers to whether to output in a text format or not.
    *
    * For example, with armored we get output like:
    *
-   * -----BEGIN PGP MESSAGE-----
-   * Version: BCPG C# v1.6.1.0
+   * -----BEGIN PGP MESSAGE----- Version: BCPG C# v1.6.1.0
    *
    * hQIMA0tM4ZUzpKCkAQ//ZO8hVhp6LMxshCLqcqgPkXcU1kBHPQjiUBs6QPxaQFcg
    * PIXJEdZWQ1RkMUKdCfzjvevizi/2NWAwZ797fELdbpVyH6JI2Me1Ov10f8qgYvbG
@@ -24,22 +19,15 @@ interface PgpEncrypter {
    * WzermmeEgjw1MADeh0jg/9wMM/p9UnTxihGQrPRgHYUu45jI3ys3qArsD2GvAi9y
    * QYqsuRJNB7EEu2clBRASA3zoWkpqbs3H9S2fB9Sf9ZzZTPCzowOdK1oe0vlMVt3A
    * mCILe05s2nowwBrBWu4PHUTkllsnLliHhrihu9sqXCHy6u1pdNQMvJgY6kbgQmsG
-   * bVY+brdkLdQ1BxbTT1YixzLm//zqMqGC1ZJUsr5PAIbNtyKK6u6+mCkZj0Y3fU3J
-   * Il0x5V09QcC9AHyxJ8VMOxzhQZjwVYNtD6SGeY8jOyfUScY=
-   * =DHKq
-   * -----END PGP MESSAGE-----
+   * bVY+brdkLdQ1BxbTT1YixzLm//zqMqGC1ZJUsr5PAIbNtyKK6u6+mCkZj0Y3fU3J Il0x5V09QcC9AHyxJ8VMOxzhQZjwVYNtD6SGeY8jOyfUScY=
+   * =DHKq -----END PGP MESSAGE-----
    *
-   * Without the armored encoding we would get binary data which isn't
-   * viewable in text format.
+   * Without the armored encoding we would get binary data which isn't viewable in text format.
    */
   fun encrypt(plaintext: ByteArray, armored: Boolean): ByteArray
 }
 
-/**
- * A [PgpDecrypter] is tied to a private PGP key which it uses to decrypt
- * messages.
- */
+/** A [PgpDecrypter] is tied to a private PGP key which it uses to decrypt messages. */
 interface PgpDecrypter {
   fun decrypt(ciphertext: ByteArray): ByteArray
 }
-

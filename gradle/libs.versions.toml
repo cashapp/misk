@@ -23,7 +23,7 @@ mcp = "0.8.1"
 micrometer = "1.12.13"
 netty = "4.2.6.Final"
 okHttp = "5.1.0"
-okio = "3.16.0"
+okio = "3.16.4"
 prometheus = "0.16.0"
 protobuf = "3.25.8"
 retrofit = "3.0.0"
@@ -61,6 +61,7 @@ bucket4jDynamoDbV1 = { module = "com.bucket4j:bucket4j-dynamodb-sdk-v1", version
 bucket4jMySQL = { module = "com.bucket4j:bucket4j-mysql", version.ref = "bucket4j" }
 bucket4jRedis = { module = "com.bucket4j:bucket4j-redis", version.ref = "bucket4j" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.2" }
+classGraph = { module = "io.github.classgraph:classgraph", version = "4.8.179" }
 concurrencyLimitsCore = { module = "com.netflix.concurrency-limits:concurrency-limits-core", version = "0.5.3" }
 cronUtils = { module = "com.cronutils:cron-utils", version = "9.2.1" }
 datasourceProxy = { module = "net.ttddyy:datasource-proxy", version = "1.11.0" }
@@ -194,7 +195,7 @@ mcpKotlinSdkCore = { module = "io.modelcontextprotocol:kotlin-sdk-core", version
 mcpKotlinSdkServer = { module = "io.modelcontextprotocol:kotlin-sdk-server", version.ref = "mcp" }
 micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
-mockitoCore = { module = "org.mockito:mockito-core", version = "5.20.0" }
+mockitoCore = { module = "org.mockito:mockito-core", version = "5.21.0" }
 mockitoKotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "6.0.0" }
 mockk = { module = "io.mockk:mockk", version = "1.14.5" }
 moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version = "1.15.2" }

@@ -9,15 +9,14 @@ import com.google.inject.Scopes
 import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
-import misk.inject.toKey
+import misk.logging.getLogger
 import misk.metadata.servicegraph.ServiceGraphMetadata
 import misk.metadata.servicegraph.ServiceGraphMetadataProvider
 import misk.web.metadata.MetadataModule
-import misk.logging.getLogger
 
-class ServiceManagerModule @JvmOverloads constructor(
-  private val serviceManagerConfig: ServiceManagerConfig = ServiceManagerConfig()
-) : KAbstractModule() {
+class ServiceManagerModule
+@JvmOverloads
+constructor(private val serviceManagerConfig: ServiceManagerConfig = ServiceManagerConfig()) : KAbstractModule() {
 
   companion object {
     private val log = getLogger<ServiceManagerModule>()
@@ -27,13 +26,15 @@ class ServiceManagerModule @JvmOverloads constructor(
     newMultibinder<Service>()
     newMultibinder<ServiceManager.Listener>()
 
-    multibind<ServiceManager.Listener>().toProvider {
-      object : ServiceManager.Listener() {
-        override fun failure(service: Service) {
-          log.error(service.failureCause()) { "Service $service failed" }
+    multibind<ServiceManager.Listener>()
+      .toProvider {
+        object : ServiceManager.Listener() {
+          override fun failure(service: Service) {
+            log.error(service.failureCause()) { "Service $service failed" }
+          }
         }
       }
-    }.asSingleton()
+      .asSingleton()
     newMultibinder<ServiceEntry>()
     newMultibinder<OptionalServiceEntry>()
     newMultibinder<DependencyEdge>()
@@ -72,7 +73,7 @@ class ServiceManagerModule @JvmOverloads constructor(
     dependencies: List<DependencyEdge>,
     optionalDependencies: List<OptionalDependencyEdge>,
     enhancements: List<EnhancementEdge>,
-    optionalEnhancements: List<OptionalEnhancementEdge>
+    optionalEnhancements: List<OptionalEnhancementEdge>,
   ): ServiceGraphBuilder {
     val invalidServices = mutableListOf<String>()
     val builder = ServiceGraphBuilder()
@@ -80,19 +81,19 @@ class ServiceManagerModule @JvmOverloads constructor(
     // Support the new ServiceModule API.
     // Combine regular and optional entries, filtering out nulls from disabled conditional services
     val allServiceEntries = serviceEntries + optionalServiceEntries.mapNotNull { it.entry }
-    
+
     for (entry in allServiceEntries) {
       if (!Scopes.isSingleton(injector.getBinding(entry.key))) {
         invalidServices += entry.key.typeLiteral.type.typeName
       }
       builder.addService(entry.key, entry.key.typeLiteral.toString(), injector.getProvider(entry.key))
     }
-    
+
     val allDependencies = dependencies + optionalDependencies.mapNotNull { it.edge }
     for (edge in allDependencies) {
       builder.addDependency(dependent = edge.dependent, dependsOn = edge.dependsOn)
     }
-    
+
     val allEnhancements = enhancements + optionalEnhancements.mapNotNull { it.edge }
     for (edge in allEnhancements) {
       builder.enhanceService(toBeEnhanced = edge.toBeEnhanced, enhancement = edge.enhancement)
@@ -117,7 +118,5 @@ class ServiceManagerModule @JvmOverloads constructor(
     return builder
   }
 
-  @Provides
-  @Singleton
-  internal fun provideServiceGraphMetadata(builder: ServiceGraphBuilder) = builder.toMetadata()
+  @Provides @Singleton internal fun provideServiceGraphMetadata(builder: ServiceGraphBuilder) = builder.toMetadata()
 }

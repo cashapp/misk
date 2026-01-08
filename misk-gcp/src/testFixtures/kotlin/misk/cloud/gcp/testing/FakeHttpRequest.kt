@@ -5,11 +5,9 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
-class FakeHttpRequest constructor(
-  val method: String,
-  val url: String,
-  private val router: (FakeHttpRequest) -> FakeHttpResponse
-) : LowLevelHttpRequest() {
+class FakeHttpRequest
+constructor(val method: String, val url: String, private val router: (FakeHttpRequest) -> FakeHttpResponse) :
+  LowLevelHttpRequest() {
   private val headers = LinkedHashMap<String, String>()
   private var contentBytes: ByteArray? = null
 
@@ -36,9 +34,9 @@ class FakeHttpRequest constructor(
       return contentBytes
     }
 
-  val stringContent: String? get() = content?.toString(Charsets.UTF_8)
+  val stringContent: String?
+    get() = content?.toString(Charsets.UTF_8)
 
-  inline fun <reified T : Any> jsonContent(): T? = content.let {
-    JacksonFactory().fromInputStream(ByteArrayInputStream(it), T::class.java)
-  }
+  inline fun <reified T : Any> jsonContent(): T? =
+    content.let { JacksonFactory().fromInputStream(ByteArrayInputStream(it), T::class.java) }
 }

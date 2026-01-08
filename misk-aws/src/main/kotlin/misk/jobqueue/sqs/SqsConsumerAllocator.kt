@@ -1,25 +1,21 @@
 package misk.jobqueue.sqs
 
 import com.google.common.annotations.VisibleForTesting
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.feature.FeatureFlags
 import misk.jobqueue.QueueName
 import wisp.lease.LeaseManager
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 /**
- * Uses a [LeaseManager] and [FeatureFlags] to calculate the number of sqs consumers a pods should
- * have. This computation is based off of the [AwsSqsJobReceiverPolicy] specification.
+ * Uses a [LeaseManager] and [FeatureFlags] to calculate the number of sqs consumers a pods should have. This
+ * computation is based off of the [AwsSqsJobReceiverPolicy] specification.
  */
 @Singleton
-class SqsConsumerAllocator @Inject constructor(
-  private val leaseManager: LeaseManager,
-  private val featureFlags: FeatureFlags
-) {
-  fun computeSqsConsumersForPod(
-    queueName: QueueName,
-    receiverPolicy: AwsSqsJobReceiverPolicy
-  ): Int {
+class SqsConsumerAllocator
+@Inject
+constructor(private val leaseManager: LeaseManager, private val featureFlags: FeatureFlags) {
+  fun computeSqsConsumersForPod(queueName: QueueName, receiverPolicy: AwsSqsJobReceiverPolicy): Int {
     return when (receiverPolicy) {
       AwsSqsJobReceiverPolicy.ONE_FLAG_ONLY -> oneFlagPriorityReceivers(queueName)
       AwsSqsJobReceiverPolicy.BALANCED_MAX -> balancedMaxReceivers(queueName)
@@ -34,7 +30,6 @@ class SqsConsumerAllocator @Inject constructor(
     }
     val count = (1..receiversForQueue(queueName)).count { maybeAcquireConsumerLease(queueName, it) }
     return count
-
   }
 
   private fun balancedMaxReceivers(queueName: QueueName): Int {
@@ -57,7 +52,7 @@ class SqsConsumerAllocator @Inject constructor(
   /** Returns true if the lease was acquired false otherwise. */
   private fun maybeAcquireConsumerLease(queueName: QueueName, candidate: Int): Boolean {
     val lease = leaseManager.requestLease(leaseName(queueName, candidate))
-    return lease.isHeld() || lease.acquire()
+    return lease.checkHeld() || lease.acquire()
   }
 
   private fun receiversPerPodForQueue(queueName: QueueName): Int {
@@ -65,17 +60,16 @@ class SqsConsumerAllocator @Inject constructor(
   }
 
   /** Returns a ceiling on # of consumers a pod should have. */
-  private fun podMaxJobQueueConsumers(queueName: QueueName,): Int {
+  private fun podMaxJobQueueConsumers(queueName: QueueName): Int {
     return featureFlags.getInt(SqsJobConsumer.POD_MAX_JOBQUEUE_CONSUMERS, queueName.value).coerceAtLeast(0)
   }
-  private fun receiversForQueue(queueName: QueueName,): Int {
+
+  private fun receiversForQueue(queueName: QueueName): Int {
     return featureFlags.getInt(SqsJobConsumer.CONSUMERS_PER_QUEUE, queueName.value)
   }
 
   companion object {
     @VisibleForTesting
-    fun leaseName(queueName: QueueName, candidate: Int) =
-      "sqs-job-consumer-${queueName.value}-$candidate"
+    fun leaseName(queueName: QueueName, candidate: Int) = "sqs-job-consumer-${queueName.value}-$candidate"
   }
-
 }

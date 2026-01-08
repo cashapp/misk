@@ -5,7 +5,6 @@ import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Ports
 import com.github.dockerjava.core.DefaultDockerClientConfig
-import misk.docker.withMiskDefaults
 import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.core.command.LogContainerResultCallback
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
@@ -24,19 +23,18 @@ import com.google.cloud.spanner.SpannerException
 import com.google.cloud.spanner.SpannerOptions
 import com.google.cloud.spanner.Statement
 import com.google.common.util.concurrent.AbstractIdleService
-import kotlinx.coroutines.runBlocking
-import mu.KotlinLogging
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
+import kotlinx.coroutines.runBlocking
+import misk.docker.withMiskDefaults
 import misk.testing.TestFixture
+import mu.KotlinLogging
 
 @Singleton
-class GoogleSpannerEmulator @Inject constructor(
-  val config: SpannerConfig,
-): AbstractIdleService(), TestFixture  {
+class GoogleSpannerEmulator @Inject constructor(val config: SpannerConfig) : AbstractIdleService(), TestFixture {
   private val server: SpannerServer
   private val client: Spanner
 
@@ -47,12 +45,13 @@ class GoogleSpannerEmulator @Inject constructor(
 
   init {
     server = SpannerServer(config = config)
-    client = SpannerOptions.newBuilder()
-      .setCredentials(NoCredentials.getInstance())
-      .setEmulatorHost("${config.emulator.hostname}:${config.emulator.port}")
-      .setProjectId(config.project_id)
-      .build()
-      .service
+    client =
+      SpannerOptions.newBuilder()
+        .setCredentials(NoCredentials.getInstance())
+        .setEmulatorHost("${config.emulator.hostname}:${config.emulator.port}")
+        .setProjectId(config.project_id)
+        .build()
+        .service
 
     if (shouldStartServer()) {
       // We need to do this outside of the service start up because this takes a really long time
@@ -63,9 +62,7 @@ class GoogleSpannerEmulator @Inject constructor(
 
   private fun shouldStartServer() = config.emulator.enabled
 
-  /**
-   * Starts a Docker container running the Google Spanner emulator.
-   */
+  /** Starts a Docker container running the Google Spanner emulator. */
   override fun startUp() {
     val startupFailure = this.startupFailure
     if (startupFailure != null) throw startupFailure
@@ -82,20 +79,16 @@ class GoogleSpannerEmulator @Inject constructor(
 
   companion object {
     val logger = KotlinLogging.logger {}
-    val defaultDockerClientConfig =
-      DefaultDockerClientConfig
-      .createDefaultConfigBuilder()
-      .withMiskDefaults()
-      .build()
-    val httpClient = ApacheDockerHttpClient.Builder()
-      .dockerHost(defaultDockerClientConfig.dockerHost)
-      .sslConfig(defaultDockerClientConfig.sslConfig)
-      .maxConnections(100)
-      .connectionTimeout(Duration.ofSeconds(60))
-      .responseTimeout(Duration.ofSeconds(120))
-      .build()
-    val docker: DockerClient =
-      DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
+    val defaultDockerClientConfig = DefaultDockerClientConfig.createDefaultConfigBuilder().withMiskDefaults().build()
+    val httpClient =
+      ApacheDockerHttpClient.Builder()
+        .dockerHost(defaultDockerClientConfig.dockerHost)
+        .sslConfig(defaultDockerClientConfig.sslConfig)
+        .maxConnections(100)
+        .connectionTimeout(Duration.ofSeconds(60))
+        .responseTimeout(Duration.ofSeconds(120))
+        .build()
+    val docker: DockerClient = DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
     const val IMAGE_NAME = "gcr.io/cloud-spanner-emulator/emulator"
     const val CONTAINER_NAME = "misk-spanner-testing"
     var image: String = "$IMAGE_NAME:latest"
@@ -107,10 +100,11 @@ class GoogleSpannerEmulator @Inject constructor(
       synchronized(this) {
         if (imagePulled.get()) return
 
-        val process = ProcessBuilder("bash", "-c", "docker pull $image")
-          .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-          .redirectError(ProcessBuilder.Redirect.INHERIT)
-          .start()
+        val process =
+          ProcessBuilder("bash", "-c", "docker pull $image")
+            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+            .redirectError(ProcessBuilder.Redirect.INHERIT)
+            .start()
         process.waitFor(60, TimeUnit.MINUTES)
 
         if (process.exitValue() != 0) {
@@ -126,31 +120,27 @@ class GoogleSpannerEmulator @Inject constructor(
     private val imagePulled = AtomicBoolean()
   }
 
-  /**
-   * Pulls a Docker container containing the Google Spanner emulator.
-   */
+  /** Pulls a Docker container containing the Google Spanner emulator. */
   fun pullImage(imageVersion: String? = null) {
     image = fullImageName(imageVersion)
     Companion.pullImage()
   }
 
   private fun doStart(imageVersion: String? = null) {
-    val image = if (imageVersion != null) {
-      fullImageName(imageVersion)
-    } else {
-      image
-    }
+    val image =
+      if (imageVersion != null) {
+        fullImageName(imageVersion)
+      } else {
+        image
+      }
     val spannerGrpcPort = ExposedPort.tcp(server.config.emulator.port)
     val spannerHttpPort = ExposedPort.tcp(server.config.emulator.port + 10)
     val ports = Ports()
     ports.bind(spannerGrpcPort, Ports.Binding.bindPort(9010)) // 9010 is the gRPC host inside the container
     ports.bind(spannerHttpPort, Ports.Binding.bindPort(9020)) // 9020 is the HTTP host inside the container
     val containerName = CONTAINER_NAME
-    val runningContainer = docker.listContainersCmd()
-      .withNameFilter(listOf(containerName))
-      .withLimit(1)
-      .exec()
-      .firstOrNull()
+    val runningContainer =
+      docker.listContainersCmd().withNameFilter(listOf(containerName)).withLimit(1).exec().firstOrNull()
 
     if (runningContainer != null) {
       if (runningContainer.state != "running") {
@@ -172,18 +162,20 @@ class GoogleSpannerEmulator @Inject constructor(
 
     if (containerId == null) {
       logger.info("Starting Spanner with command")
-      containerId = docker.createContainerCmd(image)
-        .withExposedPorts(spannerGrpcPort)
-        .withExposedPorts(spannerHttpPort)
-        .withHostConfig(
-          HostConfig().withPortBindings(ports)
-        )
-        .withTty(true)
-        .withName(containerName)
-        .exec().id!!
+      containerId =
+        docker
+          .createContainerCmd(image)
+          .withExposedPorts(spannerGrpcPort)
+          .withExposedPorts(spannerHttpPort)
+          .withHostConfig(HostConfig().withPortBindings(ports))
+          .withTty(true)
+          .withName(containerName)
+          .exec()
+          .id!!
       val containerId = containerId!!
       docker.startContainerCmd(containerId).exec()
-      docker.logContainerCmd(containerId)
+      docker
+        .logContainerCmd(containerId)
         .withStdErr(true)
         .withStdOut(true)
         .withFollowStream(true)
@@ -200,10 +192,7 @@ class GoogleSpannerEmulator @Inject constructor(
   private fun waitUntilHealthy() {
     try {
       runBlocking {
-        retry(
-          limitAttempts(20) +
-            binaryExponentialBackoff(1L, 5L)
-        ) {
+        retry(limitAttempts(20) + binaryExponentialBackoff(1L, 5L)) {
           // The query will fail if the server is not responding
           client.instanceAdminClient.listInstances().values
         }
@@ -220,13 +209,14 @@ class GoogleSpannerEmulator @Inject constructor(
     try {
       instance = client.instanceAdminClient.getInstance(config.instance_id)
     } catch (e: SpannerException) {
-      instance = client.instanceAdminClient.createInstance(
-        InstanceInfo.newBuilder(
-          InstanceId.of(config.project_id, config.instance_id),
-        ).setInstanceConfigId(
-          InstanceConfigId.of(config.project_id, "emulator-config")
-        ).build()
-      ).get()
+      instance =
+        client.instanceAdminClient
+          .createInstance(
+            InstanceInfo.newBuilder(InstanceId.of(config.project_id, config.instance_id))
+              .setInstanceConfigId(InstanceConfigId.of(config.project_id, "emulator-config"))
+              .build()
+          )
+          .get()
     }
 
     try {
@@ -236,9 +226,7 @@ class GoogleSpannerEmulator @Inject constructor(
     }
   }
 
-  /**
-   * Stops a Docker container running the Google Spanner emulator.
-   */
+  /** Stops a Docker container running the Google Spanner emulator. */
   override fun shutDown() {
     client.close()
     logger.info(
@@ -251,32 +239,30 @@ class GoogleSpannerEmulator @Inject constructor(
   override fun reset() = clearTables()
 
   fun clearTables() {
-    val dataClient = client.getDatabaseClient(
-      DatabaseId.of(config.project_id, config.instance_id, config.database)
-    )
-    val tableNameQuery = dataClient.singleUseReadOnlyTransaction().executeQuery(
-      Statement.of(
-        """
-        SELECT
-          table_name
-        FROM
-          information_schema.tables
-        WHERE
-          table_catalog = '' and table_schema = ''
-        """.trimIndent()
-      )
-    )
+    val dataClient = client.getDatabaseClient(DatabaseId.of(config.project_id, config.instance_id, config.database))
+    val tableNameQuery =
+      dataClient
+        .singleUseReadOnlyTransaction()
+        .executeQuery(
+          Statement.of(
+            """
+            SELECT
+              table_name
+            FROM
+              information_schema.tables
+            WHERE
+              table_catalog = '' and table_schema = ''
+            """
+              .trimIndent()
+          )
+        )
     val tableNames: MutableList<String> = mutableListOf()
     while (tableNameQuery.next()) {
       tableNames.add(tableNameQuery.getString(0))
     }
     if (tableNames.size == 0) return
     dataClient.readWriteTransaction().run {
-      it.batchUpdate(
-        tableNames.map {
-          tableName -> Statement.of("DELETE FROM ${tableName} WHERE true")
-        }
-      )
+      it.batchUpdate(tableNames.map { tableName -> Statement.of("DELETE FROM ${tableName} WHERE true") })
     }
   }
 
@@ -284,8 +270,5 @@ class GoogleSpannerEmulator @Inject constructor(
     return "$IMAGE_NAME:${imageVersion ?: "latest"}"
   }
 
-  private class SpannerServer(
-    val config: SpannerConfig
-  ) {
-  }
+  private class SpannerServer(val config: SpannerConfig) {}
 }

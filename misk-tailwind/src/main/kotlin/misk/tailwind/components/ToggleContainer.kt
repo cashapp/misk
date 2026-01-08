@@ -10,7 +10,15 @@ import kotlinx.html.span
 import misk.tailwind.icons.Heroicons
 import misk.tailwind.icons.heroicon
 
-fun TagConsumer<*>.ToggleContainer(buttonText: String, classes: String = "", borderless: Boolean = false, marginless: Boolean = false, menuBlock: TagConsumer<*>.() -> Unit = {}, isOpen: Boolean = false, hiddenBlock: TagConsumer<*>.() -> Unit) {
+fun TagConsumer<*>.ToggleContainer(
+  buttonText: String,
+  classes: String = "",
+  borderless: Boolean = false,
+  marginless: Boolean = false,
+  menuBlock: TagConsumer<*>.() -> Unit = {},
+  isOpen: Boolean = false,
+  hiddenBlock: TagConsumer<*>.() -> Unit,
+) {
   val borderStyle = if (!borderless) "border-b border-t border-gray-200" else ""
   val containerBorderStyle = if (!borderless) "border-t border-gray-200" else ""
   val hiddenStyle = if (isOpen) "" else "hidden"
@@ -35,9 +43,7 @@ fun TagConsumer<*>.ToggleContainer(buttonText: String, classes: String = "", bor
           val leftPadStyle = if (marginless) "" else "pl-6"
           div(classes = leftPadStyle) {
             div(classes = "group flex items-center font-medium text-gray-700") {
-              span("pr-4") {
-                +buttonText
-              }
+              span("pr-4") { +buttonText }
 
               // Toggle icon on click
               div("") {

@@ -62,12 +62,7 @@ internal class VschemaLinter(val vschemaAdapter: VschemaAdapter) {
             )
 
             // Check if "to" field exists and equals "keyspace_id"
-            validateLookupVindex(
-              vindexType,
-              params,
-              keyspaceName,
-              vindexName
-            )
+            validateLookupVindex(vindexType, params, keyspaceName, vindexName)
           }
         }
       }

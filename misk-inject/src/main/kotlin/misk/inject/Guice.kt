@@ -22,7 +22,7 @@ fun ScopedBindingBuilder.asSingleton() {
 /** Given a Set<T>, provide a List<T>. */
 internal class ListProvider<T>(
   private val setKey: Key<MutableSet<T>>,
-  private val setProvider: Provider<MutableSet<T>>
+  private val setProvider: Provider<MutableSet<T>>,
 ) : Provider<List<T>> {
   override fun get(): List<T> = ArrayList(setProvider.get())
 
@@ -50,18 +50,16 @@ fun KType.typeLiteral(): TypeLiteral<*> = TypeLiteral.get(javaType)
 fun <T : Any> KClass<T>.typeLiteral(): TypeLiteral<T> = TypeLiteral.get(java)
 
 @Suppress("UNCHECKED_CAST") // The type system isn't aware of constructed types.
-fun <T> listOfType(elementType: TypeLiteral<T>): TypeLiteral<List<T>> = TypeLiteral.get(
-  Types.listOf(elementType.type)
-) as TypeLiteral<List<T>>
+fun <T> listOfType(elementType: TypeLiteral<T>): TypeLiteral<List<T>> =
+  TypeLiteral.get(Types.listOf(elementType.type)) as TypeLiteral<List<T>>
 
 fun <T : Any> listOfType(elementType: KClass<T>) = listOfType(elementType.typeLiteral())
 
 inline fun <reified T : Any> listOfType() = listOfType(T::class)
 
 @Suppress("UNCHECKED_CAST") // The type system isn't aware of constructed types.
-fun <T> setOfType(elementType: TypeLiteral<T>): TypeLiteral<Set<T>> = TypeLiteral.get(
-  Types.setOf(elementType.type)
-) as TypeLiteral<Set<T>>
+fun <T> setOfType(elementType: TypeLiteral<T>): TypeLiteral<Set<T>> =
+  TypeLiteral.get(Types.setOf(elementType.type)) as TypeLiteral<Set<T>>
 
 fun <T : Any> setOfType(elementType: KClass<T>) = setOfType(elementType.typeLiteral())
 
@@ -82,10 +80,8 @@ inline fun <reified T : Any> Injector.getInstance(annotation: Annotation? = null
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T : Any> Injector.getSetOf(
-  type: KClass<T>,
-  annotation: KClass<out Annotation>? = null
-): Set<T> = getInstance(setOfType(type).toKey(annotation))
+fun <T : Any> Injector.getSetOf(type: KClass<T>, annotation: KClass<out Annotation>? = null): Set<T> =
+  getInstance(setOfType(type).toKey(annotation))
 
 /**
  * Creates a Guice [Key] for type [T] with an optional annotation qualifier.
@@ -93,8 +89,7 @@ fun <T : Any> Injector.getSetOf(
  * @param a The annotation instance to use as a qualifier, or null for an unqualified binding
  * @return A [Key] for the specified type and qualifier
  */
-inline fun <reified T : Any> keyOf(a: Annotation?): Key<T> =
-  keyOf(a?.qualifier)
+inline fun <reified T : Any> keyOf(a: Annotation?): Key<T> = keyOf(a?.qualifier)
 
 /**
  * Creates a Guice [Key] for type [T] with an optional annotation type qualifier.
@@ -102,14 +97,13 @@ inline fun <reified T : Any> keyOf(a: Annotation?): Key<T> =
  * @param a The annotation class to use as a qualifier, or null for an unqualified binding
  * @return A [Key] for the specified type and qualifier
  */
-inline fun <reified T : Any> keyOf(a: KClass<out Annotation>?): Key<T> =
-  keyOf(a?.qualifier)
+inline fun <reified T : Any> keyOf(a: KClass<out Annotation>?): Key<T> = keyOf(a?.qualifier)
 
 /**
  * Creates a Guice [Key] for type [T] with an optional [BindingQualifier].
  *
- * This is the primary function for creating qualified keys. It handles both type-based
- * and instance-based qualifiers, as well as unqualified bindings.
+ * This is the primary function for creating qualified keys. It handles both type-based and instance-based qualifiers,
+ * as well as unqualified bindings.
  *
  * @param qualifier The [BindingQualifier] to use, or null for an unqualified binding
  * @return A [Key] for the specified type and qualifier
@@ -127,8 +121,7 @@ inline fun <reified T : Any> keyOf(qualifier: BindingQualifier? = null): Key<T> 
  * @param annotation The annotation class to use as a qualifier, or null for an unqualified binding
  * @return A [Key] for this type literal and the specified qualifier
  */
-fun <T : Any> TypeLiteral<T>.toKey(annotation: KClass<out Annotation>?): Key<T> =
-  toKey(annotation?.qualifier)
+fun <T : Any> TypeLiteral<T>.toKey(annotation: KClass<out Annotation>?): Key<T> = toKey(annotation?.qualifier)
 
 /**
  * Converts a [TypeLiteral] to a Guice [Key] with an optional annotation instance qualifier.
@@ -136,14 +129,13 @@ fun <T : Any> TypeLiteral<T>.toKey(annotation: KClass<out Annotation>?): Key<T> 
  * @param annotation The annotation instance to use as a qualifier, or null for an unqualified binding
  * @return A [Key] for this type literal and the specified qualifier
  */
-fun <T : Any> TypeLiteral<T>.toKey(annotation: Annotation?): Key<T> =
-  toKey(annotation?.qualifier)
+fun <T : Any> TypeLiteral<T>.toKey(annotation: Annotation?): Key<T> = toKey(annotation?.qualifier)
 
 /**
  * Converts a [TypeLiteral] to a Guice [Key] with an optional [BindingQualifier].
  *
- * This is the primary function for converting type literals to qualified keys. It handles
- * both type-based and instance-based qualifiers, as well as unqualified bindings.
+ * This is the primary function for converting type literals to qualified keys. It handles both type-based and
+ * instance-based qualifiers, as well as unqualified bindings.
  *
  * @param qualifier The [BindingQualifier] to use, or null for an unqualified binding
  * @return A [Key] for this type literal and the specified qualifier
@@ -159,8 +151,7 @@ fun <T : Any> TypeLiteral<T>.toKey(qualifier: BindingQualifier? = null): Key<T> 
 fun <T : Any> KClass<T>.toKey(qualifier: KClass<out Annotation>? = null): Key<T> =
   typeLiteral().toKey(qualifier?.qualifier)
 
-fun <T : Any> KClass<T>.toKey(qualifier: Annotation?): Key<T> =
-  typeLiteral().toKey(qualifier?.qualifier)
+fun <T : Any> KClass<T>.toKey(qualifier: Annotation?): Key<T> = typeLiteral().toKey(qualifier?.qualifier)
 
 fun uninject(target: Any) {
   try {

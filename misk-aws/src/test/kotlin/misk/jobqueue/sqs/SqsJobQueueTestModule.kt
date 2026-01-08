@@ -12,10 +12,8 @@ import misk.inject.KAbstractModule
 import misk.tasks.RepeatedTaskQueueConfig
 import misk.testing.MockTracingBackendModule
 
-class SqsJobQueueTestModule(
-  private val credentials: AWSCredentialsProvider,
-  private val client: AmazonSQS
-) : KAbstractModule() {
+class SqsJobQueueTestModule(private val credentials: AWSCredentialsProvider, private val client: AmazonSQS) :
+  KAbstractModule() {
   override fun configure() {
     install(MiskTestingServiceModule())
     install(MockTracingBackendModule())
@@ -30,22 +28,20 @@ class SqsJobQueueTestModule(
     )
     install(
       Modules.override(
-        AwsSqsJobQueueModule(
-          AwsSqsJobQueueConfig(
-            task_queue = RepeatedTaskQueueConfig(default_jitter_ms = 0),
-            queue_attribute_importer_frequency_ms = 0
+          AwsSqsJobQueueModule(
+            AwsSqsJobQueueConfig(
+              task_queue = RepeatedTaskQueueConfig(default_jitter_ms = 0),
+              queue_attribute_importer_frequency_ms = 0,
+            )
           )
         )
-      )
         .with(SqsTestModule(credentials, client))
     )
   }
 }
 
-class SqsTestModule(
-  private val credentials: AWSCredentialsProvider,
-  private val client: AmazonSQS
-) : KAbstractModule() {
+class SqsTestModule(private val credentials: AWSCredentialsProvider, private val client: AmazonSQS) :
+  KAbstractModule() {
   override fun configure() {
     bind<AWSCredentialsProvider>().toInstance(credentials)
     bind<AmazonSQS>().toInstance(client)

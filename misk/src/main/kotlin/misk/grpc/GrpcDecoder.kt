@@ -1,9 +1,9 @@
 package misk.grpc
 
+import java.net.ProtocolException
 import okio.BufferedSource
 import okio.GzipSource
 import okio.Source
-import java.net.ProtocolException
 
 /**
  * This is derived from Wire's GrpcDecoder.kt.

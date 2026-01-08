@@ -1,9 +1,9 @@
 package misk.vitess.testing.internal
 
-import misk.vitess.testing.VitessTestDbSchemaParseException
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
+import misk.vitess.testing.VitessTestDbSchemaParseException
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -269,10 +269,10 @@ class VitessSchemaParserTest {
     val sqlFile = File(keyspaceDir, "v0001__add_tables.sql")
     sqlFile.writeText(
       """
-        CREATE TABLE `test_table1` (id int primary key);
-        CREATE TABLE `test_table2` (id int primary key);
-        DROP TABLE `test_table1`;
-        """
+      CREATE TABLE `test_table1` (id int primary key);
+      CREATE TABLE `test_table2` (id int primary key);
+      DROP TABLE `test_table1`;
+      """
         .trimIndent()
     )
     val vschemaFile = File(keyspaceDir, "vschema.json")
@@ -296,7 +296,7 @@ class VitessSchemaParserTest {
       CREATE TABLE `test_table` (id int primary key);
       CREATE TABLE `test_table2` (id int primary key);
       DROP TABLE IF EXISTS `test_table`;
-    """
+      """
         .trimIndent()
     )
     val vschemaFile = File(keyspaceDir, "vschema.json")

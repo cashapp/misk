@@ -1,6 +1,7 @@
 package misk.redis
 
-import misk.redis.RealRedis.Companion
+import java.time.Duration
+import java.util.function.Supplier
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import redis.clients.jedis.AbstractPipeline
@@ -12,8 +13,6 @@ import redis.clients.jedis.params.SetParams
 import redis.clients.jedis.params.ZRangeParams
 import redis.clients.jedis.resps.Tuple
 import redis.clients.jedis.util.JedisClusterCRC16
-import java.time.Duration
-import java.util.function.Supplier
 
 internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : DeferredRedis {
   private fun checkSlot(op: String, keys: List<ByteArray>): Throwable? {
@@ -31,21 +30,17 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
 
   override fun del(vararg keys: String): Supplier<Int> {
     val keysBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
-    val responses = when (pipeline) {
-      is Pipeline -> listOf(pipeline.del(*keysBytes))
-      is ClusterPipeline -> {
-        keysBytes.groupBy { JedisClusterCRC16.getSlot(it) }
-          .map { (_, slottedKeys) ->
-            pipeline.del(*slottedKeys.toTypedArray())
-          }
+    val responses =
+      when (pipeline) {
+        is Pipeline -> listOf(pipeline.del(*keysBytes))
+        is ClusterPipeline -> {
+          keysBytes
+            .groupBy { JedisClusterCRC16.getSlot(it) }
+            .map { (_, slottedKeys) -> pipeline.del(*slottedKeys.toTypedArray()) }
+        }
+        else -> error("Unknown pipeline type: $pipeline")
       }
-      else -> error("Unknown pipeline type: $pipeline")
-    }
-    return Supplier {
-      responses.fold(0) { acc, response ->
-        acc + response.get().toInt()
-      }
-    }
+    return Supplier { responses.fold(0) { acc, response -> acc + response.get().toInt() } }
   }
 
   override fun mget(vararg keys: String): Supplier<List<ByteString?>> {
@@ -57,21 +52,21 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
         Supplier { response.get().map { it?.toByteString() } }
       }
       is ClusterPipeline -> {
-        val responses = keysBytes.groupBy { JedisClusterCRC16.getSlot(it) }
-          .mapValues { (_, slottedKeys) ->
-            pipeline.mget(*slottedKeys.toTypedArray())
-          }
+        val responses =
+          keysBytes
+            .groupBy { JedisClusterCRC16.getSlot(it) }
+            .mapValues { (_, slottedKeys) -> pipeline.mget(*slottedKeys.toTypedArray()) }
         Supplier {
           // Stitch together the responses in the order of the original keys, as we may have run
           // multiple mgets out of order.
           val keyToValueMap = mutableMapOf<String, ByteString?>()
-          keys.groupBy { JedisClusterCRC16.getSlot(it.toByteArray(charset)) }
+          keys
+            .groupBy { JedisClusterCRC16.getSlot(it.toByteArray(charset)) }
             .flatMap { (slot, slotKeys) ->
               val result = responses[slot]?.get() ?: listOf(null)
               slotKeys.zip(result)
-            }.forEach { (key, value) ->
-              keyToValueMap[key] = value?.toByteString()
             }
+            .forEach { (key, value) -> keyToValueMap[key] = value?.toByteString() }
           keys.map { keyToValueMap[it] }
         }
       }
@@ -86,16 +81,17 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
 
     val keyValuePairs = keyValues.map { it.toByteArray() }
 
-    val responses = when (pipeline) {
-      is Pipeline -> listOf(pipeline.mset(*keyValuePairs.toTypedArray()))
-      is ClusterPipeline -> {
-        keyValuePairs.chunked(2).groupBy { JedisClusterCRC16.getSlot(it.first()) }
-          .map { (_, slottedKeyValues) ->
-            pipeline.mset(*slottedKeyValues.flatten().toTypedArray())
-          }
+    val responses =
+      when (pipeline) {
+        is Pipeline -> listOf(pipeline.mset(*keyValuePairs.toTypedArray()))
+        is ClusterPipeline -> {
+          keyValuePairs
+            .chunked(2)
+            .groupBy { JedisClusterCRC16.getSlot(it.first()) }
+            .map { (_, slottedKeyValues) -> pipeline.mset(*slottedKeyValues.flatten().toTypedArray()) }
+        }
+        else -> error("Unknown pipeline type: $pipeline")
       }
-      else -> error("Unknown pipeline type: $pipeline")
-    }
     return Supplier { responses.map { it.get() } }
   }
 
@@ -128,11 +124,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
   override fun hgetAll(key: String): Supplier<Map<String, ByteString>?> {
     val keyBytes = key.toByteArray(charset)
     val response = pipeline.hgetAll(keyBytes)
-    return Supplier {
-      response.get()
-        ?.mapKeys { it.key.toString(charset) }
-        ?.mapValues { it.value.toByteString() }
-    }
+    return Supplier { response.get()?.mapKeys { it.key.toString(charset) }?.mapValues { it.value.toByteString() } }
   }
 
   override fun hlen(key: String): Supplier<Long> {
@@ -165,9 +157,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     checkHrandFieldCount(count)
     val keyBytes = key.toByteArray(charset)
     val response = pipeline.hrandfieldWithValues(keyBytes, count)
-    return Supplier {
-      response.get().associate { it.key.toString(charset) to it.value.toByteString() }
-    }
+    return Supplier { response.get().associate { it.key.toString(charset) to it.value.toByteString() } }
   }
 
   override fun hrandField(key: String, count: Long): Supplier<List<String>> {
@@ -180,11 +170,12 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
   override fun set(key: String, value: ByteString, expiryDuration: Duration?): Supplier<Unit> {
     val keyBytes = key.toByteArray(charset)
     val valueBytes = value.toByteArray()
-    val params = SetParams().apply {
-      if (expiryDuration != null) {
-        px(expiryDuration.toMillis())
+    val params =
+      SetParams().apply {
+        if (expiryDuration != null) {
+          px(expiryDuration.toMillis())
+        }
       }
-    }
     val response = pipeline.set(keyBytes, valueBytes, params)
     return Supplier { response.get() }
   }
@@ -192,9 +183,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
   override fun setnx(key: String, value: ByteString, expiryDuration: Duration?): Supplier<Boolean> {
     val keyBytes = key.toByteArray(charset)
     val valueBytes = value.toByteArray()
-    val params = SetParams().nx().apply {
-      if (expiryDuration != null) px(expiryDuration.toMillis())
-    }
+    val params = SetParams().nx().apply { if (expiryDuration != null) px(expiryDuration.toMillis()) }
     val response = pipeline.set(keyBytes, valueBytes, params)
     return Supplier { response.get() == "OK" }
   }
@@ -209,8 +198,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
 
   override fun hset(key: String, hash: Map<String, ByteString>): Supplier<Long> {
     val keyBytes = key.toByteArray(charset)
-    val hashBytes = hash.mapKeys { it.key.toByteArray(charset) }
-      .mapValues { it.value.toByteArray() }
+    val hashBytes = hash.mapKeys { it.key.toByteArray(charset) }.mapValues { it.value.toByteArray() }
     val response = pipeline.hset(keyBytes, hashBytes)
     return Supplier { response.get() }
   }
@@ -232,7 +220,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     destinationKey: String,
     from: ListDirection,
     to: ListDirection,
-    timeoutSeconds: Double
+    timeoutSeconds: Double,
   ): Supplier<ByteString?> {
     val sourceKeyBytes = sourceKey.toByteArray(charset)
     val destKeyBytes = destinationKey.toByteArray(charset)
@@ -244,11 +232,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     return Supplier { response.get()?.toByteString() }
   }
 
-  override fun brpoplpush(
-    sourceKey: String,
-    destinationKey: String,
-    timeoutSeconds: Int
-  ): Supplier<ByteString?> {
+  override fun brpoplpush(sourceKey: String, destinationKey: String, timeoutSeconds: Int): Supplier<ByteString?> {
     val sourceKeyBytes = sourceKey.toByteArray(charset)
     val destinationKeyBytes = destinationKey.toByteArray(charset)
     checkSlot("BRPOPLPUSH", listOf(sourceKeyBytes, destinationKeyBytes))?.let {
@@ -263,7 +247,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     sourceKey: String,
     destinationKey: String,
     from: ListDirection,
-    to: ListDirection
+    to: ListDirection,
   ): Supplier<ByteString?> {
     val sourceKeyBytes = sourceKey.toByteArray(charset)
     val destKeyBytes = destinationKey.toByteArray(charset)
@@ -304,11 +288,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
   override fun blpop(keys: Array<String>, timeoutSeconds: Double): Supplier<Pair<String, ByteString>?> {
     val keysAsBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
     val response = pipeline.blpop(timeoutSeconds, *keysAsBytes)
-    return Supplier {
-      response.get()?.let {
-        Pair(it.key.toString(charset), it.value.toByteString())
-      }
-    }
+    return Supplier { response.get()?.let { Pair(it.key.toString(charset), it.value.toByteString()) } }
   }
 
   override fun rpop(key: String, count: Int): Supplier<List<ByteString?>> {
@@ -401,12 +381,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     return Supplier { response.get() == 1L }
   }
 
-  override fun zadd(
-    key: String,
-    score: Double,
-    member: String,
-    vararg options: Redis.ZAddOptions,
-  ): Supplier<Long> {
+  override fun zadd(key: String, score: Double, member: String, vararg options: Redis.ZAddOptions): Supplier<Long> {
     Redis.ZAddOptions.verify(options)
     val keyBytes = key.toByteArray(charset)
     val memberBytes = member.toByteArray(charset)
@@ -415,11 +390,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     return Supplier { response.get() }
   }
 
-  override fun zadd(
-    key: String,
-    scoreMembers: Map<String, Double>,
-    vararg options: Redis.ZAddOptions,
-  ): Supplier<Long> {
+  override fun zadd(key: String, scoreMembers: Map<String, Double>, vararg options: Redis.ZAddOptions): Supplier<Long> {
     Redis.ZAddOptions.verify(options)
     val keyBytes = key.toByteArray(charset)
     val scoreMembersBytes = scoreMembers.mapKeys { it.key.toByteArray(charset) }
@@ -441,12 +412,10 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     start: Redis.ZRangeMarker,
     stop: Redis.ZRangeMarker,
     reverse: Boolean,
-    limit: Redis.ZRangeLimit?
+    limit: Redis.ZRangeLimit?,
   ): Supplier<List<ByteString?>> {
     val response = zrangeBase(key, type, start, stop, reverse, false, limit).noScore
-    return Supplier {
-      response?.get()?.map { bytes -> bytes?.toByteString() } ?: listOf()
-    }
+    return Supplier { response?.get()?.map { bytes -> bytes?.toByteString() } ?: listOf() }
   }
 
   override fun zrangeWithScores(
@@ -455,7 +424,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     start: Redis.ZRangeMarker,
     stop: Redis.ZRangeMarker,
     reverse: Boolean,
-    limit: Redis.ZRangeLimit?
+    limit: Redis.ZRangeLimit?,
   ): Supplier<List<Pair<ByteString?, Double>>> {
     val response = zrangeBase(key, type, start, stop, reverse, true, limit).withScore
     return Supplier {
@@ -466,7 +435,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
   override fun zremRangeByRank(
     key: String,
     start: Redis.ZRangeRankMarker,
-    stop: Redis.ZRangeRankMarker
+    stop: Redis.ZRangeRankMarker,
   ): Supplier<Long> {
     val response = pipeline.zremrangeByRank(key, start.longValue, stop.longValue)
     return Supplier { response.get() }
@@ -493,7 +462,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
           start = start as Redis.ZRangeIndexMarker,
           stop = stop as Redis.ZRangeIndexMarker,
           reverse = reverse,
-          withScore = withScore
+          withScore = withScore,
         )
 
       Redis.ZRangeType.SCORE ->
@@ -503,7 +472,7 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
           stop = stop as Redis.ZRangeScoreMarker,
           reverse = reverse,
           withScore = withScore,
-          limit = limit
+          limit = limit,
         )
     }
   }
@@ -513,12 +482,9 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     start: Redis.ZRangeIndexMarker,
     stop: Redis.ZRangeIndexMarker,
     reverse: Boolean,
-    withScore: Boolean
+    withScore: Boolean,
   ): ZRangeResponse {
-    val params = ZRangeParams(
-      start.intValue,
-      stop.intValue
-    )
+    val params = ZRangeParams(start.intValue, stop.intValue)
     if (reverse) params.rev()
 
     return if (withScore) {
@@ -551,27 +517,17 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     } else if (!reverse && !withScore) {
       ZRangeResponse.noScore(pipeline.zrangeByScore(keyBytes, min, max, limit.offset, limit.count))
     } else if (!reverse) {
-      ZRangeResponse.withScore(
-        pipeline.zrangeByScoreWithScores(keyBytes, min, max, limit.offset, limit.count)
-      )
+      ZRangeResponse.withScore(pipeline.zrangeByScoreWithScores(keyBytes, min, max, limit.offset, limit.count))
     } else if (!withScore) {
-      ZRangeResponse.noScore(
-        pipeline.zrevrangeByScore(keyBytes, max, min, limit.offset, limit.count)
-      )
+      ZRangeResponse.noScore(pipeline.zrevrangeByScore(keyBytes, max, min, limit.offset, limit.count))
     } else {
-      ZRangeResponse.withScore(
-        pipeline.zrevrangeByScoreWithScores(keyBytes, max, min, limit.offset, limit.count)
-      )
+      ZRangeResponse.withScore(pipeline.zrevrangeByScoreWithScores(keyBytes, max, min, limit.offset, limit.count))
     }
   }
 
-  /**
-   * A wrapper class for handling response from zrange* methods.
-   */
-  private class ZRangeResponse private constructor(
-    val noScore: Response<List<ByteArray?>>?,
-    val withScore: Response<List<Tuple>>?
-  ) {
+  /** A wrapper class for handling response from zrange* methods. */
+  private class ZRangeResponse
+  private constructor(val noScore: Response<List<ByteArray?>>?, val withScore: Response<List<Tuple>>?) {
     companion object {
       fun noScore(ans: Response<List<ByteArray?>>?): ZRangeResponse = ZRangeResponse(ans, null)
 

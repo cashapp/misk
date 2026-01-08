@@ -9,6 +9,7 @@ import com.squareup.wire.GrpcMethod
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
 import helpers.protos.Dinosaur
+import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import misk.MiskTestingServiceModule
@@ -38,13 +39,11 @@ import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class PropagatingScopeActionInInterceptorsTest {
 
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var scope: ActionScope
@@ -53,53 +52,48 @@ class PropagatingScopeActionInInterceptorsTest {
   private lateinit var suspendClient: TypedHttpClientTest.ReturnADinosaurNonBlocking
   private lateinit var dinoService: DinoService
 
-  private val seedData: Map<Key<*>, Any> = mapOf(
-    keyOf<String>(Names.named("language-preference")) to "es-US"
-  )
+  private val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("language-preference")) to "es-US")
 
   @BeforeEach
   fun createClient() {
     val clientInjector = Guice.createInjector(ClientModule(jetty))
     client = clientInjector.getInstance()
-    suspendClient = clientInjector.getInstance(
-      Names.named("nonblockingDinosaur")
-    )
+    suspendClient = clientInjector.getInstance(Names.named("nonblockingDinosaur"))
     dinoService = clientInjector.getInstance()
   }
 
   @Test
   fun `propagate action scoped using typed http client`() {
-    val response = scope.enter(seedData).use {
-      client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
-    }
+    val response = scope.enter(seedData).use { client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute() }
     assertThat(response.body()!!.name).isEqualTo("es-US")
   }
 
   @Test
   fun `propagate action scoped using typed http client with suspended calls`() {
-    val response = scope.enter(seedData).use {
-      runBlocking(Dispatchers.IO + it.asContextElement()) {
-        client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
+    val response =
+      scope.enter(seedData).use {
+        runBlocking(Dispatchers.IO + it.asContextElement()) {
+          client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
+        }
       }
-    }
     assertThat(response.body()!!.name).isEqualTo("es-US")
   }
 
   @Test
   fun `propagate action scoped using gRPC client`() {
-    val response = scope.enter(seedData).use {
-      dinoService.GetDinosour().executeBlocking(Dinosaur.Builder().name("trex").build())
-    }
+    val response =
+      scope.enter(seedData).use { dinoService.GetDinosour().executeBlocking(Dinosaur.Builder().name("trex").build()) }
     assertThat(response.name).isEqualTo("es-US")
   }
 
   @Test
   fun `propagate action scoped using gRPC client with suspended calls`() {
-    val response = scope.enter(seedData).use {
-      runBlocking(Dispatchers.IO +  it.asContextElement()) {
-        dinoService.GetDinosour().execute(Dinosaur.Builder().name("trex").build())
+    val response =
+      scope.enter(seedData).use {
+        runBlocking(Dispatchers.IO + it.asContextElement()) {
+          dinoService.GetDinosour().execute(Dinosaur.Builder().name("trex").build())
+        }
       }
-    }
     assertThat(response.name).isEqualTo("es-US")
   }
 
@@ -107,38 +101,38 @@ class PropagatingScopeActionInInterceptorsTest {
     override fun configure() {
       install(MiskTestingServiceModule())
       install(DinoClientModule(jetty))
-      install(TypedHttpClientModule.create<TypedHttpClientTest.ReturnADinosaurNonBlocking>(
-        "dinosaur",
-        Names.named("nonblockingDinosaur")
-      ))
+      install(
+        TypedHttpClientModule.create<TypedHttpClientTest.ReturnADinosaurNonBlocking>(
+          "dinosaur",
+          Names.named("nonblockingDinosaur"),
+        )
+      )
       multibind<CallFactoryWrapper>().to<LanguageCallFactoryWrapper>()
       multibind<ClientApplicationInterceptorFactory>().to<ClientScopeActionHeaderInterceptor.Factory>()
 
       install(GrpcClientModule.create<DinoService, GrpcDinoService>("dinosaur"))
 
-      install(object : ActionScopedProviderModule() {
-        override fun configureProviders() {
-          bindSeedData(String::class, Names.named("language-preference"))
+      install(
+        object : ActionScopedProviderModule() {
+          override fun configureProviders() {
+            bindSeedData(String::class, Names.named("language-preference"))
+          }
         }
-      })
+      )
     }
   }
 
-  class LanguageCallFactoryWrapper @Inject constructor(
-    val actionScope: ActionScope
-  ) : CallFactoryWrapper {
+  class LanguageCallFactoryWrapper @Inject constructor(val actionScope: ActionScope) : CallFactoryWrapper {
     override fun wrap(action: ClientAction, delegate: Call.Factory): Call.Factory? {
-       return Call.Factory { request ->
-          if (!actionScope.inScope()) {
-            return@Factory delegate.newCall(request)
-          }
+      return Call.Factory { request ->
+        if (!actionScope.inScope()) {
+          return@Factory delegate.newCall(request)
+        }
 
-         val language = actionScope.get(Key.get(String::class.java, Names.named("language-preference")))
-         val newRequest = request.newBuilder()
-           .tag(LanguageContainer::class.java, LanguageContainer(language))
-           .build()
-         delegate.newCall(newRequest)
-       }
+        val language = actionScope.get(Key.get(String::class.java, Names.named("language-preference")))
+        val newRequest = request.newBuilder().tag(LanguageContainer::class.java, LanguageContainer(language)).build()
+        delegate.newCall(newRequest)
+      }
     }
   }
 
@@ -148,25 +142,22 @@ class PropagatingScopeActionInInterceptorsTest {
     override fun intercept(chain: Interceptor.Chain): Response {
       val language = chain.request().tag(LanguageContainer::class.java)
       return chain.proceed(
-        chain.request().newBuilder()
-          .addHeader("Content-Language", language?.language ?: "en-US")
-          .build()
+        chain.request().newBuilder().addHeader("Content-Language", language?.language ?: "en-US").build()
       )
     }
 
-    class Factory @Inject constructor(): ClientApplicationInterceptorFactory {
+    class Factory @Inject constructor() : ClientApplicationInterceptorFactory {
       override fun create(action: ClientAction) = ClientScopeActionHeaderInterceptor()
     }
   }
 
-  class ReturnADinosaur @Inject constructor(
-    val actionScope: ActionScoped<HttpCall>,
-  ) : WebAction, ReturnADinosaurBlockingServer {
+  class ReturnADinosaur @Inject constructor(val actionScope: ActionScoped<HttpCall>) :
+    WebAction, ReturnADinosaurBlockingServer {
     @Post("/cooldinos")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun getDinosaur(@RequestBody requestBody: Dinosaur, @RequestHeaders headers: Headers):
-      Dinosaur = requestBody.newBuilder().name(headers["Content-Language"]).build()
+    fun getDinosaur(@RequestBody requestBody: Dinosaur, @RequestHeaders headers: Headers): Dinosaur =
+      requestBody.newBuilder().name(headers["Content-Language"]).build()
 
     override fun GetDinosour(request: Dinosaur): Dinosaur {
       return request.newBuilder().name(actionScope.get().requestHeaders["Content-Language"]).build()
@@ -177,21 +168,20 @@ class PropagatingScopeActionInInterceptorsTest {
     @WireRpc(
       path = "/DinoService/GetDinosaur",
       requestAdapter = "helpers.protos.Dinosaur#ADAPTER",
-      responseAdapter = "helpers.protos.Dinosaur#ADAPTER"
+      responseAdapter = "helpers.protos.Dinosaur#ADAPTER",
     )
     fun GetDinosour(request: Dinosaur): Dinosaur
   }
 
-  class GrpcDinoService(
-    private val client: GrpcClient
-  ) : DinoService {
-    override fun GetDinosour(): GrpcCall<Dinosaur, Dinosaur> = client.newCall(
-      GrpcMethod(
-        path = "/DinoService/GetDinosaur",
-        requestAdapter = Dinosaur.ADAPTER,
-        responseAdapter = Dinosaur.ADAPTER
+  class GrpcDinoService(private val client: GrpcClient) : DinoService {
+    override fun GetDinosour(): GrpcCall<Dinosaur, Dinosaur> =
+      client.newCall(
+        GrpcMethod(
+          path = "/DinoService/GetDinosaur",
+          requestAdapter = Dinosaur.ADAPTER,
+          responseAdapter = Dinosaur.ADAPTER,
+        )
       )
-    )
   }
 
   interface DinoService : Service {

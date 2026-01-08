@@ -1,5 +1,9 @@
 package misk.events
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.time.Instant
+import kotlin.test.assertFailsWith
 import misk.events.FakeEventProcessor.PublishedEvent
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -7,15 +11,10 @@ import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.Instant
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-import kotlin.test.assertFailsWith
 
 @MiskTest
 class FakeEventProcessorTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject lateinit var producer: Producer
   @Inject lateinit var fakeEventProcessor: FakeEventProcessor
@@ -42,9 +41,7 @@ class FakeEventProcessorTest {
     val event = newEvent("a")
 
     producer.publish(RETRY_ONCE_TOPIC, event)
-    val e = assertFailsWith<IllegalStateException> {
-      fakeEventProcessor.deliverAll()
-    }
+    val e = assertFailsWith<IllegalStateException> { fakeEventProcessor.deliverAll() }
     assertThat(e).hasMessage("unexpected retry! use allowRetries=true if that is expected")
   }
 
@@ -121,25 +118,17 @@ class FakeEventProcessorTest {
 
     fakeEventProcessor.deliverAll(batchSize = 3, allowRetries = true)
     assertThat(fakeEventProcessor.queue).hasSize(0)
-    assertThat(simpleConsumer.receivedEvents)
-      .containsExactly(newEvent("a"), newEvent("c"), newEvent("e"))
+    assertThat(simpleConsumer.receivedEvents).containsExactly(newEvent("a"), newEvent("c"), newEvent("e"))
     assertThat(simpleConsumer.batchCount).isEqualTo(1)
-    assertThat(retryOnceConsumer.receivedEvents)
-      .containsExactly(newEvent("b"), newEvent("d"))
+    assertThat(retryOnceConsumer.receivedEvents).containsExactly(newEvent("b"), newEvent("d"))
   }
 
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(FakeEventProcessorModule)
-      newMapBinder<Topic, Consumer.Handler>()
-        .addBinding(SIMPLE_TOPIC)
-        .to<SimpleConsumer>()
-      newMapBinder<Topic, Consumer.Handler>()
-        .addBinding(RETRY_ONCE_TOPIC)
-        .to<RetryOnceConsumer>()
-      newMapBinder<Topic, Consumer.Handler>()
-        .addBinding(RETRY_ALWAYS_TOPIC)
-        .to<RetryAlwaysConsumer>()
+      newMapBinder<Topic, Consumer.Handler>().addBinding(SIMPLE_TOPIC).to<SimpleConsumer>()
+      newMapBinder<Topic, Consumer.Handler>().addBinding(RETRY_ONCE_TOPIC).to<RetryOnceConsumer>()
+      newMapBinder<Topic, Consumer.Handler>().addBinding(RETRY_ALWAYS_TOPIC).to<RetryAlwaysConsumer>()
     }
   }
 
@@ -174,12 +163,7 @@ class FakeEventProcessorTest {
   }
 
   private fun newEvent(body: String): Event {
-    return Event(
-      type = "TEST",
-      body = body.encodeUtf8(),
-      occurredAt = Instant.EPOCH,
-      id = "1".encodeUtf8()
-    )
+    return Event(type = "TEST", body = body.encodeUtf8(), occurredAt = Instant.EPOCH, id = "1".encodeUtf8())
   }
 
   companion object {

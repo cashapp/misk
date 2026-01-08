@@ -11,21 +11,6 @@ import io.opentracing.tag.StringTag
 import io.opentracing.tag.Tags
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import misk.annotation.ExperimentalMiskApi
-import misk.feature.Feature
-import misk.feature.FeatureFlags
-import misk.jobqueue.BatchJobHandler
-import misk.jobqueue.JobConsumer
-import misk.jobqueue.JobHandler
-import misk.jobqueue.QueueName
-import misk.tasks.RepeatedTaskQueue
-import misk.tasks.Status
-import misk.time.timed
-import org.slf4j.MDC
-import misk.logging.SmartTagsThreadLocalHandler
-import misk.logging.error
-import misk.logging.getLogger
-import misk.tracing.traceWithNewRootSpan
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -39,9 +24,26 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
+import misk.annotation.ExperimentalMiskApi
+import misk.feature.Feature
+import misk.feature.FeatureFlags
+import misk.jobqueue.BatchJobHandler
+import misk.jobqueue.JobConsumer
+import misk.jobqueue.JobHandler
+import misk.jobqueue.QueueName
+import misk.logging.SmartTagsThreadLocalHandler
+import misk.logging.error
+import misk.logging.getLogger
+import misk.tasks.RepeatedTaskQueue
+import misk.tasks.Status
+import misk.time.timed
+import misk.tracing.traceWithNewRootSpan
+import org.slf4j.MDC
 
 @Singleton
-internal class SqsJobConsumer @Inject internal constructor(
+internal class SqsJobConsumer
+@Inject
+internal constructor(
   @ForSqsHandling private val handlingThreads: ExecutorService,
   @ForSqsHandling private val taskQueue: RepeatedTaskQueue,
   @ForSqsReceiving private val receivingThreads: ExecutorService,
@@ -53,7 +55,7 @@ internal class SqsJobConsumer @Inject internal constructor(
   private val serviceManagerProvider: Provider<ServiceManager>,
   private val tracer: Tracer,
   private val clock: Clock,
-  awsSqsJobQueueConfig: AwsSqsJobQueueConfig
+  awsSqsJobQueueConfig: AwsSqsJobQueueConfig,
 ) : JobConsumer {
   private val receiverPolicy = awsSqsJobQueueConfig.aws_sqs_job_receiver_policy
 
@@ -68,13 +70,9 @@ internal class SqsJobConsumer @Inject internal constructor(
   }
 
   private fun subscribe(queueName: QueueName, receiver: QueueReceiver) {
-    check(subscriptions.putIfAbsent(queueName, receiver) == null) {
-      "already subscribed to queue ${queueName.value}"
-    }
+    check(subscriptions.putIfAbsent(queueName, receiver) == null) { "already subscribed to queue ${queueName.value}" }
 
-    log.info {
-      "subscribing to queue ${queueName.value}"
-    }
+    log.info { "subscribing to queue ${queueName.value}" }
     taskQueue.scheduleWithBackoff(Duration.ZERO) {
 
       // Don't call handlers until all services are ready, otherwise handlers will crash because
@@ -88,9 +86,7 @@ internal class SqsJobConsumer @Inject internal constructor(
   }
 
   override fun unsubscribe(queueName: QueueName) {
-    log.info {
-      "unsubscribing from queue ${queueName.value}"
-    }
+    log.info { "unsubscribing from queue ${queueName.value}" }
     subscriptions[queueName]?.stop()
   }
 
@@ -103,9 +99,7 @@ internal class SqsJobConsumer @Inject internal constructor(
   }
 
   fun shutDown() {
-    log.info {
-      "shutting down queue consumer threads"
-    }
+    log.info { "shutting down queue consumer threads" }
     receivingThreads.shutdown()
     // Giving it some time to the receivers & handlers to finish.
     receivingThreads.awaitTermination(10, TimeUnit.SECONDS)
@@ -125,40 +119,40 @@ internal class SqsJobConsumer @Inject internal constructor(
 
     fun run(): Status {
       if (!shouldKeepRunning.get()) {
-        log.info {
-          "shutting down receiver for ${queue.queueName}"
-        }
+        log.info { "shutting down receiver for ${queue.queueName}" }
         return Status.NO_RESCHEDULE
       }
       val size = sqsConsumerAllocator.computeSqsConsumersForPod(queue.name, receiverPolicy)
-      val futures = List(size) {
-        CompletableFuture.supplyAsync({ receive() }, receivingThreads)
-      }
+      val futures = List(size) { CompletableFuture.supplyAsync({ receive() }, receivingThreads) }
 
       // Either all messages are consumed and processed successfully, or we signal failure.
       // If none of the received consume any messages, return NO_WORK for backoff.
-      return CompletableFuture.allOf(*futures.toTypedArray()).thenApply {
-        futures.flatMap { it.join() }
-          .onEach { check(it in listOf(Status.FAILED, Status.OK, Status.NO_WORK)) }
-          .fold(Status.NO_WORK) { finalStatus, status ->
-            when {
-              status == Status.FAILED -> status
-              status == Status.OK && finalStatus != Status.FAILED -> status
-              status == Status.NO_WORK && finalStatus == Status.NO_WORK -> status
-              else -> finalStatus
+      return CompletableFuture.allOf(*futures.toTypedArray())
+        .thenApply {
+          futures
+            .flatMap { it.join() }
+            .onEach { check(it in listOf(Status.FAILED, Status.OK, Status.NO_WORK)) }
+            .fold(Status.NO_WORK) { finalStatus, status ->
+              when {
+                status == Status.FAILED -> status
+                status == Status.OK && finalStatus != Status.FAILED -> status
+                status == Status.NO_WORK && finalStatus == Status.NO_WORK -> status
+                else -> finalStatus
+              }
             }
-          }
-      }.join()
+        }
+        .join()
     }
 
     /**
-     * The maximum number of messages we will fetch at a time. We might issue multiple
-     * requests to SQS to fetch these messages, depending on the QueueReceiver implementation.
+     * The maximum number of messages we will fetch at a time. We might issue multiple requests to SQS to fetch these
+     * messages, depending on the QueueReceiver implementation.
      */
     protected fun batchSize() = featureFlags.getInt(CONSUMERS_BATCH_SIZE, queue.queueName)
 
     /**
      * Issues a single request to SQS to fetch messages.
+     *
      * @param sqsBatchSize the number of messages to fetch, max 10
      * @param waitTimeSeconds 0 to short poll, > 0 to long poll, null uses the queue's default
      */
@@ -166,26 +160,28 @@ internal class SqsJobConsumer @Inject internal constructor(
       check(sqsBatchSize <= SQS_MAX_BATCH_SIZE) {
         "Batch size $sqsBatchSize but SQS supports a max of $SQS_MAX_BATCH_SIZE messages per batch"
       }
-      val messages = try {
-        metrics.sqsReceiveTime.timedMills(queue.queueName, queue.queueName) {
-          queue.call { client ->
-            var receiveRequest = ReceiveMessageRequest()
-              .withAttributeNames("All")
-              .withMessageAttributeNames("All")
-              .withQueueUrl(queue.url)
-              .withMaxNumberOfMessages(sqsBatchSize)
+      val messages =
+        try {
+          metrics.sqsReceiveTime.timedMills(queue.queueName, queue.queueName) {
+            queue.call { client ->
+              var receiveRequest =
+                ReceiveMessageRequest()
+                  .withAttributeNames("All")
+                  .withMessageAttributeNames("All")
+                  .withQueueUrl(queue.url)
+                  .withMaxNumberOfMessages(sqsBatchSize)
 
-            if (waitTimeSeconds != null) {
-              receiveRequest = receiveRequest.withWaitTimeSeconds(waitTimeSeconds)
+              if (waitTimeSeconds != null) {
+                receiveRequest = receiveRequest.withWaitTimeSeconds(waitTimeSeconds)
+              }
+
+              client.receiveMessage(receiveRequest).messages
             }
-
-            client.receiveMessage(receiveRequest).messages
           }
+        } catch (e: ClientExecutionTimeoutException) {
+          log.info("timed out long polling for messages from ${queue.queueName}")
+          emptyList<Message>()
         }
-      } catch (e: ClientExecutionTimeoutException) {
-        log.info("timed out long polling for messages from ${queue.queueName}")
-        emptyList<Message>()
-      }
 
       for (message in messages) {
         try {
@@ -195,14 +191,8 @@ internal class SqsJobConsumer @Inject internal constructor(
           if (receiveCount <= 1) {
             // Calculate milliseconds between received time and when job was sent.
             val processingLag = clock.instant().minusMillis(sentTimestamp).toEpochMilli()
-            metrics.queueProcessingLag.record(
-              processingLag.toDouble(),
-              queue.queueName,
-              queue.queueName
-            )
+            metrics.queueProcessingLag.record(processingLag.toDouble(), queue.queueName, queue.queueName)
           }
-
-
         } catch (e: NumberFormatException) {
           log.warn("Message ${message.messageId} had invalid SentTimestamp format")
         } catch (e: NullPointerException) {
@@ -214,10 +204,8 @@ internal class SqsJobConsumer @Inject internal constructor(
     }
   }
 
-  internal inner class IndividualQueueReceiver(
-    queueName: QueueName,
-    private val handler: JobHandler
-  ) : QueueReceiver(queueName) {
+  internal inner class IndividualQueueReceiver(queueName: QueueName, private val handler: JobHandler) :
+    QueueReceiver(queueName) {
 
     override fun receive(): List<Status> {
       val messages = fetchMessages(batchSize())
@@ -228,9 +216,7 @@ internal class SqsJobConsumer @Inject internal constructor(
 
       val futures = handleMessages(messages)
 
-      return CompletableFuture.allOf(*futures.toTypedArray()).thenApply {
-        futures.map { it.join() }
-      }.join()
+      return CompletableFuture.allOf(*futures.toTypedArray()).thenApply { futures.map { it.join() } }.join()
     }
 
     @OptIn(ExperimentalMiskApi::class)
@@ -245,9 +231,7 @@ internal class SqsJobConsumer @Inject internal constructor(
               // We don't turn that into the parent of the current span because that would
               // incorrectly include the execution time of the job in the execution time of the
               // action that triggered the job
-              message.attributes[SqsJob.ORIGINAL_TRACE_ID_ATTR]?.let {
-                ORIGINAL_TRACE_ID_TAG.set(span, it)
-              }
+              message.attributes[SqsJob.ORIGINAL_TRACE_ID_ATTR]?.let { ORIGINAL_TRACE_ID_TAG.set(span, it) }
 
               // Run the handler and record timing
               try {
@@ -256,10 +240,7 @@ internal class SqsJobConsumer @Inject internal constructor(
                 MDC.put(SQS_QUEUE_NAME_MDC, message.queueName.value)
                 MDC.put(SQS_QUEUE_TYPE_MDC, SQS_QUEUE_TYPE)
                 val (duration) = timed { handler.handleJob(message) }
-                metrics.handlerDispatchTime.record(
-                  duration.toMillis().toDouble(), queue.queueName,
-                  queue.queueName
-                )
+                metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queue.queueName, queue.queueName)
                 Status.OK
               } catch (th: Throwable) {
                 val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
@@ -277,23 +258,21 @@ internal class SqsJobConsumer @Inject internal constructor(
               }
             }
           },
-          handlingThreads
+          handlingThreads,
         )
       }
     }
-
   }
 
   internal inner class BatchQueueReceiver(
     queueName: QueueName,
     private val handler: BatchJobHandler,
-    private val clock: Clock
+    private val clock: Clock,
   ) : QueueReceiver(queueName) {
 
-    private fun receiveWaitTimeSeconds() =
-      featureFlags.getInt(CONSUMERS_RECEIVE_WAIT_TIME_SECONDS, queue.queueName)
-    private fun batchWaitTimeSeconds() =
-      featureFlags.getInt(CONSUMERS_BATCH_WAIT_TIME_SECONDS, queue.queueName)
+    private fun receiveWaitTimeSeconds() = featureFlags.getInt(CONSUMERS_RECEIVE_WAIT_TIME_SECONDS, queue.queueName)
+
+    private fun batchWaitTimeSeconds() = featureFlags.getInt(CONSUMERS_BATCH_WAIT_TIME_SECONDS, queue.queueName)
 
     override fun receive(): List<Status> {
       // Threads poll concurrently, fetching up to batchSize messages.
@@ -302,9 +281,10 @@ internal class SqsJobConsumer @Inject internal constructor(
       val deadline = clock.instant().plusSeconds(batchWaitTimeSeconds().toLong())
       val remainingMessages = Semaphore(batchSize())
       val numThreads = ceil(batchSize() / SQS_MAX_BATCH_SIZE.toDouble()).toInt()
-      val batch = (1..numThreads).map {
-        receivingThreads.submit(ReceiverCallable(remainingMessages, deadline))
-      }.flatMap { it.get() }
+      val batch =
+        (1..numThreads)
+          .map { receivingThreads.submit(ReceiverCallable(remainingMessages, deadline)) }
+          .flatMap { it.get() }
 
       if (batch.isEmpty()) {
         return listOf(Status.NO_WORK)
@@ -323,10 +303,7 @@ internal class SqsJobConsumer @Inject internal constructor(
           MDC.put(SQS_QUEUE_NAME_MDC, messages.first().queueName.value)
           MDC.put(SQS_QUEUE_TYPE_MDC, SQS_QUEUE_TYPE)
           val (duration) = timed { handler.handleJobs(messages) }
-          metrics.handlerDispatchTime.record(
-            duration.toMillis().toDouble(), queue.queueName,
-            queue.queueName
-          )
+          metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queue.queueName, queue.queueName)
           Status.OK
         } catch (th: Throwable) {
           val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
@@ -343,10 +320,8 @@ internal class SqsJobConsumer @Inject internal constructor(
       }
     }
 
-    private inner class ReceiverCallable(
-      private val remainingMessages: Semaphore,
-      private val deadline: Instant
-    ) : Callable<List<SqsJob>> {
+    private inner class ReceiverCallable(private val remainingMessages: Semaphore, private val deadline: Instant) :
+      Callable<List<SqsJob>> {
 
       private fun acquirePermits() =
         if (remainingMessages.tryAcquire(SQS_MAX_BATCH_SIZE)) {
@@ -375,19 +350,17 @@ internal class SqsJobConsumer @Inject internal constructor(
           }
 
           // We might exceed the deadline by some milliseconds. That's ok.
-          val waitTimeSeconds = min(
-            receiveWaitTimeSeconds(),
-            (deadline.epochSecond - clock.instant().epochSecond).toInt()
-          ).let { max(0, it) }
+          val waitTimeSeconds =
+            min(receiveWaitTimeSeconds(), (deadline.epochSecond - clock.instant().epochSecond).toInt()).let {
+              max(0, it)
+            }
 
           val messages = fetchMessages(sqsBatchSize, waitTimeSeconds)
           addAll(messages)
           releasePermits(sqsBatchSize - messages.size)
         } while (clock.instant().isBefore(deadline) && shouldKeepRunning.get())
       }
-
     }
-
   }
 
   companion object {
@@ -408,5 +381,4 @@ internal class SqsJobConsumer @Inject internal constructor(
     private const val SQS_ATTRIBUTE_APPROX_RECEIVE_COUNT = "ApproximateReceiveCount"
     private const val SQS_MAX_BATCH_SIZE = 10
   }
-
 }

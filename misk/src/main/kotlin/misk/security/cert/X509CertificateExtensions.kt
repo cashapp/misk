@@ -8,13 +8,15 @@ import java.security.cert.X509Certificate
 
 fun X509Certificate.isSignedBy(cert: Certificate) = isSignedBy(cert.publicKey)
 
-fun X509Certificate.isSignedBy(key: PublicKey): Boolean = try {
-  verify(key)
-  true
-} catch (sigEx: SignatureException) {
-  false
-} catch (keyEx: InvalidKeyException) {
-  false
-}
+fun X509Certificate.isSignedBy(key: PublicKey): Boolean =
+  try {
+    verify(key)
+    true
+  } catch (sigEx: SignatureException) {
+    false
+  } catch (keyEx: InvalidKeyException) {
+    false
+  }
 
-val X509Certificate.isSelfSigned: Boolean get() = isSignedBy(this)
+val X509Certificate.isSelfSigned: Boolean
+  get() = isSignedBy(this)

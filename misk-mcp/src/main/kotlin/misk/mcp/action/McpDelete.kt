@@ -8,17 +8,15 @@ import misk.web.mediatype.MediaTypes
 /**
  * Annotation for web action methods that handle MCP session deletion for StreamableHTTP transport.
  *
- * This annotation configures a web action to handle explicit MCP session termination for
- * StreamableHTTP transport (Server-Sent Events) as specified in the MCP specification for
- * session management. The client sends a DELETE request with the session ID to cleanly
- * terminate an existing MCP session.
+ * This annotation configures a web action to handle explicit MCP session termination for StreamableHTTP transport
+ * (Server-Sent Events) as specified in the MCP specification for session management. The client sends a DELETE request
+ * with the session ID to cleanly terminate an existing MCP session.
  *
  * ## Transport Compatibility
  *
- * **StreamableHTTP Transport Only**: This annotation is designed exclusively for StreamableHTTP
- * transport using Server-Sent Events. WebSocket transport (`@McpWebSocket`) does not use
- * explicit session deletion endpoints, as session termination is handled automatically when
- * the WebSocket connection is closed.
+ * **StreamableHTTP Transport Only**: This annotation is designed exclusively for StreamableHTTP transport using
+ * Server-Sent Events. WebSocket transport (`@McpWebSocket`) does not use explicit session deletion endpoints, as
+ * session termination is handled automatically when the WebSocket connection is closed.
  *
  * ## Configuration
  *
@@ -30,7 +28,6 @@ import misk.web.mediatype.MediaTypes
  * ## Usage
  *
  * Use this annotation for MCP session termination endpoints:
- *
  * ```kotlin
  * @Singleton
  * class McpWebAction @Inject constructor() : WebAction {
@@ -55,11 +52,10 @@ import misk.web.mediatype.MediaTypes
  *
  * ## MCP Specification Compliance
  *
- * This implements point 5 of the MCP specification's session management:
- * "Clients can send a DELETE request to explicitly terminate a session"
+ * This implements point 5 of the MCP specification's session management: "Clients can send a DELETE request to
+ * explicitly terminate a session"
  *
- * The session ID is passed via the `Mcp-Session-Id` header as defined in the
- * MCP transport specification.
+ * The session ID is passed via the `Mcp-Session-Id` header as defined in the MCP transport specification.
  *
  * ## Session Cleanup
  *

@@ -1,9 +1,10 @@
 package misk.crypto.pgp.internal
 
 import com.google.crypto.tink.aead.KmsEnvelopeAead
-import jakarta.inject.Inject
 import com.google.inject.Provider
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
+import java.util.Base64
 import misk.crypto.KeyAlias
 import misk.crypto.KeyReader
 import misk.crypto.PgpDecrypterManager
@@ -15,19 +16,15 @@ import org.bouncycastle.openpgp.PGPSecretKeyRingCollection
 import org.bouncycastle.openpgp.PGPUtil
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder
-import java.util.Base64
 
-class PgpDecrypterProvider(
-  private val alias: KeyAlias,
-) : Provider<PgpDecrypter>, KeyReader() {
+class PgpDecrypterProvider(private val alias: KeyAlias) : Provider<PgpDecrypter>, KeyReader() {
   @Inject private lateinit var moshi: Moshi
   @Inject private lateinit var pgpDecrypterManager: PgpDecrypterManager
 
   override fun get(): PgpDecrypter {
     val key = getRawKey(alias)
     val jsonAdapter = moshi.adapter<PgpKeyJsonFile>()
-    val pgpKeyJsonFile =
-      jsonAdapter.fromJson(key.encrypted_key!!.value) ?: error("could not deserialize json file")
+    val pgpKeyJsonFile = jsonAdapter.fromJson(key.encrypted_key!!.value) ?: error("could not deserialize json file")
 
     val decoded = Base64.getDecoder().decode(pgpKeyJsonFile.encrypted_private_key)
 
@@ -35,20 +32,13 @@ class PgpDecrypterProvider(
     val kek = KmsEnvelopeAead(KEK_TEMPLATE, masterKey)
     val secretKeyStream = kek.decrypt(decoded, null).inputStream()
 
-    val pgpSec = PGPSecretKeyRingCollection(
-      PGPUtil.getDecoderStream(secretKeyStream),
-      JcaKeyFingerprintCalculator()
-    )
+    val pgpSec = PGPSecretKeyRingCollection(PGPUtil.getDecoderStream(secretKeyStream), JcaKeyFingerprintCalculator())
 
     // It's common for there to be subkeys within the keyring.
     val pbeSecretKeyDecryptor = JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(null)
     val privateKeys = mutableMapOf<Long, PGPPrivateKey>()
-    pgpSec.keyRings.next().secretKeys.forEach {
-      privateKeys[it.keyID] = it.extractPrivateKey(pbeSecretKeyDecryptor)
-    }
+    pgpSec.keyRings.next().secretKeys.forEach { privateKeys[it.keyID] = it.extractPrivateKey(pbeSecretKeyDecryptor) }
 
-    return RealPgpDecrypter(privateKeys).also {
-      pgpDecrypterManager[key.key_name] = it
-    }
+    return RealPgpDecrypter(privateKeys).also { pgpDecrypterManager[key.key_name] = it }
   }
 }

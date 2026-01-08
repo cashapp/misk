@@ -4,27 +4,30 @@ import com.google.common.base.Supplier
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
-import misk.jdbc.DataSourceService
-import misk.jdbc.mapNotNull
-import misk.logging.getLogger
 import java.sql.SQLException
 import java.sql.SQLRecoverableException
 import java.sql.SQLTimeoutException
 import java.sql.SQLTransientException
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
+import misk.jdbc.DataSourceService
+import misk.jdbc.mapNotNull
+import misk.logging.getLogger
 
 object ShardsLoader {
   private val logger = getLogger<ShardsLoader>()
 
-  private val vitessCache: LoadingCache<DataSourceService, Set<Shard>> = CacheBuilder.newBuilder()
-    .refreshAfterWrite(4, TimeUnit.MINUTES)
-    .expireAfterWrite(6, TimeUnit.MINUTES)
-    .build(object : CacheLoader<DataSourceService, Set<Shard>>() {
-      override fun load(dataSourceService: DataSourceService): Set<Shard> {
-        return loadVitessShards(dataSourceService)
-      }
-    })
+  private val vitessCache: LoadingCache<DataSourceService, Set<Shard>> =
+    CacheBuilder.newBuilder()
+      .refreshAfterWrite(4, TimeUnit.MINUTES)
+      .expireAfterWrite(6, TimeUnit.MINUTES)
+      .build(
+        object : CacheLoader<DataSourceService, Set<Shard>>() {
+          override fun load(dataSourceService: DataSourceService): Set<Shard> {
+            return loadVitessShards(dataSourceService)
+          }
+        }
+      )
 
   fun shards(dataSourceService: DataSourceService): Supplier<Set<Shard>> {
     return if (!dataSourceService.config().type.isVitess) {
@@ -37,11 +40,7 @@ object ShardsLoader {
   private fun loadVitessShards(dataSourceService: DataSourceService): Set<Shard> {
     val maxRetries = 3
     var lastException: Exception? = null
-    val retryableErrorMessages = listOf(
-      "timeout",
-      "context canceled",
-      "connection closed"
-    )
+    val retryableErrorMessages = listOf("timeout", "context canceled", "connection closed")
 
     repeat(maxRetries) { attempt ->
       try {
@@ -52,15 +51,18 @@ object ShardsLoader {
 
             val resultSet = statement.executeQuery("SHOW VITESS_SHARDS")
 
-            val shards = resultSet.mapNotNull { rs ->
-              try {
-                val shardName = rs.getString(1)
-                Shard.parse(shardName)
-              } catch (e: Exception) {
-                logger.warn(e) { "Failed to parse shard from result: ${rs.getString(1)}" }
-                null
-              }
-            }.toSet()
+            val shards =
+              resultSet
+                .mapNotNull { rs ->
+                  try {
+                    val shardName = rs.getString(1)
+                    Shard.parse(shardName)
+                  } catch (e: Exception) {
+                    logger.warn(e) { "Failed to parse shard from result: ${rs.getString(1)}" }
+                    null
+                  }
+                }
+                .toSet()
 
             if (shards.isEmpty()) {
               throw SQLRecoverableException("SHOW VITESS_SHARDS returned empty result set")
@@ -69,18 +71,19 @@ object ShardsLoader {
             shards
           }
         }
-
       } catch (e: Exception) {
         lastException = e
 
         val isRetryableException =
-            e.cause is SQLTimeoutException || e is SQLTimeoutException ||
-            e.cause is SQLRecoverableException || e is SQLRecoverableException ||
-            e.cause is SQLTransientException || e is SQLTransientException
+          e.cause is SQLTimeoutException ||
+            e is SQLTimeoutException ||
+            e.cause is SQLRecoverableException ||
+            e is SQLRecoverableException ||
+            e.cause is SQLTransientException ||
+            e is SQLTransientException
 
-        val isRetryableMessage = retryableErrorMessages.any { errorMessage ->
-          e.message?.contains(errorMessage, ignoreCase = true) == true
-        }
+        val isRetryableMessage =
+          retryableErrorMessages.any { errorMessage -> e.message?.contains(errorMessage, ignoreCase = true) == true }
 
         val isRetryable = isRetryableException || isRetryableMessage
 
@@ -111,7 +114,7 @@ object ShardsLoader {
     throw SQLException(
       "Failed to load Vitess shards after $maxRetries attempts. " +
         "Check Vitess connectivity and query timeout settings.",
-      lastException
+      lastException,
     )
   }
 

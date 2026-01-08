@@ -2,6 +2,7 @@ package misk.redis
 
 import com.google.inject.Module
 import jakarta.inject.Inject
+import java.time.Duration
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
@@ -14,20 +15,20 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import redis.clients.jedis.ConnectionPoolConfig
 import wisp.deployment.TESTING
-import java.time.Duration
 
 @MiskTest
 class RealRedisTest : AbstractRedisTest() {
   @Suppress("unused")
   @MiskTestModule
-  private val module: Module = object : KAbstractModule() {
-    override fun configure() {
-      install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
-      install(MiskTestingServiceModule())
-      install(DeploymentModule(TESTING))
-      install(RedisTestFlushModule())
+  private val module: Module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
+        install(MiskTestingServiceModule())
+        install(DeploymentModule(TESTING))
+        install(RedisTestFlushModule())
+      }
     }
-  }
 
   @Inject override lateinit var redis: Redis
 
@@ -86,7 +87,8 @@ class RealRedisTest : AbstractRedisTest() {
     assertThat(redis["key6"]).isNull()
   }
 
-  @Test fun `scan for all keys with default options`() {
+  @Test
+  fun `scan for all keys with default options`() {
     val expectedKeys = mutableSetOf<String>()
     for (i in 1..100) {
       expectedKeys.add(i.toString())
@@ -98,7 +100,8 @@ class RealRedisTest : AbstractRedisTest() {
     assertThat(scanKeys).isEqualTo(expectedKeys)
   }
 
-  @Test fun `scan for keys matching a pattern`() {
+  @Test
+  fun `scan for keys matching a pattern`() {
     redis["test_tag:hello"] = "a".encodeUtf8()
     redis["different_tag:1"] = "b".encodeUtf8()
     redis["test_tag:2"] = "c".encodeUtf8()
@@ -109,17 +112,17 @@ class RealRedisTest : AbstractRedisTest() {
     assertThat(scanKeys).containsExactlyInAnyOrder("test_tag:hello", "test_tag:2")
   }
 
-  @Test fun `scan for all keys with a desired hinted page size`() {
+  @Test
+  fun `scan for all keys with a desired hinted page size`() {
     val expectedKeys = mutableSetOf<String>()
     for (i in 1..100) {
       expectedKeys.add(i.toString())
       redis[i.toString()] = i.toString().encodeUtf8()
     }
 
-    val scanKeys = scanAll(count=1)
+    val scanKeys = scanAll(count = 1)
 
     assertThat(scanKeys).isEqualTo(expectedKeys)
-
   }
 
   @Test
@@ -146,16 +149,12 @@ class RealRedisTest : AbstractRedisTest() {
   fun `hkeys returns all map keys within a given key`() {
     val hashKey = "myhash"
 
-    val map = mapOf(
-      "field1" to "value1".encodeUtf8(),
-      "field2" to "value2".encodeUtf8(),
-      "field3" to "value3".encodeUtf8()
-    )
+    val map =
+      mapOf("field1" to "value1".encodeUtf8(), "field2" to "value2".encodeUtf8(), "field3" to "value3".encodeUtf8())
 
     redis.hset(hashKey, map)
 
-    assertThat(redis.hkeys(hashKey).map { it.utf8() })
-      .containsExactly("field1", "field2", "field3")
+    assertThat(redis.hkeys(hashKey).map { it.utf8() }).containsExactly("field1", "field2", "field3")
   }
 
   @Test
@@ -207,11 +206,7 @@ class RealRedisTest : AbstractRedisTest() {
     assertThat(redis.exists(key1, key2, key3)).isEqualTo(2L)
   }
 
-  private fun scanAll(
-    initialCursor: String = "0",
-    matchPattern: String? = null,
-    count: Int? = null
-  ): Set<String> {
+  private fun scanAll(initialCursor: String = "0", matchPattern: String? = null, count: Int? = null): Set<String> {
     var cursor = initialCursor
     val allKeys = mutableSetOf<String>()
 

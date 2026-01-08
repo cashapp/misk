@@ -1,13 +1,13 @@
 package misk.web.marshal
 
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
+import kotlin.reflect.KType
 import misk.inject.typeLiteral
 import misk.web.HttpCall
 import misk.web.Response
 import misk.web.ResponseBody
 import okhttp3.MediaType
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.Type
-import kotlin.reflect.KType
 
 /** Marshalls typed kotlin objects into a [ResponseBody] */
 interface Marshaller<in T> {
@@ -18,9 +18,8 @@ interface Marshaller<in T> {
   fun responseBody(o: T): ResponseBody
 
   /**
-   * This interface is used with Guice multibindings. Register instances by calling `multibind()`
-   * in a `KAbstractModule`:
-   *
+   * This interface is used with Guice multibindings. Register instances by calling `multibind()` in a
+   * `KAbstractModule`:
    * ```
    * multibind<Marshaller.Factory>().to<MyFactory>()
    * ```
@@ -30,8 +29,7 @@ interface Marshaller<in T> {
   }
 
   /**
-   * Alternate way to marshal the response body with access to the HttpCall.
-   * Invokes [responseBody] by default.
+   * Alternate way to marshal the response body with access to the HttpCall. Invokes [responseBody] by default.
    *
    * @return The object marshalled into a [ResponseBody]
    */

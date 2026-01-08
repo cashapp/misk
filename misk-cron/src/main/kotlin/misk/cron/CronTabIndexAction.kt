@@ -28,12 +28,10 @@ import misk.web.v2.DashboardPageLayout
 import wisp.moshi.defaultKotlinMoshi
 
 @Singleton
-internal class CronTabIndexAction @Inject constructor(
-  private val dashboardPageLayout: DashboardPageLayout,
-  private val cronManager: CronManager,
-) : WebAction {
-  val adapter = defaultKotlinMoshi
-    .adapter<CronManager.CronEntry.Metadata>()
+internal class CronTabIndexAction
+@Inject
+constructor(private val dashboardPageLayout: DashboardPageLayout, private val cronManager: CronManager) : WebAction {
+  val adapter = defaultKotlinMoshi.adapter<CronManager.CronEntry.Metadata>()
 
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
@@ -43,9 +41,8 @@ internal class CronTabIndexAction @Inject constructor(
     @QueryParam q: String?,
     /** Alert message to show in banner. */
     @QueryParam m: String?,
-  ): String = dashboardPageLayout
-    .newBuilder()
-    .build { _, _, _ ->
+  ): String =
+    dashboardPageLayout.newBuilder().build { _, _, _ ->
       val runningCrons = cronManager.getRunningCrons()
       val allCrons = cronManager.getCronEntries()
       val cron = allCrons[q]
@@ -59,14 +56,16 @@ internal class CronTabIndexAction @Inject constructor(
           Link(
             label = "${runningCrons.size} running / ${allCrons.size} registered",
             href = PATH,
-            isPageNavigation = true
+            isPageNavigation = true,
           ),
         )
 
         div {
           form {
             action = PATH
-            select("mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6") {
+            select(
+              "mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            ) {
               id = "q"
               name = "q"
               onChange = "this.form.submit()"
@@ -102,8 +101,7 @@ internal class CronTabIndexAction @Inject constructor(
             AlertInfo("Run cron ${cron.name}", Link("Run Now", CronTabRunAction.path(cron.name)))
 
             val metadata = cron.toMetadata()
-            val prettyPrint = adapter
-              .toFormattedJson(metadata)
+            val prettyPrint = adapter.toFormattedJson(metadata)
 
             h3("text-xl font-bold my-4") { +"""Metadata""" }
             CodeBlock(prettyPrint)
@@ -124,11 +122,14 @@ internal class CronTabIndexAction @Inject constructor(
 
   companion object {
     const val PATH = "/_admin/cron/"
+
     fun path(name: String?, message: String? = null) =
-      "/_admin/cron/" + if (name.isNullOrBlank()) {
-        "?"
-      } else {
-        "?q=$name"
-      } + (message?.let { "&m=$message" } ?: "")
+      "/_admin/cron/" +
+        if (name.isNullOrBlank()) {
+          "?"
+        } else {
+          "?q=$name"
+        } +
+        (message?.let { "&m=$message" } ?: "")
   }
 }

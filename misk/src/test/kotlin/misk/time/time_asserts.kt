@@ -1,15 +1,11 @@
 package misk.time
 
+import java.time.Duration
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Offset
-import java.time.Duration
 
 /** Fails unless the block executes in the expected time. */
-fun assertElapsedTime(
-  expected: Duration,
-  tolerance: Duration = Duration.ofMillis(100),
-  block: () -> Unit
-) {
+fun assertElapsedTime(expected: Duration, tolerance: Duration = Duration.ofMillis(100), block: () -> Unit) {
   val startNanos = System.nanoTime()
   block()
   val endNanos = System.nanoTime()

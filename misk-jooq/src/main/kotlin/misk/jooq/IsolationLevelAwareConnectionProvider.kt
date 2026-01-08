@@ -1,12 +1,12 @@
 package misk.jooq
 
+import java.sql.Connection
 import org.jooq.ConnectionProvider
 import org.jooq.impl.DataSourceConnectionProvider
-import java.sql.Connection
 
 class IsolationLevelAwareConnectionProvider(
   private val dataSourceConnectionProvider: DataSourceConnectionProvider,
-  private val transacterOptions: JooqTransacter.TransacterOptions
+  private val transacterOptions: JooqTransacter.TransacterOptions,
 ) : ConnectionProvider {
   override fun acquire(): Connection {
     return dataSourceConnectionProvider.acquire().apply {

@@ -7,6 +7,9 @@ import io.opentracing.Scope
 import io.opentracing.Span
 import io.opentracing.Tracer
 import io.opentracing.tag.Tags
+import java.time.Clock
+import java.time.Duration
+import java.util.concurrent.CompletableFuture
 import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.jobqueue.QueueName
 import misk.jobqueue.sqs.parentQueue
@@ -14,16 +17,15 @@ import misk.jobqueue.v2.JobEnqueuer
 import misk.moshi.adapter
 import misk.tokens.TokenGenerator
 import software.amazon.awssdk.services.sqs.model.MessageAttributeValue
-import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchResponse
-import java.time.Clock
-import java.time.Duration
-import java.util.concurrent.CompletableFuture
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 
 @Singleton
-class SqsJobEnqueuer @Inject constructor(
+class SqsJobEnqueuer
+@Inject
+constructor(
   private val sqsClientFactory: SqsClientFactory,
   private val sqsBatchManagerFactory: SqsBatchManagerFactory,
   private val sqsConfig: SqsConfig,
@@ -39,6 +41,7 @@ class SqsJobEnqueuer @Inject constructor(
     // SQS allows max 10 message attributes per message, 1 is reserved for job queue metadata
     private const val MAX_CUSTOM_ATTRIBUTES_PER_MESSAGE = 9
   }
+
   /**
    * Enqueue the job and return a CompletableFuture.
    *
@@ -60,11 +63,13 @@ class SqsJobEnqueuer @Inject constructor(
         val client = sqsClientFactory.get(region)
         val response = client.sendMessage(request)
         sqsMetrics.jobsEnqueued.labels(queueName.value).inc()
-        response.whenComplete { _, _ ->
-          sqsMetrics.sqsSendTime.labels(queueName.value).observe((clock.millis() - startTimeMs).toDouble())
-          span.finish()
-          scope.close()
-        }.thenApply { true }
+        response
+          .whenComplete { _, _ ->
+            sqsMetrics.sqsSendTime.labels(queueName.value).observe((clock.millis() - startTimeMs).toDouble())
+            span.finish()
+            scope.close()
+          }
+          .thenApply { true }
       } catch (e: Exception) {
         sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc()
         throw e
@@ -73,8 +78,7 @@ class SqsJobEnqueuer @Inject constructor(
   }
 
   /**
-   * Batch enqueue jobs and return a CompletableFuture.
-   * Maximum batch size is 10 messages.
+   * Batch enqueue jobs and return a CompletableFuture. Maximum batch size is 10 messages.
    *
    * @return CompletableFuture<BatchEnqueueResult> with detailed success/failure breakdown
    */
@@ -114,28 +118,22 @@ class SqsJobEnqueuer @Inject constructor(
             isFullySuccessful = false,
             successfulIds = emptyList(),
             invalidIds = invalidJobIds,
-            retriableIds = emptyList()
+            retriableIds = emptyList(),
           )
         )
       }
 
-      val messageEntries = validJobsWithKeys.map { (job, resolvedIdempotencyKey) ->
-        SendMessageBatchRequestEntry.builder()
-          .id(resolvedIdempotencyKey)
-          .messageBody(job.body)
-          .apply {
-            job.deliveryDelay?.let { delay ->
-              delaySeconds(delay.toSeconds().toInt())
-            }
-          }
-          .messageAttributes(buildMessageAttributes(queueName, resolvedIdempotencyKey, job.attributes, span))
-          .build()
-      }
+      val messageEntries =
+        validJobsWithKeys.map { (job, resolvedIdempotencyKey) ->
+          SendMessageBatchRequestEntry.builder()
+            .id(resolvedIdempotencyKey)
+            .messageBody(job.body)
+            .apply { job.deliveryDelay?.let { delay -> delaySeconds(delay.toSeconds().toInt()) } }
+            .messageAttributes(buildMessageAttributes(queueName, resolvedIdempotencyKey, job.attributes, span))
+            .build()
+        }
 
-      val request = SendMessageBatchRequest.builder()
-        .queueUrl(queueUrl)
-        .entries(messageEntries)
-        .build()
+      val request = SendMessageBatchRequest.builder().queueUrl(queueUrl).entries(messageEntries).build()
 
       val startTimeMs = clock.millis()
       try {
@@ -143,13 +141,13 @@ class SqsJobEnqueuer @Inject constructor(
         val client = sqsClientFactory.get(region)
         val response = client.sendMessageBatch(request)
 
-        response.whenComplete { _, _ ->
-          sqsMetrics.sqsBatchSendTime.labels(queueName.value).observe((clock.millis() - startTimeMs).toDouble())
-          span.finish()
-          scope.close()
-        }.thenApply { result ->
-          processBatchResponse(result, queueName, invalidJobIds)
-        }
+        response
+          .whenComplete { _, _ ->
+            sqsMetrics.sqsBatchSendTime.labels(queueName.value).observe((clock.millis() - startTimeMs).toDouble())
+            span.finish()
+            scope.close()
+          }
+          .thenApply { result -> processBatchResponse(result, queueName, invalidJobIds) }
       } catch (e: Exception) {
         sqsMetrics.jobBatchEnqueueFailures.labels(queueName.value).inc(jobs.size.toDouble())
         throw e
@@ -160,8 +158,8 @@ class SqsJobEnqueuer @Inject constructor(
   /**
    * Enqueue a job using SqsAsyncBatchManager for automatic client-side batching and parallelization.
    *
-   * This method buffers messages and sends them in batches automatically, optimizing
-   * for high-throughput scenarios where many messages are sent concurrently.
+   * This method buffers messages and sends them in batches automatically, optimizing for high-throughput scenarios
+   * where many messages are sent concurrently.
    */
   override fun enqueueBufferedAsync(
     queueName: QueueName,
@@ -179,14 +177,16 @@ class SqsJobEnqueuer @Inject constructor(
         val batchManager = sqsBatchManagerFactory.get(region)
         val response = batchManager.sendMessage(request)
         sqsMetrics.jobsEnqueued.labels(queueName.value).inc()
-        response.whenComplete { _, error ->
-          sqsMetrics.sqsSendTime.labels(queueName.value).observe((clock.millis() - startTimeMs).toDouble())
-          if (error != null) {
-            sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc()
+        response
+          .whenComplete { _, error ->
+            sqsMetrics.sqsSendTime.labels(queueName.value).observe((clock.millis() - startTimeMs).toDouble())
+            if (error != null) {
+              sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc()
+            }
+            span.finish()
+            scope.close()
           }
-          span.finish()
-          scope.close()
-        }.thenApply { true }
+          .thenApply { true }
       } catch (e: Exception) {
         sqsMetrics.jobEnqueueFailures.labels(queueName.value).inc()
         throw e
@@ -208,7 +208,7 @@ class SqsJobEnqueuer @Inject constructor(
   private fun processBatchResponse(
     response: SendMessageBatchResponse,
     queueName: QueueName,
-    preFilteredInvalidIds: List<String>
+    preFilteredInvalidIds: List<String>,
   ): JobEnqueuer.BatchEnqueueResult {
     val successful = response.successful().map { it.id() }
     val invalid = mutableListOf<String>()
@@ -220,24 +220,26 @@ class SqsJobEnqueuer @Inject constructor(
     // Categorize failures by error type
     response.failed().forEach { failure ->
       if (failure.senderFault()) {
-        invalid.add(failure.id())      // Client error - don't retry
+        invalid.add(failure.id()) // Client error - don't retry
       } else {
-        retriable.add(failure.id())    // Server error - can retry
+        retriable.add(failure.id()) // Server error - can retry
       }
     }
 
-    val result = JobEnqueuer.BatchEnqueueResult(
-      isFullySuccessful = invalid.isEmpty() && retriable.isEmpty(),
-      successfulIds = successful,
-      invalidIds = invalid,
-      retriableIds = retriable
-    )
+    val result =
+      JobEnqueuer.BatchEnqueueResult(
+        isFullySuccessful = invalid.isEmpty() && retriable.isEmpty(),
+        successfulIds = successful,
+        invalidIds = invalid,
+        retriableIds = retriable,
+      )
 
     // Update metrics
     sqsMetrics.jobsBatchEnqueued.labels(queueName.value).inc(result.successfulIds.size.toDouble())
     if (!result.isFullySuccessful) {
-      sqsMetrics.jobBatchEnqueueFailures.labels(queueName.value).inc(
-        (result.invalidIds.size + result.retriableIds.size).toDouble())
+      sqsMetrics.jobBatchEnqueueFailures
+        .labels(queueName.value)
+        .inc((result.invalidIds.size + result.retriableIds.size).toDouble())
     }
 
     return result
@@ -249,11 +251,11 @@ class SqsJobEnqueuer @Inject constructor(
     attributes: Map<String, String>,
     span: Span,
   ): Map<String, MessageAttributeValue> {
-    val attrs = attributes.mapValues {
-      MessageAttributeValue.builder().dataType("String").stringValue(it.value).build()
-    }.toMutableMap()
-    attrs[SqsJob.JOBQUEUE_METADATA_ATTR] =
-      createMetadataMessageAttributeValue(queueName, idempotencyKey, span)
+    val attrs =
+      attributes
+        .mapValues { MessageAttributeValue.builder().dataType("String").stringValue(it.value).build() }
+        .toMutableMap()
+    attrs[SqsJob.JOBQUEUE_METADATA_ATTR] = createMetadataMessageAttributeValue(queueName, idempotencyKey, span)
     return attrs
   }
 
@@ -281,15 +283,18 @@ class SqsJobEnqueuer @Inject constructor(
     idempotencyKey: String,
     span: Span,
   ): MessageAttributeValue {
-    val metadata = mutableMapOf(
-      SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE to queueName.parentQueue.value,
-      SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY to idempotencyKey,
-    )
+    val metadata =
+      mutableMapOf(
+        SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE to queueName.parentQueue.value,
+        SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY to idempotencyKey,
+      )
 
     // Preserve original trace id, if available.
-    span.context().toTraceId()?.takeIf { it.isNotBlank() }?.let {
-      metadata[SqsJob.JOBQUEUE_METADATA_ORIGINAL_TRACE_ID] = it
-    }
+    span
+      .context()
+      .toTraceId()
+      ?.takeIf { it.isNotBlank() }
+      ?.let { metadata[SqsJob.JOBQUEUE_METADATA_ORIGINAL_TRACE_ID] = it }
 
     return MessageAttributeValue.builder()
       .dataType("String")

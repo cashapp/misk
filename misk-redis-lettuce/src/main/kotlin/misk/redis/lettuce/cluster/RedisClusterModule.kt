@@ -5,47 +5,43 @@ import io.lettuce.core.AbstractRedisClient
 import io.lettuce.core.RedisClient
 import io.lettuce.core.cluster.RedisClusterClient
 import io.lettuce.core.codec.RedisCodec
-import misk.inject.KAbstractModule
-import misk.inject.asSingleton
-import misk.inject.keyOf
-import misk.redis.lettuce.RedisClusterConfig
-import misk.redis.lettuce.connectionProviderTypeLiteral
-import misk.redis.lettuce.redisUri
-import misk.redis.lettuce.standalone.clientResources
-import misk.redis.lettuce.FunctionCodeLoader
-import misk.redis.lettuce.metrics.RedisClientMetrics
-import misk.redis2.metrics.RedisClientMetricsCommandLatencyRecorder
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
+import misk.inject.KAbstractModule
+import misk.inject.asSingleton
+import misk.inject.keyOf
+import misk.redis.lettuce.FunctionCodeLoader
+import misk.redis.lettuce.RedisClusterConfig
+import misk.redis.lettuce.connectionProviderTypeLiteral
+import misk.redis.lettuce.metrics.RedisClientMetrics
+import misk.redis.lettuce.redisUri
+import misk.redis.lettuce.standalone.clientResources
+import misk.redis2.metrics.RedisClientMetricsCommandLatencyRecorder
 
 /**
  * Internal module that handles the configuration of a clustered Redis service.
  *
- * This supports various replication groups, each configured with a [RedisClusterConfig] object.
- * It supports any key/value type with a corresponding [RedisCodec].
+ * This supports various replication groups, each configured with a [RedisClusterConfig] object. It supports any
+ * key/value type with a corresponding [RedisCodec].
  *
  * This module does the following:
- *
- * 1. **Creates a binding for a** [RedisClient] **for each replication group.**
- *    Each client will be configured using the corresponding [RedisConfig] object
- *    and will install a [RedisClientMetricsCommandLatencyRecorder] to record
- *    command latencies for [RedisClientMetrics].
- *
+ * 1. **Creates a binding for a** [RedisClient] **for each replication group.** Each client will be configured using the
+ *    corresponding [RedisConfig] object and will install a [RedisClientMetricsCommandLatencyRecorder] to record command
+ *    latencies for [RedisClientMetrics].
  * 2. **Creates a binding for a** [StatefulRedisClusterConnectionProvider] **using the** [RedisClusterConfig]'s
- *    `writer_endpoint`.
- *    This will either be a [PooledStatefulRedisClusterConnectionProvider] or a [SharedStatefulRedisClusterConnectionProvider],
- *    depending on whether connection pooling is enabled in the [RedisClusterConfig].
+ *    `writer_endpoint`. This will either be a [PooledStatefulRedisClusterConnectionProvider] or a
+ *    [SharedStatefulRedisClusterConnectionProvider], depending on whether connection pooling is enabled in the
+ *    [RedisClusterConfig].
  *
  * ---
  *
- * **Note:**
- * If there is only a single replication group, the bindings will not be qualified.
- * If there are multiple replication groups, bindings will be qualified using [Names.named]
- * with the replication group ID.
+ * **Note:** If there is only a single replication group, the bindings will not be qualified. If there are multiple
+ * replication groups, bindings will be qualified using [Names.named] with the replication group ID.
  */
-internal class RedisClusterModule<K : Any, V : Any> internal constructor(
+internal class RedisClusterModule<K : Any, V : Any>
+internal constructor(
   private val config: RedisClusterConfig,
   private val keyType: KClass<K>,
   private val valueType: KClass<V>,
@@ -60,8 +56,9 @@ internal class RedisClusterModule<K : Any, V : Any> internal constructor(
 
       val redisClientMetricsProvider = getProvider(RedisClientMetrics::class.java)
 
-      bind(clusterClientKey).toProvider {
-        redisClusterClient(
+      bind(clusterClientKey)
+        .toProvider {
+          redisClusterClient(
             with(clusterGroupConfig.configuration_endpoint) {
               redisUri {
                 withHost(hostname.takeIf { it.isNotBlank() } ?: "localhost")
@@ -70,26 +67,27 @@ internal class RedisClusterModule<K : Any, V : Any> internal constructor(
                 withSsl(clusterGroupConfig.use_ssl)
               }
             },
-            clientOptions = clusterClientOptions {
-              clusterTopologyRefreshOptions {
-                enablePeriodicRefresh()
-                refreshPeriod(15.seconds.toJavaDuration())
-                enableAllAdaptiveRefreshTriggers()
-              }
-              socketOptions {
-                connectTimeout(clusterGroupConfig.timeout_ms.milliseconds.toJavaDuration())
-              }
-            },
-            clientResources = clientResources {
-              commandLatencyRecorder(
+            clientOptions =
+              clusterClientOptions {
+                clusterTopologyRefreshOptions {
+                  enablePeriodicRefresh()
+                  refreshPeriod(15.seconds.toJavaDuration())
+                  enableAllAdaptiveRefreshTriggers()
+                }
+                socketOptions { connectTimeout(clusterGroupConfig.timeout_ms.milliseconds.toJavaDuration()) }
+              },
+            clientResources =
+              clientResources {
+                commandLatencyRecorder(
                   RedisClientMetricsCommandLatencyRecorder(
-                      replicationGroupId = replicationGroupId,
-                      clientMetrics = redisClientMetricsProvider.get(),
-                  ),
-              )
-            },
-        )
-      }.asSingleton()
+                    replicationGroupId = replicationGroupId,
+                    clientMetrics = redisClientMetricsProvider.get(),
+                  )
+                )
+              },
+          )
+        }
+        .asSingleton()
 
       // Add the client binding to the multibind for all clients
       multibind<AbstractRedisClient>().to(clusterClientKey)
@@ -98,30 +96,26 @@ internal class RedisClusterModule<K : Any, V : Any> internal constructor(
       val clientProvider = getProvider(clusterClientKey)
       clusterGroupConfig.function_code_file_path?.also { codeResourcePath ->
         multibind<FunctionCodeLoader>().toProvider {
-          ClusterFunctionCodeLoader(
-            clientProvider = clientProvider,
-            codeResourcePath = codeResourcePath
-          )
+          ClusterFunctionCodeLoader(clientProvider = clientProvider, codeResourcePath = codeResourcePath)
         }
       }
 
       with(clusterGroupConfig) {
         install(
-            StatefulRedisClusterConnectionProviderModule(
-                connectionProviderType =
-                    connectionProviderTypeLiteral<StatefulRedisClusterConnectionProvider<K, V>>(
-                        keyType = keyType,
-                        valueType = valueType,
-                    ),
-                replicationGroupId = replicationGroupId,
-                connectionPoolConfig = connection_pool,
-                clientName = client_name ?: "cluster",
-                codec = codec,
-                annotation = qualifier,
-            ),
+          StatefulRedisClusterConnectionProviderModule(
+            connectionProviderType =
+              connectionProviderTypeLiteral<StatefulRedisClusterConnectionProvider<K, V>>(
+                keyType = keyType,
+                valueType = valueType,
+              ),
+            replicationGroupId = replicationGroupId,
+            connectionPoolConfig = connection_pool,
+            clientName = client_name ?: "cluster",
+            codec = codec,
+            annotation = qualifier,
+          )
         )
       }
     }
   }
 }
-

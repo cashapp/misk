@@ -7,11 +7,13 @@ import com.launchdarkly.sdk.LDContext
 import com.launchdarkly.sdk.LDValue
 import com.launchdarkly.sdk.UserAttribute
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
+import java.util.function.Function
 import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.FeatureFlags
 import misk.feature.getEnum
 import misk.feature.getJson
+import misk.logging.QueuedLogCollector
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -25,10 +27,8 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import misk.logging.QueuedLogCollector
-import wisp.moshi.defaultKotlinMoshi
-import java.util.function.Function
 import wisp.launchdarkly.LaunchDarklyFeatureFlags as WispLaunchDarklyFeatureFlags
+import wisp.moshi.defaultKotlinMoshi
 
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)
@@ -50,32 +50,20 @@ internal class LaunchDarklyFeatureFlagsTest {
 
   @Test
   fun getEnum() {
-    Mockito
-      .`when`(client.stringVariationDetail(anyString(), any(LDContext::class.java), anyString()))
-      .thenReturn(
-        EvaluationDetail.fromValue(
-          "TYRANNOSAURUS", 1, EvaluationReason.targetMatch()
-        )
-      )
+    Mockito.`when`(client.stringVariationDetail(anyString(), any(LDContext::class.java), anyString()))
+      .thenReturn(EvaluationDetail.fromValue("TYRANNOSAURUS", 1, EvaluationReason.targetMatch()))
 
-    val feature = featureFlags.getEnum<Dinosaur>(
-      Feature("which-dinosaur"), "abcd",
-      Attributes(
-        mapOf(
-          "continent" to "europa",
-          "platform" to "lava"
-        ),
-        mapOf(
-          "age" to 100000
-        )
+    val feature =
+      featureFlags.getEnum<Dinosaur>(
+        Feature("which-dinosaur"),
+        "abcd",
+        Attributes(mapOf("continent" to "europa", "platform" to "lava"), mapOf("age" to 100000)),
       )
-    )
 
     assertThat(feature).isEqualTo(Dinosaur.TYRANNOSAURUS)
 
     val userCaptor = ArgumentCaptor.forClass(LDContext::class.java)
-    verify(client, times(1))
-      .stringVariationDetail(eq("which-dinosaur"), userCaptor.capture(), eq(""))
+    verify(client, times(1)).stringVariationDetail(eq("which-dinosaur"), userCaptor.capture(), eq(""))
 
     val user = userCaptor.value
 
@@ -86,8 +74,7 @@ internal class LaunchDarklyFeatureFlagsTest {
 
     val privateAttrsField = LDContext::class.java.getDeclaredField("privateAttributes")
     privateAttrsField.isAccessible = true
-    @Suppress("unchecked_cast")
-    val privateAttrs = privateAttrsField.get(user) as List<String>
+    @Suppress("unchecked_cast") val privateAttrs = privateAttrsField.get(user) as List<String>
     val continent = UserAttribute.forName("continent")
     val platform = UserAttribute.forName("platform")
     val age = UserAttribute.forName("age")
@@ -102,62 +89,39 @@ internal class LaunchDarklyFeatureFlagsTest {
 
   @Test
   fun getEnumThrowsOnDefault() {
-    Mockito
-      .`when`(client.stringVariationDetail(anyString(), any(LDContext::class.java), anyString()))
-      .thenReturn(
-        EvaluationDetail.fromValue(
-          "PTERODACTYL",
-          EvaluationDetail.NO_VARIATION,
-          EvaluationReason.off()
-        )
-      )
+    Mockito.`when`(client.stringVariationDetail(anyString(), any(LDContext::class.java), anyString()))
+      .thenReturn(EvaluationDetail.fromValue("PTERODACTYL", EvaluationDetail.NO_VARIATION, EvaluationReason.off()))
 
-    assertThrows<IllegalStateException> {
-      featureFlags.getEnum<Dinosaur>(
-        Feature("which-dinosaur"), "a-token"
-      )
-    }
+    assertThrows<IllegalStateException> { featureFlags.getEnum<Dinosaur>(Feature("which-dinosaur"), "a-token") }
   }
 
   @Test
   fun getEnumThrowsOnEvalError() {
-    Mockito
-      .`when`(client.stringVariationDetail(anyString(), any(LDContext::class.java), anyString()))
+    Mockito.`when`(client.stringVariationDetail(anyString(), any(LDContext::class.java), anyString()))
       .thenReturn(
         EvaluationDetail.fromValue(
           "PTERODACTYL",
           EvaluationDetail.NO_VARIATION,
-          EvaluationReason.error(EvaluationReason.ErrorKind.MALFORMED_FLAG)
+          EvaluationReason.error(EvaluationReason.ErrorKind.MALFORMED_FLAG),
         )
       )
 
-    assertThrows<RuntimeException> {
-      featureFlags.getEnum<Dinosaur>(
-        Feature("which-dinosaur"), "a-token"
-      )
-    }
+    assertThrows<RuntimeException> { featureFlags.getEnum<Dinosaur>(Feature("which-dinosaur"), "a-token") }
   }
 
   data class JsonFeature(val value: String)
 
   @Test
   fun getJson() {
-    val json = """{
-      "value" : "dino"
-    }
-    """.trimIndent()
-    Mockito
-      .`when`(
-        client.jsonValueVariationDetail(
-          anyString(), any(LDContext::class.java),
-          any(LDValue::class.java)
-        )
-      )
-      .thenReturn(
-        EvaluationDetail.fromValue(
-          LDValue.parse(json), 1, EvaluationReason.targetMatch()
-        )
-      )
+    val json =
+      """
+      {
+            "value" : "dino"
+          }
+      """
+        .trimIndent()
+    Mockito.`when`(client.jsonValueVariationDetail(anyString(), any(LDContext::class.java), any(LDValue::class.java)))
+      .thenReturn(EvaluationDetail.fromValue(LDValue.parse(json), 1, EvaluationReason.targetMatch()))
 
     val feature = featureFlags.getJson<JsonFeature>(Feature("which-dinosaur"), "abcd")
 
@@ -166,23 +130,16 @@ internal class LaunchDarklyFeatureFlagsTest {
 
   @Test
   fun getJsonWithUnknownFieldsLogsOnce() {
-    val json = """{
-      "value" : "dino",
-      "new_field": "more dinos"
-    }
-    """.trimIndent()
-    Mockito
-      .`when`(
-        client.jsonValueVariationDetail(
-          anyString(), any(LDContext::class.java),
-          any(LDValue::class.java)
-        )
-      )
-      .thenReturn(
-        EvaluationDetail.fromValue(
-          LDValue.parse(json), 1, EvaluationReason.targetMatch()
-        )
-      )
+    val json =
+      """
+      {
+            "value" : "dino",
+            "new_field": "more dinos"
+          }
+      """
+        .trimIndent()
+    Mockito.`when`(client.jsonValueVariationDetail(anyString(), any(LDContext::class.java), any(LDValue::class.java)))
+      .thenReturn(EvaluationDetail.fromValue(LDValue.parse(json), 1, EvaluationReason.targetMatch()))
 
     val feature = featureFlags.getJson<JsonFeature>(Feature("which-dinosaur"), "abcd")
 
@@ -195,72 +152,66 @@ internal class LaunchDarklyFeatureFlagsTest {
     // Check log events.
     val logEvents = logCollector.takeEvents(WispLaunchDarklyFeatureFlags::class)
     assertThat(logEvents).extracting(Function { it.level }).containsExactly(Level.WARN)
-    assertThat(logEvents).extracting(Function { it.message })
-      .containsExactly(
-        "failed to parse JSON due to unknown fields. ignoring those fields and trying again"
-      )
+    assertThat(logEvents)
+      .extracting(Function { it.message })
+      .containsExactly("failed to parse JSON due to unknown fields. ignoring those fields and trying again")
   }
 
   @Test
   fun invalidKeys() {
-    assertThrows<IllegalArgumentException> {
-      featureFlags.getEnum<Dinosaur>(Feature("which-dinosaur"), "")
-    }
+    assertThrows<IllegalArgumentException> { featureFlags.getEnum<Dinosaur>(Feature("which-dinosaur"), "") }
   }
 
   enum class Dinosaur {
     PTERODACTYL,
-    TYRANNOSAURUS
+    TYRANNOSAURUS,
   }
 
   @Test
   fun attributes() {
-    Mockito
-      .`when`(client.stringVariationDetail(anyString(), any(LDContext::class.java), anyString()))
-      .thenReturn(
-        EvaluationDetail.fromValue(
-          "value",
-          1,
-          EvaluationReason.targetMatch()
+    Mockito.`when`(client.stringVariationDetail(anyString(), any(LDContext::class.java), anyString()))
+      .thenReturn(EvaluationDetail.fromValue("value", 1, EvaluationReason.targetMatch()))
+
+    val attributes =
+      Attributes(
+        mapOf(
+          "secondary" to "secondary value",
+          "ip" to "127.0.0.1",
+          "email" to "email@value.com",
+          "name" to "name value",
+          "avatar" to "avatar value",
+          "firstName" to "firstName value",
+          "lastName" to "lastName value",
+          "country" to "US",
+          "custom1" to "custom1 value",
+          "custom2" to "custom2 value",
         )
       )
-
-    val attributes = Attributes(
-      mapOf(
-        "secondary" to "secondary value",
-        "ip" to "127.0.0.1",
-        "email" to "email@value.com",
-        "name" to "name value",
-        "avatar" to "avatar value",
-        "firstName" to "firstName value",
-        "lastName" to "lastName value",
-        "country" to "US",
-        "custom1" to "custom1 value",
-        "custom2" to "custom2 value"
-      )
-    )
     val feature = featureFlags.getString(Feature("key"), "user", attributes)
     assertThat(feature).isEqualTo("value")
 
     val userCaptor = ArgumentCaptor.forClass(LDContext::class.java)
-    verify(client, times(1))
-      .stringVariationDetail(eq("key"), userCaptor.capture(), eq(""))
+    verify(client, times(1)).stringVariationDetail(eq("key"), userCaptor.capture(), eq(""))
 
     val user = userCaptor.value
     // NB: LDContext properties are package-local so we can't read them here.
     // Create expected user and compare against actual.
-    val expected = LDContext.builder("user")
-      .name("name value")
-      .set("ip", "127.0.0.1")
-      .set("email", "email@value.com")
-      .set("avatar", "avatar value")
-      .set("firstName", "firstName value")
-      .set("lastName", "lastName value")
-      .set("country", "US")
-      .set("secondary", "secondary value").privateAttributes("secondary")
-      .set("custom1", "custom1 value").privateAttributes("custom1")
-      .set("custom2", "custom2 value").privateAttributes("custom2")
-      .build()
+    val expected =
+      LDContext.builder("user")
+        .name("name value")
+        .set("ip", "127.0.0.1")
+        .set("email", "email@value.com")
+        .set("avatar", "avatar value")
+        .set("firstName", "firstName value")
+        .set("lastName", "lastName value")
+        .set("country", "US")
+        .set("secondary", "secondary value")
+        .privateAttributes("secondary")
+        .set("custom1", "custom1 value")
+        .privateAttributes("custom1")
+        .set("custom2", "custom2 value")
+        .privateAttributes("custom2")
+        .build()
 
     assertThat(user).isEqualTo(expected)
   }

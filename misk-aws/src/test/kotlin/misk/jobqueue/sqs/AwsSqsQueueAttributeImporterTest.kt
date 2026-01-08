@@ -2,6 +2,8 @@ package misk.jobqueue.sqs
 
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.CreateQueueRequest
+import jakarta.inject.Inject
+import java.util.concurrent.TimeUnit
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
 import misk.testing.MiskExternalDependency
@@ -10,14 +12,11 @@ import misk.testing.MiskTestModule
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class AwsSqsQueueAttributeImporterTest {
   @MiskExternalDependency private val dockerSqs = DockerSqs
-  @MiskTestModule private val module =
-    SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client)
+  @MiskTestModule private val module = SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client)
 
   @Inject private lateinit var sqs: AmazonSQS
   @Inject private lateinit var queue: JobQueue
@@ -26,7 +25,8 @@ internal class AwsSqsQueueAttributeImporterTest {
 
   private lateinit var queueName: QueueName
 
-  @BeforeEach fun createQueues() {
+  @BeforeEach
+  fun createQueues() {
     // Ensure that each test case runs on a unique queue
     queueName = QueueName("sqs_job_queue_test")
     sqs.createQueue(
@@ -41,22 +41,23 @@ internal class AwsSqsQueueAttributeImporterTest {
     )
   }
 
-  @Test fun importQueueAttributes() {
+  @Test
+  fun importQueueAttributes() {
     importer.import(queueName)
     queue.enqueue(queueName, "ok")
     queue.enqueue(queueName, "ok")
     queue.enqueue(queueName, "ok")
     queue.enqueue(queueName, "ok")
 
-    await()
-      .atMost(1, TimeUnit.SECONDS)
-      .until {
-        sqsMetrics.sqsApproxNumberOfMessages.labels(
+    await().atMost(1, TimeUnit.SECONDS).until {
+      sqsMetrics.sqsApproxNumberOfMessages
+        .labels(
           AwsSqsQueueAttributeImporter.metricNamespace,
           AwsSqsQueueAttributeImporter.metricStat,
           queueName.value,
-          queueName.value
-        ).get() == 4.0
-      }
+          queueName.value,
+        )
+        .get() == 4.0
+    }
   }
 }

@@ -18,8 +18,7 @@ class FakeMetricsTest {
   @Test
   internal fun `count happy path`() {
     assertThat(registry.get("gets", "status" to "200")).isNull()
-    val counter = metrics.counter("gets", "-", labelNames = listOf("status"))
-      .labels("200")
+    val counter = metrics.counter("gets", "-", labelNames = listOf("status")).labels("200")
     counter.inc()
     assertThat(registry.get("gets", "status" to "200")).isEqualTo(1.0)
     counter.inc()
@@ -29,8 +28,7 @@ class FakeMetricsTest {
   @Test
   internal fun `gauge happy path`() {
     assertThat(registry.get("thread_count", "state" to "running")).isNull()
-    val gauge = metrics.gauge("thread_count", "-", labelNames = listOf("state"))
-      .labels("running")
+    val gauge = metrics.gauge("thread_count", "-", labelNames = listOf("state")).labels("running")
     gauge.set(20.0)
     assertThat(registry.get("thread_count", "state" to "running")).isEqualTo(20.0)
     gauge.set(30.0)
@@ -129,13 +127,14 @@ class FakeMetricsTest {
     val quantiles = mapOf(0.5 to 0.5, 0.99 to 0.99)
     metrics.legacyHistogram("histogram", "-", listOf("foo"), quantiles).record(1.0, "bar")
 
-    assertThat(registry.getAllSamples().toList()).contains(
-      Sample("counter_total", listOf("foo"), listOf("bar"), 1.0),
-      Sample("gauge", listOf("foo"), listOf("bar"), 1.0),
-      Sample("histogram", listOf("foo", "quantile"), listOf("bar", "0.5"), 1.0),
-      Sample("histogram", listOf("foo", "quantile"), listOf("bar", "0.99"), 1.0),
-      Sample("histogram_count", listOf("foo"), listOf("bar"), 1.0),
-      Sample("histogram_sum", listOf("foo"), listOf("bar"), 1.0),
-    )
+    assertThat(registry.getAllSamples().toList())
+      .contains(
+        Sample("counter_total", listOf("foo"), listOf("bar"), 1.0),
+        Sample("gauge", listOf("foo"), listOf("bar"), 1.0),
+        Sample("histogram", listOf("foo", "quantile"), listOf("bar", "0.5"), 1.0),
+        Sample("histogram", listOf("foo", "quantile"), listOf("bar", "0.99"), 1.0),
+        Sample("histogram_count", listOf("foo"), listOf("bar"), 1.0),
+        Sample("histogram_sum", listOf("foo"), listOf("bar"), 1.0),
+      )
   }
 }

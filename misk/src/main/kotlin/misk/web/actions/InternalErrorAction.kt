@@ -1,9 +1,9 @@
 package misk.web.actions
 
-import misk.security.authz.Unauthenticated
-import misk.web.Get
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.security.authz.Unauthenticated
+import misk.web.Get
 
 @Singleton
 class InternalErrorAction @Inject constructor() : WebAction {

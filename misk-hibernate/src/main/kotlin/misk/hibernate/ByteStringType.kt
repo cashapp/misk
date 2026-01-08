@@ -1,12 +1,12 @@
 package misk.hibernate
 
-import okio.ByteString
-import org.hibernate.engine.spi.SharedSessionContractImplementor
-import org.hibernate.usertype.UserType
 import java.io.Serializable
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
+import okio.ByteString
+import org.hibernate.engine.spi.SharedSessionContractImplementor
+import org.hibernate.usertype.UserType
 
 /** Binds ByteString in the DB to a varbinary in MySQL. */
 internal object ByteStringType : UserType {
@@ -24,12 +24,7 @@ internal object ByteStringType : UserType {
 
   override fun disassemble(value: Any) = value as ByteString
 
-  override fun nullSafeSet(
-    st: PreparedStatement,
-    value: Any?,
-    index: Int,
-    session: SharedSessionContractImplementor?
-  ) {
+  override fun nullSafeSet(st: PreparedStatement, value: Any?, index: Int, session: SharedSessionContractImplementor?) {
     if (value == null) {
       st.setNull(index, Types.VARBINARY)
     } else {
@@ -41,7 +36,7 @@ internal object ByteStringType : UserType {
     rs: ResultSet,
     names: Array<out String>,
     session: SharedSessionContractImplementor?,
-    owner: Any?
+    owner: Any?,
   ): Any? {
     val result = rs.getBytes(names[0])
     return if (result != null) ByteString.of(*result) else null

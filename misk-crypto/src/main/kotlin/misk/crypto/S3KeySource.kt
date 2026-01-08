@@ -6,39 +6,38 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.model.AmazonS3Exception
 import com.google.inject.Inject
 import misk.config.MiskConfig
-import wisp.deployment.Deployment
 import misk.logging.getLogger
+import wisp.deployment.Deployment
 
 /**
- * [S3KeySource] implements an [ExternalKeySource] that fetches Tink keysets from an S3
- * bucket. Keysets are indexed by an alias and a region, and are encrypted with a key in the KMS
- * using an envelope key encryption scheme. Each Keyset is protected by a KMS key in each service
- * region.
+ * [S3KeySource] implements an [ExternalKeySource] that fetches Tink keysets from an S3 bucket. Keysets are indexed by
+ * an alias and a region, and are encrypted with a key in the KMS using an envelope key encryption scheme. Each Keyset
+ * is protected by a KMS key in each service region.
  *
- * For example, if we are to load a key aliased by "example_key" in the staging environment, we'd
- * expect the following layout:
+ * For example, if we are to load a key aliased by "example_key" in the staging environment, we'd expect the following
+ * layout:
  *
- * bucket
- *  ↳ example_key
- *    ↳ us-east-1
- *    ↳ us-west-2
+ * bucket ↳ example_key ↳ us-east-1 ↳ us-west-2
  *
- *  And the metadata of the region-specified object will contain the KMS key arn that was used to
- *  protect it under the key x-amz-meta-kms-key-arn, and the type of the key under
- *  x-amz-meta-key-type. These keys are exposed in the S3 api without the `x-amz-meta-` prefix.
+ * And the metadata of the region-specified object will contain the KMS key arn that was used to protect it under the
+ * key x-amz-meta-kms-key-arn, and the type of the key under x-amz-meta-key-type. These keys are exposed in the S3 api
+ * without the `x-amz-meta-` prefix.
  *
- *  The envelope scheme itself is from misk-crypto and is defined in [KeyReader]
+ * The envelope scheme itself is from misk-crypto and is defined in [KeyReader]
  *
- *  If a requested key alias does not exist, this will raise a [ExternalKeyManagerException]
+ * If a requested key alias does not exist, this will raise a [ExternalKeyManagerException]
  */
-class S3KeySource @Inject constructor(
+class S3KeySource
+@Inject
+constructor(
   private val deployment: Deployment,
   defaultS3: AmazonS3,
   @ExternalDataKeys val allKeyAliases: Map<KeyAlias, KeyType>,
   @Inject(optional = true)
-  private val bucketNameSource: BucketNameSource = object : BucketNameSource {
-    override fun getBucketName(deployment: Deployment) = deployment.mapToEnvironmentName()
-  },
+  private val bucketNameSource: BucketNameSource =
+    object : BucketNameSource {
+      override fun getBucketName(deployment: Deployment) = deployment.mapToEnvironmentName()
+    },
 
   // The data keys bucket might live in a different region than the region this service executes
   // in; if BucketNameSource provides a non-standard bucket region, we need to create a new S3
@@ -46,24 +45,22 @@ class S3KeySource @Inject constructor(
   private val awsCredentials: AWSCredentialsProvider,
 ) : ExternalKeySource {
 
-  private val s3: AmazonS3 = bucketNameSource.getBucketRegion(deployment)?.let { region ->
-    if (region != defaultS3.regionName) {
-      logger.info("creating S3ExternalKeyManager S3 client for $region")
-      AmazonS3ClientBuilder
-        .standard()
-        .withRegion(region)
-        .withCredentials(awsCredentials)
-        .build()
-    } else null
-  } ?: defaultS3
+  private val s3: AmazonS3 =
+    bucketNameSource.getBucketRegion(deployment)?.let { region ->
+      if (region != defaultS3.regionName) {
+        logger.info("creating S3ExternalKeyManager S3 client for $region")
+        AmazonS3ClientBuilder.standard().withRegion(region).withCredentials(awsCredentials).build()
+      } else null
+    } ?: defaultS3
 
   // N.B. The path we're using for the object is based on _our_ region, not where the bucket lives
   private fun objectPath(alias: String): String {
-    val basename = if (allKeyAliases[alias] == KeyType.HYBRID_ENCRYPT) {
-      "public"
-    } else {
-      s3.regionName.lowercase()
-    }
+    val basename =
+      if (allKeyAliases[alias] == KeyType.HYBRID_ENCRYPT) {
+        "public"
+      } else {
+        s3.regionName.lowercase()
+      }
 
     return "$alias/$basename"
   }

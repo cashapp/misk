@@ -2,17 +2,16 @@ package misk.moshi.time
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import java.time.Duration
 import misk.MiskTestingServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.Duration
 
 @MiskTest(startService = false)
 internal class DurationAdapterTest {
-  @MiskTestModule
-  val module = MiskTestingServiceModule()
+  @MiskTestModule val module = MiskTestingServiceModule()
 
   private val moshi: Moshi = Moshi.Builder().add(DurationAdapter).add(KotlinJsonAdapterFactory()).build()
 
@@ -72,11 +71,14 @@ internal class DurationAdapterTest {
 
   @Test
   fun encodeAndDecodeWithDataClass() {
-    val json = """
-        |{
-        |  "timeout": "PT30S",
-        |  "retryDelay": "PT5S"
-        |}""".trimMargin()
+    val json =
+      """
+      |{
+      |  "timeout": "PT30S",
+      |  "retryDelay": "PT5S"
+      |}
+      """
+        .trimMargin()
     val value = DurationPair(Duration.ofSeconds(30), Duration.ofSeconds(5))
     val jsonAdapter = moshi.adapter(DurationPair::class.java).indent("  ")
     assertThat(jsonAdapter.toJson(value)).isEqualTo(json)
@@ -85,11 +87,14 @@ internal class DurationAdapterTest {
 
   @Test
   fun nullDurationInDataClass() {
-    val json = """
-        |{
-        |  "timeout": null,
-        |  "retryDelay": null
-        |}""".trimMargin()
+    val json =
+      """
+      |{
+      |  "timeout": null,
+      |  "retryDelay": null
+      |}
+      """
+        .trimMargin()
     val value = DurationPair(null, null)
     val jsonAdapter = moshi.adapter(DurationPair::class.java).indent("  ").serializeNulls()
     assertThat(jsonAdapter.toJson(value)).isEqualTo(json)

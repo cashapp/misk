@@ -6,15 +6,17 @@ import misk.web.dashboard.AdminDashboard
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.dashboard.DashboardModule
 
-class GuiceDashboardTabModule: KAbstractModule() {
+class GuiceDashboardTabModule : KAbstractModule() {
   override fun configure() {
     install(WebActionModule.create<GuiceTabIndexAction>())
-    install(DashboardModule.createHotwireTab<AdminDashboard, AdminDashboardAccess>(
-      slug = "guice",
-      urlPathPrefix = GuiceTabIndexAction.PATH,
-      menuCategory = "Container Admin",
-      menuLabel = "Guice",
-    ))
+    install(
+      DashboardModule.createHotwireTab<AdminDashboard, AdminDashboardAccess>(
+        slug = "guice",
+        urlPathPrefix = GuiceTabIndexAction.PATH,
+        menuCategory = "Container Admin",
+        menuLabel = "Guice",
+      )
+    )
     bindOptionalDefault<GuiceSourceUrlProvider>().to<GitHubSourceUrlProvider>()
   }
 }

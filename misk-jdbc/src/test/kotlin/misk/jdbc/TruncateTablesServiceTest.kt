@@ -4,6 +4,7 @@ import com.google.inject.util.Providers
 import jakarta.inject.Inject
 import jakarta.inject.Qualifier
 import misk.MiskTestingServiceModule
+import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
@@ -12,13 +13,11 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import misk.config.Config
 import wisp.deployment.TESTING
 
 @MiskTest(startService = true)
 internal class TruncateTablesServiceTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject @TestDatasource lateinit var transacter: Transacter
   @Inject @TestDatasource lateinit var dataSourceProvider: DataSourceService
@@ -48,8 +47,7 @@ internal class TruncateTablesServiceTest {
     assertThat(rowCount("movies")).isGreaterThan(0)
 
     // Start up TruncateTablesService. The inserted data should be truncated.
-    val service =
-      TruncateTablesService(TestDatasource::class, dataSourceProvider, Providers.of(transacter))
+    val service = TruncateTablesService(TestDatasource::class, dataSourceProvider, Providers.of(transacter))
     service.startAsync()
     service.awaitRunning()
     assertThat(rowCount("schema_version")).isGreaterThan(0)
@@ -58,12 +56,13 @@ internal class TruncateTablesServiceTest {
 
   @Test
   fun startUpStatements() {
-    val service = TruncateTablesService(
-      TestDatasource::class,
-      dataSourceProvider,
-      Providers.of(transacter),
-      startUpStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')")
-    )
+    val service =
+      TruncateTablesService(
+        TestDatasource::class,
+        dataSourceProvider,
+        Providers.of(transacter),
+        startUpStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')"),
+      )
 
     assertThat(rowCount("movies")).isEqualTo(0)
     service.startAsync()
@@ -73,12 +72,13 @@ internal class TruncateTablesServiceTest {
 
   @Test
   fun shutDownStatements() {
-    val service = TruncateTablesService(
-      TestDatasource::class,
-      dataSourceProvider,
-      Providers.of(transacter),
-      shutDownStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')")
-    )
+    val service =
+      TruncateTablesService(
+        TestDatasource::class,
+        dataSourceProvider,
+        Providers.of(transacter),
+        shutDownStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')"),
+      )
 
     service.startAsync()
     service.awaitRunning()
@@ -92,9 +92,7 @@ internal class TruncateTablesServiceTest {
   private fun rowCount(table: String): Int {
     return transacter.transaction { connection ->
       connection.createStatement().use { statement ->
-        statement.executeQuery("SELECT count(*) FROM $table").map {
-          it.getInt(1)
-        }[0]
+        statement.executeQuery("SELECT count(*) FROM $table").map { it.getInt(1) }[0]
       }
     }
   }
@@ -111,7 +109,5 @@ internal class TruncateTablesServiceTest {
 
   data class TestConfig(val data_source: DataSourceConfig) : Config
 
-  @Qualifier
-  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-  annotation class TestDatasource
+  @Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) annotation class TestDatasource
 }

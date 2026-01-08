@@ -2,20 +2,15 @@ package misk.jdbc
 
 import io.opentracing.Tracer
 import io.opentracing.propagation.Format
+import io.opentracing.propagation.TextMap
+import java.lang.RuntimeException
+import javax.sql.DataSource
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder
 import net.ttddyy.dsproxy.transform.QueryTransformer
 import net.ttddyy.dsproxy.transform.TransformInfo
-import javax.sql.DataSource
-import io.opentracing.propagation.TextMap
-import java.lang.RuntimeException
 
-/***
- * On the fly decorates queries with the span context, so the query call can be traced all the way through Vitess
- */
-class SpanInjector(
-  val tracer: Tracer?,
-  val config: DataSourceConfig
-) : QueryTransformer, DataSourceDecorator {
+/** On the fly decorates queries with the span context, so the query call can be traced all the way through Vitess */
+class SpanInjector(val tracer: Tracer?, val config: DataSourceConfig) : QueryTransformer, DataSourceDecorator {
   override fun decorate(dataSource: DataSource): DataSource {
     if (config.type != DataSourceType.VITESS_MYSQL || tracer == null) return dataSource
     return ProxyDataSourceBuilder(dataSource).queryTransformer(this).build()
@@ -44,8 +39,7 @@ class StringBuilderCarrier : TextMap {
   }
 
   override fun put(key: String?, value: String?) {
-    if (key != null && value != null)
-      map.put(key, value)
+    if (key != null && value != null) map.put(key, value)
   }
 
   override fun toString(): String {

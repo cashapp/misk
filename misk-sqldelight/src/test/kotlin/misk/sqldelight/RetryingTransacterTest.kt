@@ -12,8 +12,7 @@ import org.junit.jupiter.api.assertThrows
 
 @MiskTest(startService = true)
 class RetryingTransacterTest {
-  @MiskTestModule
-  val module = SqlDelightTestModule()
+  @MiskTestModule val module = SqlDelightTestModule()
 
   class NonRetriableException() : RuntimeException()
 
@@ -23,10 +22,9 @@ class RetryingTransacterTest {
   private val title = "Fellowship of the Ring"
   private val newTitle = "The Two Towers"
 
-  @Test fun transactionRetriesAndSucceeds() {
-    moviesDatabase.transaction {
-      moviesDatabase.moviesQueries.createMovie(id, title)
-    }
+  @Test
+  fun transactionRetriesAndSucceeds() {
+    moviesDatabase.transaction { moviesDatabase.moviesQueries.createMovie(id, title) }
 
     var version = -2L
 
@@ -35,36 +33,29 @@ class RetryingTransacterTest {
       moviesDatabase.moviesQueries.updateMovie(newTitle, Movies.Version(version), id)
     }
 
-    val retrievedTitle = moviesDatabase.transactionWithResult {
-      moviesDatabase.moviesQueries.getMovie(id).executeAsOne().title
-    }
+    val retrievedTitle =
+      moviesDatabase.transactionWithResult { moviesDatabase.moviesQueries.getMovie(id).executeAsOne().title }
 
     assertThat(retrievedTitle).isEqualTo(newTitle)
   }
 
-  @Test fun transactionRetriesAndExhaustsFailures() {
-    moviesDatabase.transaction {
-      moviesDatabase.moviesQueries.createMovie(id, title)
-    }
+  @Test
+  fun transactionRetriesAndExhaustsFailures() {
+    moviesDatabase.transaction { moviesDatabase.moviesQueries.createMovie(id, title) }
 
     assertThrows<OptimisticLockException> {
-      moviesDatabase.transaction {
-        moviesDatabase.moviesQueries.updateMovie(newTitle, Movies.Version(-3L), id)
-      }
+      moviesDatabase.transaction { moviesDatabase.moviesQueries.updateMovie(newTitle, Movies.Version(-3L), id) }
     }
 
-
-    val retrievedTitle = moviesDatabase.transactionWithResult {
-      moviesDatabase.moviesQueries.getMovie(id).executeAsOne().title
-    }
+    val retrievedTitle =
+      moviesDatabase.transactionWithResult { moviesDatabase.moviesQueries.getMovie(id).executeAsOne().title }
 
     assertThat(retrievedTitle).isEqualTo(title)
   }
 
-  @Test fun transactionIgnoresNonRetriableExceptions() {
-    moviesDatabase.transaction {
-      moviesDatabase.moviesQueries.createMovie(id, title)
-    }
+  @Test
+  fun transactionIgnoresNonRetriableExceptions() {
+    moviesDatabase.transaction { moviesDatabase.moviesQueries.createMovie(id, title) }
     var attempts = 0
     assertThrows<NonRetriableException> {
       moviesDatabase.transaction {
@@ -75,38 +66,35 @@ class RetryingTransacterTest {
     }
     assertThat(attempts).isEqualTo(1)
 
-    val retrievedTitle = moviesDatabase.transactionWithResult {
-      moviesDatabase.moviesQueries.getMovie(id).executeAsOne().title
-    }
+    val retrievedTitle =
+      moviesDatabase.transactionWithResult { moviesDatabase.moviesQueries.getMovie(id).executeAsOne().title }
 
     assertThat(retrievedTitle).isEqualTo(title)
   }
 
-  @Test fun transactionWithResultRetriesAndSucceeds() {
-    moviesDatabase.transaction {
-      moviesDatabase.moviesQueries.createMovie(id, title)
-    }
+  @Test
+  fun transactionWithResultRetriesAndSucceeds() {
+    moviesDatabase.transaction { moviesDatabase.moviesQueries.createMovie(id, title) }
 
     var version = -2L
 
-    val updatedTitle = moviesDatabase.transactionWithResult {
-      version += 1
-      moviesDatabase.moviesQueries.updateMovie(newTitle, Movies.Version(version), id)
-      moviesDatabase.moviesQueries.getMovie(id).executeAsOne().title
-    }
+    val updatedTitle =
+      moviesDatabase.transactionWithResult {
+        version += 1
+        moviesDatabase.moviesQueries.updateMovie(newTitle, Movies.Version(version), id)
+        moviesDatabase.moviesQueries.getMovie(id).executeAsOne().title
+      }
     assertThat(updatedTitle).isEqualTo(newTitle)
 
-    val retrievedTitle = moviesDatabase.transactionWithResult {
-      moviesDatabase.moviesQueries.getMovie(id).executeAsOne().title
-    }
+    val retrievedTitle =
+      moviesDatabase.transactionWithResult { moviesDatabase.moviesQueries.getMovie(id).executeAsOne().title }
 
     assertThat(retrievedTitle).isEqualTo(newTitle)
   }
 
-  @Test fun transactionWithResultExhaustsFailures() {
-    moviesDatabase.transaction {
-      moviesDatabase.moviesQueries.createMovie(id, title)
-    }
+  @Test
+  fun transactionWithResultExhaustsFailures() {
+    moviesDatabase.transaction { moviesDatabase.moviesQueries.createMovie(id, title) }
 
     assertThrows<OptimisticLockException> {
       moviesDatabase.transactionWithResult {
@@ -114,18 +102,15 @@ class RetryingTransacterTest {
       }
     }
 
-
-    val retrievedTitle = moviesDatabase.transactionWithResult {
-      moviesDatabase.moviesQueries.getMovie(id).executeAsOne().title
-    }
+    val retrievedTitle =
+      moviesDatabase.transactionWithResult { moviesDatabase.moviesQueries.getMovie(id).executeAsOne().title }
 
     assertThat(retrievedTitle).isEqualTo(title)
   }
 
-  @Test fun transactionWithResultIgnoresNonRetriableExceptions() {
-    moviesDatabase.transaction {
-      moviesDatabase.moviesQueries.createMovie(id, title)
-    }
+  @Test
+  fun transactionWithResultIgnoresNonRetriableExceptions() {
+    moviesDatabase.transaction { moviesDatabase.moviesQueries.createMovie(id, title) }
     var attempts = 0
     assertThrows<NonRetriableException> {
       moviesDatabase.transactionWithResult {
@@ -136,14 +121,14 @@ class RetryingTransacterTest {
     }
     assertThat(attempts).isEqualTo(1)
 
-    val retrievedTitle = moviesDatabase.transactionWithResult {
-      moviesDatabase.moviesQueries.getMovie(id).executeAsOne().title
-    }
+    val retrievedTitle =
+      moviesDatabase.transactionWithResult { moviesDatabase.moviesQueries.getMovie(id).executeAsOne().title }
 
     assertThat(retrievedTitle).isEqualTo(title)
   }
 
-  @Test fun nestedRetries() {
+  @Test
+  fun nestedRetries() {
     var tries = 0
     assertThrows<OptimisticLockException> {
       moviesDatabase.transaction {

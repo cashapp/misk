@@ -11,48 +11,46 @@ import io.ktor.client.plugins.logging.SIMPLE
 import io.ktor.client.plugins.sse.SSE
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.serialization.kotlinx.json.json
-import io.modelcontextprotocol.kotlin.sdk.types.ClientCapabilities
-import io.modelcontextprotocol.kotlin.sdk.types.EmptyJsonObject
-import io.modelcontextprotocol.kotlin.sdk.types.Implementation
 import io.modelcontextprotocol.kotlin.sdk.client.Client
 import io.modelcontextprotocol.kotlin.sdk.client.ClientOptions
 import io.modelcontextprotocol.kotlin.sdk.client.StreamableHttpClientTransport
 import io.modelcontextprotocol.kotlin.sdk.client.WebSocketClientTransport
 import io.modelcontextprotocol.kotlin.sdk.shared.AbstractTransport
+import io.modelcontextprotocol.kotlin.sdk.types.ClientCapabilities
+import io.modelcontextprotocol.kotlin.sdk.types.EmptyJsonObject
+import io.modelcontextprotocol.kotlin.sdk.types.Implementation
 import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Protocol.HTTP_1_1
 
-fun OkHttpClient.asKtorClient(webSocket: Boolean = true): HttpClient = HttpClient(OkHttp) {
+fun OkHttpClient.asKtorClient(webSocket: Boolean = true): HttpClient =
+  HttpClient(OkHttp) {
+    engine { preconfigured = this@asKtorClient.newBuilder().protocols(listOf(HTTP_1_1)).build() }
 
-  engine {
-    preconfigured = this@asKtorClient.newBuilder().protocols(listOf(HTTP_1_1)).build()
-  }
-
-  if (webSocket) {
-    install(WebSockets)
-  } else {
-    install(SSE)
-    install(ContentNegotiation) {
-      json(
-        Json {
-          ignoreUnknownKeys = true
-          explicitNulls = false
-          isLenient = true
-        },
-      )
+    if (webSocket) {
+      install(WebSockets)
+    } else {
+      install(SSE)
+      install(ContentNegotiation) {
+        json(
+          Json {
+            ignoreUnknownKeys = true
+            explicitNulls = false
+            isLenient = true
+          }
+        )
+      }
     }
-  }
 
-  install(Logging) {
-    logger = Logger.SIMPLE
-    level = LogLevel.INFO
-    format = LoggingFormat.OkHttp
-  }
+    install(Logging) {
+      logger = Logger.SIMPLE
+      level = LogLevel.INFO
+      format = LoggingFormat.OkHttp
+    }
 
-  expectSuccess = false
-}
+    expectSuccess = false
+  }
 
 fun HttpUrl.normalizeWebSocketUrlString(): String {
   return when (scheme) {
@@ -75,11 +73,8 @@ fun HttpClient.asMcpStreamableHttpTransport(baseUrl: HttpUrl, path: String = "/m
 suspend fun AbstractTransport.asMcpClient(
   implementationName: String,
   version: String,
-  options: ClientOptions = ClientOptions()
-) =
-  Client(Implementation(name = implementationName, version = version), options).also {
-    it.connect(this)
-  }
+  options: ClientOptions = ClientOptions(),
+) = Client(Implementation(name = implementationName, version = version), options).also { it.connect(this) }
 
 suspend fun OkHttpClient.asMcpStreamableHttpClient(
   baseUrl: HttpUrl,
@@ -91,17 +86,20 @@ suspend fun OkHttpClient.asMcpStreamableHttpClient(
   supportsSampling: Boolean = true,
   supportsElicitation: Boolean = false,
   supportsRoots: Boolean = false,
-) = asKtorClient(false)
-  .asMcpStreamableHttpTransport(baseUrl, path)
-  .asMcpClient(
-    implementationName, version, clientOptionsFor(
-      enforceStrictCapabilities,
-      supportsExperimental,
-      supportsSampling,
-      supportsElicitation,
-      supportsRoots,
+) =
+  asKtorClient(false)
+    .asMcpStreamableHttpTransport(baseUrl, path)
+    .asMcpClient(
+      implementationName,
+      version,
+      clientOptionsFor(
+        enforceStrictCapabilities,
+        supportsExperimental,
+        supportsSampling,
+        supportsElicitation,
+        supportsRoots,
+      ),
     )
-  )
 
 suspend fun OkHttpClient.asMcpWebSocketClient(
   baseUrl: HttpUrl,
@@ -113,17 +111,20 @@ suspend fun OkHttpClient.asMcpWebSocketClient(
   supportsSampling: Boolean = true,
   supportsElicitation: Boolean = false,
   supportsRoots: Boolean = false,
-) = asKtorClient()
-  .asMcpWebSocketTransport(baseUrl, path)
-  .asMcpClient(
-    implementationName, version, clientOptionsFor(
-      enforceStrictCapabilities,
-      supportsExperimental,
-      supportsSampling,
-      supportsElicitation,
-      supportsRoots,
+) =
+  asKtorClient()
+    .asMcpWebSocketTransport(baseUrl, path)
+    .asMcpClient(
+      implementationName,
+      version,
+      clientOptionsFor(
+        enforceStrictCapabilities,
+        supportsExperimental,
+        supportsSampling,
+        supportsElicitation,
+        supportsRoots,
+      ),
     )
-  )
 
 fun clientOptionsFor(
   enforceStrictCapabilities: Boolean = true,
@@ -131,12 +132,14 @@ fun clientOptionsFor(
   supportsSampling: Boolean = true,
   supportsElicitation: Boolean = false,
   supportsRoots: Boolean = false,
-) = ClientOptions(
-  enforceStrictCapabilities = enforceStrictCapabilities,
-  capabilities = ClientCapabilities(
-    experimental = if (supportsExperimental) EmptyJsonObject else null,
-    sampling = if (supportsSampling) EmptyJsonObject else null,
-    elicitation = if (supportsElicitation) EmptyJsonObject else null,
-    roots = if (supportsRoots) ClientCapabilities.Roots(false) else null,
+) =
+  ClientOptions(
+    enforceStrictCapabilities = enforceStrictCapabilities,
+    capabilities =
+      ClientCapabilities(
+        experimental = if (supportsExperimental) EmptyJsonObject else null,
+        sampling = if (supportsSampling) EmptyJsonObject else null,
+        elicitation = if (supportsElicitation) EmptyJsonObject else null,
+        roots = if (supportsRoots) ClientCapabilities.Roots(false) else null,
+      ),
   )
-)

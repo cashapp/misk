@@ -15,7 +15,9 @@ class DevelopmentJobProcessorModule : KAbstractModule() {
     install(ServiceModule(keyOf<RepeatedTaskQueue>(ForDevelopmentHandling::class)))
   }
 
-  @Provides @ForDevelopmentHandling @Singleton
+  @Provides
+  @ForDevelopmentHandling
+  @Singleton
   fun consumerRepeatedTaskQueue(queueFactory: RepeatedTaskQueueFactory): RepeatedTaskQueue {
     return queueFactory.new("development-job-poller")
   }

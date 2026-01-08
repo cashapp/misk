@@ -3,6 +3,9 @@ package misk.exceptions.dynamodb
 import com.amazonaws.http.timers.client.ClientExecutionTimeoutException
 import com.amazonaws.services.dynamodbv2.model.CancellationReason
 import com.amazonaws.services.dynamodbv2.model.TransactionCanceledException
+import jakarta.inject.Inject
+import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
+import java.net.HttpURLConnection.HTTP_UNAVAILABLE
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -18,14 +21,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
-import java.net.HttpURLConnection.HTTP_UNAVAILABLE
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class DynamoDbExceptionMapperTest {
-  @MiskTestModule
-  val module = DynamoDbExceptionMapperTestModule()
+  @MiskTestModule val module = DynamoDbExceptionMapperTestModule()
 
   @Inject lateinit var jettyService: JettyService
 
@@ -37,26 +36,28 @@ class DynamoDbExceptionMapperTest {
   fun `service unavailable 503 for concurrency related TransactionCanceledException`() {
     val response = get("/throws/concurrency")
     Assertions.assertThat(response.code).isEqualTo(HTTP_UNAVAILABLE)
-    Assertions.assertThat(response.body?.string()).isEqualTo(
-      "DynamoDB Resource Contention Exception: " +
-        "com.amazonaws.services.dynamodbv2.model." +
-        "TransactionCanceledException: " +
-        "Concurrency (Service: null; Status Code: 0; " +
-        "Error Code: null; Request ID: null; Proxy: null)"
-    )
+    Assertions.assertThat(response.body?.string())
+      .isEqualTo(
+        "DynamoDB Resource Contention Exception: " +
+          "com.amazonaws.services.dynamodbv2.model." +
+          "TransactionCanceledException: " +
+          "Concurrency (Service: null; Status Code: 0; " +
+          "Error Code: null; Request ID: null; Proxy: null)"
+      )
   }
 
   @Test
   fun `internal server error 500 for all other TransactionCanceledException`() {
     val response = get("/throws/other")
     Assertions.assertThat(response.code).isEqualTo(HTTP_INTERNAL_ERROR)
-    Assertions.assertThat(response.body?.string()).isEqualTo(
-      "Internal server error: " +
-        "com.amazonaws.services.dynamodbv2.model." +
-        "TransactionCanceledException: " +
-        "Not Concurrency (Service: null; Status Code: 0; " +
-        "Error Code: null; Request ID: null; Proxy: null)"
-    )
+    Assertions.assertThat(response.body?.string())
+      .isEqualTo(
+        "Internal server error: " +
+          "com.amazonaws.services.dynamodbv2.model." +
+          "TransactionCanceledException: " +
+          "Not Concurrency (Service: null; Status Code: 0; " +
+          "Error Code: null; Request ID: null; Proxy: null)"
+      )
   }
 
   @Test
@@ -74,10 +75,7 @@ class DynamoDbExceptionMapperTest {
 
   private fun get(path: String): okhttp3.Response {
     val httpClient = OkHttpClient()
-    val request = Request.Builder()
-      .get()
-      .url(serverUrlBuilder().encodedPath(path).build())
-      .build()
+    val request = Request.Builder().get().url(serverUrlBuilder().encodedPath(path).build()).build()
     return httpClient.newCall(request).execute()
   }
 

@@ -1,7 +1,7 @@
 package misk.lease.mysql
 
-import java.time.Duration
 import jakarta.inject.Inject
+import java.time.Duration
 import misk.MiskTestingServiceModule
 import misk.annotation.ExperimentalMiskApi
 import misk.environment.DeploymentModule
@@ -17,20 +17,20 @@ import wisp.lease.LeaseManager
 
 @MiskTest(startService = true)
 class SqlLeaseManagerTest {
-  @MiskTestModule val module = object : KAbstractModule() {
-    override fun configure() {
-      install(DeploymentModule(TESTING))
-      install(MiskTestingServiceModule())
-      install(SqlLeaseTestingModule())
+  @MiskTestModule
+  val module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(DeploymentModule(TESTING))
+        install(MiskTestingServiceModule())
+        install(SqlLeaseTestingModule())
+      }
     }
-  }
 
   @Inject lateinit var leaseManager: LeaseManager
   @Inject lateinit var clock: FakeClock
 
-  /**
-   * Verifies that a lease cannot be acquired by a second requester while it is held.
-   */
+  /** Verifies that a lease cannot be acquired by a second requester while it is held. */
   @Test
   fun leaseCannotBeAcquiredWhenItIsHeld() {
     val leaseA = leaseManager.requestLease("a")
@@ -44,9 +44,7 @@ class SqlLeaseManagerTest {
     assertThat(leaseA2.checkHeld()).isFalse()
   }
 
-  /**
-   * Verifies that a lease can be acquired again after it is released.
-   */
+  /** Verifies that a lease can be acquired again after it is released. */
   @Test
   fun leaseCanBeAcquiredAfterItIsReleased() {
     val leaseA = leaseManager.requestLease("a")
@@ -61,9 +59,7 @@ class SqlLeaseManagerTest {
     assertThat(leaseA2.checkHeld()).isTrue()
   }
 
-  /**
-   * Verifies that multiple leases with different names can be acquired independently.
-   */
+  /** Verifies that multiple leases with different names can be acquired independently. */
   @Test
   fun multipleLeasesCanBeAcquiredIndependently() {
     val leaseA = leaseManager.requestLease("a")
@@ -77,9 +73,7 @@ class SqlLeaseManagerTest {
     assertThat(leaseB.checkHeld()).isTrue()
   }
 
-  /**
-   * Verifies that a lease cannot be acquired again immediately after the lease duration elapses.
-   */
+  /** Verifies that a lease cannot be acquired again immediately after the lease duration elapses. */
   @Test
   @OptIn(ExperimentalMiskApi::class)
   fun leaseCannotBeAcquiredImmediatelyBeforeDurationElapses() {
@@ -99,9 +93,7 @@ class SqlLeaseManagerTest {
     assertThat(leaseA2.checkHeld()).isFalse()
   }
 
-  /**
-   * Verifies that a lease can be acquired by another requester after the lease duration has fully elapsed.
-   */
+  /** Verifies that a lease can be acquired by another requester after the lease duration has fully elapsed. */
   @Test
   @OptIn(ExperimentalMiskApi::class)
   fun leaseCanBeAcquiredAfterDurationElapses() {
@@ -121,9 +113,7 @@ class SqlLeaseManagerTest {
     assertThat(leaseA2.checkHeld()).isTrue()
   }
 
-  /**
-   * Test the call-site duration configuration approach.
-   */
+  /** Test the call-site duration configuration approach. */
   @Test
   @OptIn(ExperimentalMiskApi::class)
   fun testCallSiteDurationConfiguration() {

@@ -1,6 +1,7 @@
 package misk.web.extractors
 
 import jakarta.inject.Inject
+import javax.servlet.http.Cookie
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -15,51 +16,33 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.servlet.http.Cookie
 
 @MiskTest(startService = true)
 internal class RequestCookiesParameterTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject lateinit var jettyService: JettyService
 
-  @Test fun multipleRequestCookies() {
-    assertThat(
-      get(
-        listOf(
-          "app_token" to "AppToken1",
-          "app_platform" to "IOS",
-        )
-      )
-    ).isEqualTo("your cookies are [app_token=AppToken1, app_platform=IOS]'")
+  @Test
+  fun multipleRequestCookies() {
+    assertThat(get(listOf("app_token" to "AppToken1", "app_platform" to "IOS")))
+      .isEqualTo("your cookies are [app_token=AppToken1, app_platform=IOS]'")
   }
 
-  @Test fun duplicateRequestCookies() {
-    assertThat(
-      get(
-        listOf(
-          "app_token" to "AppToken1",
-          "app_token" to "AppToken2",
-          "app_platform" to "IOS",
-        )
-      )
-    ).isEqualTo("your cookies are [app_token=AppToken1, app_token=AppToken2, app_platform=IOS]'")
+  @Test
+  fun duplicateRequestCookies() {
+    assertThat(get(listOf("app_token" to "AppToken1", "app_token" to "AppToken2", "app_platform" to "IOS")))
+      .isEqualTo("your cookies are [app_token=AppToken1, app_token=AppToken2, app_platform=IOS]'")
   }
 
-  @Test fun noRequestCookies() {
-    assertThat(
-      get(
-        listOf()
-      )
-    ).isEqualTo("your cookies are []'")
+  @Test
+  fun noRequestCookies() {
+    assertThat(get(listOf())).isEqualTo("your cookies are []'")
   }
 
   class EchoCookiesAction @Inject constructor() : WebAction {
     @Get("/echo-cookies")
-    fun call(
-      @RequestCookies cookies: List<Cookie>
-    ) = "your cookies are ${cookies.map { "${it.name}=${it.value}" }}'"
+    fun call(@RequestCookies cookies: List<Cookie>) = "your cookies are ${cookies.map { "${it.name}=${it.value}" }}'"
   }
 
   class TestModule : KAbstractModule() {
@@ -71,12 +54,14 @@ internal class RequestCookiesParameterTest {
   }
 
   private fun get(cookies: List<Pair<String, String>>): String {
-    val url = jettyService.httpServerUrl.newBuilder()
-      .encodedPath("/echo-cookies")
-      .build()
-    val request = Request(url).newBuilder()
-      .also { request -> cookies.forEach { cookie -> request.addHeader("Cookie", "${cookie.first}=${cookie.second}") } }
-      .build()
+    val url = jettyService.httpServerUrl.newBuilder().encodedPath("/echo-cookies").build()
+    val request =
+      Request(url)
+        .newBuilder()
+        .also { request ->
+          cookies.forEach { cookie -> request.addHeader("Cookie", "${cookie.first}=${cookie.second}") }
+        }
+        .build()
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request).execute()
     return response.body.source().readUtf8()

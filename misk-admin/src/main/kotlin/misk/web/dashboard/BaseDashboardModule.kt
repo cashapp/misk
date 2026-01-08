@@ -16,9 +16,7 @@ import misk.web.v2.DashboardV2RedirectAction
  * - `admin-dashboard` tab which loads all other tabs and provides navbar, menu links, auth
  * - `@misk` packages used by Misk-Web tabs from window to provide faster tab loads
  */
-class BaseDashboardModule(
-  private val isDevelopment: Boolean
-): KAbstractModule() {
+class BaseDashboardModule(private val isDevelopment: Boolean) : KAbstractModule() {
   override fun configure() {
     // Setup multibindings for dashboard related components
     newMultibinder<DashboardTab>()
@@ -50,7 +48,7 @@ class BaseDashboardModule(
         web_proxy_url = "http://localhost:3201/",
         url_path_prefix = "/@misk/",
         // Serve the @misk dependencies from the Database tab lib directory
-        resourcePath = "classpath:/web/_tab/database/@misk/"
+        resourcePath = "classpath:/web/_tab/database/@misk/",
       )
     )
   }

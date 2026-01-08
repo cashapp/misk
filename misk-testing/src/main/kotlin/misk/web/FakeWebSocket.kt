@@ -1,9 +1,9 @@
 package misk.web
 
-import misk.web.actions.WebSocket
-import okio.ByteString
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
+import misk.web.actions.WebSocket
+import okio.ByteString
 
 class FakeWebSocket : WebSocket {
   private val log = LinkedBlockingDeque<String>()
