@@ -43,9 +43,9 @@ import misk.vitess.testing.internal.VitessQueryExecutor
  *   `ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION`.
  * @property transactionTimeoutSeconds The transaction timeout in seconds. Default is `null`.
  * @property vitessImage The Vitess image to be used. Open-source Vitess images can be found at
- *   [Docker Hub](https://hub.docker.com/r/vitess/vttestserver/tags). Default is `vitess/vttestserver:v21.0.4-mysql80`.
+ *   [Docker Hub](https://hub.docker.com/r/vitess/vttestserver/tags). Default is `vitess/vttestserver:v23.0.0-mysql80`.
  * @property vitessVersion The Vitess major version to be used, which must match the version in `vitessImage`. Default
- *   is `21`.
+ *   is `23`.
  */
 class VitessTestDb(
   private var autoApplySchemaChanges: Boolean = DefaultSettings.AUTO_APPLY_SCHEMA_CHANGES,
