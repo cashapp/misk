@@ -22,11 +22,15 @@ import wisp.ratelimiting.bucket4j.ClockTimeMeter
  * @param additionalTtl Additional duration to add to the base TTL of each rate limit bucket, which is the duration of
  *   the refill period. This is a performance optimization that enables bucket reuse when a request comes in after the
  *   bucket has been refilled, since reuse is cheaper than creating a new bucket
+ * @param keyMapper Optional mapper to transform Redis keys
  */
 class RedisBucket4jRateLimiterModule
 @JvmOverloads
-constructor(private val additionalTtl: Duration = Duration.ofSeconds(5), private val qualifier: Annotation? = null) :
-  KAbstractModule() {
+constructor(
+  private val additionalTtl: Duration = Duration.ofSeconds(5),
+  private val qualifier: Annotation? = null,
+  private val keyMapper: Mapper<String>? = null,
+) : KAbstractModule() {
   override fun configure() {
     requireBinding<Clock>()
     requireBinding<MeterRegistry>()
@@ -37,12 +41,14 @@ constructor(private val additionalTtl: Duration = Duration.ofSeconds(5), private
 
     val rateLimiterKey =
       if (qualifier == null) Key.get(RateLimiter::class.java) else Key.get(RateLimiter::class.java, qualifier)
-    bind(rateLimiterKey).toProvider(RedisBucket4jRateLimiterProvider(additionalTtl, unifiedJedisProvider))
+    bind(rateLimiterKey)
+      .toProvider(RedisBucket4jRateLimiterProvider(additionalTtl, unifiedJedisProvider, keyMapper ?: Mapper.STRING))
   }
 
   private class RedisBucket4jRateLimiterProvider(
     val additionalTtl: Duration,
     private val unifiedJedisProvider: Provider<UnifiedJedis>,
+    private val keyMapper: Mapper<String>,
   ) : Provider<RateLimiter> {
     @Inject lateinit var clock: Clock
     @Inject lateinit var metricsRegistry: MeterRegistry
@@ -59,7 +65,7 @@ constructor(private val additionalTtl: Duration = Duration.ofSeconds(5), private
             // Set Redis TTLs to the bucket refill period + additionalTtl
             ExpirationAfterWriteStrategy.basedOnTimeForRefillingBucketUpToMax(additionalTtl)
           )
-          .withKeyMapper(Mapper.STRING)
+          .withKeyMapper(keyMapper)
           .build()
       return Bucket4jRateLimiter(proxyManager, clock, metricsRegistry)
     }
