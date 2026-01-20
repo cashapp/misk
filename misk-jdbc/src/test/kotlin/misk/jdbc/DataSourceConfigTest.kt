@@ -338,4 +338,46 @@ class DataSourceConfigTest {
     val jdbcUrl = config.buildJdbcUrl(TESTING)
     assertThat(jdbcUrl).startsWith("jdbc:tracing:mysql://")
   }
+
+  @Test
+  fun testTransactionIsolationLevelEnum() {
+    // Test enum values match JDBC constants
+    assertThat(TransactionIsolationLevel.READ_UNCOMMITTED.jdbcValue).isEqualTo(1)
+    assertThat(TransactionIsolationLevel.READ_COMMITTED.jdbcValue).isEqualTo(2)
+    assertThat(TransactionIsolationLevel.REPEATABLE_READ.jdbcValue).isEqualTo(4)
+    assertThat(TransactionIsolationLevel.SERIALIZABLE.jdbcValue).isEqualTo(8)
+
+    // Test HikariCP values
+    assertThat(TransactionIsolationLevel.READ_UNCOMMITTED.hikariValue).isEqualTo("TRANSACTION_READ_UNCOMMITTED")
+    assertThat(TransactionIsolationLevel.READ_COMMITTED.hikariValue).isEqualTo("TRANSACTION_READ_COMMITTED")
+    assertThat(TransactionIsolationLevel.REPEATABLE_READ.hikariValue).isEqualTo("TRANSACTION_REPEATABLE_READ")
+    assertThat(TransactionIsolationLevel.SERIALIZABLE.hikariValue).isEqualTo("TRANSACTION_SERIALIZABLE")
+  }
+
+  @Test
+  fun testDefaultTransactionIsolationConfiguration() {
+    // Config without isolation level should have null default
+    val configWithoutIsolation = DataSourceConfig(type = DataSourceType.MYSQL)
+    assertThat(configWithoutIsolation.default_transaction_isolation).isNull()
+
+    // Config with isolation level should preserve it
+    val configWithIsolation = DataSourceConfig(
+      type = DataSourceType.MYSQL,
+      default_transaction_isolation = TransactionIsolationLevel.READ_COMMITTED
+    )
+    assertThat(configWithIsolation.default_transaction_isolation).isEqualTo(TransactionIsolationLevel.READ_COMMITTED)
+  }
+
+  @Test
+  fun testReplicaConfigPreservesTransactionIsolation() {
+    val originalConfig = DataSourceConfig(
+      type = DataSourceType.VITESS_MYSQL,
+      default_transaction_isolation = TransactionIsolationLevel.SERIALIZABLE
+    )
+
+    val replicaConfig = originalConfig.asReplica()
+
+    assertThat(replicaConfig.default_transaction_isolation).isEqualTo(TransactionIsolationLevel.SERIALIZABLE)
+    assertThat(replicaConfig.database).isEqualTo("@replica")
+  }
 }
