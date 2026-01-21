@@ -119,6 +119,18 @@ misk/
 └── samples/                                 # Example applications
 ```
 
+Each subproject follows this structure:
+
+```
+misk-jdbc/
+├── api/              # Public API definitions (.api files)
+├── src/
+│   ├── main/         # Production code
+│   ├── test/         # Test code
+│   └── testFixtures/ # Shared test utilities
+└── build.gradle.kts
+```
+
 ## Code Quality
 
 ### Comments
