@@ -120,4 +120,22 @@ expected: {"my_structure":["thi  s",45,"zip"],"my_value":"another value"}
  but was: {"my_structure":["this",45,"zip"],"my_value":"another value"}"""
       )
   }
+
+  @Test
+  fun assertInvalidActualJsonMessage() {
+    val validJson = """{"missing":"end brace"}"""
+    val invalidJson = """{"missing":"end brace""""
+
+    val assertionError = assertFailsWith<AssertionError> { assertThat(invalidJson).isEqualToAsJson(validJson) }
+    assertThat(assertionError.message).startsWith("Failed to parse actual value as JSON")
+  }
+
+  @Test
+  fun assertInvalidExpectedJsonMessage() {
+    val validJson = """{"missing":"end brace"}"""
+    val invalidJson = """{"missing":"end brace""""
+
+    val assertionError = assertFailsWith<AssertionError> { assertThat(validJson).isEqualToAsJson(invalidJson) }
+    assertThat(assertionError.message).startsWith("Failed to parse expected value as JSON")
+  }
 }
