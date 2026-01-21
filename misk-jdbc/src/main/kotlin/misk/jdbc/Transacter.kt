@@ -96,22 +96,36 @@ class RealTransacter(private val dataSourceService: DataSourceService) : Transac
         }
 
         // SET ISOLATION LEVEL
+        val originalIsolationLevel = connection.transactionIsolation
         options.isolationLevel?.let { isolationLevel ->
           connection.transactionIsolation = isolationLevel.jdbcValue
         }
 
-        // Do stuff
-        session = JDBCSession(connection)
-        val result =
-          runCatching { work(session) }
-            .onFailure { e -> session.onSessionClose { session.executeRollbackHooks(e) } }
-            .getOrThrow()
+        var committed = false
+        try {
+          // Do stuff
+          session = JDBCSession(connection)
+          val result =
+            runCatching { work(session) }
+              .onFailure { e -> session.onSessionClose { session.executeRollbackHooks(e) } }
+              .getOrThrow()
 
-        // COMMIT
-        session.executePreCommitHooks()
-        connection.commit()
-        session.executePostCommitHooks()
-        result
+          // COMMIT
+          session.executePreCommitHooks()
+          connection.commit()
+          committed = true
+          session.executePostCommitHooks()
+          result
+        } finally {
+          // RESTORE ISOLATION LEVEL
+          // Rollback if not committed (required by PostgreSQL before changing isolation level)
+          if (!committed) {
+            connection.rollback()
+          }
+          if (options.isolationLevel != null) {
+            connection.transactionIsolation = originalIsolationLevel
+          }
+        }
       }
     } finally {
       transacting.set(false)
