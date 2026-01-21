@@ -1,5 +1,6 @@
 package org.assertj.core.api
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.Assertions.assertThat
 
 inline fun <reified KEY, VALUE> MapAssert<KEY, VALUE>.containsExactly(
@@ -11,11 +12,10 @@ inline fun <reified KEY, VALUE> MapAssert<KEY, VALUE>.containsExactly(
 fun <ACTUAL : CharSequence> AbstractCharSequenceAssert<*, ACTUAL>.isEqualToAsJson(
   expected: CharSequence
 ): AbstractCharSequenceAssert<*, ACTUAL> {
-  // Normalize whitespace outside of field names and string values
-  val regex = Regex("[^\\s\"']+|\"[^\"]*\"|'[^']*'")
-  val normalizedActual = regex.findAll(actual).map { it.groupValues[0] }.joinToString(" ")
-  val normalizedExpected = regex.findAll(expected).map { it.groupValues[0] }.joinToString(" ")
-  objects.assertEqual(getWritableAssertionInfo(), normalizedActual, normalizedExpected)
+  val om = ObjectMapper()
+  val parsedActual = om.readTree(actual.toString())
+  val parsedExpected = om.readTree(expected.toString())
+  objects.assertEqual(writableAssertionInfo, parsedActual, parsedExpected)
   return this
 }
 

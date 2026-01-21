@@ -28,6 +28,13 @@ internal class AssertExtensionsTest {
   }
 
   @Test
+  fun assertAsJsonWithNoSpacesMatches() {
+    val withSpaces = """{"a": 1, "foo": "bar", "list": [1, 2, 3]}"""
+    val withoutSpaces = """{"a":1,"foo":"bar","list":[1,2,3]}"""
+    assertThat(withSpaces).isEqualToAsJson(withoutSpaces)
+  }
+
+  @Test
   fun assertAsJsonMismatchedFieldName() {
     assertThat(
         assertFailsWith<AssertionError> {
@@ -51,8 +58,8 @@ internal class AssertExtensionsTest {
       )
       .hasMessage(
         """
-expected: "{ "my_structure" : [ "this" , 45, "zip" ], "my_value" : "another value" }"
- but was: "{ "my_structure2" : [ "this" , 45, "zip" ], "my_value" : "another value" }""""
+expected: {"my_structure":["this",45,"zip"],"my_value":"another value"}
+ but was: {"my_structure2":["this",45,"zip"],"my_value":"another value"}"""
       )
   }
 
@@ -80,8 +87,8 @@ expected: "{ "my_structure" : [ "this" , 45, "zip" ], "my_value" : "another valu
       )
       .hasMessage(
         """
-expected: "{ "my_structure" : [ "this" , 45, "zip" ], "my_value" : "another value" }"
- but was: "{ "my_structure" : [ "thisisit" , 45, "zip" ], "my_value" : "another value" }""""
+expected: {"my_structure":["this",45,"zip"],"my_value":"another value"}
+ but was: {"my_structure":["thisisit",45,"zip"],"my_value":"another value"}"""
       )
   }
 
@@ -109,8 +116,8 @@ expected: "{ "my_structure" : [ "this" , 45, "zip" ], "my_value" : "another valu
       )
       .hasMessage(
         """
-expected: "{ "my_structure" : [ "thi  s" , 45, "zip" ], "my_value" : "another value" }"
- but was: "{ "my_structure" : [ "this" , 45, "zip" ], "my_value" : "another value" }""""
+expected: {"my_structure":["thi  s",45,"zip"],"my_value":"another value"}
+ but was: {"my_structure":["this",45,"zip"],"my_value":"another value"}"""
       )
   }
 }
