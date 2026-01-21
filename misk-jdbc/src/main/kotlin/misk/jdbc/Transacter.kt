@@ -2,6 +2,23 @@ package misk.jdbc
 
 import java.sql.Connection
 
+/** Transaction isolation levels for database transactions */
+enum class TransactionIsolationLevel(val jdbcValue: Int) {
+  READ_UNCOMMITTED(Connection.TRANSACTION_READ_UNCOMMITTED),
+  READ_COMMITTED(Connection.TRANSACTION_READ_COMMITTED),
+  REPEATABLE_READ(Connection.TRANSACTION_REPEATABLE_READ),
+  SERIALIZABLE(Connection.TRANSACTION_SERIALIZABLE),
+}
+
+/** Options for configuring transaction behavior */
+data class TransactionOptions(
+  /**
+   * Transaction isolation level for this transaction.
+   * If null, uses the database's default isolation level.
+   */
+  val isolationLevel: TransactionIsolationLevel? = null
+)
+
 interface Transacter {
   /** Returns true if the calling thread is currently within a transaction block. */
   val inTransaction: Boolean
@@ -27,6 +44,19 @@ interface Transacter {
    * It is an error to start a transaction if another transaction is already in progress.
    */
   fun <T> transactionWithSession(work: (session: JDBCSession) -> T): T
+
+  /**
+   * Starts a transaction with specific options on the current thread, executes [work], and commits the transaction.
+   * If the work raises an exception the transaction will be rolled back instead of committed.
+   *
+   * This allows configuring transaction-specific behavior like isolation levels.
+   *
+   * It is an error to start a transaction if another transaction is already in progress.
+   */
+  fun <T> transactionWithSession(
+    options: TransactionOptions,
+    work: (session: JDBCSession) -> T
+  ): T
 }
 
 class RealTransacter(private val dataSourceService: DataSourceService) : Transacter {
@@ -41,6 +71,13 @@ class RealTransacter(private val dataSourceService: DataSourceService) : Transac
   }
 
   override fun <T> transactionWithSession(work: (session: JDBCSession) -> T): T {
+    return transactionWithSession(TransactionOptions(), work)
+  }
+
+  override fun <T> transactionWithSession(
+    options: TransactionOptions,
+    work: (session: JDBCSession) -> T
+  ): T {
     check(!transacting.get()) { "The current thread is already in a transaction" }
     transacting.set(true)
 
@@ -56,6 +93,11 @@ class RealTransacter(private val dataSourceService: DataSourceService) : Transac
         // BEGIN
         if (connection.autoCommit) {
           connection.autoCommit = false
+        }
+
+        // SET ISOLATION LEVEL
+        options.isolationLevel?.let { isolationLevel ->
+          connection.transactionIsolation = isolationLevel.jdbcValue
         }
 
         // Do stuff
