@@ -41,6 +41,7 @@ dependencies {
   implementation(libs.openTracingUtil)
   implementation(libs.slf4jApi)
   implementation(libs.logbackCore)
+  implementation(libs.jacksonCore)
   implementation(libs.jacksonDatabind)
   implementation(project(":misk-action-scopes"))
   implementation(project(":misk-config"))
