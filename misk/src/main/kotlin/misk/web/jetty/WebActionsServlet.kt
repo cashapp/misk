@@ -35,6 +35,12 @@ import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
 import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse
 import org.eclipse.jetty.websocket.server.JettyWebSocketServlet
 import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory
+import misk.logging.getLogger
+import java.net.HttpURLConnection
+import java.net.ProtocolException
+import java.time.Duration
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 @Singleton
 internal class WebActionsServlet
@@ -190,7 +196,10 @@ constructor(
   override fun configure(factory: JettyWebSocketServletFactory) {
     factory.setCreator(JettyWebSocket.Creator(boundActions))
     // Set idle timeout for WebSocket connections from config
-    factory.idleTimeout = java.time.Duration.ofSeconds(webConfig.websocket_idle_timeout_seconds)
+    factory.idleTimeout = Duration.ofSeconds(webConfig.websocket_idle_timeout_seconds)
+    factory.maxBinaryMessageSize = webConfig.websocket_max_binary_message_size
+    factory.maxTextMessageSize = webConfig.websocket_max_text_message_size
+    factory.maxFrameSize = webConfig.websocket_max_frame_size
   }
 }
 
