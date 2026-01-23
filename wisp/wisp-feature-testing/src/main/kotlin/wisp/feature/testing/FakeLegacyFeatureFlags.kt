@@ -23,35 +23,34 @@ class FakeLegacyFeatureFlags @Deprecated("Needed for Misk Provider usage...") co
   private val overrides = ConcurrentHashMap<MapKey, PriorityQueue<MapValue>>()
 
   override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean =
-    get(feature, key, attributes) as? Boolean
+    get(feature, key, attributes) as Boolean?
       ?: throw IllegalArgumentException(
         "Boolean flag $feature must be overridden with override() before use; the default value of false has been DEPRECATED"
       )
 
   override fun getDouble(feature: Feature, key: String, attributes: Attributes): Double =
-    get(feature, key, attributes) as? Double
+    get(feature, key, attributes) as Double?
       ?: throw IllegalArgumentException(
         "Double flag $feature must be overridden with override() before use; the default value of false has been DEPRECATED"
       )
 
   override fun getInt(feature: Feature, key: String, attributes: Attributes): Int =
-    get(feature, key, attributes) as? Int
+    get(feature, key, attributes) as Int?
       ?: throw IllegalArgumentException("Int flag $feature must be overridden with override() before use")
 
   override fun getString(feature: Feature, key: String, attributes: Attributes): String =
-    get(feature, key, attributes) as? String
+    get(feature, key, attributes) as String?
       ?: throw IllegalArgumentException("String flag $feature must be overridden with override() before use")
 
-  @Suppress("UNCHECKED_CAST")
   override fun <T : Enum<T>> getEnum(feature: Feature, key: String, clazz: Class<T>, attributes: Attributes): T =
-    get(feature, key, attributes) as? T
+    get(feature, key, attributes)?.let { clazz.cast(it) }
       ?: throw IllegalArgumentException(
         "Enum flag $feature must be overridden with override() before use; the default value of the first constant has been DEPRECATED"
       )
 
   override fun <T> getJson(feature: Feature, key: String, clazz: Class<T>, attributes: Attributes): T {
     val jsonFn =
-      get(feature, key, attributes) as? Function0<*>
+      get(feature, key, attributes) as Function0<*>?
         ?: throw IllegalArgumentException(
           "JSON flag $feature must be overridden with override() before use: ${get(feature, key)}"
         )
@@ -64,7 +63,7 @@ class FakeLegacyFeatureFlags @Deprecated("Needed for Misk Provider usage...") co
 
   override fun getJsonString(feature: Feature, key: String, attributes: Attributes): String {
     val jsonFn =
-      get(feature, key, attributes) as? Function0<*>
+      get(feature, key, attributes) as Function0<*>?
         ?: throw IllegalArgumentException(
           "JSON flag $feature must be overridden with override() before use: ${get(feature, key)}"
         )
