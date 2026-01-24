@@ -76,16 +76,19 @@ public final class misk/jooq/JooqTransacter$TransacterOptions {
 	public fun <init> (I)V
 	public fun <init> (IJ)V
 	public fun <init> (IJLmisk/jooq/TransactionIsolationLevel;)V
-	public synthetic fun <init> (IJLmisk/jooq/TransactionIsolationLevel;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (IJLmisk/jooq/TransactionIsolationLevel;Z)V
+	public synthetic fun <init> (IJLmisk/jooq/TransactionIsolationLevel;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component2 ()J
 	public final fun component3 ()Lmisk/jooq/TransactionIsolationLevel;
-	public final fun copy (IJLmisk/jooq/TransactionIsolationLevel;)Lmisk/jooq/JooqTransacter$TransacterOptions;
-	public static synthetic fun copy$default (Lmisk/jooq/JooqTransacter$TransacterOptions;IJLmisk/jooq/TransactionIsolationLevel;ILjava/lang/Object;)Lmisk/jooq/JooqTransacter$TransacterOptions;
+	public final fun component4 ()Z
+	public final fun copy (IJLmisk/jooq/TransactionIsolationLevel;Z)Lmisk/jooq/JooqTransacter$TransacterOptions;
+	public static synthetic fun copy$default (Lmisk/jooq/JooqTransacter$TransacterOptions;IJLmisk/jooq/TransactionIsolationLevel;ZILjava/lang/Object;)Lmisk/jooq/JooqTransacter$TransacterOptions;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getIsolationLevel ()Lmisk/jooq/TransactionIsolationLevel;
 	public final fun getMaxAttempts ()I
 	public final fun getMaxRetryDelayMillis ()J
+	public final fun getReadOnly ()Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

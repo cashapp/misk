@@ -11,11 +11,12 @@ import misk.jooq.listeners.JooqTimestampRecordListenerOptions
 import org.jooq.Configuration
 
 /**
- * This [ConfigurationFactory] generates configurations and caches them by their associated [TransactionIsolationLevel].
+ * This [ConfigurationFactory] generates configurations and caches them by their associated [TransactionIsolationLevel]
+ * and read-only flag.
  *
- * This is doable because the only user-modifiable parameter that can change the [Configuration] after the Guice
- * injector is built (i.e. after JooqModule is installed), is the transaction isolation level. It is important to cache
- * the [Configuration] and share it among transactions because [it contains the reflection cache](
+ * This is doable because these are the only user-modifiable parameters that can change the [Configuration] after the
+ * Guice injector is built (i.e. after JooqModule is installed). It is important to cache the [Configuration] and share
+ * it among transactions because [it contains the reflection cache](
  * https://www.jooq.org/doc/latest/manual/sql-building/dsl-context/thread-safety/).
  */
 internal class CachedConfigurationFactory(
@@ -26,14 +27,18 @@ internal class CachedConfigurationFactory(
   private val jooqTimestampRecordListenerOptions: JooqTimestampRecordListenerOptions,
   private val jooqConfigExtension: Configuration.() -> Unit = {},
 ) : ConfigurationFactory() {
-  private val concurrentHashMap = ConcurrentHashMap<TransactionIsolationLevel, Configuration>()
+  private data class CacheKey(val isolationLevel: TransactionIsolationLevel, val readOnly: Boolean)
+
+  private fun JooqTransacter.TransacterOptions.toCacheKey() = CacheKey(isolationLevel, readOnly)
+
+  private val concurrentHashMap = ConcurrentHashMap<CacheKey, Configuration>()
 
   @VisibleForTesting
-  val cacheContents
-    get() = concurrentHashMap.entries.toSet()
+  val cacheSize: Int
+    get() = concurrentHashMap.size
 
   override fun getConfiguration(options: JooqTransacter.TransacterOptions): Configuration {
-    return concurrentHashMap.computeIfAbsent(options.isolationLevel) {
+    return concurrentHashMap.computeIfAbsent(options.toCacheKey()) {
       buildConfiguration(
           clock = clock,
           dataSourceConfig = dataSourceConfig,
