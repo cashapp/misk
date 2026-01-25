@@ -23,51 +23,31 @@ class FakeLegacyFeatureFlags @Deprecated("Needed for Misk Provider usage...") co
   private val overrides = ConcurrentHashMap<MapKey, PriorityQueue<MapValue>>()
 
   override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean =
-    get(feature, key, attributes) as Boolean?
-      ?: throw IllegalArgumentException(
-        "Boolean flag $feature must be overridden with override() before use; the default value of false has been DEPRECATED"
-      )
+    get(feature, key, attributes, Boolean::class.javaObjectType)
 
   override fun getDouble(feature: Feature, key: String, attributes: Attributes): Double =
-    get(feature, key, attributes) as Double?
-      ?: throw IllegalArgumentException(
-        "Double flag $feature must be overridden with override() before use; the default value of false has been DEPRECATED"
-      )
+    get(feature, key, attributes, Double::class.javaObjectType)
 
   override fun getInt(feature: Feature, key: String, attributes: Attributes): Int =
-    get(feature, key, attributes) as Int?
-      ?: throw IllegalArgumentException("Int flag $feature must be overridden with override() before use")
+    get(feature, key, attributes, Int::class.javaObjectType)
 
   override fun getString(feature: Feature, key: String, attributes: Attributes): String =
-    get(feature, key, attributes) as String?
-      ?: throw IllegalArgumentException("String flag $feature must be overridden with override() before use")
+    get(feature, key, attributes, String::class.javaObjectType)
 
   override fun <T : Enum<T>> getEnum(feature: Feature, key: String, clazz: Class<T>, attributes: Attributes): T =
-    get(feature, key, attributes)?.let { clazz.cast(it) }
-      ?: throw IllegalArgumentException(
-        "Enum flag $feature must be overridden with override() before use; the default value of the first constant has been DEPRECATED"
-      )
+    get(feature, key, attributes, clazz)
 
   override fun <T> getJson(feature: Feature, key: String, clazz: Class<T>, attributes: Attributes): T {
-    val jsonFn =
-      get(feature, key, attributes) as Function0<*>?
-        ?: throw IllegalArgumentException(
-          "JSON flag $feature must be overridden with override() before use: ${get(feature, key)}"
-        )
+    val jsonFn = get(feature, key, attributes, JsonValue::class.java)
     // The JSON is lazily provided to handle the case where the override is provided by the
     // FakeFeatureFlagModule and the Moshi instance cannot be accessed inside the module.
-    val json = jsonFn.invoke() as? String ?: throw IllegalArgumentException("JSON function did not provide a string")
-    return moshi().adapter(clazz).fromSafeJson(json)
+    return moshi().adapter(clazz).fromSafeJson(jsonFn.get())
       ?: throw IllegalArgumentException("null value deserialized from $feature")
   }
 
   override fun getJsonString(feature: Feature, key: String, attributes: Attributes): String {
-    val jsonFn =
-      get(feature, key, attributes) as Function0<*>?
-        ?: throw IllegalArgumentException(
-          "JSON flag $feature must be overridden with override() before use: ${get(feature, key)}"
-        )
-    return jsonFn.invoke() as String
+    val jsonFn = get(feature, key, attributes, JsonValue::class.java)
+    return jsonFn.get()
   }
 
   override fun getBoolean(feature: Feature) = getBoolean(feature, KEY)
@@ -84,7 +64,17 @@ class FakeLegacyFeatureFlags @Deprecated("Needed for Misk Provider usage...") co
 
   override fun getJsonString(feature: Feature): String = getJsonString(feature, KEY)
 
-  private fun get(feature: Feature, key: String, attributes: Attributes = defaultAttributes): Any? {
+  private fun <T> get(feature: Feature, key: String, attributes: Attributes, clazz: Class<T>): T {
+    val result = get(feature, key, attributes)
+      ?: throw IllegalArgumentException("Flag $feature must be overridden with override() before use")
+    try {
+      return clazz.cast(result)
+    } catch (_: ClassCastException) {
+      throw IllegalArgumentException("Flag $feature: expecting $clazz but override() was called with ${result.javaClass}")
+    }
+  }
+
+  private fun get(feature: Feature, key: String, attributes: Attributes): Any? {
     FeatureFlagValidation.checkValidKey(feature, key)
     // Override value lookup is structured in 3 levels: feature, key, and attributes level. The
     // logic to get the override value is as follows:
@@ -211,12 +201,12 @@ class FakeLegacyFeatureFlags @Deprecated("Needed for Misk Provider usage...") co
   fun <T> override(feature: Feature, value: T) = overrideKey(feature, KEY, value, defaultAttributes)
 
   fun <T> override(feature: Feature, value: T, clazz: Class<T>) {
-    val jsonValue = { moshi().adapter(clazz).toSafeJson(value) }
+    val jsonValue = JsonValue { moshi().adapter(clazz).toSafeJson(value) }
     overrideKey(feature, KEY, jsonValue, defaultAttributes)
   }
 
   fun overrideJsonString(feature: Feature, json: String) {
-    overrideKey(feature, KEY, { json }, defaultAttributes)
+    overrideKey(feature, KEY, JsonValue { json }, defaultAttributes)
   }
 
   inline fun <reified T> overrideJson(feature: Feature, value: T) {
@@ -244,7 +234,7 @@ class FakeLegacyFeatureFlags @Deprecated("Needed for Misk Provider usage...") co
     overrideKey<Enum<*>>(feature, key, value, attributes)
 
   fun <T> overrideKey(feature: Feature, key: String, value: T, clazz: Class<T>) {
-    val jsonValue = { moshi().adapter(clazz).toSafeJson(value) }
+    val jsonValue = JsonValue { moshi().adapter(clazz).toSafeJson(value) }
     overrideKey(feature, key, jsonValue, defaultAttributes)
   }
 
@@ -287,13 +277,13 @@ class FakeLegacyFeatureFlags @Deprecated("Needed for Misk Provider usage...") co
     attributes: Attributes = defaultAttributes,
   ) {
     val adapter = moshi().adapter(T::class.java)
-    val jsonValue = { adapter.toSafeJson(value) }
-    overrideKey<() -> String, T>(feature, key, jsonValue, attributes, { adapter.fromSafeJson(it())!! })
+    val jsonValue = JsonValue { adapter.toSafeJson(value) }
+    overrideKey<JsonValue, T>(feature, key, jsonValue, attributes, { adapter.fromSafeJson(it.get())!! })
   }
 
   @JvmOverloads
   fun overrideKeyJsonString(feature: Feature, key: String, value: String, attributes: Attributes = defaultAttributes) {
-    overrideKey(feature, key, { value }, attributes)
+    overrideKey(feature, key, JsonValue { value }, attributes)
   }
 
   fun reset() {
@@ -329,4 +319,9 @@ class FakeLegacyFeatureFlags @Deprecated("Needed for Misk Provider usage...") co
     val executor: Executor,
     val tracker: (T) -> Unit,
   )
+
+  /** Provides a JSON value lazily. */
+  fun interface JsonValue {
+    fun get(): String
+  }
 }
