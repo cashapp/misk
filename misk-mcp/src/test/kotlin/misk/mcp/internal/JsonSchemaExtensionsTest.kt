@@ -121,6 +121,7 @@ internal class JsonSchemaExtensionsTest {
   // Test enums
   @Serializable
   enum class Status {
+    @Description("Active status")
     ACTIVE,
     INACTIVE,
     PENDING,
@@ -625,19 +626,23 @@ internal class JsonSchemaExtensionsTest {
     // Verify status enum field
     val statusField = properties["status"] as JsonObject
     assertEquals(JsonPrimitive("string"), statusField["type"])
-    assertTrue(statusField.containsKey("enum"))
-    val statusEnum = statusField["enum"] as JsonArray
-    assertEquals(4, statusEnum.size)
-    val statusValues = statusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(statusField.containsKey("oneOf"))
+    val statusOneOf = statusField["oneOf"] as JsonArray
+    assertEquals(4, statusOneOf.size)
+    val statusValues = statusOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     assertEquals(setOf("ACTIVE", "INACTIVE", "PENDING", "ARCHIVED"), statusValues)
+
+    // Verify ACTIVE has description
+    val activeOption = statusOneOf.first { ((it as JsonObject)["const"] as JsonPrimitive).content == "ACTIVE" } as JsonObject
+    assertEquals(JsonPrimitive("Active status"), activeOption["description"])
 
     // Verify priority enum field
     val priorityField = properties["priority"] as JsonObject
     assertEquals(JsonPrimitive("string"), priorityField["type"])
-    assertTrue(priorityField.containsKey("enum"))
-    val priorityEnum = priorityField["enum"] as JsonArray
-    assertEquals(4, priorityEnum.size)
-    val priorityValues = priorityEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(priorityField.containsKey("oneOf"))
+    val priorityOneOf = priorityField["oneOf"] as JsonArray
+    assertEquals(4, priorityOneOf.size)
+    val priorityValues = priorityOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     assertEquals(setOf("LOW", "MEDIUM", "HIGH", "URGENT"), priorityValues)
 
     // Verify all fields are required
@@ -654,17 +659,17 @@ internal class JsonSchemaExtensionsTest {
     // Verify required enum field
     val statusField = properties["status"] as JsonObject
     assertEquals(JsonPrimitive("string"), statusField["type"])
-    assertTrue(statusField.containsKey("enum"))
+    assertTrue(statusField.containsKey("oneOf"))
 
     // Verify nullable enum field
     val priorityField = properties["priority"] as JsonObject
     assertEquals(JsonPrimitive("string"), priorityField["type"])
-    assertTrue(priorityField.containsKey("enum"))
+    assertTrue(priorityField.containsKey("oneOf"))
 
     // Verify optional enum field with default value
     val defaultStatusField = properties["defaultStatus"] as JsonObject
     assertEquals(JsonPrimitive("string"), defaultStatusField["type"])
-    assertTrue(defaultStatusField.containsKey("enum"))
+    assertTrue(defaultStatusField.containsKey("oneOf"))
 
     // Verify required fields - only status should be required
     val requiredFields = required.map { (it as JsonPrimitive).content }.toSet()
@@ -680,18 +685,18 @@ internal class JsonSchemaExtensionsTest {
     val statusField = properties["status"] as JsonObject
     assertEquals(JsonPrimitive("string"), statusField["type"])
     assertEquals(JsonPrimitive("The current status of the object"), statusField["description"])
-    assertTrue(statusField.containsKey("enum"))
-    val statusEnum = statusField["enum"] as JsonArray
-    val statusValues = statusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(statusField.containsKey("oneOf"))
+    val statusOneOf = statusField["oneOf"] as JsonArray
+    val statusValues = statusOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     assertEquals(setOf("ACTIVE", "INACTIVE", "PENDING", "ARCHIVED"), statusValues)
 
     // Verify priority enum field with description
     val priorityField = properties["priority"] as JsonObject
     assertEquals(JsonPrimitive("string"), priorityField["type"])
     assertEquals(JsonPrimitive("The priority level"), priorityField["description"])
-    assertTrue(priorityField.containsKey("enum"))
-    val priorityEnum = priorityField["enum"] as JsonArray
-    val priorityValues = priorityEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(priorityField.containsKey("oneOf"))
+    val priorityOneOf = priorityField["oneOf"] as JsonArray
+    val priorityValues = priorityOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     assertEquals(setOf("LOW", "MEDIUM", "HIGH", "URGENT"), priorityValues)
   }
 
@@ -706,9 +711,9 @@ internal class JsonSchemaExtensionsTest {
     assertTrue(statusesField.containsKey("items"))
     val statusItems = statusesField["items"] as JsonObject
     assertEquals(JsonPrimitive("string"), statusItems["type"])
-    assertTrue(statusItems.containsKey("enum"))
-    val statusEnum = statusItems["enum"] as JsonArray
-    val statusValues = statusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(statusItems.containsKey("oneOf"))
+    val statusOneOf = statusItems["oneOf"] as JsonArray
+    val statusValues = statusOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     assertEquals(setOf("ACTIVE", "INACTIVE", "PENDING", "ARCHIVED"), statusValues)
 
     // Verify list of priority enums
@@ -717,9 +722,9 @@ internal class JsonSchemaExtensionsTest {
     assertTrue(prioritiesField.containsKey("items"))
     val priorityItems = prioritiesField["items"] as JsonObject
     assertEquals(JsonPrimitive("string"), priorityItems["type"])
-    assertTrue(priorityItems.containsKey("enum"))
-    val priorityEnum = priorityItems["enum"] as JsonArray
-    val priorityValues = priorityEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(priorityItems.containsKey("oneOf"))
+    val priorityOneOf = priorityItems["oneOf"] as JsonArray
+    val priorityValues = priorityOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     assertEquals(setOf("LOW", "MEDIUM", "HIGH", "URGENT"), priorityValues)
   }
 
@@ -734,9 +739,9 @@ internal class JsonSchemaExtensionsTest {
     assertTrue(statusMapField.containsKey("additionalProperties"))
     val statusAdditionalProps = statusMapField["additionalProperties"] as JsonObject
     assertEquals(JsonPrimitive("string"), statusAdditionalProps["type"])
-    assertTrue(statusAdditionalProps.containsKey("enum"))
-    val statusEnum = statusAdditionalProps["enum"] as JsonArray
-    val statusValues = statusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(statusAdditionalProps.containsKey("oneOf"))
+    val statusOneOf = statusAdditionalProps["oneOf"] as JsonArray
+    val statusValues = statusOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     assertEquals(setOf("ACTIVE", "INACTIVE", "PENDING", "ARCHIVED"), statusValues)
 
     // Verify map with priority enum values
@@ -745,9 +750,9 @@ internal class JsonSchemaExtensionsTest {
     assertTrue(priorityMapField.containsKey("additionalProperties"))
     val priorityAdditionalProps = priorityMapField["additionalProperties"] as JsonObject
     assertEquals(JsonPrimitive("string"), priorityAdditionalProps["type"])
-    assertTrue(priorityAdditionalProps.containsKey("enum"))
-    val priorityEnum = priorityAdditionalProps["enum"] as JsonArray
-    val priorityValues = priorityEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(priorityAdditionalProps.containsKey("oneOf"))
+    val priorityOneOf = priorityAdditionalProps["oneOf"] as JsonArray
+    val priorityValues = priorityOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     assertEquals(setOf("LOW", "MEDIUM", "HIGH", "URGENT"), priorityValues)
   }
 
@@ -761,9 +766,9 @@ internal class JsonSchemaExtensionsTest {
     val primaryStatusField = properties["primaryStatus"] as JsonObject
     assertEquals(JsonPrimitive("string"), primaryStatusField["type"])
     assertEquals(JsonPrimitive("Primary status"), primaryStatusField["description"])
-    assertTrue(primaryStatusField.containsKey("enum"))
-    val primaryStatusEnum = primaryStatusField["enum"] as JsonArray
-    val primaryStatusValues = primaryStatusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(primaryStatusField.containsKey("oneOf"))
+    val primaryStatusOneOf = primaryStatusField["oneOf"] as JsonArray
+    val primaryStatusValues = primaryStatusOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     assertEquals(setOf("ACTIVE", "INACTIVE", "PENDING", "ARCHIVED"), primaryStatusValues)
 
     // Verify list of status enums
@@ -772,7 +777,7 @@ internal class JsonSchemaExtensionsTest {
     assertTrue(secondaryStatusesField.containsKey("items"))
     val statusItems = secondaryStatusesField["items"] as JsonObject
     assertEquals(JsonPrimitive("string"), statusItems["type"])
-    assertTrue(statusItems.containsKey("enum"))
+    assertTrue(statusItems.containsKey("oneOf"))
 
     // Verify map with status enum values
     val statusMappingField = properties["statusMapping"] as JsonObject
@@ -780,15 +785,15 @@ internal class JsonSchemaExtensionsTest {
     assertTrue(statusMappingField.containsKey("additionalProperties"))
     val statusAdditionalProps = statusMappingField["additionalProperties"] as JsonObject
     assertEquals(JsonPrimitive("string"), statusAdditionalProps["type"])
-    assertTrue(statusAdditionalProps.containsKey("enum"))
+    assertTrue(statusAdditionalProps.containsKey("oneOf"))
 
     // Verify optional priority enum with description
     val priorityField = properties["priority"] as JsonObject
     assertEquals(JsonPrimitive("string"), priorityField["type"])
     assertEquals(JsonPrimitive("Optional priority"), priorityField["description"])
-    assertTrue(priorityField.containsKey("enum"))
-    val priorityEnum = priorityField["enum"] as JsonArray
-    val priorityValues = priorityEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(priorityField.containsKey("oneOf"))
+    val priorityOneOf = priorityField["oneOf"] as JsonArray
+    val priorityValues = priorityOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     assertEquals(setOf("LOW", "MEDIUM", "HIGH", "URGENT"), priorityValues)
 
     // Verify required fields - priority should not be required (has default null)
@@ -805,20 +810,20 @@ internal class JsonSchemaExtensionsTest {
     // Verify HTTP method enum field uses @SerialName values
     val methodField = properties["method"] as JsonObject
     assertEquals(JsonPrimitive("string"), methodField["type"])
-    assertTrue(methodField.containsKey("enum"))
-    val methodEnum = methodField["enum"] as JsonArray
-    assertEquals(4, methodEnum.size)
-    val methodValues = methodEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(methodField.containsKey("oneOf"))
+    val methodOneOf = methodField["oneOf"] as JsonArray
+    assertEquals(4, methodOneOf.size)
+    val methodValues = methodOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     // Should use SerialName values, not enum constant names
     assertEquals(setOf("GET", "POST", "put", "delete"), methodValues)
 
     // Verify order status enum field uses @SerialName values
     val orderStatusField = properties["orderStatus"] as JsonObject
     assertEquals(JsonPrimitive("string"), orderStatusField["type"])
-    assertTrue(orderStatusField.containsKey("enum"))
-    val orderStatusEnum = orderStatusField["enum"] as JsonArray
-    assertEquals(5, orderStatusEnum.size)
-    val orderStatusValues = orderStatusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(orderStatusField.containsKey("oneOf"))
+    val orderStatusOneOf = orderStatusField["oneOf"] as JsonArray
+    assertEquals(5, orderStatusOneOf.size)
+    val orderStatusValues = orderStatusOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     // Should use SerialName values (snake_case), not enum constant names
     assertEquals(setOf("pending_payment", "processing", "shipped", "delivered", "cancelled"), orderStatusValues)
 
@@ -835,10 +840,10 @@ internal class JsonSchemaExtensionsTest {
     // Verify mixed enum field - some with SerialName, some without
     val mixedValueField = properties["mixedValue"] as JsonObject
     assertEquals(JsonPrimitive("string"), mixedValueField["type"])
-    assertTrue(mixedValueField.containsKey("enum"))
-    val mixedEnum = mixedValueField["enum"] as JsonArray
-    assertEquals(3, mixedEnum.size)
-    val mixedValues = mixedEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(mixedValueField.containsKey("oneOf"))
+    val mixedOneOf = mixedValueField["oneOf"] as JsonArray
+    assertEquals(3, mixedOneOf.size)
+    val mixedValues = mixedOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     // Should use SerialName where present, enum constant name where not
     assertEquals(setOf("custom_value_1", "VALUE_TWO", "custom_value_3"), mixedValues)
 
@@ -846,9 +851,9 @@ internal class JsonSchemaExtensionsTest {
     val methodField = properties["method"] as JsonObject
     assertEquals(JsonPrimitive("string"), methodField["type"])
     assertEquals(JsonPrimitive("HTTP method for the request"), methodField["description"])
-    assertTrue(methodField.containsKey("enum"))
-    val methodEnum = methodField["enum"] as JsonArray
-    val methodValues = methodEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(methodField.containsKey("oneOf"))
+    val methodOneOf = methodField["oneOf"] as JsonArray
+    val methodValues = methodOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     assertEquals(setOf("GET", "POST", "put", "delete"), methodValues)
   }
 
@@ -863,9 +868,9 @@ internal class JsonSchemaExtensionsTest {
     assertTrue(methodsField.containsKey("items"))
     val methodItems = methodsField["items"] as JsonObject
     assertEquals(JsonPrimitive("string"), methodItems["type"])
-    assertTrue(methodItems.containsKey("enum"))
-    val methodEnum = methodItems["enum"] as JsonArray
-    val methodValues = methodEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(methodItems.containsKey("oneOf"))
+    val methodOneOf = methodItems["oneOf"] as JsonArray
+    val methodValues = methodOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     assertEquals(setOf("GET", "POST", "put", "delete"), methodValues)
 
     // Verify list of order status enums with SerialName
@@ -874,9 +879,9 @@ internal class JsonSchemaExtensionsTest {
     assertTrue(statusesField.containsKey("items"))
     val statusItems = statusesField["items"] as JsonObject
     assertEquals(JsonPrimitive("string"), statusItems["type"])
-    assertTrue(statusItems.containsKey("enum"))
-    val statusEnum = statusItems["enum"] as JsonArray
-    val statusValues = statusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(statusItems.containsKey("oneOf"))
+    val statusOneOf = statusItems["oneOf"] as JsonArray
+    val statusValues = statusOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     assertEquals(setOf("pending_payment", "processing", "shipped", "delivered", "cancelled"), statusValues)
   }
 
@@ -899,9 +904,9 @@ internal class JsonSchemaExtensionsTest {
     assertTrue(methodMapField.containsKey("additionalProperties"))
     val methodAdditionalProps = methodMapField["additionalProperties"] as JsonObject
     assertEquals(JsonPrimitive("string"), methodAdditionalProps["type"])
-    assertTrue(methodAdditionalProps.containsKey("enum"))
-    val methodEnum = methodAdditionalProps["enum"] as JsonArray
-    val methodValues = methodEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(methodAdditionalProps.containsKey("oneOf"))
+    val methodOneOf = methodAdditionalProps["oneOf"] as JsonArray
+    val methodValues = methodOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     assertEquals(setOf("GET", "POST", "put", "delete"), methodValues)
 
     // Verify map with order status enum values using SerialName
@@ -910,9 +915,9 @@ internal class JsonSchemaExtensionsTest {
     assertTrue(statusMapField.containsKey("additionalProperties"))
     val statusAdditionalProps = statusMapField["additionalProperties"] as JsonObject
     assertEquals(JsonPrimitive("string"), statusAdditionalProps["type"])
-    assertTrue(statusAdditionalProps.containsKey("enum"))
-    val statusEnum = statusAdditionalProps["enum"] as JsonArray
-    val statusValues = statusEnum.map { (it as JsonPrimitive).content }.toSet()
+    assertTrue(statusAdditionalProps.containsKey("oneOf"))
+    val statusOneOf = statusAdditionalProps["oneOf"] as JsonArray
+    val statusValues = statusOneOf.map { ((it as JsonObject)["const"] as JsonPrimitive).content }.toSet()
     assertEquals(setOf("pending_payment", "processing", "shipped", "delivered", "cancelled"), statusValues)
   }
 
