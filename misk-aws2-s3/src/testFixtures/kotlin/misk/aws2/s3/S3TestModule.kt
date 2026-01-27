@@ -1,11 +1,9 @@
 package misk.aws2.s3
 
-import misk.annotation.ExperimentalMiskApi
 import misk.aws2.s3.config.S3Config
 import misk.inject.ReusableTestModule
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 
-@OptIn(ExperimentalMiskApi::class)
 class S3TestModule(private val dockerS3: DockerS3 = DockerS3.Default) : ReusableTestModule() {
 
   override fun configure() {
