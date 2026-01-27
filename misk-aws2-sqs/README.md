@@ -50,7 +50,6 @@ Install the SQS module in your application by adding it to your service module:
 ```kotlin
 import com.squareup.cash.orc.orcOverride
 import com.squareup.skim.aws.sqs.CommonCashQueues
-import misk.annotation.ExperimentalMiskApi
 import misk.aws2.sqs.jobqueue.DeadLetterQueueProvider
 import misk.aws2.sqs.jobqueue.SqsJobHandlerModule
 import misk.aws2.sqs.jobqueue.SqsJobQueueModule
@@ -60,7 +59,6 @@ import misk.inject.KAbstractModule
 import misk.jobqueue.QueueName
 import misk.web.WebActionModule
 
-@OptIn(ExperimentalMiskApi::class)
 class SqsModule(private val config: SqsConfig) : KAbstractModule() {
     override fun configure() {
         // Override configuration in local development to support Orc connection
