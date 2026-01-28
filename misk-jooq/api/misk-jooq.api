@@ -6,6 +6,7 @@ public final class misk/jooq/IsolationLevelAwareConnectionProvider : org/jooq/Co
 
 public final class misk/jooq/JooqExtensionsKt {
 	public static final fun fetchOneOrNull (Lorg/jooq/ResultQuery;)Lorg/jooq/Record;
+	public static final fun getOrThrow (Ljava/lang/Object;)Ljava/lang/Object;
 	public static final fun ifNotNull (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Lorg/jooq/Condition;
 	public static final fun toInstant (Ljava/time/LocalDateTime;)Ljava/time/Instant;
 	public static final fun toLocalDateTime (Ljava/time/Instant;)Ljava/time/LocalDateTime;
