@@ -34,7 +34,7 @@ internal class CachedConfigurationFactory(
   private val concurrentHashMap = ConcurrentHashMap<CacheKey, Configuration>()
 
   @VisibleForTesting
-  val cacheSize: Int
+  internal val cacheSize: Int
     get() = concurrentHashMap.size
 
   override fun getConfiguration(options: JooqTransacter.TransacterOptions): Configuration {
