@@ -36,9 +36,13 @@ class JsonSchemaExtensionsIntegrationTest {
     private val sealedFruit: List<Fruit>,
   ) {
     enum class SampleEnum {
+      @Description("First value")
       FIRST,
+      @Description("Second value")
       SECOND,
+      @Description("Third value")
       THIRD,
+      NO_DESCRIPTION,
     }
 
     @Serializable sealed interface Fruit
