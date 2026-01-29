@@ -76,6 +76,7 @@ class JooqTransacter internal constructor(private val configurationFactory: (Tra
     val maxAttempts: Int = 3,
     val maxRetryDelayMillis: Long = 500,
     val isolationLevel: TransactionIsolationLevel = TransactionIsolationLevel.REPEATABLE_READ,
+    val readOnly: Boolean = false,
   )
 
   companion object {
