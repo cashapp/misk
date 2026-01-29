@@ -528,4 +528,56 @@ internal class JooqTransacterTest {
       }
     }
   }
+
+  @Nested
+  inner class ReadOnlyTests {
+    @Test
+    fun `check readOnly is false by default`() {
+      transacter.transaction { (ctx) -> ctx.connection { assertThat(it.isReadOnly).isFalse() } }
+    }
+
+    @Test
+    fun `check readOnly is true when explicitly set`() {
+      transacter.transaction(options = TransacterOptions(readOnly = true)) { (ctx) ->
+        ctx.connection { assertThat(it.isReadOnly).isTrue() }
+      }
+    }
+
+    @Test
+    fun `read only transaction can read data`() {
+      val savedMovie =
+        transacter.transaction { (ctx) ->
+          ctx
+            .newRecord(MOVIE)
+            .apply {
+              this.genre = Genre.COMEDY.name
+              this.name = "Read Only Test Movie"
+            }
+            .also { it.store() }
+        }
+
+      val movie =
+        transacter.transaction(options = TransacterOptions(readOnly = true)) { (ctx) ->
+          ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(savedMovie.id)).fetchOne()
+        }
+
+      assertThat(movie).isNotNull
+      assertThat(movie!!.name).isEqualTo("Read Only Test Movie")
+    }
+
+    @Test
+    fun `read only transaction rejects writes`() {
+      assertThrows<DataAccessException> {
+        transacter.transaction(options = TransacterOptions(readOnly = true)) { (ctx) ->
+          ctx
+            .newRecord(MOVIE)
+            .apply {
+              this.genre = Genre.COMEDY.name
+              this.name = "Should Fail"
+            }
+            .also { it.store() }
+        }
+      }
+    }
+  }
 }

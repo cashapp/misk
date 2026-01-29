@@ -124,9 +124,20 @@ private fun SerialDescriptor.generateJsonSchemaInternal(
       }
 
       SerialKind.ENUM -> {
-        val enumValues = (0 until elementsCount).map { index -> getElementName(index) }
         label?.let { put("properties", buildLabelProperty(it)) }
-        put("enum", JsonArray(enumValues.map { JsonPrimitive(it) }))
+
+        put("oneOf",
+          buildJsonArray {
+            (0 until elementsCount).forEach { index ->
+              val enumValue = getElementName(index)
+              val description = getElementAnnotations(index).description()
+              add(buildJsonObject {
+                put("const", JsonPrimitive(enumValue))
+                description?.let { put("description", JsonPrimitive(description)) }
+              })
+            }
+          }
+        )
       }
 
       StructureKind.LIST -> {
