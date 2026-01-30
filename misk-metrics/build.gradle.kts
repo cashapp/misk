@@ -10,6 +10,7 @@ plugins {
 dependencies {
   api(project(":misk-inject"))
   api(libs.prometheusClient)
+  api(libs.micrometerCore)
   implementation(libs.findbugsJsr305)
   implementation(libs.guava)
   implementation(libs.guice)
@@ -27,6 +28,7 @@ dependencies {
 
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-metrics"))
+  testImplementation(project(":misk-micrometer"))
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
 

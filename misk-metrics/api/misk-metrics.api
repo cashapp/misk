@@ -83,6 +83,10 @@ public final class misk/metrics/MetricsModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 }
 
+public final class misk/metrics/MetricsV3Module : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
 public final class misk/metrics/v2/FakeMetrics : misk/metrics/v2/Metrics {
 	public fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
 	public fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
@@ -198,5 +202,89 @@ public final class misk/metrics/v2/ProvidedGauge$Child {
 
 public final class misk/metrics/v2/ProvidedGauge$Companion {
 	public final fun builder (Ljava/lang/String;Ljava/lang/String;)Lmisk/metrics/v2/ProvidedGauge$Builder;
+}
+
+public abstract interface class misk/metrics/v3/Metrics {
+	public static final field Companion Lmisk/metrics/v3/Metrics$Companion;
+	public abstract fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v3/Metrics$Counter;
+	public abstract fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v3/Metrics$Gauge;
+	public abstract fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lmisk/metrics/v3/Metrics$Histogram;
+	public abstract fun peakGauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v3/Metrics$Gauge;
+	public abstract fun providedGauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v3/Metrics$ProvidedGauge;
+	public abstract fun registry ()Lio/micrometer/core/instrument/MeterRegistry;
+	public abstract fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/v3/Metrics$Summary;
+}
+
+public final class misk/metrics/v3/Metrics$Companion {
+	public final fun from (Lio/micrometer/core/instrument/MeterRegistry;)Lmisk/metrics/v3/Metrics;
+}
+
+public abstract interface class misk/metrics/v3/Metrics$Counter {
+	public abstract fun labels ([Ljava/lang/String;)Lmisk/metrics/v3/Metrics$Counter$Child;
+}
+
+public abstract interface class misk/metrics/v3/Metrics$Counter$Child {
+	public abstract fun inc (D)V
+}
+
+public final class misk/metrics/v3/Metrics$Counter$Child$DefaultImpls {
+	public static synthetic fun inc$default (Lmisk/metrics/v3/Metrics$Counter$Child;DILjava/lang/Object;)V
+}
+
+public final class misk/metrics/v3/Metrics$DefaultImpls {
+	public static synthetic fun counter$default (Lmisk/metrics/v3/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/metrics/v3/Metrics$Counter;
+	public static synthetic fun gauge$default (Lmisk/metrics/v3/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/metrics/v3/Metrics$Gauge;
+	public static synthetic fun histogram$default (Lmisk/metrics/v3/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lmisk/metrics/v3/Metrics$Histogram;
+	public static synthetic fun peakGauge$default (Lmisk/metrics/v3/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/metrics/v3/Metrics$Gauge;
+	public static synthetic fun providedGauge$default (Lmisk/metrics/v3/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/metrics/v3/Metrics$ProvidedGauge;
+	public static synthetic fun summary$default (Lmisk/metrics/v3/Metrics;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;ILjava/lang/Object;)Lmisk/metrics/v3/Metrics$Summary;
+}
+
+public abstract interface class misk/metrics/v3/Metrics$Gauge {
+	public abstract fun labels ([Ljava/lang/String;)Lmisk/metrics/v3/Metrics$Gauge$Child;
+}
+
+public abstract interface class misk/metrics/v3/Metrics$Gauge$Child {
+	public abstract fun dec (D)V
+	public abstract fun get ()D
+	public abstract fun inc (D)V
+	public abstract fun set (D)V
+}
+
+public final class misk/metrics/v3/Metrics$Gauge$Child$DefaultImpls {
+	public static fun dec (Lmisk/metrics/v3/Metrics$Gauge$Child;D)V
+	public static synthetic fun dec$default (Lmisk/metrics/v3/Metrics$Gauge$Child;DILjava/lang/Object;)V
+	public static synthetic fun inc$default (Lmisk/metrics/v3/Metrics$Gauge$Child;DILjava/lang/Object;)V
+}
+
+public abstract interface class misk/metrics/v3/Metrics$Histogram {
+	public abstract fun labels ([Ljava/lang/String;)Lmisk/metrics/v3/Metrics$Histogram$Child;
+}
+
+public abstract interface class misk/metrics/v3/Metrics$Histogram$Child {
+	public abstract fun observe (D)V
+	public abstract fun timeMs (Lkotlin/jvm/functions/Function0;)D
+}
+
+public abstract interface class misk/metrics/v3/Metrics$ProvidedGauge {
+	public abstract fun labels ([Ljava/lang/String;)Lmisk/metrics/v3/Metrics$ProvidedGauge$Child;
+}
+
+public abstract interface class misk/metrics/v3/Metrics$ProvidedGauge$Child {
+	public abstract fun setSupplier (Lkotlin/jvm/functions/Function0;)V
+}
+
+public abstract interface class misk/metrics/v3/Metrics$Summary {
+	public abstract fun labels ([Ljava/lang/String;)Lmisk/metrics/v3/Metrics$Summary$Child;
+}
+
+public abstract interface class misk/metrics/v3/Metrics$Summary$Child {
+	public abstract fun observe (D)V
+}
+
+public final class misk/metrics/v3/MetricsKt {
+	public static final fun getDefaultBuckets ()Ljava/util/List;
+	public static final fun getDefaultQuantiles ()Ljava/util/Map;
+	public static final fun getDefaultSparseBuckets ()Ljava/util/List;
 }
 
