@@ -1,4 +1,6 @@
 public final class misk/metrics/backends/micrometer/MicrometerMetricsModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
+	public fun <init> (Lio/micrometer/prometheus/PrometheusMeterRegistry;)V
+	public synthetic fun <init> (Lio/micrometer/prometheus/PrometheusMeterRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 

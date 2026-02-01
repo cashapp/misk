@@ -259,4 +259,28 @@ class MicrometerMetricsTest {
     v2Metrics.counter("v2_counter", "V2 counter test")
     v1Metrics.counter("v1_counter", "V1 counter test", listOf())
   }
+
+  @Test
+  fun `can provide custom PrometheusMeterRegistry`() {
+    val customRegistry =
+      io.micrometer.prometheus.PrometheusMeterRegistry(io.micrometer.prometheus.PrometheusConfig.DEFAULT)
+
+    val injector = Guice.createInjector(MicrometerMetricsModule(customRegistry))
+
+    val prometheusMeterRegistry = injector.getInstance(io.micrometer.prometheus.PrometheusMeterRegistry::class.java)
+    val meterRegistry = injector.getInstance(io.micrometer.core.instrument.MeterRegistry::class.java)
+    val metrics = injector.getInstance(misk.metrics.v2.Metrics::class.java)
+
+    // Should use the provided registry
+    assertThat(prometheusMeterRegistry).isSameAs(customRegistry)
+    assertThat(meterRegistry).isSameAs(customRegistry)
+
+    // Metrics should work with the provided registry
+    val counter = metrics.counter("custom_registry_counter", "Counter using custom registry")
+    counter.inc()
+    assertThat(counter.get()).isEqualTo(1.0)
+
+    // The registry should contain our metric
+    assertThat(customRegistry.prometheusRegistry.metricFamilySamples()).isNotNull
+  }
 }

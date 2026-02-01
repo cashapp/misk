@@ -26,14 +26,25 @@ import misk.inject.asSingleton
  *
  * // Use:
  * install(MicrometerMetricsModule())
+ *
+ * // Or with a provided registry:
+ * val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+ * install(MicrometerMetricsModule(registry))
  * ```
  *
  * All existing code using `@Inject lateinit var metrics: misk.metrics.v2.Metrics` will continue to work without
  * changes.
+ *
+ * @param prometheusMeterRegistry Optional PrometheusMeterRegistry to use. If null, a new one will be created.
  */
-class MicrometerMetricsModule : KAbstractModule() {
+class MicrometerMetricsModule(private val prometheusMeterRegistry: PrometheusMeterRegistry? = null) :
+  KAbstractModule() {
   override fun configure() {
-    bind<PrometheusMeterRegistry>().toProvider(PrometheusMeterRegistryProvider::class.java).asSingleton()
+    if (prometheusMeterRegistry != null) {
+      bind<PrometheusMeterRegistry>().toInstance(prometheusMeterRegistry)
+    } else {
+      bind<PrometheusMeterRegistry>().toProvider(PrometheusMeterRegistryProvider::class.java).asSingleton()
+    }
     bind<MeterRegistry>().toProvider(MeterRegistryProvider::class.java).asSingleton()
     bind<CollectorRegistry>().toProvider(CollectorRegistryProvider::class.java).asSingleton()
     bind<misk.metrics.Metrics>().toProvider(MetricsProvider::class.java).asSingleton()
