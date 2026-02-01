@@ -1,0 +1,20 @@
+public final class misk/micrometer/prometheus/MicrometerPrometheusModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class misk/micrometer/prometheus/v2/MicrometerMetrics : misk/metrics/v2/Metrics {
+	public fun <init> (Lio/micrometer/core/instrument/MeterRegistry;Lio/prometheus/client/CollectorRegistry;)V
+	public fun counter (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Counter;
+	public fun gauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/prometheus/client/Gauge;
+	public fun getRegistry ()Lio/prometheus/client/CollectorRegistry;
+	public fun histogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lio/prometheus/client/Histogram;
+	public fun legacyHistogram (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lmisk/metrics/Histogram;
+	public fun peakGauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/PeakGauge;
+	public fun providedGauge (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/metrics/v2/ProvidedGauge;
+	public fun summary (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/Long;)Lio/prometheus/client/Summary;
+}
+
+public final class misk/micrometer/prometheus/v2/MicrometerMetricsModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
