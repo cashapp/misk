@@ -9,9 +9,6 @@ import helpers.protos.Dinosaur
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
-import misk.clustering.Cluster
-import misk.clustering.ClusterWatch
-import misk.clustering.fake.ExplicitClusterResourceMapper
 import misk.config.AppName
 import misk.inject.KAbstractModule
 import misk.security.ssl.CertStoreConfig
@@ -43,8 +40,6 @@ internal class TypedPeerHttpClientTest {
 
   @Inject private lateinit var jetty: JettyService
 
-  @Inject private lateinit var cluster: Cluster
-
   private lateinit var clientInjector: Injector
 
   @BeforeEach
@@ -57,8 +52,10 @@ internal class TypedPeerHttpClientTest {
     val clientFactory =
       clientInjector.getInstance(Key.get(object : TypeLiteral<TypedPeerClientFactory<ReturnADinosaur>>() {}))
 
-    val snapshot = cluster.snapshot
-    val client: ReturnADinosaur = clientFactory.client(snapshot.self)
+    val clusterMember = object : PeerIdentifier {
+      override val ipAddress = "127.0.0.1"
+    }
+    val client: ReturnADinosaur = clientFactory.client(clusterMember)
 
     val response = client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
     assertThat(response.code()).isEqualTo(200)
@@ -76,25 +73,6 @@ internal class TypedPeerHttpClientTest {
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun getDinosaur(@RequestBody request: Dinosaur): Dinosaur =
       request.newBuilder().name("super${request.name}").build()
-  }
-
-  class FakeCluster @Inject constructor(memberIp: String = "127.0.0.1") : Cluster {
-
-    override val snapshot: Cluster.Snapshot
-
-    init {
-      val self = Cluster.Member(name = "self-name", ipAddress = memberIp)
-      val resourceMapper = ExplicitClusterResourceMapper()
-
-      resourceMapper.setDefaultMapping(self)
-
-      snapshot =
-        Cluster.Snapshot(self = self, readyMembers = setOf(), selfReady = true, resourceMapper = resourceMapper)
-    }
-
-    override fun watch(watch: ClusterWatch) {
-      throw UnsupportedOperationException()
-    }
   }
 
   class TestModule : KAbstractModule() {
@@ -124,7 +102,6 @@ internal class TypedPeerHttpClientTest {
       )
 
       install(MiskTestingServiceModule())
-      bind<Cluster>().toInstance(FakeCluster())
       install(WebActionModule.create<ReturnADinosaurAction>())
     }
   }
