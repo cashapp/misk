@@ -1,0 +1,4 @@
+public final class misk/metrics/backends/micrometer/MicrometerMetricsModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
