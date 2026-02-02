@@ -680,13 +680,17 @@ public final class misk/client/OkHttpClientCommonConfigurator$Companion {
 
 public final class misk/client/PeerClientFactory {
 	public fun <init> (Ljava/lang/String;Lmisk/client/HttpClientsConfig;Lmisk/client/HttpClientFactory;I)V
-	public final fun baseUrl (Lmisk/clustering/Cluster$Member;)Ljava/lang/String;
-	public final fun client (Lmisk/clustering/Cluster$Member;)Lokhttp3/OkHttpClient;
+	public final fun baseUrl (Lmisk/client/PeerIdentifier;)Ljava/lang/String;
+	public final fun client (Lmisk/client/PeerIdentifier;)Lokhttp3/OkHttpClient;
 }
 
 public final class misk/client/PeerClientModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public final fun peerClientFactory (Ljava/lang/String;Lmisk/client/HttpClientsConfig;Lmisk/client/HttpClientFactory;Lmisk/web/WebConfig;)Lmisk/client/PeerClientFactory;
+}
+
+public abstract interface class misk/client/PeerIdentifier {
+	public abstract fun getIpAddress ()Ljava/lang/String;
 }
 
 public final class misk/client/ProtoMessageHttpClient {
@@ -712,7 +716,7 @@ public final class misk/client/TypedHttpClientModule$Companion {
 }
 
 public abstract interface class misk/client/TypedPeerClientFactory {
-	public abstract fun client (Lmisk/clustering/Cluster$Member;)Ljava/lang/Object;
+	public abstract fun client (Lmisk/client/PeerIdentifier;)Ljava/lang/Object;
 }
 
 public final class misk/client/TypedPeerHttpClientModule : misk/inject/KAbstractModule {

@@ -11,7 +11,6 @@ import jakarta.inject.Singleton
 import java.lang.reflect.Proxy
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
-import misk.clustering.Cluster
 import misk.inject.KAbstractModule
 import okhttp3.EventListener
 import okhttp3.OkHttpClient
@@ -78,7 +77,7 @@ constructor(
 
 /** Factory for creating typed clients that call other members of a cluster. */
 interface TypedPeerClientFactory<T> {
-  fun client(peer: Cluster.Member): T
+  fun client(peer: PeerIdentifier): T
 }
 
 /**
@@ -126,7 +125,7 @@ constructor(
 
     override fun get(): TypedPeerClientFactory<T> {
       return object : TypedPeerClientFactory<T> {
-        override fun client(peer: Cluster.Member): T {
+        override fun client(peer: PeerIdentifier): T {
           return typedClient(peerClientFactory.client(peer), peerClientFactory.baseUrl(peer))
         }
       }
