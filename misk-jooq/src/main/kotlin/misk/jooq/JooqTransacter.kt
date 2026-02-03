@@ -62,7 +62,7 @@ class JooqTransacter internal constructor(private val configurationFactory: (Tra
           jooqSession = JooqSession(DSL.using(configuration))
           runCatching { callback(jooqSession).also { jooqSession.executePreCommitHooks() } }
             .onFailure { jooqSession.onSessionClose { jooqSession.executeRollbackHooks(it) } }
-            .getOrElse { throw it } // JooqExtensions.kt shadows Result<T>.getOrThrow()... This is equivalent.
+            .getOrThrow()
         }
         .also { jooqSession?.executePostCommitHooks() }
     } finally {

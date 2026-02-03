@@ -195,8 +195,7 @@ internal class JooqTransacterTest {
         ctx
           .selectFrom(MOVIE)
           .where(MOVIE.ID.eq(movie.id))
-          .fetchOne()
-          .getOrThrow()
+          .fetchSingle()
           .apply { this.genre = Genre.HORROR.name }
           .also { it.store() }
       }

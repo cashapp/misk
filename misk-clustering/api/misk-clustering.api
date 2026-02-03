@@ -27,7 +27,7 @@ public final class misk/clustering/Cluster$DefaultImpls {
 	public static fun newResourceMapper (Lmisk/clustering/Cluster;Ljava/util/Set;)Lmisk/clustering/ClusterResourceMapper;
 }
 
-public final class misk/clustering/Cluster$Member {
+public final class misk/clustering/Cluster$Member : misk/client/PeerIdentifier {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
