@@ -9,18 +9,9 @@ import org.junit.jupiter.api.Test
 
 @MiskTest
 class FakeSwitchTest {
-  @MiskTestModule
-  val module =
-    object : KAbstractModule() {
-      override fun configure() {
-        bind<Switch>().to<FakeSwitch>()
-      }
-    }
+  @MiskTestModule val module = FakeSwitchModule()
 
-  @Inject lateinit var switch: Switch
-
-  private val fakeSwitch
-    get() = switch as FakeSwitch
+  @Inject lateinit var fakeSwitch: FakeSwitch
 
   @Test
   fun `starts with all keys disabled`() {
