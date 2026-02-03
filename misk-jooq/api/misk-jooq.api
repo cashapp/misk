@@ -390,3 +390,23 @@ public final class misk/jooq/testgen/tables/references/TablesKt {
 	public static final fun getRECORD_SIGNATURE_TEST ()Lmisk/jooq/testgen/tables/RecordSignatureTest;
 }
 
+public final class misk/jooq/transacter/JooqUnifiedTransacterModule : misk/inject/KAbstractModule {
+	public fun <init> (Lkotlin/reflect/KClass;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jooq/JooqTransacter$TransacterOptions;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/reflect/KClass;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface class misk/jooq/transacter/Transacter {
+	public abstract fun getInTransaction ()Z
+	public abstract fun isolationLevel (Lmisk/jooq/TransactionIsolationLevel;)Lmisk/jooq/transacter/Transacter;
+	public abstract fun maxAttempts (I)Lmisk/jooq/transacter/Transacter;
+	public abstract fun maxRetryDelay (Ljava/time/Duration;)Lmisk/jooq/transacter/Transacter;
+	public abstract fun noRetries ()Lmisk/jooq/transacter/Transacter;
+	public abstract fun readOnly ()Lmisk/jooq/transacter/Transacter;
+	public abstract fun replicaRead (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public abstract fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public abstract fun writable ()Lmisk/jooq/transacter/Transacter;
+}
+
