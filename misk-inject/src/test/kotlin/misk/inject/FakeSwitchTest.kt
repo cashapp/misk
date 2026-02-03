@@ -26,119 +26,65 @@ class FakeSwitchTest {
   fun `starts with all keys disabled`() {
     assertThat(fakeSwitch.isEnabled("any-key")).isFalse()
     assertThat(fakeSwitch.isDisabled("any-key")).isTrue()
-    assertThat(fakeSwitch.getEnabledKeys()).isEmpty()
+    assertThat(fakeSwitch.enabledKeys).isEmpty()
   }
 
   @Test
-  fun `enable single key`() {
-    fakeSwitch.enable("feature-a")
+  fun `can add key to enable it`() {
+    fakeSwitch.enabledKeys.add("feature-a")
 
     assertThat(fakeSwitch.isEnabled("feature-a")).isTrue()
     assertThat(fakeSwitch.isDisabled("feature-a")).isFalse()
     assertThat(fakeSwitch.isEnabled("feature-b")).isFalse()
-    assertThat(fakeSwitch.getEnabledKeys()).containsExactly("feature-a")
   }
 
   @Test
-  fun `disable single key`() {
-    fakeSwitch.enable("feature-a")
-    fakeSwitch.disable("feature-a")
+  fun `can remove key to disable it`() {
+    fakeSwitch.enabledKeys.add("feature-a")
+    fakeSwitch.enabledKeys.remove("feature-a")
 
     assertThat(fakeSwitch.isEnabled("feature-a")).isFalse()
-    assertThat(fakeSwitch.getEnabledKeys()).isEmpty()
   }
 
   @Test
-  fun `enable multiple keys`() {
-    fakeSwitch.enable("feature-a")
-    fakeSwitch.enable("feature-b")
-    fakeSwitch.enable("feature-c")
+  fun `can add multiple keys`() {
+    fakeSwitch.enabledKeys.addAll(listOf("feature-a", "feature-b", "feature-c"))
 
     assertThat(fakeSwitch.isEnabled("feature-a")).isTrue()
     assertThat(fakeSwitch.isEnabled("feature-b")).isTrue()
     assertThat(fakeSwitch.isEnabled("feature-c")).isTrue()
-    assertThat(fakeSwitch.getEnabledKeys()).containsExactlyInAnyOrder("feature-a", "feature-b", "feature-c")
   }
 
   @Test
-  fun `enableAll with multiple keys`() {
-    fakeSwitch.enableAll("feature-a", "feature-b", "feature-c")
-
-    assertThat(fakeSwitch.isEnabled("feature-a")).isTrue()
-    assertThat(fakeSwitch.isEnabled("feature-b")).isTrue()
-    assertThat(fakeSwitch.isEnabled("feature-c")).isTrue()
-    assertThat(fakeSwitch.getEnabledKeys()).containsExactlyInAnyOrder("feature-a", "feature-b", "feature-c")
-  }
-
-  @Test
-  fun `disableAll with multiple keys`() {
-    fakeSwitch.enableAll("feature-a", "feature-b", "feature-c")
-    fakeSwitch.disableAll("feature-a", "feature-c")
+  fun `can remove multiple keys`() {
+    fakeSwitch.enabledKeys.addAll(listOf("feature-a", "feature-b", "feature-c"))
+    fakeSwitch.enabledKeys.removeAll(listOf("feature-a", "feature-c"))
 
     assertThat(fakeSwitch.isEnabled("feature-a")).isFalse()
     assertThat(fakeSwitch.isEnabled("feature-b")).isTrue()
     assertThat(fakeSwitch.isEnabled("feature-c")).isFalse()
-    assertThat(fakeSwitch.getEnabledKeys()).containsExactly("feature-b")
   }
 
   @Test
-  fun `toggle key from disabled to enabled`() {
-    fakeSwitch.toggle("feature-a")
+  fun `adding same key multiple times is idempotent`() {
+    fakeSwitch.enabledKeys.add("feature-a")
+    fakeSwitch.enabledKeys.add("feature-a")
+    fakeSwitch.enabledKeys.add("feature-a")
 
     assertThat(fakeSwitch.isEnabled("feature-a")).isTrue()
+    assertThat(fakeSwitch.enabledKeys).hasSize(1)
   }
 
   @Test
-  fun `toggle key from enabled to disabled`() {
-    fakeSwitch.enable("feature-a")
-    fakeSwitch.toggle("feature-a")
+  fun `removing non-existent key is safe`() {
+    fakeSwitch.enabledKeys.remove("feature-a")
 
     assertThat(fakeSwitch.isEnabled("feature-a")).isFalse()
-  }
-
-  @Test
-  fun `toggle key multiple times`() {
-    fakeSwitch.toggle("feature-a")
-    assertThat(fakeSwitch.isEnabled("feature-a")).isTrue()
-
-    fakeSwitch.toggle("feature-a")
-    assertThat(fakeSwitch.isEnabled("feature-a")).isFalse()
-
-    fakeSwitch.toggle("feature-a")
-    assertThat(fakeSwitch.isEnabled("feature-a")).isTrue()
-  }
-
-  @Test
-  fun `clear removes all enabled keys`() {
-    fakeSwitch.enableAll("feature-a", "feature-b", "feature-c")
-    fakeSwitch.clear()
-
-    assertThat(fakeSwitch.isEnabled("feature-a")).isFalse()
-    assertThat(fakeSwitch.isEnabled("feature-b")).isFalse()
-    assertThat(fakeSwitch.isEnabled("feature-c")).isFalse()
-    assertThat(fakeSwitch.getEnabledKeys()).isEmpty()
-  }
-
-  @Test
-  fun `enabling same key multiple times is idempotent`() {
-    fakeSwitch.enable("feature-a")
-    fakeSwitch.enable("feature-a")
-    fakeSwitch.enable("feature-a")
-
-    assertThat(fakeSwitch.getEnabledKeys()).containsExactly("feature-a")
-  }
-
-  @Test
-  fun `disabling already disabled key is safe`() {
-    fakeSwitch.disable("feature-a")
-
-    assertThat(fakeSwitch.isEnabled("feature-a")).isFalse()
-    assertThat(fakeSwitch.getEnabledKeys()).isEmpty()
   }
 
   @Test
   fun `ifEnabled executes block when key is enabled`() {
-    fakeSwitch.enable("feature-a")
+    fakeSwitch.enabledKeys.add("feature-a")
     var executed = false
 
     fakeSwitch.ifEnabled("feature-a") { executed = true }
@@ -166,7 +112,7 @@ class FakeSwitchTest {
 
   @Test
   fun `ifDisabled does not execute block when key is enabled`() {
-    fakeSwitch.enable("feature-a")
+    fakeSwitch.enabledKeys.add("feature-a")
     var executed = false
 
     fakeSwitch.ifDisabled("feature-a") { executed = true }
@@ -176,20 +122,20 @@ class FakeSwitchTest {
 
   @Test
   fun `reset clears all enabled keys`() {
-    fakeSwitch.enableAll("feature-a", "feature-b", "feature-c")
+    fakeSwitch.enabledKeys.addAll(listOf("feature-a", "feature-b", "feature-c"))
     fakeSwitch.reset()
 
     assertThat(fakeSwitch.isEnabled("feature-a")).isFalse()
     assertThat(fakeSwitch.isEnabled("feature-b")).isFalse()
     assertThat(fakeSwitch.isEnabled("feature-c")).isFalse()
-    assertThat(fakeSwitch.getEnabledKeys()).isEmpty()
+    assertThat(fakeSwitch.enabledKeys).isEmpty()
   }
 
   @Test
   fun `reset is called between tests when using MiskTest`() {
     // This test verifies that the fixture is properly reset between test runs
     // State from previous tests should not affect this test
-    assertThat(fakeSwitch.getEnabledKeys()).isEmpty()
+    assertThat(fakeSwitch.enabledKeys).isEmpty()
   }
 
   @Test
@@ -203,21 +149,8 @@ class FakeSwitchTest {
     val injector = Guice.createInjector(module)
     val asyncSwitch = injector.getInstance(AsyncSwitch::class.java) as FakeSwitch
 
-    asyncSwitch.enable("async-feature")
+    asyncSwitch.enabledKeys.add("async-feature")
     assertThat(asyncSwitch.isEnabled("async-feature")).isTrue()
-  }
-
-  @Test
-  fun `getEnabledKeys returns copy not live set`() {
-    fakeSwitch.enable("feature-a")
-    val keys1 = fakeSwitch.getEnabledKeys()
-
-    fakeSwitch.enable("feature-b")
-    val keys2 = fakeSwitch.getEnabledKeys()
-
-    // Original set should not have changed
-    assertThat(keys1).containsExactly("feature-a")
-    assertThat(keys2).containsExactlyInAnyOrder("feature-a", "feature-b")
   }
 
   @Test
@@ -245,10 +178,10 @@ class FakeSwitchTest {
 
     assertThat(result()).isEqualTo("disabled")
 
-    switch.enable("test-feature")
+    switch.enabledKeys.add("test-feature")
     assertThat(result()).isEqualTo("enabled")
 
-    switch.disable("test-feature")
+    switch.enabledKeys.remove("test-feature")
     assertThat(result()).isEqualTo("disabled")
   }
 }

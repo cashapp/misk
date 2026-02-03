@@ -95,17 +95,11 @@ public final class misk/inject/DefaultAsyncSwitchModule : misk/inject/KInstallOn
 
 public final class misk/inject/FakeSwitch : misk/testing/FakeFixture, misk/inject/AsyncSwitch, misk/inject/Switch {
 	public fun <init> ()V
-	public final fun clear ()V
-	public final fun disable (Ljava/lang/String;)V
-	public final fun disableAll ([Ljava/lang/String;)V
-	public final fun enable (Ljava/lang/String;)V
-	public final fun enableAll ([Ljava/lang/String;)V
 	public final fun getEnabledKeys ()Ljava/util/Set;
 	public fun ifDisabled (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public fun ifEnabled (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public fun isDisabled (Ljava/lang/String;)Z
 	public fun isEnabled (Ljava/lang/String;)Z
-	public final fun toggle (Ljava/lang/String;)V
 }
 
 public final class misk/inject/GuiceKt {
