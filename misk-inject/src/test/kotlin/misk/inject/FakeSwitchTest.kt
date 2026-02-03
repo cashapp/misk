@@ -184,4 +184,22 @@ class FakeSwitchTest {
     switch.enabledKeys.remove("test-feature")
     assertThat(result()).isEqualTo("disabled")
   }
+
+  @Test
+  fun `FakeSwitchModule binds all switch types and registers test fixture`() {
+    val injector = Guice.createInjector(FakeSwitchModule())
+
+    val fakeSwitch = injector.getInstance(FakeSwitch::class.java)
+    val switch = injector.getInstance(Switch::class.java)
+    val asyncSwitch = injector.getInstance(AsyncSwitch::class.java)
+
+    // All should be the same instance
+    assertThat(switch).isSameAs(fakeSwitch)
+    assertThat(asyncSwitch).isSameAs(fakeSwitch)
+
+    // Verify it works
+    fakeSwitch.enabledKeys.add("test-feature")
+    assertThat(switch.isEnabled("test-feature")).isTrue()
+    assertThat(asyncSwitch.isEnabled("test-feature")).isTrue()
+  }
 }
