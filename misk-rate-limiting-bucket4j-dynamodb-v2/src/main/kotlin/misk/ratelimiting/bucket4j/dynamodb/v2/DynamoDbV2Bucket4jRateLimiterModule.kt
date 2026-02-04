@@ -23,6 +23,7 @@ constructor(
   private val prunerPageSize: Int = 1000,
   private val maxRetries: Int = 3,
   private val retryTimeout: Duration = Duration.ofMillis(25),
+  private val configMutator: ClientSideConfig.() -> Unit = {},
 ) : KAbstractModule() {
   override fun configure() {
     requireBinding<Clock>()
@@ -38,6 +39,7 @@ constructor(
         .withClientClock(ClockTimeMeter(clock))
         .withRequestTimeout(retryTimeout)
         .withMaxRetries(maxRetries)
+        .apply { configMutator() }
     val proxyManager: ProxyManager<String> = DynamoDBProxyManager.stringKey(dynamoDB, tableName, config)
     return Bucket4jRateLimiter(proxyManager, clock, meterRegistry)
   }

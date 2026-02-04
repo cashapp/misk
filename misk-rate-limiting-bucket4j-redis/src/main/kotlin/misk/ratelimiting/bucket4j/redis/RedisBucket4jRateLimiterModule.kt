@@ -32,6 +32,7 @@ constructor(
   private val keyMapper: Mapper<String>? = null,
   private val maxRetries: Int = 3,
   private val retryTimeout: Duration = Duration.ofMillis(25),
+  private val configMutator: Bucket4jJedis.JedisBasedProxyManagerBuilder<String>.() -> Unit = {},
 ) : KAbstractModule() {
   override fun configure() {
     requireBinding<Clock>()
@@ -51,6 +52,7 @@ constructor(
           keyMapper = keyMapper ?: Mapper.STRING,
           maxRetries = maxRetries,
           retryTimeout = retryTimeout,
+          configMutator = configMutator,
         )
       )
       .asSingleton()
@@ -62,6 +64,7 @@ constructor(
     private val keyMapper: Mapper<String>,
     private val maxRetries: Int,
     private val retryTimeout: Duration,
+    private val configMutator: Bucket4jJedis.JedisBasedProxyManagerBuilder<String>.() -> Unit,
   ) : Provider<RateLimiter> {
     @Inject lateinit var clock: Clock
     @Inject lateinit var metricsRegistry: MeterRegistry
@@ -79,6 +82,7 @@ constructor(
             // Set Redis TTLs to the bucket refill period + additionalTtl
             ExpirationAfterWriteStrategy.basedOnTimeForRefillingBucketUpToMax(additionalTtl)
           )
+          .apply { configMutator() }
           .build()
       return Bucket4jRateLimiter(proxyManager, clock, metricsRegistry)
     }

@@ -28,6 +28,7 @@ constructor(
   private val prunerPageSize: Long = 1000L,
   private val maxRetries: Int = 3,
   private val retryTimeout: Duration = Duration.ofMillis(25),
+  private val configMutator: Bucket4jMySQL.MySQLSelectForUpdateBasedProxyManagerBuilder<String>.() -> Unit = {},
 ) : KAbstractModule() {
   override fun configure() {
     requireBinding<Clock>()
@@ -49,6 +50,7 @@ constructor(
         .clientClock(ClockTimeMeter(clock))
         .requestTimeout(retryTimeout)
         .maxRetries(maxRetries)
+        .apply { configMutator() }
         .build()
 
     return Bucket4jRateLimiter(proxyManager, clock, meterRegistry)
