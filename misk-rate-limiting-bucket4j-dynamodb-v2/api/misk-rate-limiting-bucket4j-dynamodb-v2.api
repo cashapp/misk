@@ -1,7 +1,9 @@
 public final class misk/ratelimiting/bucket4j/dynamodb/v2/DynamoDbV2Bucket4jRateLimiterModule : misk/inject/KAbstractModule {
 	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;I)V
-	public synthetic fun <init> (Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;II)V
+	public fun <init> (Ljava/lang/String;IILjava/time/Duration;)V
+	public synthetic fun <init> (Ljava/lang/String;IILjava/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun providedPruner (Ljava/time/Clock;Lsoftware/amazon/awssdk/services/dynamodb/DynamoDbClient;Lio/micrometer/core/instrument/MeterRegistry;)Lwisp/ratelimiting/RateLimitPruner;
 	public final fun providedRateLimiter (Ljava/time/Clock;Lsoftware/amazon/awssdk/services/dynamodb/DynamoDbClient;Lio/micrometer/core/instrument/MeterRegistry;)Lwisp/ratelimiting/RateLimiter;
 }
@@ -10,7 +12,8 @@ public final class misk/ratelimiting/bucket4j/dynamodb/v2/DynamoDbV2BucketPruner
 	public static final field Companion Lmisk/ratelimiting/bucket4j/dynamodb/v2/DynamoDbV2BucketPruner$Companion;
 	public fun <init> (Ljava/time/Clock;Lsoftware/amazon/awssdk/services/dynamodb/DynamoDbClient;Lio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;)V
 	public fun <init> (Ljava/time/Clock;Lsoftware/amazon/awssdk/services/dynamodb/DynamoDbClient;Lio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;I)V
-	public synthetic fun <init> (Ljava/time/Clock;Lsoftware/amazon/awssdk/services/dynamodb/DynamoDbClient;Lio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/time/Clock;Lsoftware/amazon/awssdk/services/dynamodb/DynamoDbClient;Lio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;ILjava/time/Duration;)V
+	public synthetic fun <init> (Ljava/time/Clock;Lsoftware/amazon/awssdk/services/dynamodb/DynamoDbClient;Lio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;ILjava/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun getClockTimeMeter ()Lwisp/ratelimiting/bucket4j/ClockTimeMeter;
 	public fun prune ()V
 }

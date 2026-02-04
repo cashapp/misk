@@ -2,6 +2,7 @@ package misk.ratelimiting.bucket4j.dynamodb.v2.transaction
 
 import io.github.bucket4j.distributed.proxy.generic.compare_and_swap.CompareAndSwapOperation
 import io.github.bucket4j.distributed.remote.RemoteBucketState
+import java.time.Duration
 import java.util.Optional
 import kotlin.collections.getValue
 import software.amazon.awssdk.core.SdkBytes
@@ -14,13 +15,15 @@ internal abstract class BaseDynamoDBTransaction(private val dynamoDB: DynamoDbCl
   override fun getStateData(timeoutNanos: Optional<Long>): Optional<ByteArray> {
     val attributes = mapOf(DEFAULT_KEY_NAME to getKeyAttributeValue())
 
-    // TODO: respect timeout
     val result =
       dynamoDB
-        .getItem {
-          it.tableName(table)
-          it.key(attributes)
-          it.consistentRead(true)
+        .getItem { request ->
+          timeoutNanos.ifPresent { timeout ->
+            request.overrideConfiguration { config -> config.apiCallTimeout(Duration.ofNanos(timeout)) }
+          }
+          request.tableName(table)
+          request.key(attributes)
+          request.consistentRead(true)
         }
         .item()
     if (result == null || !result.containsKey(DEFAULT_STATE_NAME)) {
@@ -37,7 +40,12 @@ internal abstract class BaseDynamoDBTransaction(private val dynamoDB: DynamoDbCl
     return Optional.of(state.b().asByteArray())
   }
 
-  override fun compareAndSwap(originalData: ByteArray?, newData: ByteArray, newState: RemoteBucketState?, timeoutNanos: Optional<Long>): Boolean {
+  override fun compareAndSwap(
+    originalData: ByteArray?,
+    newData: ByteArray,
+    newState: RemoteBucketState?,
+    timeoutNanos: Optional<Long>,
+  ): Boolean {
     val item =
       mapOf(
         DEFAULT_KEY_NAME to getKeyAttributeValue(),
@@ -49,12 +57,15 @@ internal abstract class BaseDynamoDBTransaction(private val dynamoDB: DynamoDbCl
 
     // TODO: respect timeouts
     return try {
-      dynamoDB.putItem {
-        it.tableName(table)
-        it.item(item)
-        it.conditionExpression("attribute_not_exists(#st) OR #st = :expected")
-        it.expressionAttributeNames(names)
-        it.expressionAttributeValues(attributes)
+      dynamoDB.putItem { request ->
+        timeoutNanos.ifPresent { timeout ->
+          request.overrideConfiguration { config -> config.apiCallTimeout(Duration.ofNanos(timeout)) }
+        }
+        request.tableName(table)
+        request.item(item)
+        request.conditionExpression("attribute_not_exists(#st) OR #st = :expected")
+        request.expressionAttributeNames(names)
+        request.expressionAttributeValues(attributes)
       }
       true
     } catch (_: ConditionalCheckFailedException) {

@@ -3,6 +3,7 @@ package misk.ratelimiting.bucket4j.dynamodb.v2.proxymanager
 import io.github.bucket4j.distributed.proxy.ClientSideConfig
 import io.github.bucket4j.distributed.proxy.generic.compare_and_swap.AsyncCompareAndSwapOperation
 import io.github.bucket4j.distributed.proxy.generic.compare_and_swap.CompareAndSwapOperation
+import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import misk.ratelimiting.bucket4j.dynamodb.v2.transaction.BaseDynamoDBTransaction.Companion.DEFAULT_KEY_NAME
 import misk.ratelimiting.bucket4j.dynamodb.v2.transaction.LongDynamoDBTransaction
@@ -21,9 +22,12 @@ internal class LongDynamoDBProxyManager(dynamoDb: DynamoDbClient, table: String,
   override fun removeProxy(key: Long?) {
     val attributes = mapOf(DEFAULT_KEY_NAME to AttributeValue.fromN(key.toString()))
 
-    dynamoDb.deleteItem {
-      it.tableName(table)
-      it.key(attributes)
+    dynamoDb.deleteItem { request ->
+      clientSideConfig.requestTimeoutNanos.ifPresent { timeout ->
+        request.overrideConfiguration { config -> config.apiCallTimeout(Duration.ofNanos(timeout)) }
+      }
+      request.tableName(table)
+      request.key(attributes)
     }
   }
 
