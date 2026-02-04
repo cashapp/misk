@@ -11,9 +11,10 @@ import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedExce
 
 internal abstract class BaseDynamoDBTransaction(private val dynamoDB: DynamoDbClient, private val table: String) :
   CompareAndSwapOperation {
-  override fun getStateData(): Optional<ByteArray> {
+  override fun getStateData(timeoutNanos: Optional<Long>): Optional<ByteArray> {
     val attributes = mapOf(DEFAULT_KEY_NAME to getKeyAttributeValue())
 
+    // TODO: respect timeout
     val result =
       dynamoDB
         .getItem {
@@ -36,7 +37,7 @@ internal abstract class BaseDynamoDBTransaction(private val dynamoDB: DynamoDbCl
     return Optional.of(state.b().asByteArray())
   }
 
-  override fun compareAndSwap(originalData: ByteArray?, newData: ByteArray, newState: RemoteBucketState?): Boolean {
+  override fun compareAndSwap(originalData: ByteArray?, newData: ByteArray, newState: RemoteBucketState?, timeoutNanos: Optional<Long>): Boolean {
     val item =
       mapOf(
         DEFAULT_KEY_NAME to getKeyAttributeValue(),
@@ -46,6 +47,7 @@ internal abstract class BaseDynamoDBTransaction(private val dynamoDB: DynamoDbCl
       mapOf(":expected" to AttributeValue.fromB(originalData?.toSdkBytes() ?: SdkBytes.fromUtf8String("")))
     val names = mapOf("#st" to DEFAULT_STATE_NAME)
 
+    // TODO: respect timeouts
     return try {
       dynamoDB.putItem {
         it.tableName(table)
