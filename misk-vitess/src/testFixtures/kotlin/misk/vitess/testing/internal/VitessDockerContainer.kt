@@ -682,7 +682,6 @@ internal class VitessDockerContainer(
         .createContainerCmd(vitessImage)
         .withName(containerName)
         .withHostConfig(hostConfig)
-        .withPlatform("linux/amd64")
         .withHealthcheck(healthCheck)
         .withExposedPorts(*vitessPortConfig.allPortMappings().map { ExposedPort(it.containerPort) }.toTypedArray())
         .withEnv(
