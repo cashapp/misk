@@ -59,7 +59,9 @@ constructor(
           .withClientSideConfig(
             // Use Clock instead of calling System.currentTimeMillis() for refill determination
             // Equivalent logic at runtime, but lets us mock the refill times in integration tests
-            ClientSideConfig.getDefault().withClientClock(ClockTimeMeter(clock))
+            ClientSideConfig.getDefault()
+              .withClientClock(ClockTimeMeter(clock))
+              .withMaxRetries(5)
           )
           .withExpirationStrategy(
             // Set Redis TTLs to the bucket refill period + additionalTtl
