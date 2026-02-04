@@ -76,6 +76,17 @@ internal constructor(
     if (!running.compareAndSet(false, true)) return
   }
 
+  override fun shutDown() {
+    // Wait for in-flight tasks to complete before reporting terminated.
+    // This ensures dependent services (like AWS SDK HTTP clients) remain available.
+    taskExecutor.shutdown()
+    val terminated = taskExecutor.awaitTermination(30, TimeUnit.SECONDS)
+    if (!terminated) {
+      log.warn { "Timed out waiting for in-flight tasks to finish on $name; forcing shutdownNow()" }
+      taskExecutor.shutdownNow()
+    }
+  }
+
   override fun triggerShutdown() {
     log.info { "Triggered shutdown, stopping repeated task queue $name" }
 
