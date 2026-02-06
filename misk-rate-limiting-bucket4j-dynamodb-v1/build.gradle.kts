@@ -17,7 +17,6 @@ dependencies {
 
   implementation(project(":misk-logging"))
   implementation(libs.bucket4jCore)
-  implementation(libs.bucket4jDynamoDbV1)
   implementation(libs.loggingApi)
 
   testImplementation(project(":misk"))
@@ -33,6 +32,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = JavadocJar.Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = JavadocJar.Dokka("dokkaGfm")),
   )
 }

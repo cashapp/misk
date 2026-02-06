@@ -14,6 +14,10 @@ import wisp.ratelimiting.RateLimitPrunerMetrics
 import wisp.ratelimiting.bucket4j.Bucket4jPruner
 import wisp.ratelimiting.bucket4j.ClockTimeMeter
 
+@Deprecated(
+  "Deprecated as the AWS Java v1 SDK is EoL since Dec '25",
+  ReplaceWith("misk.ratelimiting.bucket4j.dynamodb.v2.DynamoDbV2BucketPruner"),
+)
 class DynamoDbV1BucketPruner
 @JvmOverloads
 constructor(

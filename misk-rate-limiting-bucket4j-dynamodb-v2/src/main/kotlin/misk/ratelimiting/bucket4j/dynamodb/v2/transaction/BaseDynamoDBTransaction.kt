@@ -55,7 +55,6 @@ internal abstract class BaseDynamoDBTransaction(private val dynamoDB: DynamoDbCl
       mapOf(":expected" to AttributeValue.fromB(originalData?.toSdkBytes() ?: SdkBytes.fromUtf8String("")))
     val names = mapOf("#st" to DEFAULT_STATE_NAME)
 
-    // TODO: respect timeouts
     return try {
       dynamoDB.putItem { request ->
         timeoutNanos.ifPresent { timeout ->
