@@ -47,6 +47,6 @@ constructor(
   @Provides
   @Singleton
   fun providedPruner(clock: Clock, dynamoDB: DynamoDbClient, meterRegistry: MeterRegistry): RateLimitPruner {
-    return DynamoDbV2BucketPruner(clock, dynamoDB, meterRegistry, tableName, prunerPageSize)
+    return DynamoDbV2BucketPruner(clock, dynamoDB, meterRegistry, tableName, prunerPageSize, retryTimeout)
   }
 }
