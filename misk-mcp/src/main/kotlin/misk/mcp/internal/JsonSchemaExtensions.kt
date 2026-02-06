@@ -3,7 +3,6 @@
 package misk.mcp.internal
 
 import kotlin.reflect.KType
-import kotlin.reflect.typeOf
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.PolymorphicKind
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -19,18 +18,6 @@ import kotlinx.serialization.json.buildJsonObject
 import misk.mcp.Description
 import misk.mcp.serializer
 
-/**
- * Generates a JSON schema for a reified serializable Kotlin type.
- *
- * This is a convenience function that converts the reified type [T] to a [KType] and delegates to
- * [KType.generateJsonSchema] for schema generation.
- *
- * @param T the reified type to generate a schema for
- * @return JsonObject representing the generated JSON schema with type, properties, and required fields
- * @throws IllegalArgumentException if the class has no serializer
- * @see KType.generateJsonSchema
- */
-@PublishedApi internal inline fun <reified T : Any> generateJsonSchema(): JsonObject = typeOf<T>().generateJsonSchema()
 
 /**
  * Generates a JSON schema for a serializable Kotlin type, including properties, types, and required fields.
