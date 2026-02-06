@@ -3,7 +3,8 @@ public final class misk/ratelimiting/bucket4j/mysql/MySQLBucket4jRateLimiterModu
 	public fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)V
 	public fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JI)V
 	public fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/time/Duration;)V
-	public synthetic fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/time/Duration;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/time/Duration;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun providedPruner (Ljava/time/Clock;Lcom/google/inject/Injector;Lio/micrometer/core/instrument/MeterRegistry;)Lwisp/ratelimiting/RateLimitPruner;
 	public final fun providedRateLimiter (Ljava/time/Clock;Lcom/google/inject/Injector;Lio/micrometer/core/instrument/MeterRegistry;)Lwisp/ratelimiting/RateLimiter;
 }
