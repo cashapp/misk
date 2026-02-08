@@ -1,11 +1,13 @@
 package misk.aws2.sqs.jobqueue
 
 import com.google.inject.Provides
+import com.google.inject.multibindings.OptionalBinder
 import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.cloud.aws.AwsRegion
+import misk.feature.FeatureFlags
 import misk.inject.AsyncSwitch
 import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
@@ -30,6 +32,9 @@ constructor(private val config: SqsConfig, private val configureClient: SqsAsync
     install(ServiceModule<SqsJobConsumer>().conditionalOn<AsyncSwitch>("sqs").dependsOn<ReadyService>())
     bind<SqsBatchManagerFactory>().to<RealSqsBatchManagerFactory>()
     install(ServiceModule<RealSqsBatchManagerFactory>())
+
+    // FeatureFlags is optional - only required if feature flag names are configured in SqsConfig
+    OptionalBinder.newOptionalBinder(binder(), FeatureFlags::class.java)
   }
 
   @Provides

@@ -254,6 +254,37 @@ Refer to the "threading model" section below for in-depth description.
   * defined the AWS account id that own the queue. By default, uses the deployment account if of the service.
     This setting is needed for queue defined outside of our AWS accounts (external queues)
 
+### Feature flag configuration (optional)
+
+For services migrating from the v1 `misk-aws` library that used LaunchDarkly feature flags like `pod-jobqueue-consumers`
+to control concurrency, you can configure feature flag names to override YAML values at startup.
+
+* `concurrency_feature_flag`
+  * default value: null
+  * when set, the flag is evaluated with the queue name as the key at service startup
+  * if the flag returns a value > 0, it overrides the `concurrency` setting from YAML
+  * example: `"pod-jobqueue-consumers"` for compatibility with v1 library flag
+* `parallelism_feature_flag`
+  * default value: null
+  * when set, the flag is evaluated with the queue name as the key at service startup
+  * if the flag returns a value > 0, it overrides the `parallelism` setting from YAML
+
+Example configuration using feature flags:
+```yaml
+aws_sqs:
+  concurrency_feature_flag: "pod-jobqueue-consumers"
+  parallelism_feature_flag: "pod-jobqueue-parallelism"
+  all_queues:
+    concurrency: 1   # fallback if flag not set or returns 0
+    parallelism: 1
+```
+
+**Important notes:**
+- Feature flag values are read once at service startup. To pick up new flag values, the service must be restarted.
+- If feature flag names are configured, a `FeatureFlags` implementation must be bound in your Guice module.
+  If no `FeatureFlags` is bound but flag names are configured, the service will fail to start with a clear error message.
+- YAML values serve as fallbacks when the flag is not configured for a specific queue or returns 0.
+
 ## Threading model
 
 Receiving and processing messages is handled by separate views on the `Dispatchers.IO`:
@@ -283,7 +314,7 @@ It's advised to start with the default settings and adjust based on specific wor
 * exposes suspending API
 * handlers return status and don't make calls to SQS. Acknowledging jobs is done by the framework code
 * no dependency on the lease module. There will be at least one handler per service instance
-* no dependency on the feature flags
+* optional feature flag support for concurrency/parallelism (requires explicit configuration, see "Feature flag configuration")
 * metrics are updated to v2, names of the metrics have been changed
 
 ## Migration
