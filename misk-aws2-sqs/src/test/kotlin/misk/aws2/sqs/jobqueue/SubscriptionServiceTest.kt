@@ -8,15 +8,14 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
+import misk.feature.DynamicConfig
 import misk.feature.Feature
-import misk.feature.FeatureFlags
 import misk.jobqueue.QueueName
 import misk.jobqueue.v2.Job
 import misk.jobqueue.v2.JobHandler
 import misk.jobqueue.v2.JobStatus
 import misk.jobqueue.v2.SuspendingJobHandler
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -27,7 +26,7 @@ class SubscriptionServiceTest {
   private val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
 
   @Test
-  fun `startUp without feature flag uses yaml config values`() {
+  fun `startUp without dynamic config uses yaml config values`() {
     val consumer = mock<SqsJobConsumer>()
     val handler = TestHandler()
     val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
@@ -46,21 +45,21 @@ class SubscriptionServiceTest {
   }
 
   @Test
-  fun `startUp with feature flag overrides yaml config values`() {
+  fun `startUp with dynamic config overrides yaml config values`() {
     val consumer = mock<SqsJobConsumer>()
     val handler = TestHandler()
     val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
-    val featureFlags = mock<FeatureFlags>()
+    val dynamicConfig = mock<DynamicConfig>()
     val config = SqsConfig(
       all_queues = SqsQueueConfig(concurrency = 1, parallelism = 1),
       config_feature_flag = "sqs-config-override",
     )
 
-    // Feature flag returns JSON string with overrides
+    // Dynamic config returns JSON string with overrides
     val flagJsonString = """{"all_queues": {"concurrency": 10, "parallelism": 3}}"""
-    whenever(featureFlags.getJsonString(eq(Feature("sqs-config-override")), any())).thenReturn(flagJsonString)
+    whenever(dynamicConfig.getJsonString(eq(Feature("sqs-config-override")))).thenReturn(flagJsonString)
 
-    val service = SubscriptionService(consumer, handlers, config, Optional.of(featureFlags), moshi)
+    val service = SubscriptionService(consumer, handlers, config, Optional.of(dynamicConfig), moshi)
     service.startAsync().awaitRunning()
 
     verify(consumer).subscribe(
@@ -71,19 +70,19 @@ class SubscriptionServiceTest {
   }
 
   @Test
-  fun `startUp with feature flag returning empty uses yaml fallback`() {
+  fun `startUp with dynamic config returning empty uses yaml fallback`() {
     val consumer = mock<SqsJobConsumer>()
     val handler = TestHandler()
     val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
-    val featureFlags = mock<FeatureFlags>()
+    val dynamicConfig = mock<DynamicConfig>()
     val config = SqsConfig(
       all_queues = SqsQueueConfig(concurrency = 5, parallelism = 2),
       config_feature_flag = "sqs-config-override",
     )
 
-    whenever(featureFlags.getJsonString(eq(Feature("sqs-config-override")), any())).thenReturn("")
+    whenever(dynamicConfig.getJsonString(eq(Feature("sqs-config-override")))).thenReturn("")
 
-    val service = SubscriptionService(consumer, handlers, config, Optional.of(featureFlags), moshi)
+    val service = SubscriptionService(consumer, handlers, config, Optional.of(dynamicConfig), moshi)
     service.startAsync().awaitRunning()
 
     verify(consumer).subscribe(
@@ -94,19 +93,19 @@ class SubscriptionServiceTest {
   }
 
   @Test
-  fun `startUp with feature flag returning null string uses yaml fallback`() {
+  fun `startUp with dynamic config returning null string uses yaml fallback`() {
     val consumer = mock<SqsJobConsumer>()
     val handler = TestHandler()
     val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
-    val featureFlags = mock<FeatureFlags>()
+    val dynamicConfig = mock<DynamicConfig>()
     val config = SqsConfig(
       all_queues = SqsQueueConfig(concurrency = 5, parallelism = 2),
       config_feature_flag = "sqs-config-override",
     )
 
-    whenever(featureFlags.getJsonString(eq(Feature("sqs-config-override")), any())).thenReturn("null")
+    whenever(dynamicConfig.getJsonString(eq(Feature("sqs-config-override")))).thenReturn("null")
 
-    val service = SubscriptionService(consumer, handlers, config, Optional.of(featureFlags), moshi)
+    val service = SubscriptionService(consumer, handlers, config, Optional.of(dynamicConfig), moshi)
     service.startAsync().awaitRunning()
 
     verify(consumer).subscribe(
@@ -117,21 +116,21 @@ class SubscriptionServiceTest {
   }
 
   @Test
-  fun `startUp with feature flag overriding only concurrency`() {
+  fun `startUp with dynamic config overriding only concurrency`() {
     val consumer = mock<SqsJobConsumer>()
     val handler = TestHandler()
     val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
-    val featureFlags = mock<FeatureFlags>()
+    val dynamicConfig = mock<DynamicConfig>()
     val config = SqsConfig(
       all_queues = SqsQueueConfig(concurrency = 1, parallelism = 5),
       config_feature_flag = "sqs-config-override",
     )
 
-    // Feature flag only overrides concurrency, parallelism should remain from YAML
+    // Dynamic config only overrides concurrency, parallelism should remain from YAML
     val flagJsonString = """{"all_queues": {"concurrency": 20}}"""
-    whenever(featureFlags.getJsonString(eq(Feature("sqs-config-override")), any())).thenReturn(flagJsonString)
+    whenever(dynamicConfig.getJsonString(eq(Feature("sqs-config-override")))).thenReturn(flagJsonString)
 
-    val service = SubscriptionService(consumer, handlers, config, Optional.of(featureFlags), moshi)
+    val service = SubscriptionService(consumer, handlers, config, Optional.of(dynamicConfig), moshi)
     service.startAsync().awaitRunning()
 
     verify(consumer).subscribe(
@@ -142,7 +141,7 @@ class SubscriptionServiceTest {
   }
 
   @Test
-  fun `startUp fails when feature flag configured but FeatureFlags not bound`() {
+  fun `startUp fails when dynamic config flag configured but DynamicConfig not bound`() {
     val consumer = mock<SqsJobConsumer>()
     val handler = TestHandler()
     val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
@@ -161,15 +160,15 @@ class SubscriptionServiceTest {
     val cause = exception.cause
     assertTrue(cause is IllegalStateException)
     assertEquals(
-      "Feature flag name is configured in SqsConfig (config_feature_flag=sqs-config-override) " +
-        "but no FeatureFlags implementation is bound. " +
-        "Either bind a FeatureFlags implementation or remove the feature flag configuration from SqsConfig.",
+      "Dynamic config flag name is configured in SqsConfig (config_feature_flag=sqs-config-override) " +
+        "but no DynamicConfig implementation is bound. " +
+        "Either bind a DynamicConfig implementation or remove the feature flag configuration from SqsConfig.",
       cause.message,
     )
   }
 
   @Test
-  fun `startUp with per-queue overrides from feature flag`() {
+  fun `startUp with per-queue overrides from dynamic config`() {
     val consumer = mock<SqsJobConsumer>()
     val handler1 = TestHandler()
     val handler2 = TestHandler()
@@ -177,7 +176,7 @@ class SubscriptionServiceTest {
       QueueName("queue-a") to handler1 as JobHandler,
       QueueName("queue-b") to handler2 as JobHandler,
     )
-    val featureFlags = mock<FeatureFlags>()
+    val dynamicConfig = mock<DynamicConfig>()
     val config = SqsConfig(
       all_queues = SqsQueueConfig(concurrency = 1, parallelism = 1),
       per_queue_overrides = mapOf(
@@ -186,16 +185,16 @@ class SubscriptionServiceTest {
       config_feature_flag = "sqs-config-override",
     )
 
-    // Feature flag overrides queue-a's concurrency and adds queue-b override
+    // Dynamic config overrides queue-a's concurrency and adds queue-b override
     val flagJsonString = """{
       "per_queue_overrides": {
         "queue-a": {"concurrency": 15},
         "queue-b": {"concurrency": 8}
       }
     }"""
-    whenever(featureFlags.getJsonString(eq(Feature("sqs-config-override")), any())).thenReturn(flagJsonString)
+    whenever(dynamicConfig.getJsonString(eq(Feature("sqs-config-override")))).thenReturn(flagJsonString)
 
-    val service = SubscriptionService(consumer, handlers, config, Optional.of(featureFlags), moshi)
+    val service = SubscriptionService(consumer, handlers, config, Optional.of(dynamicConfig), moshi)
     service.startAsync().awaitRunning()
 
     verify(consumer).subscribe(
@@ -211,23 +210,23 @@ class SubscriptionServiceTest {
   }
 
   @Test
-  fun `startUp with feature flag error uses yaml fallback`() {
+  fun `startUp with dynamic config error uses yaml fallback`() {
     val consumer = mock<SqsJobConsumer>()
     val handler = TestHandler()
     val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
-    val featureFlags = mock<FeatureFlags>()
+    val dynamicConfig = mock<DynamicConfig>()
     val config = SqsConfig(
       all_queues = SqsQueueConfig(concurrency = 5, parallelism = 2),
       config_feature_flag = "sqs-config-override",
     )
 
-    whenever(featureFlags.getJsonString(eq(Feature("sqs-config-override")), any()))
-      .thenThrow(RuntimeException("Feature flag service unavailable"))
+    whenever(dynamicConfig.getJsonString(eq(Feature("sqs-config-override"))))
+      .thenThrow(RuntimeException("Dynamic config service unavailable"))
 
-    val service = SubscriptionService(consumer, handlers, config, Optional.of(featureFlags), moshi)
+    val service = SubscriptionService(consumer, handlers, config, Optional.of(dynamicConfig), moshi)
     service.startAsync().awaitRunning()
 
-    // Should fall back to YAML config when feature flag throws
+    // Should fall back to YAML config when dynamic config throws
     verify(consumer).subscribe(
       eq(QueueName("test-queue")),
       eq(handler),

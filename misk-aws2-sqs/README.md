@@ -254,31 +254,34 @@ Refer to the "threading model" section below for in-depth description.
   * defined the AWS account id that own the queue. By default, uses the deployment account if of the service.
     This setting is needed for queue defined outside of our AWS accounts (external queues)
 
-### Feature flag configuration (optional)
+### Dynamic configuration (optional)
 
-For services that want to dynamically adjust SQS configuration without code deploys, you can configure a feature flag
-that returns a JSON object matching the `SqsConfig` structure. The flag value is merged with the YAML configuration
+For services that want to dynamically adjust SQS configuration without code deploys, you can configure a dynamic config
+flag that returns a JSON object matching the `SqsConfig` structure. The flag value is merged with the YAML configuration
 at service startup, with flag values taking precedence.
+
+This uses Misk's `DynamicConfig` interface, which is appropriate for service-wide configuration (as opposed to 
+`FeatureFlags` which supports per-entity variations).
 
 * `config_feature_flag`
   * default value: null
-  * when set, the flag is evaluated at service startup and parsed as a JSON `SqsConfig` object
-  * flag values are merged with YAML config (flag values override YAML values)
-  * only non-default values in the flag are applied; default values are ignored to allow partial overrides
+  * when set, the dynamic config is evaluated at service startup and parsed as a JSON `SqsConfig` object
+  * dynamic config values are merged with YAML config (dynamic config values override YAML values)
+  * only non-default values in the dynamic config are applied; default values are ignored to allow partial overrides
 
 Example YAML configuration:
 ```yaml
 aws_sqs:
   config_feature_flag: "sqs-config-override"
   all_queues:
-    concurrency: 1   # fallback if flag not set
+    concurrency: 1   # fallback if dynamic config not set
     parallelism: 1
   per_queue_overrides:
     my_queue:
       concurrency: 5
 ```
 
-Example feature flag JSON value:
+Example dynamic config JSON value:
 ```json
 {
   "all_queues": {
@@ -298,16 +301,16 @@ Example feature flag JSON value:
 ```
 
 With the above configuration:
-- `my_queue` would use concurrency=20 (from flag), parallelism=1 (from YAML default)
-- `another_queue` would use concurrency=15, parallelism=5 (both from flag)
-- All other queues would use concurrency=10, parallelism=3 (from flag's all_queues)
+- `my_queue` would use concurrency=20 (from dynamic config), parallelism=1 (from YAML default)
+- `another_queue` would use concurrency=15, parallelism=5 (both from dynamic config)
+- All other queues would use concurrency=10, parallelism=3 (from dynamic config's all_queues)
 
 **Important notes:**
-- Feature flag values are read once at service startup. To pick up new flag values, the service must be restarted.
-- If `config_feature_flag` is configured, a `FeatureFlags` implementation must be bound in your Guice module.
-  If no `FeatureFlags` is bound but the flag name is configured, the service will fail to start with a clear error message.
-- If the feature flag returns null or cannot be parsed, the service falls back to YAML configuration only (with a warning log).
-- YAML values serve as fallbacks for any settings not specified in the feature flag.
+- Dynamic config values are read once at service startup. To pick up new values, the service must be restarted.
+- If `config_feature_flag` is configured, a `DynamicConfig` implementation must be bound in your Guice module.
+  If no `DynamicConfig` is bound but the flag name is configured, the service will fail to start with a clear error message.
+- If the dynamic config returns null or cannot be parsed, the service falls back to YAML configuration only (with a warning log).
+- YAML values serve as fallbacks for any settings not specified in the dynamic config.
 
 ## Threading model
 
@@ -338,7 +341,7 @@ It's advised to start with the default settings and adjust based on specific wor
 * exposes suspending API
 * handlers return status and don't make calls to SQS. Acknowledging jobs is done by the framework code
 * no dependency on the lease module. There will be at least one handler per service instance
-* optional feature flag support for concurrency/parallelism (requires explicit configuration, see "Feature flag configuration")
+* optional dynamic config support for SQS configuration (requires explicit configuration, see "Dynamic configuration")
 * metrics are updated to v2, names of the metrics have been changed
 
 ## Migration
