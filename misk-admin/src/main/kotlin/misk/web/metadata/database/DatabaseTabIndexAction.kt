@@ -68,29 +68,28 @@ constructor(private val dashboardPageLayout: DashboardPageLayout, private val da
 
           if (databases.isEmpty()) {
             AlertInfo("No databases registered. Install JdbcModule to automatically register databases.")
-            return@build
-          }
+          } else {
+            // Database selector
+            DatabaseSelector(db)
 
-          // Database selector
-          DatabaseSelector(db)
+            if (selectedDb != null) {
+              div("grid grid-cols-4 gap-6 mt-6") {
+                // Left column: Table list
+                div("col-span-1") { TableList(db!!, tableNames, table) }
 
-          if (selectedDb != null) {
-            div("grid grid-cols-4 gap-6 mt-6") {
-              // Left column: Table list
-              div("col-span-1") { TableList(db!!, tableNames, table) }
+                // Right column: Schema + Query
+                div("col-span-3") {
+                  // Table schema
+                  if (table != null && columns.isNotEmpty()) {
+                    SchemaTable(table, columns)
+                  }
 
-              // Right column: Schema + Query
-              div("col-span-3") {
-                // Table schema
-                if (table != null && columns.isNotEmpty()) {
-                  SchemaTable(table, columns)
+                  // SQL Query form
+                  QueryForm(db!!, table)
+
+                  // Results area (turbo-frame, populated by POST response)
+                  turbo_frame(id = "query-results") {}
                 }
-
-                // SQL Query form
-                QueryForm(db!!, table)
-
-                // Results area (turbo-frame, populated by POST response)
-                turbo_frame(id = "query-results") {}
               }
             }
           }
@@ -161,10 +160,14 @@ constructor(private val dashboardPageLayout: DashboardPageLayout, private val da
         table("min-w-full divide-y divide-gray-200") {
           thead("bg-gray-50") {
             tr {
-              th("px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") { +"Column" }
-              th("px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") { +"Type" }
-              th("px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") { +"Size" }
-              th("px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") { +"Nullable" }
+              th(classes = "px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") {
+                +"Column"
+              }
+              th(classes = "px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") { +"Type" }
+              th(classes = "px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") { +"Size" }
+              th(classes = "px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") {
+                +"Nullable"
+              }
             }
           }
           tbody("bg-white divide-y divide-gray-200") {

@@ -61,7 +61,9 @@ internal class DatabaseQueryAction @Inject constructor(private val databases: Li
               thead("bg-gray-50") {
                 tr {
                   result.columns.forEach { col ->
-                    th("px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") { +col }
+                    th(classes = "px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") {
+                      +col
+                    }
                   }
                 }
               }
