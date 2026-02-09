@@ -47,14 +47,14 @@ class DynamoClusterAsyncSwitchTest {
   }
 
   @Test
-  fun `cluster watcher skips updates when async switch is disabled`() {
+  fun `cluster watcher removes from cluster when async switch is disabled and re-registers when re-enabled`() {
     waitFor { dynamoClusterWatcherTask.run() }
     assertThat(cluster.snapshot.readyMembers).hasSize(1)
 
     fakeSwitch.enabledKeys.remove("clustering")
 
-    dynamoClusterWatcherTask.run()
-    assertThat(cluster.snapshot.readyMembers).hasSize(1)
+    waitFor { dynamoClusterWatcherTask.run() }
+    assertThat(cluster.snapshot.readyMembers).hasSize(0)
 
     fakeSwitch.enabledKeys.add("clustering")
 

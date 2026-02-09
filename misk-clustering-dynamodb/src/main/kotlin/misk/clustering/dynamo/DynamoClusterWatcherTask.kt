@@ -57,7 +57,10 @@ constructor(
 
     if (!asyncSwitch.isEnabled("clustering")) {
       if (!wasDisabled) {
-        logger.info { "Async clustering tasks disabled. Pausing." }
+        logger.info { "Async clustering tasks disabled. Removing from cluster and pausing." }
+        removeOurselfFromDynamo()
+        cluster.clusterChanged(membersBecomingReady = emptySet(), membersBecomingNotReady = prevMembers)
+        prevMembers = emptySet()
         wasDisabled = true
       }
       return Status.OK
@@ -110,6 +113,10 @@ constructor(
 
   /** On pod shutdown, remove the pod from the cluster view */
   override fun shutDown() {
+    removeOurselfFromDynamo()
+  }
+
+  private fun removeOurselfFromDynamo() {
     val self = cluster.snapshot.self.name
     val member = table.getItem(Key.builder().partitionValue(self).build())
     if (member != null) {
