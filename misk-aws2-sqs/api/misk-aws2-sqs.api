@@ -52,7 +52,7 @@ public final class misk/aws2/sqs/jobqueue/SqsJob$Companion {
 
 public final class misk/aws2/sqs/jobqueue/SqsJobConsumer : com/google/common/util/concurrent/AbstractService, misk/jobqueue/v2/JobConsumer, misk/testing/TestFixture {
 	public static final field Companion Lmisk/aws2/sqs/jobqueue/SqsJobConsumer$Companion;
-	public fun <init> (Lmisk/aws2/sqs/jobqueue/SqsClientFactory;Lmisk/aws2/sqs/jobqueue/SqsQueueResolver;Lmisk/aws2/sqs/jobqueue/VisibilityTimeoutCalculator;Lcom/squareup/moshi/Moshi;Lmisk/aws2/sqs/jobqueue/DeadLetterQueueProvider;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Ljava/time/Clock;Lio/opentracing/Tracer;)V
+	public fun <init> (Lmisk/aws2/sqs/jobqueue/SqsClientFactory;Lmisk/aws2/sqs/jobqueue/SqsQueueResolver;Lmisk/aws2/sqs/jobqueue/VisibilityTimeoutCalculator;Lcom/squareup/moshi/Moshi;Lmisk/aws2/sqs/jobqueue/DeadLetterQueueProvider;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Ljava/time/Clock;Lio/opentracing/Tracer;Lmisk/inject/AsyncSwitch;)V
 	public fun reset ()V
 	public fun subscribe (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobHandler;)V
 	public final fun subscribe (Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobHandler;Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;)V
@@ -133,7 +133,8 @@ public final class misk/aws2/sqs/jobqueue/StaticDeadLetterQueueProvider : misk/a
 
 public final class misk/aws2/sqs/jobqueue/Subscriber {
 	public static final field Companion Lmisk/aws2/sqs/jobqueue/Subscriber$Companion;
-	public fun <init> (Lmisk/jobqueue/QueueName;Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobHandler;Lkotlinx/coroutines/channels/Channel;Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;Lmisk/aws2/sqs/jobqueue/SqsQueueResolver;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Lcom/squareup/moshi/Moshi;Ljava/time/Clock;Lio/opentracing/Tracer;Lmisk/aws2/sqs/jobqueue/VisibilityTimeoutCalculator;)V
+	public fun <init> (Lmisk/jobqueue/QueueName;Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;Lmisk/jobqueue/QueueName;Lmisk/jobqueue/v2/JobHandler;Lkotlinx/coroutines/channels/Channel;Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;Lmisk/aws2/sqs/jobqueue/SqsQueueResolver;Lmisk/aws2/sqs/jobqueue/SqsMetrics;Lcom/squareup/moshi/Moshi;Ljava/time/Clock;Lio/opentracing/Tracer;Lmisk/aws2/sqs/jobqueue/VisibilityTimeoutCalculator;Lmisk/inject/AsyncSwitch;)V
+	public final fun getAsyncSwitch ()Lmisk/inject/AsyncSwitch;
 	public final fun getChannel ()Lkotlinx/coroutines/channels/Channel;
 	public final fun getClient ()Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClient;
 	public final fun getClock ()Ljava/time/Clock;
