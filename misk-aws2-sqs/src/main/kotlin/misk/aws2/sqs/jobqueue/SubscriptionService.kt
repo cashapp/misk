@@ -6,6 +6,7 @@ import com.google.inject.Singleton
 import com.squareup.moshi.Moshi
 import java.util.Optional
 import misk.aws2.sqs.jobqueue.config.SqsConfig
+import misk.aws2.sqs.jobqueue.config.SqsConfigOverride
 import misk.feature.DynamicConfig
 import misk.feature.Feature
 import misk.jobqueue.QueueName
@@ -44,7 +45,7 @@ constructor(
   }
 
   /**
-   * Resolves the effective configuration by merging YAML config with dynamic config overrides.
+   * Resolves the effective configuration by applying dynamic config overrides to YAML config.
    * Dynamic config values take precedence over YAML values.
    */
   private fun resolveEffectiveConfig(): SqsConfig {
@@ -52,7 +53,7 @@ constructor(
     val dc = dynamicConfig.orElse(null) ?: return config
 
     return try {
-      val jsonAdapter = moshi.adapter(SqsConfig::class.java)
+      val jsonAdapter = moshi.adapter(SqsConfigOverride::class.java)
       val flagJsonString = dc.getJsonString(Feature(flagName))
 
       if (flagJsonString.isBlank() || flagJsonString == "null") {
@@ -60,15 +61,15 @@ constructor(
         return config
       }
 
-      val flagConfig = jsonAdapter.fromJson(flagJsonString)
+      val configOverride = jsonAdapter.fromJson(flagJsonString)
 
-      if (flagConfig == null) {
-        logger.warn { "Failed to parse dynamic config '$flagName' as SqsConfig, using YAML config only" }
+      if (configOverride == null) {
+        logger.warn { "Failed to parse dynamic config '$flagName' as SqsConfigOverride, using YAML config only" }
         return config
       }
 
-      logger.info { "Merging dynamic config from '$flagName': $flagConfig" }
-      config.mergeWith(flagConfig)
+      logger.info { "Applying dynamic config override from '$flagName': $configOverride" }
+      config.applyOverride(configOverride)
     } catch (e: Exception) {
       logger.warn(e) { "Error reading dynamic config '$flagName', using YAML config only" }
       config

@@ -179,6 +179,7 @@ public final class misk/aws2/sqs/jobqueue/config/SqsConfig : misk/config/Config 
 	public fun <init> (Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;Ljava/util/Map;J)V
 	public fun <init> (Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;Ljava/util/Map;JLjava/lang/String;)V
 	public synthetic fun <init> (Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;Ljava/util/Map;JLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun applyOverride (Lmisk/aws2/sqs/jobqueue/config/SqsConfigOverride;)Lmisk/aws2/sqs/jobqueue/config/SqsConfig;
 	public final fun component1 ()Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;
 	public final fun component2 ()Ljava/util/Map;
 	public final fun component3 ()J
@@ -193,17 +194,29 @@ public final class misk/aws2/sqs/jobqueue/config/SqsConfig : misk/config/Config 
 	public final fun getQueueConfig (Lmisk/jobqueue/QueueName;)Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;
 	public final fun hasFeatureFlag ()Z
 	public fun hashCode ()I
-	public final fun mergeWith (Lmisk/aws2/sqs/jobqueue/config/SqsConfig;)Lmisk/aws2/sqs/jobqueue/config/SqsConfig;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/aws2/sqs/jobqueue/config/SqsConfigOverride {
+	public fun <init> ()V
+	public fun <init> (Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfigOverride;)V
+	public fun <init> (Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfigOverride;Ljava/util/Map;)V
+	public fun <init> (Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfigOverride;Ljava/util/Map;Ljava/lang/Long;)V
+	public synthetic fun <init> (Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfigOverride;Ljava/util/Map;Ljava/lang/Long;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfigOverride;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun component3 ()Ljava/lang/Long;
+	public final fun copy (Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfigOverride;Ljava/util/Map;Ljava/lang/Long;)Lmisk/aws2/sqs/jobqueue/config/SqsConfigOverride;
+	public static synthetic fun copy$default (Lmisk/aws2/sqs/jobqueue/config/SqsConfigOverride;Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfigOverride;Ljava/util/Map;Ljava/lang/Long;ILjava/lang/Object;)Lmisk/aws2/sqs/jobqueue/config/SqsConfigOverride;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAll_queues ()Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfigOverride;
+	public final fun getBuffered_batch_flush_frequency_ms ()Ljava/lang/Long;
+	public final fun getPer_queue_overrides ()Ljava/util/Map;
+	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class misk/aws2/sqs/jobqueue/config/SqsQueueConfig {
-	public static final field Companion Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig$Companion;
-	public static final field DEFAULT_CHANNEL_CAPACITY I
-	public static final field DEFAULT_CONCURRENCY I
-	public static final field DEFAULT_INSTALL_RETRY_QUEUE Z
-	public static final field DEFAULT_MAX_NUMBER_OF_MESSAGES I
-	public static final field DEFAULT_PARALLELISM I
 	public fun <init> ()V
 	public fun <init> (I)V
 	public fun <init> (II)V
@@ -215,6 +228,7 @@ public final class misk/aws2/sqs/jobqueue/config/SqsQueueConfig {
 	public fun <init> (IIIIZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;)V
 	public fun <init> (IIIIZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (IIIIZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun applyOverride (Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfigOverride;)Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;
 	public final fun component1 ()I
 	public final fun component2 ()I
 	public final fun component3 ()I
@@ -237,10 +251,43 @@ public final class misk/aws2/sqs/jobqueue/config/SqsQueueConfig {
 	public final fun getVisibility_timeout ()Ljava/lang/Integer;
 	public final fun getWait_timeout ()Ljava/lang/Integer;
 	public fun hashCode ()I
-	public final fun mergeWith (Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;)Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfig;
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/aws2/sqs/jobqueue/config/SqsQueueConfig$Companion {
+public final class misk/aws2/sqs/jobqueue/config/SqsQueueConfigOverride {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Integer;)V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Integer;)V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Integer;
+	public final fun component2 ()Ljava/lang/Integer;
+	public final fun component3 ()Ljava/lang/Integer;
+	public final fun component4 ()Ljava/lang/Integer;
+	public final fun component5 ()Ljava/lang/Boolean;
+	public final fun component6 ()Ljava/lang/Integer;
+	public final fun component7 ()Ljava/lang/Integer;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;)Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfigOverride;
+	public static synthetic fun copy$default (Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfigOverride;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/aws2/sqs/jobqueue/config/SqsQueueConfigOverride;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAccount_id ()Ljava/lang/String;
+	public final fun getChannel_capacity ()Ljava/lang/Integer;
+	public final fun getConcurrency ()Ljava/lang/Integer;
+	public final fun getInstall_retry_queue ()Ljava/lang/Boolean;
+	public final fun getMax_number_of_messages ()Ljava/lang/Integer;
+	public final fun getParallelism ()Ljava/lang/Integer;
+	public final fun getRegion ()Ljava/lang/String;
+	public final fun getVisibility_timeout ()Ljava/lang/Integer;
+	public final fun getWait_timeout ()Ljava/lang/Integer;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 

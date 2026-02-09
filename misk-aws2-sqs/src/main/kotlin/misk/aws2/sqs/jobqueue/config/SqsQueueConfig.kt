@@ -26,28 +26,41 @@ constructor(
   val account_id: String? = null,
 ) {
   /**
-   * Merges this config with another, where the other config's non-default values take precedence.
-   * Used to apply feature flag overrides on top of YAML configuration.
+   * Applies an override to this config. Only non-null fields in the override are applied.
    */
-  fun mergeWith(override: SqsQueueConfig): SqsQueueConfig {
+  fun applyOverride(override: SqsQueueConfigOverride): SqsQueueConfig {
     return copy(
-      parallelism = if (override.parallelism != DEFAULT_PARALLELISM) override.parallelism else parallelism,
-      concurrency = if (override.concurrency != DEFAULT_CONCURRENCY) override.concurrency else concurrency,
-      channel_capacity = if (override.channel_capacity != DEFAULT_CHANNEL_CAPACITY) override.channel_capacity else channel_capacity,
-      max_number_of_messages = if (override.max_number_of_messages != DEFAULT_MAX_NUMBER_OF_MESSAGES) override.max_number_of_messages else max_number_of_messages,
-      install_retry_queue = if (override.install_retry_queue != DEFAULT_INSTALL_RETRY_QUEUE) override.install_retry_queue else install_retry_queue,
+      parallelism = override.parallelism ?: parallelism,
+      concurrency = override.concurrency ?: concurrency,
+      channel_capacity = override.channel_capacity ?: channel_capacity,
+      max_number_of_messages = override.max_number_of_messages ?: max_number_of_messages,
+      install_retry_queue = override.install_retry_queue ?: install_retry_queue,
       wait_timeout = override.wait_timeout ?: wait_timeout,
       visibility_timeout = override.visibility_timeout ?: visibility_timeout,
       region = override.region ?: region,
       account_id = override.account_id ?: account_id,
     )
   }
-
-  companion object {
-    const val DEFAULT_PARALLELISM = 1
-    const val DEFAULT_CONCURRENCY = 1
-    const val DEFAULT_CHANNEL_CAPACITY = 0
-    const val DEFAULT_MAX_NUMBER_OF_MESSAGES = 10
-    const val DEFAULT_INSTALL_RETRY_QUEUE = true
-  }
 }
+
+/**
+ * Override configuration for an SQS queue, used by dynamic config.
+ *
+ * All fields are nullable - null means "use the base config value", while any non-null value
+ * (including values that match defaults like concurrency=1) will override the base config.
+ *
+ * This allows dynamic config to explicitly set values back to defaults if needed.
+ */
+data class SqsQueueConfigOverride
+@JvmOverloads
+constructor(
+  val parallelism: Int? = null,
+  val concurrency: Int? = null,
+  val channel_capacity: Int? = null,
+  val max_number_of_messages: Int? = null,
+  val install_retry_queue: Boolean? = null,
+  val wait_timeout: Int? = null,
+  val visibility_timeout: Int? = null,
+  val region: String? = null,
+  val account_id: String? = null,
+)

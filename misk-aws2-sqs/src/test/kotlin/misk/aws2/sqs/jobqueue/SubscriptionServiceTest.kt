@@ -234,6 +234,32 @@ class SubscriptionServiceTest {
     )
   }
 
+  @Test
+  fun `startUp with dynamic config can set values to defaults explicitly`() {
+    val consumer = mock<SqsJobConsumer>()
+    val handler = TestHandler()
+    val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
+    val dynamicConfig = mock<DynamicConfig>()
+    val config = SqsConfig(
+      all_queues = SqsQueueConfig(concurrency = 50, parallelism = 10),
+      config_feature_flag = "sqs-config-override",
+    )
+
+    // Dynamic config explicitly sets values to defaults (1)
+    val flagJsonString = """{"all_queues": {"concurrency": 1, "parallelism": 1}}"""
+    whenever(dynamicConfig.getJsonString(eq(Feature("sqs-config-override")))).thenReturn(flagJsonString)
+
+    val service = SubscriptionService(consumer, handlers, config, Optional.of(dynamicConfig), moshi)
+    service.startAsync().awaitRunning()
+
+    // Values should be overridden to 1, not preserved at 50/10
+    verify(consumer).subscribe(
+      eq(QueueName("test-queue")),
+      eq(handler),
+      eq(SqsQueueConfig(concurrency = 1, parallelism = 1)),
+    )
+  }
+
   private class TestHandler : SuspendingJobHandler {
     override suspend fun handleJob(job: Job): JobStatus = JobStatus.OK
   }

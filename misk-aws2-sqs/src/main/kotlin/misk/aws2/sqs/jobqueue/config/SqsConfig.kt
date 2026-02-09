@@ -10,10 +10,10 @@ import misk.jobqueue.QueueName
  * overriding configuration for a given queue `buffered_batch_flush_frequency_ms` controls how often buffered messages
  * are flushed to SQS when using enqueueBuffered
  *
- * `config_feature_flag` allows specifying a LaunchDarkly feature flag name that returns a JSON object matching the
- * structure of SqsConfig. When set, the flag is evaluated at service startup and merged with the YAML configuration
- * (feature flag values take precedence). This allows dynamic configuration changes with a service restart (without
- * requiring a code deploy). If not set, only YAML configuration is used.
+ * `config_feature_flag` allows specifying a dynamic config name that returns a JSON object matching the
+ * structure of [SqsConfigOverride]. When set, the dynamic config is evaluated at service startup and merged with the
+ * YAML configuration (dynamic config values take precedence). This allows dynamic configuration changes with a service
+ * restart (without requiring a code deploy). If not set, only YAML configuration is used.
  */
 data class SqsConfig
 @JvmOverloads
@@ -22,9 +22,9 @@ constructor(
   val per_queue_overrides: Map<String, SqsQueueConfig> = emptyMap(),
   val buffered_batch_flush_frequency_ms: Long = 50,
   /**
-   * Feature flag name that returns a JSON object matching SqsConfig structure.
-   * When set, the flag value is merged with YAML config (flag values take precedence).
-   * Example flag value: {"all_queues": {"concurrency": 10}, "per_queue_overrides": {"my_queue": {"concurrency": 20}}}
+   * Dynamic config name that returns a JSON object matching [SqsConfigOverride] structure.
+   * When set, the dynamic config value is merged with YAML config (dynamic config values take precedence).
+   * Example value: {"all_queues": {"concurrency": 10}, "per_queue_overrides": {"my_queue": {"concurrency": 20}}}
    */
   val config_feature_flag: String? = null,
 ) : Config {
@@ -43,31 +43,40 @@ constructor(
     }
   }
 
-  /** Returns true if a feature flag is configured. */
+  /** Returns true if a dynamic config flag is configured. */
   fun hasFeatureFlag(): Boolean = config_feature_flag != null
 
   /**
-   * Merges this config with another, where the other config's non-default values take precedence.
-   * Used to apply feature flag overrides on top of YAML configuration.
+   * Applies an override to this config. Only non-null fields in the override are applied.
    */
-  fun mergeWith(override: SqsConfig): SqsConfig {
+  fun applyOverride(override: SqsConfigOverride): SqsConfig {
     val mergedPerQueueOverrides = per_queue_overrides.toMutableMap()
 
-    // Merge per-queue overrides from the feature flag config
-    override.per_queue_overrides.forEach { (queueName, overrideConfig) ->
-      val existingConfig = mergedPerQueueOverrides[queueName]
-      mergedPerQueueOverrides[queueName] = existingConfig?.mergeWith(overrideConfig) ?: overrideConfig
+    // Apply per-queue overrides from the dynamic config
+    override.per_queue_overrides?.forEach { (queueName, queueOverride) ->
+      val existingConfig = mergedPerQueueOverrides[queueName] ?: all_queues
+      mergedPerQueueOverrides[queueName] = existingConfig.applyOverride(queueOverride)
     }
 
     return copy(
-      all_queues = all_queues.mergeWith(override.all_queues),
+      all_queues = override.all_queues?.let { all_queues.applyOverride(it) } ?: all_queues,
       per_queue_overrides = mergedPerQueueOverrides,
-      // Only override buffered_batch_flush_frequency_ms if explicitly set (non-default)
-      buffered_batch_flush_frequency_ms = if (override.buffered_batch_flush_frequency_ms != 50L) {
-        override.buffered_batch_flush_frequency_ms
-      } else {
-        buffered_batch_flush_frequency_ms
-      },
+      buffered_batch_flush_frequency_ms = override.buffered_batch_flush_frequency_ms ?: buffered_batch_flush_frequency_ms,
     )
   }
 }
+
+/**
+ * Override configuration for SQS, used by dynamic config.
+ *
+ * All fields are nullable - null means "use the base config value", while any non-null value
+ * will override the base config. This allows dynamic config to explicitly set values back to
+ * defaults if needed.
+ */
+data class SqsConfigOverride
+@JvmOverloads
+constructor(
+  val all_queues: SqsQueueConfigOverride? = null,
+  val per_queue_overrides: Map<String, SqsQueueConfigOverride>? = null,
+  val buffered_batch_flush_frequency_ms: Long? = null,
+)

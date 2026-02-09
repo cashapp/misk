@@ -257,17 +257,17 @@ Refer to the "threading model" section below for in-depth description.
 ### Dynamic configuration (optional)
 
 For services that want to dynamically adjust SQS configuration without code deploys, you can configure a dynamic config
-flag that returns a JSON object matching the `SqsConfig` structure. The flag value is merged with the YAML configuration
-at service startup, with flag values taking precedence.
+flag that returns a JSON object. The dynamic config value is applied on top of the YAML configuration at service startup,
+with dynamic config values taking precedence.
 
 This uses Misk's `DynamicConfig` interface, which is appropriate for service-wide configuration (as opposed to 
 `FeatureFlags` which supports per-entity variations).
 
 * `config_feature_flag`
   * default value: null
-  * when set, the dynamic config is evaluated at service startup and parsed as a JSON `SqsConfig` object
-  * dynamic config values are merged with YAML config (dynamic config values override YAML values)
-  * only non-default values in the dynamic config are applied; default values are ignored to allow partial overrides
+  * when set, the dynamic config is evaluated at service startup and parsed as a JSON `SqsConfigOverride` object
+  * only fields present in the JSON override the YAML config; omitted fields preserve the YAML values
+  * this allows partial overrides (e.g., just change concurrency without specifying all other fields)
 
 Example YAML configuration:
 ```yaml
@@ -311,6 +311,8 @@ With the above configuration:
   If no `DynamicConfig` is bound but the flag name is configured, the service will fail to start with a clear error message.
 - If the dynamic config returns null or cannot be parsed, the service falls back to YAML configuration only (with a warning log).
 - YAML values serve as fallbacks for any settings not specified in the dynamic config.
+- You can explicitly set values back to defaults (e.g., `"concurrency": 1`) - the dynamic config uses nullable fields
+  internally, so any value present in the JSON will override the YAML, including values that match defaults.
 
 ## Threading model
 
