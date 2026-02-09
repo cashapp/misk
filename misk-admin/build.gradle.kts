@@ -7,6 +7,7 @@ plugins {
   id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
   id("com.squareup.wire")
+  id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 dependencies {
@@ -20,6 +21,7 @@ dependencies {
   api(project(":misk-actions"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
+  api(project(":misk-mcp"))
   api(project(":misk-service"))
   api(libs.kotlinXHtml)
   api(libs.moshiCore)
@@ -39,6 +41,7 @@ dependencies {
   testImplementation(libs.kotlinReflect)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.wireRuntime)
+  testImplementation(testFixtures(project(":misk-mcp")))
   testImplementation(project(":misk-api"))
   testImplementation(project(":misk-action-scopes"))
   testImplementation(project(":misk-service"))
