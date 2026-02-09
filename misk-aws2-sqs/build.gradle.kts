@@ -19,6 +19,7 @@ dependencies {
   api(libs.prometheusClient)
   api(project(":misk-aws"))
   api(project(":misk-config"))
+  api(project(":misk-feature"))
   api(project(":misk-inject"))
   api(project(":misk-jobqueue"))
   api(project(":misk-testing-api"))
