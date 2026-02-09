@@ -24,4 +24,30 @@ constructor(
   val visibility_timeout: Int? = null,
   val region: String? = null,
   val account_id: String? = null,
-)
+) {
+  /**
+   * Merges this config with another, where the other config's non-default values take precedence.
+   * Used to apply feature flag overrides on top of YAML configuration.
+   */
+  fun mergeWith(override: SqsQueueConfig): SqsQueueConfig {
+    return copy(
+      parallelism = if (override.parallelism != DEFAULT_PARALLELISM) override.parallelism else parallelism,
+      concurrency = if (override.concurrency != DEFAULT_CONCURRENCY) override.concurrency else concurrency,
+      channel_capacity = if (override.channel_capacity != DEFAULT_CHANNEL_CAPACITY) override.channel_capacity else channel_capacity,
+      max_number_of_messages = if (override.max_number_of_messages != DEFAULT_MAX_NUMBER_OF_MESSAGES) override.max_number_of_messages else max_number_of_messages,
+      install_retry_queue = if (override.install_retry_queue != DEFAULT_INSTALL_RETRY_QUEUE) override.install_retry_queue else install_retry_queue,
+      wait_timeout = override.wait_timeout ?: wait_timeout,
+      visibility_timeout = override.visibility_timeout ?: visibility_timeout,
+      region = override.region ?: region,
+      account_id = override.account_id ?: account_id,
+    )
+  }
+
+  companion object {
+    const val DEFAULT_PARALLELISM = 1
+    const val DEFAULT_CONCURRENCY = 1
+    const val DEFAULT_CHANNEL_CAPACITY = 0
+    const val DEFAULT_MAX_NUMBER_OF_MESSAGES = 10
+    const val DEFAULT_INSTALL_RETRY_QUEUE = true
+  }
+}

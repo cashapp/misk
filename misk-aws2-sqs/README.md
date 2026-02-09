@@ -256,34 +256,58 @@ Refer to the "threading model" section below for in-depth description.
 
 ### Feature flag configuration (optional)
 
-For services migrating from the v1 `misk-aws` library that used LaunchDarkly feature flags like `pod-jobqueue-consumers`
-to control concurrency, you can configure feature flag names to override YAML values at startup.
+For services that want to dynamically adjust SQS configuration without code deploys, you can configure a feature flag
+that returns a JSON object matching the `SqsConfig` structure. The flag value is merged with the YAML configuration
+at service startup, with flag values taking precedence.
 
-* `concurrency_feature_flag`
+* `config_feature_flag`
   * default value: null
-  * when set, the flag is evaluated with the queue name as the key at service startup
-  * if the flag returns a value > 0, it overrides the `concurrency` setting from YAML
-  * example: `"pod-jobqueue-consumers"` for compatibility with v1 library flag
-* `parallelism_feature_flag`
-  * default value: null
-  * when set, the flag is evaluated with the queue name as the key at service startup
-  * if the flag returns a value > 0, it overrides the `parallelism` setting from YAML
+  * when set, the flag is evaluated at service startup and parsed as a JSON `SqsConfig` object
+  * flag values are merged with YAML config (flag values override YAML values)
+  * only non-default values in the flag are applied; default values are ignored to allow partial overrides
 
-Example configuration using feature flags:
+Example YAML configuration:
 ```yaml
 aws_sqs:
-  concurrency_feature_flag: "pod-jobqueue-consumers"
-  parallelism_feature_flag: "pod-jobqueue-parallelism"
+  config_feature_flag: "sqs-config-override"
   all_queues:
-    concurrency: 1   # fallback if flag not set or returns 0
+    concurrency: 1   # fallback if flag not set
     parallelism: 1
+  per_queue_overrides:
+    my_queue:
+      concurrency: 5
 ```
+
+Example feature flag JSON value:
+```json
+{
+  "all_queues": {
+    "concurrency": 10,
+    "parallelism": 3
+  },
+  "per_queue_overrides": {
+    "my_queue": {
+      "concurrency": 20
+    },
+    "another_queue": {
+      "concurrency": 15,
+      "parallelism": 5
+    }
+  }
+}
+```
+
+With the above configuration:
+- `my_queue` would use concurrency=20 (from flag), parallelism=1 (from YAML default)
+- `another_queue` would use concurrency=15, parallelism=5 (both from flag)
+- All other queues would use concurrency=10, parallelism=3 (from flag's all_queues)
 
 **Important notes:**
 - Feature flag values are read once at service startup. To pick up new flag values, the service must be restarted.
-- If feature flag names are configured, a `FeatureFlags` implementation must be bound in your Guice module.
-  If no `FeatureFlags` is bound but flag names are configured, the service will fail to start with a clear error message.
-- YAML values serve as fallbacks when the flag is not configured for a specific queue or returns 0.
+- If `config_feature_flag` is configured, a `FeatureFlags` implementation must be bound in your Guice module.
+  If no `FeatureFlags` is bound but the flag name is configured, the service will fail to start with a clear error message.
+- If the feature flag returns null or cannot be parsed, the service falls back to YAML configuration only (with a warning log).
+- YAML values serve as fallbacks for any settings not specified in the feature flag.
 
 ## Threading model
 

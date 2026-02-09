@@ -42,6 +42,7 @@ dependencies {
   testImplementation(libs.kotlinxCoroutinesTest)
   testImplementation(libs.mockitoCore)
   testImplementation(libs.mockitoKotlin)
+  testImplementation(libs.moshiKotlin)
   testImplementation(project(":misk-clustering"))
   testImplementation(project(":misk-testing"))
   testImplementation(project(":wisp:wisp-feature-testing"))

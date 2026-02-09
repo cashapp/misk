@@ -1,5 +1,7 @@
 package misk.aws2.sqs.jobqueue
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import java.util.Optional
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -14,6 +16,7 @@ import misk.jobqueue.v2.JobHandler
 import misk.jobqueue.v2.JobStatus
 import misk.jobqueue.v2.SuspendingJobHandler
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -21,8 +24,10 @@ import org.mockito.kotlin.whenever
 
 class SubscriptionServiceTest {
 
+  private val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
+
   @Test
-  fun `startUp without feature flags uses yaml config values`() {
+  fun `startUp without feature flag uses yaml config values`() {
     val consumer = mock<SqsJobConsumer>()
     val handler = TestHandler()
     val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
@@ -30,7 +35,7 @@ class SubscriptionServiceTest {
       all_queues = SqsQueueConfig(concurrency = 5, parallelism = 2),
     )
 
-    val service = SubscriptionService(consumer, handlers, config, Optional.empty())
+    val service = SubscriptionService(consumer, handlers, config, Optional.empty(), moshi)
     service.startAsync().awaitRunning()
 
     verify(consumer).subscribe(
@@ -41,21 +46,21 @@ class SubscriptionServiceTest {
   }
 
   @Test
-  fun `startUp with feature flags overrides yaml config values`() {
+  fun `startUp with feature flag overrides yaml config values`() {
     val consumer = mock<SqsJobConsumer>()
     val handler = TestHandler()
     val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
     val featureFlags = mock<FeatureFlags>()
     val config = SqsConfig(
       all_queues = SqsQueueConfig(concurrency = 1, parallelism = 1),
-      concurrency_feature_flag = "pod-jobqueue-consumers",
-      parallelism_feature_flag = "pod-jobqueue-parallelism",
+      config_feature_flag = "sqs-config-override",
     )
 
-    whenever(featureFlags.getInt(Feature("pod-jobqueue-consumers"), "test-queue")).thenReturn(10)
-    whenever(featureFlags.getInt(Feature("pod-jobqueue-parallelism"), "test-queue")).thenReturn(3)
+    // Feature flag returns JSON string with overrides
+    val flagJsonString = """{"all_queues": {"concurrency": 10, "parallelism": 3}}"""
+    whenever(featureFlags.getJsonString(eq(Feature("sqs-config-override")), any())).thenReturn(flagJsonString)
 
-    val service = SubscriptionService(consumer, handlers, config, Optional.of(featureFlags))
+    val service = SubscriptionService(consumer, handlers, config, Optional.of(featureFlags), moshi)
     service.startAsync().awaitRunning()
 
     verify(consumer).subscribe(
@@ -66,21 +71,19 @@ class SubscriptionServiceTest {
   }
 
   @Test
-  fun `startUp with feature flag returning zero uses yaml fallback`() {
+  fun `startUp with feature flag returning empty uses yaml fallback`() {
     val consumer = mock<SqsJobConsumer>()
     val handler = TestHandler()
     val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
     val featureFlags = mock<FeatureFlags>()
     val config = SqsConfig(
       all_queues = SqsQueueConfig(concurrency = 5, parallelism = 2),
-      concurrency_feature_flag = "pod-jobqueue-consumers",
-      parallelism_feature_flag = "pod-jobqueue-parallelism",
+      config_feature_flag = "sqs-config-override",
     )
 
-    whenever(featureFlags.getInt(Feature("pod-jobqueue-consumers"), "test-queue")).thenReturn(0)
-    whenever(featureFlags.getInt(Feature("pod-jobqueue-parallelism"), "test-queue")).thenReturn(0)
+    whenever(featureFlags.getJsonString(eq(Feature("sqs-config-override")), any())).thenReturn("")
 
-    val service = SubscriptionService(consumer, handlers, config, Optional.of(featureFlags))
+    val service = SubscriptionService(consumer, handlers, config, Optional.of(featureFlags), moshi)
     service.startAsync().awaitRunning()
 
     verify(consumer).subscribe(
@@ -91,39 +94,64 @@ class SubscriptionServiceTest {
   }
 
   @Test
-  fun `startUp with only concurrency flag configured`() {
+  fun `startUp with feature flag returning null string uses yaml fallback`() {
     val consumer = mock<SqsJobConsumer>()
     val handler = TestHandler()
     val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
     val featureFlags = mock<FeatureFlags>()
     val config = SqsConfig(
-      all_queues = SqsQueueConfig(concurrency = 1, parallelism = 1),
-      concurrency_feature_flag = "pod-jobqueue-consumers",
+      all_queues = SqsQueueConfig(concurrency = 5, parallelism = 2),
+      config_feature_flag = "sqs-config-override",
     )
 
-    whenever(featureFlags.getInt(Feature("pod-jobqueue-consumers"), "test-queue")).thenReturn(20)
+    whenever(featureFlags.getJsonString(eq(Feature("sqs-config-override")), any())).thenReturn("null")
 
-    val service = SubscriptionService(consumer, handlers, config, Optional.of(featureFlags))
+    val service = SubscriptionService(consumer, handlers, config, Optional.of(featureFlags), moshi)
     service.startAsync().awaitRunning()
 
     verify(consumer).subscribe(
       eq(QueueName("test-queue")),
       eq(handler),
-      eq(SqsQueueConfig(concurrency = 20, parallelism = 1)),
+      eq(SqsQueueConfig(concurrency = 5, parallelism = 2)),
     )
   }
 
   @Test
-  fun `startUp fails when feature flags configured but FeatureFlags not bound`() {
+  fun `startUp with feature flag overriding only concurrency`() {
+    val consumer = mock<SqsJobConsumer>()
+    val handler = TestHandler()
+    val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
+    val featureFlags = mock<FeatureFlags>()
+    val config = SqsConfig(
+      all_queues = SqsQueueConfig(concurrency = 1, parallelism = 5),
+      config_feature_flag = "sqs-config-override",
+    )
+
+    // Feature flag only overrides concurrency, parallelism should remain from YAML
+    val flagJsonString = """{"all_queues": {"concurrency": 20}}"""
+    whenever(featureFlags.getJsonString(eq(Feature("sqs-config-override")), any())).thenReturn(flagJsonString)
+
+    val service = SubscriptionService(consumer, handlers, config, Optional.of(featureFlags), moshi)
+    service.startAsync().awaitRunning()
+
+    verify(consumer).subscribe(
+      eq(QueueName("test-queue")),
+      eq(handler),
+      eq(SqsQueueConfig(concurrency = 20, parallelism = 5)),
+    )
+  }
+
+  @Test
+  fun `startUp fails when feature flag configured but FeatureFlags not bound`() {
     val consumer = mock<SqsJobConsumer>()
     val handler = TestHandler()
     val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
     val config = SqsConfig(
       all_queues = SqsQueueConfig(concurrency = 1, parallelism = 1),
-      concurrency_feature_flag = "pod-jobqueue-consumers",
+      config_feature_flag = "sqs-config-override",
     )
 
-    val service = SubscriptionService(consumer, handlers, config, Optional.empty())
+    val service = SubscriptionService(consumer, handlers, config, Optional.empty(), moshi)
 
     val exception = assertFailsWith<IllegalStateException> {
       service.startAsync().awaitRunning()
@@ -133,15 +161,15 @@ class SubscriptionServiceTest {
     val cause = exception.cause
     assertTrue(cause is IllegalStateException)
     assertEquals(
-      "Feature flag names are configured in SqsConfig (concurrency_feature_flag=pod-jobqueue-consumers, " +
-        "parallelism_feature_flag=null) but no FeatureFlags implementation is bound. " +
+      "Feature flag name is configured in SqsConfig (config_feature_flag=sqs-config-override) " +
+        "but no FeatureFlags implementation is bound. " +
         "Either bind a FeatureFlags implementation or remove the feature flag configuration from SqsConfig.",
       cause.message,
     )
   }
 
   @Test
-  fun `startUp with per-queue overrides and feature flags`() {
+  fun `startUp with per-queue overrides from feature flag`() {
     val consumer = mock<SqsJobConsumer>()
     val handler1 = TestHandler()
     val handler2 = TestHandler()
@@ -155,14 +183,19 @@ class SubscriptionServiceTest {
       per_queue_overrides = mapOf(
         "queue-a" to SqsQueueConfig(concurrency = 5, parallelism = 2),
       ),
-      concurrency_feature_flag = "pod-jobqueue-consumers",
+      config_feature_flag = "sqs-config-override",
     )
 
-    // Feature flag overrides queue-a's yaml value, queue-b uses default
-    whenever(featureFlags.getInt(Feature("pod-jobqueue-consumers"), "queue-a")).thenReturn(15)
-    whenever(featureFlags.getInt(Feature("pod-jobqueue-consumers"), "queue-b")).thenReturn(8)
+    // Feature flag overrides queue-a's concurrency and adds queue-b override
+    val flagJsonString = """{
+      "per_queue_overrides": {
+        "queue-a": {"concurrency": 15},
+        "queue-b": {"concurrency": 8}
+      }
+    }"""
+    whenever(featureFlags.getJsonString(eq(Feature("sqs-config-override")), any())).thenReturn(flagJsonString)
 
-    val service = SubscriptionService(consumer, handlers, config, Optional.of(featureFlags))
+    val service = SubscriptionService(consumer, handlers, config, Optional.of(featureFlags), moshi)
     service.startAsync().awaitRunning()
 
     verify(consumer).subscribe(
@@ -174,6 +207,31 @@ class SubscriptionServiceTest {
       eq(QueueName("queue-b")),
       eq(handler2),
       eq(SqsQueueConfig(concurrency = 8, parallelism = 1)),
+    )
+  }
+
+  @Test
+  fun `startUp with feature flag error uses yaml fallback`() {
+    val consumer = mock<SqsJobConsumer>()
+    val handler = TestHandler()
+    val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
+    val featureFlags = mock<FeatureFlags>()
+    val config = SqsConfig(
+      all_queues = SqsQueueConfig(concurrency = 5, parallelism = 2),
+      config_feature_flag = "sqs-config-override",
+    )
+
+    whenever(featureFlags.getJsonString(eq(Feature("sqs-config-override")), any()))
+      .thenThrow(RuntimeException("Feature flag service unavailable"))
+
+    val service = SubscriptionService(consumer, handlers, config, Optional.of(featureFlags), moshi)
+    service.startAsync().awaitRunning()
+
+    // Should fall back to YAML config when feature flag throws
+    verify(consumer).subscribe(
+      eq(QueueName("test-queue")),
+      eq(handler),
+      eq(SqsQueueConfig(concurrency = 5, parallelism = 2)),
     )
   }
 
