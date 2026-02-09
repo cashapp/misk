@@ -9,7 +9,6 @@ import java.time.ZoneId
 import misk.ReadyService
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceModule
-import misk.inject.AsyncSwitch
 import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KInstallOnceModule
 import misk.tasks.RepeatedTaskQueue
@@ -48,10 +47,10 @@ constructor(
     )
 
     install(
-      ServiceModule<RepeatedTaskQueue, ForMiskCron>().conditionalOn<AsyncSwitch>("cron").dependsOn<ReadyService>()
+      ServiceModule<RepeatedTaskQueue, ForMiskCron>().dependsOn<ReadyService>()
     )
     install(
-      ServiceModule<CronTask>().conditionalOn<AsyncSwitch>("cron").dependsOn(dependencies).dependsOn<ReadyService>()
+      ServiceModule<CronTask>().dependsOn(dependencies).dependsOn<ReadyService>()
     )
   }
 
