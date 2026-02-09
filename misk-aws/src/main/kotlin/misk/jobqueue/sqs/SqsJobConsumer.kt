@@ -77,21 +77,19 @@ internal constructor(
 
     log.info { "subscribing to queue ${queueName.value}" }
     taskQueue.scheduleWithBackoff(Duration.ZERO) {
-      if (!asyncSwitch.isEnabled("sqs")) {
-        if (!wasDisabled) {
-          log.info { "Async SQS tasks disabled. Consumer paused." }
-          wasDisabled = true
-        }
-        return@scheduleWithBackoff Status.NO_WORK
+      val enabled = asyncSwitch.isEnabled("sqs")
+      if (!enabled && !wasDisabled) {
+        log.info { "Async SQS tasks disabled. Consumer paused." }
+        wasDisabled = true
       }
-      if (wasDisabled) {
+      if (enabled && wasDisabled) {
         log.info { "Async SQS tasks re-enabled. Consumer resuming." }
         wasDisabled = false
       }
 
       // Don't call handlers until all services are ready, otherwise handlers will crash because
       // the services they might need (databases, etc.) won't be ready.
-      if (serviceManagerProvider.get().isHealthy) {
+      if (serviceManagerProvider.get().isHealthy && enabled) {
         receiver.run()
       } else {
         Status.NO_WORK
