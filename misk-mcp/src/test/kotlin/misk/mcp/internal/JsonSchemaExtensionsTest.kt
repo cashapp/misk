@@ -19,6 +19,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import misk.mcp.Description
+import misk.mcp.generateJsonSchema
 import org.junit.jupiter.api.Test
 
 internal class JsonSchemaExtensionsTest {
