@@ -6,7 +6,6 @@ import com.google.inject.Singleton
 import com.squareup.moshi.Moshi
 import java.util.Optional
 import misk.aws2.sqs.jobqueue.config.SqsConfig
-import misk.aws2.sqs.jobqueue.config.SqsConfigOverride
 import misk.feature.DynamicConfig
 import misk.feature.Feature
 import misk.jobqueue.QueueName
@@ -33,7 +32,7 @@ constructor(
       )
     }
 
-    // Merge YAML config with dynamic config (if configured)
+    // Use dynamic config if available, otherwise fall back to YAML config
     val effectiveConfig = resolveEffectiveConfig()
 
     logger.info { "Starting AWS SQS SubscriptionService with config=$effectiveConfig" }
@@ -45,33 +44,34 @@ constructor(
   }
 
   /**
-   * Resolves the effective configuration by applying dynamic config overrides to YAML config.
-   * Dynamic config values take precedence over YAML values.
+   * Resolves the effective configuration.
+   * If a dynamic config flag is configured and returns a valid config, it completely replaces the YAML config.
+   * Otherwise, the YAML config is used.
    */
   private fun resolveEffectiveConfig(): SqsConfig {
     val flagName = config.config_feature_flag ?: return config
     val dc = dynamicConfig.orElse(null) ?: return config
 
     return try {
-      val jsonAdapter = moshi.adapter(SqsConfigOverride::class.java)
+      val jsonAdapter = moshi.adapter(SqsConfig::class.java)
       val flagJsonString = dc.getJsonString(Feature(flagName))
 
       if (flagJsonString.isBlank() || flagJsonString == "null") {
-        logger.info { "Dynamic config '$flagName' returned empty/null, using YAML config only" }
+        logger.info { "Dynamic config '$flagName' returned empty/null, using YAML config" }
         return config
       }
 
-      val configOverride = jsonAdapter.fromJson(flagJsonString)
+      val dynamicSqsConfig = jsonAdapter.fromJson(flagJsonString)
 
-      if (configOverride == null) {
-        logger.warn { "Failed to parse dynamic config '$flagName' as SqsConfigOverride, using YAML config only" }
+      if (dynamicSqsConfig == null) {
+        logger.warn { "Failed to parse dynamic config '$flagName' as SqsConfig, using YAML config" }
         return config
       }
 
-      logger.info { "Applying dynamic config override from '$flagName': $configOverride" }
-      config.applyOverride(configOverride)
+      logger.info { "Using dynamic config from '$flagName' (replaces YAML config): $dynamicSqsConfig" }
+      dynamicSqsConfig
     } catch (e: Exception) {
-      logger.warn(e) { "Error reading dynamic config '$flagName', using YAML config only" }
+      logger.warn(e) { "Error reading dynamic config '$flagName', using YAML config" }
       config
     }
   }

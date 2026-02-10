@@ -11,9 +11,9 @@ import misk.jobqueue.QueueName
  * are flushed to SQS when using enqueueBuffered
  *
  * `config_feature_flag` allows specifying a dynamic config name that returns a JSON object matching the
- * structure of [SqsConfigOverride]. When set, the dynamic config is evaluated at service startup and merged with the
- * YAML configuration (dynamic config values take precedence). This allows dynamic configuration changes with a service
- * restart (without requiring a code deploy). If not set, only YAML configuration is used.
+ * structure of SqsConfig. When set, the dynamic config is evaluated at service startup and **completely replaces**
+ * the YAML configuration. This allows dynamic configuration changes with a service restart (without requiring a code
+ * deploy). If not set, or if the dynamic config returns null/empty, the YAML configuration is used.
  */
 data class SqsConfig
 @JvmOverloads
@@ -22,8 +22,8 @@ constructor(
   val per_queue_overrides: Map<String, SqsQueueConfig> = emptyMap(),
   val buffered_batch_flush_frequency_ms: Long = 50,
   /**
-   * Dynamic config name that returns a JSON object matching [SqsConfigOverride] structure.
-   * When set, the dynamic config value is merged with YAML config (dynamic config values take precedence).
+   * Dynamic config name that returns a JSON object matching SqsConfig structure.
+   * When set and returns a valid config, it completely replaces the YAML config.
    * Example value: {"all_queues": {"concurrency": 10}, "per_queue_overrides": {"my_queue": {"concurrency": 20}}}
    */
   val config_feature_flag: String? = null,
@@ -45,38 +45,4 @@ constructor(
 
   /** Returns true if a dynamic config flag is configured. */
   fun hasFeatureFlag(): Boolean = config_feature_flag != null
-
-  /**
-   * Applies an override to this config. Only non-null fields in the override are applied.
-   */
-  fun applyOverride(override: SqsConfigOverride): SqsConfig {
-    val mergedPerQueueOverrides = per_queue_overrides.toMutableMap()
-
-    // Apply per-queue overrides from the dynamic config
-    override.per_queue_overrides?.forEach { (queueName, queueOverride) ->
-      val existingConfig = mergedPerQueueOverrides[queueName] ?: all_queues
-      mergedPerQueueOverrides[queueName] = existingConfig.applyOverride(queueOverride)
-    }
-
-    return copy(
-      all_queues = override.all_queues?.let { all_queues.applyOverride(it) } ?: all_queues,
-      per_queue_overrides = mergedPerQueueOverrides,
-      buffered_batch_flush_frequency_ms = override.buffered_batch_flush_frequency_ms ?: buffered_batch_flush_frequency_ms,
-    )
-  }
 }
-
-/**
- * Override configuration for SQS, used by dynamic config.
- *
- * All fields are nullable - null means "use the base config value", while any non-null value
- * will override the base config. This allows dynamic config to explicitly set values back to
- * defaults if needed.
- */
-data class SqsConfigOverride
-@JvmOverloads
-constructor(
-  val all_queues: SqsQueueConfigOverride? = null,
-  val per_queue_overrides: Map<String, SqsQueueConfigOverride>? = null,
-  val buffered_batch_flush_frequency_ms: Long? = null,
-)

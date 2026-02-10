@@ -45,7 +45,7 @@ class SubscriptionServiceTest {
   }
 
   @Test
-  fun `startUp with dynamic config overrides yaml config values`() {
+  fun `startUp with dynamic config completely replaces yaml config`() {
     val consumer = mock<SqsJobConsumer>()
     val handler = TestHandler()
     val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
@@ -55,7 +55,7 @@ class SubscriptionServiceTest {
       config_feature_flag = "sqs-config-override",
     )
 
-    // Dynamic config returns JSON string with overrides
+    // Dynamic config returns complete config that replaces YAML
     val flagJsonString = """{"all_queues": {"concurrency": 10, "parallelism": 3}}"""
     whenever(dynamicConfig.getJsonString(eq(Feature("sqs-config-override")))).thenReturn(flagJsonString)
 
@@ -116,31 +116,6 @@ class SubscriptionServiceTest {
   }
 
   @Test
-  fun `startUp with dynamic config overriding only concurrency`() {
-    val consumer = mock<SqsJobConsumer>()
-    val handler = TestHandler()
-    val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
-    val dynamicConfig = mock<DynamicConfig>()
-    val config = SqsConfig(
-      all_queues = SqsQueueConfig(concurrency = 1, parallelism = 5),
-      config_feature_flag = "sqs-config-override",
-    )
-
-    // Dynamic config only overrides concurrency, parallelism should remain from YAML
-    val flagJsonString = """{"all_queues": {"concurrency": 20}}"""
-    whenever(dynamicConfig.getJsonString(eq(Feature("sqs-config-override")))).thenReturn(flagJsonString)
-
-    val service = SubscriptionService(consumer, handlers, config, Optional.of(dynamicConfig), moshi)
-    service.startAsync().awaitRunning()
-
-    verify(consumer).subscribe(
-      eq(QueueName("test-queue")),
-      eq(handler),
-      eq(SqsQueueConfig(concurrency = 20, parallelism = 5)),
-    )
-  }
-
-  @Test
   fun `startUp fails when dynamic config flag configured but DynamicConfig not bound`() {
     val consumer = mock<SqsJobConsumer>()
     val handler = TestHandler()
@@ -168,7 +143,7 @@ class SubscriptionServiceTest {
   }
 
   @Test
-  fun `startUp with per-queue overrides from dynamic config`() {
+  fun `startUp with dynamic config uses per_queue_overrides from dynamic config`() {
     val consumer = mock<SqsJobConsumer>()
     val handler1 = TestHandler()
     val handler2 = TestHandler()
@@ -178,15 +153,16 @@ class SubscriptionServiceTest {
     )
     val dynamicConfig = mock<DynamicConfig>()
     val config = SqsConfig(
-      all_queues = SqsQueueConfig(concurrency = 1, parallelism = 1),
+      all_queues = SqsQueueConfig(concurrency = 100, parallelism = 100), // YAML values ignored
       per_queue_overrides = mapOf(
-        "queue-a" to SqsQueueConfig(concurrency = 5, parallelism = 2),
+        "queue-a" to SqsQueueConfig(concurrency = 100, parallelism = 100), // YAML values ignored
       ),
       config_feature_flag = "sqs-config-override",
     )
 
-    // Dynamic config overrides queue-a's concurrency and adds queue-b override
+    // Dynamic config completely replaces YAML - YAML per_queue_overrides are NOT preserved
     val flagJsonString = """{
+      "all_queues": {"concurrency": 1, "parallelism": 1},
       "per_queue_overrides": {
         "queue-a": {"concurrency": 15},
         "queue-b": {"concurrency": 8}
@@ -197,11 +173,13 @@ class SubscriptionServiceTest {
     val service = SubscriptionService(consumer, handlers, config, Optional.of(dynamicConfig), moshi)
     service.startAsync().awaitRunning()
 
+    // queue-a uses dynamic config's per_queue_override (concurrency=15, parallelism defaults to 1)
     verify(consumer).subscribe(
       eq(QueueName("queue-a")),
       eq(handler1),
-      eq(SqsQueueConfig(concurrency = 15, parallelism = 2)),
+      eq(SqsQueueConfig(concurrency = 15, parallelism = 1)),
     )
+    // queue-b uses dynamic config's per_queue_override
     verify(consumer).subscribe(
       eq(QueueName("queue-b")),
       eq(handler2),
@@ -235,28 +213,28 @@ class SubscriptionServiceTest {
   }
 
   @Test
-  fun `startUp with dynamic config can set values to defaults explicitly`() {
+  fun `startUp with dynamic config does not inherit from yaml`() {
     val consumer = mock<SqsJobConsumer>()
     val handler = TestHandler()
     val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
     val dynamicConfig = mock<DynamicConfig>()
     val config = SqsConfig(
-      all_queues = SqsQueueConfig(concurrency = 50, parallelism = 10),
+      all_queues = SqsQueueConfig(concurrency = 50, parallelism = 10, channel_capacity = 20),
       config_feature_flag = "sqs-config-override",
     )
 
-    // Dynamic config explicitly sets values to defaults (1)
-    val flagJsonString = """{"all_queues": {"concurrency": 1, "parallelism": 1}}"""
+    // Dynamic config only specifies concurrency - other fields use SqsQueueConfig defaults, NOT yaml values
+    val flagJsonString = """{"all_queues": {"concurrency": 5}}"""
     whenever(dynamicConfig.getJsonString(eq(Feature("sqs-config-override")))).thenReturn(flagJsonString)
 
     val service = SubscriptionService(consumer, handlers, config, Optional.of(dynamicConfig), moshi)
     service.startAsync().awaitRunning()
 
-    // Values should be overridden to 1, not preserved at 50/10
+    // parallelism and channel_capacity should be defaults (1 and 0), not YAML values (10 and 20)
     verify(consumer).subscribe(
       eq(QueueName("test-queue")),
       eq(handler),
-      eq(SqsQueueConfig(concurrency = 1, parallelism = 1)),
+      eq(SqsQueueConfig(concurrency = 5, parallelism = 1, channel_capacity = 0)),
     )
   }
 

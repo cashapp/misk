@@ -43,196 +43,45 @@ class SqsConfigTest {
   }
 
   @Test
-  fun `applyOverride overrides all_queues values`() {
-    val base = SqsConfig(
-      all_queues = SqsQueueConfig(concurrency = 1, parallelism = 1),
-    )
-    val override = SqsConfigOverride(
-      all_queues = SqsQueueConfigOverride(concurrency = 10, parallelism = 5),
-    )
-
-    val result = base.applyOverride(override)
-
-    assertEquals(10, result.all_queues.concurrency)
-    assertEquals(5, result.all_queues.parallelism)
-  }
-
-  @Test
-  fun `applyOverride preserves base values when override fields are null`() {
-    val base = SqsConfig(
+  fun `getQueueConfig returns all_queues when no per_queue_override exists`() {
+    val config = SqsConfig(
       all_queues = SqsQueueConfig(concurrency = 10, parallelism = 5),
     )
-    val override = SqsConfigOverride(
-      all_queues = SqsQueueConfigOverride(), // all nulls
-    )
 
-    val result = base.applyOverride(override)
+    val queueConfig = config.getQueueConfig(misk.jobqueue.QueueName("test-queue"))
 
-    // Base values preserved because override fields are null
-    assertEquals(10, result.all_queues.concurrency)
-    assertEquals(5, result.all_queues.parallelism)
+    assertEquals(10, queueConfig.concurrency)
+    assertEquals(5, queueConfig.parallelism)
   }
 
   @Test
-  fun `applyOverride can set values to defaults explicitly`() {
-    val base = SqsConfig(
-      all_queues = SqsQueueConfig(concurrency = 50, parallelism = 10),
-    )
-    val override = SqsConfigOverride(
-      all_queues = SqsQueueConfigOverride(concurrency = 1, parallelism = 1), // explicitly set to defaults
-    )
-
-    val result = base.applyOverride(override)
-
-    // Override values applied even though they match defaults
-    assertEquals(1, result.all_queues.concurrency)
-    assertEquals(1, result.all_queues.parallelism)
-  }
-
-  @Test
-  fun `applyOverride adds new per_queue_overrides`() {
-    val base = SqsConfig(
+  fun `getQueueConfig returns per_queue_override when it exists`() {
+    val config = SqsConfig(
       all_queues = SqsQueueConfig(concurrency = 1, parallelism = 1),
       per_queue_overrides = mapOf(
-        "queue-a" to SqsQueueConfig(concurrency = 5),
+        "test-queue" to SqsQueueConfig(concurrency = 20, parallelism = 10),
       ),
     )
-    val override = SqsConfigOverride(
+
+    val queueConfig = config.getQueueConfig(misk.jobqueue.QueueName("test-queue"))
+
+    assertEquals(20, queueConfig.concurrency)
+    assertEquals(10, queueConfig.parallelism)
+  }
+
+  @Test
+  fun `getQueueConfig inherits nullable fields from all_queues`() {
+    val config = SqsConfig(
+      all_queues = SqsQueueConfig(region = "us-west-2", wait_timeout = 20),
       per_queue_overrides = mapOf(
-        "queue-b" to SqsQueueConfigOverride(concurrency = 10),
+        "test-queue" to SqsQueueConfig(concurrency = 10),
       ),
     )
 
-    val result = base.applyOverride(override)
+    val queueConfig = config.getQueueConfig(misk.jobqueue.QueueName("test-queue"))
 
-    assertEquals(2, result.per_queue_overrides.size)
-    assertEquals(5, result.per_queue_overrides["queue-a"]?.concurrency)
-    assertEquals(10, result.per_queue_overrides["queue-b"]?.concurrency)
-  }
-
-  @Test
-  fun `applyOverride merges existing per_queue_overrides`() {
-    val base = SqsConfig(
-      per_queue_overrides = mapOf(
-        "queue-a" to SqsQueueConfig(concurrency = 5, parallelism = 2),
-      ),
-    )
-    val override = SqsConfigOverride(
-      per_queue_overrides = mapOf(
-        "queue-a" to SqsQueueConfigOverride(concurrency = 15), // only override concurrency
-      ),
-    )
-
-    val result = base.applyOverride(override)
-
-    assertEquals(15, result.per_queue_overrides["queue-a"]?.concurrency)
-    assertEquals(2, result.per_queue_overrides["queue-a"]?.parallelism) // preserved from base
-  }
-
-  @Test
-  fun `applyOverride overrides buffered_batch_flush_frequency_ms when set`() {
-    val base = SqsConfig(buffered_batch_flush_frequency_ms = 50)
-    val override = SqsConfigOverride(buffered_batch_flush_frequency_ms = 100)
-
-    val result = base.applyOverride(override)
-
-    assertEquals(100, result.buffered_batch_flush_frequency_ms)
-  }
-
-  @Test
-  fun `applyOverride preserves buffered_batch_flush_frequency_ms when override is null`() {
-    val base = SqsConfig(buffered_batch_flush_frequency_ms = 100)
-    val override = SqsConfigOverride(buffered_batch_flush_frequency_ms = null)
-
-    val result = base.applyOverride(override)
-
-    assertEquals(100, result.buffered_batch_flush_frequency_ms)
-  }
-
-  @Test
-  fun `applyOverride can set buffered_batch_flush_frequency_ms to default explicitly`() {
-    val base = SqsConfig(buffered_batch_flush_frequency_ms = 100)
-    val override = SqsConfigOverride(buffered_batch_flush_frequency_ms = 50) // explicitly set to default
-
-    val result = base.applyOverride(override)
-
-    assertEquals(50, result.buffered_batch_flush_frequency_ms)
-  }
-
-  @Test
-  fun `applyOverride creates new per_queue_override from all_queues when queue not in base`() {
-    val base = SqsConfig(
-      all_queues = SqsQueueConfig(concurrency = 5, parallelism = 2),
-    )
-    val override = SqsConfigOverride(
-      per_queue_overrides = mapOf(
-        "new-queue" to SqsQueueConfigOverride(concurrency = 10),
-      ),
-    )
-
-    val result = base.applyOverride(override)
-
-    // New queue should inherit from all_queues and apply override
-    assertEquals(10, result.per_queue_overrides["new-queue"]?.concurrency)
-    assertEquals(2, result.per_queue_overrides["new-queue"]?.parallelism) // from all_queues
-  }
-}
-
-class SqsQueueConfigTest {
-  @Test
-  fun `applyOverride overrides non-null values`() {
-    val base = SqsQueueConfig(concurrency = 1, parallelism = 1)
-    val override = SqsQueueConfigOverride(concurrency = 10, parallelism = 5)
-
-    val result = base.applyOverride(override)
-
-    assertEquals(10, result.concurrency)
-    assertEquals(5, result.parallelism)
-  }
-
-  @Test
-  fun `applyOverride preserves base values when override fields are null`() {
-    val base = SqsQueueConfig(concurrency = 10, parallelism = 5, channel_capacity = 20)
-    val override = SqsQueueConfigOverride() // all nulls
-
-    val result = base.applyOverride(override)
-
-    assertEquals(10, result.concurrency)
-    assertEquals(5, result.parallelism)
-    assertEquals(20, result.channel_capacity)
-  }
-
-  @Test
-  fun `applyOverride can set values to defaults explicitly`() {
-    val base = SqsQueueConfig(concurrency = 50, parallelism = 10, channel_capacity = 20)
-    val override = SqsQueueConfigOverride(concurrency = 1, parallelism = 1, channel_capacity = 0)
-
-    val result = base.applyOverride(override)
-
-    assertEquals(1, result.concurrency)
-    assertEquals(1, result.parallelism)
-    assertEquals(0, result.channel_capacity)
-  }
-
-  @Test
-  fun `applyOverride handles nullable fields`() {
-    val base = SqsQueueConfig(wait_timeout = 10, visibility_timeout = 30)
-    val override = SqsQueueConfigOverride(wait_timeout = 20) // visibility_timeout is null
-
-    val result = base.applyOverride(override)
-
-    assertEquals(20, result.wait_timeout)
-    assertEquals(30, result.visibility_timeout) // preserved from base
-  }
-
-  @Test
-  fun `applyOverride overrides nullable fields when set`() {
-    val base = SqsQueueConfig(region = "us-west-2", account_id = "123456")
-    val override = SqsQueueConfigOverride(region = "us-east-1")
-
-    val result = base.applyOverride(override)
-
-    assertEquals("us-east-1", result.region)
-    assertEquals("123456", result.account_id) // preserved from base
+    assertEquals(10, queueConfig.concurrency)
+    assertEquals("us-west-2", queueConfig.region) // inherited from all_queues
+    assertEquals(20, queueConfig.wait_timeout) // inherited from all_queues
   }
 }
