@@ -15,9 +15,11 @@ dependencies {
   implementation(libs.guava)
   implementation(libs.guice)
   implementation(libs.jakartaInject)
+  implementation(libs.loggingApi)
   implementation(project(":misk"))
   implementation(project(":misk-backoff"))
   implementation(project(":misk-clustering"))
+  implementation(project(":misk-logging"))
   implementation(project(":misk-service"))
 
   testImplementation(libs.assertj)
