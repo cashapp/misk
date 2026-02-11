@@ -1,7 +1,9 @@
 package misk.aws2.sqs.jobqueue
 
+import com.google.common.util.concurrent.ServiceManager
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import jakarta.inject.Inject
 import java.util.Optional
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -13,47 +15,42 @@ import misk.jobqueue.v2.Job
 import misk.jobqueue.v2.JobHandler
 import misk.jobqueue.v2.JobStatus
 import misk.jobqueue.v2.SuspendingJobHandler
+import misk.testing.MiskExternalDependency
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 
 /**
- * Unit tests for [SubscriptionService] configuration validation.
- *
- * These tests verify startup validation behavior without requiring Docker.
- * They use a mock [SqsJobConsumer] since we're only testing validation logic.
- */
-class SubscriptionServiceConfigValidationTest {
 
-  private val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
+Tests that startup fails when config_feature_flag is configured but DynamicConfig is not bound.
+ */
+@MiskTest(startService = false)
+class SubscriptionServiceConfigValidationTest {
+  @MiskExternalDependency private val dockerSqs = DockerSqs
+  @MiskExternalDependency private val queueCreator = SubscriptionServiceTestQueueCreator(dockerSqs)
+
+  @MiskTestModule
+  private val module = SubscriptionServiceTestModule(
+    dockerSqs = dockerSqs,
+    installFakeFeatureFlags = false
+  )
+
+  @Inject private lateinit var serviceManager: ServiceManager
 
   @Test
   fun `startUp fails when dynamic config flag configured but DynamicConfig not bound`() {
-    val consumer = mock<SqsJobConsumer>()
-    val handler = TestHandler()
-    val handlers = mapOf(QueueName("test-queue") to handler as JobHandler)
-    val config = SqsConfig(
-      all_queues = SqsQueueConfig(concurrency = 1, parallelism = 1),
-      config_feature_flag = "sqs-config-override",
-    )
-
-    val service = SubscriptionService(consumer, handlers, config, Optional.empty(), moshi)
-
     val exception = assertFailsWith<IllegalStateException> {
-      service.startAsync().awaitRunning()
+      serviceManager.startAsync().awaitHealthy()
     }
 
-    // The exception is wrapped by Guava's Service, so check the cause
-    val cause = exception.cause
+    val cause = exception.suppressedExceptions.firstOrNull()?.cause
     assertTrue(cause is IllegalStateException)
     assertEquals(
-      "Dynamic config flag name is configured in SqsConfig (config_feature_flag=sqs-config-override) " +
+      "Dynamic config flag name is configured in SqsConfig (config_feature_flag=test-sqs-config) " +
         "but no DynamicConfig implementation is bound. " +
         "Either bind a DynamicConfig implementation or remove the feature flag configuration from SqsConfig.",
       cause.message,
     )
-  }
-
-  private class TestHandler : SuspendingJobHandler {
-    override suspend fun handleJob(job: Job): JobStatus = JobStatus.OK
   }
 }

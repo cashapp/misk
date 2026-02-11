@@ -36,18 +36,23 @@ class SubscriptionServiceTestModule(
     config_feature_flag = "test-sqs-config",
   ),
   private val dynamicConfigJson: String? = null,
+  private val installFakeFeatureFlags: Boolean = true,
 ) : KAbstractModule() {
   override fun configure() {
     install(MiskTestingServiceModule())
     install(MockTracingBackendModule())
 
-    // Install FakeFeatureFlagsModule with optional override
-    if (dynamicConfigJson != null) {
-      install(FakeFeatureFlagsModule().withOverrides {
-        overrideJsonString(Feature("test-sqs-config"), dynamicConfigJson)
-      })
-    } else {
-      install(FakeFeatureFlagsModule())
+    if (installFakeFeatureFlags) {
+      // Install FakeFeatureFlagsModule with optional override
+      if (dynamicConfigJson != null) {
+        install(
+          FakeFeatureFlagsModule().withOverrides {
+            overrideJsonString(Feature("test-sqs-config"), dynamicConfigJson)
+          }
+        )
+      } else {
+        install(FakeFeatureFlagsModule())
+      }
     }
 
     install(AwsEnvironmentModule())
