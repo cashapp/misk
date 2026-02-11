@@ -45,6 +45,7 @@ dependencies {
   testImplementation(libs.moshiKotlin)
   testImplementation(project(":misk-clustering"))
   testImplementation(project(":misk-testing"))
+  testImplementation(testFixtures(project(":misk-feature")))
   testImplementation(project(":wisp:wisp-feature-testing"))
   testImplementation(project(":wisp:wisp-time-testing"))
   testImplementation(project(":wisp:wisp-logging-testing"))

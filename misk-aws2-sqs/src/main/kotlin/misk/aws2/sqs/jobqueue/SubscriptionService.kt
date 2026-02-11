@@ -23,6 +23,12 @@ constructor(
   private val maybeDynamicConfig: Optional<DynamicConfig>,
   private val moshi: Moshi,
 ) : AbstractIdleService() {
+
+  /** The effective config after resolving dynamic config overrides. Available after startup. */
+  @com.google.common.annotations.VisibleForTesting
+  lateinit var effectiveConfig: SqsConfig
+    private set
+
   override fun startUp() {
     // Validate: if dynamic config flag is configured, DynamicConfig must be bound
     if (config.hasFeatureFlag() && maybeDynamicConfig.isEmpty) {
@@ -34,7 +40,7 @@ constructor(
     }
 
     // Use dynamic config if available, otherwise fall back to YAML config
-    val effectiveConfig = resolveEffectiveConfig()
+    effectiveConfig = resolveEffectiveConfig()
 
     logger.info { "Starting AWS SQS SubscriptionService with config=$effectiveConfig" }
     handlers.forEach { (queueName, handler) ->
