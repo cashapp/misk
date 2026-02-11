@@ -9,6 +9,8 @@ import java.time.Duration
 import misk.clustering.Cluster.Member
 import misk.clustering.DefaultCluster
 import misk.clustering.weights.ClusterWeightProvider
+import misk.inject.AsyncSwitch
+import misk.logging.getLogger
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
@@ -34,11 +36,13 @@ constructor(
   private val clusterWeightProvider: ClusterWeightProvider,
   private val cluster: DefaultCluster,
   private val dynamoClusterConfig: DynamoClusterConfig,
+  private val asyncSwitch: AsyncSwitch,
 ) : AbstractIdleService() {
   private val enhancedClient = DynamoDbEnhancedClient.builder().dynamoDbClient(ddb).build()
   private val table = enhancedClient.table(dynamoClusterConfig.table_name, TABLE_SCHEMA)
   private val podName = System.getenv("MY_POD_NAME")
   private var prevMembers = cluster.snapshot.readyMembers.toSet()
+  private var wasDisabled = false
 
   override fun startUp() {
     taskQueue.scheduleWithBackoff(timeBetweenRuns = Duration.ofSeconds(dynamoClusterConfig.update_frequency_seconds)) {
@@ -49,6 +53,21 @@ constructor(
   internal fun run(): Status {
     if (state() >= Service.State.STOPPING) {
       return Status.NO_RESCHEDULE
+    }
+
+    if (!asyncSwitch.isEnabled("clustering")) {
+      if (!wasDisabled) {
+        logger.info { "Async clustering tasks disabled. Removing from cluster and pausing." }
+        removeOurselfFromDynamo()
+        cluster.clusterChanged(membersBecomingReady = emptySet(), membersBecomingNotReady = prevMembers)
+        prevMembers = emptySet()
+        wasDisabled = true
+      }
+      return Status.OK
+    }
+    if (wasDisabled) {
+      logger.info { "Async clustering tasks re-enabled. Resuming." }
+      wasDisabled = false
     }
 
     // If we're not active, we don't want to mark ourselves as part of the active cluster.
@@ -94,6 +113,10 @@ constructor(
 
   /** On pod shutdown, remove the pod from the cluster view */
   override fun shutDown() {
+    removeOurselfFromDynamo()
+  }
+
+  private fun removeOurselfFromDynamo() {
     val self = cluster.snapshot.self.name
     val member = table.getItem(Key.builder().partitionValue(self).build())
     if (member != null) {
@@ -102,6 +125,7 @@ constructor(
   }
 
   companion object {
+    private val logger = getLogger<DynamoClusterWatcherTask>()
     internal val TABLE_SCHEMA = TableSchema.fromClass(DyClusterMember::class.java)
   }
 }
