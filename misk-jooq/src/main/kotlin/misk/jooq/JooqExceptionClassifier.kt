@@ -1,37 +1,41 @@
 package misk.jooq
 
 import misk.jdbc.DataSourceType
-import misk.jdbc.DefaultExceptionClassifier
+import misk.jdbc.retry.DefaultExceptionClassifier
 import org.jooq.exception.DataAccessException
 import org.jooq.exception.DataChangedException
 import java.sql.SQLException
 
 /**
  * Exception classifier for JOOQ-specific exceptions.
- * 
- * This extends the default classifier to handle JOOQ-specific retryable exceptions
- * like DataChangedException and DataAccessException, while also supporting
- * database type-specific retry logic.
+ *
+ * Retryable exceptions:
+ * - DataChangedException: Optimistic locking failures
+ * - DataAccessException: Only when the underlying cause is retryable (connection
+ *   closed, SQLRecoverableException, SQLTransientException, or database-specific
+ *   transient errors). Non-retryable causes like syntax errors are not retried.
+ * - Falls back to DefaultExceptionClassifier for other exception types
  */
 class JooqExceptionClassifier @JvmOverloads constructor(
   databaseType: DataSourceType? = null
 ) : DefaultExceptionClassifier(databaseType) {
-  
+
   override fun isRetryable(th: Throwable): Boolean {
     return when (th) {
-      // JOOQ-specific retryable exceptions
+      // DataChangedException indicates optimistic locking failure - always retry
       is DataChangedException -> true
       is DataAccessException -> {
-        // Check if the underlying cause is retryable
         val cause = th.cause
-        if (cause is SQLException) {
-          isMessageRetryable(cause) || isCauseRetryable(th)
-        } else {
-          // For DataAccessException without SQLException cause, always retry to match original behavior
-          true
+        when {
+          // No cause - retry for backward compatibility with existing behavior
+          cause == null -> true
+          // SQLException cause - only retry if actually retryable (connection issues, transient errors)
+          cause is SQLException -> isMessageRetryable(cause) || isCauseRetryable(th)
+          // Other cause - check the cause chain for retryable exceptions
+          else -> isCauseRetryable(th)
         }
       }
-      // Fall back to default classification (which now includes database type-specific logic)
+      // Fall back to default classification for other exception types
       else -> super.isRetryable(th)
     }
   }

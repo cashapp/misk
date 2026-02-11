@@ -71,6 +71,7 @@ dependencyAnalysis {
     project(":misk-jooq") {
       onIncorrectConfiguration {
         exclude("org.jooq:jooq")
+        exclude("org.jooq:jooq-kotlin")
       }
     }
     project(":detektive") {
@@ -330,8 +331,6 @@ subprojects {
   }
 
   tasks.withType<Detekt>().configureEach {
-    // Keep Detekt CLI happy regardless of host JDK; 1.23.x supports up to 22
-    jvmTarget = "21"
     dependsOn(":detektive:assemble")
     exclude { it.file.absolutePath.contains("/generated/source/") || it.file.absolutePath.contains("SampledLogger") }
   }

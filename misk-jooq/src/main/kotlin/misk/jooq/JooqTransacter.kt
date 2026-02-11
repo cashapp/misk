@@ -1,9 +1,12 @@
 package misk.jooq
 
+import misk.backoff.ExponentialBackoff
+import misk.backoff.RetryConfig
+import misk.backoff.retry
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceService
 import misk.jdbc.DataSourceType
-import misk.jdbc.TransactionRetryHandler
+import misk.jdbc.retry.ExceptionClassifier
 import misk.jooq.listeners.AvoidUsingSelectStarListener
 import misk.jooq.listeners.JooqSQLLogger
 import misk.jooq.listeners.JooqTimestampRecordListener
@@ -31,24 +34,23 @@ class JooqTransacter @JvmOverloads constructor(
   private val jooqConfigExtension: Configuration.() -> Unit = {}
 ) {
   
-  private val retryHandler = TransactionRetryHandler(
-    qualifierName = "jooq",
-    exceptionClassifier = JooqExceptionClassifier(dataSourceConfig.type)
-  )
+  private val exceptionClassifier: ExceptionClassifier = JooqExceptionClassifier(dataSourceConfig.type)
 
   @JvmOverloads
   fun <RETURN_TYPE> transaction(
     options: TransacterOptions = TransacterOptions(),
     callback: (jooqSession: JooqSession) -> RETURN_TYPE
   ): RETURN_TYPE {
-    return retryHandler.executeWithRetries(
-      maxAttempts = options.maxAttempts,
-      minRetryDelayMillis = 10L, // Use a shorter initial delay for JOOQ
-      maxRetryDelayMillis = options.maxRetryDelayMillis,
-      retryJitterMillis = 400L
-    ) {
-      performInTransaction(options, callback)
-    }
+    val backoff = ExponentialBackoff(
+      baseDelay = java.time.Duration.ofMillis(options.minRetryDelayMillis),
+      maxDelay = java.time.Duration.ofMillis(options.maxRetryDelayMillis),
+      jitter = java.time.Duration.ofMillis(options.retryJitterMillis)
+    )
+    val retryConfig = RetryConfig.Builder(options.maxAttempts, backoff)
+      .shouldRetry { exceptionClassifier.isRetryable(it) }
+      .onRetry { attempt, e -> log.info(e) { "jooq transaction failed, retrying (attempt $attempt)" } }
+      .build()
+    return retry(retryConfig) { performInTransaction(options, callback) }
   }
 
   private fun <RETURN_TYPE> performInTransaction(
@@ -138,7 +140,9 @@ class JooqTransacter @JvmOverloads constructor(
 
   data class TransacterOptions @JvmOverloads constructor(
     val maxAttempts: Int = 3,
+    val minRetryDelayMillis: Long = 10,
     val maxRetryDelayMillis: Long = 500,
+    val retryJitterMillis: Long = 400,
     val isolationLevel: TransactionIsolationLevel = TransactionIsolationLevel.REPEATABLE_READ
   )
 
