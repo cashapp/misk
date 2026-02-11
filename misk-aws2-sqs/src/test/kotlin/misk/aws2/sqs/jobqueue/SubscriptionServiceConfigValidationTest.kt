@@ -22,8 +22,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 
 /**
-
-Tests that startup fails when config_feature_flag is configured but DynamicConfig is not bound.
+ * Tests that startup fails when config_feature_flag is configured but DynamicConfig is not bound.
  */
 @MiskTest(startService = false)
 class SubscriptionServiceConfigValidationTest {
