@@ -105,4 +105,21 @@ class SubscriptionServiceDynamicConfigTest {
     assertEquals(15, queueConfig.concurrency)
     assertEquals(1, queueConfig.parallelism)
   }
+
+  @Test
+  fun `startUp with dynamic config without region uses AWS environment default`() {
+    // Dynamic config without region - should be populated from AWS environment
+    // FakeAwsEnvironmentModule provides REGION="us-east-1"
+    fakeFeatureFlags.overrideJsonString(
+      Feature("test-sqs-config"),
+      """{"all_queues": {"concurrency": 7, "parallelism": 4}}""",
+    )
+    serviceManager.startAsync().awaitHealthy()
+
+    val queueConfig = subscriptionService.effectiveConfig.getQueueConfig(QueueName("test-queue"))
+    assertEquals(7, queueConfig.concurrency)
+    assertEquals(4, queueConfig.parallelism)
+    // Verify AWS environment default was applied for region
+    assertEquals("us-east-1", queueConfig.region)
+  }
 }

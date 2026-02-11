@@ -96,7 +96,7 @@ public class misk/aws2/sqs/jobqueue/SqsJobQueueModule : misk/inject/KAbstractMod
 	protected fun configure ()V
 	public final fun sqsBatchManagerFactory (Lmisk/aws2/sqs/jobqueue/SqsClientFactory;Lmisk/aws2/sqs/jobqueue/config/SqsConfig;)Lmisk/aws2/sqs/jobqueue/RealSqsBatchManagerFactory;
 	public final fun sqsClientFactory (Lsoftware/amazon/awssdk/auth/credentials/AwsCredentialsProvider;)Lmisk/aws2/sqs/jobqueue/SqsClientFactory;
-	public final fun sqsConfig (Lmisk/cloud/aws/AwsRegion;)Lmisk/aws2/sqs/jobqueue/config/SqsConfig;
+	public final fun sqsConfig (Lmisk/cloud/aws/AwsRegion;Lmisk/cloud/aws/AwsAccountId;)Lmisk/aws2/sqs/jobqueue/config/SqsConfig;
 }
 
 public final class misk/aws2/sqs/jobqueue/SqsMetrics {
@@ -156,7 +156,7 @@ public final class misk/aws2/sqs/jobqueue/Subscriber$Companion {
 
 public final class misk/aws2/sqs/jobqueue/SubscriptionService : com/google/common/util/concurrent/AbstractIdleService {
 	public static final field Companion Lmisk/aws2/sqs/jobqueue/SubscriptionService$Companion;
-	public fun <init> (Lmisk/aws2/sqs/jobqueue/SqsJobConsumer;Ljava/util/Map;Lmisk/aws2/sqs/jobqueue/config/SqsConfig;Ljava/util/Optional;Lcom/squareup/moshi/Moshi;)V
+	public fun <init> (Lmisk/aws2/sqs/jobqueue/SqsJobConsumer;Ljava/util/Map;Lmisk/aws2/sqs/jobqueue/config/SqsConfig;Ljava/util/Optional;Lcom/squareup/moshi/Moshi;Lmisk/cloud/aws/AwsRegion;Lmisk/cloud/aws/AwsAccountId;)V
 	public final fun getEffectiveConfig ()Lmisk/aws2/sqs/jobqueue/config/SqsConfig;
 }
 
