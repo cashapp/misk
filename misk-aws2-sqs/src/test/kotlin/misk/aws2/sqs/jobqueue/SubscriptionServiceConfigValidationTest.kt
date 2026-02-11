@@ -1,25 +1,14 @@
 package misk.aws2.sqs.jobqueue
 
 import com.google.common.util.concurrent.ServiceManager
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import jakarta.inject.Inject
-import java.util.Optional
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-import misk.aws2.sqs.jobqueue.config.SqsConfig
-import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
-import misk.jobqueue.QueueName
-import misk.jobqueue.v2.Job
-import misk.jobqueue.v2.JobHandler
-import misk.jobqueue.v2.JobStatus
-import misk.jobqueue.v2.SuspendingJobHandler
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
 
 /**
  * Tests that startup fails when config_feature_flag is configured but DynamicConfig is not bound.
@@ -32,7 +21,7 @@ class SubscriptionServiceConfigValidationTest {
   @MiskTestModule
   private val module = SubscriptionServiceTestModule(
     dockerSqs = dockerSqs,
-    installFakeFeatureFlags = false
+    installFakeFeatureFlags = false,
   )
 
   @Inject private lateinit var serviceManager: ServiceManager

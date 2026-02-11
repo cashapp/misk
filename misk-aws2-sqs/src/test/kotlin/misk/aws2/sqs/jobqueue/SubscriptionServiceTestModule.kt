@@ -7,7 +7,6 @@ import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
 import misk.cloud.aws.AwsEnvironmentModule
 import misk.cloud.aws.FakeAwsEnvironmentModule
-import misk.feature.Feature
 import misk.feature.testing.FakeFeatureFlagsModule
 import misk.inject.KAbstractModule
 import misk.jobqueue.QueueName
@@ -26,8 +25,8 @@ import software.amazon.awssdk.services.sqs.model.QueueAttributeName
  *
  * @param dockerSqs The Docker SQS instance
  * @param yamlConfig The YAML-based SqsConfig (always required as fallback)
- * @param dynamicConfigJson Optional JSON string to override via dynamic config flag.
- *        If null, no flag override is set. If empty string or "null", tests fallback behavior.
+ * @param installFakeFeatureFlags Whether to install FakeFeatureFlagsModule (default true).
+ *        Set to false to test behavior when DynamicConfig is not bound.
  */
 class SubscriptionServiceTestModule(
   private val dockerSqs: DockerSqs,
@@ -35,7 +34,6 @@ class SubscriptionServiceTestModule(
     all_queues = SqsQueueConfig(concurrency = 5, parallelism = 2, region = "us-east-1"),
     config_feature_flag = "test-sqs-config",
   ),
-  private val dynamicConfigJson: String? = null,
   private val installFakeFeatureFlags: Boolean = true,
 ) : KAbstractModule() {
   override fun configure() {
@@ -43,16 +41,7 @@ class SubscriptionServiceTestModule(
     install(MockTracingBackendModule())
 
     if (installFakeFeatureFlags) {
-      // Install FakeFeatureFlagsModule with optional override
-      if (dynamicConfigJson != null) {
-        install(
-          FakeFeatureFlagsModule().withOverrides {
-            overrideJsonString(Feature("test-sqs-config"), dynamicConfigJson)
-          }
-        )
-      } else {
-        install(FakeFeatureFlagsModule())
-      }
+      install(FakeFeatureFlagsModule())
     }
 
     install(AwsEnvironmentModule())
