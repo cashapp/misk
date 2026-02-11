@@ -33,7 +33,7 @@ constructor(private val config: SqsConfig, private val configureClient: SqsAsync
     install(ServiceModule<RealSqsBatchManagerFactory>())
 
     // DynamicConfig is optional - only required if config_feature_flag is configured in SqsConfig
-    OptionalBinder.newOptionalBinder(binder(), DynamicConfig::class.java)
+    bindOptional<DynamicConfig>()
   }
 
   @Provides

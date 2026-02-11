@@ -11,6 +11,7 @@ import misk.feature.Feature
 import misk.jobqueue.QueueName
 import misk.jobqueue.v2.JobHandler
 import misk.logging.getLogger
+import misk.moshi.adapter
 
 @Singleton
 class SubscriptionService
@@ -19,12 +20,12 @@ constructor(
   private val consumer: SqsJobConsumer,
   private val handlers: Map<QueueName, JobHandler>,
   private val config: SqsConfig,
-  private val dynamicConfig: Optional<DynamicConfig>,
+  private val maybeDynamicConfig: Optional<DynamicConfig>,
   private val moshi: Moshi,
 ) : AbstractIdleService() {
   override fun startUp() {
     // Validate: if dynamic config flag is configured, DynamicConfig must be bound
-    if (config.hasFeatureFlag() && dynamicConfig.isEmpty) {
+    if (config.hasFeatureFlag() && maybeDynamicConfig.isEmpty) {
       throw IllegalStateException(
         "Dynamic config flag name is configured in SqsConfig (config_feature_flag=${config.config_feature_flag}) " +
           "but no DynamicConfig implementation is bound. " +
@@ -50,11 +51,11 @@ constructor(
    */
   private fun resolveEffectiveConfig(): SqsConfig {
     val flagName = config.config_feature_flag ?: return config
-    val dc = dynamicConfig.orElse(null) ?: return config
+    val dynamicConfig = maybeDynamicConfig.orElse(null) ?: return config
 
     return try {
-      val jsonAdapter = moshi.adapter(SqsConfig::class.java)
-      val flagJsonString = dc.getJsonString(Feature(flagName))
+      val jsonAdapter = moshi.adapter<SqsConfig>()
+      val flagJsonString = dynamicConfig.getJsonString(Feature(flagName))
 
       if (flagJsonString.isBlank() || flagJsonString == "null") {
         logger.info { "Dynamic config '$flagName' returned empty/null, using YAML config" }
