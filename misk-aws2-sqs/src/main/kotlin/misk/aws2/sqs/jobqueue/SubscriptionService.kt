@@ -1,5 +1,6 @@
 package misk.aws2.sqs.jobqueue
 
+import com.google.common.annotations.VisibleForTesting
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Inject
 import com.google.inject.Singleton
@@ -25,7 +26,7 @@ constructor(
 ) : AbstractIdleService() {
 
   /** The effective config after resolving dynamic config overrides. Available after startup. */
-  @com.google.common.annotations.VisibleForTesting
+  @VisibleForTesting
   lateinit var effectiveConfig: SqsConfig
     private set
 
