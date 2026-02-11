@@ -254,6 +254,57 @@ Refer to the "threading model" section below for in-depth description.
   * defined the AWS account id that own the queue. By default, uses the deployment account if of the service.
     This setting is needed for queue defined outside of our AWS accounts (external queues)
 
+### Dynamic configuration (optional)
+
+For services that want to dynamically adjust SQS configuration without code deploys, you can configure a dynamic config
+flag that returns a JSON object matching the `SqsConfig` structure. When the dynamic config returns a valid configuration,
+it **completely replaces** the YAML configuration.
+
+This uses Misk's `DynamicConfig` interface, which is appropriate for service-wide configuration (as opposed to 
+`FeatureFlags` which supports per-entity variations).
+
+* `config_feature_flag`
+  * default value: null
+  * when set, the dynamic config is evaluated at service startup and parsed as a JSON `SqsConfig` object
+  * if the dynamic config returns a valid config, it completely replaces the YAML config
+  * if the dynamic config returns null/empty or fails to parse, the YAML config is used as a fallback
+
+Example YAML configuration:
+```yaml
+aws_sqs:
+  config_feature_flag: "sqs-config-override"
+  all_queues:
+    concurrency: 1   # used only if dynamic config is empty/null
+    parallelism: 1
+```
+
+Example dynamic config JSON value:
+```json
+{
+  "all_queues": {
+    "concurrency": 10,
+    "parallelism": 3
+  },
+  "per_queue_overrides": {
+    "my_queue": {
+      "concurrency": 20
+    }
+  }
+}
+```
+
+With the above configuration, when the dynamic config is set:
+- The entire YAML config is ignored
+- `my_queue` would use concurrency=20, parallelism=3 (from dynamic config's all_queues default)
+- All other queues would use concurrency=10, parallelism=3 (from dynamic config's all_queues)
+
+**Important notes:**
+- Dynamic config values are read once at service startup. To pick up new values, the service must be restarted.
+- If `config_feature_flag` is configured, a `DynamicConfig` implementation must be bound in your Guice module.
+  If no `DynamicConfig` is bound but the flag name is configured, the service will fail to start with a clear error message.
+- If the dynamic config returns null/empty or cannot be parsed, the service falls back to YAML configuration (with a warning log).
+- The dynamic config completely replaces the YAML config - there is no merging. This keeps the behavior simple and predictable.
+
 ## Threading model
 
 Receiving and processing messages is handled by separate views on the `Dispatchers.IO`:
@@ -283,7 +334,7 @@ It's advised to start with the default settings and adjust based on specific wor
 * exposes suspending API
 * handlers return status and don't make calls to SQS. Acknowledging jobs is done by the framework code
 * no dependency on the lease module. There will be at least one handler per service instance
-* no dependency on the feature flags
+* optional dynamic config support for SQS configuration (requires explicit configuration, see "Dynamic configuration")
 * metrics are updated to v2, names of the metrics have been changed
 
 ## Migration
