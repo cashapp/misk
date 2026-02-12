@@ -246,13 +246,19 @@ Refer to the "threading model" section below for in-depth description.
   * default value: true
   * defines if a retry queue should be installed by default. Retry queue is populated by replaying
     failed jobs from DeadLetterOffice
-* `reqion`
-  * default value: null
-  * defines the AWS region to consume the messages from. By default, uses the deployment region of the service
+* `region`
+  * default value: null (auto-populated from AWS environment)
+  * defines the AWS region to consume the messages from. If not specified, defaults to the deployment 
+    region of the service (from `REGION` or `AWS_REGION` environment variable)
 * `account_id`
   * default value: null
-  * defined the AWS account id that own the queue. By default, uses the deployment account if of the service.
-    This setting is needed for queue defined outside of our AWS accounts (external queues)
+  * defines the AWS account id that owns the queue. If not specified, AWS assumes the queue is in 
+    the caller's account. This setting is only needed for queues defined outside of your AWS account 
+    (external queues)
+
+**Note:** The `region` is automatically populated from the AWS environment if not explicitly specified 
+in either YAML or dynamic config. This means you typically don't need to specify the region unless 
+you're accessing queues in a different region than your service is deployed in.
 
 ### Dynamic configuration (optional)
 
@@ -304,6 +310,7 @@ With the above configuration, when the dynamic config is set:
   If no `DynamicConfig` is bound but the flag name is configured, the service will fail to start with a clear error message.
 - If the dynamic config returns null/empty or cannot be parsed, the service falls back to YAML configuration (with a warning log).
 - The dynamic config completely replaces the YAML config - there is no merging. This keeps the behavior simple and predictable.
+- The `region` default from the AWS environment is automatically applied to both YAML and dynamic config if not explicitly specified.
 
 ## Threading model
 
