@@ -1,5 +1,8 @@
 package wisp.launchdarkly
 
+import com.launchdarkly.logging.LDLogLevel
+import com.launchdarkly.logging.LDSLF4J
+import com.launchdarkly.logging.Logs
 import com.launchdarkly.sdk.server.Components
 import com.launchdarkly.sdk.server.LDClient
 import com.launchdarkly.sdk.server.LDConfig
@@ -45,6 +48,14 @@ object LaunchDarklyClient {
       }
       ldConfig.http(httpConfiguration)
     }
+
+    // Wrap LDSLF4J to bypass IsConfiguredExternally so Logs.level() actually filters.
+    val slf4j = LDSLF4J.adapter()
+    val filteredAdapter = Logs.level(
+      { name -> slf4j.newChannel(name) },
+      LDLogLevel.WARN
+    )
+    ldConfig.logging(Components.logging().adapter(filteredAdapter))
 
     return LDClient(resourceLoader.requireUtf8(config.sdk_key).trim(), ldConfig.build())
   }
