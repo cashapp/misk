@@ -21,6 +21,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   override fun configure() {
     MapBinder.newMapBinder(binder(), KEY_TYPE, ACTION_SCOPED_PROVIDER_TYPE)
     Multibinder.newSetBinder(binder(), KEY_TYPE)
+    Multibinder.newSetBinder(binder(), ACTION_SCOPE_LISTENER_TYPE)
     configureProviders()
   }
 
@@ -146,6 +147,14 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
     bindProvider(typeKey, actionScopedKey, binder().getProvider(providerType.java))
   }
 
+  inline fun <reified T : ActionScopeListener> bindListener() {
+    bindListener(object : TypeLiteral<T>() {})
+  }
+
+  fun bindListener(typeLiteral: TypeLiteral<out ActionScopeListener>) {
+    Multibinder.newSetBinder(binder(), ACTION_SCOPE_LISTENER_TYPE).addBinding().to(typeLiteral)
+  }
+
   private fun <T> bindProvider(
     key: Key<T>,
     actionScopedKey: Key<ActionScoped<T>>,
@@ -190,6 +199,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
 
     private val KEY_TYPE = object : TypeLiteral<Key<*>>() {}
     private val ACTION_SCOPED_PROVIDER_TYPE = object : TypeLiteral<ActionScopedProvider<*>>() {}
+    private val ACTION_SCOPE_LISTENER_TYPE = object : TypeLiteral<ActionScopeListener>() {}
 
     private class SeedDataActionScopedProvider<out T>(private val key: Key<T>) : ActionScopedProvider<T> {
       override fun get(): T {
