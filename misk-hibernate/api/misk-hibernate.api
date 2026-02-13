@@ -108,6 +108,13 @@ public abstract class misk/hibernate/HibernateEntityModule : misk/inject/KAbstra
 	protected final fun installHibernateAdminDashboardWebActions ()V
 }
 
+public final class misk/hibernate/HibernateExceptionClassifier : misk/jdbc/retry/DefaultExceptionClassifier {
+	public fun <init> ()V
+	public fun <init> (Lmisk/jdbc/DataSourceType;)V
+	public synthetic fun <init> (Lmisk/jdbc/DataSourceType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun isRetryable (Ljava/lang/Throwable;)Z
+}
+
 public final class misk/hibernate/HibernateExceptionLogLevelConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Lorg/slf4j/event/Level;)V
@@ -277,7 +284,7 @@ public final class misk/hibernate/QueryKt {
 	public static final fun queryHint (Lmisk/hibernate/Query;Ljava/lang/String;)Lmisk/hibernate/Query;
 }
 
-public final class misk/hibernate/RetryTransactionException : java/lang/Exception {
+public final class misk/hibernate/RetryTransactionException : misk/jdbc/retry/RetryTransactionException {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V

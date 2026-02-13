@@ -127,4 +127,4 @@ fun <T> Transacter.failSafeRead(block: (session: Session) -> T): T =
 
 /** Thrown to explicitly trigger a retry, subject to retry limits and config such as noRetries(). */
 class RetryTransactionException @JvmOverloads constructor(message: String? = null, cause: Throwable? = null) :
-  Exception(message, cause)
+  misk.jdbc.retry.RetryTransactionException(message, cause)
