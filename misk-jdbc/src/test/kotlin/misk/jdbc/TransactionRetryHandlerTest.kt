@@ -1,7 +1,7 @@
 package misk.jdbc
 
+import misk.jdbc.retry.DefaultExceptionClassifier
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.sql.SQLException
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -68,14 +68,4 @@ class TransactionRetryHandlerTest {
     assertFalse(cockroachClassifier.isRetryable(tidbException))
   }
 
-  @Test
-  fun `transaction retry handler uses database type correctly`() {
-    val vitessHandler = TransactionRetryHandler("vitess", DataSourceType.VITESS_MYSQL)
-    val tidbHandler = TransactionRetryHandler("tidb", DataSourceType.TIDB)
-    
-    // Test that we can create handlers with database types
-    // This primarily tests that the constructors work correctly
-    assertTrue(vitessHandler.toString().isNotEmpty())
-    assertTrue(tidbHandler.toString().isNotEmpty())
-  }
 }

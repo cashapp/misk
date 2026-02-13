@@ -6,7 +6,7 @@ import misk.hibernate.VitessTestExtensions.createInSeparateShard
 import misk.hibernate.VitessTestExtensions.save
 import misk.hibernate.VitessTestExtensions.shard
 import misk.jdbc.DataSourceType
-import misk.jdbc.RetryTransactionException
+import misk.jdbc.retry.RetryTransactionException
 import misk.jdbc.uniqueString
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
@@ -721,19 +721,10 @@ abstract class TransacterTest {
       if (callCount.getAndIncrement() < 2) throw RetryTransactionException()
     }
 
-    val logs = logCollector.takeMessages(misk.jdbc.TransactionRetryHandler::class)
-    assertThat(logs).hasSize(3)
-    assertThat(logs[0]).matches(
-      "Movies recoverable transaction exception " +
-        "\\(attempt 1\\), will retry after a PT.*S delay"
-    )
-    assertThat(logs[1]).matches(
-      "Movies recoverable transaction exception " +
-        "\\(attempt 2\\), will retry after a PT.*S delay"
-    )
-    assertThat(logs[2]).matches(
-      "retried Movies transaction succeeded \\(attempt 3\\)"
-    )
+    val logs = logCollector.takeMessages(RealTransacter::class)
+    assertThat(logs).hasSize(2)
+    assertThat(logs[0]).isEqualTo("Movies transaction failed, retrying (attempt 1)")
+    assertThat(logs[1]).isEqualTo("Movies transaction failed, retrying (attempt 2)")
   }
 
   @Test

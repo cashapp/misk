@@ -1,7 +1,7 @@
 package misk.hibernate
 
-import misk.jdbc.DefaultExceptionClassifier
-import misk.jdbc.RetryTransactionException
+import misk.jdbc.retry.DefaultExceptionClassifier
+import misk.jdbc.retry.RetryTransactionException
 import javax.persistence.OptimisticLockException
 import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.LockAcquisitionException

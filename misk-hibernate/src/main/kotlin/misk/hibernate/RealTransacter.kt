@@ -17,8 +17,10 @@ import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import javax.persistence.OptimisticLockException
 import kotlin.reflect.KClass
+import misk.backoff.ExponentialBackoff
+import misk.backoff.RetryConfig
+import misk.backoff.retry
 import misk.concurrent.ExecutorServiceFactory
-import misk.jdbc.TransactionRetryHandler
 import misk.hibernate.advisorylocks.tryAcquireLock
 import misk.hibernate.advisorylocks.tryReleaseLock
 import misk.jdbc.CheckDisabler
@@ -58,11 +60,10 @@ private constructor(
   private val shardListFetcher: ShardListFetcher,
   private val hibernateEntities: Set<HibernateEntity>,
 ) : Transacter {
-  
-  private val retryHandler = TransactionRetryHandler(
-    qualifierName = qualifier.simpleName ?: "hibernate",
-    exceptionClassifier = HibernateExceptionClassifier()
-  )
+
+  private val qualifierName = qualifier.simpleName ?: "hibernate"
+  private val exceptionClassifier = HibernateExceptionClassifier()
+
   constructor(
     qualifier: KClass<out Annotation>,
     sessionFactoryService: SessionFactoryService,
@@ -255,14 +256,16 @@ private constructor(
   }
 
   private fun <T> transactionWithRetriesInternal(block: () -> T): T {
-    return retryHandler.executeWithRetries(
-      maxAttempts = options.maxAttempts,
-      minRetryDelayMillis = options.minRetryDelayMillis,
-      maxRetryDelayMillis = options.maxRetryDelayMillis,
-      retryJitterMillis = options.retryJitterMillis
-    ) {
-      block()
-    }
+    val backoff = ExponentialBackoff(
+      baseDelay = Duration.ofMillis(options.minRetryDelayMillis),
+      maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
+      jitter = Duration.ofMillis(options.retryJitterMillis)
+    )
+    val retryConfig = RetryConfig.Builder(options.maxAttempts, backoff)
+      .shouldRetry { exceptionClassifier.isRetryable(it) }
+      .onRetry { attempt, e -> logger.info(e) { "$qualifierName transaction failed, retrying (attempt $attempt)" } }
+      .build()
+    return retry(retryConfig) { block() }
   }
 
   private fun <T> transactionInternalSession(block: (session: RealSession) -> T): T {
