@@ -41,7 +41,7 @@ wire {
 
   // Generate service interfaces also.
   kotlin {
-    includes = listOf("routeguide.RouteGuide")
+    includes = listOf("routeguide.RouteGuide", "transitive.MainService")
     exclusive = false
     rpcRole = "server"
     rpcCallStyle = "blocking"
