@@ -147,6 +147,33 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
     bindProvider(typeKey, actionScopedKey, binder().getProvider(providerType.java))
   }
 
+  /**
+   * Binds a lambda that returns type T to an ActionScopedProvider<T>.
+   *
+   * Useful when you can't use bindConstant because the value may be mutated. For example, if you do:
+   *
+   * bindConstant(object: TypeLiteral<List<String>>() {}, mutableListOf())
+   *
+   * The same list will be used in each ActionScope and can be mutated. Instead, if you do:
+   *
+   * bindProvider(object: TypeLiteral<List<String>>() {}) { mutableListOf() }
+   *
+   * The lambda will be invoked in each ActionScope and provide a new list.
+   */
+  @JvmOverloads
+  fun <T : Any> bindProvider(type: TypeLiteral<T>, annotatedBy: Annotation? = null, provider: () -> T) {
+    val typeKey = if (annotatedBy == null) Key.get(type) else Key.get(type, annotatedBy)
+
+    @Suppress("UNCHECKED_CAST") val actionScopedType = actionScopedType(type.type) as TypeLiteral<ActionScoped<T>>
+    val actionScopedKey = if (annotatedBy == null) Key.get(actionScopedType) else Key.get(actionScopedType, annotatedBy)
+
+    bindProvider(typeKey, actionScopedKey) {
+      object : ActionScopedProvider<T> {
+        override fun get(): T = provider()
+      }
+    }
+  }
+
   inline fun <reified T : ActionScopeListener> bindListener() {
     bindListener(object : TypeLiteral<T>() {})
   }
