@@ -42,6 +42,10 @@ public final class misk/scope/ActionScope$Instance : java/lang/AutoCloseable {
 	public final fun inScope (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
+public abstract interface class misk/scope/ActionScopeListener {
+	public abstract fun onClose ()V
+}
+
 public abstract class misk/scope/ActionScopedProviderModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/scope/ActionScopedProviderModule$Companion;
 	public fun <init> ()V
@@ -51,6 +55,7 @@ public abstract class misk/scope/ActionScopedProviderModule : misk/inject/KAbstr
 	public final fun bindConstant (Lkotlin/reflect/KClass;Ljava/lang/Object;Ljava/lang/annotation/Annotation;)V
 	public static synthetic fun bindConstant$default (Lmisk/scope/ActionScopedProviderModule;Lcom/google/inject/TypeLiteral;Ljava/lang/Object;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)V
 	public static synthetic fun bindConstant$default (Lmisk/scope/ActionScopedProviderModule;Lkotlin/reflect/KClass;Ljava/lang/Object;Ljava/lang/annotation/Annotation;ILjava/lang/Object;)V
+	public final fun bindListener (Lcom/google/inject/TypeLiteral;)V
 	public final fun bindProvider (Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;)V
 	public final fun bindProvider (Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;Ljava/lang/Class;)V
 	public final fun bindProvider (Lcom/google/inject/TypeLiteral;Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)V

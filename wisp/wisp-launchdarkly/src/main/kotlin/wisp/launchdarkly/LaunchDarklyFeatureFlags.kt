@@ -234,7 +234,10 @@ constructor(
     )
 
   private fun checkInitialized() {
-    checkState(ldClient.value.isInitialized, "LaunchDarkly feature flags not initialized.")
+    checkState(
+      ldClient.value.isInitialized,
+      "LaunchDarkly feature flags not initialized. Are you trying to use feature flags during injector bootstrapping? That is unsupported.",
+    )
   }
 
   private fun <T> checkDefaultNotUsed(feature: Feature, detail: EvaluationDetail<T>) {

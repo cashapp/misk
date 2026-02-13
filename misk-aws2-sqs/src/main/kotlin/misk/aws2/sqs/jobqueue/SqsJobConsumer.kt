@@ -14,6 +14,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
+import misk.inject.AsyncSwitch
 import misk.jobqueue.QueueName
 import misk.jobqueue.v2.JobConsumer
 import misk.jobqueue.v2.JobHandler
@@ -51,6 +52,7 @@ constructor(
   private val sqsMetrics: SqsMetrics,
   private val clock: Clock,
   private val tracer: Tracer,
+  private val asyncSwitch: AsyncSwitch,
 ) : JobConsumer, AbstractService(), TestFixture {
   private val scope = CoroutineScope(Dispatchers.IO.limitedParallelism(1) + SupervisorJob())
 
@@ -78,6 +80,7 @@ constructor(
         clock = clock,
         tracer = tracer,
         visibilityTimeoutCalculator = visibilityTimeoutCalculator,
+        asyncSwitch = asyncSwitch,
       )
 
     scope.launch { subscriber.poll() }
