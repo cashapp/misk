@@ -7,9 +7,12 @@ plugins {
   id("com.squareup.wire")
 }
 
+val testGeneratedSourceDir = layout.buildDirectory.dir("generated/source/wire-test").get().asFile.path
+
 wire {
   sourcePath {
     srcJar(libs.wireReflector)
+    srcDir("src/test/proto/")
   }
   // Generate service interfaces only; the client comes with wire-reflector.
   kotlin {
@@ -17,6 +20,47 @@ wire {
     rpcRole = "server"
     rpcCallStyle = "blocking"
     singleMethodServices = true
+  }
+
+  // Generate test message types for transitive import tests.
+  java {
+    out = testGeneratedSourceDir
+    includes = listOf("transitive.*")
+    exclusive = false
+  }
+
+  // Generate test service interfaces for transitive import tests.
+  kotlin {
+    out = testGeneratedSourceDir
+    includes = listOf("transitive.MainService")
+    exclusive = false
+    rpcRole = "server"
+    rpcCallStyle = "blocking"
+    singleMethodServices = true
+  }
+}
+
+// Make sure the Wire-generated test sources are test-only.
+afterEvaluate {
+  val generatedSourceGlob = "$testGeneratedSourceDir/**"
+
+  sourceSets {
+    main {
+      java.setSrcDirs(java.srcDirs.filter { !it.path.contains(testGeneratedSourceDir) })
+    }
+    test {
+      java.srcDir(testGeneratedSourceDir)
+      resources.srcDir("src/test/proto/")
+    }
+  }
+
+  tasks {
+    compileJava {
+      exclude(generatedSourceGlob)
+    }
+    compileTestJava {
+      include(generatedSourceGlob)
+    }
   }
 }
 
