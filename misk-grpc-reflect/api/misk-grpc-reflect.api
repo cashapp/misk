@@ -17,3 +17,86 @@ public final class misk/grpc/reflect/ServerReflectionApi : grpc/reflection/v1alp
 	public fun ServerReflectionInfo (Lcom/squareup/wire/MessageSource;Lcom/squareup/wire/MessageSink;)V
 }
 
+public final class transitive/EchoRequest : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public final field ping Ltransitive/PingRequest;
+	public fun <init> (Ltransitive/PingRequest;)V
+	public fun <init> (Ltransitive/PingRequest;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun newBuilder ()Ltransitive/EchoRequest$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class transitive/EchoRequest$Builder : com/squareup/wire/Message$Builder {
+	public field ping Ltransitive/PingRequest;
+	public fun <init> ()V
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun build ()Ltransitive/EchoRequest;
+	public fun ping (Ltransitive/PingRequest;)Ltransitive/EchoRequest$Builder;
+}
+
+public final class transitive/EchoResponse : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_REPLY Ljava/lang/String;
+	public final field reply Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun newBuilder ()Ltransitive/EchoResponse$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class transitive/EchoResponse$Builder : com/squareup/wire/Message$Builder {
+	public field reply Ljava/lang/String;
+	public fun <init> ()V
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun build ()Ltransitive/EchoResponse;
+	public fun reply (Ljava/lang/String;)Ltransitive/EchoResponse$Builder;
+}
+
+public abstract interface class transitive/MainServiceEchoBlockingServer : com/squareup/wire/Service {
+	public abstract fun Echo (Ltransitive/EchoRequest;)Ltransitive/EchoResponse;
+}
+
+public final class transitive/PingRequest : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public fun <init> ()V
+	public fun <init> (Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun newBuilder ()Ltransitive/PingRequest$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class transitive/PingRequest$Builder : com/squareup/wire/Message$Builder {
+	public fun <init> ()V
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun build ()Ltransitive/PingRequest;
+}
+
+public final class transitive/PingResponse : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_MESSAGE Ljava/lang/String;
+	public final field message Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun newBuilder ()Ltransitive/PingResponse$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class transitive/PingResponse$Builder : com/squareup/wire/Message$Builder {
+	public field message Ljava/lang/String;
+	public fun <init> ()V
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun build ()Ltransitive/PingResponse;
+	public fun message (Ljava/lang/String;)Ltransitive/PingResponse$Builder;
+}
+
