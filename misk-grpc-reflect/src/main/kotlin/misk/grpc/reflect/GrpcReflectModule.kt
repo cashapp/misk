@@ -5,6 +5,7 @@ import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
 import com.squareup.wire.reflector.SchemaReflector
 import com.squareup.wire.schema.Location
+import com.squareup.wire.schema.PruningRules
 import com.squareup.wire.schema.Schema
 import com.squareup.wire.schema.SchemaLoader
 import jakarta.inject.Singleton
@@ -41,31 +42,43 @@ class GrpcReflectModule : KAbstractModule() {
   @Singleton
   fun provideSchema(webActions: List<WebActionEntry>): Schema {
     val fileSystem = FileSystem.RESOURCES
+    val sourceLocations = mutableSetOf<Location>()
+    val implementedServices = mutableSetOf<String>()
+
+    for (webAction in webActions) {
+      val wireRpc = getWireRpcAnnotation(webAction.actionClass) ?: continue
+      val sourceFile = wireRpc.sourceFile
+      if (sourceFile == "") continue
+
+      val location = Location.get(".", sourceFile)
+      if (!fileSystem.exists(location.path.toPath())) {
+        logger.info("Omitting ${location.path} from ServerReflectionApi; file is not in artifact")
+        continue
+      }
+
+      sourceLocations += location
+      serviceNameFromPath(wireRpc.path)?.let { implementedServices += it }
+    }
+
     val schemaLoader = SchemaLoader(fileSystem)
     schemaLoader.initRoots(
-      sourcePath = toSourceLocations(fileSystem, webActions).toList(),
+      sourcePath = sourceLocations.toList(),
       protoPath = listOf(Location.get(".")),
     )
     schemaLoader.loadExhaustively = true
-    return schemaLoader.loadSchema()
+    val schema = schemaLoader.loadSchema()
+
+    val pruningRules = PruningRules.Builder()
+      .addRoot(implementedServices)
+      .build()
+    return schema.prune(pruningRules)
   }
 
-  private fun toSourceLocations(fileSystem: FileSystem, webActions: List<WebActionEntry>): Set<Location> {
-    val result = mutableSetOf<Location>()
-    for (webAction in webActions) {
-      val wireRpcAnnotation = getWireRpcAnnotation(webAction.actionClass) ?: continue
-      val sourceFile = wireRpcAnnotation.sourceFile
-      if (sourceFile == "") continue // Generated before @WireRpc.sourceFile existed.
-      result += Location.get(".", sourceFile)
-    }
-    result.removeIf {
-      val fileDoesNotExist = !fileSystem.exists(it.path.toPath())
-      if (fileDoesNotExist) {
-        logger.info("Omitting ${it.path} from ServerReflectionApi; file is not in artifact")
-      }
-      fileDoesNotExist
-    }
-    return result
+  private fun serviceNameFromPath(path: String): String? {
+    if (!path.startsWith("/")) return null
+    val secondSlash = path.indexOf('/', startIndex = 1)
+    if (secondSlash == -1) return null
+    return path.substring(1, secondSlash)
   }
 
   /** Find `@WireRpc` on a function of one of the supertypes and return it. */
