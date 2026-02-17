@@ -115,7 +115,7 @@ inline fun <reified T : Any> keyOf(a: KClass<out Annotation>?): Key<T> = keyOf(a
  * @return A [Key] for the specified type and qualifier
  */
 inline fun <reified T : Any> keyOf(qualifier: BindingQualifier? = null): Key<T> =
-  createKey(object : TypeLiteral<T>() {}, T::class.java, qualifier)
+  keyOf(object : TypeLiteral<T>() {}, T::class.java, qualifier)
 
 /**
  * Creates a Guice [Key] from the given [TypeLiteral] and erased [Class].
@@ -126,11 +126,7 @@ inline fun <reified T : Any> keyOf(qualifier: BindingQualifier? = null): Key<T> 
  */
 @Suppress("UNCHECKED_CAST")
 @PublishedApi
-internal fun <T : Any> createKey(
-  typeLiteral: TypeLiteral<T>,
-  erasedClass: Class<T>,
-  qualifier: BindingQualifier?,
-): Key<T> =
+internal fun <T : Any> keyOf(typeLiteral: TypeLiteral<T>, erasedClass: Class<T>, qualifier: BindingQualifier?): Key<T> =
   if (typeLiteral.type.containsTypeVariable()) {
     when (qualifier) {
       is BindingQualifier.InstanceQualifier -> Key.get(erasedClass, qualifier.annotation)
