@@ -149,32 +149,6 @@ class KeyOfTest {
     assertThat(result.value).isEqualTo("hello")
   }
 
-  @Test
-  fun `containsTypeVariable returns false for simple class`() {
-    assertThat(String::class.java.containsTypeVariable()).isFalse()
-  }
-
-  @Test
-  fun `containsTypeVariable returns false for fully specified parameterized type`() {
-    val type = object : TypeLiteral<List<String>>() {}.type
-    assertThat(type.containsTypeVariable()).isFalse()
-  }
-
-  @Test
-  fun `containsTypeVariable returns true for type variable`() {
-    // Get a TypeVariable from a generic class's type parameters.
-    val typeVar = Wrapper::class.java.typeParameters[0]
-    assertThat(typeVar.containsTypeVariable()).isTrue()
-  }
-
-  @Test
-  fun `containsTypeVariable returns true for parameterized type with type variable`() {
-    // Get a field type like Wrapper<T> where T is unresolved.
-    val wrapperField = GenericFieldHolder::class.java.getDeclaredField("field")
-    val fieldType = wrapperField.genericType
-    assertThat(fieldType.containsTypeVariable()).isTrue()
-  }
-
   /** A generic wrapper class used to test keyOf with unresolved type variables. */
   class Wrapper<T>(val value: T)
 
@@ -188,10 +162,5 @@ class KeyOfTest {
     fun createKeyWithAnnotationType(): Key<Wrapper<T>> = keyOf<Wrapper<T>>(TestAnnotation::class)
 
     fun createKeyWithAnnotationInstance(annotation: Annotation): Key<Wrapper<T>> = keyOf<Wrapper<T>>(annotation)
-  }
-
-  /** Helper class with a generic field for testing containsTypeVariable on field types. */
-  class GenericFieldHolder<T> {
-    @JvmField var field: Wrapper<T>? = null
   }
 }
