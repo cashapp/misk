@@ -8,8 +8,10 @@ import com.google.inject.binder.ScopedBindingBuilder
 import com.google.inject.util.Types
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.lang.reflect.GenericArrayType
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
+import java.lang.reflect.TypeVariable
 import java.lang.reflect.WildcardType
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
@@ -99,6 +101,16 @@ inline fun <reified T : Any> keyOf(a: Annotation?): Key<T> = keyOf(a?.qualifier)
  */
 inline fun <reified T : Any> keyOf(a: KClass<out Annotation>?): Key<T> = keyOf(a?.qualifier)
 
+private fun Type.hasTypeVariables(): Boolean = when (this) {
+  is TypeVariable<*> -> true
+  is ParameterizedType -> ownerType?.hasTypeVariables() == true ||
+    actualTypeArguments.any { it.hasTypeVariables() }
+  is WildcardType -> upperBounds.any { it.hasTypeVariables() } ||
+    lowerBounds.any { it.hasTypeVariables() }
+  is GenericArrayType -> genericComponentType.hasTypeVariables()
+  else -> false
+}
+
 /**
  * Creates a Guice [Key] for type [T] with an optional [BindingQualifier].
  *
@@ -108,12 +120,22 @@ inline fun <reified T : Any> keyOf(a: KClass<out Annotation>?): Key<T> = keyOf(a
  * @param qualifier The [BindingQualifier] to use, or null for an unqualified binding
  * @return A [Key] for the specified type and qualifier
  */
-inline fun <reified T : Any> keyOf(qualifier: BindingQualifier? = null): Key<T> =
-  when (qualifier) {
-    is BindingQualifier.InstanceQualifier -> Key.get(object : TypeLiteral<T>() {}, qualifier.annotation)
-    is BindingQualifier.TypeClassifier -> Key.get(object : TypeLiteral<T>() {}, qualifier.type.java)
-    null -> Key.get(object : TypeLiteral<T>() {})
+inline fun <reified T : Any> keyOf(qualifier: BindingQualifier? = null): Key<T> {
+  val typeLiteral = object : TypeLiteral<T>() {}
+  return if (typeLiteral.type.hasTypeVariables()) {
+    when (qualifier) {
+      is BindingQualifier.InstanceQualifier -> Key.get(T::class.java, qualifier.annotation)
+      is BindingQualifier.TypeClassifier -> Key.get(T::class.java, qualifier.type.java)
+      null -> Key.get(T::class.java)
+    }
+  } else {
+    when (qualifier) {
+      is BindingQualifier.InstanceQualifier -> Key.get(typeLiteral, qualifier.annotation)
+      is BindingQualifier.TypeClassifier -> Key.get(typeLiteral, qualifier.type.java)
+      null -> Key.get(typeLiteral)
+    }
   }
+}
 
 /**
  * Converts a [TypeLiteral] to a Guice [Key] with an optional annotation type qualifier.
