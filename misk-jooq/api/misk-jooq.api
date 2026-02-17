@@ -5,8 +5,6 @@ public final class misk/jooq/IsolationLevelAwareConnectionProvider : org/jooq/Co
 }
 
 public final class misk/jooq/JooqExtensionsKt {
-	public static final fun fetchOneOrNull (Lorg/jooq/ResultQuery;)Lorg/jooq/Record;
-	public static final fun getOrThrow (Ljava/lang/Object;)Ljava/lang/Object;
 	public static final fun ifNotNull (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Lorg/jooq/Condition;
 	public static final fun toInstant (Ljava/time/LocalDateTime;)Ljava/time/Instant;
 	public static final fun toLocalDateTime (Ljava/time/Instant;)Ljava/time/LocalDateTime;
@@ -390,5 +388,25 @@ public class misk/jooq/testgen/tables/records/RecordSignatureTestRecord : org/jo
 public final class misk/jooq/testgen/tables/references/TablesKt {
 	public static final fun getMOVIE ()Lmisk/jooq/testgen/tables/Movie;
 	public static final fun getRECORD_SIGNATURE_TEST ()Lmisk/jooq/testgen/tables/RecordSignatureTest;
+}
+
+public final class misk/jooq/transacter/JooqUnifiedTransacterModule : misk/inject/KAbstractModule {
+	public fun <init> (Lkotlin/reflect/KClass;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jooq/JooqTransacter$TransacterOptions;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/reflect/KClass;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface class misk/jooq/transacter/Transacter {
+	public abstract fun getInTransaction ()Z
+	public abstract fun isolationLevel (Lmisk/jooq/TransactionIsolationLevel;)Lmisk/jooq/transacter/Transacter;
+	public abstract fun maxAttempts (I)Lmisk/jooq/transacter/Transacter;
+	public abstract fun maxRetryDelay (Ljava/time/Duration;)Lmisk/jooq/transacter/Transacter;
+	public abstract fun noRetries ()Lmisk/jooq/transacter/Transacter;
+	public abstract fun readOnly ()Lmisk/jooq/transacter/Transacter;
+	public abstract fun replicaRead (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public abstract fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public abstract fun writable ()Lmisk/jooq/transacter/Transacter;
 }
 

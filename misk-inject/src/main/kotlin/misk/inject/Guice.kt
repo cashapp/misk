@@ -110,9 +110,9 @@ inline fun <reified T : Any> keyOf(a: KClass<out Annotation>?): Key<T> = keyOf(a
  */
 inline fun <reified T : Any> keyOf(qualifier: BindingQualifier? = null): Key<T> =
   when (qualifier) {
-    is BindingQualifier.InstanceQualifier -> Key.get(T::class.java, qualifier.annotation)
-    is BindingQualifier.TypeClassifier -> Key.get(T::class.java, qualifier.type.java)
-    null -> Key.get(T::class.java)
+    is BindingQualifier.InstanceQualifier -> Key.get(object : TypeLiteral<T>() {}, qualifier.annotation)
+    is BindingQualifier.TypeClassifier -> Key.get(object : TypeLiteral<T>() {}, qualifier.type.java)
+    null -> Key.get(object : TypeLiteral<T>() {})
   }
 
 /**

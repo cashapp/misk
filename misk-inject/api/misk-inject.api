@@ -93,6 +93,19 @@ public final class misk/inject/DefaultAsyncSwitchModule : misk/inject/KInstallOn
 	public fun <init> ()V
 }
 
+public final class misk/inject/FakeSwitch : misk/testing/FakeFixture, misk/inject/AsyncSwitch, misk/inject/Switch {
+	public fun <init> ()V
+	public final fun getEnabledKeys ()Ljava/util/Set;
+	public fun ifDisabled (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public fun ifEnabled (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public fun isDisabled (Ljava/lang/String;)Z
+	public fun isEnabled (Ljava/lang/String;)Z
+}
+
+public final class misk/inject/FakeSwitchModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
 public final class misk/inject/GuiceKt {
 	public static final fun asSingleton (Lcom/google/inject/binder/ScopedBindingBuilder;)V
 	public static final fun getSetOf (Lcom/google/inject/Injector;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Ljava/util/Set;

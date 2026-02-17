@@ -7,6 +7,7 @@ import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
+import com.squareup.moshi.JsonDataException
 import com.squareup.wire.GrpcException
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -55,6 +56,7 @@ import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
 import misk.web.exceptions.GrpcExceptionMapper
 import misk.web.exceptions.IOExceptionMapper
+import misk.web.exceptions.JsonDataExceptionMapper
 import misk.web.exceptions.RequestBodyExceptionMapper
 import misk.web.exceptions.WebActionExceptionMapper
 import misk.web.extractors.FormValueFeatureBinding
@@ -253,6 +255,7 @@ constructor(private val config: WebConfig, private val jettyDependsOn: List<Key<
     install(ExceptionMapperModule.create<EofException, EofExceptionMapper>())
     install(ExceptionMapperModule.create<RequestBodyException, RequestBodyExceptionMapper>())
     install(ExceptionMapperModule.create<DeadlineExceededException, DeadlineExceededExceptionMapper>())
+    install(ExceptionMapperModule.create<JsonDataException, JsonDataExceptionMapper>())
 
     // Register built-in feature bindings.
     multibind<FeatureBinding.Factory>().toInstance(PathParamFeatureBinding.Factory)

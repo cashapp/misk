@@ -33,7 +33,6 @@ dependencies {
   api(project(":misk-api"))
   api(project(":misk-audit-client"))
   api(project(":misk-backoff"))
-  api(project(":misk-clustering"))
   api(project(":misk-config"))
   api(project(":misk-core"))
   api(project(":misk-inject"))
