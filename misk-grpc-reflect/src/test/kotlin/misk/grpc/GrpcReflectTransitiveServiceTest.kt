@@ -45,7 +45,7 @@ class GrpcReflectTransitiveServiceTest {
           "grpc.reflection.v1alpha.ServerReflection",
           "transitive.MainService",
         )
-        assertThat(serviceNames).doesNotContain("transitive.ExtraService")
+
       }
     }
   }

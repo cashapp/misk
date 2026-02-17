@@ -78,7 +78,8 @@ class GrpcReflectModule : KAbstractModule() {
     if (!path.startsWith("/")) return null
     val secondSlash = path.indexOf('/', startIndex = 1)
     if (secondSlash == -1) return null
-    return path.substring(1, secondSlash)
+    val serviceName = path.substring(1, secondSlash)
+    return serviceName.takeIf { it.isNotEmpty() }
   }
 
   /** Find `@WireRpc` on a function of one of the supertypes and return it. */
