@@ -1,12 +1,13 @@
 package misk.aws2.sqs.jobqueue
 
 import com.google.inject.Provides
+import com.google.inject.multibindings.OptionalBinder
 import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
 import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.cloud.aws.AwsRegion
-import misk.inject.AsyncSwitch
+import misk.feature.DynamicConfig
 import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
 import misk.jobqueue.v2.JobConsumer
@@ -27,9 +28,12 @@ constructor(private val config: SqsConfig, private val configureClient: SqsAsync
     multibind<TestFixture>().to<SqsJobConsumer>()
 
     install(DefaultAsyncSwitchModule())
-    install(ServiceModule<SqsJobConsumer>().conditionalOn<AsyncSwitch>("sqs").dependsOn<ReadyService>())
+    install(ServiceModule<SqsJobConsumer>().dependsOn<ReadyService>())
     bind<SqsBatchManagerFactory>().to<RealSqsBatchManagerFactory>()
     install(ServiceModule<RealSqsBatchManagerFactory>())
+
+    // DynamicConfig is optional - only required if config_feature_flag is configured in SqsConfig
+    bindOptional<DynamicConfig>()
   }
 
   @Provides

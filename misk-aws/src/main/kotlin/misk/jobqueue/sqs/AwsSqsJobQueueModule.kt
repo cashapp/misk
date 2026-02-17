@@ -18,7 +18,6 @@ import misk.cloud.aws.AwsRegion
 import misk.concurrent.ExecutorServiceModule
 import misk.config.AppName
 import misk.feature.FeatureFlags
-import misk.inject.AsyncSwitch
 import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
@@ -87,7 +86,6 @@ open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbs
     install(ServiceModule<AwsSqsClientService>())
     install(
       ServiceModule<RepeatedTaskQueue, ForSqsHandling>()
-        .conditionalOn<AsyncSwitch>("sqs")
         .dependsOn<ReadyService>()
         .dependsOn<AwsSqsClientService>()
     )

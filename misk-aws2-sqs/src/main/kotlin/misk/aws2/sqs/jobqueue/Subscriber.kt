@@ -6,11 +6,13 @@ import io.opentracing.tag.Tags
 import java.time.Clock
 import java.util.concurrent.CompletableFuture
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runInterruptible
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
+import misk.inject.AsyncSwitch
 import misk.jobqueue.QueueName
 import misk.jobqueue.v2.BlockingJobHandler
 import misk.jobqueue.v2.JobHandler
@@ -43,7 +45,10 @@ class Subscriber(
   val clock: Clock,
   val tracer: Tracer,
   val visibilityTimeoutCalculator: VisibilityTimeoutCalculator,
+  val asyncSwitch: AsyncSwitch,
 ) {
+  private var wasDisabled = false
+
   suspend fun run() {
     while (true) {
       val job = tracer.withSpan("channel-receive-queue-${queueName.value}") { channel.receive() }
@@ -172,6 +177,18 @@ class Subscriber(
   private fun messageFlow(queueName: QueueName) = flow {
     val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
     while (true) {
+      if (!asyncSwitch.isEnabled("sqs")) {
+        if (!wasDisabled) {
+          logger.info { "Async SQS tasks disabled. Polling paused for queue ${queueName.value}." }
+          wasDisabled = true
+        }
+        delay(1000)
+        continue
+      }
+      if (wasDisabled) {
+        logger.info { "Async SQS tasks re-enabled. Polling resuming for queue ${queueName.value}." }
+        wasDisabled = false
+      }
       val startTime = clock.millis()
       val response = fetchMessages(queueUrl).await()
       sqsMetrics.sqsReceiveTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())

@@ -15,6 +15,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import misk.mcp.Description
 import misk.mcp.McpJson
+import misk.mcp.generateJsonSchema
 import org.junit.jupiter.api.Test
 
 /** Test to verify that the schemas produced by JSON Schema extensions correctly describe serialized data. */

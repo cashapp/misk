@@ -23,7 +23,8 @@ internal constructor(
   // on ActionScopedProviders, which might depend on other ActionScopeds. We break
   // this circular dependency by injecting a map of Provider<ActionScopedProvider>
   // rather than the map of ActionScopedProvider directly
-  private val providers: @JvmSuppressWildcards Map<Key<*>, Provider<ActionScopedProvider<*>>>
+  private val providers: @JvmSuppressWildcards Map<Key<*>, Provider<ActionScopedProvider<*>>>,
+  private val listeners: @JvmSuppressWildcards Provider<Set<ActionScopeListener>>,
 ) : AutoCloseable {
   companion object {
     private val threadLocalInstance = ThreadLocal<Instance>()
@@ -123,7 +124,11 @@ internal constructor(
   }
 
   override fun close() {
-    threadLocalInstance.remove()
+    try {
+      listeners.get().forEach { it.onClose() }
+    } finally {
+      threadLocalInstance.remove()
+    }
 
     // Explicitly NOT removing threadLocalUUID because we want to retain the thread's UUID if
     // the action scope is re-entered on the same thread.

@@ -13,6 +13,7 @@ import kotlinx.coroutines.runBlocking
 import misk.inject.keyOf
 import misk.inject.toKey
 import misk.inject.uninject
+import misk.scope.TestActionScopedProviderModule.TestListener
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -35,6 +36,8 @@ internal class ActionScopedTest {
   @Inject @Named("counting") private lateinit var countingString: ActionScoped<String>
 
   @Inject private lateinit var scope: ActionScope
+
+  @Inject private lateinit var testListener: TestListener
 
   @BeforeEach
   fun clearInjections() {
@@ -276,5 +279,20 @@ internal class ActionScopedTest {
       }
       assertThat(countingString.get()).isEqualTo("Called CountingProvider 1 time(s)")
     }
+  }
+
+  @Test
+  fun `listeners are called before the scope closes`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    assertThat(testListener.result).isNull()
+
+    scope.create(mapOf()).inScope {
+      // We don't have to do anything in the scope, just call inScope() so that close() is called. The listener is
+      // then triggered, setting the result field to an action scoped value, to show we're still in an action scope.
+    }
+
+    assertThat(testListener.result).isEqualTo("constant-value")
   }
 }
