@@ -108,6 +108,7 @@ public final class misk/inject/FakeSwitchModule : misk/inject/KAbstractModule {
 
 public final class misk/inject/GuiceKt {
 	public static final fun asSingleton (Lcom/google/inject/binder/ScopedBindingBuilder;)V
+	public static final fun containsTypeVariable (Ljava/lang/reflect/Type;)Z
 	public static final fun getSetOf (Lcom/google/inject/Injector;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Ljava/util/Set;
 	public static synthetic fun getSetOf$default (Lcom/google/inject/Injector;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILjava/lang/Object;)Ljava/util/Set;
 	public static final fun listOfType (Lcom/google/inject/TypeLiteral;)Lcom/google/inject/TypeLiteral;

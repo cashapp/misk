@@ -8,8 +8,10 @@ import com.google.inject.binder.ScopedBindingBuilder
 import com.google.inject.util.Types
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.lang.reflect.GenericArrayType
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
+import java.lang.reflect.TypeVariable
 import java.lang.reflect.WildcardType
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
@@ -105,14 +107,41 @@ inline fun <reified T : Any> keyOf(a: KClass<out Annotation>?): Key<T> = keyOf(a
  * This is the primary function for creating qualified keys. It handles both type-based and instance-based qualifiers,
  * as well as unqualified bindings.
  *
+ * Uses [TypeLiteral] to preserve generic type information when the type is fully specified. Falls back to the erased
+ * class when the type contains unresolved type variables (e.g., when called with a non-reified type parameter from an
+ * enclosing generic class).
+ *
  * @param qualifier The [BindingQualifier] to use, or null for an unqualified binding
  * @return A [Key] for the specified type and qualifier
  */
-inline fun <reified T : Any> keyOf(qualifier: BindingQualifier? = null): Key<T> =
-  when (qualifier) {
-    is BindingQualifier.InstanceQualifier -> Key.get(T::class.java, qualifier.annotation)
-    is BindingQualifier.TypeClassifier -> Key.get(T::class.java, qualifier.type.java)
-    null -> Key.get(T::class.java)
+inline fun <reified T : Any> keyOf(qualifier: BindingQualifier? = null): Key<T> {
+  val typeLiteral = object : TypeLiteral<T>() {}
+  return if (typeLiteral.type.containsTypeVariable()) {
+    when (qualifier) {
+      is BindingQualifier.InstanceQualifier -> Key.get(T::class.java, qualifier.annotation)
+      is BindingQualifier.TypeClassifier -> Key.get(T::class.java, qualifier.type.java)
+      null -> Key.get(T::class.java)
+    }
+  } else {
+    when (qualifier) {
+      is BindingQualifier.InstanceQualifier -> Key.get(typeLiteral, qualifier.annotation)
+      is BindingQualifier.TypeClassifier -> Key.get(typeLiteral, qualifier.type.java)
+      null -> Key.get(typeLiteral)
+    }
+  }
+}
+
+/**
+ * Checks whether a [Type] contains any unresolved [TypeVariable]s, recursively inspecting parameterized types, wildcard
+ * types, and generic array types.
+ */
+fun Type.containsTypeVariable(): Boolean =
+  when (this) {
+    is TypeVariable<*> -> true
+    is ParameterizedType -> actualTypeArguments.any { it.containsTypeVariable() }
+    is WildcardType -> upperBounds.any { it.containsTypeVariable() } || lowerBounds.any { it.containsTypeVariable() }
+    is GenericArrayType -> genericComponentType.containsTypeVariable()
+    else -> false
   }
 
 /**

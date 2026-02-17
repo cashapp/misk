@@ -4,12 +4,13 @@ import com.google.inject.TypeLiteral
 import com.google.inject.name.Named
 import com.google.inject.name.Names
 import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.util.Optional
 
 internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
   override fun configureProviders() {
     bindConstant(String::class, "constant-value", Names.named("constant"))
-    bindConstant(object : TypeLiteral<Optional<String>>() {}, Optional.of("constant-value"), Names.named("constant"))
+    bindProvider(object : TypeLiteral<Optional<String>>() {}, Names.named("constant")) { Optional.of("constant-value") }
     bindSeedData(String::class, Names.named("from-seed"))
     bindSeedData(object : TypeLiteral<Optional<String>>() {})
     bindProvider(String::class, FooProvider::class, Names.named("foo"))
@@ -19,6 +20,7 @@ internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
     bindProvider(nullableStringTypeLiteral, NullableFooProvider::class, Names.named("nullable-foo"))
     bindProvider(nullableStringTypeLiteral, NullableBasedOnFooProvider::class, Names.named("nullable-based-on-foo"))
     bindProvider(String::class, CountingProvider::class, Names.named(("counting")))
+    bindListener<TestListener>()
   }
 
   class BarProvider @Inject internal constructor(@Named("from-seed") private val seedData: ActionScoped<String>) :
@@ -73,6 +75,16 @@ internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
     private var callCount = 0
 
     override fun get(): String = "Called CountingProvider ${++callCount} time(s)"
+  }
+
+  @Singleton
+  class TestListener @Inject constructor(@Named("constant") private val constant: ActionScoped<String>) :
+    ActionScopeListener {
+    var result: String? = null
+
+    override fun onClose() {
+      result = constant.get()
+    }
   }
 
   companion object {
