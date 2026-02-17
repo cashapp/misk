@@ -45,7 +45,6 @@ class GrpcReflectTransitiveServiceTest {
           "grpc.reflection.v1alpha.ServerReflection",
           "transitive.MainService",
         )
-
       }
     }
   }
