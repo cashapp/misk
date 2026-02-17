@@ -135,7 +135,8 @@ inline fun <reified T : Any> keyOf(qualifier: BindingQualifier? = null): Key<T> 
  * Checks whether a [Type] contains any unresolved [TypeVariable]s, recursively inspecting parameterized types, wildcard
  * types, and generic array types.
  */
-fun Type.containsTypeVariable(): Boolean =
+@PublishedApi
+internal fun Type.containsTypeVariable(): Boolean =
   when (this) {
     is TypeVariable<*> -> true
     is ParameterizedType -> actualTypeArguments.any { it.containsTypeVariable() }
