@@ -551,10 +551,17 @@ public final class misk/jdbc/RealDatabasePool : misk/jdbc/DatabasePool {
 }
 
 public final class misk/jdbc/RealTransacter : misk/jdbc/Transacter {
+	public static final field Companion Lmisk/jdbc/RealTransacter$Companion;
 	public fun <init> (Lmisk/jdbc/DataSourceService;)V
+	public fun <init> (Lmisk/jdbc/DataSourceService;Lmisk/jdbc/DataSourceConfig;)V
 	public fun getInTransaction ()Z
+	public fun noRetries ()Lmisk/jdbc/Transacter;
+	public fun retries (I)Lmisk/jdbc/Transacter;
 	public fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public fun transactionWithSession (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class misk/jdbc/RealTransacter$Companion {
 }
 
 public final class misk/jdbc/ScaleSafetyChecks {
@@ -669,6 +676,8 @@ public final class misk/jdbc/TracingDataSourceDecorator : misk/jdbc/DataSourceDe
 
 public abstract interface class misk/jdbc/Transacter {
 	public abstract fun getInTransaction ()Z
+	public abstract fun noRetries ()Lmisk/jdbc/Transacter;
+	public abstract fun retries (I)Lmisk/jdbc/Transacter;
 	public abstract fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public abstract fun transactionWithSession (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 }
