@@ -277,7 +277,7 @@ public final class misk/hibernate/QueryKt {
 	public static final fun queryHint (Lmisk/hibernate/Query;Ljava/lang/String;)Lmisk/hibernate/Query;
 }
 
-public final class misk/hibernate/RetryTransactionException : java/lang/Exception {
+public final class misk/hibernate/RetryTransactionException : misk/jdbc/retry/RetryTransactionException {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V

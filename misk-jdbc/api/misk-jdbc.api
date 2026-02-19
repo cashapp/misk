@@ -681,3 +681,22 @@ public final class misk/jdbc/TruncateTablesService : com/google/common/util/conc
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;Lmisk/jdbc/JdbcTestFixture;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
+public class misk/jdbc/retry/DefaultExceptionClassifier : misk/jdbc/retry/ExceptionClassifier {
+	public fun <init> ()V
+	public fun <init> (Lmisk/jdbc/DataSourceType;)V
+	public synthetic fun <init> (Lmisk/jdbc/DataSourceType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	protected final fun isCauseRetryable (Ljava/lang/Throwable;)Z
+	public fun isRetryable (Ljava/lang/Throwable;)Z
+}
+
+public abstract interface class misk/jdbc/retry/ExceptionClassifier {
+	public abstract fun isRetryable (Ljava/lang/Throwable;)Z
+}
+
+public class misk/jdbc/retry/RetryTransactionException : java/lang/Exception {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+

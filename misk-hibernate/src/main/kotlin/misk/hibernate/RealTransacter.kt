@@ -7,7 +7,6 @@ import java.sql.Connection
 import java.sql.SQLException
 import java.sql.SQLIntegrityConstraintViolationException
 import java.sql.SQLRecoverableException
-import java.sql.SQLTransientException
 import java.time.Duration
 import java.util.EnumSet
 import java.util.UUID
@@ -15,9 +14,10 @@ import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
-import javax.persistence.OptimisticLockException
 import kotlin.reflect.KClass
 import misk.backoff.ExponentialBackoff
+import misk.backoff.RetryConfig
+import misk.backoff.retry
 import misk.concurrent.ExecutorServiceFactory
 import misk.hibernate.advisorylocks.tryAcquireLock
 import misk.hibernate.advisorylocks.tryReleaseLock
@@ -58,6 +58,10 @@ private constructor(
   private val shardListFetcher: ShardListFetcher,
   private val hibernateEntities: Set<HibernateEntity>,
 ) : Transacter {
+
+  private val qualifierName = qualifier.simpleName ?: "hibernate"
+  private val exceptionClassifier = HibernateExceptionClassifier(config.type)
+
   constructor(
     qualifier: KClass<out Annotation>,
     sessionFactoryService: SessionFactoryService,
@@ -245,47 +249,16 @@ private constructor(
   }
 
   private fun <T> transactionWithRetriesInternal(block: () -> T): T {
-    require(options.maxAttempts > 0)
-
-    val backoff =
-      ExponentialBackoff(
-        Duration.ofMillis(options.minRetryDelayMillis),
-        Duration.ofMillis(options.maxRetryDelayMillis),
-        Duration.ofMillis(options.retryJitterMillis),
-      )
-    var attempt = 0
-
-    while (true) {
-      try {
-        attempt++
-        val result = block()
-
-        if (attempt > 1) {
-          logger.info { "retried ${qualifier.simpleName} transaction succeeded (attempt $attempt)" }
-        }
-
-        return result
-      } catch (e: Exception) {
-        if (!isRetryable(e)) throw e
-
-        if (attempt >= options.maxAttempts) {
-          logger.info {
-            "${qualifier.simpleName} recoverable transaction exception " + "(attempt $attempt), no more attempts"
-          }
-          throw e
-        }
-
-        val sleepDuration = backoff.nextRetry()
-        logger.info(e) {
-          "${qualifier.simpleName} recoverable transaction exception " +
-            "(attempt $attempt), will retry after a $sleepDuration delay"
-        }
-
-        if (!sleepDuration.isZero) {
-          Thread.sleep(sleepDuration.toMillis())
-        }
-      }
-    }
+    val backoff = ExponentialBackoff(
+      baseDelay = Duration.ofMillis(options.minRetryDelayMillis),
+      maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
+      jitter = Duration.ofMillis(options.retryJitterMillis)
+    )
+    val retryConfig = RetryConfig.Builder(options.maxAttempts, backoff)
+      .shouldRetry { exceptionClassifier.isRetryable(it) }
+      .onRetry { attempt, e -> logger.info(e) { "$qualifierName transaction failed, retrying (attempt $attempt)" } }
+      .build()
+    return retry(retryConfig) { block() }
   }
 
   private fun <T> transactionInternalSession(block: (session: RealSession) -> T): T {
@@ -330,7 +303,9 @@ private constructor(
         return ConstraintViolationException(sqlException.message, sqlException, "")
       }
       // write-write conflicts fail at COMMIT rather than waiting on a lock.
-      e.cause is SQLException && isTidbWriteConflict(e.cause as SQLException) -> {
+      // Error 9007: "Transactions in TiKV encounter write conflicts"
+      // https://docs.pingcap.com/tidb/dev/tidb-faq#error-9007-hy000-write-conflict
+      e.cause is SQLException && (e.cause as SQLException).errorCode == 9007 -> {
         val sqlException = e.cause as SQLException
         return ConstraintViolationException(sqlException.message, sqlException, "")
       }
@@ -448,69 +423,6 @@ private constructor(
       }
     }
   }
-
-  private fun isRetryable(th: Throwable): Boolean {
-    return when (th) {
-      is RetryTransactionException,
-      is StaleObjectStateException,
-      is LockAcquisitionException,
-      is SQLRecoverableException,
-      is SQLTransientException,
-      is OptimisticLockException -> true
-      is SQLException -> if (isMessageRetryable(th)) true else isCauseRetryable(th)
-      else -> isCauseRetryable(th)
-    }
-  }
-
-  private fun isMessageRetryable(th: SQLException) =
-    isConnectionClosed(th) ||
-      isVitessTransactionNotFound(th) ||
-      isCockroachRestartTransaction(th) ||
-      isTidbWriteConflict(th)
-
-  /**
-   * This is thrown as a raw SQLException from Hikari even though it is most certainly a recoverable exception. See
-   * com/zaxxer/hikari/pool/ProxyConnection.java:493
-   */
-  private fun isConnectionClosed(th: SQLException) = th.message.equals("Connection is closed")
-
-  /**
-   * We get this error as a MySQLQueryInterruptedException when a tablet gracefully terminates, we just need to retry
-   * the transaction and the new primary should handle it.
-   *
-   * ```
-   * vttablet: rpc error: code = Aborted desc = transaction 1572922696317821557:
-   * not found (CallerID: )
-   * ```
-   */
-  private fun isVitessTransactionNotFound(th: SQLException): Boolean {
-    val message = th.message
-    return message != null &&
-      message.contains("vttablet: rpc error") &&
-      message.contains("code = Aborted") &&
-      message.contains("transaction") &&
-      message.contains("not found")
-  }
-
-  /**
-   * "Messages with the error code 40001 and the string restart transaction indicate that a transaction failed because
-   * it conflicted with another concurrent or recent transaction accessing the same data. The transaction needs to be
-   * retried by the client." https://www.cockroachlabs.com/docs/stable/common-errors.html#restart-transaction
-   */
-  private fun isCockroachRestartTransaction(th: SQLException): Boolean {
-    val message = th.message
-    return th.errorCode == 40001 && message != null && message.contains("restart transaction")
-  }
-
-  /**
-   * "Transactions in TiKV encounter write conflicts". This can happen when optimistic transaction mode is on. Conflicts
-   * are detected during transaction commit https://docs.pingcap.com/tidb/dev/tidb-faq#error-9007-hy000-write-conflict
-   */
-  private fun isTidbWriteConflict(th: SQLException): Boolean {
-    return th.errorCode == 9007
-  }
-
-  private fun isCauseRetryable(th: Throwable) = th.cause?.let { isRetryable(it) } ?: false
 
   // NB: all options should be immutable types as copy() is shallow.
   internal data class TransacterOptions(
