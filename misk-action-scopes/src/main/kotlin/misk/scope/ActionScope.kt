@@ -123,17 +123,25 @@ internal constructor(
     return this
   }
 
+  /**
+   * If the scope is currently open, i.e. [inScope] returns true, the [listeners] are called and then
+   * [threadLocalInstance] is removed. If [close] is called and the scope is not open, this method does nothing.
+   */
   override fun close() {
+    if (!inScope()) {
+      return
+    }
+
     try {
       listeners.get().forEach { it.onClose() }
     } finally {
       threadLocalInstance.remove()
-    }
 
-    // Explicitly NOT removing threadLocalUUID because we want to retain the thread's UUID if
-    // the action scope is re-entered on the same thread.
-    // The only way in which threadLocalUUID is removed is through garbage collection, which occurs
-    // when the thread is no longer alive.
+      // Explicitly NOT removing threadLocalUUID because we want to retain the thread's UUID if
+      // the action scope is re-entered on the same thread.
+      // The only way in which threadLocalUUID is removed is through garbage collection, which occurs
+      // when the thread is no longer alive.
+    }
   }
 
   /** Returns true if currently in the scope */
