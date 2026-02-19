@@ -284,6 +284,62 @@ abstract class RealTransacterTest {
     }
   }
 
+  @Test
+  fun `transaction retries on retryable exception`() {
+    var attempts = 0
+    transacter.transactionWithSession { session ->
+      session.useConnection {
+        attempts++
+        if (attempts < 3) {
+          throw misk.jdbc.retry.RetryTransactionException("retry me")
+        }
+      }
+    }
+    assertThat(attempts).isEqualTo(3)
+  }
+
+  @Test
+  fun `transaction does not retry non-retryable exception`() {
+    var attempts = 0
+    assertFailsWith<BadException> {
+      transacter.transactionWithSession { session ->
+        session.useConnection {
+          attempts++
+          throw BadException("not retryable")
+        }
+      }
+    }
+    assertThat(attempts).isEqualTo(1)
+  }
+
+  @Test
+  fun `noRetries disables retry behavior`() {
+    var attempts = 0
+    assertFailsWith<misk.jdbc.retry.RetryTransactionException> {
+      transacter.noRetries().transactionWithSession { session ->
+        session.useConnection {
+          attempts++
+          throw misk.jdbc.retry.RetryTransactionException("retry me")
+        }
+      }
+    }
+    assertThat(attempts).isEqualTo(1)
+  }
+
+  @Test
+  fun `retries configures max attempts`() {
+    var attempts = 0
+    assertFailsWith<misk.jdbc.retry.RetryTransactionException> {
+      transacter.retries(5).transactionWithSession { session ->
+        session.useConnection {
+          attempts++
+          throw misk.jdbc.retry.RetryTransactionException("retry me")
+        }
+      }
+    }
+    assertThat(attempts).isEqualTo(5)
+  }
+
   private fun createTestData() {
     // Insert some movies, characters and actors.
     transacter.transactionWithSession { session ->
