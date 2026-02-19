@@ -5,6 +5,7 @@ import misk.backoff.ExponentialBackoff
 import misk.backoff.RetryConfig
 import misk.backoff.retry
 import misk.jdbc.DataSourceType
+import misk.jdbc.retry.RetryDefaults
 import misk.logging.getLogger
 import org.jooq.Configuration
 import org.jooq.impl.DSL
@@ -61,10 +62,10 @@ class JooqTransacter internal constructor(
   data class TransacterOptions
   @JvmOverloads
   constructor(
-    val maxAttempts: Int = 3,
-    val minRetryDelayMillis: Long = 100,
-    val maxRetryDelayMillis: Long = 500,
-    val retryJitterMillis: Long = 400,
+    val maxAttempts: Int = RetryDefaults.MAX_ATTEMPTS,
+    val minRetryDelayMillis: Long = RetryDefaults.MIN_RETRY_DELAY_MILLIS,
+    val maxRetryDelayMillis: Long = RetryDefaults.MAX_RETRY_DELAY_MILLIS,
+    val retryJitterMillis: Long = RetryDefaults.RETRY_JITTER_MILLIS,
     val isolationLevel: TransactionIsolationLevel = TransactionIsolationLevel.REPEATABLE_READ,
     val readOnly: Boolean = false,
   )
