@@ -17,6 +17,7 @@ import misk.scope.TestActionScopedProviderModule.TestListener
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class ActionScopedTest {
   @Inject @Named("foo") private lateinit var foo: ActionScoped<String>
@@ -294,5 +295,17 @@ internal class ActionScopedTest {
     }
 
     assertThat(testListener.result).isEqualTo("constant-value")
+  }
+
+  @Test
+  fun `calling close on an already closed scope does nothing`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    // Make sure that calling onClose on the listener directly throws an exception because we're not in an action scope
+    assertThrows<IllegalStateException> { testListener.onClose() }
+
+    // Make sure that closing the scope when it isn't open doesn't call the listeners which would throw the exception
+    scope.close()
   }
 }
