@@ -38,6 +38,14 @@ class HibernateExceptionClassifierTest {
   }
 
   @Test
+  fun `misk hibernate RetryTransactionException is retryable`() {
+    val classifier = HibernateExceptionClassifier()
+    assertThat(classifier.isRetryable(misk.hibernate.RetryTransactionException())).isTrue()
+    assertThat(classifier.isRetryable(misk.hibernate.RetryTransactionException("test"))).isTrue()
+    assertThat(classifier.isRetryable(misk.hibernate.RetryTransactionException("test", RuntimeException()))).isTrue()
+  }
+
+  @Test
   fun `inherits base classifier behavior for SQLRecoverableException`() {
     val classifier = HibernateExceptionClassifier()
     assertThat(classifier.isRetryable(SQLRecoverableException())).isTrue()

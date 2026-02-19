@@ -14,7 +14,7 @@ import org.hibernate.exception.LockAcquisitionException
  * - [LockAcquisitionException]: Database lock acquisition failure
  * - [OptimisticLockException]: JPA optimistic locking failure
  */
-class HibernateExceptionClassifier @JvmOverloads constructor(
+internal class HibernateExceptionClassifier @JvmOverloads constructor(
   dataSourceType: DataSourceType? = null
 ) : DefaultExceptionClassifier(dataSourceType) {
 
