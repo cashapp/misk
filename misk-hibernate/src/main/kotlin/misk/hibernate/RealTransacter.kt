@@ -25,6 +25,7 @@ import misk.jdbc.CheckDisabler
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.map
+import misk.jdbc.retry.RetryDefaults
 import misk.logging.getLogger
 import misk.vitess.Destination
 import misk.vitess.Keyspace
@@ -426,11 +427,11 @@ private constructor(
 
   // NB: all options should be immutable types as copy() is shallow.
   internal data class TransacterOptions(
-    val maxAttempts: Int = 3,
+    val maxAttempts: Int = RetryDefaults.MAX_ATTEMPTS,
     val disabledChecks: EnumSet<Check> = EnumSet.noneOf(Check::class.java),
-    val minRetryDelayMillis: Long = 100,
-    val maxRetryDelayMillis: Long = 500,
-    val retryJitterMillis: Long = 400,
+    val minRetryDelayMillis: Long = RetryDefaults.MIN_RETRY_DELAY_MILLIS,
+    val maxRetryDelayMillis: Long = RetryDefaults.MAX_RETRY_DELAY_MILLIS,
+    val retryJitterMillis: Long = RetryDefaults.RETRY_JITTER_MILLIS,
     val readOnly: Boolean = false,
   )
 
