@@ -28,7 +28,7 @@ class JooqTransacter internal constructor(
     )
     val retryConfig = RetryConfig.Builder(options.maxAttempts, backoff)
       .shouldRetry { exceptionClassifier.isRetryable(it) }
-      .onRetry { attempt, e -> log.info(e) { "JOOQ transaction failed, retrying (attempt $attempt)" } }
+      .onRetry { attempt, e -> log.info(e) { "jOOQ transaction failed, retrying (attempt $attempt)" } }
       .build()
     return retry(retryConfig) { performInTransaction(options, callback) }
   }

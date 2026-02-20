@@ -5,10 +5,10 @@ import misk.jdbc.retry.DefaultExceptionClassifier
 import org.jooq.exception.DataAccessException
 
 /**
- * Exception classifier for JOOQ transactions.
+ * Exception classifier for jOOQ transactions.
  *
- * Extends [DefaultExceptionClassifier] to add JOOQ-specific retryable exceptions:
- * - [DataAccessException]: JOOQ's wrapper for database exceptions
+ * Extends [DefaultExceptionClassifier] to add jOOQ-specific retryable exceptions:
+ * - [DataAccessException]: jOOQ's wrapper for database exceptions
  */
 internal class JooqExceptionClassifier(
   dataSourceType: DataSourceType? = null
