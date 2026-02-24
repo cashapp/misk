@@ -25,6 +25,9 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import wisp.deployment.TESTING
+import java.sql.Connection.TRANSACTION_READ_COMMITTED
+import java.sql.Connection.TRANSACTION_READ_UNCOMMITTED
+import java.sql.Connection.TRANSACTION_REPEATABLE_READ
 
 abstract class RealTransacterTest {
   @Inject @Movies lateinit var transacter: Transacter
@@ -281,6 +284,186 @@ abstract class RealTransacterTest {
   fun cannotStartTransactionWhileInTransaction() {
     assertFailsWith<IllegalStateException> {
       transacter.transactionWithSession { transacter.transactionWithSession { fail("transaction in transaction") } }
+    }
+  }
+
+  @Test
+  fun `TransactionOptions with no isolation level works`() {
+    val options = TransactionOptions()
+    assertThat(options.isolationLevel).isNull()
+
+    // Should work without setting any isolation level
+    transacter.transactionWithSession(options) { session ->
+      session.useConnection { connection ->
+        // Just verify it works - database default isolation will be used
+        val result = connection.createStatement().executeQuery("SELECT 1").apply { next() }.getInt(1)
+        assertThat(result).isEqualTo(1)
+      }
+    }
+  }
+
+  @Test
+  fun `transactionWithSession with TransactionOptions sets isolation level`() {
+    val options = TransactionOptions(isolationLevel = TransactionIsolationLevel.READ_COMMITTED)
+
+    transacter.transactionWithSession(options) { session ->
+      session.useConnection { connection ->
+        // Verify the isolation level was set correctly
+        assertThat(connection.transactionIsolation).isEqualTo(TransactionIsolationLevel.READ_COMMITTED.jdbcValue)
+      }
+    }
+  }
+
+  @Test
+  fun `different isolation levels can be set for different transactions`() {
+    // Test READ_COMMITTED (widely supported)
+    transacter.transactionWithSession(
+      TransactionOptions(isolationLevel = TransactionIsolationLevel.READ_COMMITTED)
+    ) { session ->
+      session.useConnection { connection ->
+        assertThat(connection.transactionIsolation).isEqualTo(TRANSACTION_READ_COMMITTED)
+      }
+    }
+
+    // Test REPEATABLE_READ (widely supported)
+    transacter.transactionWithSession(
+      TransactionOptions(isolationLevel = TransactionIsolationLevel.REPEATABLE_READ)
+    ) { session ->
+      session.useConnection { connection ->
+        assertThat(connection.transactionIsolation).isEqualTo(TRANSACTION_REPEATABLE_READ)
+      }
+    }
+
+    // Test SERIALIZABLE (may not be supported by all databases like TiDB)
+    try {
+      transacter.transactionWithSession(
+        TransactionOptions(isolationLevel = TransactionIsolationLevel.SERIALIZABLE)
+      ) { session ->
+        session.useConnection { connection ->
+          assertThat(connection.transactionIsolation).isEqualTo(Connection.TRANSACTION_SERIALIZABLE)
+        }
+      }
+    } catch (e: SQLException) {
+      // Some databases (like TiDB) don't support SERIALIZABLE isolation level
+      // This is expected behavior - the API should still work and throw a clear error
+      assertThat(e.message).contains("The isolation level 'SERIALIZABLE' is not supported")
+    }
+  }
+
+  @Test
+  fun `isolation level setting works with hooks`() {
+    var preCommitExecuted = false
+    var postCommitExecuted = false
+
+    transacter.transactionWithSession(
+      TransactionOptions(isolationLevel = TransactionIsolationLevel.READ_COMMITTED)
+    ) { session ->
+      session.useConnection { connection ->
+        // Verify isolation level is set
+        assertThat(connection.transactionIsolation).isEqualTo(Connection.TRANSACTION_READ_COMMITTED)
+
+        // Add hooks to ensure they still work with isolation level setting
+        session.onPreCommit { preCommitExecuted = true }
+        session.onPostCommit { postCommitExecuted = true }
+
+        // Insert some data
+        connection.createStatement().execute("INSERT INTO movies (name) VALUES ('Test Movie')")
+      }
+    }
+
+    assertThat(preCommitExecuted).isTrue
+    assertThat(postCommitExecuted).isTrue
+  }
+
+  @Test
+  fun `isolation level exception handling works correctly`() {
+    assertFailsWith<BadException> {
+      transacter.transactionWithSession(
+        TransactionOptions(isolationLevel = TransactionIsolationLevel.READ_COMMITTED)
+      ) { session ->
+        session.useConnection { connection ->
+          assertThat(connection.transactionIsolation).isEqualTo(TRANSACTION_READ_COMMITTED)
+          connection.createStatement().execute("INSERT INTO movies (name) VALUES ('Test Movie')")
+          throw BadException("test exception")
+        }
+      }
+    }
+
+    // Verify transaction was rolled back despite having isolation level set
+    val count = transacter.transactionWithSession { session ->
+      session.useConnection(this.count)
+    }
+    assertThat(count).isEqualTo(0) // Should be 0 if properly rolled back
+  }
+
+  @Test
+  fun `isolation level is restored after transaction completes`() {
+    var originalIsolationLevel: Int? = null
+    transacter.transactionWithSession { session ->
+      session.useConnection { connection ->
+        originalIsolationLevel = connection.transactionIsolation
+      }
+    }
+    transacter.transactionWithSession(
+      TransactionOptions(isolationLevel = TransactionIsolationLevel.READ_COMMITTED)
+    ) { session ->
+      session.useConnection { connection ->
+        assertThat(connection.transactionIsolation).isEqualTo(TRANSACTION_READ_COMMITTED)
+      }
+    }
+
+    transacter.transactionWithSession { session ->
+      session.useConnection { connection ->
+        assertThat(connection.transactionIsolation).isEqualTo(originalIsolationLevel)
+      }
+    }
+  }
+
+  @Test
+  fun `isolation level is restored after transaction throws exception`() {
+    var originalIsolationLevel: Int? = null
+    transacter.transactionWithSession { session ->
+      session.useConnection { connection ->
+        originalIsolationLevel = connection.transactionIsolation
+      }
+    }
+    assertFailsWith<BadException> {
+      transacter.transactionWithSession(
+        TransactionOptions(isolationLevel = TransactionIsolationLevel.READ_COMMITTED)
+      ) { session ->
+        session.useConnection { connection ->
+          assertThat(connection.transactionIsolation).isEqualTo(TRANSACTION_READ_COMMITTED)
+          throw BadException("test exception")
+        }
+      }
+    }
+
+    transacter.transactionWithSession { session ->
+      session.useConnection { connection ->
+        assertThat(connection.transactionIsolation).isEqualTo(originalIsolationLevel)
+      }
+    }
+  }
+
+  @Test
+  fun `isolation level is not changed when TransactionOptions has no isolation level`() {
+    var originalIsolationLevel: Int? = null
+    transacter.transactionWithSession { session ->
+      session.useConnection { connection ->
+        originalIsolationLevel = connection.transactionIsolation
+      }
+    }
+
+    transacter.transactionWithSession(TransactionOptions()) { session ->
+      session.useConnection { connection ->
+        assertThat(connection.transactionIsolation).isEqualTo(originalIsolationLevel)
+      }
+    }
+
+    transacter.transactionWithSession { session ->
+      session.useConnection { connection ->
+        assertThat(connection.transactionIsolation).isEqualTo(originalIsolationLevel)
+      }
     }
   }
 
