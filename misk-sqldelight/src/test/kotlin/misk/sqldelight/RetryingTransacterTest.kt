@@ -1,6 +1,7 @@
 package misk.sqldelight
 
 import app.cash.sqldelight.db.OptimisticLockException
+import java.sql.SQLRecoverableException
 import jakarta.inject.Inject
 import misk.sqldelight.testing.Movies
 import misk.sqldelight.testing.MoviesDatabase
@@ -140,5 +141,17 @@ class RetryingTransacterTest {
     }
 
     assertThat(tries).isEqualTo(3)
+  }
+
+  @Test
+  fun `SQLRecoverableException is retried up to max attempts`() {
+    var attempts = 0
+    assertThrows<SQLRecoverableException> {
+      moviesDatabase.transaction {
+        attempts++
+        throw SQLRecoverableException("recoverable error")
+      }
+    }
+    assertThat(attempts).isEqualTo(3)
   }
 }
