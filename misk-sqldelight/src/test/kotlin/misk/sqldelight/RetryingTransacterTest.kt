@@ -1,10 +1,12 @@
 package misk.sqldelight
 
 import app.cash.sqldelight.db.OptimisticLockException
+import app.cash.sqldelight.driver.jdbc.JdbcDriver
 import java.sql.SQLRecoverableException
 import jakarta.inject.Inject
 import misk.sqldelight.testing.Movies
 import misk.sqldelight.testing.MoviesDatabase
+import misk.sqldelight.testing.MoviesQueries
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -18,6 +20,7 @@ class RetryingTransacterTest {
   class NonRetriableException() : RuntimeException()
 
   @Inject lateinit var moviesDatabase: MoviesDatabase
+  @Inject @SqlDelightTestdb lateinit var jdbcDriver: JdbcDriver
 
   private val id = 4L
   private val title = "Fellowship of the Ring"
@@ -144,14 +147,21 @@ class RetryingTransacterTest {
   }
 
   @Test
-  fun `SQLRecoverableException is retried up to max attempts`() {
+  fun `SQLRecoverableException is retried up to configured max attempts`() {
+    // Create a fresh database without retry wrapper to avoid nested retries
+    val rawDatabase = MoviesDatabase.invoke(jdbcDriver)
+    val customOptions = TransacterOptions(maxAttempts = 5)
+    val transacterWithCustomRetries = object : RetryingTransacter(rawDatabase, customOptions), MoviesDatabase {
+      override val moviesQueries: MoviesQueries get() = rawDatabase.moviesQueries
+    }
+
     var attempts = 0
     assertThrows<SQLRecoverableException> {
-      moviesDatabase.transaction {
+      transacterWithCustomRetries.transaction {
         attempts++
         throw SQLRecoverableException("recoverable error")
       }
     }
-    assertThat(attempts).isEqualTo(3)
+    assertThat(attempts).isEqualTo(5)
   }
 }
