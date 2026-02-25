@@ -68,7 +68,11 @@ class JooqTransacter internal constructor(
     val retryJitterMillis: Long = RetryDefaults.RETRY_JITTER_MILLIS,
     val isolationLevel: TransactionIsolationLevel = TransactionIsolationLevel.REPEATABLE_READ,
     val readOnly: Boolean = false,
-  )
+  ) {
+    /** @deprecated Use [maxRetries] instead. This returns maxRetries + 1 for backwards compatibility. */
+    @Deprecated("Use maxRetries instead", replaceWith = ReplaceWith("maxRetries"))
+    val maxAttempts: Int get() = maxRetries + 1
+  }
 
   companion object {
     private val log = getLogger<JooqTransacter>()

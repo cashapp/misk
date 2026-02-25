@@ -88,6 +88,7 @@ public final class misk/jooq/JooqTransacter$TransacterOptions {
 	public static synthetic fun copy$default (Lmisk/jooq/JooqTransacter$TransacterOptions;IJJJLmisk/jooq/TransactionIsolationLevel;ZILjava/lang/Object;)Lmisk/jooq/JooqTransacter$TransacterOptions;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getIsolationLevel ()Lmisk/jooq/TransactionIsolationLevel;
+	public final fun getMaxAttempts ()I
 	public final fun getMaxRetries ()I
 	public final fun getMaxRetryDelayMillis ()J
 	public final fun getMinRetryDelayMillis ()J
@@ -407,6 +408,7 @@ public final class misk/jooq/transacter/JooqUnifiedTransacterModule : misk/injec
 public abstract interface class misk/jooq/transacter/Transacter {
 	public abstract fun getInTransaction ()Z
 	public abstract fun isolationLevel (Lmisk/jooq/TransactionIsolationLevel;)Lmisk/jooq/transacter/Transacter;
+	public abstract fun maxAttempts (I)Lmisk/jooq/transacter/Transacter;
 	public abstract fun maxRetries (I)Lmisk/jooq/transacter/Transacter;
 	public abstract fun maxRetryDelay (Ljava/time/Duration;)Lmisk/jooq/transacter/Transacter;
 	public abstract fun noRetries ()Lmisk/jooq/transacter/Transacter;
@@ -414,5 +416,9 @@ public abstract interface class misk/jooq/transacter/Transacter {
 	public abstract fun replicaRead (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public abstract fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public abstract fun writable ()Lmisk/jooq/transacter/Transacter;
+}
+
+public final class misk/jooq/transacter/Transacter$DefaultImpls {
+	public static fun maxAttempts (Lmisk/jooq/transacter/Transacter;I)Lmisk/jooq/transacter/Transacter;
 }
 

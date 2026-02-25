@@ -79,10 +79,10 @@ private val retryExecutor =
  * The retry function is provided with current attempt number, in case this is relevant.
  */
 fun <A> retryableFuture(config: RetryConfig, block: (retryCount: Int) -> CompletableFuture<A>): CompletableFuture<A> {
-  val totalAttempts = config.maxRetries + 1
+  val attemptLimit = config.maxRetries + 1
 
   fun attempt(remaining: Int): CompletableFuture<A> {
-    val attemptNumber = totalAttempts - remaining // zero based
+    val attemptNumber = attemptLimit - remaining // zero based
     return block(attemptNumber)
       .handle { result, throwable ->
         val exception = throwable?.let { (it as? Exception) ?: throw throwable }
@@ -109,7 +109,7 @@ fun <A> retryableFuture(config: RetryConfig, block: (retryCount: Int) -> Complet
       .thenCompose { it }
   }
   config.withBackoff.reset()
-  return attempt(totalAttempts)
+  return attempt(attemptLimit)
 }
 
 /**
@@ -127,7 +127,21 @@ private constructor(
   val onRetry: ((retryCount: Int, exception: Exception) -> Unit)?,
   val shouldRetry: (e: Exception) -> Boolean,
 ) {
-  data class Builder(val maxRetries: Int, val withBackoff: Backoff) {
+  /** @deprecated Use [maxRetries] instead. This returns maxRetries + 1 for backwards compatibility. */
+  @Deprecated("Use maxRetries instead", replaceWith = ReplaceWith("maxRetries"))
+  val upTo: Int get() = maxRetries + 1
+
+  class Builder(
+    maxRetries: Int? = null,
+    val withBackoff: Backoff,
+    upTo: Int? = null,
+  ) {
+    val maxRetries: Int = maxRetries ?: (upTo?.let { it - 1 } ?: error("Either maxRetries or upTo must be specified"))
+
+    /** @deprecated Use [maxRetries] instead. This returns maxRetries + 1 for backwards compatibility. */
+    @Deprecated("Use maxRetries instead", replaceWith = ReplaceWith("maxRetries"))
+    val upTo: Int get() = this.maxRetries + 1
+
     var onRetry: ((retryCount: Int, exception: Exception) -> Unit)? = null
     var shouldRetry: (e: Exception) -> Boolean = { true }
 
