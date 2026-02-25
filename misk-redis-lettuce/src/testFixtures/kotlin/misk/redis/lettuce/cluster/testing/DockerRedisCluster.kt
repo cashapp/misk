@@ -102,7 +102,7 @@ class DockerRedisCluster(private val version: String = "7.0.10") : ExternalDepen
     }
 
     val connection =
-      retry(RetryConfig.Builder(upTo = 100, withBackoff = FlatBackoff(200.milliseconds.toJavaDuration())).build()) {
+      retry(RetryConfig.Builder(maxRetries = 100, withBackoff = FlatBackoff(200.milliseconds.toJavaDuration())).build()) {
         redisClient.connect()
       }
 
