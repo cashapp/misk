@@ -36,10 +36,10 @@ interface Transacter {
   fun <T> transactionWithSession(work: (session: JDBCSession) -> T): T
 
   /**
-   * Returns a new transacter configured to retry transactions up to [maxAttempts] times on retryable exceptions.
-   * Default is 3 attempts.
+   * Returns a new transacter configured to retry transactions up to [maxRetries] times on retryable exceptions.
+   * Total executions = maxRetries + 1 (initial attempt + retries). Default is 2 retries (3 total executions).
    */
-  fun retries(maxAttempts: Int): Transacter
+  fun retries(maxRetries: Int): Transacter
 
   /**
    * Returns a new transacter configured to not retry transactions.
@@ -85,7 +85,7 @@ class RealTransacter private constructor(
       maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
       jitter = Duration.ofMillis(options.retryJitterMillis)
     )
-    val retryConfig = RetryConfig.Builder(options.maxAttempts, backoff)
+    val retryConfig = RetryConfig.Builder(options.maxRetries + 1, backoff)
       .shouldRetry { exceptionClassifier.isRetryable(it) }
       .onRetry { attempt, e -> logger.info(e) { "JDBC transaction failed, retrying (attempt $attempt)" } }
       .build()
@@ -129,16 +129,16 @@ class RealTransacter private constructor(
     }
   }
 
-  override fun retries(maxAttempts: Int): Transacter = RealTransacter(
+  override fun retries(maxRetries: Int): Transacter = RealTransacter(
     dataSourceService = dataSourceService,
     config = config,
-    options = options.copy(maxAttempts = maxAttempts),
+    options = options.copy(maxRetries = maxRetries),
   )
 
-  override fun noRetries(): Transacter = retries(1)
+  override fun noRetries(): Transacter = retries(0)
 
   internal data class TransacterOptions(
-    val maxAttempts: Int = RetryDefaults.MAX_ATTEMPTS,
+    val maxRetries: Int = RetryDefaults.MAX_RETRIES,
     val minRetryDelayMillis: Long = RetryDefaults.MIN_RETRY_DELAY_MILLIS,
     val maxRetryDelayMillis: Long = RetryDefaults.MAX_RETRY_DELAY_MILLIS,
     val retryJitterMillis: Long = RetryDefaults.RETRY_JITTER_MILLIS,

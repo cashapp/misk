@@ -329,17 +329,19 @@ abstract class RealTransacterTest {
   }
 
   @Test
-  fun `retries configures max attempts`() {
-    var attempts = 0
+  fun `retries configures max retries`() {
+    val maxRetries = 4
+    var executions = 0
     assertFailsWith<RetryTransactionException> {
-      transacter.retries(5).transactionWithSession { session ->
+      transacter.retries(maxRetries).transactionWithSession { session ->
         session.useConnection {
-          attempts++
+          executions++
           throw RetryTransactionException("retry me")
         }
       }
     }
-    assertThat(attempts).isEqualTo(5)
+    // maxRetries + 1 = total executions (initial attempt + retries)
+    assertThat(executions).isEqualTo(maxRetries + 1)
   }
 
   @Test

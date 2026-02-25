@@ -50,7 +50,7 @@ interface Transacter {
    */
   fun <T> replicaRead(block: (session: Session) -> T): T
 
-  fun retries(maxAttempts: Int = 2): Transacter
+  fun retries(maxRetries: Int = 2): Transacter
 
   fun noRetries(): Transacter
 

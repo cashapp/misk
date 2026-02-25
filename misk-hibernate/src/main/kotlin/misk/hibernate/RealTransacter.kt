@@ -255,7 +255,7 @@ private constructor(
       maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
       jitter = Duration.ofMillis(options.retryJitterMillis)
     )
-    val retryConfig = RetryConfig.Builder(options.maxAttempts, backoff)
+    val retryConfig = RetryConfig.Builder(options.maxRetries + 1, backoff)
       .shouldRetry { exceptionClassifier.isRetryable(it) }
       .onRetry { attempt, e -> logger.info(e) { "$qualifierName transaction failed, retrying (attempt $attempt)" } }
       .build()
@@ -341,7 +341,7 @@ private constructor(
     )
   }
 
-  override fun retries(maxAttempts: Int): Transacter = withOptions(options.copy(maxAttempts = maxAttempts))
+  override fun retries(maxRetries: Int): Transacter = withOptions(options.copy(maxRetries = maxRetries))
 
   override fun allowCowrites(): Transacter {
     val disableChecks = options.disabledChecks.clone()
@@ -349,7 +349,7 @@ private constructor(
     return withOptions(options.copy(disabledChecks = disableChecks))
   }
 
-  override fun noRetries(): Transacter = withOptions(options.copy(maxAttempts = 1))
+  override fun noRetries(): Transacter = withOptions(options.copy(maxRetries = 0))
 
   override fun readOnly(): Transacter = withOptions(options.copy(readOnly = true))
 
@@ -427,7 +427,7 @@ private constructor(
 
   // NB: all options should be immutable types as copy() is shallow.
   internal data class TransacterOptions(
-    val maxAttempts: Int = RetryDefaults.MAX_ATTEMPTS,
+    val maxRetries: Int = RetryDefaults.MAX_RETRIES,
     val disabledChecks: EnumSet<Check> = EnumSet.noneOf(Check::class.java),
     val minRetryDelayMillis: Long = RetryDefaults.MIN_RETRY_DELAY_MILLIS,
     val maxRetryDelayMillis: Long = RetryDefaults.MAX_RETRY_DELAY_MILLIS,

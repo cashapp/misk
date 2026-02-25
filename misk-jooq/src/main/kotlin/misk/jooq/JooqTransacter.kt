@@ -26,7 +26,7 @@ class JooqTransacter internal constructor(
       maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
       jitter = Duration.ofMillis(options.retryJitterMillis),
     )
-    val retryConfig = RetryConfig.Builder(options.maxAttempts, backoff)
+    val retryConfig = RetryConfig.Builder(options.maxRetries + 1, backoff)
       .shouldRetry { exceptionClassifier.isRetryable(it) }
       .onRetry { attempt, e -> log.info(e) { "jOOQ transaction failed, retrying (attempt $attempt)" } }
       .build()
@@ -62,7 +62,7 @@ class JooqTransacter internal constructor(
   data class TransacterOptions
   @JvmOverloads
   constructor(
-    val maxAttempts: Int = RetryDefaults.MAX_ATTEMPTS,
+    val maxRetries: Int = RetryDefaults.MAX_RETRIES,
     val minRetryDelayMillis: Long = RetryDefaults.MIN_RETRY_DELAY_MILLIS,
     val maxRetryDelayMillis: Long = RetryDefaults.MAX_RETRY_DELAY_MILLIS,
     val retryJitterMillis: Long = RetryDefaults.RETRY_JITTER_MILLIS,
@@ -74,6 +74,6 @@ class JooqTransacter internal constructor(
     private val log = getLogger<JooqTransacter>()
 
     val noRetriesOptions: TransacterOptions
-      get() = TransacterOptions().copy(maxAttempts = 1)
+      get() = TransacterOptions().copy(maxRetries = 0)
   }
 }
