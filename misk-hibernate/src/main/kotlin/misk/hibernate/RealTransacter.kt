@@ -255,7 +255,7 @@ private constructor(
       maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
       jitter = Duration.ofMillis(options.retryJitterMillis)
     )
-    val retryConfig = RetryConfig.Builder(options.maxRetries + 1, backoff)
+    val retryConfig = RetryConfig.Builder(options.maxRetries, backoff)
       .shouldRetry { exceptionClassifier.isRetryable(it) }
       .onRetry { attempt, e -> logger.info(e) { "$qualifierName transaction failed, retrying (attempt $attempt)" } }
       .build()
