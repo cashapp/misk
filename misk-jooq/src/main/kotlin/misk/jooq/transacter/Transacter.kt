@@ -39,7 +39,7 @@ interface Transacter {
    */
   fun <T> replicaRead(closure: (session: JooqSession) -> T): T
 
-  /** Configures the maximum number of retries for transient failures. Total executions = maxRetries + 1. */
+  /** Configures the maximum number of retries for transient failures. */
   fun maxRetries(maxRetries: Int): Transacter
 
   /** Disables retries for the next transaction (equivalent to `maxRetries(0)`). */

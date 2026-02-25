@@ -162,7 +162,6 @@ class RetryingTransacterTest {
         throw SQLRecoverableException("recoverable error")
       }
     }
-    // maxRetries + 1 = total executions (initial attempt + retries)
     assertThat(executions).isEqualTo(customOptions.maxRetries + 1)
   }
 }

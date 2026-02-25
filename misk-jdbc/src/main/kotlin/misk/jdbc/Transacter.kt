@@ -37,7 +37,6 @@ interface Transacter {
 
   /**
    * Returns a new transacter configured to retry transactions up to [maxRetries] times on retryable exceptions.
-   * Total executions = maxRetries + 1 (initial attempt + retries). Default is 2 retries (3 total executions).
    */
   fun retries(maxRetries: Int): Transacter
 

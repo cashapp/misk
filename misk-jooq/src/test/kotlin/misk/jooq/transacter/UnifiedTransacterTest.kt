@@ -39,7 +39,6 @@ class UnifiedTransacterTest {
         throw DataAccessException("boom")
       }
     }
-    // maxRetries + 1 = total executions (initial attempt + retries)
     assertThat(executions).isEqualTo(maxRetries + 1)
   }
 

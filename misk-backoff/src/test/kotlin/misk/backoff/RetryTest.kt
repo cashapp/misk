@@ -43,7 +43,6 @@ internal class RetryTest {
     fun retries() {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
-      // maxRetries=2 means 2 retries after initial attempt = 3 total executions
       val retryConfig = RetryConfig.Builder(2, backoff)
       val result =
         retry(retryConfig.build()) { retry: Int ->
@@ -59,7 +58,6 @@ internal class RetryTest {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
       assertFailsWith<IllegalStateException> {
-        // maxRetries=2 means 2 retries after initial attempt = 3 total executions
         val retryConfig = RetryConfig.Builder(2, backoff)
         retry(retryConfig.build()) { throw IllegalStateException("this failed") }
       }
@@ -70,12 +68,11 @@ internal class RetryTest {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
       assertFailsWith<IllegalStateException> {
-        // maxRetries=2 means 2 retries after initial attempt = 3 total executions
         val retryConfig = RetryConfig.Builder(2, backoff)
         retry(retryConfig.build()) { throw IllegalStateException("this failed") }
       }
 
-      // Backoff should have advanced (2 retries = 2 calls to nextRetry: 10ms, 20ms)
+      // Backoff should have advanced
       assertThat(backoff.nextRetry()).isEqualTo(Duration.ofMillis(40))
     }
 
@@ -89,19 +86,17 @@ internal class RetryTest {
       backoff.nextRetry()
 
       assertFailsWith<IllegalStateException> {
-        // maxRetries=2 means 2 retries after initial attempt = 3 total executions
         val retryConfig = RetryConfig.Builder(2, backoff)
         retry(retryConfig.build()) { throw IllegalStateException("this failed") }
       }
 
-      // resets backoff prior to use (2 retries = 2 calls to nextRetry: 10ms, 20ms)
+      // resets backoff prior to use
       assertThat(backoff.nextRetry()).isEqualTo(Duration.ofMillis(40))
     }
 
     @Test
     fun resetsBackoffAfterSuccess() {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
-      // maxRetries=2 means 2 retries after initial attempt = 3 total executions
       val retryConfig = RetryConfig.Builder(2, backoff)
       val result =
         retry(retryConfig.build()) { retry: Int ->
@@ -206,7 +201,6 @@ internal class RetryTest {
     fun retries() {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
-      // maxRetries=2 means 2 retries after initial attempt = 3 total executions
       val retryConfig = RetryConfig.Builder(2, backoff)
       val result =
         retryableFuture(retryConfig.build()) { retry: Int ->
@@ -225,7 +219,6 @@ internal class RetryTest {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
       assertFailsWith<ExecutionException> {
-          // maxRetries=2 means 2 retries after initial attempt = 3 total executions
           val retryConfig = RetryConfig.Builder(2, backoff)
           retryableFuture(retryConfig.build()) { failedFuture<Void>(IllegalStateException("this failed")) }.get()
         }
@@ -237,13 +230,12 @@ internal class RetryTest {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
       assertFailsWith<ExecutionException> {
-          // maxRetries=2 means 2 retries after initial attempt = 3 total executions
           val retryConfig = RetryConfig.Builder(2, backoff)
           retryableFuture(retryConfig.build()) { failedFuture<Void>(IllegalStateException("this failed")) }.get()
         }
         .also { e -> assertTrue(e.cause is IllegalStateException) }
 
-      // Backoff should have advanced (2 retries = 2 calls to nextRetry: 10ms, 20ms)
+      // Backoff should have advanced
       assertThat(backoff.nextRetry()).isEqualTo(Duration.ofMillis(40))
     }
 
@@ -257,20 +249,18 @@ internal class RetryTest {
       backoff.nextRetry()
 
       assertFailsWith<ExecutionException> {
-          // maxRetries=2 means 2 retries after initial attempt = 3 total executions
           val retryConfig = RetryConfig.Builder(2, backoff)
           retryableFuture(retryConfig.build()) { failedFuture<Void>(IllegalStateException("this failed")) }.get()
         }
         .also { e -> assertTrue(e.cause is IllegalStateException) }
 
-      // resets backoff prior to use (2 retries = 2 calls to nextRetry: 10ms, 20ms)
+      // resets backoff prior to use
       assertThat(backoff.nextRetry()).isEqualTo(Duration.ofMillis(40))
     }
 
     @Test
     fun resetsBackoffAfterSuccess() {
       val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
-      // maxRetries=2 means 2 retries after initial attempt = 3 total executions
       val retryConfig = RetryConfig.Builder(2, backoff)
       val result =
         retryableFuture(retryConfig.build()) { retry: Int ->

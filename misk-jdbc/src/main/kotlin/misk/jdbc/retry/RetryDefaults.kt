@@ -4,7 +4,7 @@ package misk.jdbc.retry
  * Default retry configuration values shared across transacter implementations.
  */
 object RetryDefaults {
-  /** Default number of retries after the initial attempt. Total executions = MAX_RETRIES + 1. */
+  /** Default number of retries after the initial attempt. */
   const val MAX_RETRIES: Int = 2
   const val MIN_RETRY_DELAY_MILLIS: Long = 100
   const val MAX_RETRY_DELAY_MILLIS: Long = 500

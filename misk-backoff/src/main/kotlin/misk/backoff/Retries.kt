@@ -116,7 +116,6 @@ fun <A> retryableFuture(config: RetryConfig, block: (retryCount: Int) -> Complet
  * Configuration for retry behavior.
  *
  * @property maxRetries The maximum number of retries after the initial attempt.
- *                      Total executions = maxRetries + 1.
  * @property withBackoff The backoff strategy to use between retries.
  * @property onRetry Optional callback invoked on each retry with the retry count and exception.
  * @property shouldRetry Predicate to determine if an exception should trigger a retry.
