@@ -329,7 +329,7 @@ abstract class RealTransacterTest {
   }
 
   @Test
-  fun `retries configures max attempts`() {
+  fun `retries configures max retries`() {
     var attempts = 0
     assertFailsWith<RetryTransactionException> {
       transacter.retries(5).transactionWithSession { session ->
