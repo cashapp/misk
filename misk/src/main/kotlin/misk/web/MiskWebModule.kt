@@ -84,6 +84,7 @@ import misk.web.interceptors.RequestLogContextInterceptor
 import misk.web.interceptors.RequestLoggingConfig
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.RequestLoggingTransformer
+import misk.web.interceptors.GrpcRootSpanInterceptor
 import misk.web.interceptors.TracingInterceptor
 import misk.web.interceptors.hooks.RequestResponseHook
 import misk.web.interceptors.hooks.RequestResponseLoggingHook
@@ -224,6 +225,9 @@ constructor(private val config: WebConfig, private val jettyDependsOn: List<Key<
         )
       concurrencyLimiterConfig?.let { install(ConcurrencyLimitsModule(it)) }
     }
+
+    // Creates a root span for gRPC requests when dd-trace-java fails to (HTTP/2 over UDS).
+    multibind<NetworkInterceptor.Factory>(BeforeContentEncoding::class).to<GrpcRootSpanInterceptor.Factory>()
 
     // Traces requests as they work their way through the system.
     multibind<NetworkInterceptor.Factory>(MiskDefault::class).to<TracingInterceptor.Factory>()
