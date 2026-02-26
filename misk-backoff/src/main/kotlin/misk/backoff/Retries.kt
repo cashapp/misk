@@ -131,7 +131,7 @@ private constructor(
   @Deprecated("Use maxRetries instead", replaceWith = ReplaceWith("maxRetries"))
   val upTo: Int get() = maxRetries + 1
 
-  class Builder(
+  class Builder constructor(
     maxRetries: Int? = null,
     val withBackoff: Backoff,
     upTo: Int? = null,
