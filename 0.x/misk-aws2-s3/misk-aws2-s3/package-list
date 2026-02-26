@@ -1,0 +1,13 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.aws2.s3.config////PointingToDeclaration/misk-aws2-s3/misk.aws2.s3.config/index.md
+$dokka.location:misk.aws2.s3.config/S3Config///PointingToDeclaration/misk-aws2-s3/misk.aws2.s3.config/-s3-config/index.md
+$dokka.location:misk.aws2.s3.config/S3Config/S3Config/#kotlin.String?/PointingToDeclaration/misk-aws2-s3/misk.aws2.s3.config/-s3-config/-s3-config.md
+$dokka.location:misk.aws2.s3.config/S3Config/region/#/PointingToDeclaration/misk-aws2-s3/misk.aws2.s3.config/-s3-config/region.md
+$dokka.location:misk.aws2.s3////PointingToDeclaration/misk-aws2-s3/misk.aws2.s3/index.md
+$dokka.location:misk.aws2.s3/S3Module///PointingToDeclaration/misk-aws2-s3/misk.aws2.s3/-s3-module/index.md
+$dokka.location:misk.aws2.s3/S3Module/S3Module/#misk.aws2.s3.config.S3Config#kotlin.Function1[software.amazon.awssdk.services.s3.S3ClientBuilder,kotlin.Unit]#kotlin.Function1[software.amazon.awssdk.services.s3.S3AsyncClientBuilder,kotlin.Unit]/PointingToDeclaration/misk-aws2-s3/misk.aws2.s3/-s3-module/-s3-module.md
+$dokka.location:misk.aws2.s3/S3Module/s3AsyncClient/#software.amazon.awssdk.auth.credentials.AwsCredentialsProvider#misk.cloud.aws.AwsRegion/PointingToDeclaration/misk-aws2-s3/misk.aws2.s3/-s3-module/s3-async-client.md
+$dokka.location:misk.aws2.s3/S3Module/s3Client/#software.amazon.awssdk.auth.credentials.AwsCredentialsProvider#misk.cloud.aws.AwsRegion/PointingToDeclaration/misk-aws2-s3/misk.aws2.s3/-s3-module/s3-client.md
+misk.aws2.s3
+misk.aws2.s3.config

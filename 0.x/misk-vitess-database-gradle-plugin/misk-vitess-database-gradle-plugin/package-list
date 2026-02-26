@@ -1,0 +1,27 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.vitess.gradle////PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/index.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask///PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/index.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/StartVitessDatabaseTask/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/-start-vitess-database-task.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/autoApplySchemaChanges/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/auto-apply-schema-changes.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/containerName/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/container-name.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/debugStartup/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/debug-startup.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/enableDeclarativeSchemaChanges/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/enable-declarative-schema-changes.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/enableInMemoryStorage/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/enable-in-memory-storage.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/enableScatters/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/enable-scatters.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/inMemoryStorageSize/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/in-memory-storage-size.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/keepAlive/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/keep-alive.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/lintSchema/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/lint-schema.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/mysqlVersion/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/mysql-version.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/port/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/port.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/schemaDir/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/schema-dir.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/sqlMode/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/sql-mode.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/start/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/start.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/transactionIsolationLevel/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/transaction-isolation-level.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/transactionTimeoutSeconds/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/transaction-timeout-seconds.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/vitessImage/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/vitess-image.md
+$dokka.location:misk.vitess.gradle/StartVitessDatabaseTask/vitessVersion/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-start-vitess-database-task/vitess-version.md
+$dokka.location:misk.vitess.gradle/VitessDatabasePlugin///PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-vitess-database-plugin/index.md
+$dokka.location:misk.vitess.gradle/VitessDatabasePlugin/VitessDatabasePlugin/#/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-vitess-database-plugin/-vitess-database-plugin.md
+$dokka.location:misk.vitess.gradle/VitessDatabasePlugin/apply/#org.gradle.api.Project/PointingToDeclaration/misk-vitess-database-gradle-plugin/misk.vitess.gradle/-vitess-database-plugin/apply.md
+misk.vitess.gradle
