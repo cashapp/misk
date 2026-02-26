@@ -147,21 +147,21 @@ class RetryingTransacterTest {
   }
 
   @Test
-  fun `SQLRecoverableException is retried up to configured max attempts`() {
+  fun `SQLRecoverableException is retried up to configured max retries`() {
     // Create a fresh database without retry wrapper to avoid nested retries
     val rawDatabase = MoviesDatabase.invoke(jdbcDriver)
-    val customOptions = TransacterOptions(maxAttempts = 5)
+    val customOptions = TransacterOptions(maxRetries = 4)
     val transacterWithCustomRetries = object : RetryingTransacter(rawDatabase, customOptions), MoviesDatabase {
       override val moviesQueries: MoviesQueries get() = rawDatabase.moviesQueries
     }
 
-    var attempts = 0
+    var executions = 0
     assertThrows<SQLRecoverableException> {
       transacterWithCustomRetries.transaction {
-        attempts++
+        executions++
         throw SQLRecoverableException("recoverable error")
       }
     }
-    assertThat(attempts).isEqualTo(5)
+    assertThat(executions).isEqualTo(customOptions.maxRetries + 1)
   }
 }
