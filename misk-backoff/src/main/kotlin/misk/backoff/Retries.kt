@@ -131,6 +131,9 @@ private constructor(
   @Deprecated("Use maxRetries instead", replaceWith = ReplaceWith("maxRetries"))
   val upTo: Int get() = maxRetries + 1
 
+  // @JvmOverloads is intentionally omitted: it doesn't work correctly when the required parameter
+  // (withBackoff) is between optional parameters (maxRetries, upTo).
+  @Suppress("AnnotatePublicApisWithJvmOverloads")
   class Builder constructor(
     maxRetries: Int? = null,
     val withBackoff: Backoff,
