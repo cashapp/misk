@@ -25,7 +25,7 @@ class DashboardPageLayoutTest {
 
   @Test
   fun `happy path`() {
-    actionScope.enter(mapOf(HttpCall::class.toKey() to fakeHttpCall)).use {
+    actionScope.create(mapOf(HttpCall::class.toKey() to fakeHttpCall)).inScope {
       // No exception thrown on correct usage
       layout.get().newBuilder().build()
     }
@@ -33,7 +33,7 @@ class DashboardPageLayoutTest {
 
   @Test
   fun `no builder reuse permitted`() {
-    actionScope.enter(mapOf(HttpCall::class.toKey() to fakeHttpCall)).use {
+    actionScope.create(mapOf(HttpCall::class.toKey() to fakeHttpCall)).inScope {
       // Fresh builder must have newBuilder() called
       val e1 = assertFailsWith<IllegalStateException> { layout.get().build() }
       assertEquals("You must call newBuilder() before calling build() to prevent builder reuse.", e1.message)

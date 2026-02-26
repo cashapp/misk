@@ -110,7 +110,7 @@ class BoundAction<A : WebAction>(
     MDC.clear() // MDC should already be empty, but clear it again just in case
 
     try {
-      scope.enter(seedData).use { handle(httpCall, pathMatcher) }
+      scope.create(seedData).inScope { handle(httpCall, pathMatcher) }
     } finally {
       MDC.clear() // don't let any MDC tags leak to subsequent requests
     }
@@ -134,7 +134,7 @@ class BoundAction<A : WebAction>(
     MDC.clear() // MDC should already be empty, but clear it again just in case
 
     try {
-      scope.enter(seedData).use { handle(httpCall, pathMatcher) }
+      scope.create(seedData).inScope { handle(httpCall, pathMatcher) }
     } finally {
       MDC.clear() // don't let any MDC tags leak to subsequent requests
     }

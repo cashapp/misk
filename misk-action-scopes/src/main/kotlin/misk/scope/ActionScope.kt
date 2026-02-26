@@ -57,7 +57,7 @@ internal constructor(
    *
    * Example usage:
    * ```
-   *  scope.enter(seedData).use {
+   *  scope.create(seedData).inScope {
    *    runBlocking(scope.asContextElement()) {
    *      async(Dispatchers.IO) {
    *        tester.fooValue()
@@ -74,21 +74,9 @@ internal constructor(
     return threadLocalInstance.asContextElement(instance)
   }
 
-  @Deprecated("Use snapshotActionScopeInstance instead", ReplaceWith("this.snapshotActionScopeInstance()"))
-  fun snapshotActionScope(): Map<Key<*>, Any?> {
-    return snapshotActionScopeInstance().asImmediateValues()
-  }
-
   fun snapshotActionScopeInstance(): Instance {
     check(inScope()) { "not running within an ActionScope" }
     return threadLocalInstance.get()
-  }
-
-  @Deprecated("Use create() instead and then call inScope() to enter the scope")
-  /** Starts the scope on a thread with the provided seed data */
-  fun enter(seedData: Map<Key<*>, Any?>): ActionScope {
-    create(seedData).enter()
-    return this
   }
 
   /** Creates a new scope on the current thread with the provided seed data */
@@ -210,10 +198,6 @@ internal constructor(
     internal operator fun <T> get(key: Key<T>): T {
       @Suppress("UNCHECKED_CAST")
       return lazyValues.getValue(key).value as T
-    }
-
-    internal fun asImmediateValues(): Map<Key<*>, Any?> {
-      return lazyValues.filterValues { it.isInitialized() }.mapValues { it.value.value }
     }
 
     fun <T> inScope(block: () -> T): T {
