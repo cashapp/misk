@@ -54,8 +54,10 @@ public final class misk/backoff/RetryConfig {
 }
 
 public final class misk/backoff/RetryConfig$Builder {
+	public fun <init> (Ljava/lang/Integer;Lmisk/backoff/Backoff;)V
 	public fun <init> (Ljava/lang/Integer;Lmisk/backoff/Backoff;Ljava/lang/Integer;)V
 	public synthetic fun <init> (Ljava/lang/Integer;Lmisk/backoff/Backoff;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/backoff/Backoff;)V
 	public final fun build ()Lmisk/backoff/RetryConfig;
 	public final fun getMaxRetries ()I
 	public final fun getOnRetry ()Lkotlin/jvm/functions/Function2;
