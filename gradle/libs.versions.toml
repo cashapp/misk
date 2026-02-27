@@ -85,7 +85,7 @@ gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.23.4" }
 gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.100.0" }
 googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.8.1" }
-googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20250815-2.0.0" }
+googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20251118-2.0.0" }
 googleAuthLibraryCredentials = { module = "com.google.auth:google-auth-library-credentials", version.ref = "googleAuth" }
 googleAuthLibraryOauth2Http = { module = "com.google.auth:google-auth-library-oauth2-http", version.ref = "googleAuth" }
 googleCloudCoreHttp = { module = "com.google.cloud:google-cloud-core-http", version = "2.60.2" }
