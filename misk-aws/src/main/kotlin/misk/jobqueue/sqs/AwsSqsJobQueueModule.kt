@@ -20,6 +20,7 @@ import misk.config.AppName
 import misk.feature.FeatureFlags
 import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
+import misk.inject.asSingleton
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
@@ -61,6 +62,7 @@ open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbs
         regionSpecificClientBinder
           .addBinding(it)
           .toProvider(AmazonSQSProvider(config, it, false, ::configureSyncClient, ::configureAsyncClient))
+          .asSingleton()
       }
     val regionSpecificClientBinderForReceiving = newMapBinder<AwsRegion, AmazonSQS>(ForSqsReceiving::class)
     config.external_queues
@@ -71,6 +73,7 @@ open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbs
         regionSpecificClientBinderForReceiving
           .addBinding(it)
           .toProvider(AmazonSQSProvider(config, it, true, ::configureSyncClient, ::configureAsyncClient))
+          .asSingleton()
       }
 
     // Bind the configs for external queues
@@ -80,8 +83,11 @@ open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbs
       .forEach { (queueName, config) -> externalQueueConfigBinder.addBinding(queueName).toInstance(config) }
 
     install(DefaultAsyncSwitchModule())
+    install(ServiceModule<AwsSqsClientService>())
     install(
-      ServiceModule<RepeatedTaskQueue, ForSqsHandling>().dependsOn<ReadyService>()
+      ServiceModule<RepeatedTaskQueue, ForSqsHandling>()
+        .dependsOn<ReadyService>()
+        .dependsOn<AwsSqsClientService>()
     )
   }
 

@@ -64,6 +64,17 @@ public final class misk/jobqueue/sqs/AwsSqsBatchJobHandlerModule$Companion {
 	public static synthetic fun create$default (Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;ILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule;
 }
 
+public class misk/jobqueue/sqs/AwsSqsClientService : com/google/common/util/concurrent/AbstractIdleService {
+	public static final field Companion Lmisk/jobqueue/sqs/AwsSqsClientService$Companion;
+	public fun <init> (Lcom/amazonaws/services/sqs/AmazonSQS;Lcom/amazonaws/services/sqs/AmazonSQS;Ljava/util/Map;Ljava/util/Map;)V
+	protected fun shutDown ()V
+	protected fun startUp ()V
+	public final fun withShutdownClients (Z)Lmisk/jobqueue/sqs/AwsSqsClientService;
+}
+
+public final class misk/jobqueue/sqs/AwsSqsClientService$Companion {
+}
+
 public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;
 	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
