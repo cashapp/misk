@@ -208,6 +208,17 @@ constructor(
     )
     bind(keyOf<Transacter>(qualifier)).toProvider { RealTransacter(dataSourceServiceProvider.get(), config) }
 
+    // Register DataSource for the admin database dashboard tab.
+    if (isWriter) {
+      newMultibinder<AdminDatabaseEntry>()
+      multibind<AdminDatabaseEntry>().toProvider {
+        AdminDatabaseEntry(
+          name = qualifier.simpleName ?: qualifier.toString(),
+          dataSource = dataSourceServiceProvider.get().dataSource,
+        )
+      }
+    }
+
     if (config.type == DataSourceType.VITESS_MYSQL) {
       val spanInjectorDecoratorKey = SpanInjector::class.toKey(qualifier)
       bind(spanInjectorDecoratorKey)
