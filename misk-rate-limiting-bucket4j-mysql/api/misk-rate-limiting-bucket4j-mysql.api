@@ -1,7 +1,9 @@
 public final class misk/ratelimiting/bucket4j/mysql/MySQLBucket4jRateLimiterModule : misk/inject/KAbstractModule {
 	public fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)V
-	public synthetic fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JI)V
+	public fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/time/Duration;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun providedPruner (Ljava/time/Clock;Lcom/google/inject/Injector;Lio/micrometer/core/instrument/MeterRegistry;)Lwisp/ratelimiting/RateLimitPruner;
 	public final fun providedRateLimiter (Ljava/time/Clock;Lcom/google/inject/Injector;Lio/micrometer/core/instrument/MeterRegistry;)Lwisp/ratelimiting/RateLimiter;
 }

@@ -3,7 +3,9 @@ public final class misk/ratelimiting/bucket4j/redis/RedisBucket4jRateLimiterModu
 	public fun <init> (Ljava/time/Duration;)V
 	public fun <init> (Ljava/time/Duration;Ljava/lang/annotation/Annotation;)V
 	public fun <init> (Ljava/time/Duration;Ljava/lang/annotation/Annotation;Lio/github/bucket4j/distributed/serialization/Mapper;)V
-	public synthetic fun <init> (Ljava/time/Duration;Ljava/lang/annotation/Annotation;Lio/github/bucket4j/distributed/serialization/Mapper;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/time/Duration;Ljava/lang/annotation/Annotation;Lio/github/bucket4j/distributed/serialization/Mapper;I)V
+	public fun <init> (Ljava/time/Duration;Ljava/lang/annotation/Annotation;Lio/github/bucket4j/distributed/serialization/Mapper;ILjava/time/Duration;)V
+	public synthetic fun <init> (Ljava/time/Duration;Ljava/lang/annotation/Annotation;Lio/github/bucket4j/distributed/serialization/Mapper;ILjava/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/ratelimiting/bucket4j/redis/RedisBucket4jRateLimiterTestModule : misk/inject/KAbstractModule {
