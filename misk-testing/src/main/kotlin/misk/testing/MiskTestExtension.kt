@@ -171,9 +171,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
       // Starting services first given some fixtures rely on services being started. For example,
       // the dynamo DB fixture needs the service to be started, in order to be able to delete data.
       startServicesBeforeEach.beforeEach(context)
-      if (context.reuseInjector()) {
-        testFixtures.forEach { it.reset() }
-      }
+      testFixtures.forEach { it.reset() }
       // Call the beforeEach callbacks after resetting fixtures, so that things like seeding test
       // data can be done in these callback and not be reset.
       beforeEachCallbacks.forEach { it.beforeEach(context) }
