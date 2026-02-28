@@ -63,6 +63,23 @@ internal class WebSocketsTest {
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).isEmpty()
   }
 
+  @Test
+  fun queryArgumentsAreParsedCorrectly() {
+    val client = OkHttpClient()
+
+    val request = Request.Builder()
+      .url(
+        jettyService.httpServerUrl
+          .resolve("/echo-with-query-args?first=this&second=that&second=those")!!
+      )
+      .build()
+
+    val webSocket = client.newWebSocket(request, listener)
+
+    webSocket.send("hello")
+    assertEquals("ACK hello: this [that, those]", listener.takeMessage())
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebServerTestingModule())
@@ -98,4 +115,21 @@ class EchoWebSocket @Inject constructor() : WebAction {
       override fun toString() = "EchoListener"
     }
   }
+
+  @ConnectWebSocket("/echo-with-query-args")
+  @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
+  fun echoWithQueryArgs(
+    @QueryParam("first") first: String?,
+    @QueryParam("second") second: List<String>,
+    @Suppress("UNUSED_PARAMETER") webSocket: WebSocket
+  ): WebSocketListener {
+    return object : WebSocketListener() {
+      override fun onMessage(webSocket: WebSocket, text: String) {
+        webSocket.send("ACK $text: $first $second")
+      }
+
+      override fun toString() = "EchoListener"
+    }
+  }
+
 }
