@@ -1,5 +1,6 @@
 package misk.jdbc
 
+import java.sql.Connection
 import java.time.Duration
 import java.util.Properties
 import misk.config.Config
@@ -52,6 +53,14 @@ enum class MigrationsFormat {
    * used, SchemaMigratorService will not be installed.
    */
   EXTERNALLY_MANAGED,
+}
+
+/** Transaction isolation levels supported by HikariCP */
+enum class TransactionIsolationLevel(val jdbcValue: Int, val hikariValue: String) {
+  READ_UNCOMMITTED(Connection.TRANSACTION_READ_UNCOMMITTED, "TRANSACTION_READ_UNCOMMITTED"),
+  READ_COMMITTED(Connection.TRANSACTION_READ_COMMITTED, "TRANSACTION_READ_COMMITTED"),
+  REPEATABLE_READ(Connection.TRANSACTION_REPEATABLE_READ, "TRANSACTION_REPEATABLE_READ"),
+  SERIALIZABLE(Connection.TRANSACTION_SERIALIZABLE, "TRANSACTION_SERIALIZABLE"),
 }
 
 /** Configuration element for an individual datasource */
@@ -127,6 +136,12 @@ constructor(
   val declarative_schema_config: DeclarativeSchemaConfig? = null,
   val mysql_use_aws_secret_for_credentials: Boolean = false,
   val mysql_aws_secret_name: String? = null,
+  /**
+   * Default transaction isolation level for connections from this pool.
+   * If null, uses the database's default isolation level.
+   * This is applied when connections are created and after they are returned to the pool.
+   */
+  val default_transaction_isolation: TransactionIsolationLevel? = null,
 ) {
   init {
     if (migrations_format == MigrationsFormat.DECLARATIVE) {
@@ -371,6 +386,7 @@ constructor(
       this.show_sql,
       this.generate_hibernate_stats,
       migrations_format = this.migrations_format,
+      default_transaction_isolation = this.default_transaction_isolation,
     )
   }
 
