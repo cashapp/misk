@@ -1,50 +1,34 @@
-import { OfflineComponent } from "@misk/core"
+import { simpleSelectorGet } from "@misk/simpleredux"
 import * as React from "react"
 import { connect } from "react-redux"
 import { ConfigComponent } from "../components"
-import { dispatchConfig, IConfigState, IState } from "../ducks"
-
-interface ITabProps {
-  config: IConfigState
-  getAllConfig: (url: string) => void
-}
+import { IDispatchProps, IState, rootDispatcher, rootSelectors } from "../ducks"
 
 export interface IConfigResources {
   [name: string]: string
 }
 
-const apiUrl = "/api/config/all"
+const apiUrl = "/api/config/metadata"
 
-class TabContainer extends React.Component<ITabProps, { children: any }> {
+class TabContainer extends React.Component<IState & IDispatchProps, IState> {
   componentDidMount() {
-    this.props.getAllConfig(apiUrl)
+    this.props.simpleHttpGet("config", apiUrl)
   }
 
   render() {
-    const { error, resources, status } = this.props.config
-    if (resources) {
-      return <ConfigComponent resources={resources} status={status} />
-    } else {
-      return (
-        <OfflineComponent
-          error={error}
-          title={"Error Loading Config Data"}
-          endpoint={apiUrl}
-        />
-      )
-    }
+    const resources = simpleSelectorGet(this.props.simpleRedux, [
+      "config",
+      "data",
+      "resources"
+    ])
+    return <ConfigComponent resources={resources} />
   }
 }
 
-const mapStateToProps = (state: IState) => ({
-  config: state.config.toJS()
-})
+const mapStateToProps = (state: IState) => rootSelectors(state)
 
 const mapDispatchToProps = {
-  getAllConfig: dispatchConfig.getAll
+  ...rootDispatcher
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TabContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(TabContainer)

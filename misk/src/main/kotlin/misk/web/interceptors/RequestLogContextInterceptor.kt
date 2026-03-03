@@ -5,7 +5,6 @@ import misk.MiskCaller
 import misk.scope.ActionScoped
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import misk.web.Response
 import org.slf4j.MDC
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,15 +20,16 @@ internal class RequestLogContextInterceptor private constructor(
   private val currentRequest: ActionScoped<HttpServletRequest>
 ) : NetworkInterceptor {
 
-  override fun intercept(chain: NetworkChain): Response<*> {
+  override fun intercept(chain: NetworkChain) {
     val request = currentRequest.get()
     return try {
       MDC.put(MDC_ACTION, action.name)
       MDC.put(MDC_CALLING_PRINCIPAL, currentCaller.get()?.principal ?: "unknown")
-      MDC.put(MDC_REMOTE_IP, request.remoteAddr)
-      MDC.put(MDC_REMOTE_PORT, request.remotePort.toString())
+      MDC.put(MDC_PROTOCOL, request.protocol)
+      MDC.put(MDC_REMOTE_ADDR, "${request.remoteAddr}:${request.remotePort}")
       MDC.put(MDC_REQUEST_URI, request.requestURI)
-      chain.proceed(chain.request)
+      MDC.put(MDC_HTTP_METHOD, request.method)
+      chain.proceed(chain.httpCall)
     } finally {
       allContextNames.forEach { MDC.remove(it) }
     }
@@ -46,16 +46,18 @@ internal class RequestLogContextInterceptor private constructor(
 
   internal companion object {
     const val MDC_CALLING_PRINCIPAL = "calling_principal"
-    const val MDC_REMOTE_IP = "remote_ip"
-    const val MDC_REMOTE_PORT = "remote_port"
+    const val MDC_REMOTE_ADDR = "remote_addr"
     const val MDC_ACTION = "action"
     const val MDC_REQUEST_URI = "request_uri"
+    const val MDC_PROTOCOL = "protocol"
+    const val MDC_HTTP_METHOD = "http_method"
 
     val allContextNames = listOf(
         MDC_ACTION,
         MDC_CALLING_PRINCIPAL,
-        MDC_REMOTE_IP,
-        MDC_REMOTE_PORT,
+        MDC_HTTP_METHOD,
+        MDC_PROTOCOL,
+        MDC_REMOTE_ADDR,
         MDC_REQUEST_URI
     )
   }

@@ -24,3 +24,6 @@ annotation class MiskTest(val startService: Boolean = false)
 
 @Target(AnnotationTarget.FIELD)
 annotation class MiskTestModule
+
+@Target(AnnotationTarget.FIELD)
+annotation class MiskExternalDependency

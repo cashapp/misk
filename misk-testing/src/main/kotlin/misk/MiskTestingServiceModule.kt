@@ -1,10 +1,13 @@
 package misk
 
-import misk.MiskCommonServiceModule
+import misk.concurrent.FakeSleeperModule
 import misk.environment.FakeEnvVarModule
 import misk.inject.KAbstractModule
+import misk.random.FakeRandomModule
 import misk.resources.TestingResourceLoaderModule
 import misk.time.FakeClockModule
+import misk.time.FakeTickerModule
+import misk.tokens.FakeTokenGeneratorModule
 
 /**
  * [MiskTestingServiceModule] should be installed in unit testing environments.
@@ -18,6 +21,10 @@ class MiskTestingServiceModule : KAbstractModule() {
     install(TestingResourceLoaderModule())
     install(FakeEnvVarModule())
     install(FakeClockModule())
+    install(FakeSleeperModule())
+    install(FakeTickerModule())
+    install(FakeRandomModule())
+    install(FakeTokenGeneratorModule())
     install(MiskCommonServiceModule())
   }
 }

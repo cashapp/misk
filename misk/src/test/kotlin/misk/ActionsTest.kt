@@ -1,36 +1,49 @@
 package misk
 
+import misk.web.DispatchMechanism
+import misk.web.RequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.reflect.full.createType
 import kotlin.test.assertFailsWith
 
 internal class ActionsTest {
-  @Test
-  fun methodAsAction() {
-    val action = TestAction::myActionMethod.asAction()
+  @Test fun methodAsAction() {
+    val action = TestAction::myActionMethod.asAction(DispatchMechanism.GET)
     assertThat(action.name).isEqualTo("TestAction")
-    assertThat(action.parameterTypes).hasSize(1)
+    assertThat(action.parameterTypes).hasSize(2)
     assertThat(action.parameterTypes[0]).isEqualTo(Int::class.createType())
+    assertThat(action.parameterTypes[1]).isEqualTo(String::class.createType())
+    assertThat(action.requestType).isEqualTo(String::class.createType())
     assertThat(action.returnType).isEqualTo(String::class.createType())
   }
 
-  @Test
-  fun methodReferenceNotAllowedAsAction() {
+  @Test fun noRequestBodyAction() {
+    val action = NoRequestBodyAction::myActionMethod.asAction(DispatchMechanism.GET)
+    assertThat(action.name).isEqualTo("NoRequestBodyAction")
+    assertThat(action.parameterTypes).hasSize(1)
+    assertThat(action.parameterTypes[0]).isEqualTo(Int::class.createType())
+    assertThat(action.requestType).isNull()
+  }
+
+  @Test fun methodReferenceNotAllowedAsAction() {
     assertFailsWith<IllegalArgumentException> {
       val t = TestAction()
-      t::myActionMethod.asAction()
+      t::myActionMethod.asAction(DispatchMechanism.GET)
     }
   }
 
-  @Test
-  fun freeStandingFunctionNotAllowedAsAction() {
+  @Test fun freeStandingFunctionNotAllowedAsAction() {
     assertFailsWith<IllegalArgumentException> {
-      ::myActionHandler.asAction()
+      ::myActionHandler.asAction(DispatchMechanism.GET)
     }
   }
 
   class TestAction {
+    fun myActionMethod(n: Int, @RequestBody req: String): String = "foo$n$req"
+  }
+
+  class NoRequestBodyAction {
     fun myActionMethod(n: Int): String = "foo$n"
   }
 

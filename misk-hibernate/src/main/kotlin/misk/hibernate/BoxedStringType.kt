@@ -1,11 +1,13 @@
 package misk.hibernate
 
 import org.hibernate.engine.spi.SharedSessionContractImplementor
+import org.hibernate.usertype.ParameterizedType
 import org.hibernate.usertype.UserType
 import java.io.Serializable
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
+import java.util.Properties
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty1
@@ -32,24 +34,29 @@ import kotlin.reflect.full.primaryConstructor
  * }
  * ```
  */
-internal class BoxedStringType<T : Any> private constructor(
-  private val property: KProperty1<T, String>,
-  private val constructor: KFunction<T>
-) : UserType {
+internal class BoxedStringType<T : Any> : UserType, ParameterizedType {
+  private lateinit var boxer: Boxer<T>
+
+  @Suppress("UNCHECKED_CAST")
+  override fun setParameterValues(properties: Properties) {
+    val javaClass = properties.getField("boxedStringField")!!.type as Class<T>
+    this.boxer = boxer(javaClass.kotlin)!!
+  }
+
   override fun hashCode(x: Any) = x.hashCode()
 
-  override fun deepCopy(value: Any) = value
+  override fun deepCopy(value: Any?) = value
 
   override fun replace(original: Any, target: Any, owner: Any?) = original
 
-  override fun equals(x: Any, y: Any) = x == y
+  override fun equals(x: Any?, y: Any?) = x == y
 
-  override fun returnedClass() = constructor.returnType.javaClass
+  override fun returnedClass() = boxer.returnedClass
 
-  override fun assemble(cached: Serializable, owner: Any?) = constructor.call(cached)
+  override fun assemble(cached: Serializable, owner: Any?) = boxer.box(cached as String)
 
   @Suppress("UNCHECKED_CAST") // Hibernate promises to call us only with the types we support.
-  override fun disassemble(value: Any?) = property.get(value as T)
+  override fun disassemble(value: Any) = boxer.unbox(value as T)
 
   override fun nullSafeSet(
     st: PreparedStatement,
@@ -79,11 +86,15 @@ internal class BoxedStringType<T : Any> private constructor(
   override fun sqlTypes() = intArrayOf(Types.VARCHAR)
 
   companion object {
+    fun <T : Any> isBoxedString(propertyType: KClass<T>): Boolean {
+      return boxer(propertyType) != null
+    }
+
     /**
-     * Returns a boxed string type if `propertyType` is a data class with a single string property.
-     * Otherwise this returns null.
+     * Returns a boxer if `propertyType` is a data class with a single string property. Otherwise
+     * this returns null.
      */
-    fun <T : Any> create(propertyType: KClass<T>): BoxedStringType<*>? {
+    private fun <T : Any> boxer(propertyType: KClass<T>): Boxer<T>? {
       if (!propertyType.isData) return null
 
       val memberPropertiesList = propertyType.memberProperties.toList()
@@ -99,7 +110,20 @@ internal class BoxedStringType<T : Any> private constructor(
       if (constructor.parameters.size != 1) return null // Too many parameters.
       if (constructor.parameters[0].type.classifier != String::class) return null // Wrong type.
 
-      return BoxedStringType(stringProperty, constructor)
+      return Boxer(stringProperty, constructor)
     }
+  }
+
+  /** Puts a string in a box and takes it out again. */
+  data class Boxer<T>(
+    val property: KProperty1<T, String>,
+    val constructor: KFunction<T>
+  ) {
+    val returnedClass: Class<*>
+      get() = constructor.returnType.javaClass
+
+    fun box(string: String): T = constructor.call(string)
+
+    fun unbox(value: T): String = property.get(value)
   }
 }

@@ -7,10 +7,11 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class EchoFormAction : WebAction {
+class EchoFormAction @Inject constructor() : WebAction {
   @Post("/hello")
   @RequestContentType(MediaTypes.APPLICATION_FORM_URLENCODED)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)

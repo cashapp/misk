@@ -1,18 +1,51 @@
 buildscript {
   dependencies {
+    classpath dep.kotlinAllOpenPlugin
     classpath dep.kotlinNoArgPlugin
   }
 }
 
+apply plugin: 'kotlin-allopen'
 apply plugin: 'kotlin-jpa'
 
+allOpen {
+  annotation("javax.persistence.Entity")
+  annotation("javax.persistence.Embeddable")
+  annotation("javax.persistence.MappedSuperclass")
+}
+
 dependencies {
-  compile dep.curatorFramework
+  compile(dep.curatorFramework) {
+    exclude(group: 'org.slf4j', module: 'slf4j-log4j12')
+    exclude(group: 'log4j', module: 'log4j')
+  }
   compile project(':misk')
-  compile dep.zookeeper
+  compile(dep.zookeeper) {
+    exclude(group: 'org.slf4j', module: 'slf4j-log4j12')
+    exclude(group: 'log4j', module: 'log4j')
+  }
 
   testCompile dep.docker
   testCompile dep.junitApi
-  testCompile dep.zookeeper
+  testCompile(dep.zookeeper) {
+    exclude(group: 'org.slf4j', module: 'slf4j-log4j12')
+    exclude(group: 'log4j', module: 'log4j')
+  }
   testCompile project(':misk-testing')
+  testCompile project(':misk-zookeeper-testing')
+}
+
+sourceSets {
+  test {
+    resources {
+      srcDir '../misk-zookeeper-testing/src/main/resources'
+    }
+  }
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
 }

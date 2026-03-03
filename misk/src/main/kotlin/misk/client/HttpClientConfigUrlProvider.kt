@@ -7,7 +7,7 @@ import com.google.inject.Inject
  * which can differ depending on if the client
  * is envoy-based or connects directly.
  */
-class HttpClientConfigUrlProvider {
+class HttpClientConfigUrlProvider @Inject constructor() {
   @Inject(optional = true) lateinit var envoyClientEndpointProvider: EnvoyClientEndpointProvider
 
   fun getUrl(endpointConfig: HttpClientEndpointConfig): String {

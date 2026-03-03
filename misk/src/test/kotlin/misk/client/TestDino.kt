@@ -13,6 +13,7 @@ import misk.web.mediatype.MediaTypes
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
+import javax.inject.Inject
 import javax.inject.Singleton
 
 internal interface ReturnADinosaur {
@@ -20,7 +21,7 @@ internal interface ReturnADinosaur {
   fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
 }
 
-internal class ReturnADinosaurAction : WebAction {
+internal class ReturnADinosaurAction @Inject constructor() : WebAction {
   @Post("/cooldinos")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -29,7 +30,7 @@ internal class ReturnADinosaurAction : WebAction {
       .build()
 }
 
-internal class DinoClientModule(private val jetty : JettyService) : KAbstractModule() {
+internal class DinoClientModule(private val jetty: JettyService) : KAbstractModule() {
   override fun configure() {
     install(TypedHttpClientModule.create<ReturnADinosaur>("dinosaur"))
     super.configure()

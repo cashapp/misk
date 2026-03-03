@@ -35,6 +35,7 @@ class JsonColumnTest {
     }
     transacter.transaction { session ->
       val movie = queryFactory.newQuery(WillFerrellMovieQuery::class)
+          .allowTableScan()
           .name("Anchorman")
           .nameAndCameosAndSetting(session)[0]
       assertThat(movie.name).isEqualTo("Anchorman")
@@ -49,7 +50,7 @@ class JsonColumnTest {
       install(EnvironmentModule(Environment.TESTING))
 
       val config = MiskConfig.load<RootConfig>("jsoncolumn", Environment.TESTING)
-      install(HibernateTestingModule(WillFerrellDb::class))
+      install(HibernateTestingModule(WillFerrellDb::class, config.data_source))
       install(HibernateModule(WillFerrellDb::class, config.data_source))
       install(object : HibernateEntityModule(WillFerrellDb::class) {
         override fun configureHibernate() {
@@ -66,6 +67,7 @@ class JsonColumnTest {
     }
     transacter.transaction { session ->
       val movie = queryFactory.newQuery(WillFerrellMovieQuery::class)
+          .allowTableScan()
           .name("Anchorman")
           .nameAndCameosAndSetting(session)[0]
       assertThat(movie.name).isEqualTo("Anchorman")

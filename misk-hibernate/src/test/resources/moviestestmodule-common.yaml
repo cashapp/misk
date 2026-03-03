@@ -1,5 +1,34 @@
-data_source:
+vitess_data_source:
   type: VITESS
   username: vt_app
   password: whatever
   vitess_schema_resource_root: classpath:/misk/hibernate/moviestestmodule-schema
+vitess_mysql_data_source:
+  type: VITESS_MYSQL
+  username: vt_app
+  password: whatever
+  vitess_schema_resource_root: classpath:/misk/hibernate/moviestestmodule-schema
+mysql_data_source:
+  type: MYSQL
+  database: movies
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/hibernate/moviestestmodule-schema
+cockroachdb_data_source:
+  type: COCKROACHDB
+  database: movies
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/hibernate/moviestestmodule-cockroachdb
+tidb_data_source:
+  type: TIDB
+  database: movies
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/hibernate/moviestestmodule-tidb
+postgresql_data_source:
+  type: POSTGRESQL
+  database: movies
+  username: postgres
+  password: password
+  migrations_resource: classpath:/misk/hibernate/moviestestmodule-cockroachdb

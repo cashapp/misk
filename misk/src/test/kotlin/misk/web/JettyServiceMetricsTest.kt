@@ -7,18 +7,20 @@ import misk.moshi.adapter
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.ConnectionMetrics
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
+import misk.web.jetty.MeasuredQueuedThreadPool
+import misk.web.jetty.MeasuredThreadPool
 import misk.web.jetty.ThreadPoolMetrics
 import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.data.Percentage
+import org.assertj.core.data.Offset
 import org.eclipse.jetty.util.thread.QueuedThreadPool
+import org.eclipse.jetty.util.thread.ThreadPool
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
@@ -35,25 +37,26 @@ internal class JettyServiceMetricsTest {
     val httpClient = OkHttpClient()
     val request = Request.Builder()
         .get()
+        .header("user-agent", "JettyServiceMetricsTest")
         .url(serverUrlBuilder().encodedPath("/hello").build())
         .build()
 
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(200)
-    assertThat(response.body()?.string()).isEqualTo("hi!")
+    assertThat(response.code).isEqualTo(200)
+    assertThat(response.body?.string()).isEqualTo("hi!")
 
     connectionMetricsCollector.refreshMetrics()
 
     val labels = ConnectionMetrics.forPort("http", 0) // It's the configured port not the actual
     assertThat(connectionMetrics.acceptedConnections.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.activeConnections.labels(*labels).get()).isEqualTo(1.0)
-    assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(120.0)
-    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(118.0)
+    assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(130.0)
+    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(153.0)
     assertThat(connectionMetrics.messagesReceived.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.messagesSent.labels(*labels).get()).isEqualTo(1.0)
 
     // Force close the okhttp connection
-    httpClient.connectionPool().evictAll()
+    httpClient.connectionPool.evictAll()
 
     // Wait for the active connections to go to zero. This is done by another thread (and we can't
     // control it) so we need to do a spin wait on time out
@@ -68,8 +71,8 @@ internal class JettyServiceMetricsTest {
     // Active connections should have dropped to zero, all other metrics should remain the same
     assertThat(connectionMetrics.acceptedConnections.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.activeConnections.labels(*labels).get()).isEqualTo(0.0)
-    assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(120.0)
-    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(118.0)
+    assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(130.0)
+    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(153.0)
     assertThat(connectionMetrics.messagesReceived.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.messagesSent.labels(*labels).get()).isEqualTo(1.0)
 
@@ -77,8 +80,8 @@ internal class JettyServiceMetricsTest {
     connectionMetricsCollector.refreshMetrics()
     assertThat(connectionMetrics.acceptedConnections.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.activeConnections.labels(*labels).get()).isEqualTo(0.0)
-    assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(120.0)
-    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(118.0)
+    assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(130.0)
+    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(153.0)
     assertThat(connectionMetrics.messagesReceived.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.messagesSent.labels(*labels).get()).isEqualTo(1.0)
   }
@@ -92,16 +95,16 @@ internal class JettyServiceMetricsTest {
 
     val adapter = moshi.adapter<PoolMetricsResponse>()
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.code).isEqualTo(200)
 
-    val metrics = adapter.fromJson(response.body()?.string()!!)!!
+    val metrics = adapter.fromJson(response.body?.string()!!)!!
     assertThat(metrics.queuedJobs).isEqualTo(0.0)
     assertThat(metrics.size).isEqualTo(10.0)
-    assertThat(metrics.utilization).isCloseTo(0.5, Percentage.withPercentage(10.0))
-    assertThat(metrics.utilization_max).isCloseTo(0.5, Percentage.withPercentage(10.0))
+    assertThat(metrics.utilization).isCloseTo(0.5, Offset.offset(0.35))
+    assertThat(metrics.utilization_max).isCloseTo(0.5, Offset.offset(0.35))
   }
 
-  internal class HelloAction : WebAction {
+  internal class HelloAction @Inject constructor() : WebAction {
     @Get("/hello")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun hi(): String {
@@ -116,7 +119,7 @@ internal class JettyServiceMetricsTest {
     val utilization_max: Double
   )
 
-  internal class CurrentPoolMetricsAction : WebAction {
+  internal class CurrentPoolMetricsAction @Inject constructor() : WebAction {
     @Inject lateinit var threadPoolMetrics: ThreadPoolMetrics
 
     @Get("/current-pool-metrics")
@@ -138,14 +141,16 @@ internal class JettyServiceMetricsTest {
       install(Modules.override(WebTestingModule()).with(
           object : KAbstractModule() {
             override fun configure() {
-              bind<QueuedThreadPool>().toInstance(QueuedThreadPool(
+              val pool = QueuedThreadPool(
                   10, 10 // Fixed # of threads
-              ))
+              )
+              bind<ThreadPool>().toInstance(pool)
+              bind<MeasuredThreadPool>().toInstance(MeasuredQueuedThreadPool(pool))
             }
           }
       ))
-      multibind<WebActionEntry>().toInstance(WebActionEntry<HelloAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<CurrentPoolMetricsAction>())
+      install(WebActionModule.create<HelloAction>())
+      install(WebActionModule.create<CurrentPoolMetricsAction>())
     }
   }
 

@@ -1,0 +1,74 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Common Components Metadata 1`] = `
+<DocumentFragment>
+  <li
+    class=""
+  >
+    <a
+      class="bp3-menu-item bp3-popover-dismiss"
+      content="Test Content"
+    >
+      <div
+        class="bp3-text-overflow-ellipsis bp3-fill"
+      >
+        Test Content
+      </div>
+    </a>
+  </li>
+</DocumentFragment>
+`;
+
+exports[`Common Components MetadataCollapse can render with redux 1`] = `
+<DocumentFragment>
+  <div>
+    <li
+      class=""
+    >
+      <a
+        class="bp3-menu-item bp3-popover-dismiss"
+        content="[object Object]"
+        data-testid="metadata-collapse"
+      >
+        <div
+          class="bp3-text-overflow-ellipsis bp3-fill"
+        >
+          <span>
+            <span
+              class="bp3-icon bp3-icon-caret-right"
+              icon="caret-right"
+            >
+              <svg
+                data-icon="caret-right"
+                height="16"
+                viewBox="0 0 16 16"
+                width="16"
+              >
+                <desc>
+                  caret-right
+                </desc>
+                <path
+                  d="M11 8c0-.15-.07-.28-.17-.37l-4-3.5A.495.495 0 006 4.5v7a.495.495 0 00.83.37l4-3.5c.1-.09.17-.22.17-.37z"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </span>
+            <span>
+              Collapse Span
+            </span>
+          </span>
+        </div>
+      </a>
+    </li>
+    <div
+      class="bp3-collapse"
+    >
+      <div
+        aria-hidden="false"
+        class="bp3-collapse-body"
+        style="transform: translateY(-0px);"
+      />
+    </div>
+  </div>
+</DocumentFragment>
+`;

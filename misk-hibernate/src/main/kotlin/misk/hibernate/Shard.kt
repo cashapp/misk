@@ -1,11 +1,11 @@
 package misk.hibernate
 
 import com.google.common.base.Strings
+import com.google.common.base.Suppliers
+import com.google.common.collect.ImmutableList
+import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Range
 import okio.ByteString
-
-import com.google.common.base.Suppliers
-import com.google.common.collect.ImmutableSet
 import okio.ByteString.Companion.decodeHex
 
 data class Shard(val keyspace: Keyspace, val name: String) {
@@ -76,5 +76,10 @@ data class Shard(val keyspace: Keyspace, val name: String) {
     val SINGLE_KEYSPACE = Keyspace("keyspace")
     val SINGLE_SHARD = Shard(SINGLE_KEYSPACE, SINGLE_SHARD_ID)
     val SINGLE_SHARD_SET = ImmutableSet.of(SINGLE_SHARD)
+
+    fun parse(string: String): Shard {
+      val (keyspace, shard) = string.split('/', ':', limit = 2)
+      return Shard(Keyspace(keyspace), shard)
+    }
   }
 }

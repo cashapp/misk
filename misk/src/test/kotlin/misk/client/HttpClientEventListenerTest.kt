@@ -7,8 +7,8 @@ import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import okhttp3.Call
 import okhttp3.EventListener
@@ -50,8 +50,8 @@ internal class HttpClientEventListenerTest {
     assertThat(testListener.started()).isTrue()
   }
 
-  class ClientModule(val jetty: JettyService, val eventListener : TestEventListener)
-    : KAbstractModule() {
+  class ClientModule(val jetty: JettyService, val eventListener: TestEventListener) :
+    KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
       install(DinoClientModule(jetty))
@@ -60,21 +60,21 @@ internal class HttpClientEventListenerTest {
     }
   }
 
-  class TestEventListenerFactory @Inject constructor(private val listener : TestEventListener)
-    : EventListener.Factory {
+  class TestEventListenerFactory @Inject constructor(private val listener: TestEventListener) :
+    EventListener.Factory {
     override fun create(call: Call): EventListener {
       return listener
     }
   }
 
   @Singleton
-  class TestEventListener : EventListener() {
+  class TestEventListener @Inject constructor() : EventListener() {
     private var started = false
     override fun connectStart(call: Call, inetSocketAddress: InetSocketAddress, proxy: Proxy) {
       started = true
     }
 
-    fun started() : Boolean {
+    fun started(): Boolean {
       return started
     }
   }
@@ -82,8 +82,7 @@ internal class HttpClientEventListenerTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry<ReturnADinosaurAction>())
+      install(WebActionModule.create<ReturnADinosaurAction>())
     }
   }
 }

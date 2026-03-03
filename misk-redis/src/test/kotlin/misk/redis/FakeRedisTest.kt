@@ -6,28 +6,38 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import misk.time.FakeClockModule
+import okio.ByteString.Companion.encodeUtf8
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import java.lang.IllegalArgumentException
 import java.time.Duration
 import javax.inject.Inject
-import kotlin.test.*
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @MiskTest
 class FakeRedisTest {
+  @Suppress("unused")
   @MiskTestModule
   val module: Module = Modules.combine(FakeClockModule(), RedisTestModule())
 
   @Inject lateinit var clock: FakeClock
   @Inject lateinit var redis: Redis
 
-  @Test fun simpleSetGet() {
+  @Test
+  fun simpleStringSetGet() {
     val key = "test key"
+    val value = "test value".encodeUtf8()
+    val valueOverride = "test value override".encodeUtf8()
     val unknownKey = "this key doesn't exist"
-    val value = "test value"
-    val valueOverride = "test value override"
 
     // Set the value and read it
     redis[key] = value
-    assertEquals(value, redis[key], "Got unexpected value")
+    assertEquals(value, redis[key])
 
     // Overwrite the value and read it
     redis[key] = valueOverride
@@ -37,18 +47,51 @@ class FakeRedisTest {
     assertNull(redis[unknownKey], "Key should not exist")
   }
 
+  @Test
+  fun batchGetAndSet() {
+    val key = "key"
+    val key2 = "key2"
+    val firstValue = "firstValue".encodeUtf8()
+    val value = "value".encodeUtf8()
+    val value2 = "value2".encodeUtf8()
+    val unknownKey = "this key doesn't exist"
+
+    assertThat(redis.mget(key)).isEqualTo(listOf(null))
+    assertThat(redis.mget(key, key2)).isEqualTo(listOf(null, null))
+
+    redis.mset(key.encodeUtf8(), firstValue)
+    assertThat(redis.mget(key)).isEqualTo(listOf(firstValue))
+
+    redis.mset(key.encodeUtf8(), value, key2.encodeUtf8(), value2)
+    assertThat(redis.mget(key)).isEqualTo(listOf(value))
+    assertThat(redis.mget(key, key2)).isEqualTo(listOf(value, value2))
+    assertThat(redis.mget(key2, key)).isEqualTo(listOf(value2, value))
+    assertThat(redis.mget(key, unknownKey, key2, key)).isEqualTo(listOf(value, null, value2, value))
+
+    assertThat(redis[key]).isEqualTo(value)
+    assertThat(redis[key2]).isEqualTo(value2)
+    assertThat(redis[unknownKey]).isNull()
+  }
+
+  @Test
+  fun badArgumentsToBatchSet() {
+    assertThatThrownBy {
+      redis.mset("key".encodeUtf8())
+    }.isInstanceOf(IllegalArgumentException::class.java)
+  }
+
   @Test fun setWithExpiry() {
     val key = "key"
-    val value = "value"
+    val value = "value".encodeUtf8()
     val expirySec = 5L
 
-    // Set a key that expires
-    redis.set(key, Duration.ofSeconds(expirySec), value)
-    assertEquals(value, redis[key], "Got unexpected value")
+    // Set keys that expire
+    redis[key, Duration.ofSeconds(expirySec)] = value
+    assertEquals(value, redis[key])
 
     // Key should still be there
     clock.add(Duration.ofSeconds(4))
-    assertEquals(value, redis[key], "Got unexpected value")
+    assertEquals(value, redis[key])
 
     // Key should now be expired
     clock.add(Duration.ofSeconds(1))
@@ -61,15 +104,15 @@ class FakeRedisTest {
 
   @Test fun overridingResetsExpiry() {
     val key = "key"
-    val value = "value"
+    val value = "value".encodeUtf8()
     val expirySec = 5L
 
     // Set a key that expires
-    redis.set(key, Duration.ofSeconds(expirySec), value)
+    redis[key, Duration.ofSeconds(expirySec)] = value
 
     // Right before the key expires, override it with a new expiry time
     clock.add(Duration.ofSeconds(4))
-    redis.set(key, Duration.ofSeconds(expirySec), value)
+    redis[key, Duration.ofSeconds(expirySec)] = value
 
     // Key should not be expired
     clock.add(Duration.ofSeconds(4))
@@ -82,12 +125,12 @@ class FakeRedisTest {
 
   @Test fun deleteKey() {
     val key = "key"
+    val value = "value".encodeUtf8()
     val unknownKey = "this key doesn't exist"
-    val value = "value"
 
     // Set key
     redis[key] = value
-    assertEquals(value, redis[key], "Got unexpected value")
+    assertEquals(value, redis[key])
 
     // Delete key
     assertTrue(redis.del(key), "1 key should have been deleted")
@@ -100,7 +143,7 @@ class FakeRedisTest {
   @Test fun deleteMultipleKeys() {
     val keysToInsert = listOf("key1", "key2").toTypedArray()
     val key3 = "key3"
-    val value = "value"
+    val value = "value".encodeUtf8()
 
     // Set all keys except key3
     keysToInsert.forEach { redis[it] = value }

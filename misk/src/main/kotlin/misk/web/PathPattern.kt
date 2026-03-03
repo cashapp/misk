@@ -1,5 +1,7 @@
 package misk.web
 
+import okhttp3.HttpUrl
+import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 /**
@@ -17,34 +19,37 @@ class PathPattern(
   val matchesWildcardPath: Boolean
 ) : Comparable<PathPattern> {
 
+  /** Returns a Matcher if requestUrl can be matched, else null */
+  fun matcher(requestUrl: HttpUrl): Matcher? {
+    val matcher = regex.matcher(requestUrl.encodedPath)
+    return if (matcher.matches()) matcher else null
+  }
+
   override fun hashCode(): Int = pattern.hashCode()
 
-  override fun equals(other: Any?): Boolean {
-    val otherPath = other as? PathPattern ?: return false
-    return otherPath.pattern == pattern
-  }
+  override fun equals(other: Any?): Boolean = other is PathPattern && other.pattern == pattern
 
   override fun toString() = pattern
 
-  /** Compares path patterns by specificity, with the more specific pattern ordered first */
+  /** Compares path patterns by specificity with the more specific pattern ordered first. */
   override fun compareTo(other: PathPattern): Int {
-    // A path with more segments requires a more specific match
-    val numSegmentDiff = other.numSegments - numSegments
-    if (numSegmentDiff != 0) return numSegmentDiff
+    // More segments comes first.
+    val numSegmentsDiff = -numSegments.compareTo(other.numSegments)
+    if (numSegmentsDiff != 0) return numSegmentsDiff
 
-    // If we have the same number of fixed segments, but one of the patterns captures
-    // the trailing part of the path in a variable, that pattern is less specific
-    if (matchesWildcardPath && !other.matchesWildcardPath) return 1
-    if (!matchesWildcardPath && other.matchesWildcardPath) return -1
+    // Not matching a wildcard comes first.
+    val matchesWildcardPathDiff = matchesWildcardPath.compareTo(other.matchesWildcardPath)
+    if (matchesWildcardPathDiff != 0) return matchesWildcardPathDiff
 
-    // Assuming we match on the same number of segments, then the pattern that has
-    // more of those segments as constant text is a more specific match
-    val numVariablesDiff = variableNames.size - other.variableNames.size
+    // Fewer variables comes first.
+    val numVariablesDiff = variableNames.size.compareTo(other.variableNames.size)
     if (numVariablesDiff != 0) return numVariablesDiff
 
-    // Finally, the pattern which qualifies more of its variables with regexes is a
-    // more specific match
-    return other.numRegexVariables - numRegexVariables
+    // More regexes comes first.
+    val numRegexVariablesDiff = -numRegexVariables.compareTo(other.numRegexVariables)
+    if (numRegexVariablesDiff != 0) return numRegexVariablesDiff
+
+    return 0
   }
 
   companion object {

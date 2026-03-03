@@ -1,18 +1,21 @@
 package misk.web
 
 import misk.inject.KAbstractModule
+import misk.logging.LogCollector
+import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
+import misk.web.interceptors.LogRequestResponse
+import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.util.concurrent.LinkedBlockingDeque
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,37 +25,40 @@ internal class WebSocketsTest {
   val module = TestModule()
 
   @Inject lateinit var jettyService: JettyService
+  @Inject lateinit var logCollector: LogCollector
+
+  val listener = FakeWebSocketListener()
 
   @Test
   fun basicWebSocket() {
-    val client = OkHttpClient.Builder()
+    val client = OkHttpClient()
+
+    val request = Request.Builder()
+        .url(jettyService.httpServerUrl.resolve("/echo")!!)
         .build()
 
-    val httpServerUrl = jettyService.httpServerUrl
-    val request = okhttp3.Request.Builder()
-        .url("ws://${httpServerUrl.host()}:${httpServerUrl.port()}/echo")
-        .build()
+    val webSocket = client.newWebSocket(request, listener)
 
-    val messages = LinkedBlockingDeque<String>()
-    val webSocket = client.newWebSocket(request, object : okhttp3.WebSocketListener() {
-      override fun onMessage(webSocket: okhttp3.WebSocket, text: String) {
-        messages.add(text)
-      }
-    })
+    webSocket.send("hello")
+    assertEquals("ACK hello", listener.takeMessage())
 
-    val message = "this message will be echo'd back by the server"
-    webSocket.send(message)
-    assertEquals(message, messages.pollFirst(2, TimeUnit.SECONDS))
+    // Confirm interceptors were invoked.
+    assertThat(logCollector.takeMessage(RequestLoggingInterceptor::class)).matches(
+      "EchoWebSocket principal=unknown time=0.000 ns code=200 request=\\[JettyWebSocket\\[.* to /echo]] response=EchoListener"
+    )
   }
 
   @Singleton
-  class EchoWebSocket : WebAction {
+  class EchoWebSocket @Inject constructor() : WebAction {
     @ConnectWebSocket("/echo")
+    @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
     fun echo(@Suppress("UNUSED_PARAMETER") webSocket: WebSocket): WebSocketListener {
       return object : WebSocketListener() {
         override fun onMessage(webSocket: WebSocket, text: String) {
-          webSocket.send(text)
+          webSocket.send("ACK $text")
         }
+
+        override fun toString() = "EchoListener"
       }
     }
   }
@@ -60,7 +66,8 @@ internal class WebSocketsTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<EchoWebSocket>())
+      install(LogCollectorModule())
+      install(WebActionModule.create<EchoWebSocket>())
     }
   }
 }

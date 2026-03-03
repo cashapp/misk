@@ -1,0 +1,158 @@
+version: 2.1
+jobs:
+  compile_and_cache_java:
+    machine:
+      image: circleci/classic:latest
+    working_directory: ~/misk
+    environment:
+      ENVIRONMENT: TESTING
+      JVM_OPTS: -Xmx1024M
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=3 -Xmx4096m"
+      TERM: dumb
+    steps:
+      - checkout
+      - run:
+          name: "Download and extract OpenJDK 11"
+          command: |
+            mkdir -p ~/openjdk-11 && cd ~/openjdk-11 && curl -sSL https://download.oracle.com/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz | tar -xz --strip-components 1
+            echo '
+              export PATH="$JAVA_HOME/bin:$PATH"
+              export JAVA_HOME="$HOME/openjdk-11"
+            ' >> $BASH_ENV
+      - run:
+          name: "Compile"
+          command: |
+            ./gradlew testClasses --parallel --build-cache
+      - save_cache:
+          paths:
+            - ~/.gradle/caches
+            - ~/.gradle/wrapper
+          # Under normal usage, saves compiled results from master once a day
+          key: v1-master-compile-{{ .BuildNum }}
+  java:
+    machine:
+      image: circleci/classic:latest
+    parallelism: 2
+    working_directory: ~/misk
+    environment:
+      ENVIRONMENT: TESTING
+      JVM_OPTS: -Xmx1024M
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=3 -Xmx4096m"
+      TERM: dumb
+    steps:
+      - checkout # check out source code to working directory
+      - restore_cache:
+          keys:
+            # restore compilation and wrapper from previous branch/job build or master
+            - v1-{{ .Branch }}-{{ .Environment.CIRCLE_JOB }}-{{ .Environment.CIRCLE_NODE_INDEX }}
+            - v1-{{ .Branch }}-{{ .Environment.CIRCLE_JOB }}
+            - v1-master-compile
+      - run:
+          name: "Download and extract OpenJDK 11"
+          command: |
+            mkdir -p ~/openjdk-11 && cd ~/openjdk-11 && curl -sSL https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz | tar -xz --strip-components 1
+            echo '
+              export PATH="$JAVA_HOME/bin:$PATH"
+              export JAVA_HOME="$HOME/openjdk-11"
+            ' >> $BASH_ENV
+      - run:
+          name: "Dump environment variables"
+          command: env
+      - run:
+          name: "Start MySQL if needed"
+          # There's a race condition here, where it's possible that MySQL hasn't finished starting
+          # up before we try to connect to it. But Kotlin builds are so damn slow it'll never
+          # happen in practice.
+          command: |
+            # Only run MySQL for the hibernate tests.
+            if [ "$CIRCLE_NODE_INDEX" -eq 1 ]; then
+              docker run -d -p 3306:3306 --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=1 mysql:5.7
+            else
+              echo "Not starting MySQL"
+            fi
+      - run:
+          name: "Build and test"
+          command: |
+            if [ "$CIRCLE_NODE_INDEX" -eq 1 ]; then
+              ./gradlew testShardHibernate -i --scan --parallel --build-cache
+            else
+              ./gradlew testShardNonHibernate -i --scan --parallel --build-cache
+            fi
+      - run:
+          name: Collect test results
+          command: |
+            mkdir -p ~/test-results/junit/
+            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/test-results/junit/ \;
+          when: always
+      - save_cache:
+          paths:
+            - ~/.gradle/caches
+            - ~/.gradle/wrapper
+          # Under normal usage, saves compiled results from master once a day
+          key: v1-{{ .Branch }}-{{ .Environment.CIRCLE_JOB }}-{{ .Environment.CIRCLE_NODE_INDEX }}-build-{{ .BuildNum }}
+      - store_test_results:
+          name: Store test results
+          path: ~/test-results
+      - run:
+          name: Collect gradle reports
+          command: |
+            mkdir -p ~/reports/
+            tar cf - */build/reports | (cd ~/reports/; tar xf -)
+          when: always
+      - store_artifacts:
+          name: Store gradle reports
+          path: ~/reports
+  node:
+    working_directory: ~/misk
+    docker:
+      - image: circleci/node:10.15
+    steps:
+      - checkout
+      - run: sudo npm install -g @misk/cli && miskweb ci-build -e
+  docs:
+    docker:
+      - image: circleci/python:3.8.3
+    parallelism: 1
+    steps:
+      - run:
+          name: "Download and extract OpenJDK 11"
+          command: |
+            mkdir -p ~/openjdk-11 && cd ~/openjdk-11 && curl -sSL https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz | tar -xz --strip-components 1
+            echo '
+              export PATH="$JAVA_HOME/bin:$PATH"
+              export JAVA_HOME="$HOME/openjdk-11"
+            ' >> $BASH_ENV
+      - checkout # check out source code to working directory
+      - run: |
+          pip install mkdocs mkdocs-material
+      - run: |
+          ./gradlew dokka
+      - run: |
+          cat README.md | grep -v 'project website' > docs/index.md
+          cp CHANGELOG.md docs/changelog.md
+          cp RELEASING.md docs/releasing.md
+      - run: mkdocs build
+workflows:
+  version: 2
+  on_commit:
+    jobs:
+      - compile_and_cache_java:
+          filters:
+            branches:
+              only: master
+      - java
+      - node
+      - docs
+  nightly:
+    jobs:
+      - java
+      - node
+      - docs
+    triggers:
+      - schedule:
+          # midnight mountain time in UTC
+          cron: "0 6 * * *"
+          filters:
+            branches:
+              only:
+                - master

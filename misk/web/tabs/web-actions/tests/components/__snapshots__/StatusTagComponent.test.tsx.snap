@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StatusTagComponent StatusTagComponent renders empty when no status given 1`] = `
+<DocumentFragment>
+  <span />
+</DocumentFragment>
+`;
+
+exports[`StatusTagComponent StatusTagComponent renders status 200 ok intent primary 1`] = `
+<DocumentFragment>
+  <span
+    class="bp3-tag bp3-intent-success"
+  >
+    <span
+      class="bp3-text-overflow-ellipsis bp3-fill"
+    >
+      200 OK
+    </span>
+  </span>
+</DocumentFragment>
+`;
+
+exports[`StatusTagComponent StatusTagComponent renders status 404 not found intent warning 1`] = `
+<DocumentFragment>
+  <span
+    class="bp3-tag bp3-intent-warning"
+  >
+    <span
+      class="bp3-text-overflow-ellipsis bp3-fill"
+    >
+      404 NOT FOUND
+    </span>
+  </span>
+</DocumentFragment>
+`;
+
+exports[`StatusTagComponent StatusTagComponent renders status 500 internal error intent danger 1`] = `
+<DocumentFragment>
+  <span
+    class="bp3-tag bp3-intent-danger"
+  >
+    <span
+      class="bp3-text-overflow-ellipsis bp3-fill"
+    >
+      500 INTERNAL ERROR
+    </span>
+  </span>
+</DocumentFragment>
+`;

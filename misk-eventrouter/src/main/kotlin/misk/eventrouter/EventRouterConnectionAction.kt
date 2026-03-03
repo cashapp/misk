@@ -8,7 +8,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class EventRouterConnectionAction : WebAction {
+internal class EventRouterConnectionAction @Inject constructor() : WebAction {
   @Inject lateinit var realEventRouter: RealEventRouter
 
   @ConnectWebSocket("/eventrouter")

@@ -2,7 +2,7 @@ package misk.okio
 
 import okio.Buffer
 import okio.ByteString.Companion.encodeUtf8
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class OkioExtensionsTest {

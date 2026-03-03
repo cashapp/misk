@@ -8,11 +8,12 @@ import org.hibernate.event.spi.PreLoadEvent
 import org.hibernate.event.spi.PreLoadEventListener
 import org.hibernate.event.spi.PreUpdateEvent
 import org.hibernate.event.spi.PreUpdateEventListener
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FakeEventListener
-  : PreLoadEventListener, PreInsertEventListener, PreUpdateEventListener, PreDeleteEventListener {
+class FakeEventListener @Inject constructor() :
+  PreLoadEventListener, PreInsertEventListener, PreUpdateEventListener, PreDeleteEventListener {
   private val eventLog = mutableListOf<String>()
 
   override fun onPreLoad(event: PreLoadEvent) {

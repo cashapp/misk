@@ -1,40 +1,59 @@
+/** @jsx jsx */
+import { H1, H3, Spinner } from "@blueprintjs/core"
+import { css, jsx } from "@emotion/core"
+import { CodePreContainer } from "@misk/core"
 import * as React from "react"
-import styled from "styled-components"
-import { IConfigResources, IConfigState } from "../ducks"
 
-const Container = styled.div``
+export interface IConfigResource {
+  name: string
+  file: string
+}
 
-const ConfigEntry = styled.pre`
-  font-family: Fira Code, Menlo;
-`
+export interface IConfigProps {
+  resources?: string
+}
 
-const ConfigCode = styled.code`
-  font-family: Fira Code, Menlo;
-`
+const cssH3 = css({ fontFamily: "Fira Code, Menlo" })
 
-export default class ConfigComponent extends React.PureComponent<IConfigState> {
-  renderConfig(resource: IConfigResources) {
+export default class ConfigComponent extends React.PureComponent<IConfigProps> {
+  renderConfig(resource: IConfigResource) {
     return (
-      <ConfigEntry>
-        <h5>
-          <strong>{resource.name}</strong>
-        </h5>
-        <ConfigCode>{resource.file}</ConfigCode>
-      </ConfigEntry>
+      <div>
+        <br />
+        <H3 css={css({ fontFamily: "Fira Code, Menlo" })}>{resource.name}</H3>
+        <CodePreContainer>{resource.file}</CodePreContainer>
+      </div>
     )
   }
 
   render() {
-    const { resources, status } = this.props
-    return (
-      <Container>
-        <h1>Config</h1>
-        <p>{status}</p>
-        {resources &&
-          Object.entries(resources).map(([name, file]) =>
-            this.renderConfig({ name, file })
-          )}
-      </Container>
-    )
+    const { resources } = this.props
+    if (resources) {
+      return (
+        <div>
+          <H1>Config</H1>
+          {resources &&
+            Object.entries(resources).map(([name, file]) =>
+              this.renderConfig({ name, file })
+            )}
+        </div>
+      )
+    } else {
+      return (
+        <div>
+          <H1>Config</H1>
+          <br />
+          <H3 css={cssH3}>{"Effective Config"}</H3>
+          <CodePreContainer>{<Spinner />}</CodePreContainer>
+          <br />
+          <H3 css={cssH3}>{"classpath://common.yaml"}</H3>
+          <CodePreContainer>{<Spinner />}</CodePreContainer>
+          <H3 css={cssH3}>{"classpath://production.yaml"}</H3>
+          <CodePreContainer>{<Spinner />}</CodePreContainer>
+          <H3 css={cssH3}>{"classpath://staging.yaml"}</H3>
+          <CodePreContainer>{<Spinner />}</CodePreContainer>
+        </div>
+      )
+    }
   }
 }

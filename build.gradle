@@ -1,70 +1,63 @@
-plugins {
-  id "org.jetbrains.kotlin.jvm" version "1.3.11" apply false
-  id "com.vanniktech.maven.publish" version "0.4.0" apply false
-  id 'com.gradle.build-scan' version '1.16'
+buildscript {
+  repositories {
+    mavenCentral()
+    jcenter()
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+
+  apply from: new File("./dependencies.gradle")
+
+  dependencies {
+    classpath dep.kotlinGradlePlugin
+    classpath dep.junitGradlePlugin
+    classpath dep.mavenPublishGradlePlugin
+    classpath dep.wireGradlePlugin
+  }
 }
 
-buildScan {
-    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
-    termsOfServiceAgree = 'yes'
+tasks.register("testShardNonHibernate") {
+  group = "Continuous integration"
+  description = "Runs all tests that don't depend on misk-hibernate. " +
+          "This target is intended for manually sharding tests to make CI faster."
 }
 
-ext {
-  isCi = "true".equals(System.getenv('CI'))
-  isSqCi = "true".equals(System.getenv('SQCI'))
-  rep = null
-}
-apply from: file("./dependencies.gradle")
-
-if (rootProject.file("repositories.gradle").exists()) {
-  apply from: rootProject.file("repositories.gradle")
+tasks.register("testShardHibernate") {
+  group = "Continuous integration"
+  description = "Runs all tests that depend on misk-hibernate. " +
+          "This target is intended for manually sharding tests to make CI faster."
 }
 
-subprojects {
-  apply plugin: "java"
+subprojects { subProject ->
+  apply plugin: 'java'
   apply plugin: 'kotlin'
+  apply plugin: 'org.jetbrains.dokka'
+
   buildscript {
     repositories {
       mavenCentral()
       jcenter()
-      if (rep != null) {
-        if (rep.maven) {
-          for (Map.Entry<String, String> repEntry : rep.maven) {
-            maven {
-              url repEntry.value
-            }
-          }
-        }
-      }
-    }
-
-    dependencies {
-      classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
     }
   }
   repositories {
     mavenCentral()
     jcenter()
-    if (rep != null) {
-      if (rep.maven) {
-        for (Map.Entry<String, String> repEntry : rep.maven) {
-          maven {
-            url repEntry.value
-          }
-        }
-      }
-    }
   }
   compileKotlin {
     kotlinOptions {
       jvmTarget = "1.8"
-      allWarningsAsErrors = true
+
+      // TODO(alec): Enable again once Environment enum is deleted
+       allWarningsAsErrors = false
     }
   }
   compileTestKotlin {
     kotlinOptions {
       jvmTarget = "1.8"
-      allWarningsAsErrors = true
+
+      // TODO(alec): Enable again once Environment enum is deleted
+       allWarningsAsErrors = false
     }
   }
   sourceSets {
@@ -75,16 +68,60 @@ subprojects {
   dependencies {
     testImplementation dep.junitApi
     testRuntimeOnly dep.junitEngine
+
+    // Platform/BOM dependencies constrain versions only.
+    api enforcedPlatform(dep.grpcBom)
+    api enforcedPlatform(dep.jacksonBom)
+    api enforcedPlatform(dep.jerseyBom)
+    api enforcedPlatform(dep.jettyBom)
+    api enforcedPlatform(dep.kotlinBom)
+    api enforcedPlatform(dep.nettyBom)
   }
+
+  // We have to set the dokka configuration after evaluation since the com.vanniktech.maven.publish
+  // plugin overwrites our dokka configuration on projects where it's applied.
+  afterEvaluate { p ->
+    p.tasks.dokka {
+      reportUndocumented = false
+      skipDeprecated = true
+      jdkVersion = 8
+    }
+  }
+
   test {
     useJUnitPlatform()
     testLogging {
       events "started", "passed", "skipped", "failed"
       exceptionFormat = 'full'
+      showStandardStreams = false
     }
   }
   if (rootProject.file("hooks.gradle").exists()) {
     apply from: rootProject.file("hooks.gradle")
   }
+
+  if (["misk-aws","misk-events","misk-jobqueue","misk-jobqueue-testing","misk-hibernate","misk-hibernate-testing"].contains(name)) {
+    rootProject.getTasksByName("testShardHibernate", false).first().dependsOn.add(test)
+  } else {
+    rootProject.getTasksByName("testShardNonHibernate", false).first().dependsOn.add(test)
+  }
+
+  if (!path.startsWith(":samples") && !path.startsWith(":misk-embedded-sample")) {
+    apply plugin: 'com.vanniktech.maven.publish'
+  }
+
+  // Workaround the Gradle bug resolving multiplatform dependencies.
+  // https://github.com/square/okio/issues/647
+  configurations.all { configuration ->
+    if (name.contains('kapt') || name.contains("wire") || name.contains("proto") || name.contains("Proto")) {
+      attributes.attribute(Usage.USAGE_ATTRIBUTE, subProject.objects.named(Usage.class, Usage.JAVA_RUNTIME))
+    }
+  }
 }
 
+if (hasProperty('buildScan')) {
+  buildScan {
+    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+    termsOfServiceAgree = 'yes'
+  }
+}

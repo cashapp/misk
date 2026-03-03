@@ -11,6 +11,7 @@ import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -36,15 +37,14 @@ internal class WebDispatchTest {
     val requestContent = helloByeJsonAdapter.toJson(HelloBye("my friend"))
     val httpClient = OkHttpClient()
     val request = Request.Builder()
-        .post(okhttp3.RequestBody.create(MediaTypes.APPLICATION_JSON_MEDIA_TYPE,
-            requestContent))
+        .post(requestContent.toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE))
         .url(serverUrlBuilder().encodedPath("/hello").build())
         .build()
 
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.code).isEqualTo(200)
 
-    val responseContent = response.body()!!.source()
+    val responseContent = response.body!!.source()
     assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message).isEqualTo(
         "post hello my friend")
   }
@@ -58,9 +58,9 @@ internal class WebDispatchTest {
         .build()
 
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.code).isEqualTo(200)
 
-    val responseContent = response.body()!!.source().readString(Charsets.UTF_8)
+    val responseContent = response.body!!.source().readString(Charsets.UTF_8)
     assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message)
         .isEqualTo("get hello my_friend")
   }
@@ -74,9 +74,9 @@ internal class WebDispatchTest {
         .build()
 
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.code).isEqualTo(200)
 
-    val responseContent = response.body()!!.source().readString(Charsets.UTF_8)
+    val responseContent = response.body!!.source().readString(Charsets.UTF_8)
     assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message)
         .isEqualTo("get hello my_friend")
   }
@@ -93,7 +93,7 @@ internal class WebDispatchTest {
 
     // we expect this to fail since we threw an error; what we are trying to avoid is a
     // binding time error due to missing marshaller
-    assertThat(response.code()).isEqualTo(500)
+    assertThat(response.code).isEqualTo(500)
   }
 
   @Test
@@ -118,16 +118,16 @@ internal class WebDispatchTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostHello>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<GetHello>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostBye>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<GetBye>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<GetNothing>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<GetHello>("/path/prefix/"))
+      install(WebActionModule.create<PostHello>())
+      install(WebActionModule.create<GetHello>())
+      install(WebActionModule.create<PostBye>())
+      install(WebActionModule.create<GetBye>())
+      install(WebActionModule.create<GetNothing>())
+      install(WebActionModule.createWithPrefix<GetHello>("/path/prefix/"))
     }
   }
 
-  class PostHello : WebAction {
+  class PostHello @Inject constructor() : WebAction {
     @Post("/hello")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -135,14 +135,14 @@ internal class WebDispatchTest {
         HelloBye("post hello ${request.message}")
   }
 
-  class GetHello : WebAction {
+  class GetHello @Inject constructor() : WebAction {
     @Get("/hello/{message}")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun hello(@PathParam("message") message: String) =
         HelloBye("get hello $message")
   }
 
-  class PostBye : WebAction {
+  class PostBye @Inject constructor() : WebAction {
     @Post("/bye")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -150,14 +150,14 @@ internal class WebDispatchTest {
         HelloBye("post bye ${request.message}")
   }
 
-  class GetBye : WebAction {
+  class GetBye @Inject constructor() : WebAction {
     @Get("/bye/{message}")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun bye(@PathParam("message") message: String) =
         HelloBye("get bye $message")
   }
 
-  class GetNothing : WebAction {
+  class GetNothing @Inject constructor() : WebAction {
     @Get("/nothing")
     fun doNothing(): Nothing {
       throw UnsupportedOperationException("we did nothing")

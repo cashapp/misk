@@ -3,7 +3,7 @@ package misk.security.authz
 import kotlin.reflect.KClass
 
 /**
- * Use this to alias an annotation to a set of services and roles. This can be used to decouple code
+ * Use this to alias an annotation to a set of services and capabilities. This can be used to decouple code
  * that needs access control from the policy that defines it.
  *
  * To demonstrate, let's define an access annotation. By convention these annotations are suffixed
@@ -18,35 +18,35 @@ import kotlin.reflect.KClass
  * Next we define actions that apply our annotation:
  *
  * ```
- * class DiscoverDinosaurAction : WebAction {
+ * class DiscoverDinosaurAction @Inject constructor() : WebAction {
  *   @Get("/discover")
  *   @PaleontologistAccess
  *   fun discover()
  * }
  *
- * class DigUpDinosaurAction : WebAction {
+ * class DigUpDinosaurAction @Inject constructor() : WebAction {
  *   @Get("/dig")
  *   @PaleontologistAccess
  *   fun dig()
  * }
  * ```
  *
- * Finally we use multibindings to specify which services and roles are permitted:
+ * Finally we use multibindings to specify which services and capabilities are permitted:
  *
  * ```
  * multibind<AccessAnnotationEntry>().toInstance(
- *  AccessAnnotationEntry<PaleontologistAccess>(roles = listOf("paleontologist", "intern")))
+ *  AccessAnnotationEntry<PaleontologistAccess>(capabilities = listOf("paleontologist", "intern")))
  * ```
  */
 data class AccessAnnotationEntry(
   val annotation: KClass<out Annotation>,
   val services: List<String> = listOf(),
-  val roles: List<String> = listOf()
+  val capabilities: List<String> = listOf()
 )
 
 inline fun <reified T : Annotation> AccessAnnotationEntry(
   services: List<String> = listOf(),
-  roles: List<String> = listOf()
+  capabilities: List<String> = listOf()
 ): AccessAnnotationEntry {
-  return AccessAnnotationEntry(T::class, services, roles)
+  return AccessAnnotationEntry(T::class, services, capabilities)
 }

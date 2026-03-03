@@ -9,7 +9,8 @@ import java.sql.ResultSet
 import java.sql.Types
 
 /** Binds Id<*> in the DB to a bigint in MySQL. */
-internal object IdType : UserType, ResultSetIdentifierConsumer {
+class IdType : UserType, ResultSetIdentifierConsumer {
+
   override fun hashCode(x: Any?) = (x as Id<*>).hashCode()
 
   override fun deepCopy(value: Any?) = value

@@ -10,11 +10,11 @@ import misk.logging.log
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Response
+import misk.web.ResponseBody
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
-import okhttp3.Headers
+import okhttp3.Headers.Companion.toHeaders
 import java.lang.reflect.InvocationTargetException
-import java.util.concurrent.ExecutionException
 import javax.inject.Inject
 
 /**
@@ -23,22 +23,30 @@ import javax.inject.Inject
  * represented to clients; for example by setting the status code appropriately, or by returning
  * a specialized response format specific to the error. Components can control how exceptions are
  * mapped by installing [ExceptionMapper] via the [ExceptionMapperModule]
+ *
+ * TODO(isabel): Set the response body in a ThreadLocal to log in [RequestLoggingInterceptor]
  */
 class ExceptionHandlingInterceptor(
   private val actionName: String,
   private val mapperResolver: ExceptionMapperResolver
 ) : NetworkInterceptor {
 
-  override fun intercept(chain: NetworkChain): Response<*> = try {
-    chain.proceed(chain.request)
-  } catch (th: Throwable) {
-    toResponse(th)
+  override fun intercept(chain: NetworkChain) {
+    try {
+      chain.proceed(chain.httpCall)
+    } catch (th: Throwable) {
+      val response = toResponse(th)
+      chain.httpCall.statusCode = response.statusCode
+      chain.httpCall.takeResponseBody()?.use { sink ->
+        chain.httpCall.addResponseHeaders(response.headers)
+        (response.body as ResponseBody).writeTo(sink)
+      }
+    }
   }
 
   private fun toResponse(th: Throwable): Response<*> = when (th) {
     is UnauthenticatedException -> UNAUTHENTICATED_RESPONSE
     is UnauthorizedException -> UNAUTHORIZED_RESPONSE
-    is ExecutionException -> toResponse(th.cause!!)
     is InvocationTargetException -> toResponse(th.targetException)
     is UncheckedExecutionException -> toResponse(th.cause!!)
     else -> mapperResolver.mapperFor(th)?.let {
@@ -62,17 +70,17 @@ class ExceptionHandlingInterceptor(
     val log = getLogger<ExceptionHandlingInterceptor>()
 
     val INTERNAL_SERVER_ERROR_RESPONSE = Response("internal server error".toResponseBody(),
-        Headers.of(listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap()),
+        listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
         StatusCode.INTERNAL_SERVER_ERROR.code
     )
 
     val UNAUTHENTICATED_RESPONSE = Response("unauthenticated".toResponseBody(),
-        Headers.of(listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap()),
+        listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
         StatusCode.UNAUTHENTICATED.code
     )
 
     val UNAUTHORIZED_RESPONSE = Response("unauthorized".toResponseBody(),
-        Headers.of(listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap()),
+        listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
         StatusCode.FORBIDDEN.code
     )
   }

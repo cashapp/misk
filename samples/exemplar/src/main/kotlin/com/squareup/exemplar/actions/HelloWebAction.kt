@@ -8,10 +8,11 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import okhttp3.Headers
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class HelloWebAction : WebAction {
+class HelloWebAction @Inject constructor() : WebAction {
   @Get("/hello/{name}")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun hello(

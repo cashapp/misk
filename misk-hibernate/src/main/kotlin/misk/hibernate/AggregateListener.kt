@@ -7,6 +7,8 @@ import org.hibernate.event.spi.PostDeleteEvent
 import org.hibernate.event.spi.PostDeleteEventListener
 import org.hibernate.event.spi.PostInsertEvent
 import org.hibernate.event.spi.PostInsertEventListener
+import org.hibernate.event.spi.PostLoadEvent
+import org.hibernate.event.spi.PostLoadEventListener
 import org.hibernate.event.spi.PostUpdateEvent
 import org.hibernate.event.spi.PostUpdateEventListener
 import org.hibernate.event.spi.PreDeleteEvent
@@ -17,6 +19,8 @@ import org.hibernate.event.spi.PreLoadEvent
 import org.hibernate.event.spi.PreLoadEventListener
 import org.hibernate.event.spi.PreUpdateEvent
 import org.hibernate.event.spi.PreUpdateEventListener
+import org.hibernate.event.spi.SaveOrUpdateEvent
+import org.hibernate.event.spi.SaveOrUpdateEventListener
 import org.hibernate.persister.entity.EntityPersister
 import javax.inject.Provider
 
@@ -27,12 +31,14 @@ import javax.inject.Provider
 internal class AggregateListener(
   registrations: Set<ListenerRegistration>
 ) : PreLoadEventListener,
+    PostLoadEventListener,
     PreDeleteEventListener,
     PostDeleteEventListener,
     PreUpdateEventListener,
     PostUpdateEventListener,
     PreInsertEventListener,
-    PostInsertEventListener {
+    PostInsertEventListener,
+    SaveOrUpdateEventListener {
   private val multimap = LinkedHashMultimap.create<EventType<*>, Provider<*>>()!!
 
   init {
@@ -104,9 +110,21 @@ internal class AggregateListener(
     }
   }
 
+  override fun onPostLoad(event: PostLoadEvent?) {
+    for (provider in multimap[EventType.POST_LOAD]) {
+      (provider.get() as PostLoadEventListener).onPostLoad(event)
+    }
+  }
+
   override fun onPostInsert(event: PostInsertEvent?) {
     for (provider in multimap[EventType.POST_INSERT]) {
       (provider.get() as PostInsertEventListener).onPostInsert(event)
+    }
+  }
+
+  override fun onSaveOrUpdate(event: SaveOrUpdateEvent?) {
+    for (provider in multimap[EventType.SAVE_UPDATE]) {
+      (provider.get() as SaveOrUpdateEventListener).onSaveOrUpdate(event)
     }
   }
 }

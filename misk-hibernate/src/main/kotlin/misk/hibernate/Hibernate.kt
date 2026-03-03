@@ -6,6 +6,7 @@ import org.hibernate.boot.Metadata
 import org.hibernate.mapping.Component
 import org.hibernate.mapping.PersistentClass
 import org.hibernate.mapping.Property
+import org.hibernate.mapping.SimpleValue
 import java.lang.reflect.Field
 import java.util.Properties
 
@@ -71,4 +72,25 @@ internal fun Properties.getField(name: String): Field? {
 
   val entityClass = Class.forName(declaringClassName)
   return entityClass.getDeclaredField(fieldName)
+}
+
+internal fun SimpleValue.setTypeParameter(key: String, value: String) {
+  if (typeParameters == null) {
+    typeParameters = Properties()
+  }
+  typeParameters.setProperty(key, value)
+}
+
+internal fun SimpleValue.setTypeParameter(name: String, field: Field) {
+  if (typeParameters == null) {
+    typeParameters = Properties()
+  }
+  typeParameters.setField(name, field)
+}
+
+internal fun SimpleValue.setTypeParameter(key: String, value: Any) {
+  if (typeParameters == null) {
+    typeParameters = Properties()
+  }
+  typeParameters[key] = value
 }

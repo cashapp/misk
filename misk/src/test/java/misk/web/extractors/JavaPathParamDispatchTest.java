@@ -41,6 +41,10 @@ public class JavaPathParamDispatchTest {
   }
 
   public static final class GetObjectDetails implements WebAction {
+    @Inject
+    public GetObjectDetails() {
+    }
+
     @Get(pathPattern = "/objects/{resourceType}/{name}/{version}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     public String getObjectDetails(

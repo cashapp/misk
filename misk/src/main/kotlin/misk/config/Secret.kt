@@ -1,6 +1,5 @@
 package misk.config
 
-
 /**
  * Type for any secrets that need to be loaded as reference in their config file.
  * Secret addresses should use format specified in [misk.resources.ResourceLoader].
@@ -39,6 +38,6 @@ package misk.config
  * ```
  */
 
-interface Secret<T>{
+interface Secret<T> {
   val value: T
 }

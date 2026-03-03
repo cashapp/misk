@@ -1,9 +1,9 @@
 package misk.tasks
 
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
+import misk.ServiceModule
 import misk.backoff.ExponentialBackoff
 import misk.backoff.FlatBackoff
 import misk.backoff.retry
@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.concurrent.withLock
 
@@ -32,6 +33,8 @@ internal class RepeatedTaskQueueTest {
 
   @Inject lateinit var clock: FakeClock
   @Inject lateinit var taskQueue: RepeatedTaskQueue
+  // Install another RepeatedTaskQueue to test guice is happy
+  @Inject @field:Named("another") lateinit var anotherTaskQueue: RepeatedTaskQueue
   @Inject lateinit var pendingTasks: ExplicitReleaseDelayQueue<DelayedTask>
 
   @BeforeEach fun initClock() {
@@ -49,6 +52,50 @@ internal class RepeatedTaskQueueTest {
 
     clock.add(Duration.ofSeconds(7))
     assertThat(scheduled.getDelay(TimeUnit.SECONDS)).isEqualTo(3)
+  }
+
+  @Test fun scheduleMetrics() {
+    var counter = 0
+    taskQueue.schedule(Duration.ofSeconds(10)) {
+      val status = when (counter) {
+        0 -> Status.OK
+        1 -> Status.FAILED
+        2 -> Status.NO_RESCHEDULE
+        else -> Status.NO_WORK
+      }
+      counter++
+      Result(status, Duration.ofSeconds(5))
+    }
+    waitForNextPendingTask().task()
+    assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "ok")).isEqualTo(1)
+    waitForNextPendingTask().task()
+    assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "failed")).isEqualTo(1)
+    waitForNextPendingTask().task()
+    assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "no_reschedule")).isEqualTo(1)
+    waitForNextPendingTask().task()
+    assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "no_work")).isEqualTo(1)
+  }
+
+  @Test fun scheduleBackoffMetrics() {
+    var counter = 0
+    taskQueue.scheduleWithBackoff(Duration.ofSeconds(10)) {
+      val status = when (counter) {
+        0 -> Status.OK
+        1 -> Status.FAILED
+        2 -> Status.NO_RESCHEDULE
+        else -> Status.NO_WORK
+      }
+      counter++
+      status
+    }
+    waitForNextPendingTask().task()
+    assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "ok")).isEqualTo(1)
+    waitForNextPendingTask().task()
+    assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "failed")).isEqualTo(1)
+    waitForNextPendingTask().task()
+    assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "no_reschedule")).isEqualTo(1)
+    waitForNextPendingTask().task()
+    assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "no_work")).isEqualTo(1)
   }
 
   @Test fun ordersTasksByInitialDelay() {
@@ -452,10 +499,40 @@ internal class RepeatedTaskQueueTest {
     assertThat(queue.poll().task().status).isEqualTo(Status.NO_WORK)
   }
 
+  @Test fun handlesUncaughtThrowableFromTask() {
+    val latch = CountDownLatch(1)
+    taskQueue.schedule(Duration.ofSeconds(3)) {
+      if (latch.count > 0) latch.countDown()
+      throw Throwable("a throwable!")
+    }
+
+    // Allow the first task to be dispatched, then wait for it complete
+    pendingTasks.release(1)
+    assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue()
+
+    val nextScheduled = waitForNextPendingTask()
+    assertThat(nextScheduled.getDelay(TimeUnit.SECONDS)).isEqualTo(3)
+  }
+
+  @Test fun handlesUncaughtThrowableFromTaskWithRetryDelay() {
+    val latch = CountDownLatch(1)
+    taskQueue.schedule(Duration.ofSeconds(3), Duration.ofSeconds(5)) {
+      if (latch.count > 0) latch.countDown()
+      throw Throwable("a throwable!")
+    }
+
+    // Allow the first task to be dispatched, then wait for it complete
+    pendingTasks.release(1)
+    assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue()
+
+    val nextScheduled = waitForNextPendingTask()
+    assertThat(nextScheduled.getDelay(TimeUnit.SECONDS)).isEqualTo(5)
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(Modules.override(MiskTestingServiceModule()).with(FakeClockModule()))
-      multibind<Service>().to<RepeatedTaskQueue>()
+      install(ServiceModule<RepeatedTaskQueue>())
     }
 
     @Provides @Singleton
@@ -465,10 +542,18 @@ internal class RepeatedTaskQueueTest {
 
     @Provides @Singleton
     fun repeatedTaskQueue(
-      clock: FakeClock,
+      queueFactory: RepeatedTaskQueueFactory,
       backingStorage: ExplicitReleaseDelayQueue<DelayedTask>
     ): RepeatedTaskQueue {
-      return RepeatedTaskQueue.forTesting("my-task-queue", clock, backingStorage)
+      return queueFactory.forTesting("my-task-queue", backingStorage)
+    }
+
+    @Provides @Singleton @Named("another")
+    fun anotherRepeatedTaskQueue(
+      queueFactory: RepeatedTaskQueueFactory,
+      backingStorage: ExplicitReleaseDelayQueue<DelayedTask>
+    ): RepeatedTaskQueue {
+      return queueFactory.forTesting("another-task-queue", backingStorage)
     }
   }
 

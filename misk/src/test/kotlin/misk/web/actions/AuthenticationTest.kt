@@ -3,20 +3,10 @@ package misk.web.actions
 import misk.MiskCaller
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientFactory
-import misk.inject.KAbstractModule
-import misk.scope.ActionScoped
-import misk.security.authz.AccessAnnotationEntry
-import misk.security.authz.AccessControlModule
 import misk.security.authz.FakeCallerAuthenticator
-import misk.security.authz.MiskCallerAuthenticator
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.Get
-import misk.web.ResponseContentType
-import misk.web.WebTestingModule
 import misk.web.jetty.JettyService
-import misk.web.mediatype.MediaTypes
-import misk.web.toResponseBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
@@ -26,7 +16,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class AuthenticationTest {
   @MiskTestModule
-  val module = TestModule()
+  val module = TestWebActionModule()
 
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var httpClientFactory: HttpClientFactory
@@ -47,20 +37,20 @@ class AuthenticationTest {
         .isEqualTo("$caller authorized as custom service")
   }
 
-  @Test fun customRoleAccess_unauthenticated() {
-    assertThat(executeRequest(path = "/custom_role_access"))
+  @Test fun customCapabilityAccess_unauthenticated() {
+    assertThat(executeRequest(path = "/custom_capability_access"))
         .isEqualTo("unauthenticated")
   }
 
-  @Test fun customRoleAccess_unauthorized() {
-    assertThat(executeRequest(path = "/custom_role_access", user = "sandy", roles = "guest"))
+  @Test fun customCapabilityAccess_unauthorized() {
+    assertThat(executeRequest(path = "/custom_capability_access", user = "sandy", capabilities = "guest"))
         .isEqualTo("unauthorized")
   }
 
-  @Test fun customRoleAccess_authorized() {
-    val caller = MiskCaller(user = "sandy", roles = setOf("admin"))
-    assertThat(executeRequest(path = "/custom_role_access", user = "sandy", roles = "admin"))
-        .isEqualTo("$caller authorized as custom role")
+  @Test fun customCapabilityAccess_authorized() {
+    val caller = MiskCaller(user = "sandy", capabilities = setOf("admin"))
+    assertThat(executeRequest(path = "/custom_capability_access", user = "sandy", capabilities = "admin"))
+        .isEqualTo("$caller authorized with custom capability")
   }
 
   /** Executes a request and returns the response body as a string. */
@@ -68,7 +58,7 @@ class AuthenticationTest {
     path: String = "/",
     service: String? = null,
     user: String? = null,
-    roles: String? = null
+    capabilities: String? = null
   ): String? {
     val client = createOkHttpClient()
 
@@ -81,58 +71,16 @@ class AuthenticationTest {
     user?.let {
       requestBuilder.header(FakeCallerAuthenticator.USER_HEADER, user)
     }
-    roles?.let {
-      requestBuilder.header(FakeCallerAuthenticator.ROLES_HEADER, roles)
+    capabilities?.let {
+      requestBuilder.header(FakeCallerAuthenticator.CAPABILITIES_HEADER, capabilities)
     }
     val call = client.newCall(requestBuilder.build())
     val response = call.execute()
-    return response.body()!!.string()
+    return response.body!!.string()
   }
 
   private fun createOkHttpClient(): OkHttpClient {
     val config = HttpClientEndpointConfig(jetty.httpServerUrl.toString())
     return httpClientFactory.create(config)
   }
-
-  class TestModule : KAbstractModule() {
-    override fun configure() {
-      install(WebTestingModule())
-      install(AccessControlModule())
-
-      multibind<WebActionEntry>().toInstance(WebActionEntry<CustomServiceAccessAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<CustomRoleAccessAction>())
-
-      multibind<AccessAnnotationEntry>().toInstance(
-          AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments")))
-      multibind<AccessAnnotationEntry>().toInstance(
-          AccessAnnotationEntry<CustomRoleAccess>(roles = listOf("admin")))
-      multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-    }
-  }
-
-  class CustomServiceAccessAction : WebAction {
-    @Inject lateinit var scopedCaller: ActionScoped<MiskCaller?>
-
-    @Get("/custom_service_access")
-    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    @CustomServiceAccess
-    fun get() = "${scopedCaller.get()} authorized as custom service".toResponseBody()
-  }
-
-  @Retention(AnnotationRetention.RUNTIME)
-  @Target(AnnotationTarget.FUNCTION)
-  annotation class CustomServiceAccess
-
-  class CustomRoleAccessAction : WebAction {
-    @Inject lateinit var scopedCaller: ActionScoped<MiskCaller?>
-
-    @Get("/custom_role_access")
-    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    @CustomRoleAccess
-    fun get() = "${scopedCaller.get()} authorized as custom role".toResponseBody()
-  }
-
-  @Retention(AnnotationRetention.RUNTIME)
-  @Target(AnnotationTarget.FUNCTION)
-  annotation class CustomRoleAccess
 }

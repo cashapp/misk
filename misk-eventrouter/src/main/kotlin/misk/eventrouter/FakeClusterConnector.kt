@@ -5,10 +5,11 @@ import misk.web.actions.WebSocketListener
 import okio.ByteString
 import java.io.IOException
 import java.util.concurrent.LinkedBlockingQueue
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class FakeClusterConnector : ClusterConnector {
+internal class FakeClusterConnector @Inject constructor() : ClusterConnector {
   val queue = LinkedBlockingQueue<Action>()
   private var nextHostId = 1
   private val peers = mutableMapOf<String, TopicPeer>()

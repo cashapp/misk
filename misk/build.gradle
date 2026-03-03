@@ -1,21 +1,16 @@
-apply from: rootProject.file("gradle/localdb.gradle")
-apply from: "https://raw.githubusercontent.com/square/misk-web/master/gradle/web.gradle"
-
-
 sourceSets {
   main.resources {
     srcDirs += [
+      'web/tabs/admin-dashboard/lib',
       'web/tabs/config/lib',
-      'web/tabs/loader/lib'
+      'web/tabs/web-actions/lib',
     ]
     exclude '**/node_modules'
   }
 }
 
-jar.dependsOn web
-
 dependencies {
-  compile dep.kotlinStdLib
+  compile dep.kotlinStdLibJdk8
   compile dep.kotlinTest
   compile dep.bouncycastle
   compile dep.guava
@@ -25,17 +20,21 @@ dependencies {
   compile dep.okHttp
   compile dep.okio
   compile dep.kotlinReflection
-  compile dep.moshi
+  compile dep.moshiCore
+  compile dep.moshiKotlin
+  compile dep.moshiAdapters
   compile dep.jettyHttp2
   compile dep.jettyServer
+  compile dep.jettyUnixSocket
   compile dep.servletApi
   compile dep.jettyAlpnJava
   compile dep.jettyServlet
+  compile dep.jettyServlets
   compile dep.jettyWebsocketServlet
   compile dep.jettyWebsocketServer
   compile dep.kubernetesClient
+  compile dep.wireGrpcClient
   compile dep.wireRuntime
-  compile dep.loggingApi
   compile dep.jacksonDatabind
   compile dep.jacksonDataformatYaml
   compile dep.jacksonKotlin
@@ -46,21 +45,29 @@ dependencies {
   compile dep.openTracingOkHttp
   compile dep.retrofit
   compile dep.retrofitMoshi
+  compile dep.retrofitProtobuf
   compile dep.retrofitWire
-  compile dep.logbackClassic
-  compile dep.slf4jApi
   compile dep.jaxbApi
   compile dep.prometheusClient
   compile dep.prometheusHotspot
   compile dep.jnrUnixsocket
+  compile dep.concurrencyLimitsCore
+  compile project(':misk-actions')
+  compile project(':misk-core')
+  compile project(':misk-inject')
+  compile project(':misk-metrics')
+  compile project(':misk-prometheus')
+  compile project(':misk-service')
 
   testCompile dep.kotlinxCoroutines
   testCompile dep.mockitoCore
   testCompile project(':misk-testing')
+  testImplementation dep.junit4Api
 }
 
-if (rootProject.file("repositories.gradle").exists()) {
-  dependencies {
-    compile dep.miskWeb
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
   }
 }

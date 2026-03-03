@@ -1,15 +1,15 @@
 package misk.eventrouter
 
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.squareup.moshi.Moshi
+import misk.ServiceModule
 import misk.environment.Environment
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.moshi.MoshiAdapterModule
 import misk.moshi.adapter
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -21,7 +21,7 @@ class RealEventRouterModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
     bind<EventRouter>().to<RealEventRouter>().asSingleton()
     bind<RealEventRouter>().asSingleton()
-    multibind<Service>().to<EventRouterService>()
+    install(ServiceModule<EventRouterService>())
     if (environment == Environment.DEVELOPMENT) {
       bind<ClusterConnector>().to<LocalClusterConnector>()
     } else {
@@ -30,7 +30,7 @@ class RealEventRouterModule(val environment: Environment) : KAbstractModule() {
     }
     bind<ClusterMapper>().to<ConsistentHashing>()
     install(MoshiAdapterModule(SocketEventJsonAdapter))
-    multibind<WebActionEntry>().toInstance(WebActionEntry<EventRouterConnectionAction>())
+    install(WebActionModule.create<EventRouterConnectionAction>())
   }
 
   @Provides @Singleton @ForEventRouterActions
@@ -56,7 +56,6 @@ class RealEventRouterModule(val environment: Environment) : KAbstractModule() {
  * not run multiple enqueued tasks concurrently! Instead it should have exactly 1 thread always.
  */
 @Qualifier
-@Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 internal annotation class ForEventRouterActions
 
@@ -65,11 +64,9 @@ internal annotation class ForEventRouterActions
  * onClose).
  */
 @Qualifier
-@Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 internal annotation class ForEventRouterSubscribers
 
 @Qualifier
-@Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 internal annotation class ForKubernetesWatching

@@ -9,7 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ToggleManualHealthCheckAction : WebAction {
+class ToggleManualHealthCheckAction @Inject constructor() : WebAction {
   @Inject lateinit var manualHealthCheck: ManualHealthCheck
 
   @Post("/health/manual")

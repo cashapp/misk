@@ -1,14 +1,25 @@
 dependencies {
   compile dep.awsApi
   compile dep.awsSqs
-  compile dep.tracingJaeger
+  compile dep.openTracingDatadog
   compile project(':misk')
   compile project(':misk-jobqueue')
+  compile project(':misk-feature')
+  compile project(':misk-transactional-jobqueue')
 
   testCompile dep.assertj
   testCompile dep.junitApi
   testCompile dep.junitEngine
   testCompile dep.junitParams
   testCompile dep.docker
+  testCompile dep.awaitility
   testCompile project(':misk-testing')
+  testCompile project(':misk-feature-testing')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
 }

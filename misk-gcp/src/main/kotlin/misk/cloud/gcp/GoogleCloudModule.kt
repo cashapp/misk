@@ -9,9 +9,9 @@ import com.google.cloud.http.HttpTransportOptions
 import com.google.cloud.storage.Storage
 import com.google.cloud.storage.StorageOptions
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.Singleton
+import misk.ServiceModule
 import misk.cloud.gcp.datastore.DatastoreConfig
 import misk.cloud.gcp.storage.LocalStorageRpc
 import misk.cloud.gcp.storage.StorageConfig
@@ -22,9 +22,14 @@ import java.nio.file.Paths
 import javax.inject.Inject
 
 /** Installs support for talking to real GCP services, either direct or via emulator */
-class GoogleCloudModule : KAbstractModule() {
+class GoogleCloudModule(
+  private val datastoreConfig: DatastoreConfig,
+  private val storageConfig: StorageConfig
+) : KAbstractModule() {
   override fun configure() {
-    multibind<Service>().to<GoogleCloud>()
+    bind<DatastoreConfig>().toInstance(datastoreConfig)
+    bind<StorageConfig>().toInstance(storageConfig)
+    install(ServiceModule<GoogleCloud>())
   }
 
   @Provides

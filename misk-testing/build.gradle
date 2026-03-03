@@ -1,13 +1,34 @@
 dependencies {
   compile dep.docker
+  // The docker-java we use in tests depends on an old version of junixsocket that depends on
+  // log4j. We force it up a minor version in packages that use it.
+  compile('com.kohlschutter.junixsocket:junixsocket-native-common:2.1.1') {
+    force = true
+  }
+  compile('com.kohlschutter.junixsocket:junixsocket-common:2.1.1') {
+    force = true
+  }
   compile dep.junitApi
   compile dep.junitParams
   compile dep.junitEngine
   compile dep.assertj
   compile dep.logbackClassic
-  compile dep.okHttpMockWebServer
+  compile (dep.okHttpMockWebServer) {
+    exclude group: 'junit'
+  }
   compile dep.okio
   compile dep.openTracingMock
   compile dep.mockitoCore
+  compile(dep.guavaTestLib) {
+    exclude group: 'junit'
+  }
   compile project(':misk')
+  compile project(':misk-core')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
 }

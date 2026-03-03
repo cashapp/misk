@@ -5,6 +5,7 @@ import com.google.inject.Provides
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
 import misk.MiskTestingServiceModule
+import misk.client.HttpClientConfig
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
@@ -24,8 +25,7 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.WebConfig
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebSslConfig
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
@@ -79,9 +79,15 @@ internal class PemSslClientServerTest {
     assertFailsWith<SSLHandshakeException> {
       noTrustClient.post<Dinosaur>("/hello", Dinosaur.Builder().name("trex").build())
     }
+    // This can sometimes cause a deadlock stopping the Jetty server, where server shutdown
+    // is triggered but the thread serving the SSL connection is still trying to start up.
+    // (only reproducible on CircleCI for some reason)...
+    // jstack: https://gist.github.com/mightyguava/785d26308beff1321297c798e907a92b
+    // So we just sleep a bit and avoid it.
+    Thread.sleep(100)
   }
 
-  class HelloAction : WebAction {
+  class HelloAction @Inject constructor() : WebAction {
     @Inject @ClientCertSubject private lateinit var clientCertSubjectDN: ActionScoped<X500Name?>
 
     @Post("/hello")
@@ -94,10 +100,7 @@ internal class PemSslClientServerTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule(WebConfig(
-          port = 0,
-          idle_timeout = 500000,
-          host = "127.0.0.1",
+      install(WebTestingModule(WebTestingModule.TESTING_WEB_CONFIG.copy(
           ssl = WebSslConfig(0,
               cert_store = CertStoreConfig(
                   resource = "classpath:/ssl/server_cert_key_combo.pem",
@@ -110,7 +113,7 @@ internal class PemSslClientServerTest {
               ),
               mutual_auth = WebSslConfig.MutualAuth.REQUIRED)
       )))
-      multibind<WebActionEntry>().toInstance(WebActionEntry<HelloAction>())
+      install(WebActionModule.create<HelloAction>())
     }
   }
 
@@ -130,40 +133,49 @@ internal class PemSslClientServerTest {
       return HttpClientsConfig(
           endpoints = mapOf(
               "cert-and-trust" to HttpClientEndpointConfig(
-                  jetty.httpsServerUrl!!.toString(),
-                  ssl = HttpClientSSLConfig(
-                      cert_store = CertStoreConfig(
-                          resource = "classpath:/ssl/client_cert_key_combo.pem",
-                          passphrase = "clientpassword",
-                          format = SslLoader.FORMAT_PEM
-                      ),
-                      trust_store = TrustStoreConfig(
-                          resource = "classpath:/ssl/server_cert.pem",
-                          format = SslLoader.FORMAT_PEM
+                  url = jetty.httpsServerUrl!!.toString(),
+                  clientConfig = HttpClientConfig(
+                      ssl = HttpClientSSLConfig(
+                          cert_store = CertStoreConfig(
+                              resource = "classpath:/ssl/client_cert_key_combo.pem",
+                              passphrase = "clientpassword",
+                              format = SslLoader.FORMAT_PEM
+                          ),
+                          trust_store = TrustStoreConfig(
+                              resource = "classpath:/ssl/server_cert.pem",
+                              format = SslLoader.FORMAT_PEM
+                          )
                       )
-                  )),
+                  )
+              ),
               "no-cert" to HttpClientEndpointConfig(
-                  jetty.httpsServerUrl!!.toString(),
-                  ssl = HttpClientSSLConfig(
-                      cert_store = null,
-                      trust_store = TrustStoreConfig(
-                          resource = "classpath:/ssl/server_cert.pem",
-                          format = SslLoader.FORMAT_PEM
+                  url = jetty.httpsServerUrl!!.toString(),
+                  clientConfig = HttpClientConfig(
+                      ssl = HttpClientSSLConfig(
+                          cert_store = null,
+                          trust_store = TrustStoreConfig(
+                              resource = "classpath:/ssl/server_cert.pem",
+                              format = SslLoader.FORMAT_PEM
+                          )
                       )
-                  )),
+                  )
+              ),
               "no-trust" to HttpClientEndpointConfig(
-                  jetty.httpsServerUrl!!.toString(),
-                  ssl = HttpClientSSLConfig(
-                      cert_store = CertStoreConfig(
-                          resource = "classpath:/ssl/client_cert_key_combo.pem",
-                          passphrase = "clientpassword",
-                          format = SslLoader.FORMAT_PEM
-                      ),
-                      trust_store = TrustStoreConfig(
-                          resource = "classpath:/ssl/client_cert.pem",
-                          format = SslLoader.FORMAT_PEM
+                  url = jetty.httpsServerUrl!!.toString(),
+                  clientConfig = HttpClientConfig(
+                      ssl = HttpClientSSLConfig(
+                          cert_store = CertStoreConfig(
+                              resource = "classpath:/ssl/client_cert_key_combo.pem",
+                              passphrase = "clientpassword",
+                              format = SslLoader.FORMAT_PEM
+                          ),
+                          trust_store = TrustStoreConfig(
+                              resource = "classpath:/ssl/client_cert.pem",
+                              format = SslLoader.FORMAT_PEM
+                          )
                       )
-                  ))
+                  )
+              )
           ))
     }
   }

@@ -1,0 +1,8 @@
+included_config:
+  key: common
+
+ignored_config:
+  key: ignored
+
+redacted_config:
+  passphrase: phrase123

@@ -1,8 +1,0 @@
-tracing:
-  backends:
-    jaeger:
-      reporter:
-        agent_host: localhost
-        agent_port: 12345
-    zipkin:
-      collector_url: localhost:12345/api/

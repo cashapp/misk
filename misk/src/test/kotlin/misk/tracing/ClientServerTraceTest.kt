@@ -2,7 +2,6 @@ package misk.tracing
 
 import com.google.inject.Guice
 import com.google.inject.Injector
-import com.google.inject.Provides
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
 import io.opentracing.Tracer
@@ -11,10 +10,12 @@ import io.opentracing.mock.MockTracer
 import misk.MiskTestingServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientsConfig
+import misk.client.HttpClientsConfigModule
 import misk.client.TypedHttpClientModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.keyOf
+import misk.testing.ConcurrentMockTracer
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
@@ -22,7 +23,7 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -45,7 +46,7 @@ internal class ClientServerTraceTest {
   private lateinit var jetty: JettyService
 
   @Inject
-  private lateinit var tracer: Tracer
+  private lateinit var serverTracer: ConcurrentMockTracer
 
   @Inject
   private lateinit var serverInjector: Injector
@@ -65,14 +66,11 @@ internal class ClientServerTraceTest {
     val client = clientInjector.getInstance<ReturnADinosaur>(Names.named("dinosaur"))
     client.getDinosaur(dinosaurRequest).execute()
 
-    val serverTracer = tracer as MockTracer
-    assertThat(serverTracer.finishedSpans().size).isEqualTo(1)
-
-    val serverSpan = serverTracer.finishedSpans().first()
+    val serverSpan = serverTracer.take()
     // Parent ID of 0 means there is no parent span
     assertThat(serverSpan.parentId()).isGreaterThan(0)
 
-    val clientTracer = clientInjector.getInstance(Tracer::class.java) as MockTracer
+    val clientTracer = clientInjector.getInstance(MockTracer::class.java)
     // Two spans here because one is created at the app level and another at the network interceptor
     // level.
     assertThat(clientTracer.finishedSpans().size).isEqualTo(2)
@@ -89,9 +87,8 @@ internal class ClientServerTraceTest {
 
     client.getDinosaur(dinosaurRequest).execute()
 
-    val serverTracer = tracer as MockTracer
-    assertThat(serverTracer.finishedSpans().size).isEqualTo(1)
-    assertThat(serverTracer.finishedSpans().first().parentId()).isEqualTo(0)
+    val span = serverTracer.take()
+    assertThat(span.parentId()).isEqualTo(0)
 
     assertThat(clientInjector.allBindings.filter { it.key == keyOf<Tracer>() }).isEmpty()
   }
@@ -105,21 +102,26 @@ internal class ClientServerTraceTest {
     val client = clientInjector.getInstance<RoarLikeDinosaur>(Names.named("roar"))
     client.doRoar(dinosaurRequest).execute()
 
-    val serverTracer = tracer as MockTracer
-    assertThat(serverTracer.finishedSpans().size).isEqualTo(4)
+    // Expect 4 spans on the server.
+    val serverSpans = listOf(
+        serverTracer.take(),
+        serverTracer.take(),
+        serverTracer.take(),
+        serverTracer.take()
+    )
 
-    val spanIds = serverTracer.finishedSpans().map { it.context().spanId() }.toSet()
-    val traceId = serverTracer.finishedSpans().first().context().traceId()
+    val spanIds = serverSpans.map { it.context().spanId() }.toSet()
+    val traceId = serverSpans[0].context().traceId()
 
     var initialServerSpan: MockSpan? = null
-    serverTracer.finishedSpans().forEach {
+    for (span in serverSpans) {
       // Parent ID of 0 means there is no parent span
-      assertThat(it.parentId()).isGreaterThan(0)
+      assertThat(span.parentId()).isGreaterThan(0)
 
       // Assert trace IDs are all the same (i.e. no new traces, new spans added as children)
-      assertThat(it.context().traceId()).isEqualTo(traceId)
+      assertThat(span.context().traceId()).isEqualTo(traceId)
 
-      if (!spanIds.contains(it.parentId())) initialServerSpan = it
+      if (!spanIds.contains(span.parentId())) initialServerSpan = span
     }
 
     assertThat(initialServerSpan).isNotNull()
@@ -140,7 +142,7 @@ internal class ClientServerTraceTest {
     fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
   }
 
-  class ReturnADinosaurAction : WebAction {
+  class ReturnADinosaurAction @Inject constructor() : WebAction {
     @Post("/cooldinos")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -154,7 +156,7 @@ internal class ClientServerTraceTest {
   }
 
   @Singleton
-  class RoarLikeDinosaurAction : WebAction {
+  class RoarLikeDinosaurAction @Inject constructor() : WebAction {
     // NOTE(nb): hackily pass in a client because I can't Guice well enough to figure out how to
     // inject this and I'm exhausted from trying to make it work.
     companion object {
@@ -172,8 +174,8 @@ internal class ClientServerTraceTest {
     override fun configure() {
       install(MockTracingBackendModule())
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnADinosaurAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<RoarLikeDinosaurAction>())
+      install(WebActionModule.create<ReturnADinosaurAction>())
+      install(WebActionModule.create<RoarLikeDinosaurAction>())
     }
   }
 
@@ -181,16 +183,11 @@ internal class ClientServerTraceTest {
     override fun configure() {
       install(TypedHttpClientModule.create<ReturnADinosaur>("dinosaur", Names.named("dinosaur")))
       install(TypedHttpClientModule.create<RoarLikeDinosaur>("roar", Names.named("roar")))
-    }
-
-    @Provides
-    @Singleton
-    fun provideHttpClientConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
+      install(HttpClientsConfigModule(HttpClientsConfig(
           endpoints = mapOf(
               "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
               "roar" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-          ))
+          ))))
     }
   }
 }

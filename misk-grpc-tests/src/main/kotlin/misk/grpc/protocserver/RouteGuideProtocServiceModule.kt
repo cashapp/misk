@@ -1,8 +1,8 @@
 package misk.grpc.protocserver
 
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import io.grpc.BindableService
+import misk.ServiceModule
 import misk.inject.KAbstractModule
 import javax.inject.Named
 
@@ -10,7 +10,7 @@ import javax.inject.Named
 class RouteGuideProtocServiceModule : KAbstractModule() {
   override fun configure() {
     multibind<BindableService>().to<RouteGuideProtocService>()
-    multibind<Service>().to<ProtocGrpcService>()
+    install(ServiceModule<ProtocGrpcService>())
   }
 
   @Provides

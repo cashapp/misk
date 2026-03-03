@@ -8,6 +8,7 @@ import misk.healthchecks.FakeHealthCheckModule
 import misk.services.FakeServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.WebActionModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -18,15 +19,15 @@ class ReadinessCheckActionTest {
   val module = Modules.combine(
       MiskTestingServiceModule(),
       FakeServiceModule(),
-      FakeHealthCheckModule()
+      FakeHealthCheckModule(),
+      WebActionModule.create<ReadinessCheckAction>()
   )
 
   @Inject lateinit var readinessCheckAction: ReadinessCheckAction
   @Inject lateinit var serviceManager: ServiceManager
   @Inject lateinit var healthCheck: FakeHealthCheck
 
-  @Test
-  fun readinessDependsOnServiceStateAndHealthChecksPassing() {
+  @Test fun readinessDependsOnServiceStateAndHealthChecksPassing() {
     serviceManager.startAsync()
     serviceManager.awaitHealthy()
     assertThat(readinessCheckAction.readinessCheck().statusCode).isEqualTo(200)

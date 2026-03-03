@@ -1,8 +1,8 @@
 package misk.config
 
 import com.google.inject.util.Modules
+import misk.environment.DeploymentModule
 import misk.environment.Environment
-import misk.environment.EnvironmentModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebConfig
@@ -13,7 +13,6 @@ import org.slf4j.event.Level
 import java.io.File
 import java.time.Duration
 import javax.inject.Inject
-import javax.inject.Named
 import kotlin.test.assertFailsWith
 
 @MiskTest
@@ -24,24 +23,12 @@ class MiskConfigTest {
   @MiskTestModule
   val module = Modules.combine(
       ConfigModule.create("test_app", config),
-      EnvironmentModule(defaultEnv)
+      DeploymentModule.forTesting()
       // @TODO(jwilson) https://github.com/square/misk/issues/272
   )
 
   @Inject
   private lateinit var testConfig: TestConfig
-
-  @field:[Inject Named("consumer_a")]
-  lateinit var consumerA: ConsumerConfig
-
-  @field:[Inject Named("consumer_b")]
-  lateinit var consumerB: ConsumerConfig
-
-  @field:[Inject]
-  lateinit var webConfig: WebConfig
-
-  @field:[Inject]
-  lateinit var nestedConfig: NestedConfig
 
   @Test
   fun configIsProperlyParsed() {
@@ -52,17 +39,6 @@ class MiskConfigTest {
     assertThat((testConfig.action_exception_log_level)).isEqualTo(
         ActionExceptionLogLevelConfig(Level.INFO, Level.ERROR)
     )
-  }
-
-  @Test
-  fun subConfigsWithDefaultNamesAreBoundUnqualified() {
-    assertThat(webConfig).isEqualTo(WebConfig(5678, 30_000))
-  }
-
-  @Test
-  fun subConfigsWithCustomNamesAreBoundWithNamedQualifiers() {
-    assertThat(consumerA).isEqualTo(ConsumerConfig(0, 1))
-    assertThat(consumerB).isEqualTo(ConsumerConfig(1, 2))
   }
 
   @Test
@@ -78,7 +54,7 @@ class MiskConfigTest {
   @Test
   fun friendlyErrorMessagesWhenFilesNotFound() {
     val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>(TestConfig::class.java, "missing", defaultEnv)
+      MiskConfig.load<TestConfig>("missing", defaultEnv)
     }
 
     assertThat(exception).hasMessageContaining("could not find configuration files -" +
@@ -88,17 +64,17 @@ class MiskConfigTest {
   @Test
   fun friendlyErrorMessageWhenConfigPropertyMissing() {
     val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>(TestConfig::class.java, "partial_test_app", defaultEnv)
+      MiskConfig.load<TestConfig>("partial_test_app", defaultEnv)
     }
 
     assertThat(exception).hasMessageContaining(
-        "could not find partial_test_app TESTING configuration for consumer_a")
+        "could not find 'consumer_a' of 'TestConfig' in partial_test_app-testing.yaml")
   }
 
   @Test
   fun friendlyErrorMessagesWhenFileUnparseable() {
     val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>(TestConfig::class.java, "unparsable", defaultEnv)
+      MiskConfig.load<TestConfig>("unparsable", defaultEnv)
     }
 
     assertThat(exception).hasMessageContaining("could not parse unparsable-common.yaml")
@@ -107,10 +83,19 @@ class MiskConfigTest {
   @Test
   fun friendlyErrorMessagesWhenPropertiesNotFound() {
     val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>(TestConfig::class.java, "unknownproperty", defaultEnv)
+      MiskConfig.load<TestConfig>("unknownproperty", defaultEnv)
     }
 
-    assertThat(exception.cause).hasMessageContaining("Unrecognized field \"blue_items\"")
+    assertThat(exception).hasMessageContaining("'consumer_b.blue_items' not found")
+  }
+
+  @Test
+  fun friendlyErrorMessagesWhenPropertiesMisspelled() {
+    val exception = assertFailsWith<IllegalStateException> {
+      MiskConfig.load<TestConfig>("misspelledproperty", defaultEnv)
+    }
+
+    assertThat(exception).hasMessageContaining("Did you mean")
   }
 
   @Test
@@ -137,7 +122,21 @@ class MiskConfigTest {
   }
 
   @Test
-  fun bindImmediateChildren() {
-    assertThat(nestedConfig.child_nested.nested_value).isEqualTo("nested value")
+  fun handlesDuplicateNamedExternalFiles() {
+    val overrides = listOf(
+      MiskConfigTest::class.java.getResource("/overrides/override-test-app1.yaml"),
+      MiskConfigTest::class.java.getResource("/additional_overrides/override-test-app1.yaml"))
+      .map { File(it.file) }
+
+    val config = MiskConfig.load<TestConfig>("test_app", defaultEnv, overrides)
+    assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 1))
+    assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 79))
+  }
+
+  @Test
+  fun handlesNonExistentExternalFile() {
+    // A common config does not exist, but the testing config does, loading the config should not fail
+    val config = MiskConfig.load<DurationConfig>("no_common_config_app", defaultEnv, listOf())
+    assertThat(config.interval).isEqualTo(Duration.ofSeconds(23))
   }
 }

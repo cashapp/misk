@@ -3,12 +3,13 @@ package misk.flags.memory
 import misk.flags.FlagStore
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 
 /** In memory implementation of a [FlagStore], suitable for use in testing */
 @Singleton
-class InMemoryFlagStore : FlagStore {
+class InMemoryFlagStore @Inject constructor() : FlagStore {
   private val _flags = ConcurrentHashMap<String, InMemoryFlag<*>>()
 
   val flags: Map<String, InMemoryFlag<*>> get() = _flags

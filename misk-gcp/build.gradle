@@ -7,10 +7,17 @@ dependencies {
   }
   compile dep.gcpKms
   compile dep.gcpLogback
+  compile dep.openTracingDatadog
+
   compile project(':misk')
-  compile project(':misk-jaeger')
-  compile project(':misk-zipkin')
 
   testCompile project(':misk-testing')
   testCompile project(':misk-gcp-testing')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
 }

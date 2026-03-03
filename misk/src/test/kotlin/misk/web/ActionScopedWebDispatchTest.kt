@@ -7,7 +7,6 @@ import misk.scope.ActionScopedProviderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import okhttp3.OkHttpClient
@@ -32,16 +31,16 @@ internal class ActionScopedWebDispatchTest {
         .addHeader("Security-ID", "Thor")
         .build())
         .execute()
-    assertThat(response.code()).isEqualTo(200)
-    assertThat(response.body()!!.string()).isEqualTo("hello Thor")
+    assertThat(response.code).isEqualTo(200)
+    assertThat(response.body!!.string()).isEqualTo("hello Thor")
   }
 
   @Singleton
   class FakeIdentityActionScopedProvider @Inject internal constructor(
-    private val request: ActionScoped<Request>
+    private val httpCall: ActionScoped<HttpCall>
   ) : ActionScopedProvider<Principal> {
     override fun get(): Principal = Principal {
-      request.get().headers["Security-Id"] ?: ""
+      httpCall.get().requestHeaders["Security-Id"] ?: ""
     }
   }
 
@@ -57,7 +56,7 @@ internal class ActionScopedWebDispatchTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<Hello>())
+      install(WebActionModule.create<Hello>())
       install(object : ActionScopedProviderModule() {
         override fun configureProviders() {
           bindProvider(Principal::class, FakeIdentityActionScopedProvider::class)

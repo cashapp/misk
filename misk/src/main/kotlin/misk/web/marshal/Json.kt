@@ -5,6 +5,7 @@ import com.squareup.moshi.Moshi
 import misk.web.ResponseBody
 import misk.web.marshal.Marshaller.Companion.actualResponseType
 import misk.web.mediatype.MediaTypes
+import okhttp3.Headers
 import okhttp3.MediaType
 import okio.BufferedSink
 import okio.BufferedSource
@@ -25,8 +26,8 @@ class JsonMarshaller<T>(val adapter: JsonAdapter<T>) : Marshaller<T> {
   @Singleton
   class Factory @Inject internal constructor(val moshi: Moshi) : Marshaller.Factory {
     override fun create(mediaType: MediaType, type: KType): Marshaller<Any>? {
-      if (mediaType.type() != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.type() ||
-          mediaType.subtype() != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.subtype()) {
+      if (mediaType.type != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.type ||
+          mediaType.subtype != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.subtype) {
         return null
       }
 
@@ -38,13 +39,13 @@ class JsonMarshaller<T>(val adapter: JsonAdapter<T>) : Marshaller<T> {
 }
 
 class JsonUnmarshaller(val adapter: JsonAdapter<Any>) : Unmarshaller {
-  override fun unmarshal(source: BufferedSource) = adapter.fromJson(source)
+  override fun unmarshal(requestHeaders: Headers, source: BufferedSource) = adapter.fromJson(source)
 
   @Singleton
   class Factory @Inject internal constructor(val moshi: Moshi) : Unmarshaller.Factory {
     override fun create(mediaType: MediaType, type: KType): Unmarshaller? {
-      if (mediaType.type() != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.type() ||
-          mediaType.subtype() != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.subtype()) return null
+      if (mediaType.type != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.type ||
+          mediaType.subtype != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.subtype) return null
 
       if (GenericUnmarshallers.canHandle(type)) return null
       return JsonUnmarshaller(moshi.adapter<Any>(type.javaType))

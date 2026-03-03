@@ -4,21 +4,23 @@ import misk.MiskApplication
 import misk.MiskRealServiceModule
 import misk.config.ConfigModule
 import misk.config.MiskConfig
+import misk.environment.Deployment
+import misk.environment.DeploymentModule
+import misk.environment.Env
 import misk.environment.Environment
-import misk.environment.EnvironmentModule
-import misk.metrics.backends.prometheus.PrometheusMetricsModule
+import misk.metrics.backends.prometheus.PrometheusMetricsServiceModule
 import misk.web.MiskWebModule
 
 fun main(args: Array<String>) {
-  val environment = Environment.fromEnvironmentVariable()
+  val environment = Env(Environment.fromEnvironmentVariable().name)
+  val deployment = Deployment(name = "exemplar", isLocalDevelopment = true)
   val config = MiskConfig.load<ExemplarConfig>("exemplar", environment)
-
   MiskApplication(
       MiskRealServiceModule(),
-      MiskWebModule(),
+      MiskWebModule(config.web),
       ExemplarModule(),
       ConfigModule.create("exemplar", config),
-      EnvironmentModule(environment),
-      PrometheusMetricsModule()
+      DeploymentModule(deployment, environment),
+      PrometheusMetricsServiceModule(config.prometheus)
   ).run(args)
 }

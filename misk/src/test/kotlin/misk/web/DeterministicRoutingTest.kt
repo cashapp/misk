@@ -4,7 +4,6 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import okhttp3.OkHttpClient
@@ -30,31 +29,31 @@ internal class DeterministicRoutingTest {
     assertThat(get("/org/unknown/caller/deep/path")).isEqualTo("whole-path")
   }
 
-  class SpecificPathAction : WebAction {
+  class SpecificPathAction @Inject constructor() : WebAction {
     @Get("/org/admin/users")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun handle() = "specific-path-action"
   }
 
-  class SubsectionAction : WebAction {
+  class SubsectionAction @Inject constructor() : WebAction {
     @Get("/org/admin/{subsection}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun handle() = "subsection-action"
   }
 
-  class SectionAction : WebAction {
+  class SectionAction @Inject constructor() : WebAction {
     @Get("/org/{section}/{subsection}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun handle() = "section-action"
   }
 
-  class RemainderPathAction : WebAction {
+  class RemainderPathAction @Inject constructor() : WebAction {
     @Get("/org/admin/{path:.*}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun handle() = "remainder-path-action"
   }
 
-  class WholePathAction : WebAction {
+  class WholePathAction @Inject constructor() : WebAction {
     @Get("/{path:.*}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun handle() = "whole-path"
@@ -72,7 +71,7 @@ internal class DeterministicRoutingTest {
       )
       shuffle(webActions)
       for (webAction in webActions) {
-        multibind<WebActionEntry>().toInstance(WebActionEntry(webAction))
+        install(WebActionModule.create(webAction))
       }
     }
   }
@@ -84,6 +83,6 @@ internal class DeterministicRoutingTest {
   private fun call(request: Request.Builder): String {
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request.build()).execute()
-    return response.body()!!.string()
+    return response.body!!.string()
   }
 }

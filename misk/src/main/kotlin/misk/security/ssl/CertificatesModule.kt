@@ -26,7 +26,7 @@ internal class CertificatesModule : ActionScopedProviderModule() {
         annotatedBy = ClientCertIssuer::class.java)
   }
 
-  private class ClientCertProvider : ActionScopedProvider<Array<X509Certificate>?> {
+  private class ClientCertProvider @Inject constructor() : ActionScopedProvider<Array<X509Certificate>?> {
     @Inject @JvmSuppressWildcards lateinit var request: ActionScoped<HttpServletRequest>
 
     override fun get(): Array<X509Certificate>? {
@@ -36,7 +36,7 @@ internal class CertificatesModule : ActionScopedProviderModule() {
     }
   }
 
-  private class ClientCertSubjectDNProvider : ActionScopedProvider<X500Name?> {
+  private class ClientCertSubjectDNProvider @Inject constructor() : ActionScopedProvider<X500Name?> {
     @Inject @JvmSuppressWildcards @ClientCertChain
     lateinit var clientCert: ActionScoped<Array<X509Certificate>?>
 
@@ -45,7 +45,7 @@ internal class CertificatesModule : ActionScopedProviderModule() {
     }
   }
 
-  private class ClientCertIssuerDNProvider : ActionScopedProvider<X500Name?> {
+  private class ClientCertIssuerDNProvider @Inject constructor() : ActionScopedProvider<X500Name?> {
     @Inject @JvmSuppressWildcards @ClientCertChain
     lateinit var clientCert: ActionScoped<Array<X509Certificate>?>
 

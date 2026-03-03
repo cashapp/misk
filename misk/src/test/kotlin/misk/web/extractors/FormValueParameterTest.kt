@@ -6,7 +6,7 @@ import misk.testing.MiskTestModule
 import misk.web.FormField
 import misk.web.FormValue
 import misk.web.Post
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -97,7 +97,7 @@ internal class FormValueParameterTest {
     TWO
   }
 
-  class BasicParamsAction : WebAction {
+  class BasicParamsAction @Inject constructor() : WebAction {
     @Post("/basic-params")
     fun call(@FormValue basicForm: BasicForm) = "$basicForm"
 
@@ -109,7 +109,7 @@ internal class FormValueParameterTest {
     )
   }
 
-  class OptionalParamsAction : WebAction {
+  class OptionalParamsAction @Inject constructor() : WebAction {
     @Post("/optional-params")
     fun call(@FormValue optionalForm: OptionalForm) = "$optionalForm"
 
@@ -119,7 +119,7 @@ internal class FormValueParameterTest {
     )
   }
 
-  class DefaultParamsAction : WebAction {
+  class DefaultParamsAction @Inject constructor() : WebAction {
     @Post("/default-params")
     fun call(@FormValue defaultForm: DefaultForm) = "$defaultForm"
 
@@ -130,7 +130,7 @@ internal class FormValueParameterTest {
     )
   }
 
-  class ListParamsAction : WebAction {
+  class ListParamsAction @Inject constructor() : WebAction {
     @Post("/list-params")
     fun call(@FormValue listForm: ListForm) = "$listForm"
 
@@ -140,7 +140,7 @@ internal class FormValueParameterTest {
     )
   }
 
-  class FormValueAnnotationAction : WebAction {
+  class FormValueAnnotationAction @Inject constructor() : WebAction {
     @Post("/form-value-annotation")
     fun call(@FormValue annotationForm: AnnotationForm) = "$annotationForm"
 
@@ -152,11 +152,11 @@ internal class FormValueParameterTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<BasicParamsAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<OptionalParamsAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<DefaultParamsAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ListParamsAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<FormValueAnnotationAction>())
+      install(WebActionModule.create<BasicParamsAction>())
+      install(WebActionModule.create<OptionalParamsAction>())
+      install(WebActionModule.create<DefaultParamsAction>())
+      install(WebActionModule.create<ListParamsAction>())
+      install(WebActionModule.create<FormValueAnnotationAction>())
     }
   }
 
@@ -182,9 +182,9 @@ internal class FormValueParameterTest {
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request.build())
         .execute()
-    assertThat(response.code())
+    assertThat(response.code)
         .isEqualTo(200)
-    return response.body()!!.source()
+    return response.body!!.source()
         .readUtf8()
   }
 }

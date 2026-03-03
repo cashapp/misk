@@ -1,0 +1,24 @@
+buildscript {
+  dependencies {
+    classpath dep.kotlinNoArgPlugin
+  }
+}
+
+dependencies {
+  compile dep.guice
+  compile dep.kotlinStdLibJdk8
+  compile dep.kotlinReflection
+  compile dep.moshiCore
+  compile project(':misk-feature')
+  compile project(':misk-inject')
+  compile project(':misk-service')
+
+  testCompile project(':misk-testing')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}

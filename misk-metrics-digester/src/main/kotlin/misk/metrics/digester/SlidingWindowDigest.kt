@@ -11,9 +11,9 @@ data class WindowDigest<T : TDigest<T>>(
 
 /** Snapshot is the state of a SlidingWindowDigest at a point in time. */
 data class Snapshot(
-  val quantileVals: List<Double>,  // Values of specific quantiles.
-  val count: Long,                 // Count of observations.
-  val sum: Double                  // Sum of observations.
+  val quantileVals: List<Double>, // Values of specific quantiles.
+  val count: Long, // Count of observations.
+  val sum: Double // Sum of observations.
 )
 
 /**

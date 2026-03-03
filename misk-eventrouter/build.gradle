@@ -1,5 +1,4 @@
 dependencies {
-  compile dep.tracingJaeger
   compile project(':misk')
 
   testCompile dep.assertj
@@ -7,4 +6,11 @@ dependencies {
   testCompile dep.junitEngine
   testCompile dep.junitParams
   testCompile project(':misk-testing')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
 }

@@ -1,9 +1,8 @@
 package misk.cloud.gcp.tracing
 
-import brave.opentracing.BraveSpan
 import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.LoggingEnhancer
-import com.uber.jaeger.Span
+import datadog.opentracing.DDTracer
 import io.opentracing.Tracer
 import io.opentracing.util.GlobalTracer
 
@@ -17,22 +16,8 @@ class TracingLoggingEnhancer : LoggingEnhancer {
   }
 
   fun enhanceLogEntry(tracer: Tracer, builder: LogEntry.Builder) {
-    val activeSpan = tracer.activeSpan()
-    var traceId: String? = null
-    when (activeSpan) {
-      is BraveSpan -> {
-        val traceContext = activeSpan.unwrap().context()
-        traceId = traceContext.traceIdString()
-        // TODO(nb): figure out why traceIdString differs from string representation in StackDriver
-        if (traceContext.traceIdHigh() == 0L) {
-          traceId = "0000000000000000" + traceId
-        }
-      }
-      is Span -> traceId = activeSpan.context().traceId.toString()
-    }
-
-    if (traceId != null) {
-      builder.addLabel("appengine.googleapis.com/trace_id", traceId)
+    if (tracer.activeSpan().context().toTraceId().isNotEmpty()) {
+      builder.addLabel("appengine.googleapis.com/trace_id", tracer.activeSpan().context().toTraceId())
     }
   }
 }
