@@ -1,6 +1,6 @@
 public abstract interface class misk/clustering/Cluster {
 	public abstract fun getSnapshot ()Lmisk/clustering/Cluster$Snapshot;
-	public abstract fun newResourceMapper (Ljava/util/Set;)Lmisk/clustering/ClusterResourceMapper;
+	public fun newResourceMapper (Ljava/util/Set;)Lmisk/clustering/ClusterResourceMapper;
 	public abstract fun watch (Lkotlin/jvm/functions/Function1;)V
 }
 
