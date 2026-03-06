@@ -38,7 +38,7 @@ fun StatefulRedisClusterConnection<*, *>.waitForRedisClusterReady(
   pollInterval: Duration = 500.milliseconds,
 ): CompletableFuture<Int> =
   retryableFuture(
-      RetryConfig.Builder(upTo = Int.MAX_VALUE, withBackoff = FlatBackoff(pollInterval.toJavaDuration())).build()
+      RetryConfig.Builder(maxRetries = Int.MAX_VALUE - 1, withBackoff = FlatBackoff(pollInterval.toJavaDuration())).build()
     ) {
       // Check the "master" nodes to verify that they are all connected and have slots assigned
       async()

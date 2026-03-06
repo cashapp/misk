@@ -704,7 +704,7 @@ public abstract interface class misk/jdbc/retry/ExceptionClassifier {
 
 public final class misk/jdbc/retry/RetryDefaults {
 	public static final field INSTANCE Lmisk/jdbc/retry/RetryDefaults;
-	public static final field MAX_ATTEMPTS I
+	public static final field MAX_RETRIES I
 	public static final field MAX_RETRY_DELAY_MILLIS J
 	public static final field MIN_RETRY_DELAY_MILLIS J
 	public static final field RETRY_JITTER_MILLIS J
