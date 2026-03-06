@@ -18,7 +18,7 @@ object DefaultSettings {
   const val IN_MEMORY_STORAGE_SIZE = "1024M"
   const val KEEP_ALIVE = true
   const val LINT_SCHEMA = false
-  const val MYSQL_VERSION = "8.0.42"
+  const val MYSQL_VERSION = "8.4.3"
   const val PORT = 27003
   const val SCHEMA_DIR = "classpath:/vitess/schema"
   const val SQL_MODE: String =
@@ -27,9 +27,9 @@ object DefaultSettings {
   @JvmField var TRANSACTION_TIMEOUT_SECONDS: Duration = Duration.ofSeconds(30)
   const val VITESS_DOCKER_NETWORK_NAME = "vitess-network"
   const val VITESS_DOCKER_NETWORK_TYPE = "bridge"
-  const val VITESS_IMAGE = "vitess/vttestserver:v22.0.2-mysql80"
+  const val VITESS_IMAGE = "vitess/vttestserver:v22.0.4-mysql84"
   const val VITESS_VERSION = 22
-  const val VTCTLD_CLIENT_IMAGE = "vitess/vtctldclient:v22.0.2"
+  const val VTCTLD_CLIENT_IMAGE = "vitess/vtctldclient:v22.0.4"
   const val VTGATE_USER = "root"
   const val VTGATE_USER_PASSWORD = ""
 }
