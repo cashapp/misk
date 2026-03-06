@@ -57,7 +57,6 @@ bouncyCastlePgp = { module = "org.bouncycastle:bcpg-jdk18on", version = "1.82" }
 bouncyCastlePkix = { module = "org.bouncycastle:bcpkix-jdk18on", version = "1.82" }
 bouncyCastleProvider = { module = "org.bouncycastle:bcprov-jdk18on", version = "1.82" }
 bucket4jCore = { module = "com.bucket4j:bucket4j_jdk17-core", version.ref = "bucket4j" }
-bucket4jDynamoDbV1 = { module = "com.bucket4j:bucket4j-dynamodb-sdk-v1", version = "8.6.0" }
 bucket4jMySQL = { module = "com.bucket4j:bucket4j_jdk17-mysql", version.ref = "bucket4j" }
 bucket4jRedis = { module = "com.bucket4j:bucket4j_jdk17-jedis", version.ref = "bucket4j" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.2" }
@@ -149,7 +148,7 @@ jettyWebsocketApi = { module = "org.eclipse.jetty.websocket:websocket-jetty-api"
 jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-server" }
 jnrUnixsocket = { module = "com.github.jnr:jnr-unixsocket", version = "0.38.23" }
 jooq = { module = "org.jooq:jooq" }
-jooqBom = { module = "org.jooq:jooq-bom", version.ref="jooq" }
+jooqBom = { module = "org.jooq:jooq-bom", version.ref = "jooq" }
 jooqKotlin = { module = "org.jooq:jooq-kotlin" }
 jsonSchemaValidator = { module = "com.networknt:json-schema-validator", version = "2.0.0" }
 jsqlparser = { module = "com.github.jsqlparser:jsqlparser", version = "5.3" }

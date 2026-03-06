@@ -33,7 +33,9 @@ class DynamoDBV1PrunerTest {
     object : KAbstractModule() {
       override fun configure() {
         install(DockerDynamoDbModule(DynamoDbTable(DyRateLimitBucket::class)))
-        install(DynamoDbV1Bucket4jRateLimiterModule(TABLE_NAME, prunerPageSize = 2))
+        install(
+          DynamoDbV1Bucket4jRateLimiterModule(TABLE_NAME, prunerPageSize = 2, retryTimeout = Duration.ofMillis(500))
+        )
         install(MiskTestingServiceModule())
         install(DeploymentModule(TESTING))
         bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
