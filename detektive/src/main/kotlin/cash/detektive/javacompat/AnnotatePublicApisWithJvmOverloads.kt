@@ -13,6 +13,7 @@ import io.gitlab.arturbosch.detekt.api.internal.RequiresTypeResolution
 import io.gitlab.arturbosch.detekt.api.internal.isSuppressedBy
 import io.gitlab.arturbosch.detekt.rules.fqNameOrNull
 import kotlin.reflect.KClass
+import org.jetbrains.kotlin.com.intellij.openapi.application.ApplicationManager
 import org.jetbrains.kotlin.descriptors.CallableMemberDescriptor
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.descriptors.Visibilities
@@ -63,18 +64,20 @@ class AnnotatePublicApisWithJvmOverloads(config: Config) : Rule(config) {
 
         if (autoCorrect) {
           if (!(element as KtElement).isSuppressedBy(ruleId, aliases, ruleSetConfig.parentPath)) {
-            val annotation =
-              element.addAnnotationEntry(
-                KtPsiFactory.contextual(element.parent, markGenerated = true).createAnnotationEntry("@JvmOverloads")
-              )
-            if (elementType == ElementType.CONSTRUCTOR) {
-              annotation.addBefore(
-                KtPsiFactory.contextual(element.parent, markGenerated = true).createWhiteSpace(),
-                null,
-              )
-              element.addAfter(KtPsiFactory.contextual(element.parent, markGenerated = true).createWhiteSpace(), null)
-            } else if (elementType == ElementType.FUNCTION) {
-              annotation.addBefore(KtPsiFactory.contextual(element.parent, markGenerated = true).createNewLine(), null)
+            ApplicationManager.getApplication().runWriteAction {
+              val annotation =
+                element.addAnnotationEntry(
+                  KtPsiFactory.contextual(element.parent, markGenerated = true).createAnnotationEntry("@JvmOverloads")
+                )
+              if (elementType == ElementType.CONSTRUCTOR) {
+                annotation.addBefore(
+                  KtPsiFactory.contextual(element.parent, markGenerated = true).createWhiteSpace(),
+                  null,
+                )
+                element.addAfter(KtPsiFactory.contextual(element.parent, markGenerated = true).createWhiteSpace(), null)
+              } else if (elementType == ElementType.FUNCTION) {
+                annotation.addBefore(KtPsiFactory.contextual(element.parent, markGenerated = true).createNewLine(), null)
+              }
             }
           }
           report(CorrectableCodeSmell(issue, Entity.atName(element), message, autoCorrectEnabled = true))

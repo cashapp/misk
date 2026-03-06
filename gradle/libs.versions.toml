@@ -4,7 +4,7 @@ aws1 = "1.12.791"
 aws2 = "2.37.2"
 bucket4j = "8.8.0"
 datadog = "1.53.0"
-dependencyAnalysisPlugin = "3.0.4"
+dependencyAnalysisPlugin = "3.6.1"
 detekt = "1.23.8"
 docker = "3.6.0"
 googleAuth = "1.39.1"
@@ -15,14 +15,14 @@ jackson = "2.20.0"
 jooq = "3.19.29"
 junit = "5.14.2"
 kotest = "6.0.7"
-kotlin = "2.1.21"
+kotlin = "2.2.21"
 kotlinBinaryCompatibilityPlugin = "0.18.1"
 ktor = "3.3.0"
 mavenPublish = "0.34.0"
 mcp = "0.8.3"
 micrometer = "1.12.13"
 netty = "4.2.6.Final"
-okHttp = "5.1.0"
+okHttp = "5.3.2"
 okio = "3.16.4"
 prometheus = "0.16.0"
 protobuf = "3.25.8"
@@ -175,8 +175,8 @@ kotlinXHtml = { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version = "0.
 kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.10.2" }
 kotlinxCoroutinesSlf4j = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j", version = "1.10.2" }
 kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.10.2" }
-kotlinxSerializationCore = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version = "1.9.0" }
-kotlinxSerializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.9.0" }
+kotlinxSerializationCore = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version = "1.10.0" }
+kotlinxSerializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.10.0" }
 ktorClientCore = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktorClientOkhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktorClientContentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }

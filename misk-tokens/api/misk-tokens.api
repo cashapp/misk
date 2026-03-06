@@ -28,6 +28,7 @@ public abstract interface class misk/tokens/TokenGenerator2 {
 	public static final field CANONICALIZE_LENGTH_MIN I
 	public static final field Companion Lmisk/tokens/TokenGenerator2$Companion;
 	public abstract fun generate (Ljava/lang/String;I)Ljava/lang/String;
+	public static synthetic fun generate$default (Lmisk/tokens/TokenGenerator2;Ljava/lang/String;IILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class misk/tokens/TokenGenerator2$Companion {

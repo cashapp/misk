@@ -108,12 +108,20 @@ public final class misk/containers/ContainerUtil {
 public abstract interface class misk/logging/LogCollector : misk/testing/TestFixture {
 	public abstract fun takeEvent (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Lch/qos/logback/classic/spi/ILoggingEvent;
 	public abstract fun takeEvent (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Lch/qos/logback/classic/spi/ILoggingEvent;
+	public static synthetic fun takeEvent$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ILjava/lang/Object;)Lch/qos/logback/classic/spi/ILoggingEvent;
+	public static synthetic fun takeEvent$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ZILjava/lang/Object;)Lch/qos/logback/classic/spi/ILoggingEvent;
 	public abstract fun takeEvents (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Ljava/util/List;
 	public abstract fun takeEvents (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Ljava/util/List;
+	public static synthetic fun takeEvents$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ILjava/lang/Object;)Ljava/util/List;
+	public static synthetic fun takeEvents$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ZILjava/lang/Object;)Ljava/util/List;
 	public abstract fun takeMessage (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Ljava/lang/String;
 	public abstract fun takeMessage (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Ljava/lang/String;
+	public static synthetic fun takeMessage$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ILjava/lang/Object;)Ljava/lang/String;
+	public static synthetic fun takeMessage$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ZILjava/lang/Object;)Ljava/lang/String;
 	public abstract fun takeMessages (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Ljava/util/List;
 	public abstract fun takeMessages (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Ljava/util/List;
+	public static synthetic fun takeMessages$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ILjava/lang/Object;)Ljava/util/List;
+	public static synthetic fun takeMessages$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ZILjava/lang/Object;)Ljava/util/List;
 }
 
 public final class misk/logging/LogCollector$DefaultImpls {
@@ -239,7 +247,7 @@ public final class misk/testing/ExtensionContextExtensionsKt {
 public abstract interface class misk/testing/ExternalDependency {
 	public abstract fun afterEach ()V
 	public abstract fun beforeEach ()V
-	public abstract fun getId ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/String;
 	public abstract fun shutdown ()V
 	public abstract fun startup ()V
 }

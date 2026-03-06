@@ -45,7 +45,7 @@ public abstract interface class wisp/lease/Lease$StateChangeListener {
 }
 
 public abstract interface class wisp/lease/LeaseManager {
-	public abstract fun releaseAll ()V
+	public fun releaseAll ()V
 	public abstract fun requestLease (Ljava/lang/String;)Lwisp/lease/Lease;
 }
 

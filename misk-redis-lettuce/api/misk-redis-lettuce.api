@@ -34,9 +34,12 @@ public final class misk/redis/lettuce/CommandArgumentsKt {
 }
 
 public abstract interface class misk/redis/lettuce/ConnectionProvider : io/lettuce/core/api/AsyncCloseable {
-	public abstract fun acquire (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun acquire (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun acquire$default (Lmisk/redis/lettuce/ConnectionProvider;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun acquireAsync (Z)Ljava/util/concurrent/CompletableFuture;
-	public abstract fun acquireBlocking (Z)Lio/lettuce/core/api/StatefulConnection;
+	public static synthetic fun acquireAsync$default (Lmisk/redis/lettuce/ConnectionProvider;ZILjava/lang/Object;)Ljava/util/concurrent/CompletableFuture;
+	public fun acquireBlocking (Z)Lio/lettuce/core/api/StatefulConnection;
+	public static synthetic fun acquireBlocking$default (Lmisk/redis/lettuce/ConnectionProvider;ZILjava/lang/Object;)Lio/lettuce/core/api/StatefulConnection;
 	public abstract fun getReplicationGroupId ()Ljava/lang/String;
 }
 
