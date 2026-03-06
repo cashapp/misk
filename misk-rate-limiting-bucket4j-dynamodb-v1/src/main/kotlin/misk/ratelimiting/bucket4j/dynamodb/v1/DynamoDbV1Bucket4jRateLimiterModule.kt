@@ -26,7 +26,7 @@ constructor(
   private val tableName: String,
   private val prunerPageSize: Int = 1000,
   private val maxRetries: Int = 3,
-  private val retryTimeout: Duration = Duration.ofMillis(25),
+  private val retryTimeout: Duration = Duration.ofMillis(100),
   private val configMutator: ClientSideConfig.() -> Unit = {},
 ) : KAbstractModule() {
   override fun configure() {
