@@ -1,6 +1,13 @@
 package misk.jdbc
 
 import java.sql.Connection
+import java.time.Duration
+import misk.backoff.ExponentialBackoff
+import misk.backoff.RetryConfig
+import misk.backoff.retry
+import misk.jdbc.retry.DefaultExceptionClassifier
+import misk.jdbc.retry.RetryDefaults
+import misk.logging.getLogger
 
 interface Transacter {
   /** Returns true if the calling thread is currently within a transaction block. */
@@ -27,10 +34,38 @@ interface Transacter {
    * It is an error to start a transaction if another transaction is already in progress.
    */
   fun <T> transactionWithSession(work: (session: JDBCSession) -> T): T
+
+  /**
+   * Returns a new transacter configured to retry transactions up to [maxAttempts] times on retryable exceptions.
+   * Default is 3 attempts.
+   */
+  fun retries(maxAttempts: Int): Transacter
+
+  /**
+   * Returns a new transacter configured to not retry transactions.
+   */
+  fun noRetries(): Transacter
 }
 
-class RealTransacter(private val dataSourceService: DataSourceService) : Transacter {
+class RealTransacter private constructor(
+  private val dataSourceService: DataSourceService,
+  private val config: DataSourceConfig?,
+  private val options: TransacterOptions,
+) : Transacter {
   private val transacting = ThreadLocal.withInitial { false }
+  private val exceptionClassifier = DefaultExceptionClassifier(config?.type)
+
+  constructor(dataSourceService: DataSourceService) : this(
+    dataSourceService = dataSourceService,
+    config = null,
+    options = TransacterOptions(),
+  )
+
+  constructor(dataSourceService: DataSourceService, config: DataSourceConfig) : this(
+    dataSourceService = dataSourceService,
+    config = config,
+    options = TransacterOptions(),
+  )
 
   override val inTransaction: Boolean
     get() = transacting.get()
@@ -41,6 +76,23 @@ class RealTransacter(private val dataSourceService: DataSourceService) : Transac
   }
 
   override fun <T> transactionWithSession(work: (session: JDBCSession) -> T): T {
+    return transactionWithRetries { transactionInternal(work) }
+  }
+
+  private fun <T> transactionWithRetries(block: () -> T): T {
+    val backoff = ExponentialBackoff(
+      baseDelay = Duration.ofMillis(options.minRetryDelayMillis),
+      maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
+      jitter = Duration.ofMillis(options.retryJitterMillis)
+    )
+    val retryConfig = RetryConfig.Builder(options.maxAttempts, backoff)
+      .shouldRetry { exceptionClassifier.isRetryable(it) }
+      .onRetry { attempt, e -> logger.info(e) { "JDBC transaction failed, retrying (attempt $attempt)" } }
+      .build()
+    return retry(retryConfig) { block() }
+  }
+
+  private fun <T> transactionInternal(work: (session: JDBCSession) -> T): T {
     check(!transacting.get()) { "The current thread is already in a transaction" }
     transacting.set(true)
 
@@ -75,5 +127,24 @@ class RealTransacter(private val dataSourceService: DataSourceService) : Transac
       transacting.set(false)
       session?.executeSessionCloseHooks()
     }
+  }
+
+  override fun retries(maxAttempts: Int): Transacter = RealTransacter(
+    dataSourceService = dataSourceService,
+    config = config,
+    options = options.copy(maxAttempts = maxAttempts),
+  )
+
+  override fun noRetries(): Transacter = retries(1)
+
+  internal data class TransacterOptions(
+    val maxAttempts: Int = RetryDefaults.MAX_ATTEMPTS,
+    val minRetryDelayMillis: Long = RetryDefaults.MIN_RETRY_DELAY_MILLIS,
+    val maxRetryDelayMillis: Long = RetryDefaults.MAX_RETRY_DELAY_MILLIS,
+    val retryJitterMillis: Long = RetryDefaults.RETRY_JITTER_MILLIS,
+  )
+
+  companion object {
+    private val logger = getLogger<RealTransacter>()
   }
 }

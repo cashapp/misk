@@ -9,7 +9,6 @@ import misk.ServiceModule
 import misk.clustering.Cluster
 import misk.clustering.ClusterService
 import misk.clustering.DefaultCluster
-import misk.inject.AsyncSwitch
 import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
 import misk.tasks.RepeatedTaskQueue
@@ -27,7 +26,6 @@ class DynamoClusterModule @JvmOverloads constructor(private val config: DynamoCl
     install(DefaultAsyncSwitchModule())
     install(
       ServiceModule<DynamoClusterWatcherTask>()
-        .conditionalOn<AsyncSwitch>("clustering")
         .dependsOn<ClusterService>()
         .enhancedBy<ReadyService>()
     )

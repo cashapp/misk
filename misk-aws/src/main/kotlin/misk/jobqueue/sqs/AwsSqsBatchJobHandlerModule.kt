@@ -5,7 +5,6 @@ import com.google.inject.Key
 import kotlin.reflect.KClass
 import misk.ReadyService
 import misk.ServiceModule
-import misk.inject.AsyncSwitch
 import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
 import misk.jobqueue.BatchJobHandler
@@ -34,7 +33,6 @@ private constructor(
     install(DefaultAsyncSwitchModule())
     install(
       ServiceModule<AwsSqsJobHandlerSubscriptionService>()
-        .conditionalOn<AsyncSwitch>("sqs")
         .dependsOn(dependsOn)
         .dependsOn<ReadyService>()
     )

@@ -4,6 +4,7 @@ import com.google.inject.util.Modules
 import jakarta.inject.Inject
 import java.sql.Connection
 import java.sql.SQLException
+import java.sql.SQLRecoverableException
 import java.time.LocalDate
 import kotlin.test.assertFailsWith
 import kotlin.test.fail
@@ -13,6 +14,7 @@ import misk.backoff.RetryConfig
 import misk.backoff.retry
 import misk.config.Config
 import misk.config.MiskConfig
+import misk.jdbc.retry.RetryTransactionException
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -282,6 +284,76 @@ abstract class RealTransacterTest {
     assertFailsWith<IllegalStateException> {
       transacter.transactionWithSession { transacter.transactionWithSession { fail("transaction in transaction") } }
     }
+  }
+
+  @Test
+  fun `transaction retries on retryable exception`() {
+    var attempts = 0
+    transacter.transactionWithSession { session ->
+      session.useConnection {
+        attempts++
+        if (attempts < 3) {
+          throw RetryTransactionException("retry me")
+        }
+      }
+    }
+    assertThat(attempts).isEqualTo(3)
+  }
+
+  @Test
+  fun `transaction does not retry non-retryable exception`() {
+    var attempts = 0
+    assertFailsWith<BadException> {
+      transacter.transactionWithSession { session ->
+        session.useConnection {
+          attempts++
+          throw BadException("not retryable")
+        }
+      }
+    }
+    assertThat(attempts).isEqualTo(1)
+  }
+
+  @Test
+  fun `noRetries disables retry behavior`() {
+    var attempts = 0
+    assertFailsWith<RetryTransactionException> {
+      transacter.noRetries().transactionWithSession { session ->
+        session.useConnection {
+          attempts++
+          throw RetryTransactionException("retry me")
+        }
+      }
+    }
+    assertThat(attempts).isEqualTo(1)
+  }
+
+  @Test
+  fun `retries configures max attempts`() {
+    var attempts = 0
+    assertFailsWith<RetryTransactionException> {
+      transacter.retries(5).transactionWithSession { session ->
+        session.useConnection {
+          attempts++
+          throw RetryTransactionException("retry me")
+        }
+      }
+    }
+    assertThat(attempts).isEqualTo(5)
+  }
+
+  @Test
+  fun `transaction retries on SQLRecoverableException`() {
+    var attempts = 0
+    transacter.transactionWithSession { session ->
+      session.useConnection {
+        attempts++
+        if (attempts < 3) {
+          throw SQLRecoverableException("connection lost")
+        }
+      }
+    }
+    assertThat(attempts).isEqualTo(3)
   }
 
   private fun createTestData() {

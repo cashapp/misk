@@ -1,0 +1,14 @@
+syntax = "proto2";
+
+package transitive;
+
+service ExtraService {
+  rpc Ping(PingRequest) returns (PingResponse);
+}
+
+message PingRequest {
+}
+
+message PingResponse {
+  optional string message = 1;
+}

@@ -30,7 +30,11 @@ internal class ActionScopedCoroutineTest {
 
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "my seed data")
 
-    val value = scope.enter(seedData).use { scope.runBlocking { tester.fooValue() } }
+    val value = scope.create(seedData).inScope {
+      scope.runBlocking {
+        tester.fooValue()
+      }
+    }
 
     assertThat(value).isEqualTo("my seed data and bar and foo!")
   }
@@ -44,7 +48,11 @@ internal class ActionScopedCoroutineTest {
 
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "my seed data")
 
-    val value = scope.enter(seedData).use { scope.runBlocking(Dispatchers.IO) { tester.fooValue() } }
+    val value = scope.create(seedData).inScope {
+      scope.runBlocking(Dispatchers.IO) {
+        tester.fooValue()
+      }
+    }
 
     assertThat(value).isEqualTo("my seed data and bar and foo!")
   }

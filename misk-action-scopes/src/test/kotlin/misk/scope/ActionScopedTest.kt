@@ -13,9 +13,11 @@ import kotlinx.coroutines.runBlocking
 import misk.inject.keyOf
 import misk.inject.toKey
 import misk.inject.uninject
+import misk.scope.TestActionScopedProviderModule.TestListener
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class ActionScopedTest {
   @Inject @Named("foo") private lateinit var foo: ActionScoped<String>
@@ -36,6 +38,8 @@ internal class ActionScopedTest {
 
   @Inject private lateinit var scope: ActionScope
 
+  @Inject private lateinit var testListener: TestListener
+
   @BeforeEach
   fun clearInjections() {
     uninject(this)
@@ -48,7 +52,7 @@ internal class ActionScopedTest {
 
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
 
-    scope.enter(seedData).use { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
+    scope.create(seedData).inScope { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
   }
 
   @Test
@@ -74,7 +78,7 @@ internal class ActionScopedTest {
       val injector = Guice.createInjector(TestActionScopedProviderModule())
       injector.injectMembers(this)
 
-      scope.enter(mapOf()).use { scope.enter(mapOf()).use {} }
+      scope.create(mapOf()).inScope { scope.create(mapOf()) }
     }
   }
 
@@ -95,7 +99,7 @@ internal class ActionScopedTest {
       injector.injectMembers(this)
 
       // NB(mmihic): Seed data not specified
-      scope.enter(mapOf()).use { foo.get() }
+      scope.create(mapOf()).inScope { foo.get() }
     }
   }
 
@@ -105,7 +109,7 @@ internal class ActionScopedTest {
     injector.injectMembers(this)
 
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "null")
-    val result = scope.enter(seedData).use { nullableFoo.get() }
+    val result = scope.create(seedData).inScope { nullableFoo.get() }
     assertThat(result).isNull()
   }
 
@@ -114,7 +118,7 @@ internal class ActionScopedTest {
     val injector = Guice.createInjector(TestActionScopedProviderModule())
     injector.injectMembers(this)
 
-    scope.enter(mapOf()).use {
+    scope.create(mapOf()).inScope {
       assertThat(constantString.get()).isEqualTo("constant-value")
       assertThat(optionalConstantString.get()).isEqualTo(Optional.of("constant-value"))
 
@@ -132,11 +136,11 @@ internal class ActionScopedTest {
     val optionalStringKey = object : TypeLiteral<Optional<String>>() {}.toKey()
 
     val emptyOptionalSeedData: Map<Key<*>, Any> = mapOf(optionalStringKey to Optional.empty<String>())
-    val emptyOptionalResult = scope.enter(emptyOptionalSeedData).use { optional.get() }
+    val emptyOptionalResult = scope.create(emptyOptionalSeedData).inScope { optional.get() }
     assertThat(emptyOptionalResult).isEqualTo("empty")
 
     val presentOptionalSeedData: Map<Key<*>, Any> = mapOf(optionalStringKey to Optional.of("present"))
-    val presentOptionalResult = scope.enter(presentOptionalSeedData).use { optional.get() }
+    val presentOptionalResult = scope.create(presentOptionalSeedData).inScope { optional.get() }
     assertThat(presentOptionalResult).isEqualTo("present")
   }
 
@@ -146,7 +150,7 @@ internal class ActionScopedTest {
     injector.injectMembers(this)
 
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "null")
-    val result = scope.enter(seedData).use { nullableBasedOnFoo.get() }
+    val result = scope.create(seedData).inScope { nullableBasedOnFoo.get() }
     assertThat(result).isNull()
   }
 
@@ -159,7 +163,7 @@ internal class ActionScopedTest {
       // NB(mmihic): Seed data set to a value that causes zed resolution to fail
       // with a user-defined exception
       val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "illegal-state")
-      scope.enter(seedData).use { zed.get() }
+      scope.create(seedData).inScope { zed.get() }
     }
   }
 
@@ -170,8 +174,10 @@ internal class ActionScopedTest {
 
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
 
-    scope.enter(seedData).use { actionScope ->
-      runBlocking(actionScope.asContextElement()) { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
+    scope.create(seedData).inScope {
+      runBlocking(scope.asContextElement()) {
+        assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
+      }
     }
   }
 
@@ -191,7 +197,7 @@ internal class ActionScopedTest {
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
 
     // exhibit A: trying to access scoped things in a new thread results in exceptions
-    scope.enter(seedData).use { _ ->
+    scope.create(seedData).inScope {
       var thrown: Throwable? = null
 
       thread {
@@ -207,17 +213,19 @@ internal class ActionScopedTest {
 
     // exhibit B: trying to access scoped things in a new thread can work, if you take
     // a snapshot of the scope and use it to instantiate a scope in the new thread.
-    scope.enter(seedData).use { actionScope ->
+    scope.create(seedData).inScope {
       var thrown: Throwable? = null
 
-      val snapshot = actionScope.snapshotActionScope()
+      val instance = scope.snapshotActionScopeInstance()
       thread {
-          try {
-            actionScope.enter(snapshot).use { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
-          } catch (t: Throwable) {
-            thrown = t
+        try {
+          instance.inScope {
+            assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
           }
+        } catch (t: Throwable) {
+          thrown = t
         }
+      }
         .join()
       assertThat(thrown).isNull()
     }
@@ -231,7 +239,7 @@ internal class ActionScopedTest {
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
 
     // exhibit A: trying to access scoped things in a new thread results in exceptions
-    scope.enter(seedData).use { _ ->
+    scope.create(seedData).inScope {
       var thrown: Throwable? = null
 
       thread {
@@ -247,17 +255,19 @@ internal class ActionScopedTest {
 
     // exhibit B: trying to access scoped things in a new thread can work, if you take
     // a snapshot of the scope and use it to instantiate a scope in the new thread.
-    scope.enter(seedData).use { actionScope ->
+    scope.create(seedData).inScope {
       var thrown: Throwable? = null
 
-      val instance = actionScope.snapshotActionScopeInstance()
+      val instance = scope.snapshotActionScopeInstance()
       thread {
-          try {
-            actionScope.enter(instance).use { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
-          } catch (t: Throwable) {
-            thrown = t
+        try {
+          instance.inScope {
+            assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
           }
+        } catch (t: Throwable) {
+          thrown = t
         }
+      }
         .join()
       assertThat(thrown).isNull()
     }
@@ -276,5 +286,32 @@ internal class ActionScopedTest {
       }
       assertThat(countingString.get()).isEqualTo("Called CountingProvider 1 time(s)")
     }
+  }
+
+  @Test
+  fun `listeners are called before the scope closes`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    assertThat(testListener.result).isNull()
+
+    scope.create(mapOf()).inScope {
+      // We don't have to do anything in the scope, just call inScope() so that close() is called. The listener is
+      // then triggered, setting the result field to an action scoped value, to show we're still in an action scope.
+    }
+
+    assertThat(testListener.result).isEqualTo("constant-value")
+  }
+
+  @Test
+  fun `calling close on an already closed scope does nothing`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    // Make sure that calling onClose on the listener directly throws an exception because we're not in an action scope
+    assertThrows<IllegalStateException> { testListener.onClose() }
+
+    // Make sure that closing the scope when it isn't open doesn't call the listeners which would throw the exception
+    scope.close()
   }
 }

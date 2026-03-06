@@ -23,7 +23,8 @@ internal constructor(
   // on ActionScopedProviders, which might depend on other ActionScopeds. We break
   // this circular dependency by injecting a map of Provider<ActionScopedProvider>
   // rather than the map of ActionScopedProvider directly
-  private val providers: @JvmSuppressWildcards Map<Key<*>, Provider<ActionScopedProvider<*>>>
+  private val providers: @JvmSuppressWildcards Map<Key<*>, Provider<ActionScopedProvider<*>>>,
+  private val listeners: @JvmSuppressWildcards Provider<Set<ActionScopeListener>>,
 ) : AutoCloseable {
   companion object {
     private val threadLocalInstance = ThreadLocal<Instance>()
@@ -56,7 +57,7 @@ internal constructor(
    *
    * Example usage:
    * ```
-   *  scope.enter(seedData).use {
+   *  scope.create(seedData).inScope {
    *    runBlocking(scope.asContextElement()) {
    *      async(Dispatchers.IO) {
    *        tester.fooValue()
@@ -73,21 +74,9 @@ internal constructor(
     return threadLocalInstance.asContextElement(instance)
   }
 
-  @Deprecated("Use snapshotActionScopeInstance instead", ReplaceWith("this.snapshotActionScopeInstance()"))
-  fun snapshotActionScope(): Map<Key<*>, Any?> {
-    return snapshotActionScopeInstance().asImmediateValues()
-  }
-
   fun snapshotActionScopeInstance(): Instance {
     check(inScope()) { "not running within an ActionScope" }
     return threadLocalInstance.get()
-  }
-
-  @Deprecated("Use create() instead and then call inScope() to enter the scope")
-  /** Starts the scope on a thread with the provided seed data */
-  fun enter(seedData: Map<Key<*>, Any?>): ActionScope {
-    create(seedData).enter()
-    return this
   }
 
   /** Creates a new scope on the current thread with the provided seed data */
@@ -122,13 +111,25 @@ internal constructor(
     return this
   }
 
+  /**
+   * If the scope is currently open, i.e. [inScope] returns true, the [listeners] are called and then
+   * [threadLocalInstance] is removed. If [close] is called and the scope is not open, this method does nothing.
+   */
   override fun close() {
-    threadLocalInstance.remove()
+    if (!inScope()) {
+      return
+    }
 
-    // Explicitly NOT removing threadLocalUUID because we want to retain the thread's UUID if
-    // the action scope is re-entered on the same thread.
-    // The only way in which threadLocalUUID is removed is through garbage collection, which occurs
-    // when the thread is no longer alive.
+    try {
+      listeners.get().forEach { it.onClose() }
+    } finally {
+      threadLocalInstance.remove()
+
+      // Explicitly NOT removing threadLocalUUID because we want to retain the thread's UUID if
+      // the action scope is re-entered on the same thread.
+      // The only way in which threadLocalUUID is removed is through garbage collection, which occurs
+      // when the thread is no longer alive.
+    }
   }
 
   /** Returns true if currently in the scope */
@@ -197,10 +198,6 @@ internal constructor(
     internal operator fun <T> get(key: Key<T>): T {
       @Suppress("UNCHECKED_CAST")
       return lazyValues.getValue(key).value as T
-    }
-
-    internal fun asImmediateValues(): Map<Key<*>, Any?> {
-      return lazyValues.filterValues { it.isInitialized() }.mapValues { it.value.value }
     }
 
     fun <T> inScope(block: () -> T): T {

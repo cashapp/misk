@@ -551,10 +551,17 @@ public final class misk/jdbc/RealDatabasePool : misk/jdbc/DatabasePool {
 }
 
 public final class misk/jdbc/RealTransacter : misk/jdbc/Transacter {
+	public static final field Companion Lmisk/jdbc/RealTransacter$Companion;
 	public fun <init> (Lmisk/jdbc/DataSourceService;)V
+	public fun <init> (Lmisk/jdbc/DataSourceService;Lmisk/jdbc/DataSourceConfig;)V
 	public fun getInTransaction ()Z
+	public fun noRetries ()Lmisk/jdbc/Transacter;
+	public fun retries (I)Lmisk/jdbc/Transacter;
 	public fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public fun transactionWithSession (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class misk/jdbc/RealTransacter$Companion {
 }
 
 public final class misk/jdbc/ScaleSafetyChecks {
@@ -669,6 +676,8 @@ public final class misk/jdbc/TracingDataSourceDecorator : misk/jdbc/DataSourceDe
 
 public abstract interface class misk/jdbc/Transacter {
 	public abstract fun getInTransaction ()Z
+	public abstract fun noRetries ()Lmisk/jdbc/Transacter;
+	public abstract fun retries (I)Lmisk/jdbc/Transacter;
 	public abstract fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public abstract fun transactionWithSession (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 }
@@ -679,5 +688,32 @@ public final class misk/jdbc/TruncateTablesService : com/google/common/util/conc
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;Lmisk/jdbc/JdbcTestFixture;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;Lmisk/jdbc/JdbcTestFixture;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public class misk/jdbc/retry/DefaultExceptionClassifier : misk/jdbc/retry/ExceptionClassifier {
+	public fun <init> ()V
+	public fun <init> (Lmisk/jdbc/DataSourceType;)V
+	public synthetic fun <init> (Lmisk/jdbc/DataSourceType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	protected final fun isCauseRetryable (Ljava/lang/Throwable;)Z
+	public fun isRetryable (Ljava/lang/Throwable;)Z
+}
+
+public abstract interface class misk/jdbc/retry/ExceptionClassifier {
+	public abstract fun isRetryable (Ljava/lang/Throwable;)Z
+}
+
+public final class misk/jdbc/retry/RetryDefaults {
+	public static final field INSTANCE Lmisk/jdbc/retry/RetryDefaults;
+	public static final field MAX_ATTEMPTS I
+	public static final field MAX_RETRY_DELAY_MILLIS J
+	public static final field MIN_RETRY_DELAY_MILLIS J
+	public static final field RETRY_JITTER_MILLIS J
+}
+
+public class misk/jdbc/retry/RetryTransactionException : java/lang/Exception {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 

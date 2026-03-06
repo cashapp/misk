@@ -173,6 +173,35 @@ class VschemaLinterTest {
   }
 
   @Test
+  fun `test sharded vschema with valid lookup vindex with no_verify`() {
+    val vschemaJson =
+      vschemaAdapter.fromJson(
+        """
+            {
+                "sharded": true,
+                "vindexes": {
+                    "customers_email_lookup": {
+                        "type": "lookup",
+                        "params": {
+                            "autocommit": "true",
+                            "from": "email",
+                            "ignore_nulls": "true",
+                            "no_verify": "true",
+                            "table": "customers_email_lookup",
+                            "to": "keyspace_id"
+                        },
+                        "owner": "customers"
+                    }
+                },
+                "tables": {}
+            }
+        """
+      )!!
+
+    assertDoesNotThrow { linter.lint(vschemaJson, "sharded") }
+  }
+
+  @Test
   fun `test sharded vschema with invalid lookup vindex with`() {
     val vschemaJson =
       vschemaAdapter.fromJson(

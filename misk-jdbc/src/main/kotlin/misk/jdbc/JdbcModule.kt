@@ -206,7 +206,7 @@ constructor(
         .let { if (installHealthCheck) it.dependsOn<PingDatabaseService>(qualifier) else it }
         .enhancedBy<ReadyService>()
     )
-    bind(keyOf<Transacter>(qualifier)).toProvider { RealTransacter(dataSourceServiceProvider.get()) }
+    bind(keyOf<Transacter>(qualifier)).toProvider { RealTransacter(dataSourceServiceProvider.get(), config) }
 
     if (config.type == DataSourceType.VITESS_MYSQL) {
       val spanInjectorDecoratorKey = SpanInjector::class.toKey(qualifier)
