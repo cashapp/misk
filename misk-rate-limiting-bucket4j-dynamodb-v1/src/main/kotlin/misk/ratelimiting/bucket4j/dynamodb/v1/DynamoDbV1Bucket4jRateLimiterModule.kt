@@ -7,6 +7,7 @@ import io.github.bucket4j.distributed.proxy.ProxyManager
 import io.micrometer.core.instrument.MeterRegistry
 import jakarta.inject.Singleton
 import java.time.Clock
+import java.time.Duration
 import misk.inject.KAbstractModule
 import misk.ratelimiting.bucket4j.dynamodb.v1.proxymanager.DynamoDBProxyManager
 import wisp.ratelimiting.RateLimitPruner
@@ -24,6 +25,8 @@ class DynamoDbV1Bucket4jRateLimiterModule
 constructor(
   private val tableName: String,
   private val prunerPageSize: Int = 1000,
+  private val maxRetries: Int = 3,
+  private val retryTimeout: Duration = Duration.ofMillis(100),
   private val configMutator: ClientSideConfig.() -> Unit = {},
 ) : KAbstractModule() {
   override fun configure() {
@@ -35,7 +38,12 @@ constructor(
   @Provides
   @Singleton
   fun providedRateLimiter(clock: Clock, dynamoDB: AmazonDynamoDB, meterRegistry: MeterRegistry): RateLimiter {
-    val config = ClientSideConfig.getDefault().withClientClock(ClockTimeMeter(clock)).apply { configMutator() }
+    val config =
+      ClientSideConfig.getDefault()
+        .withClientClock(ClockTimeMeter(clock))
+        .withRequestTimeout(retryTimeout)
+        .withMaxRetries(maxRetries)
+        .apply { configMutator() }
     val proxyManager: ProxyManager<String> = DynamoDBProxyManager.stringKey(dynamoDB, tableName, config)
     return Bucket4jRateLimiter(proxyManager, clock, meterRegistry)
   }

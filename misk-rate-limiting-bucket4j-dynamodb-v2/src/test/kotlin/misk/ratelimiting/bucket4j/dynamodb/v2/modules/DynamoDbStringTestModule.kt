@@ -2,6 +2,7 @@ package misk.ratelimiting.bucket4j.dynamodb.v2.modules
 
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import java.time.Duration
 import misk.MiskTestingServiceModule
 import misk.aws2.dynamodb.testing.DockerDynamoDbModule
 import misk.aws2.dynamodb.testing.DynamoDbTable
@@ -14,7 +15,7 @@ import wisp.deployment.TESTING
 class DynamoDbStringTestModule : ReusableTestModule() {
   override fun configure() {
     install(DockerDynamoDbModule(DynamoDbTable(STRING_TABLE_NAME, DyStringRateLimitBucket::class)))
-    install(DynamoDbV2Bucket4jRateLimiterModule(STRING_TABLE_NAME))
+    install(DynamoDbV2Bucket4jRateLimiterModule(STRING_TABLE_NAME, retryTimeout = Duration.ofMillis(500)))
     install(MiskTestingServiceModule())
     install(DeploymentModule(TESTING))
     bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
