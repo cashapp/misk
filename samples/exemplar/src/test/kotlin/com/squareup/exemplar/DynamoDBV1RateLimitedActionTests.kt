@@ -5,6 +5,7 @@ import com.google.inject.Module
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import jakarta.inject.Inject
+import java.time.Duration
 import misk.aws.dynamodb.testing.DockerDynamoDbModule
 import misk.aws.dynamodb.testing.DynamoDbTable
 import misk.inject.KAbstractModule
@@ -21,7 +22,7 @@ class DynamoDBV1RateLimitedActionTests : AbstractRateLimitedActionTests() {
       override fun configure() {
         install(ExemplarTestModule())
         install(DockerDynamoDbModule(DynamoDbTable(DyRateLimitBucket::class)))
-        install(DynamoDbV1Bucket4jRateLimiterModule("rate_limit_buckets"))
+        install(DynamoDbV1Bucket4jRateLimiterModule("rate_limit_buckets", retryTimeout = Duration.ofMillis(500)))
         bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
       }
     }

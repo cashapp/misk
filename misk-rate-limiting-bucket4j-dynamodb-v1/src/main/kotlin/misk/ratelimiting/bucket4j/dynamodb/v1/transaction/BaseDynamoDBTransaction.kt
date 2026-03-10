@@ -10,14 +10,23 @@ import io.github.bucket4j.distributed.proxy.generic.compare_and_swap.CompareAndS
 import io.github.bucket4j.distributed.remote.RemoteBucketState
 import java.nio.ByteBuffer
 import java.util.Optional
+import java.util.concurrent.TimeUnit
 
 internal abstract class BaseDynamoDBTransaction(private val dynamoDB: AmazonDynamoDB, private val table: String) :
   CompareAndSwapOperation {
-  override fun getStateData(): Optional<ByteArray> {
+  override fun getStateData(timeoutNanos: Optional<Long>): Optional<ByteArray> {
     val attributes = mapOf(DEFAULT_KEY_NAME to getKeyAttributeValue())
 
     val result =
-      dynamoDB.getItem(GetItemRequest().withTableName(table).withKey(attributes).withConsistentRead(true).apply {}).item
+      dynamoDB
+        .getItem(
+          GetItemRequest().withTableName(table).withKey(attributes).withConsistentRead(true).apply {
+            timeoutNanos.ifPresent { timeout ->
+              withSdkRequestTimeout<PutItemRequest>(TimeUnit.NANOSECONDS.toMillis(timeout).toInt())
+            }
+          }
+        )
+        .item
     if (result == null || !result.containsKey(DEFAULT_STATE_NAME)) {
       return Optional.empty()
     }
@@ -32,7 +41,12 @@ internal abstract class BaseDynamoDBTransaction(private val dynamoDB: AmazonDyna
     return Optional.of(state.b.array())
   }
 
-  override fun compareAndSwap(originalData: ByteArray?, newData: ByteArray, newState: RemoteBucketState?): Boolean {
+  override fun compareAndSwap(
+    originalData: ByteArray?,
+    newData: ByteArray,
+    newState: RemoteBucketState?,
+    timeoutNanos: Optional<Long>,
+  ): Boolean {
     val item =
       mapOf(
         DEFAULT_KEY_NAME to getKeyAttributeValue(),
@@ -50,6 +64,11 @@ internal abstract class BaseDynamoDBTransaction(private val dynamoDB: AmazonDyna
           .withConditionExpression("attribute_not_exists(#st) OR #st = :expected")
           .withExpressionAttributeNames(names)
           .withExpressionAttributeValues(ItemUtils.fromSimpleMap(attributes))
+          .apply {
+            timeoutNanos.ifPresent { timeout ->
+              withSdkRequestTimeout<PutItemRequest>(TimeUnit.NANOSECONDS.toMillis(timeout).toInt())
+            }
+          }
       )
       true
     } catch (_: ConditionalCheckFailedException) {

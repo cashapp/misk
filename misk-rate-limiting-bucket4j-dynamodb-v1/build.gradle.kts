@@ -17,6 +17,7 @@ dependencies {
   api(libs.micrometerCore)
 
   implementation(project(":misk-logging"))
+  implementation(libs.awsCore)
   implementation(libs.loggingApi)
 
   testImplementation(project(":misk"))
