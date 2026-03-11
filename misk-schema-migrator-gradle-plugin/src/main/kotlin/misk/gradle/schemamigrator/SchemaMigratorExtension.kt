@@ -1,6 +1,6 @@
 package misk.gradle.schemamigrator
 
-import jakarta.inject.Inject
+import javax.inject.Inject
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
