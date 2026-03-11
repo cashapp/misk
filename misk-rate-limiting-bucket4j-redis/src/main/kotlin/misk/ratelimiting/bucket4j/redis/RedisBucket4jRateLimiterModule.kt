@@ -10,7 +10,6 @@ import io.micrometer.core.instrument.MeterRegistry
 import java.time.Clock
 import java.time.Duration
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
 import redis.clients.jedis.UnifiedJedis
 import wisp.ratelimiting.RateLimiter
 import wisp.ratelimiting.bucket4j.Bucket4jRateLimiter
@@ -55,7 +54,6 @@ constructor(
           configMutator = configMutator,
         )
       )
-      .asSingleton()
   }
 
   private class RedisBucket4jRateLimiterProvider(
