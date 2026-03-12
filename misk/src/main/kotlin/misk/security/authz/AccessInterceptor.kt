@@ -32,6 +32,8 @@ private constructor(
 
   /** Check whether the caller is allowed to access this endpoint */
   private fun isAuthorized(caller: MiskCaller): Boolean {
+    if (caller.allowAll) return true
+
     // Deny if we don't have any requirements on service or capability
     if (allowedServices.isEmpty() && allowedCapabilities.isEmpty() && !allowAnyService && !allowAnyUser) return false
 
