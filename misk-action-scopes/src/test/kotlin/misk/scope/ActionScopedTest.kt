@@ -175,9 +175,7 @@ internal class ActionScopedTest {
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
 
     scope.create(seedData).inScope {
-      runBlocking(scope.asContextElement()) {
-        assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
-      }
+      runBlocking(scope.asContextElement()) { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
     }
   }
 
@@ -218,14 +216,12 @@ internal class ActionScopedTest {
 
       val instance = scope.snapshotActionScopeInstance()
       thread {
-        try {
-          instance.inScope {
-            assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
+          try {
+            instance.inScope { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
+          } catch (t: Throwable) {
+            thrown = t
           }
-        } catch (t: Throwable) {
-          thrown = t
         }
-      }
         .join()
       assertThat(thrown).isNull()
     }
@@ -260,14 +256,12 @@ internal class ActionScopedTest {
 
       val instance = scope.snapshotActionScopeInstance()
       thread {
-        try {
-          instance.inScope {
-            assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
+          try {
+            instance.inScope { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
+          } catch (t: Throwable) {
+            thrown = t
           }
-        } catch (t: Throwable) {
-          thrown = t
         }
-      }
         .join()
       assertThat(thrown).isNull()
     }
@@ -311,7 +305,23 @@ internal class ActionScopedTest {
     // Make sure that calling onClose on the listener directly throws an exception because we're not in an action scope
     assertThrows<IllegalStateException> { testListener.onClose() }
 
+    val instance = scope.create(mapOf())
+    instance.enter()
+
+    instance.close()
     // Make sure that closing the scope when it isn't open doesn't call the listeners which would throw the exception
-    scope.close()
+    instance.close()
+  }
+
+  @Test
+  fun `cannot use an ActionScope Instance that has already been closed`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    val instance = scope.create(mapOf())
+    instance.enter()
+    instance.close()
+
+    assertThrows<IllegalStateException> { foo.get() }
   }
 }
