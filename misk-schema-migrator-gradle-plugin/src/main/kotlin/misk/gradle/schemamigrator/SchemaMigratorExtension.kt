@@ -1,8 +1,6 @@
-@file:Suppress("ForbiddenImport") // Gradle requires javax.inject.Inject for service injection
-
 package misk.gradle.schemamigrator
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property

@@ -578,16 +578,6 @@ public abstract interface class misk/jdbc/SchemaMigrator {
 	public abstract fun requireAll ()Lmisk/jdbc/MigrationStatus;
 }
 
-public final class misk/jdbc/SchemaMigratorFactoryKt {
-	public static final fun createSchemaMigrator (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DataSourceService;Lmisk/resources/ResourceLoader;)Lmisk/jdbc/SchemaMigrator;
-	public static synthetic fun createSchemaMigrator$default (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DataSourceService;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Lmisk/jdbc/SchemaMigrator;
-}
-
-public final class misk/jdbc/SchemaMigratorRunner {
-	public static final field INSTANCE Lmisk/jdbc/SchemaMigratorRunner;
-	public static final fun main ([Ljava/lang/String;)V
-}
-
 public final class misk/jdbc/SchemaMigratorService : com/google/common/util/concurrent/AbstractIdleService, misk/healthchecks/HealthCheck, misk/jdbc/DatabaseReadyService {
 	public fun <init> (Lkotlin/reflect/KClass;Lwisp/deployment/Deployment;Lcom/google/inject/Provider;Lcom/google/inject/Provider;)V
 	public fun status ()Lmisk/healthchecks/HealthStatus;
