@@ -33,9 +33,11 @@ object SchemaMigratorRunner {
       migrations_format = MigrationsFormat.valueOf(props.getProperty("migrationsFormat")),
     )
 
+    val configWithDefaults = config.withDefaults()
+
     val dataSourceService = DataSourceService(
       qualifier = SchemaMigratorDatabase::class,
-      baseConfig = config,
+      baseConfig = configWithDefaults,
       deployment = TESTING,
       dataSourceDecorators = emptySet(),
       databasePool = RealDatabasePool,
@@ -45,7 +47,7 @@ object SchemaMigratorRunner {
     try {
       val migrator = createSchemaMigrator(
         qualifier = SchemaMigratorDatabase::class,
-        config = config,
+        config = configWithDefaults,
         dataSourceService = dataSourceService,
         resourceLoader = ResourceLoader.SYSTEM,
       )
