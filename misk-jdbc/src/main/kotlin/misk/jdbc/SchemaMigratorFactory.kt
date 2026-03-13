@@ -2,6 +2,7 @@ package misk.jdbc
 
 import kotlin.reflect.KClass
 import misk.resources.ResourceLoader
+import misk.spirit.Spirit
 
 /**
  * Creates a [SchemaMigrator] without Guice. Useful for standalone tools like the
@@ -27,11 +28,7 @@ fun createSchemaMigrator(
         resourceLoader = resourceLoader,
         dataSourceService = dataSourceService,
         connector = dataSourceService,
-        skeemaWrapper = SkeemaWrapper(
-          qualifier = qualifier,
-          resourceLoader = resourceLoader,
-          dataSourceConfig = config,
-        ),
+        spirit = Spirit(),
       )
     MigrationsFormat.EXTERNALLY_MANAGED ->
       throw IllegalStateException("SchemaMigrator should not be created for externally managed migrations")

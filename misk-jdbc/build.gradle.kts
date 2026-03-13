@@ -28,6 +28,7 @@ dependencies {
   implementation(libs.loggingApi)
   implementation(libs.mysql)
   implementation(project(":misk-backoff"))
+  implementation(project(":misk-spirit"))
   implementation(project(":misk-docker"))
   implementation(project(":misk-logging"))
   implementation(project(":misk-service"))
