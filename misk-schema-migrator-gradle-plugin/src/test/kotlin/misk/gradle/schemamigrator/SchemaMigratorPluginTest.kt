@@ -34,7 +34,7 @@ class SchemaMigratorPluginTest {
     val result =
       GradleRunner.create()
         .withProjectDir(testProjectDir)
-        .withArguments("migrateSchema")
+        .withArguments("migrateSchema", "-PschemaMigratorClasspath=${System.getProperty("java.class.path")}")
         .withPluginClasspath()
         .forwardOutput()
         .build()

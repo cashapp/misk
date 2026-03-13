@@ -16,23 +16,30 @@ gradlePlugin {
   }
 }
 
+val generateVersionProperties by tasks.registering {
+  val outputDir = layout.buildDirectory.dir("generated-resources")
+  val version = project.version.toString()
+  inputs.property("version", version)
+  outputs.dir(outputDir)
+  doLast {
+    val file = outputDir.get().asFile.resolve("misk-schema-migrator.properties")
+    file.parentFile.mkdirs()
+    file.writeText("version=$version\n")
+  }
+}
+
+sourceSets.main {
+  resources.srcDir(generateVersionProperties)
+}
+
 dependencies {
-  api(project(":misk-inject"))
-  api(libs.jakartaInject)
-
-  implementation(project(":misk"))
-  implementation(project(":misk-jdbc"))
-  implementation(project(":misk-config"))
-  implementation(project(":misk-service"))
-  implementation(project(":wisp:wisp-deployment"))
-  implementation(libs.guava)
-  implementation(libs.guice)
-
   testImplementation(gradleTestKit())
   testImplementation(libs.assertj)
   testImplementation(libs.hikariCp)
   testImplementation(libs.junitApi)
   testImplementation(libs.junitParams)
+  testRuntimeOnly(project(":misk-jdbc"))
+  testRuntimeOnly(libs.mysql)
 }
 
 mavenPublishing {
