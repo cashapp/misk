@@ -97,14 +97,14 @@ internal class DeclarativeSchemaMigratorTest {
     resourceLoader.put(
       "$mainSource/t1.sql",
       """
-      |CREATE TABLE table_1 (id bigint, PRIMARY KEY (id))
+      |CREATE TABLE table_1 (id bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
     resourceLoader.put(
       "$mainSource/t2.sql",
       """
-      |CREATE TABLE table_2 (id bigint, PRIMARY KEY (id))
+      |CREATE TABLE table_2 (id bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
@@ -112,7 +112,7 @@ internal class DeclarativeSchemaMigratorTest {
     resourceLoader.put(
       "$librarySource/name/space/t3.sql",
       """
-      |CREATE TABLE library_table (id bigint, PRIMARY KEY (id))
+      |CREATE TABLE library_table (id bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
@@ -167,14 +167,14 @@ internal class DeclarativeSchemaMigratorTest {
     resourceLoader.put(
       "$mainSource/t1.sql",
       """
-      |CREATE TABLE table_1 (id bigint, PRIMARY KEY (id))
+      |CREATE TABLE table_1 (id bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
     resourceLoader.put(
       "$mainSource/all-migrations.sql",
       """
-      |CREATE TABLE table_2 (id bigint, PRIMARY KEY (id))
+      |CREATE TABLE table_2 (id bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
@@ -198,14 +198,14 @@ internal class DeclarativeSchemaMigratorTest {
     resourceLoader.put(
       "$mainSource/t1.sql",
       """
-      |CREATE TABLE table_1 (id bigint, PRIMARY KEY (id))
+      |CREATE TABLE table_1 (id bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
     resourceLoader.put(
       "$mainSource/t2.sql",
       """
-      |CREATE TABLE `table_2` (`id` bigint, PRIMARY KEY (id))
+      |CREATE TABLE `table_2` (`id` bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
@@ -213,7 +213,7 @@ internal class DeclarativeSchemaMigratorTest {
     resourceLoader.put(
       "$librarySource/name/space/t3.sql",
       """
-      |CREATE TABLE library_table (id bigint, PRIMARY KEY (id))
+      |CREATE TABLE library_table (id bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
@@ -365,7 +365,7 @@ internal class DeclarativeSchemaMigratorTest {
     resourceLoader.put(
       "$librarySource/name/space/t3.sql",
       """
-      |CREATE TABLE library_table (id bigint, PRIMARY KEY (id))
+      |CREATE TABLE library_table (id bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
@@ -527,7 +527,7 @@ internal class DeclarativeSchemaMigratorTest {
     resourceLoader.put(
       "$mainSource/t1.sql",
       """
-      |        CREATE TABLE excluded_table (id bigint, PRIMARY KEY (id))
+      |        CREATE TABLE excluded_table (id bigint NOT NULL, PRIMARY KEY (id))
       """
         .trimMargin(),
     )
