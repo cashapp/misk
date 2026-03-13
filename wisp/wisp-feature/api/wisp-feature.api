@@ -66,7 +66,7 @@ public class wisp/feature/Feature {
 }
 
 public abstract interface class wisp/feature/FeatureFlag {
-	public abstract fun getAttributes ()Lwisp/feature/Attributes;
+	public fun getAttributes ()Lwisp/feature/Attributes;
 	public abstract fun getFeature ()Lwisp/feature/Feature;
 	public abstract fun getKey ()Ljava/lang/String;
 }
@@ -115,32 +115,45 @@ public final class wisp/feature/JsonFeatureFlag$DefaultImpls {
 }
 
 public abstract interface class wisp/feature/LegacyFeatureFlags {
-	public abstract fun getBoolean (Lwisp/feature/Feature;Ljava/lang/String;)Z
+	public fun getBoolean (Lwisp/feature/Feature;Ljava/lang/String;)Z
 	public abstract fun getBoolean (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)Z
-	public abstract fun getDouble (Lwisp/feature/Feature;Ljava/lang/String;)D
+	public static synthetic fun getBoolean$default (Lwisp/feature/LegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;ILjava/lang/Object;)Z
+	public fun getDouble (Lwisp/feature/Feature;Ljava/lang/String;)D
 	public abstract fun getDouble (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)D
-	public abstract fun getEnum (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Enum;
+	public static synthetic fun getDouble$default (Lwisp/feature/LegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;ILjava/lang/Object;)D
+	public fun getEnum (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Enum;
 	public abstract fun getEnum (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lwisp/feature/Attributes;)Ljava/lang/Enum;
-	public abstract fun getInt (Lwisp/feature/Feature;Ljava/lang/String;)I
+	public static synthetic fun getEnum$default (Lwisp/feature/LegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lwisp/feature/Attributes;ILjava/lang/Object;)Ljava/lang/Enum;
+	public fun getInt (Lwisp/feature/Feature;Ljava/lang/String;)I
 	public abstract fun getInt (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)I
-	public abstract fun getJson (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;
+	public static synthetic fun getInt$default (Lwisp/feature/LegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;ILjava/lang/Object;)I
+	public fun getJson (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;
 	public abstract fun getJson (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lwisp/feature/Attributes;)Ljava/lang/Object;
-	public abstract fun getJsonString (Lwisp/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
+	public static synthetic fun getJson$default (Lwisp/feature/LegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lwisp/feature/Attributes;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun getJsonString (Lwisp/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
 	public abstract fun getJsonString (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)Ljava/lang/String;
-	public abstract fun getString (Lwisp/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
+	public static synthetic fun getJsonString$default (Lwisp/feature/LegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;ILjava/lang/Object;)Ljava/lang/String;
+	public fun getString (Lwisp/feature/Feature;Ljava/lang/String;)Ljava/lang/String;
 	public abstract fun getString (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;)Ljava/lang/String;
-	public abstract fun trackBoolean (Lwisp/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
+	public static synthetic fun getString$default (Lwisp/feature/LegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;ILjava/lang/Object;)Ljava/lang/String;
+	public fun trackBoolean (Lwisp/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
 	public abstract fun trackBoolean (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public abstract fun trackDouble (Lwisp/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
+	public static synthetic fun trackBoolean$default (Lwisp/feature/LegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/TrackerReference;
+	public fun trackDouble (Lwisp/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
 	public abstract fun trackDouble (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public abstract fun trackEnum (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
+	public static synthetic fun trackDouble$default (Lwisp/feature/LegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/TrackerReference;
+	public fun trackEnum (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
 	public abstract fun trackEnum (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public abstract fun trackInt (Lwisp/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
+	public static synthetic fun trackEnum$default (Lwisp/feature/LegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/TrackerReference;
+	public fun trackInt (Lwisp/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
 	public abstract fun trackInt (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public abstract fun trackJson (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
+	public static synthetic fun trackInt$default (Lwisp/feature/LegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/TrackerReference;
+	public fun trackJson (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
 	public abstract fun trackJson (Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
-	public abstract fun trackString (Lwisp/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
+	public static synthetic fun trackJson$default (Lwisp/feature/LegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Ljava/lang/Class;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/TrackerReference;
+	public fun trackString (Lwisp/feature/Feature;Ljava/lang/String;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
 	public abstract fun trackString (Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;)Lwisp/feature/TrackerReference;
+	public static synthetic fun trackString$default (Lwisp/feature/LegacyFeatureFlags;Lwisp/feature/Feature;Ljava/lang/String;Lwisp/feature/Attributes;Ljava/util/concurrent/Executor;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lwisp/feature/TrackerReference;
 }
 
 public final class wisp/feature/LegacyFeatureFlags$DefaultImpls {

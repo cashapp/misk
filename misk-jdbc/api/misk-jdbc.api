@@ -484,7 +484,7 @@ public final class misk/jdbc/JdbcTestingModule : misk/inject/KAbstractModule {
 }
 
 public abstract interface class misk/jdbc/MigrationStatus {
-	public abstract fun message ()Ljava/lang/String;
+	public fun message ()Ljava/lang/String;
 }
 
 public final class misk/jdbc/MigrationStatus$DefaultImpls {

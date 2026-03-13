@@ -10,7 +10,7 @@ public final class misk/crypto/AwsKmsClientModule : misk/inject/KAbstractModule 
 
 public abstract interface class misk/crypto/BucketNameSource {
 	public abstract fun getBucketName (Lwisp/deployment/Deployment;)Ljava/lang/String;
-	public abstract fun getBucketRegion (Lwisp/deployment/Deployment;)Ljava/lang/String;
+	public fun getBucketRegion (Lwisp/deployment/Deployment;)Ljava/lang/String;
 }
 
 public final class misk/crypto/BucketNameSource$DefaultImpls {

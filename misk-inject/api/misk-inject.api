@@ -201,9 +201,9 @@ public abstract class misk/inject/ReusableTestModule : misk/inject/KAbstractModu
 }
 
 public abstract interface class misk/inject/Switch {
-	public abstract fun ifDisabled (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
-	public abstract fun ifEnabled (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
-	public abstract fun isDisabled (Ljava/lang/String;)Z
+	public fun ifDisabled (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public fun ifEnabled (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public fun isDisabled (Ljava/lang/String;)Z
 	public abstract fun isEnabled (Ljava/lang/String;)Z
 }
 
