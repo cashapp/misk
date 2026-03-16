@@ -6,7 +6,8 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import java.util.UUID
 import java.util.concurrent.Callable
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -77,7 +78,7 @@ internal constructor(
 
   fun snapshotActionScopeInstance(): Instance {
     check(inScope()) { "not running within an ActionScope" }
-    return threadLocalInstance.get().copy(runListeners = false)
+    return threadLocalInstance.get().copy()
   }
 
   /** Creates a new scope on the current thread with the provided seed data */
@@ -97,7 +98,7 @@ internal constructor(
     return Instance(
       lazyValues = lazyValues + lazyOverrides + immediateValues,
       scope = this,
-      runListeners = true,
+      openInstancesCount = AtomicInteger(0),
       listeners = listeners,
     )
   }
@@ -124,8 +125,8 @@ internal constructor(
   fun <T> propagate(c: Callable<T>): Callable<T> {
     check(inScope()) { "not running within an ActionScope" }
 
-    val currentInstance = threadLocalInstance.get().copy(runListeners = false)
     val currentThreadUUID = threadLocalUUID.get()
+    val currentInstance = threadLocalInstance.get().copy()
 
     return Callable {
       // If the original thread is the same as the thread that calls the Callable and we are already
@@ -142,7 +143,7 @@ internal constructor(
   fun <T> propagate(f: KFunction<T>): KFunction<T> {
     check(inScope()) { "not running within an ActionScope" }
 
-    val currentInstance = threadLocalInstance.get().copy(runListeners = false)
+    val currentInstance = threadLocalInstance.get().copy()
     val currentThreadUUID = threadLocalUUID.get()
     return WrappedKFunction(currentInstance, this, f, currentThreadUUID)
   }
@@ -154,8 +155,8 @@ internal constructor(
   fun <T> propagate(f: () -> T): () -> T {
     check(inScope()) { "not running within an ActionScope" }
 
-    val currentInstance = threadLocalInstance.get().copy(runListeners = false)
     val currentThreadUUID = threadLocalUUID.get()
+    val currentInstance = threadLocalInstance.get().copy()
 
     return {
       // If the original thread is the same as the thread that calls the KFunction and we are already
@@ -182,21 +183,25 @@ internal constructor(
   internal constructor(
     private val lazyValues: Map<Key<*>, Lazy<*>>,
     private val scope: ActionScope,
-    private val runListeners: Boolean,
+    private val openInstancesCount: AtomicInteger,
     private val listeners: Provider<Set<ActionScopeListener>>,
   ) : AutoCloseable {
+    private enum class State {
+      CREATED,
+      ENTERED,
+      CLOSED,
+    }
 
-    private val closed = AtomicBoolean(false)
+    private val state = AtomicReference<State>(State.CREATED)
 
     internal operator fun <T> get(key: Key<T>): T {
-      check(!closed.get()) { "ActionScope.Instance is closed, can't call get" }
+      check(state.get() == State.ENTERED) { "ActionScope.Instance state is ${state.get()}, can't call get" }
 
       @Suppress("UNCHECKED_CAST")
       return lazyValues.getValue(key).value as T
     }
 
     fun <T> inScope(block: () -> T): T {
-      check(!closed.get()) { "ActionScope.Instance is closed, can't call inScope" }
       return use {
         enter()
         block()
@@ -204,18 +209,22 @@ internal constructor(
     }
 
     fun enter() {
-      check(!closed.get()) { "ActionScope.Instance is closed, can't call enter" }
+      check(state.get() == State.CREATED) { "ActionScope.Instance state is ${state.get()}, can't call enter" }
+
+      openInstancesCount.incrementAndGet()
 
       scope.enter(this)
+
+      state.set(State.ENTERED)
     }
 
     override fun close() {
-      if (closed.get()) {
+      if (state.get() == State.CLOSED) {
         return
       }
 
       try {
-        if (runListeners) {
+        if (openInstancesCount.decrementAndGet() == 0) {
           listeners.get().forEach { it.onClose() }
         }
       } finally {
@@ -225,12 +234,12 @@ internal constructor(
         // the action scope is re-entered on the same thread.
         // The only way in which threadLocalUUID is removed is through garbage collection, which occurs
         // when the thread is no longer alive.
-        closed.set(true)
+        state.set(State.CLOSED)
       }
     }
 
-    internal fun copy(runListeners: Boolean): Instance {
-      return Instance(lazyValues, scope, runListeners, listeners)
+    internal fun copy(): Instance {
+      return Instance(lazyValues, scope, openInstancesCount, listeners)
     }
   }
 

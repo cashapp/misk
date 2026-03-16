@@ -294,7 +294,35 @@ internal class ActionScopedTest {
       // then triggered, setting the result field to an action scoped value, to show we're still in an action scope.
     }
 
-    assertThat(testListener.result).isEqualTo("constant-value")
+    assertThat(testListener.result).isEqualTo("constant-value:0")
+  }
+
+  @Test
+  fun `listeners are called when the final Instance closes`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    assertThat(testListener.result).isNull()
+
+    val instance = scope.create(mapOf())
+
+    instance.inScope {
+      repeat(3) {
+        assertThat(testListener.result).isNull()
+        val instance = scope.snapshotActionScopeInstance()
+        thread { instance.inScope {} }.join()
+      }
+    }
+
+    // Because the instance was snapshotted and continued on another thread, it's all still the same instance.
+    // We only want to call the listener once ALL the instances are closed, rather than as they each close.
+    assertThat(testListener.result).isEqualTo("constant-value:0")
+
+    // Since the original instance was closed, and we made a copy from it, as soon as this instance closes the listener
+    // should be invoked.
+    instance.copy().inScope {}
+
+    assertThat(testListener.result).isEqualTo("constant-value:1")
   }
 
   @Test
