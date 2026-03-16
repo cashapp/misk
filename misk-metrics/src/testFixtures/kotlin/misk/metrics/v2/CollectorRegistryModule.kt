@@ -5,6 +5,7 @@ import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Predicate
 import io.prometheus.client.SimpleCollector
 import java.util.Enumeration
+import java.util.concurrent.ConcurrentHashMap
 import misk.inject.KAbstractModule
 import misk.testing.TestFixture
 
@@ -19,7 +20,7 @@ internal class CollectorRegistryModule : KAbstractModule() {
 
 internal class CollectorRegistryFixture(val registry: CollectorRegistry) : CollectorRegistry(true), TestFixture {
 
-  private val registeredCollectors = mutableSetOf<Collector>()
+  private val registeredCollectors: MutableSet<Collector> = ConcurrentHashMap.newKeySet()
 
   override fun reset() {
     registeredCollectors.forEach {
