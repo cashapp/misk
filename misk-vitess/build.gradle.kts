@@ -22,6 +22,7 @@ dependencies {
   testFixturesApi(project(":misk-docker"))
   testFixturesApi(project(":misk-testing"))
 
+  testFixturesImplementation(project(":misk-spirit"))
   testFixturesImplementation(libs.mysql)
   testFixturesImplementation(libs.moshiKotlin)
   testFixturesImplementation(libs.dockerApi)

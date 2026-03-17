@@ -16,6 +16,7 @@ import misk.inject.keyOf
 import misk.inject.setOfType
 import misk.inject.toKey
 import misk.resources.ResourceLoader
+import misk.spirit.Spirit
 import wisp.deployment.Deployment
 
 /**
@@ -87,19 +88,6 @@ constructor(
       val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
       val schemaMigratorProvider = getProvider(schemaMigratorKey)
       val connectorProvider = getProvider(keyOf<DataSourceConnector>(qualifier))
-      val skeemaWrapperKey = SkeemaWrapper::class.toKey(qualifier)
-      val skeemaWrapperProvider = getProvider(skeemaWrapperKey)
-
-      bind(skeemaWrapperKey)
-        .toProvider(
-          object : Provider<SkeemaWrapper> {
-            @Inject lateinit var resourceLoader: ResourceLoader
-
-            override fun get(): SkeemaWrapper =
-              SkeemaWrapper(qualifier = qualifier, resourceLoader = resourceLoader, dataSourceConfig = config)
-          }
-        )
-        .asSingleton()
 
       val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
       bind(schemaMigratorKey)
@@ -122,7 +110,7 @@ constructor(
                     resourceLoader = resourceLoader,
                     dataSourceService = dataSourceServiceProvider.get(),
                     connector = connectorProvider.get(),
-                    skeemaWrapper = skeemaWrapperProvider.get(),
+                    spirit = Spirit(),
                   )
                 MigrationsFormat.EXTERNALLY_MANAGED ->
                   throw IllegalStateException("SchemaMigrator should not be created for externally managed migrations")

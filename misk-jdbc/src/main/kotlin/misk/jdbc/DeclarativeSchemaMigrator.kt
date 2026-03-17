@@ -1,8 +1,10 @@
 package misk.jdbc
 
+import java.io.File
 import java.sql.ResultSet
 import java.util.regex.Pattern
 import misk.logging.getLogger
+import misk.spirit.Spirit
 import misk.resources.ResourceLoader
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
 import net.sf.jsqlparser.statement.create.table.CreateTable
@@ -11,7 +13,7 @@ internal class DeclarativeSchemaMigrator(
   private val resourceLoader: ResourceLoader,
   private val dataSourceService: DataSourceService,
   private val connector: DataSourceConnector,
-  private val skeemaWrapper: SkeemaWrapper,
+  private val spirit: Spirit,
 ) : BaseSchemaMigrator(resourceLoader, dataSourceService) {
   private val logger = getLogger<DeclarativeSchemaMigrator>()
 
@@ -29,7 +31,18 @@ internal class DeclarativeSchemaMigrator(
     var appliedMigrations = false
     val migrationFiles = getMigrationFiles()
     if (migrationFiles.isNotEmpty()) {
-      skeemaWrapper.applyMigrations(migrationFiles)
+      val ddl = generateDiff(migrationFiles)
+      if (ddl != null) {
+        dataSourceService.dataSource.connection.use { conn ->
+          conn.createStatement().use { stmt ->
+            // Spirit outputs multiple DDL statements (one per line), execute each individually.
+            ddl.lines()
+              .map { it.trim() }
+              .filter { it.isNotBlank() }
+              .forEach { stmt.execute(it) }
+          }
+        }
+      }
       appliedMigrations = true
     }
 
@@ -50,6 +63,15 @@ internal class DeclarativeSchemaMigrator(
     compareMigrations(expectedTables, actualTables, excludedTables)
 
     return MigrationStatus.Success
+  }
+
+  private fun generateDiff(migrationFiles: List<MigrationFile>): String? {
+    val config = connector.config()
+    val dsn = "${config.username}:${config.password}@tcp(${config.host}:${config.port})/${config.database}"
+    val sqlFiles = migrationFiles.associate { File(it.filename).name to resourceLoader.utf8(it.filename)!! }
+    val result = spirit.diff(dsn, sqlFiles)
+    logger.info { "Spirit diff result: hasDiff=${result.hasDiff}" }
+    return result.diff
   }
 
   private fun excludedTables(): Set<String> {
