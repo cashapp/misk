@@ -91,6 +91,12 @@ dependencyAnalysis {
         exclude("com.bucket4j:bucket4j-core")
       }
     }
+    project(":misk-admin") {
+      onUnusedDependencies {
+        // `wire-runtime` is added automatically by the Wire plugin but not directly used.
+        exclude("com.squareup.wire:wire-runtime")
+      }
+    }
     project(":misk-action-scopes") {
       onIncorrectConfiguration {
         // For backwards compatibility, we want Action Scoped classes moved to misk-api to still be
