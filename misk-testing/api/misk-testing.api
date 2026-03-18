@@ -233,6 +233,7 @@ public class misk/testing/ConcurrentMockTracer : io/opentracing/mock/MockTracer,
 }
 
 public final class misk/testing/ExtensionContextExtensionsKt {
+	public static final fun retrieve (Lorg/junit/jupiter/api/extension/ExtensionContext;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;
 	public static final fun store (Lorg/junit/jupiter/api/extension/ExtensionContext;Ljava/lang/String;Ljava/lang/Object;)V
 }
 
