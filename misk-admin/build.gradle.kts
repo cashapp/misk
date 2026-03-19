@@ -2,6 +2,8 @@ import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
+import kotlin.jvm.java
+import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 
 plugins {
   id("org.jetbrains.kotlin.jvm")
@@ -38,7 +40,6 @@ dependencies {
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinReflect)
   testImplementation(libs.kotlinTest)
-  testImplementation(libs.wireRuntime)
   testImplementation(project(":misk-api"))
   testImplementation(project(":misk-action-scopes"))
   testImplementation(project(":misk-service"))
@@ -103,9 +104,9 @@ wire {
   }
 }
 
-// Make sure the Wire-generated sources are test-only.
+// We want the Wire-generated sources to be test-only, so we move them to test source sets here.
 afterEvaluate {
-  val generatedSourceGlob = "$generatedSourceDir/**"
+  val kotlinSourceSets = extensions.findByType(KotlinProjectExtension::class.java)?.sourceSets
 
   sourceSets {
     main {
@@ -116,14 +117,14 @@ afterEvaluate {
     }
   }
 
-  tasks {
-    compileJava {
-      exclude(generatedSourceGlob)
-    }
-    compileTestJava {
-      include(generatedSourceGlob)
-    }
-  }
+  kotlinSourceSets?.getByName("main")?.kotlin?.setSrcDirs(
+    kotlinSourceSets.getByName("main").kotlin.srcDirs.filter { !it.path.contains(generatedSourceDir) }
+  )
+  kotlinSourceSets?.getByName("test")?.kotlin?.srcDir(generatedSourceDir)
+
+  // Explicit dependency for test scoped protos to be generated if need be.
+  tasks.named("compileTestKotlin") { dependsOn("generateMainProtos") }
+  tasks.named("compileTestJava") { dependsOn("generateMainProtos") }
 }
 
 mavenPublishing {
