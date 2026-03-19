@@ -2,6 +2,7 @@ package misk.web.marshal
 
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
+import java.lang.reflect.WildcardType
 import kotlin.reflect.KType
 import misk.inject.typeLiteral
 import misk.web.HttpCall
@@ -38,11 +39,20 @@ interface Marshaller<in T> {
   companion object {
     fun actualResponseType(type: KType): Type {
       val typeLiteral = type.typeLiteral()
-      return when {
+      val javaType = when {
         typeLiteral.rawType == Response::class.java -> {
           (typeLiteral.type as ParameterizedType).actualTypeArguments[0]
         }
         else -> typeLiteral.type
+      }
+      // Unwrap wildcard types produced by Kotlin's declaration-site variance.
+      // Response<out T> can produce "? extends T" instead of "T" for suspend function return types,
+      // because KType.javaType reconstructs the type from Continuation metadata rather than from
+      // Method.getGenericReturnType().
+      return if (javaType is WildcardType) {
+        javaType.upperBounds.firstOrNull() ?: javaType
+      } else {
+        javaType
       }
     }
   }

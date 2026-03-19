@@ -17,10 +17,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.stream.Collectors
 import kotlin.io.path.createDirectories
 import kotlin.io.path.pathString
+import misk.spirit.SchemaDiff
+import misk.spirit.Spirit
 import misk.resources.ClasspathResourceLoaderBackend
 import misk.resources.FilesystemLoaderBackend
 import misk.resources.ResourceLoader
 import misk.vitess.testing.ApplySchemaResult
+import misk.vitess.testing.VitessTestDbException
 import misk.vitess.testing.DdlUpdate
 import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_GRPC
 import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_NAME
@@ -53,14 +56,7 @@ internal class VitessSchemaApplier(
     const val VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS = "10000ms"
   }
 
-  private val skeema =
-    VitessSkeema(
-      hostname = hostname,
-      mysqlPort = mysqlPort,
-      dbaUser = dbaUser,
-      dbaUserPassword = dbaUserPassword,
-      debugStartup = debugStartup,
-    )
+  private val spirit = Spirit()
 
   /**
    * Apply the schema defined in the schema directory, which will reinitialize the keyspace vschema's and apply all
@@ -213,19 +209,30 @@ internal class VitessSchemaApplier(
     vitessQueryExecutor: VitessQueryExecutor,
     ddlUpdates: ConcurrentLinkedQueue<DdlUpdate>,
   ): Boolean {
-    val skeemaDiff = skeema.diff(keyspace)
-    if (skeemaDiff.hasDiff) {
+    val schemaDiff = runSpirit(keyspace)
+    if (schemaDiff.hasDiff) {
       printDebug("Schema changes detected for keyspace `${keyspace.name}`")
-      if (skeemaDiff.diff != null) {
-        applyDdlCommands(skeemaDiff.diff, keyspace, vitessQueryExecutor)
-        ddlUpdates.add(DdlUpdate(keyspace.name, skeemaDiff.diff))
-        return true
-      } else {
-        throw VitessSchemaManagerException("Skeema diff returned null diff for keyspace `${keyspace.name}`")
-      }
+      val ddl = schemaDiff.diff
+        ?: throw VitessSchemaManagerException("Spirit diff returned null diff for keyspace `${keyspace.name}`")
+      applyDdlCommands(ddl, keyspace, vitessQueryExecutor)
+      ddlUpdates.add(DdlUpdate(keyspace.name, ddl))
+      return true
     } else {
       printDebug("SQL schema for keyspace `${keyspace.name}` is up-to-date.")
       return false
+    }
+  }
+
+  private fun runSpirit(keyspace: VitessKeyspace): SchemaDiff {
+    val dsn = "$vtgateUser:$vtgateUserPassword@tcp($hostname:$vtgatePort)/${keyspace.name}"
+    val sqlFiles = keyspace.ddlCommands.toMap()
+    try {
+      return spirit.diff(dsn, sqlFiles)
+    } catch (e: Exception) {
+      throw VitessTestDbException(
+        "Failed to run spirit diff for keyspace `${keyspace.name}`. Error: `${e.message}`",
+        e,
+      )
     }
   }
 

@@ -204,6 +204,9 @@ constructor(
    */
   val request_deadlines: RequestDeadlinesConfig = RequestDeadlinesConfig(),
 
+  /** If true, sets the OpenTracing `span.kind` tag on spans created by the web tracing interceptor. */
+  val tracing_set_span_kind: Boolean = true,
+
   /**
    * Exposed configuration for Jetty's HTTP/2 frame rate limiter to avoid DDoS (CVE-2023-44487, CVE-2025-5115). -1 will
    * effectively disable rate limiting but will still emit metrics on the rate limiter queue. See
