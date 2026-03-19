@@ -420,6 +420,16 @@ class DeadlinePropagationInterceptorTest {
     override fun clone(): okhttp3.Call = throw NotImplementedError("Not needed for test")
 
     override fun timeout(): okio.Timeout = TestTimeout(callTimeoutMillis)
+
+    override fun <T : Any> tag(type: kotlin.reflect.KClass<T>): T? = null
+
+    override fun <T> tag(type: Class<out T>): T? = null
+
+    override fun <T : Any> tag(type: kotlin.reflect.KClass<T>, computeIfAbsent: () -> T): T =
+      throw NotImplementedError("Not needed for test")
+
+    override fun <T : Any> tag(type: Class<T>, computeIfAbsent: () -> T): T =
+      throw NotImplementedError("Not needed for test")
   }
 
   private class TestTimeout(private val callTimeoutMillis: Int) : okio.Timeout() {

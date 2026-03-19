@@ -35,7 +35,7 @@ public final class misk/aws2/dynamodb/RequiredDynamoDbTable {
 }
 
 public abstract interface class misk/aws2/dynamodb/TableNameMapper {
-	public abstract fun mapName (Ljava/lang/String;)Ljava/lang/String;
+	public fun mapName (Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class misk/aws2/dynamodb/TableNameMapper$DefaultImpls {

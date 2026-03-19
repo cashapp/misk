@@ -48,8 +48,8 @@ public final class wisp/deployment/EnvironmentVariableDeploymentLocation : wisp/
 
 public abstract interface class wisp/deployment/EnvironmentVariableLoader {
 	public static final field Companion Lwisp/deployment/EnvironmentVariableLoader$Companion;
-	public abstract fun getEnvironmentVariable (Ljava/lang/String;)Ljava/lang/String;
-	public abstract fun getEnvironmentVariableOrDefault (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public fun getEnvironmentVariable (Ljava/lang/String;)Ljava/lang/String;
+	public fun getEnvironmentVariableOrDefault (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class wisp/deployment/EnvironmentVariableLoader$Companion {
