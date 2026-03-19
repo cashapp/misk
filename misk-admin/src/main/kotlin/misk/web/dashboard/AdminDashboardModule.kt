@@ -10,6 +10,7 @@ import misk.web.metadata.database.DatabaseDashboardTabModule
 import misk.web.metadata.guice.GuiceDashboardTabModule
 import misk.web.metadata.servicegraph.ServiceGraphDashboardTabModule
 import misk.web.metadata.webaction.WebActionsDashboardTabModule
+import misk.web.v2.DashboardLayoutConfig
 import misk.web.v2.NavbarModule
 
 /**
@@ -29,10 +30,11 @@ class AdminDashboardModule
 constructor(
   private val isDevelopment: Boolean,
   private val configTabMode: ConfigMetadataAction.ConfigTabMode = ConfigMetadataAction.ConfigTabMode.SAFE,
+  private val enableTurbo: Boolean = true,
 ) : KAbstractModule() {
   override fun configure() {
     // Base setup
-    install(BaseDashboardModule(isDevelopment))
+    install(BaseDashboardModule(isDevelopment, DashboardLayoutConfig(enableTurbo = enableTurbo)))
     install(NavbarModule())
 
     if (System.getProperty("misk.dev.running") == "true") {
@@ -49,7 +51,9 @@ constructor(
 }
 
 // Module that allows testing/development environments to bind up the admin dashboard
-class AdminDashboardTestingModule : KAbstractModule() {
+class AdminDashboardTestingModule(
+  private val enableTurbo: Boolean = true,
+) : KAbstractModule() {
   override fun configure() {
     // Set dummy values for access, these shouldn't matter,
     // as test environments should prefer to use the FakeCallerAuthenticator.
@@ -63,6 +67,7 @@ class AdminDashboardTestingModule : KAbstractModule() {
       AdminDashboardModule(
         isDevelopment = true,
         configTabMode = ConfigMetadataAction.ConfigTabMode.UNSAFE_LEAK_MISK_SECRETS,
+        enableTurbo = enableTurbo,
       )
     )
   }
