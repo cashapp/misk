@@ -15,6 +15,7 @@ public final class misk/web/dashboard/AdminDashboardTestingModule : misk/inject/
 }
 
 public final class misk/web/dashboard/BaseDashboardModule : misk/inject/KAbstractModule {
+	public fun <init> (Z)V
 	public fun <init> (ZLmisk/web/v2/DashboardLayoutConfig;)V
 	public synthetic fun <init> (ZLmisk/web/v2/DashboardLayoutConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }

@@ -51,7 +51,7 @@ constructor(
 }
 
 // Module that allows testing/development environments to bind up the admin dashboard
-class AdminDashboardTestingModule(
+class AdminDashboardTestingModule @JvmOverloads constructor(
   private val enableTurbo: Boolean = true,
 ) : KAbstractModule() {
   override fun configure() {

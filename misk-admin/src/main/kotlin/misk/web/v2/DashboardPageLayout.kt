@@ -19,7 +19,7 @@ import misk.web.v2.DashboardIndexAction.Companion.titlecase
 import wisp.deployment.Deployment
 
 /** Configuration for dashboard page layout behavior. */
-data class DashboardLayoutConfig(
+data class DashboardLayoutConfig @JvmOverloads constructor(
   val enableTurbo: Boolean = true,
 )
 
