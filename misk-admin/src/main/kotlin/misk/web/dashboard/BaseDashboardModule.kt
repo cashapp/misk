@@ -17,7 +17,7 @@ import misk.web.v2.DashboardV2RedirectAction
  * - `admin-dashboard` tab which loads all other tabs and provides navbar, menu links, auth
  * - `@misk` packages used by Misk-Web tabs from window to provide faster tab loads
  */
-class BaseDashboardModule(
+class BaseDashboardModule @JvmOverloads constructor(
   private val isDevelopment: Boolean,
   private val layoutConfig: DashboardLayoutConfig = DashboardLayoutConfig(),
 ) : KAbstractModule() {
