@@ -2,6 +2,7 @@ package misk.jdbc
 
 import com.google.common.base.Stopwatch
 import com.google.inject.Provider
+import java.sql.Connection
 import java.util.Locale
 import kotlin.reflect.KClass
 import misk.backoff.FlatBackoff
@@ -43,47 +44,32 @@ class JdbcTestFixture(
             CheckDisabler.withoutChecks {
               connection.target(shard) {
                 val config = dataSourceService.config()
-                val tableNamesQuery =
-                  when (config.type) {
-                    DataSourceType.MYSQL,
-                    DataSourceType.TIDB -> {
-                      "SELECT table_name FROM information_schema.tables where table_schema='${config.database}' AND table_type='BASE TABLE'"
-                    }
-
-                    DataSourceType.HSQLDB -> {
-                      "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.SYSTEM_TABLES WHERE TABLE_TYPE='TABLE'"
-                    }
-
-                    DataSourceType.COCKROACHDB,
-                    DataSourceType.POSTGRESQL -> {
-                      "SELECT table_name FROM information_schema.tables WHERE table_catalog='${config.database}' AND table_schema='public'"
-                    }
-
-                    else -> {
-                      throw IllegalArgumentException("Unsupported database type for table truncation: ${config.type}")
-                    }
-                  }
-
-                @Suppress("UNCHECKED_CAST") // createNativeQuery returns a raw Query.
-                val allTableNames =
-                  connection.createStatement().use { s ->
-                    s.executeQuery(tableNamesQuery).map { rs -> rs.getString(1) }
-                  }
+                val nonEmptyTableNames = findNonEmptyTables(connection, config)
 
                 val truncatedTableNames = mutableListOf<String>()
-                connection.createStatement().use { statement ->
-                  for (tableName in allTableNames) {
-                    if (persistentTables.contains(tableName.lowercase(Locale.ROOT))) continue
-                    if (tableName.equals("dual")) continue
-
-                    if (config.type == DataSourceType.COCKROACHDB || config.type == DataSourceType.POSTGRESQL) {
-                      statement.addBatch("TRUNCATE \"$tableName\" CASCADE")
-                    } else {
-                      statement.addBatch("DELETE FROM `$tableName`")
+                if (nonEmptyTableNames.isNotEmpty()) {
+                  connection.createStatement().use { statement ->
+                    if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.TIDB) {
+                      statement.execute("SET FOREIGN_KEY_CHECKS = 0")
                     }
-                    truncatedTableNames += tableName
+                    try {
+                      for (tableName in nonEmptyTableNames) {
+                        if (config.type == DataSourceType.COCKROACHDB || config.type == DataSourceType.POSTGRESQL) {
+                          statement.addBatch("TRUNCATE \"$tableName\" CASCADE")
+                        } else if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.TIDB) {
+                          statement.addBatch("TRUNCATE TABLE `$tableName`")
+                        } else {
+                          statement.addBatch("DELETE FROM `$tableName`")
+                        }
+                        truncatedTableNames += tableName
+                      }
+                      statement.executeBatch()
+                    } finally {
+                      if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.TIDB) {
+                        statement.execute("SET FOREIGN_KEY_CHECKS = 1")
+                      }
+                    }
                   }
-                  statement.executeBatch()
                 }
 
                 truncatedTableNames
@@ -97,6 +83,44 @@ class JdbcTestFixture(
       logger.info {
         "@${qualifier.simpleName} TruncateTables truncated ${truncatedTableNames.size} " + "tables in $stopwatch"
       }
+    }
+  }
+
+  /**
+   * Returns the names of non-empty, non-persistent tables. For MySQL and TiDB, InnoDB's
+   * `information_schema.tables.table_rows` is used as a fast estimate to skip empty tables.
+   * The estimate is always 0 for truly empty tables, so this is safe.
+   */
+  private fun findNonEmptyTables(connection: Connection, config: DataSourceConfig): List<String> {
+    val tableNamesQuery =
+      when (config.type) {
+        DataSourceType.MYSQL,
+        DataSourceType.TIDB -> {
+          "SELECT table_name FROM information_schema.tables WHERE table_schema='${config.database}' AND table_type='BASE TABLE' AND table_rows > 0"
+        }
+
+        DataSourceType.HSQLDB -> {
+          "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.SYSTEM_TABLES WHERE TABLE_TYPE='TABLE'"
+        }
+
+        DataSourceType.COCKROACHDB,
+        DataSourceType.POSTGRESQL -> {
+          "SELECT table_name FROM information_schema.tables WHERE table_catalog='${config.database}' AND table_schema='public'"
+        }
+
+        else -> {
+          throw IllegalArgumentException("Unsupported database type for table truncation: ${config.type}")
+        }
+      }
+
+    @Suppress("UNCHECKED_CAST")
+    val allTableNames =
+      connection.createStatement().use { s ->
+        s.executeQuery(tableNamesQuery).map { rs -> rs.getString(1) }
+      }
+
+    return allTableNames.filter { tableName ->
+      !persistentTables.contains(tableName.lowercase(Locale.ROOT)) && tableName != "dual"
     }
   }
 
