@@ -1,0 +1,8 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.lease.mysql////PointingToDeclaration/misk-lease-mysql/misk.lease.mysql/index.md
+$dokka.location:misk.lease.mysql/LeaseDb///PointingToDeclaration/misk-lease-mysql/misk.lease.mysql/-lease-db/index.md
+$dokka.location:misk.lease.mysql/SqlLeaseModule///PointingToDeclaration/misk-lease-mysql/misk.lease.mysql/-sql-lease-module/index.md
+$dokka.location:misk.lease.mysql/SqlLeaseModule/SqlLeaseModule/#misk.jdbc.DataSourceClustersConfig/PointingToDeclaration/misk-lease-mysql/misk.lease.mysql/-sql-lease-module/-sql-lease-module.md
+$dokka.location:misk.lease.mysql/SqlLeaseModule/provideLeaseDatabase/#com.google.inject.Provider[javax.sql.DataSource]/PointingToDeclaration/misk-lease-mysql/misk.lease.mysql/-sql-lease-module/provide-lease-database.md
+misk.lease.mysql
