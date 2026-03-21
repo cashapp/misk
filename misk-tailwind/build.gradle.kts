@@ -10,6 +10,9 @@ dependencies {
   api(libs.kotlinXHtml)
   api(project(":wisp:wisp-deployment"))
   implementation(project(":misk-hotwire"))
+
+  testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinTest)
 }
 
 mavenPublishing {

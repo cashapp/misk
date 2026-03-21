@@ -42,6 +42,7 @@ fun TagConsumer<*>.TailwindHtmlLayout(
   appCssPath: String? = null,
   headBlock: TagConsumer<*>.() -> Unit = {},
   hotReload: Boolean = true,
+  enableTurbo: Boolean = true,
   bodyBlock: TagConsumer<*>.() -> Unit,
 ) {
   html {
@@ -84,7 +85,9 @@ fun TagConsumer<*>.TailwindHtmlLayout(
         }
       }
 
-      addHotwireHeadImports(appRoot)
+      if (enableTurbo) {
+        addHotwireHeadImports(appRoot)
+      }
       headBlock()
     }
     body(classes = "h-full") { bodyBlock() }
