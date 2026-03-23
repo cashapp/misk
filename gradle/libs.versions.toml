@@ -146,7 +146,7 @@ jettyUnixSocket = { module = "org.eclipse.jetty:jetty-unixsocket-server" }
 jettyUtil = { module = "org.eclipse.jetty:jetty-util" }
 jettyWebsocketApi = { module = "org.eclipse.jetty.websocket:websocket-jetty-api" }
 jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-server" }
-jnrUnixsocket = { module = "com.github.jnr:jnr-unixsocket", version = "0.38.23" }
+jnrUnixsocket = { module = "com.github.jnr:jnr-unixsocket", version = "0.38.24" }
 jooq = { module = "org.jooq:jooq" }
 jooqBom = { module = "org.jooq:jooq-bom", version.ref = "jooq" }
 jooqKotlin = { module = "org.jooq:jooq-kotlin" }
