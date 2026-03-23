@@ -7,7 +7,7 @@ package misk.scope
 interface ActionScopeListener {
   /**
    * Called during [ActionScope.close], immediately before the [ThreadLocal] that holds the [ActionScope.Instance] is
-   * removed.
+   * removed. Only called when the last [ActionScope.Instance] is closed if the instance was propagated using
    *
    * The [ActionScope] is not closed until all the listeners are executed. That means that:
    * - Immediately before [onClose] is called, [ActionScope.inScope] returns true

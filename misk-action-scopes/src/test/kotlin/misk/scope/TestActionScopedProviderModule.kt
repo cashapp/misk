@@ -81,9 +81,10 @@ internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
   class TestListener @Inject constructor(@Named("constant") private val constant: ActionScoped<String>) :
     ActionScopeListener {
     var result: String? = null
+    private var counter = 0
 
     override fun onClose() {
-      result = constant.get()
+      result = "${constant.get()}:${counter++}"
     }
   }
 
