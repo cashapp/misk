@@ -269,7 +269,7 @@ kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
 mavenPublishBase = { id = "com.vanniktech.maven.publish.base", version.ref = "mavenPublish" }
-protobuf = { id = "com.google.protobuf", version = "0.9.5" }
+protobuf = { id = "com.google.protobuf", version = "0.9.6" }
 # Use a strict version here so we don't get into an infinite loop of version updates. This version can be bumped
 # periodically whenever there are nontrivial changes to the schema-migrator plugin behaviour. Having this here is
 # not great but it allows us to use the schema-migrator gradle plugin (which is published from this codebase)
