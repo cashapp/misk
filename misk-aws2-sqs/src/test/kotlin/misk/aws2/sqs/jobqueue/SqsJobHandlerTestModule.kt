@@ -2,8 +2,7 @@ package misk.aws2.sqs.jobqueue
 
 import misk.MiskTestingServiceModule
 import misk.aws2.sqs.jobqueue.config.SqsConfig
-import misk.cloud.aws.AwsEnvironmentModule
-import misk.cloud.aws.FakeAwsEnvironmentModule
+import misk.cloud.aws.AwsRegion
 import misk.inject.ReusableTestModule
 import misk.jobqueue.QueueName
 import misk.testing.MockTracingBackendModule
@@ -16,9 +15,7 @@ class SqsJobHandlerTestModule(private val dockerSqs: DockerSqs, private val sqsC
     install(MiskTestingServiceModule())
     install(MockTracingBackendModule())
 
-    install(AwsEnvironmentModule())
-    install(FakeAwsEnvironmentModule())
-
+    bind<AwsRegion>().toInstance(AwsRegion("us-east-1"))
     bind<AwsCredentialsProvider>().toInstance(dockerSqs.credentialsProvider)
     bind<Region>().toInstance(dockerSqs.region)
 

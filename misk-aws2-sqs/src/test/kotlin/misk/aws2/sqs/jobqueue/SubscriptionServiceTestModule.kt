@@ -5,8 +5,7 @@ import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
-import misk.cloud.aws.AwsEnvironmentModule
-import misk.cloud.aws.FakeAwsEnvironmentModule
+import misk.cloud.aws.AwsRegion
 import misk.feature.testing.FakeFeatureFlagsModule
 import misk.inject.KAbstractModule
 import misk.jobqueue.QueueName
@@ -44,9 +43,7 @@ class SubscriptionServiceTestModule(
       install(FakeFeatureFlagsModule())
     }
 
-    install(AwsEnvironmentModule())
-    install(FakeAwsEnvironmentModule())
-
+    bind<AwsRegion>().toInstance(AwsRegion("us-east-1"))
     bind<AwsCredentialsProvider>().toInstance(dockerSqs.credentialsProvider)
     bind<Region>().toInstance(dockerSqs.region)
 

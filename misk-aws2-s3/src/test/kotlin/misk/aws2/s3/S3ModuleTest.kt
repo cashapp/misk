@@ -5,8 +5,8 @@ import jakarta.inject.Inject
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import misk.MiskTestingServiceModule
-import misk.cloud.aws.AwsEnvironmentModule
-import misk.cloud.aws.FakeAwsEnvironmentModule
+import misk.cloud.aws.AwsRegion
+import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
@@ -21,8 +21,11 @@ class S3ModuleTest {
     Modules.combine(
       MiskTestingServiceModule(),
       MockTracingBackendModule(),
-      AwsEnvironmentModule(),
-      FakeAwsEnvironmentModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          bind<AwsRegion>().toInstance(AwsRegion("us-east-1"))
+        }
+      },
       S3TestModule(),
     )
 

@@ -5,8 +5,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import misk.MiskTestingServiceModule
 import misk.aws2.s3.config.S3Config
-import misk.cloud.aws.AwsEnvironmentModule
-import misk.cloud.aws.FakeAwsEnvironmentModule
+import misk.cloud.aws.AwsRegion
 import misk.inject.KAbstractModule
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
@@ -32,8 +31,7 @@ class CustomS3TestModule : KAbstractModule() {
     // Install required dependencies for S3Module
     install(MiskTestingServiceModule())
     install(MockTracingBackendModule())
-    install(AwsEnvironmentModule())
-    install(FakeAwsEnvironmentModule())
+    bind<AwsRegion>().toInstance(AwsRegion("us-east-1"))
 
     // Create a DockerS3 instance for this test
     val dockerS3 = DockerS3()
