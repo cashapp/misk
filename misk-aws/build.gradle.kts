@@ -13,6 +13,7 @@ dependencies {
   api(libs.guava)
   api(libs.guice)
   api(libs.jakartaInject)
+  api(project(":misk-aws-api"))
   api(project(":wisp:wisp-aws-environment"))
   api(project(":wisp:wisp-lease"))
   api(project(":misk"))
