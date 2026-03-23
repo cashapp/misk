@@ -17,7 +17,7 @@ dependencies {
   api(libs.moshiCore)
   api(libs.openTracing)
   api(libs.prometheusClient)
-  api(project(":misk-aws"))
+  api(project(":misk-aws-api"))
   api(project(":misk-config"))
   api(project(":misk-feature"))
   api(project(":misk-inject"))

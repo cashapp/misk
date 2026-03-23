@@ -18,7 +18,7 @@ dependencies {
   implementation(libs.aws2Auth)
   implementation(libs.aws2Core)
   implementation(libs.aws2Regions)
-  implementation(project(":misk-aws"))
+  implementation(project(":misk-aws-api"))
   implementation(project(":misk-exceptions-dynamodb"))
   implementation(project(":misk-service"))
 

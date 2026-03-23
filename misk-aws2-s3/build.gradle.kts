@@ -15,7 +15,7 @@ dependencies {
   api(libs.jakartaInject)
   
   // Misk core dependencies
-  api(project(":misk-aws"))  // For AwsRegion
+  api(project(":misk-aws-api"))  // For AwsRegion
   api(project(":misk-config"))
   api(project(":misk-inject"))
 
