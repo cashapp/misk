@@ -175,7 +175,9 @@ internal class ActionScopedTest {
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
 
     scope.create(seedData).inScope {
-      runBlocking(scope.asContextElement()) { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
+      runBlocking(scope.asContextElement()) {
+        assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
+      }
     }
   }
 
@@ -216,12 +218,14 @@ internal class ActionScopedTest {
 
       val instance = scope.snapshotActionScopeInstance()
       thread {
-          try {
-            instance.inScope { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
-          } catch (t: Throwable) {
-            thrown = t
+        try {
+          instance.inScope {
+            assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
           }
+        } catch (t: Throwable) {
+          thrown = t
         }
+      }
         .join()
       assertThat(thrown).isNull()
     }
@@ -256,12 +260,14 @@ internal class ActionScopedTest {
 
       val instance = scope.snapshotActionScopeInstance()
       thread {
-          try {
-            instance.inScope { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
-          } catch (t: Throwable) {
-            thrown = t
+        try {
+          instance.inScope {
+            assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
           }
+        } catch (t: Throwable) {
+          thrown = t
         }
+      }
         .join()
       assertThat(thrown).isNull()
     }
@@ -294,35 +300,7 @@ internal class ActionScopedTest {
       // then triggered, setting the result field to an action scoped value, to show we're still in an action scope.
     }
 
-    assertThat(testListener.result).isEqualTo("constant-value:0")
-  }
-
-  @Test
-  fun `listeners are called when the final Instance closes`() {
-    val injector = Guice.createInjector(TestActionScopedProviderModule())
-    injector.injectMembers(this)
-
-    assertThat(testListener.result).isNull()
-
-    val instance = scope.create(mapOf())
-
-    instance.inScope {
-      repeat(3) {
-        assertThat(testListener.result).isNull()
-        val instance = scope.snapshotActionScopeInstance()
-        thread { instance.inScope {} }.join()
-      }
-    }
-
-    // Because the instance was snapshotted and continued on another thread, it's all still the same instance.
-    // We only want to call the listener once ALL the instances are closed, rather than as they each close.
-    assertThat(testListener.result).isEqualTo("constant-value:0")
-
-    // Since the original instance was closed, and we made a copy from it, as soon as this instance closes the listener
-    // should be invoked.
-    instance.copy().inScope {}
-
-    assertThat(testListener.result).isEqualTo("constant-value:1")
+    assertThat(testListener.result).isEqualTo("constant-value")
   }
 
   @Test
@@ -333,23 +311,7 @@ internal class ActionScopedTest {
     // Make sure that calling onClose on the listener directly throws an exception because we're not in an action scope
     assertThrows<IllegalStateException> { testListener.onClose() }
 
-    val instance = scope.create(mapOf())
-    instance.enter()
-
-    instance.close()
     // Make sure that closing the scope when it isn't open doesn't call the listeners which would throw the exception
-    instance.close()
-  }
-
-  @Test
-  fun `cannot use an ActionScope Instance that has already been closed`() {
-    val injector = Guice.createInjector(TestActionScopedProviderModule())
-    injector.injectMembers(this)
-
-    val instance = scope.create(mapOf())
-    instance.enter()
-    instance.close()
-
-    assertThrows<IllegalStateException> { foo.get() }
+    scope.close()
   }
 }

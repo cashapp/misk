@@ -5,27 +5,23 @@ import misk.MiskCaller
 import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.testing.retrieve
-import misk.testing.store
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.ExtensionContext
 
-private const val actionScopeInstanceStoreKey = "actionScopeInstance"
-
 class MiskCallerExtension : BeforeTestExecutionCallback, AfterTestExecutionCallback {
   override fun beforeTestExecution(context: ExtensionContext) {
     val injector = context.retrieve<Injector>("injector")
     val actionScopeProvider = injector.getBinding(ActionScope::class.java)
-    val actionScopeInstance =
-      actionScopeProvider.provider.get().create(mapOf(keyOf<MiskCaller>() to context.getPrincipal()))
-    context.store(actionScopeInstanceStoreKey, actionScopeInstance)
-    actionScopeInstance.enter()
+    val actionScope = actionScopeProvider.provider.get()
+    actionScope.create(mapOf(keyOf<MiskCaller>() to context.getPrincipal())).enter()
   }
 
   override fun afterTestExecution(context: ExtensionContext) {
-    val actionScopeInstance = context.retrieve<ActionScope.Instance>(actionScopeInstanceStoreKey)
-    actionScopeInstance.close()
+    val injector = context.retrieve<Injector>("injector")
+    val actionScope = injector.getBinding(ActionScope::class.java)
+    actionScope.provider.get().close()
   }
 
   private fun ExtensionContext.getPrincipal(): MiskCaller {
