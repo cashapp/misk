@@ -3,8 +3,7 @@ package misk.aws2.s3
 import jakarta.inject.Inject
 import kotlin.test.assertEquals
 import misk.MiskTestingServiceModule
-import misk.cloud.aws.AwsEnvironmentModule
-import misk.cloud.aws.FakeAwsEnvironmentModule
+import misk.cloud.aws.AwsRegion
 import misk.inject.ReusableTestModule
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
@@ -97,8 +96,7 @@ class S3IntegrationTest {
     override fun configure() {
       install(MiskTestingServiceModule())
       install(MockTracingBackendModule())
-      install(AwsEnvironmentModule())
-      install(FakeAwsEnvironmentModule())
+      bind<AwsRegion>().toInstance(AwsRegion("us-east-1"))
       install(S3TestModule())
     }
   }

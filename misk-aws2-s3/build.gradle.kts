@@ -15,7 +15,7 @@ dependencies {
   api(libs.jakartaInject)
   
   // Misk core dependencies
-  api(project(":misk-aws"))  // For AwsRegion
+  api(project(":misk-aws-api"))  // For AwsRegion
   api(project(":misk-config"))
   api(project(":misk-inject"))
 
@@ -48,7 +48,7 @@ dependencies {
   testFixturesImplementation(libs.aws2S3)
   testFixturesImplementation(libs.aws2Auth)
   testFixturesImplementation(libs.aws2Regions)
-  testFixturesImplementation(project(":misk-aws"))
+  testFixturesImplementation(project(":misk-aws-api"))
   testFixturesImplementation(project(":misk-inject"))
   testFixturesImplementation(project(":wisp:wisp-logging"))
   testFixturesImplementation(project(":misk-tokens"))
