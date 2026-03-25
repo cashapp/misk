@@ -54,6 +54,7 @@ class ExternalTestDynamoDbClientModule(private val port: Int, originalTables: Li
         tables.map { table ->
           TestTable.create(table.tableName, table.tableClass) { table.configureTable(it.toBuilder()).build() }
         },
+      hostName = "localhost",
       port,
     )
 

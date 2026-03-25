@@ -35,6 +35,7 @@ class TestDynamoDbClientModule(private val port: Int, private val tables: List<D
   fun providesTestDynamoDbClient(): TestDynamoDbClient {
     return DefaultTestDynamoDbClient(
       tables = tables.map { TestTable.create(it.tableClass, it.configureTable) },
+      hostName = "localhost",
       port = port,
     )
   }
