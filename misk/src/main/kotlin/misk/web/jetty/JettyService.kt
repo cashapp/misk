@@ -55,6 +55,7 @@ import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.eclipse.jetty.unixdomain.server.UnixDomainServerConnector
 import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
 import org.eclipse.jetty.util.JavaVersion
+import org.eclipse.jetty.util.MultiException
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
@@ -376,6 +377,10 @@ internal constructor(
         // distinguished from a regular unix socket by the fact that the first byte of
         // the address is a null byte ('\0'). The address has no connection with filesystem
         // path names.
+      } catch (e: MultiException) {
+        // Jetty wraps multiple InvalidPathExceptions into a MultiException when stopping
+        // multiple abstract unix domain sockets (addresses starting with '\0').
+        if (!isOnlyInvalidPathExceptions(e)) throw e
       }
 
       logger.info { "Stopped Jetty in $stopwatch" }
@@ -463,6 +468,10 @@ private fun AbstractHTTP2ServerConnectionFactory.customize(webConfig: WebConfig)
   if (webConfig.jetty_initial_stream_recv_window != null) {
     initialStreamRecvWindow = webConfig.jetty_initial_stream_recv_window
   }
+}
+
+private fun isOnlyInvalidPathExceptions(e: MultiException): Boolean {
+  return e.throwables.isNotEmpty() && e.throwables.all { it is InvalidPathException }
 }
 
 /**
