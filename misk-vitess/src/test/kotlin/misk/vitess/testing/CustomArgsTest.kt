@@ -13,7 +13,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -136,27 +135,11 @@ class CustomArgsTest {
     val rows = testDb1.executeQuery("SELECT /*vt+ ALLOW_SCATTER */ id FROM customers;")
     val ids = rows.map { (it["id"] as Number).toLong() }
 
-    // Find two IDs that hash to different shards.
-    var crossShardIds: Pair<Long, Long>? = null
-    for (id1 in ids) {
-      for (id2 in ids) {
-        if (id1 != id2) {
-          val key1 = Shard.Key.hash(id1)
-          val key2 = Shard.Key.hash(id2)
-          if ((shard1.contains(key1) && shard2.contains(key2)) ||
-            (shard2.contains(key1) && shard1.contains(key2))
-          ) {
-            crossShardIds = id1 to id2
-            break
-          }
-        }
-      }
-      if (crossShardIds != null) break
-    }
-    assertNotNull(crossShardIds, "Could not find two IDs on different shards among: $ids")
-
-    // A cross-shard write (updating rows on different shards in one transaction) should fail.
-    val (idA, idB) = crossShardIds!!
+    // Partition IDs by shard and pick one from each.
+    val byShard = ids.groupBy { id -> if (shard1.contains(Shard.Key.hash(id))) shard1 else shard2 }
+    assertEquals(2, byShard.keys.size, "All IDs landed on the same shard: $ids")
+    val idA = byShard[shard1]!!.first()
+    val idB = byShard[shard2]!!.first()
     val exception = assertThrows<VitessQueryExecutorException> {
       testDb1.executeTransaction(
         "UPDATE customers SET token = 'updated' WHERE id = $idA;" +

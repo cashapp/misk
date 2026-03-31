@@ -54,23 +54,12 @@ class VitessTransactionModeIntegrationTest {
       transacter.transaction { session -> session.save(DbMovie("Movie $i")) }
     }
 
-    // Find two movie IDs that are deterministically on different shards.
-    for (id1 in movieIds) {
-      for (id2 in movieIds) {
-        if (id1 != id2) {
-          val key1 = Shard.Key.hash(id1.id)
-          val key2 = Shard.Key.hash(id2.id)
-          if ((shard1.contains(key1) && shard2.contains(key2)) ||
-            (shard2.contains(key1) && shard1.contains(key2))
-          ) {
-            crossShardIdA = id1
-            crossShardIdB = id2
-            return
-          }
-        }
-      }
-    }
-    throw AssertionError("Could not find two movie IDs on different shards among: $movieIds")
+    // Partition IDs by shard and pick one from each.
+    val byShard = movieIds.groupBy { id -> if (shard1.contains(Shard.Key.hash(id.id))) shard1 else shard2 }
+    assertThat(byShard.keys).hasSize(2)
+      .withFailMessage("All movie IDs landed on the same shard: $movieIds")
+    crossShardIdA = byShard[shard1]!!.first()
+    crossShardIdB = byShard[shard2]!!.first()
   }
 
   @Test
