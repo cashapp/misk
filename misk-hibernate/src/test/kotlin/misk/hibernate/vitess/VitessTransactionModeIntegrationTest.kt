@@ -75,8 +75,8 @@ class VitessTransactionModeIntegrationTest {
         }
       }
 
-    assertThat(exception.stackTraceToString()).contains("CowriteException")
-    assertThat(exception.stackTraceToString()).contains("multi-db transaction attempted")
+    assertThat(generateSequence(exception as Throwable) { it.cause }.any { it is CowriteException })
+      .isTrue()
   }
 
   @Test

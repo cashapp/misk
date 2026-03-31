@@ -58,7 +58,8 @@ inline fun <reified T : DbEntity<T>> Session.loadOrNull(id: Id<T>): T? = loadOrN
  * Allow cross-shard writes (co-writes) for this session by setting the Vitess transaction mode to MULTI. This is
  * useful when the vtgate is configured with `--transaction_mode=SINGLE`, which rejects cross-shard writes by default.
  *
- * Must be called before any writes in the transaction. For non-Vitess databases, this is a no-op.
+ * Must be called before any writes in the transaction. This is Vitess-only — calling on a non-Vitess database will
+ * throw a [java.sql.SQLException] (`Unknown system variable 'transaction_mode'`).
  */
 fun Session.allowCowrites() {
   hibernateSession.doWork { connection ->
