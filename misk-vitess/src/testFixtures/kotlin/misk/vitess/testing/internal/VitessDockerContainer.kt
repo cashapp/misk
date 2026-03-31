@@ -38,6 +38,7 @@ import misk.vitess.testing.DefaultSettings.VTGATE_USER_PASSWORD
 import misk.vitess.testing.RemoveContainerResult
 import misk.vitess.testing.StartContainerResult
 import misk.vitess.testing.TransactionIsolationLevel
+import misk.vitess.testing.TransactionMode
 import misk.vitess.testing.VitessTestDbException
 import misk.vitess.testing.VitessTestDbStartupException
 import misk.vitess.testing.hostname
@@ -57,6 +58,7 @@ internal class VitessDockerContainer(
   private val schemaDir: String,
   private val sqlMode: String,
   private val transactionIsolationLevel: TransactionIsolationLevel,
+  private val transactionMode: TransactionMode,
   private val transactionTimeoutSeconds: Duration,
   private val userPort: Int,
   private val vitessImage: String,
@@ -73,6 +75,7 @@ internal class VitessDockerContainer(
     const val PORT_ENV = "PORT"
     const val SQL_MODE_ENV = "SQL_MODE"
     const val TRANSACTION_ISOLATION_LEVEL_ENV = "TRANSACTION_ISOLATION_LEVEL"
+    const val TRANSACTION_MODE_ENV = "TRANSACTION_MODE"
     const val TRANSACTION_TIMEOUT_SECONDS_ENV = "TRANSACTION_TIMEOUT_SECONDS"
     const val VITESS_IMAGE_ENV = "VITESS_IMAGE"
     const val VITESS_VERSION_ENV = "VITESS_VERSION"
@@ -369,6 +372,7 @@ internal class VitessDockerContainer(
         PORT_ENV to ("${userPort}" to "port"),
         SQL_MODE_ENV to (sqlMode to "sqlMode"),
         TRANSACTION_ISOLATION_LEVEL_ENV to (transactionIsolationLevel.value to "transactionIsolationLevel"),
+        TRANSACTION_MODE_ENV to (transactionMode.value to "transactionMode"),
         TRANSACTION_TIMEOUT_SECONDS_ENV to ("${transactionTimeoutSeconds.seconds}" to "transactionTimeoutSeconds"),
         VITESS_IMAGE_ENV to (vitessImage to "vitessImage"),
         VITESS_VERSION_ENV to ("$vitessVersion" to "vitessVersion"),
@@ -660,6 +664,9 @@ internal class VitessDockerContainer(
       cmd.add("--no_scatter")
     }
 
+    cmd.add("--transaction_mode")
+    cmd.add(transactionMode.value)
+
     try {
       return runCreateContainerCmd(hostConfig, healthCheck, cmd, vitessPortConfig, keyspaces)
     } catch (e: ConflictException) {
@@ -696,6 +703,7 @@ internal class VitessDockerContainer(
           "$PORT_ENV=${vitessPortConfig.vtgatePort.hostPort}",
           "$SQL_MODE_ENV=$sqlMode",
           "$TRANSACTION_ISOLATION_LEVEL_ENV=${transactionIsolationLevel.value}",
+          "$TRANSACTION_MODE_ENV=${transactionMode.value}",
           "$TRANSACTION_TIMEOUT_SECONDS_ENV=${transactionTimeoutSeconds.seconds}",
           "$VITESS_IMAGE_ENV=$vitessImage",
           "$VITESS_VERSION_ENV=$vitessVersion",

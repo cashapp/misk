@@ -17,6 +17,7 @@ import wisp.deployment.TESTING
 class MoviesTestModule(
   private val type: DataSourceType = DataSourceType.VITESS_MYSQL,
   private val allowScatters: Boolean = true,
+  private val singleTransactionMode: Boolean = false,
   private val scaleSafetyChecks: Boolean = false,
   private val entitiesModule: HibernateEntityModule =
     object : HibernateEntityModule(Movies::class) {
@@ -47,6 +48,9 @@ class MoviesTestModule(
   }
 
   internal fun selectDataSourceConfig(config: MoviesConfig): DataSourceConfig {
+    if (singleTransactionMode && type == DataSourceType.VITESS_MYSQL) {
+      return config.vitess_mysql_single_transaction_mode_data_source
+    }
     if (!allowScatters && type == DataSourceType.VITESS_MYSQL) {
       return config.vitess_mysql_no_scatter_data_source
     }
@@ -62,6 +66,9 @@ class MoviesTestModule(
   }
 
   internal fun selectReaderDataSourceConfig(config: MoviesConfig): DataSourceConfig {
+    if (singleTransactionMode && type == DataSourceType.VITESS_MYSQL) {
+      return config.vitess_mysql_single_transaction_mode_data_source
+    }
     if (!allowScatters && type == DataSourceType.VITESS_MYSQL) {
       return config.vitess_mysql_no_scatter_data_source
     }

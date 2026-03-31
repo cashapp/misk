@@ -24,6 +24,7 @@ object DefaultSettings {
   const val SQL_MODE: String =
     "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
   @JvmField var TRANSACTION_ISOLATION_LEVEL: TransactionIsolationLevel = TransactionIsolationLevel.REPEATABLE_READ
+  @JvmField val TRANSACTION_MODE: TransactionMode = TransactionMode.MULTI
   @JvmField var TRANSACTION_TIMEOUT_SECONDS: Duration = Duration.ofSeconds(30)
   const val VITESS_DOCKER_NETWORK_NAME = "vitess-network"
   const val VITESS_DOCKER_NETWORK_TYPE = "bridge"
@@ -39,6 +40,12 @@ enum class TransactionIsolationLevel(val value: String) {
   READ_COMMITTED("READ-COMMITTED"),
   REPEATABLE_READ("REPEATABLE-READ"),
   SERIALIZABLE("SERIALIZABLE"),
+}
+
+enum class TransactionMode(val value: String) {
+  SINGLE("SINGLE"),
+  MULTI("MULTI"),
+  TWOPC("TWOPC"),
 }
 
 val hostname: String

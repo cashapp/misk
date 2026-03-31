@@ -41,6 +41,9 @@ import misk.vitess.testing.internal.VitessQueryExecutor
  *
  * @property sqlMode The server SQL mode. Defaults to the MySQL8 defaults:
  *   `ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION`.
+ * @property transactionMode The vtgate transaction mode. `MULTI` (default) allows cross-shard writes with best-effort
+ *   commit. `SINGLE` rejects cross-shard writes unless the session opts in via `SET transaction_mode = 'multi'`.
+ *   `TWOPC` enables atomic distributed transactions via two-phase commit.
  * @property transactionTimeoutSeconds The transaction timeout in seconds. Default is `null`.
  * @property vitessImage The Vitess image to be used. Open-source Vitess images can be found at
  *   [Docker Hub](https://hub.docker.com/r/vitess/vttestserver/tags). Default is `vitess/vttestserver:v22.0.2-mysql80`.
@@ -62,6 +65,7 @@ class VitessTestDb(
   private var schemaDir: String = DefaultSettings.SCHEMA_DIR,
   private var sqlMode: String = DefaultSettings.SQL_MODE,
   private var transactionIsolationLevel: TransactionIsolationLevel = DefaultSettings.TRANSACTION_ISOLATION_LEVEL,
+  private var transactionMode: TransactionMode = DefaultSettings.TRANSACTION_MODE,
   private var transactionTimeoutSeconds: Duration = DefaultSettings.TRANSACTION_TIMEOUT_SECONDS,
   private var vitessImage: String = DefaultSettings.VITESS_IMAGE,
   private var vitessVersion: Int = DefaultSettings.VITESS_VERSION,
@@ -85,6 +89,7 @@ class VitessTestDb(
     private var schemaDir: String = DefaultSettings.SCHEMA_DIR
     private var sqlMode: String = DefaultSettings.SQL_MODE
     private var transactionIsolationLevel: TransactionIsolationLevel = DefaultSettings.TRANSACTION_ISOLATION_LEVEL
+    private var transactionMode: TransactionMode = DefaultSettings.TRANSACTION_MODE
     private var transactionTimeoutSeconds: Duration = DefaultSettings.TRANSACTION_TIMEOUT_SECONDS
     private var vitessImage: String = DefaultSettings.VITESS_IMAGE
     private var vitessVersion: Int = DefaultSettings.VITESS_VERSION
@@ -125,6 +130,10 @@ class VitessTestDb(
       this.transactionIsolationLevel = transactionIsolationLevel
     }
 
+    fun transactionMode(transactionMode: TransactionMode) = apply {
+      this.transactionMode = transactionMode
+    }
+
     fun transactionTimeoutSeconds(transactionTimeoutSeconds: Duration) = apply {
       this.transactionTimeoutSeconds = transactionTimeoutSeconds
     }
@@ -149,6 +158,7 @@ class VitessTestDb(
         schemaDir,
         sqlMode,
         transactionIsolationLevel,
+        transactionMode,
         transactionTimeoutSeconds,
         vitessImage,
         vitessVersion,
@@ -358,6 +368,7 @@ class VitessTestDb(
         schemaDir = schemaDir,
         sqlMode = sqlMode,
         transactionIsolationLevel = transactionIsolationLevel,
+        transactionMode = transactionMode,
         transactionTimeoutSeconds = transactionTimeoutSeconds,
         userPort = port,
         vitessImage = vitessImage,
