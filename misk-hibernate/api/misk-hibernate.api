@@ -310,6 +310,10 @@ public abstract interface class misk/hibernate/Session : misk/jdbc/Session {
 	public abstract fun withoutChecks ([Lmisk/jdbc/Check;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
+public final class misk/hibernate/SessionKt {
+	public static final fun allowCowrites (Lmisk/hibernate/Session;)V
+}
+
 public abstract interface class misk/hibernate/Transacter {
 	public abstract fun allowCowrites ()Lmisk/hibernate/Transacter;
 	public abstract fun config ()Lmisk/jdbc/DataSourceConfig;
