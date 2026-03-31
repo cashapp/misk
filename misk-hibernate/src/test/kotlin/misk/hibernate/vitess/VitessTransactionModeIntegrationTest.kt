@@ -6,6 +6,7 @@ import misk.hibernate.Id
 import misk.hibernate.Movies
 import misk.hibernate.MoviesTestModule
 import misk.hibernate.Transacter
+import misk.hibernate.allowCowrites
 import misk.hibernate.load
 import misk.jdbc.DataSourceType
 import misk.testing.MiskExternalDependency
@@ -81,9 +82,7 @@ class VitessTransactionModeIntegrationTest {
   @Test
   fun `cross-shard write succeeds after opting in via SET transaction_mode`() {
     transacter.transaction { session ->
-      session.hibernateSession.doWork { connection ->
-        connection.createStatement().execute("SET transaction_mode = 'multi'")
-      }
+      session.allowCowrites()
       val movieA = session.load<DbMovie>(crossShardIdA)
       val movieB = session.load<DbMovie>(crossShardIdB)
       movieA.name = "Updated A"
