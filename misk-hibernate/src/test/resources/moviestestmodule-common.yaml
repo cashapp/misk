@@ -20,6 +20,12 @@ vitess_mysql_no_scatter_data_source:
   password: ""
   vitess_schema_resource_root: classpath:/vitess/schema
   port: 28003
+vitess_mysql_single_transaction_mode_data_source:
+  type: VITESS_MYSQL
+  username: root
+  password: ""
+  vitess_schema_resource_root: classpath:/vitess/schema
+  port: 29303
 mysql_data_source:
   type: MYSQL
   database: movies

@@ -6,6 +6,8 @@ import java.time.Duration
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import kotlin.io.path.pathString
+import misk.vitess.Keyspace
+import misk.vitess.Shard
 import misk.vitess.testing.internal.VitessQueryExecutorException
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertArrayEquals
@@ -29,6 +31,7 @@ class CustomArgsTest {
     private const val DB1_SQL_MODE =
       "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
     private val DB1_TXN_ISO_LEVEL = TransactionIsolationLevel.READ_COMMITTED
+    private val DB1_TXN_MODE = TransactionMode.SINGLE
 
     // testDb2 args
     private const val DB2_CONTAINER_NAME = "custom_args2_test_vitess_db"
@@ -50,6 +53,7 @@ class CustomArgsTest {
           schemaDir = "filesystem:${Paths.get(System.getProperty("user.dir"), "src/test/resources/vitess/schema")}",
           sqlMode = DB1_SQL_MODE,
           transactionIsolationLevel = DB1_TXN_ISO_LEVEL,
+          transactionMode = DB1_TXN_MODE,
           transactionTimeoutSeconds = Duration.ofSeconds(5),
           vitessImage = "vitess/vttestserver:v22.0.2-mysql80",
           vitessVersion = 22,
@@ -113,6 +117,39 @@ class CustomArgsTest {
 
     val results = testDb1.executeQuery("SELECT /*vt+ ALLOW_SCATTER */ * FROM customers;")
     assertEquals(1, results.size)
+  }
+
+  @Test
+  fun `test cross-shard writes fail with SINGLE transaction mode`() {
+    testDb1.truncate()
+
+    val keyspace = Keyspace("gameworld_sharded")
+    val shard1 = Shard(keyspace, "-80")
+    val shard2 = Shard(keyspace, "80-")
+
+    // Insert rows one at a time using auto-increment sequences, then find two on different shards.
+    for (i in 1..10) {
+      testDb1.executeUpdate("INSERT INTO customers (email, token) VALUES ('user$i@xyz.com', 'token$i');")
+    }
+
+    val rows = testDb1.executeQuery("SELECT /*vt+ ALLOW_SCATTER */ id FROM customers;")
+    val ids = rows.map { (it["id"] as Number).toLong() }
+
+    // Partition IDs by shard and pick one from each.
+    val byShard = ids.groupBy { id -> if (shard1.contains(Shard.Key.hash(id))) shard1 else shard2 }
+    assertEquals(2, byShard.keys.size, "All IDs landed on the same shard: $ids")
+    val idA = byShard[shard1]!!.first()
+    val idB = byShard[shard2]!!.first()
+    val exception = assertThrows<VitessQueryExecutorException> {
+      testDb1.executeTransaction(
+        "UPDATE customers SET token = 'updated' WHERE id = $idA;" +
+          "UPDATE customers SET token = 'updated' WHERE id = $idB;"
+      )
+    }
+    assertTrue(
+      exception.cause?.message!!.contains("multi-db transaction attempted"),
+      "Expected 'multi-db transaction attempted' but got: ${exception.cause?.message}",
+    )
   }
 
   @Test

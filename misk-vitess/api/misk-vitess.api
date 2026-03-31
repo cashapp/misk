@@ -187,6 +187,7 @@ public final class misk/vitess/testing/DefaultSettings {
 	public static final field SCHEMA_DIR Ljava/lang/String;
 	public static final field SQL_MODE Ljava/lang/String;
 	public static field TRANSACTION_ISOLATION_LEVEL Lmisk/vitess/testing/TransactionIsolationLevel;
+	public static final field TRANSACTION_MODE Lmisk/vitess/testing/TransactionMode;
 	public static field TRANSACTION_TIMEOUT_SECONDS Ljava/time/Duration;
 	public static final field VITESS_DOCKER_NETWORK_NAME Ljava/lang/String;
 	public static final field VITESS_DOCKER_NETWORK_TYPE Ljava/lang/String;
@@ -217,6 +218,16 @@ public final class misk/vitess/testing/TransactionIsolationLevel : java/lang/Enu
 	public final fun getValue ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lmisk/vitess/testing/TransactionIsolationLevel;
 	public static fun values ()[Lmisk/vitess/testing/TransactionIsolationLevel;
+}
+
+public final class misk/vitess/testing/TransactionMode : java/lang/Enum {
+	public static final field MULTI Lmisk/vitess/testing/TransactionMode;
+	public static final field SINGLE Lmisk/vitess/testing/TransactionMode;
+	public static final field TWOPC Lmisk/vitess/testing/TransactionMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/vitess/testing/TransactionMode;
+	public static fun values ()[Lmisk/vitess/testing/TransactionMode;
 }
 
 public final class misk/vitess/testing/VSchemaUpdate {
@@ -257,8 +268,8 @@ public final class misk/vitess/testing/VitessTableType : java/lang/Enum {
 public final class misk/vitess/testing/VitessTestDb {
 	public static final field Companion Lmisk/vitess/testing/VitessTestDb$Companion;
 	public fun <init> ()V
-	public fun <init> (ZLjava/lang/String;ZZZZLjava/lang/String;ZZLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Lmisk/vitess/testing/TransactionIsolationLevel;Ljava/time/Duration;Ljava/lang/String;I)V
-	public synthetic fun <init> (ZLjava/lang/String;ZZZZLjava/lang/String;ZZLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Lmisk/vitess/testing/TransactionIsolationLevel;Ljava/time/Duration;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLjava/lang/String;ZZZZLjava/lang/String;ZZLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Lmisk/vitess/testing/TransactionIsolationLevel;Lmisk/vitess/testing/TransactionMode;Ljava/time/Duration;Ljava/lang/String;I)V
+	public synthetic fun <init> (ZLjava/lang/String;ZZZZLjava/lang/String;ZZLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Lmisk/vitess/testing/TransactionIsolationLevel;Lmisk/vitess/testing/TransactionMode;Ljava/time/Duration;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public static final fun Builder ()Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun applySchema ()Lmisk/vitess/testing/ApplySchemaResult;
 	public final fun executeQuery (Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
@@ -296,6 +307,7 @@ public final class misk/vitess/testing/VitessTestDb$Builder {
 	public final fun schemaDir (Ljava/lang/String;)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun sqlMode (Ljava/lang/String;)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun transactionIsolationLevel (Lmisk/vitess/testing/TransactionIsolationLevel;)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun transactionMode (Lmisk/vitess/testing/TransactionMode;)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun transactionTimeoutSeconds (Ljava/time/Duration;)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun vitessImage (Ljava/lang/String;)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun vitessVersion (I)Lmisk/vitess/testing/VitessTestDb$Builder;
@@ -463,8 +475,8 @@ public final class misk/vitess/testing/internal/VschemaAdapter {
 
 public final class misk/vitess/testing/utilities/DockerVitess : misk/testing/ExternalDependency {
 	public fun <init> ()V
-	public fun <init> (ZLjava/lang/String;I)V
-	public synthetic fun <init> (ZLjava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLmisk/vitess/testing/TransactionMode;Ljava/lang/String;I)V
+	public synthetic fun <init> (ZLmisk/vitess/testing/TransactionMode;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun afterEach ()V
 	public fun beforeEach ()V
 	public fun getId ()Ljava/lang/String;

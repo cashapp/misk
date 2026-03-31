@@ -2,6 +2,7 @@ package misk.vitess.gradle
 
 import java.time.Duration
 import misk.vitess.testing.TransactionIsolationLevel
+import misk.vitess.testing.TransactionMode
 import misk.vitess.testing.VitessTestDb
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
@@ -40,6 +41,8 @@ abstract class StartVitessDatabaseTask : DefaultTask() {
 
   @get:Input abstract val transactionIsolationLevel: Property<TransactionIsolationLevel>
 
+  @get:Input abstract val transactionMode: Property<TransactionMode>
+
   @get:Input abstract val transactionTimeoutSeconds: Property<Duration>
 
   @get:Input abstract val vitessImage: Property<String>
@@ -64,6 +67,7 @@ abstract class StartVitessDatabaseTask : DefaultTask() {
         schemaDir = schemaDir.get(),
         sqlMode = sqlMode.get(),
         transactionIsolationLevel = transactionIsolationLevel.get(),
+        transactionMode = transactionMode.get(),
         transactionTimeoutSeconds = transactionTimeoutSeconds.get(),
         vitessImage = vitessImage.get(),
         vitessVersion = vitessVersion.get(),

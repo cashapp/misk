@@ -26,6 +26,7 @@ class VitessDatabasePlugin : Plugin<Project> {
       )
       it.sqlMode.convention(DefaultSettings.SQL_MODE)
       it.transactionIsolationLevel.convention(DefaultSettings.TRANSACTION_ISOLATION_LEVEL)
+      it.transactionMode.convention(DefaultSettings.TRANSACTION_MODE)
       it.transactionTimeoutSeconds.convention(DefaultSettings.TRANSACTION_TIMEOUT_SECONDS)
       it.vitessImage.convention(DefaultSettings.VITESS_IMAGE)
       it.vitessVersion.convention(DefaultSettings.VITESS_VERSION)
