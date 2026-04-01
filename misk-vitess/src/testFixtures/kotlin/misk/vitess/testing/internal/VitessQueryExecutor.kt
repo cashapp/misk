@@ -5,6 +5,7 @@ import java.sql.DriverManager
 import java.sql.SQLRecoverableException
 import java.sql.SQLTransientException
 import java.sql.Statement
+import misk.vitess.testing.TransactionMode
 import misk.vitess.testing.VitessTable
 import misk.vitess.testing.VitessTableType
 import misk.vitess.testing.VitessTestDbException
@@ -15,6 +16,7 @@ internal class VitessQueryExecutor(
   val vtgatePort: Int,
   val vtgateUser: String,
   val vtgateUserPassword: String,
+  val transactionMode: TransactionMode = TransactionMode.MULTI,
 ) {
   init {
     try {
@@ -90,7 +92,20 @@ internal class VitessQueryExecutor(
 
   fun truncate() {
     val connection = getVtgateConnection()
-    connection.use { conn -> truncate(conn) }
+    connection.use { conn ->
+      if (transactionMode == TransactionMode.SINGLE) {
+        // Truncate deletes across all shards, which SINGLE mode blocks. Temporarily override to
+        // MULTI, then reset to UNSPECIFIED (vtgate default) after.
+        conn.createStatement().execute("SET transaction_mode = 'multi'")
+        try {
+          truncate(conn)
+        } finally {
+          conn.createStatement().execute("SET transaction_mode = 'unspecified'")
+        }
+      } else {
+        truncate(conn)
+      }
+    }
   }
 
   fun truncate(connection: Connection) {
