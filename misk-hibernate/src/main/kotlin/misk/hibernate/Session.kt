@@ -55,13 +55,14 @@ inline fun <R : DbRoot<R>, reified S : DbSharded<R, S>> Session.loadSharded(gid:
 inline fun <reified T : DbEntity<T>> Session.loadOrNull(id: Id<T>): T? = loadOrNull(id, T::class)
 
 /**
- * Allow cross-shard writes (co-writes) for this session by setting the Vitess transaction mode to MULTI. This is
- * useful when the vtgate is configured with `--transaction_mode=SINGLE`, which rejects cross-shard writes by default.
+ * Allow cross-shard transactions for this session by setting the Vitess transaction mode to MULTI. This is useful when
+ * the vtgate is configured with `--transaction_mode=SINGLE`, which rejects any transaction that spans multiple shards
+ * (both reads and writes).
  *
- * Must be called before any writes in the transaction. This is Vitess-only — calling on a non-Vitess database will
- * throw a [java.sql.SQLException] (`Unknown system variable 'transaction_mode'`).
+ * Must be called before any cross-shard operations in the transaction. This is Vitess-only — calling on a non-Vitess
+ * database will throw a [java.sql.SQLException] (`Unknown system variable 'transaction_mode'`).
  */
-fun Session.allowCowrites() {
+fun Session.allowCrossShardTransactions() {
   hibernateSession.doWork { connection ->
     connection.createStatement().execute("SET transaction_mode = 'multi'")
   }
