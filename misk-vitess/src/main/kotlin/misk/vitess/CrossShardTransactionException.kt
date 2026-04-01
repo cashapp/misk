@@ -4,7 +4,8 @@ import misk.jdbc.CheckException
 
 /**
  * Thrown when a transaction that spans multiple shards is detected. This can be triggered by cross-shard reads (e.g.
- * queries using lookup vindexes) or cross-shard writes (e.g. inserts/updates targeting rows on different shards).
+ * queries using lookup vindexes), cross-shard writes (e.g. inserts/updates targeting rows on different shards), or a
+ * mix of both within the same transaction.
  *
  * This exception is thrown when the vtgate is configured with `--transaction_mode=SINGLE`, which rejects any
  * transaction that touches more than one shard. Sessions can opt in to cross-shard transactions via
