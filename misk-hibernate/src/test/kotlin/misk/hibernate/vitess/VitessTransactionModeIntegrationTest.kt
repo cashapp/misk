@@ -128,4 +128,33 @@ class VitessTransactionModeIntegrationTest {
       movieB.name = "Updated B"
     }
   }
+
+  @Test
+  fun `allowCrossShardTransactions does not leak to subsequent transactions via connection pool`() {
+    // The test data source is configured with fixed_pool_size=1 so the second transaction is
+    // guaranteed to reuse the same connection, making this test deterministic.
+
+    // First: opt in and do a cross-shard write.
+    transacter.transaction { session ->
+      session.allowCrossShardTransactions()
+      val movieA = session.load<DbMovie>(crossShardIdA)
+      val movieB = session.load<DbMovie>(crossShardIdB)
+      movieA.name = "Opted In A"
+      movieB.name = "Opted In B"
+    }
+
+    // Second: without opt-in, a cross-shard write should still fail.
+    // If this passes (doesn't throw), the session variable leaked through the connection pool.
+    val exception = assertThrows<Exception> {
+      transacter.transaction { session ->
+        val movieA = session.load<DbMovie>(crossShardIdA)
+        val movieB = session.load<DbMovie>(crossShardIdB)
+        movieA.name = "Should Fail A"
+        movieB.name = "Should Fail B"
+      }
+    }
+
+    assertThat(generateSequence(exception as Throwable) { it.cause }.any { it is CrossShardTransactionException })
+      .isTrue()
+  }
 }
