@@ -13,6 +13,13 @@ public final class misk/vitess/CowriteException : misk/jdbc/CheckException {
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
+public final class misk/vitess/CrossShardTransactionException : misk/jdbc/CheckException {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
 public final class misk/vitess/Destination {
 	public static final field Companion Lmisk/vitess/Destination$Companion;
 	public fun <init> (Lmisk/vitess/Keyspace;Lmisk/vitess/Shard;Lmisk/vitess/TabletType;)V

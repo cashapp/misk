@@ -3,18 +3,22 @@ package misk.hibernate.vitess
 import jakarta.inject.Inject
 import misk.hibernate.DbMovie
 import misk.hibernate.Id
+import misk.hibernate.MovieQuery
 import misk.hibernate.Movies
 import misk.hibernate.MoviesTestModule
+import misk.hibernate.Query
 import misk.hibernate.Transacter
-import misk.hibernate.allowCowrites
+import misk.hibernate.allowCrossShardTransactions
+import misk.hibernate.allowScatter
 import misk.hibernate.load
+import misk.hibernate.newQuery
 import misk.jdbc.DataSourceType
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.vitess.CrossShardTransactionException
 import misk.vitess.Keyspace
 import misk.vitess.Shard
-import misk.vitess.CowriteException
 import misk.vitess.testing.TransactionMode
 import misk.vitess.testing.utilities.DockerVitess
 import org.assertj.core.api.Assertions.assertThat
@@ -23,8 +27,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 /**
- * Test suite that verifies that cross-shard writes are rejected in SINGLE transaction mode and can
- * be opted in via `SET transaction_mode = 'multi'` on the session.
+ * Test suite that verifies that cross-shard transactions (reads and writes) are rejected in SINGLE
+ * transaction mode and can be opted in via [allowCrossShardTransactions].
  */
 @MiskTest(startService = true)
 class VitessTransactionModeIntegrationTest {
@@ -40,6 +44,7 @@ class VitessTransactionModeIntegrationTest {
   val module = MoviesTestModule(type = DataSourceType.VITESS_MYSQL, singleTransactionMode = true)
 
   @Inject @Movies lateinit var transacter: Transacter
+  @Inject lateinit var queryFactory: Query.Factory
 
   private lateinit var crossShardIdA: Id<DbMovie>
   private lateinit var crossShardIdB: Id<DbMovie>
@@ -64,6 +69,19 @@ class VitessTransactionModeIntegrationTest {
   }
 
   @Test
+  fun `cross-shard read fails with SINGLE transaction mode`() {
+    // A scatter query reads from all shards in one transaction, which SINGLE mode blocks.
+    val exception = assertThrows<Exception> {
+      transacter.transaction { session ->
+        queryFactory.newQuery<MovieQuery>().allowScatter().list(session)
+      }
+    }
+
+    assertThat(generateSequence(exception as Throwable) { it.cause }.any { it is CrossShardTransactionException })
+      .isTrue()
+  }
+
+  @Test
   fun `cross-shard write fails with SINGLE transaction mode`() {
     val exception =
       assertThrows<Exception> {
@@ -75,14 +93,14 @@ class VitessTransactionModeIntegrationTest {
         }
       }
 
-    assertThat(generateSequence(exception as Throwable) { it.cause }.any { it is CowriteException })
+    assertThat(generateSequence(exception as Throwable) { it.cause }.any { it is CrossShardTransactionException })
       .isTrue()
   }
 
   @Test
-  fun `cross-shard write succeeds after opting in via SET transaction_mode`() {
+  fun `cross-shard transactions succeed after opting in via allowCrossShardTransactions`() {
     transacter.transaction { session ->
-      session.allowCowrites()
+      session.allowCrossShardTransactions()
       val movieA = session.load<DbMovie>(crossShardIdA)
       val movieB = session.load<DbMovie>(crossShardIdB)
       movieA.name = "Updated A"
