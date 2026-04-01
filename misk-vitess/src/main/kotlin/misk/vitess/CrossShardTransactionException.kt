@@ -10,8 +10,8 @@ import misk.jdbc.CheckException
  * transaction that touches more than one shard. Sessions can opt in to cross-shard transactions via
  * `SET transaction_mode = 'multi'`.
  *
- * Multi-shard transactions are not safe and while multiple entity groups may currently reside on the same shard there
- * is no guarantee they will do so across shard splits.
+ * Without two-phase commit (TWOPC), cross-shard transactions use best-effort commit semantics — there is no guarantee
+ * of atomicity across shards.
  */
 class CrossShardTransactionException @JvmOverloads constructor(message: String? = null, cause: Throwable? = null) :
   CheckException(message, cause)
