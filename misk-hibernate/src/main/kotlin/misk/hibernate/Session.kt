@@ -67,9 +67,3 @@ fun Session.allowCrossShardTransactions() {
     connection.createStatement().execute("SET transaction_mode = 'multi'")
   }
 }
-
-@Deprecated(
-  "Use allowCrossShardTransactions() instead",
-  ReplaceWith("allowCrossShardTransactions()"),
-)
-fun Session.allowCowrites() = allowCrossShardTransactions()

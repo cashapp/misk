@@ -311,7 +311,6 @@ public abstract interface class misk/hibernate/Session : misk/jdbc/Session {
 }
 
 public final class misk/hibernate/SessionKt {
-	public static final fun allowCowrites (Lmisk/hibernate/Session;)V
 	public static final fun allowCrossShardTransactions (Lmisk/hibernate/Session;)V
 }
 
