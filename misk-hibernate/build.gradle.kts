@@ -32,6 +32,7 @@ dependencies {
   api(project(":misk-jdbc"))
   api(project(":misk-testing-api"))
   api(project(":misk-vitess"))
+  implementation(libs.javaxTransaction)
   implementation(libs.loggingApi)
   implementation(libs.kotlinReflect)
   implementation(libs.moshiCore)
