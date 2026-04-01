@@ -14,7 +14,7 @@ import misk.jdbc.CheckException
  * of atomicity across shards. Note that even TWOPC only provides atomic commits for writes; it does not provide
  * full ACID cross-shard read isolation.
  *
- * See https://vitess.io/docs/23.0/reference/features/distributed-transaction/
+ * See https://vitess.io/docs/reference/features/distributed-transaction/
  */
 class CrossShardTransactionException @JvmOverloads constructor(message: String? = null, cause: Throwable? = null) :
   CheckException(message, cause)
