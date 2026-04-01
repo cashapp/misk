@@ -11,8 +11,10 @@ import misk.jdbc.CheckException
  * `SET transaction_mode = 'multi'`.
  *
  * Without two-phase commit (TWOPC), cross-shard transactions use best-effort commit semantics — there is no guarantee
- * of atomicity across shards. Note that even TWOPC only provides atomic commits for writes; it does not provide full
- * ACID cross-shard read isolation. See https://vitess.io/docs/23.0/reference/features/distributed-transaction/.
+ * of atomicity across shards. Note that even TWOPC only provides atomic commits for writes; it does not provide
+ * full ACID cross-shard read isolation.
+ *
+ * See https://vitess.io/docs/23.0/reference/features/distributed-transaction/
  */
 class CrossShardTransactionException @JvmOverloads constructor(message: String? = null, cause: Throwable? = null) :
   CheckException(message, cause)
