@@ -69,6 +69,12 @@ class VitessTransactionModeIntegrationTest {
   }
 
   @Test
+  fun `single-shard write with auto-increment sequence succeeds in SINGLE transaction mode`() {
+    // Auto-increment sequence allocation is autocommit, so a single insert doesn't cross shards.
+    transacter.transaction { session -> session.save(DbMovie("Single Shard Movie")) }
+  }
+
+  @Test
   fun `cross-shard read fails with SINGLE transaction mode`() {
     // A scatter query reads from all shards in one transaction, which SINGLE mode blocks.
     val exception = assertThrows<Exception> {
@@ -92,6 +98,21 @@ class VitessTransactionModeIntegrationTest {
           movieB.name = "Updated B"
         }
       }
+
+    assertThat(generateSequence(exception as Throwable) { it.cause }.any { it is CrossShardTransactionException })
+      .isTrue()
+  }
+
+  @Test
+  fun `cross-shard read and write in same transaction fails with SINGLE transaction mode`() {
+    val exception = assertThrows<Exception> {
+      transacter.transaction { session ->
+        // Read from one shard, write to another.
+        val movieA = session.load<DbMovie>(crossShardIdA)
+        val movieB = session.load<DbMovie>(crossShardIdB)
+        movieB.name = "Updated from ${movieA.name}"
+      }
+    }
 
     assertThat(generateSequence(exception as Throwable) { it.cause }.any { it is CrossShardTransactionException })
       .isTrue()
