@@ -247,6 +247,7 @@ internal class VitessDockerContainer(
         vtgatePort = vtgatePort,
         vtgateUser = VTGATE_USER,
         vtgateUserPassword = VTGATE_USER_PASSWORD,
+        transactionMode = transactionMode,
       )
     }
 
