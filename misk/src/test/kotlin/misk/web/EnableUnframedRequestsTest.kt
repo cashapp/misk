@@ -22,14 +22,19 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import misk.web.marshal.Marshaller
+import okhttp3.Headers
+import okio.BufferedSink
 import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
 
 /**
- * Test that @[EnableUnframedRequests] enables protobuf POST on @[WireRpc] gRPC endpoints.
+ * Test that @[EnableUnframedRequests] enables protobuf POST on gRPC endpoints,
+ * for both @[WireRpc] and @[Grpc] actions.
  */
 @MiskTest(startService = true)
 internal class EnableUnframedRequestsTest {
@@ -124,6 +129,40 @@ internal class EnableUnframedRequestsTest {
     assertThat(responseBody).isEqualTo(expectedResponseBody)
   }
 
+  @Test
+  fun `protobuf POST to unframed @Grpc endpoint`() {
+    val payload = "hello".toByteArray().toByteString()
+
+    val request = Request.Builder()
+      .post(
+        payload.toRequestBody(MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE)
+      )
+      .url(serverUrlBuilder().encodedPath("/test/GrpcAnnotationEcho").build())
+      .build()
+
+    val response = httpClient.newCall(request).execute()
+    response.use {
+      assertThat(response.code).isEqualTo(200)
+      val responseBytes = response.body!!.source().readByteString()
+      assertThat(responseBytes).isEqualTo(payload)
+    }
+  }
+
+  @Test
+  fun `json POST to unframed @Grpc endpoint`() {
+    val request = Request.Builder()
+      .post(
+        "\"aGVsbG8=\"".toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
+      )
+      .url(serverUrlBuilder().encodedPath("/test/GrpcAnnotationEcho").build())
+      .build()
+
+    val response = httpClient.newCall(request).execute()
+    response.use {
+      assertThat(response.code).isEqualTo(200)
+    }
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(
@@ -133,6 +172,24 @@ internal class EnableUnframedRequestsTest {
       )
       install(MiskTestingServiceModule())
       install(WebActionModule.create<UnframedGrpcAction>())
+      install(WebActionModule.create<UnframedGrpcAnnotationAction>())
+    }
+  }
+
+  /** Tests @EnableUnframedRequests with the @Grpc annotation (as opposed to @WireRpc). */
+  class UnframedGrpcAnnotationAction @Inject constructor() : WebAction {
+    @Grpc("/test/GrpcAnnotationEcho")
+    @Unauthenticated
+    @EnableUnframedRequests
+    fun echo(@RequestBody message: ByteString): Response<ResponseBody> {
+      return Response(
+        object : ResponseBody {
+          override fun writeTo(sink: BufferedSink) {
+            sink.write(message)
+          }
+        },
+        trailers = { Headers.headersOf("grpc-status", "0") },
+      )
     }
   }
 
