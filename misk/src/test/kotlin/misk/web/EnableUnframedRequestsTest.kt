@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
 
 /**
- * Test that @[EnableUnframedRequests] enables protobuf POST on gRPC endpoints.
+ * Test that @[EnableUnframedRequests] enables protobuf POST on @[WireRpc] gRPC endpoints.
  */
 @MiskTest(startService = true)
 internal class EnableUnframedRequestsTest {
@@ -134,14 +134,6 @@ internal class EnableUnframedRequestsTest {
       install(MiskTestingServiceModule())
       install(WebActionModule.create<UnframedGrpcAction>())
     }
-  }
-
-  class RpcActionWithUnframed : WebAction {
-
-    @Grpc("/my.service/MyMethod")
-    @Unauthenticated
-    @EnableUnframedRequests
-    fun grpcMethod(): String = "grpc"
   }
 
   @Suppress("TestFunctionName")

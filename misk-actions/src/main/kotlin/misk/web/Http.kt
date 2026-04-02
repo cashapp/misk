@@ -56,15 +56,16 @@ annotation class RequestContentType(vararg val value: String)
 annotation class ResponseContentType(vararg val value: String)
 
 /**
- * Enables unframed protobuf POST for a `@WireRpc` action. When present, the framework
- * automatically creates a protobuf POST variant (`application/x-protobuf`) in addition to the
- * existing JSON variant. This allows a single gRPC action to accept gRPC, JSON POST, and
- * protobuf POST requests without defining a separate `WebAction` class.
+ * Enables unframed protobuf POST for a gRPC action. When present, the framework automatically
+ * creates a protobuf POST variant (`application/x-protobuf`) in addition to the existing JSON
+ * variant. This allows a single gRPC action to accept gRPC, JSON POST, and protobuf POST
+ * requests without defining a separate `WebAction` class.
  *
+ * Works with both `@WireRpc` and `@Grpc` actions (any action with `DispatchMechanism.GRPC`).
  * Only applies to unary gRPC actions (single request parameter). Streaming actions are not
  * supported because they require gRPC framing.
  *
- * Usage:
+ * Usage with `@WireRpc` (via Wire-generated server interface):
  * ```
  * class MyAction @Inject constructor() : GreeterSayHelloBlockingServer, WebAction {
  *   @EnableUnframedRequests

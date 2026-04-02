@@ -232,9 +232,9 @@ constructor(
 
   /**
    * Returns a copy of [action] that converts a gRPC action into a protobuf POST action, or null
-   * if the action is not a gRPC action or does not have @UnframedRequests. This enables a single
-   * @WireRpc action to accept plain HTTP POST with application/x-protobuf content type (unframed
-   * protobuf, without gRPC framing).
+   * if the action is not a gRPC action or does not have @EnableUnframedRequests. This enables a
+   * single gRPC action (`@WireRpc` or `@Grpc`) to accept plain HTTP POST with
+   * application/x-protobuf content type (unframed protobuf, without gRPC framing).
    */
   private fun transformActionIntoProtobufPost(action: Action): Action? {
     if (action.dispatchMechanism != DispatchMechanism.GRPC) return null
