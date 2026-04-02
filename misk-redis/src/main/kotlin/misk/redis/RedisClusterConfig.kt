@@ -21,6 +21,8 @@ class RedisClusterConfig : LinkedHashMap<String, RedisClusterReplicationGroupCon
  * @property max_attempts The maximum number of attempts in case of failure.
  * @property redis_auth_password The password to use for the connection to the cluster.
  * @property timeout_ms The connection and socket timeout in milliseconds.
+ * @property topology_refresh_period_ms If set, the cluster topology will be refreshed periodically at this interval
+ *   (in milliseconds). When null (default), topology is only refreshed reactively on errors/redirects.
  */
 data class RedisClusterReplicationGroupConfig
 @JvmOverloads
@@ -30,4 +32,5 @@ constructor(
   val max_attempts: Int = DEFAULT_MAX_ATTEMPTS,
   @Redact val redis_auth_password: String,
   val timeout_ms: Int = Protocol.DEFAULT_TIMEOUT,
+  val topology_refresh_period_ms: Long? = null,
 )
