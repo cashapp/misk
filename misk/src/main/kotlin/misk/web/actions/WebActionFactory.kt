@@ -21,6 +21,7 @@ import misk.web.BoundAction
 import misk.web.ConnectWebSocket
 import misk.web.Delete
 import misk.web.DispatchMechanism
+import misk.web.EnableUnframedRequests
 import misk.web.Get
 import misk.web.Grpc
 import misk.web.NetworkInterceptor
@@ -31,7 +32,6 @@ import misk.web.ProtoDocumentationProvider
 import misk.web.Put
 import misk.web.RequestBody
 import misk.web.ResponseContentType
-import misk.web.EnableUnframedRequests
 import misk.web.WebActionBinding
 import misk.web.WebActionSeedDataTransformerFactory
 import misk.web.interceptors.BeforeContentEncoding

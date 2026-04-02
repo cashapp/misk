@@ -14,11 +14,11 @@ import java.time.Duration
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.web.actions.WebAction
+import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import misk.web.mediatype.MediaTypes
 
 class InvalidActionsTest {
   @Test

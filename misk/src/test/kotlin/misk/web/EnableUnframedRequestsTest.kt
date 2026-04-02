@@ -9,6 +9,7 @@ import com.squareup.wire.GrpcClient
 import com.squareup.wire.GrpcMethod
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.grpc.Http2ClientTestingModule
 import misk.inject.KAbstractModule
@@ -18,19 +19,17 @@ import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
+import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import misk.web.marshal.Marshaller
-import okhttp3.Headers
 import okio.BufferedSink
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 /**
  * Test that @[EnableUnframedRequests] enables protobuf POST on gRPC endpoints,
