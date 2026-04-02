@@ -71,8 +71,6 @@ annotation class ResponseContentType(vararg val value: String)
  *   override fun SayHello(request: HelloRequest): HelloReply { ... }
  * }
  * ```
- *
- * @see InvalidActionsTest.UnframedHelloRpcAction for a complete example
  */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)

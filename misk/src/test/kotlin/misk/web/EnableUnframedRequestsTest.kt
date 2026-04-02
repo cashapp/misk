@@ -136,6 +136,14 @@ internal class EnableUnframedRequestsTest {
     }
   }
 
+  class RpcActionWithUnframed : WebAction {
+
+    @Grpc("/my.service/MyMethod")
+    @Unauthenticated
+    @EnableUnframedRequests
+    fun grpcMethod(): String = "grpc"
+  }
+
   @Suppress("TestFunctionName")
   class UnframedGrpcAction @Inject constructor() :
     UnframedShippingServer, WebAction {
