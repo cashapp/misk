@@ -75,7 +75,7 @@ annotation class ResponseContentType(vararg val value: String)
  * Usage with [Grpc]:
  * ```
  * class MyAction @Inject constructor() : WebAction {
- *   @Grpc
+ *   @Grpc("/my.package/SayHello")
  *   @EnableUnframedRequests
  *   fun sayHello(request: HelloRequest): HelloReply { ... }
  * }

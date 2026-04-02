@@ -65,7 +65,7 @@ internal class EnableUnframedRequestsTest {
 
     val request = Request.Builder()
       .post(
-        ByteString.of(*requestBody.encode()).toRequestBody(
+        requestBody.encode().toRequestBody(
           MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE
         )
       )
