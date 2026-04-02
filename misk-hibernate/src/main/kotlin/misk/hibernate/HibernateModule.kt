@@ -24,6 +24,7 @@ import misk.jdbc.DataSourceService
 import misk.jdbc.DataSourceType
 import misk.jdbc.DatabasePool
 import misk.jdbc.JdbcModule
+import misk.jdbc.MigrationsFormat
 import misk.jdbc.RealDatabasePool
 import misk.jdbc.SchemaMigratorService
 import misk.web.exceptions.ExceptionMapperModule
@@ -167,7 +168,8 @@ constructor(
     val transacterKey = Transacter::class.toKey(qualifier)
 
     // Only install SchemaMigratorService module if schema migrator is enabled
-    if (installSchemaMigrator) {
+    // and migrations are not externally managed.
+    if (installSchemaMigrator && config.migrations_format != MigrationsFormat.EXTERNALLY_MANAGED) {
       install(
         ServiceModule<SchemaMigratorService>(qualifier)
           .dependsOn<DataSourceService>(qualifier)
@@ -291,7 +293,8 @@ constructor(
         ServiceModule<TransacterService>(qualifier).dependsOn<DataSourceService>(qualifier).enhancedBy<ReadyService>()
 
       // Only enhance with SchemaMigratorService if it's installed
-      if (installSchemaMigrator) {
+      // and migrations are not externally managed.
+      if (installSchemaMigrator && config.migrations_format != MigrationsFormat.EXTERNALLY_MANAGED) {
         install(transacterServiceModule.enhancedBy<SchemaMigratorService>(qualifier))
       } else {
         install(transacterServiceModule)
