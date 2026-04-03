@@ -160,6 +160,9 @@ public abstract interface annotation class misk/web/Description : java/lang/anno
 	public abstract fun text ()Ljava/lang/String;
 }
 
+public abstract interface annotation class misk/web/EnableUnframedRequests : java/lang/annotation/Annotation {
+}
+
 public abstract interface annotation class misk/web/FormField : java/lang/annotation/Annotation {
 	public abstract fun name ()Ljava/lang/String;
 }
