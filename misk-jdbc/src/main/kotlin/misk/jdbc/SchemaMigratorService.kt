@@ -38,6 +38,7 @@ constructor(
       val retryConfig = RetryConfig.Builder(10, ExponentialBackoff(Duration.ofMillis(100), Duration.ofSeconds(5)))
       retry(retryConfig.build()) { migrationState = schemaMigrator.applyAll("SchemaMigratorService") }
     } else {
+      //TODO: update this as a part of the changes to the DataSourceService
       migrationState = schemaMigrator.requireAll()
     }
   }
