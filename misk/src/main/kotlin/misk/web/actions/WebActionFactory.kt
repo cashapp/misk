@@ -21,6 +21,7 @@ import misk.web.BoundAction
 import misk.web.ConnectWebSocket
 import misk.web.Delete
 import misk.web.DispatchMechanism
+import misk.web.EnableUnframedRequests
 import misk.web.Get
 import misk.web.Grpc
 import misk.web.NetworkInterceptor
@@ -184,10 +185,12 @@ constructor(
         // If we can create a synthetic action with a different media type, do it. This means all
         // protobuf actions are also published as JSON actions.
         val jsonVariant = transformActionIntoJson(action)
+        val protobufPostVariant = transformActionIntoProtobufPost(action)
 
         listOfNotNull(
           newBoundAction(provider, pathPattern, action),
           jsonVariant?.let { newBoundAction(provider, pathPattern, jsonVariant) },
+          protobufPostVariant?.let { newBoundAction(provider, pathPattern, it) },
         )
       }
 
@@ -225,6 +228,27 @@ constructor(
 
     if (jsonVariant === action) return null
     return jsonVariant
+  }
+
+  /**
+   * Returns a copy of [action] that converts a gRPC action into a protobuf POST action, or null
+   * if the action is not a gRPC action or does not have @EnableUnframedRequests. This enables a
+   * single gRPC action ([WireRpc] or [Grpc]) to accept plain HTTP POST with
+   * `application/x-protobuf` content type (unframed protobuf, without gRPC framing).
+   */
+  private fun transformActionIntoProtobufPost(action: Action): Action? {
+    if (action.dispatchMechanism != DispatchMechanism.GRPC) return null
+    if (action.parameters.size != 1) return null
+    if (action.function.findAnnotation<EnableUnframedRequests>() == null) return null
+
+    val mappedParameters = action.parameters.toMutableList()
+    mappedParameters[0] = mappedParameters[0].withAnnotations(listOf(requestBodyAnnotation()))
+    return action.copy(
+      dispatchMechanism = DispatchMechanism.POST,
+      acceptedMediaRanges = protobufMediaRanges,
+      responseContentType = protobufMediaType,
+      parameters = mappedParameters,
+    )
   }
 
   private fun <A : WebAction> newBoundAction(

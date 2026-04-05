@@ -56,6 +56,36 @@ annotation class RequestContentType(vararg val value: String)
 annotation class ResponseContentType(vararg val value: String)
 
 /**
+ * Enables unframed protobuf POST requests to a gRPC [misk.web.actions.WebAction]. When present, the framework
+ * automatically creates a protobuf POST variant (`application/x-protobuf`) in addition to the existing JSON variant.
+ * This allows a single gRPC action to accept gRPC, JSON POST, and protobuf POST requests without defining a separate
+ * `WebAction` class.
+ *
+ * Works with both [com.squareup.wire.WireRpc] and [Grpc] actions. Only applies to unary gRPC actions (single request
+ * parameter). Streaming actions are not supported because they require gRPC framing.
+ *
+ * Usage with [com.squareup.wire.WireRpc] via Wire-generated server interface:
+ * ```
+ * class MyAction @Inject constructor() : GreeterSayHelloBlockingServer, WebAction {
+ *   @EnableUnframedRequests
+ *   override fun SayHello(request: HelloRequest): HelloReply { ... }
+ * }
+ * ```
+ *
+ * Usage with [Grpc]:
+ * ```
+ * class MyAction @Inject constructor() : WebAction {
+ *   @Grpc("/my.package/SayHello")
+ *   @EnableUnframedRequests
+ *   fun sayHello(request: HelloRequest): HelloReply { ... }
+ * }
+ * ```
+ */
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
+annotation class EnableUnframedRequests
+
+/**
  * When the service is overloaded Misk will intervene and reject calls by returning "HTTP 503 Service Unavailable". We
  * call this load shedding and it works similarly to flow control in TCP.
  *
