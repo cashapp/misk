@@ -190,7 +190,10 @@ constructor(
         totalRead += read
       }
     } catch (e: Throwable) {
-      log.warn(e) { "Failed to drain request body for ${request.method} ${request.requestURI}" }
+      if (e is org.eclipse.jetty.io.EofException && e.message?.startsWith("Reset no_error") == true)
+        log.warn(e) { "Client reset stream while draining request body for ${request.method} ${request.requestURI}" }
+      else
+        log.warn(e) { "Failed to drain request body for ${request.method} ${request.requestURI}" }
     }
   }
 
