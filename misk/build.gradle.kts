@@ -19,6 +19,7 @@ dependencies {
   api(libs.jettyHttp2Common)
   api(libs.jettyIo)
   api(libs.jettyServer)
+  api(libs.jettyServletApi)
   api(libs.jettyUtil)
   api(libs.kotlinXHtml)
   api(libs.moshiCore)
