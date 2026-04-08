@@ -62,6 +62,28 @@ public final class misk/mcp/McpResourceModule$Companion {
 	public final fun create (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lmisk/mcp/McpResourceModule;
 }
 
+public abstract interface class misk/mcp/McpResourceTemplate {
+	public abstract fun getDescription ()Ljava/lang/String;
+	public fun getMimeType ()Ljava/lang/String;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getUriTemplate ()Ljava/lang/String;
+	public abstract fun handler (Lio/modelcontextprotocol/kotlin/sdk/types/ReadResourceRequest;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/McpResourceTemplate$DefaultImpls {
+	public static fun getMimeType (Lmisk/mcp/McpResourceTemplate;)Ljava/lang/String;
+}
+
+public final class misk/mcp/McpResourceTemplateModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/mcp/McpResourceTemplateModule$Companion;
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/inject/BindingQualifier;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/mcp/McpResourceTemplateModule$Companion {
+	public final fun create (Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)Lmisk/mcp/McpResourceTemplateModule;
+	public final fun create (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lmisk/mcp/McpResourceTemplateModule;
+}
+
 public final class misk/mcp/McpServerModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/mcp/McpServerModule$Companion;
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/mcp/config/McpConfig;Lcom/google/inject/Provider;Lmisk/inject/BindingQualifier;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -399,6 +421,15 @@ public final class misk/mcp/testing/prompts/KotlinDeveloperPrompt : misk/mcp/Mcp
 	public fun getDescription ()Ljava/lang/String;
 	public fun getName ()Ljava/lang/String;
 	public fun handler (Lio/modelcontextprotocol/kotlin/sdk/types/GetPromptRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/testing/resources/UserProfileResource : misk/mcp/McpResourceTemplate {
+	public fun <init> ()V
+	public fun getDescription ()Ljava/lang/String;
+	public fun getMimeType ()Ljava/lang/String;
+	public fun getName ()Ljava/lang/String;
+	public fun getUriTemplate ()Ljava/lang/String;
+	public fun handler (Lio/modelcontextprotocol/kotlin/sdk/types/ReadResourceRequest;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/testing/resources/WebSearchResource : misk/mcp/McpResource {
