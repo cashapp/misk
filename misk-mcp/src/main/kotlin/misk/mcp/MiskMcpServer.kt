@@ -1,6 +1,7 @@
 package misk.mcp
 
 import com.google.inject.Provider
+import io.modelcontextprotocol.kotlin.sdk.server.ClientConnection
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequest
@@ -10,11 +11,13 @@ import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.Tool
 import io.modelcontextprotocol.kotlin.sdk.types.ToolAnnotations
 import kotlin.time.TimeSource
+import kotlinx.coroutines.withContext
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.config.McpServerConfig
 import misk.mcp.config.asPrompts
 import misk.mcp.config.asResources
 import misk.mcp.config.asTools
+import misk.mcp.internal.McpClientConnection
 import misk.mcp.internal.build
 
 /**
@@ -125,7 +128,9 @@ internal constructor(
         name = prompt.name,
         description = prompt.description,
         arguments = prompt.arguments,
-        promptProvider = prompt::handler,
+        promptProvider = { request ->
+          withContext(McpClientConnection(this)) { prompt.handler(request) }
+        },
       )
     }
 
@@ -135,7 +140,9 @@ internal constructor(
         name = resource.name,
         description = resource.description,
         mimeType = resource.mimeType,
-        readHandler = resource::handler,
+        readHandler = { request ->
+          withContext(McpClientConnection(this)) { resource.handler(request) }
+        },
       )
     }
 
@@ -163,13 +170,13 @@ internal constructor(
   private fun metricReportingHandler(
     toolName: String,
     handler: suspend (CallToolRequest) -> CallToolResult,
-  ): suspend (CallToolRequest) -> CallToolResult {
+  ): suspend ClientConnection.(CallToolRequest) -> CallToolResult {
     return { request ->
       val mark = TimeSource.Monotonic.markNow()
       var outcome = McpMetrics.ToolCallOutcome.Success
 
       try {
-        handler(request).also { result ->
+        withContext(McpClientConnection(this)) { handler(request) }.also { result ->
           outcome = if (result.isError == true) McpMetrics.ToolCallOutcome.Error else McpMetrics.ToolCallOutcome.Success
         }
       } catch (ex: Exception) {

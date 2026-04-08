@@ -72,7 +72,7 @@ constructor(
   override suspend fun close() {
     if (initialized.compareAndSet(expectedValue = true, newValue = false)) {
       sendChannel.close()
-      _onClose.invoke()
+      invokeOnCloseCallback()
     }
   }
 

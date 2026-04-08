@@ -1,11 +1,17 @@
 package misk.mcp
 
-import io.modelcontextprotocol.kotlin.sdk.server.ServerSession
 import io.modelcontextprotocol.kotlin.sdk.shared.RequestOptions
+import io.modelcontextprotocol.kotlin.sdk.types.BooleanSchema
+import io.modelcontextprotocol.kotlin.sdk.types.DoubleSchema
 import io.modelcontextprotocol.kotlin.sdk.types.ElicitRequestParams
 import io.modelcontextprotocol.kotlin.sdk.types.ElicitResult
+import io.modelcontextprotocol.kotlin.sdk.types.IntegerSchema
+import io.modelcontextprotocol.kotlin.sdk.types.PrimitiveSchemaDefinition
+import io.modelcontextprotocol.kotlin.sdk.types.StringSchema
+import io.modelcontextprotocol.kotlin.sdk.types.UntitledSingleSelectEnumSchema
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.action.currentServerSession
@@ -51,7 +57,8 @@ suspend inline fun <reified T : Any> createTypedElicitation(
         generateJsonSchema<T>().let { schema ->
           ElicitRequestParams.RequestedSchema(
             properties =
-              requireNotNull(schema["properties"] as? JsonObject) { "RequestedSchema must have properties defined" },
+              requireNotNull(schema["properties"] as? JsonObject) { "RequestedSchema must have properties defined" }
+                .toPrimitiveSchemaMap(),
             required =
               requireNotNull(schema["required"] as? JsonArray) {
                   "RequestedSchema must have required properties defined"
@@ -64,3 +71,35 @@ suspend inline fun <reified T : Any> createTypedElicitation(
     .let { result ->
       TypedCreateElicitationResult(action = result.action, content = result.content?.decode<T>(), _meta = result.meta)
     }
+
+/**
+ * Converts a JSON Schema properties object to a map of [PrimitiveSchemaDefinition] instances.
+ *
+ * Maps each property based on its JSON Schema `type` field:
+ * - `"string"` → [StringSchema]
+ * - `"integer"` → [IntegerSchema]
+ * - `"number"` → [DoubleSchema]
+ * - `"boolean"` → [BooleanSchema]
+ * - Properties with an `"enum"` array → [UntitledSingleSelectEnumSchema]
+ * - Unsupported types fall back to [StringSchema]
+ */
+@PublishedApi
+internal fun JsonObject.toPrimitiveSchemaMap(): Map<String, PrimitiveSchemaDefinition> =
+  entries.associate { (key, value) ->
+    val prop = value as JsonObject
+    val description = prop["description"]?.jsonPrimitive?.content
+    val title = prop["title"]?.jsonPrimitive?.content
+    val enumValues = prop["enum"]?.jsonArray?.map { it.jsonPrimitive.content }
+
+    key to
+      if (enumValues != null) {
+        UntitledSingleSelectEnumSchema(title = title, description = description, enumValues = enumValues)
+      } else {
+        when (prop["type"]?.jsonPrimitive?.content) {
+          "integer" -> IntegerSchema(title = title, description = description)
+          "number" -> DoubleSchema(title = title, description = description)
+          "boolean" -> BooleanSchema(title = title, description = description)
+          else -> StringSchema(title = title, description = description)
+        }
+      }
+  }

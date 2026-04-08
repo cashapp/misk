@@ -191,6 +191,10 @@ public final class misk/mcp/TypedCreateElicitationResult {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/mcp/TypedElicitationKt {
+	public static final fun toPrimitiveSchemaMap (Lkotlinx/serialization/json/JsonObject;)Ljava/util/Map;
+}
+
 public abstract interface annotation class misk/mcp/action/McpDelete : java/lang/annotation/Annotation {
 }
 
@@ -201,6 +205,7 @@ public abstract interface annotation class misk/mcp/action/McpPost : java/lang/a
 }
 
 public final class misk/mcp/action/McpServerSessionsKt {
+	public static final fun currentClientConnection (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun currentServerSession (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun handleMessage (Lio/modelcontextprotocol/kotlin/sdk/server/ServerSession;Lio/modelcontextprotocol/kotlin/sdk/types/JSONRPCMessage;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -324,6 +329,21 @@ public final class misk/mcp/config/McpToolConfig : misk/config/Config {
 
 public final class misk/mcp/internal/JsonSchemaExtensionsKt {
 	public static final fun generateJsonSchema (Lkotlin/reflect/KType;)Lkotlinx/serialization/json/JsonObject;
+}
+
+public final class misk/mcp/internal/McpClientConnection : kotlin/coroutines/AbstractCoroutineContextElement {
+	public static final field Key Lmisk/mcp/internal/McpClientConnection$Key;
+	public fun <init> (Lio/modelcontextprotocol/kotlin/sdk/server/ClientConnection;)V
+	public final fun component1 ()Lio/modelcontextprotocol/kotlin/sdk/server/ClientConnection;
+	public final fun copy (Lio/modelcontextprotocol/kotlin/sdk/server/ClientConnection;)Lmisk/mcp/internal/McpClientConnection;
+	public static synthetic fun copy$default (Lmisk/mcp/internal/McpClientConnection;Lio/modelcontextprotocol/kotlin/sdk/server/ClientConnection;ILjava/lang/Object;)Lmisk/mcp/internal/McpClientConnection;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClientConnection ()Lio/modelcontextprotocol/kotlin/sdk/server/ClientConnection;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/internal/McpClientConnection$Key : kotlin/coroutines/CoroutineContext$Key {
 }
 
 public final class misk/mcp/internal/McpServerSession : kotlin/coroutines/AbstractCoroutineContextElement {
