@@ -505,6 +505,44 @@ public final class misk/mcp/testing/tools/CalculatorToolOutput$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class misk/mcp/testing/tools/ClientConnectionTool : misk/mcp/StructuredMcpToolEmptyInput {
+	public fun <init> ()V
+	public fun getDescription ()Ljava/lang/String;
+	public fun getName ()Ljava/lang/String;
+	public fun handle (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/testing/tools/ClientConnectionToolKt {
+	public static final fun callClientConnectionTool (Lio/modelcontextprotocol/kotlin/sdk/client/Client;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/testing/tools/ClientConnectionToolOutput {
+	public static final field Companion Lmisk/mcp/testing/tools/ClientConnectionToolOutput$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/mcp/testing/tools/ClientConnectionToolOutput;
+	public static synthetic fun copy$default (Lmisk/mcp/testing/tools/ClientConnectionToolOutput;Ljava/lang/String;ILjava/lang/Object;)Lmisk/mcp/testing/tools/ClientConnectionToolOutput;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSessionId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class misk/mcp/testing/tools/ClientConnectionToolOutput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lmisk/mcp/testing/tools/ClientConnectionToolOutput$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lmisk/mcp/testing/tools/ClientConnectionToolOutput;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/ClientConnectionToolOutput;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class misk/mcp/testing/tools/ClientConnectionToolOutput$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class misk/mcp/testing/tools/EchoTool : misk/mcp/testing/tools/AbstractEchoTool {
 	public fun <init> ()V
 	public fun getDescription ()Ljava/lang/String;
