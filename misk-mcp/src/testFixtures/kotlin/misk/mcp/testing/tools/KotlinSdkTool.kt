@@ -12,10 +12,10 @@ import misk.mcp.encode
 @Serializable data class VersionMetadata(val version: String)
 
 @OptIn(ExperimentalMiskApi::class)
-class KotlinSdkTool @Inject constructor() : McpTool<ToolSchema>() {
+class KotlinSdkTool @Inject constructor() : McpTool<Nothing>() {
   override val name = "kotlin-sdk-tool"
   override val description = "A test tool"
   override val meta: JsonObject = VersionMetadata(version = "1.2.3").encode()
 
-  override suspend fun handle(input: ToolSchema) = ToolResult(TextContent("Hello, world!"))
+  override suspend fun handle(input: Nothing) = ToolResult(TextContent("Hello, world!"))
 }
