@@ -27,7 +27,6 @@ dependencies {
   api(libs.openTracing)
   api(libs.prometheusClient)
   api(libs.retrofit)
-  api(libs.servletApi)
   api(libs.slf4jApi)
   api(project(":misk-action-scopes"))
   api(project(":misk-actions"))
