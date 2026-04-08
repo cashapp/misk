@@ -24,7 +24,7 @@ class UserProfileResource @Inject constructor() : McpResourceTemplate {
         TextResourceContents(
           text = """{"userId": "$userId", "name": "User $userId"}""",
           uri = request.uri,
-          mimeType = "application/json",
+          mimeType = mimeType,
         )
       )
     )

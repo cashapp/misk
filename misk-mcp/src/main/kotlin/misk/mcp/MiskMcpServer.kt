@@ -79,18 +79,20 @@ import misk.mcp.internal.build
  *
  * The server automatically determines capabilities from the [McpServerConfig] and registered components:
  * - The server enables tools capability if any [McpTool] implementations are registered
- * - The server enables resources capability if any [McpResource] implementations are registered
+ * - The server enables resources capability if any [McpResource] or [McpResourceTemplate] implementations are registered
  * - The server enables prompts capability if any [McpPrompt] implementations are registered
  *
  * @param name The unique name identifier for this MCP server instance
  * @param config Configuration settings including version and capability flags
  * @param tools Set of tool implementations to register with the server
  * @param resources Set of resource implementations to register with the server
+ * @param resourceTemplates Set of resource template implementations to register with the server
  * @param prompts Set of prompt implementations to register with the server
  * @param instructionsProvider Optional provider for server instructions text
  * @see misk.mcp.action.McpStreamManager For managing SSE streams and server lifecycle
  * @see McpTool For implementing executable tools
  * @see McpResource For implementing accessible resources
+ * @see McpResourceTemplate For implementing parameterized resource templates
  * @see McpPrompt For implementing prompt templates
  */
 @ExperimentalMiskApi
