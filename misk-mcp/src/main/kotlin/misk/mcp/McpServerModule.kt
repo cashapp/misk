@@ -139,6 +139,7 @@ private constructor(
     install(CommonModule())
     newMultibinder<McpPrompt>(qualifier)
     newMultibinder<McpResource>(qualifier)
+    newMultibinder<McpResourceTemplate>(qualifier)
     newMultibinder<McpTool<*>>(qualifier)
 
     val serverConfig =
@@ -159,6 +160,7 @@ private constructor(
     // Get the providers for tools, resources, and prompts
     val promptsProvider = binder().getProvider(setOfType<McpPrompt>().toKey(qualifier))
     val resourcesProvider = binder().getProvider(setOfType<McpResource>().toKey(qualifier))
+    val resourceTemplatesProvider = binder().getProvider(setOfType<McpResourceTemplate>().toKey(qualifier))
     val toolsProvider = binder().getProvider(setOfType<McpTool<*>>().toKey(qualifier))
 
     val mcpMetricsProvider = binder().getProvider(McpMetrics::class.java)
@@ -207,6 +209,7 @@ private constructor(
         config = serverConfig,
         tools = toolsProvider.get().toSet(),
         resources = resourcesProvider.get().toSet(),
+        resourceTemplates = resourceTemplatesProvider.get().toSet(),
         prompts = promptsProvider.get().toSet(),
         instructionsProvider = instructionsProvider,
         mcpMetrics = mcpMetricsProvider.get(),

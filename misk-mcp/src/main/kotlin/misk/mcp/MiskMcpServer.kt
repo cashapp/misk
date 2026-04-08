@@ -101,6 +101,7 @@ internal constructor(
   val config: McpServerConfig,
   tools: Set<McpTool<*>>,
   resources: Set<McpResource>,
+  resourceTemplates: Set<McpResourceTemplate>,
   prompts: Set<McpPrompt>,
   instructionsProvider: Provider<String>? = null,
   private val mcpMetrics: McpMetrics,
@@ -114,7 +115,7 @@ internal constructor(
           completions = null,
           logging = null,
           prompts = if (prompts.isNotEmpty()) config.prompts.asPrompts() else null,
-          resources = if (resources.isNotEmpty()) config.resources.asResources() else null,
+          resources = if (resources.isNotEmpty() || resourceTemplates.isNotEmpty()) config.resources.asResources() else null,
           tools = if (tools.isNotEmpty()) config.tools.asTools() else null,
         ),
       enforceStrictCapabilities = config.enforce_strict_capabilities,
@@ -142,6 +143,18 @@ internal constructor(
         mimeType = resource.mimeType,
         readHandler = { request ->
           withContext(McpClientConnection(this)) { resource.handler(request) }
+        },
+      )
+    }
+
+    resourceTemplates.forEach { template ->
+      addResourceTemplate(
+        uriTemplate = template.uriTemplate,
+        name = template.name,
+        description = template.description,
+        mimeType = template.mimeType,
+        readHandler = { request, variables ->
+          withContext(McpClientConnection(this)) { template.handler(request, variables) }
         },
       )
     }
