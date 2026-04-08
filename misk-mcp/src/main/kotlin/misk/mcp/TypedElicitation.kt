@@ -9,13 +9,14 @@ import io.modelcontextprotocol.kotlin.sdk.types.IntegerSchema
 import io.modelcontextprotocol.kotlin.sdk.types.PrimitiveSchemaDefinition
 import io.modelcontextprotocol.kotlin.sdk.types.StringSchema
 import io.modelcontextprotocol.kotlin.sdk.types.UntitledSingleSelectEnumSchema
-import kotlinx.serialization.json.JsonArray
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.SerialKind
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.action.currentServerSession
-import misk.mcp.internal.generateJsonSchema
 
 /**
  * Type-safe result wrapper for MCP elicitation responses.
@@ -49,57 +50,65 @@ data class TypedCreateElicitationResult<T : Any>(
 suspend inline fun <reified T : Any> createTypedElicitation(
   message: String,
   options: RequestOptions? = null,
-): TypedCreateElicitationResult<T> =
-  currentServerSession()
+): TypedCreateElicitationResult<T> {
+  val (properties, required) = typeOf<T>().toElicitationSchema()
+  return currentServerSession()
     .createElicitation(
       message = message,
-      requestedSchema =
-        generateJsonSchema<T>().let { schema ->
-          ElicitRequestParams.RequestedSchema(
-            properties =
-              requireNotNull(schema["properties"] as? JsonObject) { "RequestedSchema must have properties defined" }
-                .toPrimitiveSchemaMap(),
-            required =
-              requireNotNull(schema["required"] as? JsonArray) {
-                  "RequestedSchema must have required properties defined"
-                }
-                .map { it.jsonPrimitive.content },
-          )
-        },
+      requestedSchema = ElicitRequestParams.RequestedSchema(properties = properties, required = required),
       options = options,
     )
     .let { result ->
       TypedCreateElicitationResult(action = result.action, content = result.content?.decode<T>(), _meta = result.meta)
     }
+}
 
 /**
- * Converts a JSON Schema properties object to a map of [PrimitiveSchemaDefinition] instances.
+ * Builds an elicitation [RequestedSchema] directly from the [SerialDescriptor] of a Kotlin type.
  *
- * Maps each property based on its JSON Schema `type` field:
- * - `"string"` → [StringSchema]
- * - `"integer"` → [IntegerSchema]
- * - `"number"` → [DoubleSchema]
- * - `"boolean"` → [BooleanSchema]
- * - Properties with an `"enum"` array → [UntitledSingleSelectEnumSchema]
- * - Unsupported types fall back to [StringSchema]
+ * Maps each property's [SerialKind] to a [PrimitiveSchemaDefinition]:
+ * - [PrimitiveKind.STRING], [PrimitiveKind.CHAR] → [StringSchema]
+ * - [PrimitiveKind.INT], [PrimitiveKind.LONG], [PrimitiveKind.SHORT], [PrimitiveKind.BYTE] → [IntegerSchema]
+ * - [PrimitiveKind.FLOAT], [PrimitiveKind.DOUBLE] → [DoubleSchema]
+ * - [PrimitiveKind.BOOLEAN] → [BooleanSchema]
+ * - [SerialKind.ENUM] → [UntitledSingleSelectEnumSchema] with enum constant names
+ * - All other kinds fall back to [StringSchema]
+ *
+ * @return a pair of (properties map, required property names)
  */
 @PublishedApi
-internal fun JsonObject.toPrimitiveSchemaMap(): Map<String, PrimitiveSchemaDefinition> =
-  entries.associate { (key, value) ->
-    val prop = value as JsonObject
-    val description = prop["description"]?.jsonPrimitive?.content
-    val title = prop["title"]?.jsonPrimitive?.content
-    val enumValues = prop["enum"]?.jsonArray?.map { it.jsonPrimitive.content }
+@OptIn(ExperimentalSerializationApi::class)
+internal fun KType.toElicitationSchema(): Pair<Map<String, PrimitiveSchemaDefinition>, List<String>> {
+  val descriptor = serializer().descriptor
+  val properties = mutableMapOf<String, PrimitiveSchemaDefinition>()
+  val required = mutableListOf<String>()
 
-    key to
-      if (enumValues != null) {
-        UntitledSingleSelectEnumSchema(title = title, description = description, enumValues = enumValues)
-      } else {
-        when (prop["type"]?.jsonPrimitive?.content) {
-          "integer" -> IntegerSchema(title = title, description = description)
-          "number" -> DoubleSchema(title = title, description = description)
-          "boolean" -> BooleanSchema(title = title, description = description)
-          else -> StringSchema(title = title, description = description)
-        }
+  for (index in 0 until descriptor.elementsCount) {
+    val name = descriptor.getElementName(index)
+    val elementDescriptor = descriptor.getElementDescriptor(index)
+    val description = descriptor.getElementAnnotations(index).filterIsInstance<Description>().firstOrNull()?.value
+
+    properties[name] =
+      when (elementDescriptor.kind) {
+        SerialKind.ENUM ->
+          UntitledSingleSelectEnumSchema(
+            description = description,
+            enumValues = (0 until elementDescriptor.elementsCount).map { elementDescriptor.getElementName(it) },
+          )
+        PrimitiveKind.INT,
+        PrimitiveKind.LONG,
+        PrimitiveKind.SHORT,
+        PrimitiveKind.BYTE -> IntegerSchema(description = description)
+        PrimitiveKind.FLOAT,
+        PrimitiveKind.DOUBLE -> DoubleSchema(description = description)
+        PrimitiveKind.BOOLEAN -> BooleanSchema(description = description)
+        else -> StringSchema(description = description)
       }
+
+    if (!descriptor.isElementOptional(index) && !elementDescriptor.isNullable) {
+      required.add(name)
+    }
   }
+
+  return properties to required
+}

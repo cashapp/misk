@@ -192,7 +192,7 @@ public final class misk/mcp/TypedCreateElicitationResult {
 }
 
 public final class misk/mcp/TypedElicitationKt {
-	public static final fun toPrimitiveSchemaMap (Lkotlinx/serialization/json/JsonObject;)Ljava/util/Map;
+	public static final fun toElicitationSchema (Lkotlin/reflect/KType;)Lkotlin/Pair;
 }
 
 public abstract interface annotation class misk/mcp/action/McpDelete : java/lang/annotation/Annotation {

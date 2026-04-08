@@ -12,6 +12,7 @@ import java.net.HttpURLConnection.HTTP_BAD_REQUEST
 import java.net.HttpURLConnection.HTTP_NOT_FOUND
 import java.net.HttpURLConnection.HTTP_NO_CONTENT
 import kotlin.test.Test
+import kotlin.test.assertIs
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -179,6 +180,7 @@ internal class McpStatefulServerActionTest {
       assertThrows<McpException> {
         mcpClient.callTool(name = "session_identifier", arguments = mapOf("dummy" to "unused"))
       }
+    assertIs<StreamableHttpError>(error.cause)
     assertEquals(HTTP_NOT_FOUND, (error.cause as StreamableHttpError).code)
   }
 
@@ -205,6 +207,7 @@ internal class McpStatefulServerActionTest {
       assertThrows<McpException> {
         mcpClient.callTool(name = "session_identifier", arguments = mapOf("dummy" to "unused"))
       }
+    assertIs<StreamableHttpError>(error.cause)
     assertEquals(HTTP_BAD_REQUEST, (error.cause as StreamableHttpError).code)
   }
 
