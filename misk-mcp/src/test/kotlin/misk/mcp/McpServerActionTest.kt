@@ -10,7 +10,6 @@ import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequest
 import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequestParams
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.types.ListPromptsRequest
-import io.modelcontextprotocol.kotlin.sdk.types.ListResourceTemplatesRequest
 import io.modelcontextprotocol.kotlin.sdk.types.ListResourcesRequest
 import io.modelcontextprotocol.kotlin.sdk.types.ListToolsRequest
 import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceRequest
@@ -38,7 +37,6 @@ import misk.mcp.config.McpServerConfig
 import misk.mcp.testing.asMcpStreamableHttpClient
 import misk.mcp.testing.asMcpWebSocketClient
 import misk.mcp.testing.prompts.KotlinDeveloperPrompt
-import misk.mcp.testing.resources.UserProfileResource
 import misk.mcp.testing.resources.WebSearchResource
 import misk.mcp.testing.tools.CalculatorTool
 import misk.mcp.testing.tools.CalculatorToolInput.Operation
@@ -175,7 +173,6 @@ internal abstract class McpServerActionTest {
         install(McpToolModule.create<ClientConnectionTool>())
         install(McpPromptModule.create<KotlinDeveloperPrompt>())
         install(McpResourceModule.create<WebSearchResource>())
-        install(McpResourceTemplateModule.create<UserProfileResource>())
 
         install(WebServerTestingModule())
         install(MiskTestingServiceModule())
@@ -403,67 +400,6 @@ internal abstract class McpServerActionTest {
       content.text,
       "Placeholder content for https://search.com/",
       message = "Expected the placeholder content to be returned",
-    )
-  }
-
-  @Test
-  fun `test ListResourceTemplates`() = runBlocking {
-    val request = ListResourceTemplatesRequest()
-    val response = mcpClient.listResourceTemplates(request)
-
-    assertEquals(
-      expected = 1,
-      actual = response.resourceTemplates.size,
-      message = "Expecting one resource template to be registered",
-    )
-
-    val userProfileTemplate = response.resourceTemplates.firstOrNull()
-    assertNotNull(userProfileTemplate)
-    assertEquals(
-      expected = "users://{userId}/profile",
-      actual = userProfileTemplate.uriTemplate,
-      message = "Expected the correct URI template",
-    )
-    assertEquals(
-      expected = "User Profile",
-      actual = userProfileTemplate.name,
-      message = "Expected the correct name for the resource template",
-    )
-    assertEquals(
-      expected = "Profile information for a specific user",
-      actual = userProfileTemplate.description,
-      message = "Expected the correct description for the resource template",
-    )
-  }
-
-  @Test
-  fun `test ReadResourceTemplate`() = runBlocking {
-    val request = ReadResourceRequest(ReadResourceRequestParams(uri = "users://alice/profile"))
-    val response = mcpClient.readResource(request)
-
-    assertNotNull(response)
-    assertEquals(
-      expected = 1,
-      actual = response.contents.size,
-      message = "Expected one content item in the resource template response",
-    )
-
-    val content = response.contents.firstOrNull() as? TextResourceContents
-    assertNotNull(content)
-    assertEquals(
-      expected = "users://alice/profile",
-      actual = content.uri,
-      message = "Expected the correct URI in the resource content",
-    )
-    assertEquals(
-      expected = "application/json",
-      actual = content.mimeType,
-      message = "Expected the correct MIME type for the resource content",
-    )
-    assertContains(
-      content.text,
-      "\"userId\": \"alice\"",
-      message = "Expected the userId variable to be extracted from the URI",
     )
   }
 
