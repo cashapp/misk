@@ -6,11 +6,13 @@ import io.modelcontextprotocol.kotlin.sdk.client.StreamableHttpClientTransport
 import io.modelcontextprotocol.kotlin.sdk.client.StreamableHttpError
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.types.ListToolsRequest
+import io.modelcontextprotocol.kotlin.sdk.types.McpException
 import jakarta.inject.Inject
 import java.net.HttpURLConnection.HTTP_BAD_REQUEST
 import java.net.HttpURLConnection.HTTP_NOT_FOUND
 import java.net.HttpURLConnection.HTTP_NO_CONTENT
 import kotlin.test.Test
+import kotlin.test.assertIs
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -175,10 +177,11 @@ internal class McpStatefulServerActionTest {
 
     // Now try to call the session identifier tool again - should fail with 404
     val error =
-      assertThrows<StreamableHttpError> {
+      assertThrows<McpException> {
         mcpClient.callTool(name = "session_identifier", arguments = mapOf("dummy" to "unused"))
       }
-    assertEquals(HTTP_NOT_FOUND, error.code)
+    assertIs<StreamableHttpError>(error.cause)
+    assertEquals(HTTP_NOT_FOUND, (error.cause as StreamableHttpError).code)
   }
 
   @Test
@@ -199,12 +202,13 @@ internal class McpStatefulServerActionTest {
       set(clientTransport, null) // Simulate missing session ID
     }
 
-    // Now try to call the session identifier tool again - should fail with 404
+    // Now try to call the session identifier tool again - should fail with 400
     val error =
-      assertThrows<StreamableHttpError> {
+      assertThrows<McpException> {
         mcpClient.callTool(name = "session_identifier", arguments = mapOf("dummy" to "unused"))
       }
-    assertEquals(HTTP_BAD_REQUEST, error.code)
+    assertIs<StreamableHttpError>(error.cause)
+    assertEquals(HTTP_BAD_REQUEST, (error.cause as StreamableHttpError).code)
   }
 
   companion object {

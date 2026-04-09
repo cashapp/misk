@@ -1,5 +1,6 @@
 package misk.mcp.internal
 
+import io.modelcontextprotocol.kotlin.sdk.server.ClientConnection
 import io.modelcontextprotocol.kotlin.sdk.server.ServerSession
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
@@ -19,4 +20,22 @@ data class McpServerSession(val serverSession: ServerSession) : AbstractCoroutin
 
   /** Returns a string representation of the object. */
   override fun toString(): String = "McpServerSession"
+}
+
+/**
+ * Coroutine context element that holds an MCP [ClientConnection].
+ *
+ * This class wraps a [ClientConnection] from the MCP Kotlin SDK and makes it available in the coroutine context during
+ * tool, resource, and prompt handler execution. [ClientConnection] provides handler-scoped capabilities such as
+ * [ClientConnection.sendLoggingMessage], [ClientConnection.sendResourceUpdated], and [ClientConnection.ping].
+ *
+ * @param clientConnection The underlying MCP client connection from the Kotlin SDK
+ */
+data class McpClientConnection(val clientConnection: ClientConnection) :
+  AbstractCoroutineContextElement(McpClientConnection) {
+  /** Key for [McpClientConnection] instance in the coroutine context. */
+  companion object Key : CoroutineContext.Key<McpClientConnection>
+
+  /** Returns a string representation of the object. */
+  override fun toString(): String = "McpClientConnection"
 }
