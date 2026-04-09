@@ -6,7 +6,7 @@ This module provides Misk with Model Context Protocol (MCP) server capabilities,
 
 The [Model Context Protocol](https://modelcontextprotocol.io/specification/2025-06-18) is an open protocol that enables seamless integration between LLM applications and external data sources and tools. MCP provides a standardized way for applications to:
 
-- **Share contextual information** with language models through resources
+- **Share contextual information** with language models through resources and resource templates
 - **Expose tools and capabilities** to AI systems for function execution  
 - **Create reusable prompt templates** and workflows for users
 - **Build composable integrations** across the AI ecosystem
@@ -27,6 +27,7 @@ class MyAppModule : KAbstractModule() {
     // Register your MCP components
     install(McpToolModule.create<CalculatorTool>())
     install(McpResourceModule.create<DatabaseSchemaResource>())
+    install(McpResourceTemplateModule.create<UserProfileResource>())
     install(McpPromptModule.create<CodeReviewPrompt>())
   }
 }
@@ -695,6 +696,46 @@ Register the resource:
 
 ```kotlin
 install(McpResourceModule.create<DatabaseSchemaResource>())
+```
+
+### Resource Templates
+
+Resource templates provide parameterized resources using [RFC 6570](https://datatracker.ietf.org/doc/html/rfc6570) URI templates. They allow clients to read dynamic resources by extracting variables from the URI. Implement the `McpResourceTemplate` interface:
+
+```kotlin
+@Singleton
+class UserProfileResource @Inject constructor(
+  private val userService: UserService
+) : McpResourceTemplate {
+  override val uriTemplate = "users://{userId}/profile"
+  override val name = "User Profile"
+  override val description = "Profile information for a specific user"
+  override val mimeType = "application/json"
+
+  override suspend fun handler(
+    request: ReadResourceRequest,
+    variables: Map<String, String>,
+  ): ReadResourceResult {
+    val userId = variables["userId"] ?: error("Missing userId")
+    val user = userService.getUser(userId)
+
+    return ReadResourceResult(
+      contents = listOf(
+        TextResourceContents(
+          text = Json.encodeToString(user),
+          uri = request.uri,
+          mimeType = mimeType,
+        )
+      )
+    )
+  }
+}
+```
+
+Register the resource template:
+
+```kotlin
+install(McpResourceTemplateModule.create<UserProfileResource>())
 ```
 
 ### Prompts
