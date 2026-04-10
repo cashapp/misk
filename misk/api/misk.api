@@ -588,6 +588,17 @@ public final class misk/concurrent/ExplicitReleaseDelayQueue : java/util/concurr
 	public fun toArray ([Ljava/lang/Object;)[Ljava/lang/Object;
 }
 
+public final class misk/concurrent/RealExecutorServiceFactory : com/google/common/util/concurrent/AbstractService, misk/concurrent/ExecutorServiceFactory {
+	public fun <init> (Ljava/time/Clock;)V
+	public fun fixed (Ljava/lang/String;I)Ljava/util/concurrent/ExecutorService;
+	public fun fixedWithMetrics (Ljava/lang/String;ILio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;Ljava/lang/String;)Ljava/util/concurrent/ExecutorService;
+	public final fun getTracer ()Lio/opentracing/Tracer;
+	public fun scheduled (Ljava/lang/String;I)Ljava/util/concurrent/ScheduledExecutorService;
+	public final fun setTracer (Lio/opentracing/Tracer;)V
+	public fun single (Ljava/lang/String;)Ljava/util/concurrent/ExecutorService;
+	public fun unbounded (Ljava/lang/String;)Ljava/util/concurrent/ExecutorService;
+}
+
 public final class misk/dev/DevApplicationKt {
 	public static final fun isRunningDevApplication ()Z
 	public static final fun runDevApplication (Lkotlin/reflect/KFunction;Ljava/util/List;)V
