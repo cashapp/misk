@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicLong
  * service shuts down.
  */
 @Singleton
-internal class RealExecutorServiceFactory @Inject constructor(private val clock: Clock) :
+class RealExecutorServiceFactory @Inject constructor(private val clock: Clock) :
   AbstractService(), ExecutorServiceFactory {
   @Inject(optional = true) var tracer: Tracer? = null
 
