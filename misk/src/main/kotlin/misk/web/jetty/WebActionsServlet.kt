@@ -274,7 +274,7 @@ internal fun HttpServletRequest.httpUrl(): HttpUrl {
 /** @throws ProtocolException on unexpected methods. */
 internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism? {
   return when (method) {
-    HttpMethod.GET.name -> DispatchMechanism.GET
+    HttpMethod.GET.name, HttpMethod.HEAD.name -> DispatchMechanism.GET
     HttpMethod.POST.name ->
       when (contentType()) {
         MediaTypes.APPLICATION_GRPC_MEDIA_TYPE,

@@ -91,6 +91,16 @@ class SupportedHttpMethodsTest {
   }
 
   @Test
+  fun head() {
+    val request =
+      Request.Builder().head().url(jettyService.httpServerUrl.newBuilder().encodedPath("/resources/id").build()).build()
+
+    val response = httpClient.newCall(request).execute()
+    assertThat(response.isSuccessful).isTrue()
+    assertThat(response.body?.string()).isEmpty()
+  }
+
+  @Test
   fun deleteWithRequestBody() {
     val request =
       Request.Builder()
