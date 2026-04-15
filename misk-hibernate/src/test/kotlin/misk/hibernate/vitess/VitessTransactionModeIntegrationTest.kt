@@ -75,16 +75,12 @@ class VitessTransactionModeIntegrationTest {
   }
 
   @Test
-  fun `cross-shard read fails with SINGLE transaction mode`() {
-    // A scatter query reads from all shards in one transaction, which SINGLE mode blocks.
-    val exception = assertThrows<Exception> {
-      transacter.transaction { session ->
-        queryFactory.newQuery<MovieQuery>().allowScatter().list(session)
-      }
+  fun `cross-shard read succeeds in SINGLE transaction mode`() {
+    // Vitess v23+ allows read-only multi-shard transactions in SINGLE mode (vitessio/vitess#18173).
+    val movies = transacter.transaction { session ->
+      queryFactory.newQuery<MovieQuery>().allowScatter().list(session)
     }
-
-    assertThat(generateSequence(exception as Throwable) { it.cause }.any { it is CrossShardTransactionException })
-      .isTrue()
+    assertThat(movies).isNotEmpty()
   }
 
   @Test
@@ -104,13 +100,14 @@ class VitessTransactionModeIntegrationTest {
   }
 
   @Test
-  fun `cross-shard read and write in same transaction fails with SINGLE transaction mode`() {
+  fun `multi-shard write fails with SINGLE transaction mode`() {
+    // Writing to multiple shards in the same transaction is rejected by SINGLE mode.
     val exception = assertThrows<Exception> {
       transacter.transaction { session ->
-        // Read from one shard, write to another.
         val movieA = session.load<DbMovie>(crossShardIdA)
         val movieB = session.load<DbMovie>(crossShardIdB)
-        movieB.name = "Updated from ${movieA.name}"
+        movieA.name = "Updated A"
+        movieB.name = "Updated B"
       }
     }
 

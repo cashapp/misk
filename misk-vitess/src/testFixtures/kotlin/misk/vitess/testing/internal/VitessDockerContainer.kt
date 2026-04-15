@@ -584,7 +584,16 @@ internal class VitessDockerContainer(
     val images: List<Image> = dockerClient.listImagesCmd().withReferenceFilter(vitessImage).exec()
     if (images.isEmpty()) {
       println("Vitess image `$vitessImage` does not exist, proceeding to pull.")
-      dockerClient.pullImageCmd(vitessImage).start().awaitCompletion()
+      try {
+        dockerClient.pullImageCmd(vitessImage).start().awaitCompletion()
+      } catch (e: NotFoundException) {
+        if ("no matching manifest" !in (e.message ?: "")) throw e
+        // Vitess may not publish images for all architectures. Fall back to amd64 and let
+        // Docker Desktop emulate via Rosetta. This will be unnecessary once Vitess publishes
+        // native ARM images.
+        println("Native pull failed (no matching manifest), retrying with --platform linux/amd64")
+        dockerClient.pullImageCmd(vitessImage).withPlatform("linux/amd64").start().awaitCompletion()
+      }
     }
 
     val networkId = getOrCreateVitessNetwork()

@@ -28,9 +28,9 @@ object DefaultSettings {
   @JvmField var TRANSACTION_TIMEOUT_SECONDS: Duration = Duration.ofSeconds(30)
   const val VITESS_DOCKER_NETWORK_NAME = "vitess-network"
   const val VITESS_DOCKER_NETWORK_TYPE = "bridge"
-  const val VITESS_IMAGE = "vitess/vttestserver:v22.0.4-mysql84"
-  const val VITESS_VERSION = 22
-  const val VTCTLD_CLIENT_IMAGE = "vitess/vtctldclient:v22.0.4"
+  const val VITESS_IMAGE = "vitess/vttestserver:v23.0.3-mysql84"
+  const val VITESS_VERSION = 23
+  const val VTCTLD_CLIENT_IMAGE = "vitess/vtctldclient:v23.0.3"
   const val VTGATE_USER = "root"
   const val VTGATE_USER_PASSWORD = ""
 }
