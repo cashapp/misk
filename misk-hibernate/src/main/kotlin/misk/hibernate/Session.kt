@@ -74,12 +74,23 @@ fun Session.allowCrossShardTransactions() {
   // Reset to UNSPECIFIED after the transaction completes (commit or rollback) so it doesn't leak
   // to subsequent transactions via connection pool reuse. UNSPECIFIED falls back to whatever the
   // vtgate-level default is, so this is safe regardless of the vtgate's configured transaction mode.
+  //
+  // If the Hibernate session is still open (e.g. onSessionClose hooks pending), re-set MULTI so
+  // those hooks can also use cross-shard transactions. This is needed because vtgate's reserved
+  // connection mode (triggered by SET) retains stale shard sessions across COMMIT
+  // (vitessio/vitess#11616), which causes subsequent operations on the same pooled connection
+  // to fail in SINGLE mode with "multi-db transaction attempted".
   hibernateSession.transaction.registerSynchronization(object : Synchronization {
     override fun beforeCompletion() {}
     override fun afterCompletion(status: Int) {
       try {
         hibernateSession.doWork { connection ->
           connection.createStatement().execute("SET transaction_mode = 'unspecified'")
+        }
+        if (hibernateSession.isOpen) {
+          hibernateSession.doWork { connection ->
+            connection.createStatement().execute("SET transaction_mode = 'multi'")
+          }
         }
       } catch (e: Exception) {
         logger.error(e) { "Failed to reset transaction_mode after transaction completion" }

@@ -157,4 +157,35 @@ class VitessTransactionModeIntegrationTest {
     assertThat(generateSequence(exception as Throwable) { it.cause }.any { it is CrossShardTransactionException })
       .isTrue()
   }
+
+  @Test
+  fun `onSessionClose hooks can use cross-shard transactions after allowCrossShardTransactions`() {
+    // Verifies that after a transaction with allowCrossShardTransactions() commits, onSessionClose
+    // hooks that reuse the thread-local session can still perform cross-shard reads. Without the
+    // afterCompletion re-set to MULTI, the session reverts to SINGLE mode after commit, and the
+    // onSessionClose hook's cross-shard read fails with stale reserved connection shard sessions.
+    var onSessionCloseSucceeded = false
+
+    transacter.transaction { session ->
+      session.allowCrossShardTransactions()
+
+      // Do a cross-shard write.
+      val movieA = session.load<DbMovie>(crossShardIdA)
+      val movieB = session.load<DbMovie>(crossShardIdB)
+      movieA.name = "Hook Test A"
+      movieB.name = "Hook Test B"
+
+      // Register onSessionClose hook that does a cross-shard read.
+      session.onSessionClose {
+        transacter.readOnly().transaction { readSession ->
+          queryFactory.newQuery<MovieQuery>().allowScatter().list(readSession)
+          onSessionCloseSucceeded = true
+        }
+      }
+    }
+
+    assertThat(onSessionCloseSucceeded)
+      .withFailMessage("onSessionClose hook should succeed with cross-shard read after allowCrossShardTransactions")
+      .isTrue()
+  }
 }
