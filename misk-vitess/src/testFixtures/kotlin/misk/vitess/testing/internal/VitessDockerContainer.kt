@@ -588,9 +588,7 @@ internal class VitessDockerContainer(
         dockerClient.pullImageCmd(vitessImage).start().awaitCompletion()
       } catch (e: NotFoundException) {
         if ("no matching manifest" !in (e.message ?: "")) throw e
-        // Vitess may not publish images for all architectures. Fall back to amd64 and let
-        // Docker Desktop emulate via Rosetta. This will be unnecessary once Vitess publishes
-        // native ARM images.
+        // No native image for this architecture; pull amd64 and let Docker emulate.
         println("Native pull failed (no matching manifest), retrying with --platform linux/amd64")
         dockerClient.pullImageCmd(vitessImage).withPlatform("linux/amd64").start().awaitCompletion()
       }
