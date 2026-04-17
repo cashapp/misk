@@ -78,9 +78,12 @@ internal class VitessQueryExecutor(
   fun executeTransaction(query: String, target: String = "@primary"): Boolean {
     val connection = getVtgateConnection()
     return connection.use { conn ->
-      conn.autoCommit = false
+      // Use explicit BEGIN instead of SET autocommit=0. Since vitessio/vitess#19277 (v22.0.4+),
+      // vtgate defers implicit transaction start for autocommit=0, so vttablet doesn't apply
+      // --queryserver-config-transaction-timeout to those queries.
+      execute(conn, "BEGIN;", target)
       val result = execute(conn, query, target)
-      conn.commit()
+      execute(conn, "COMMIT;", target)
       result
     }
   }
