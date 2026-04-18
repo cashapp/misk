@@ -71,15 +71,29 @@ fun Session.allowCrossShardTransactions() {
     connection.createStatement().execute("SET transaction_mode = 'multi'")
   }
 
-  // Reset to UNSPECIFIED after the transaction completes (commit or rollback) so it doesn't leak
-  // to subsequent transactions via connection pool reuse. UNSPECIFIED falls back to whatever the
-  // vtgate-level default is, so this is safe regardless of the vtgate's configured transaction mode.
+  // Clean up after the transaction completes (commit or rollback). Two things need to happen:
+  //
+  // 1. SET transaction_mode = 'unspecified' — resets to the vtgate-level default so MULTI doesn't
+  //    leak to subsequent transactions via the connection pool.
+  //
+  // 2. ROLLBACK — clears vtgate's reserved connection state. `SET transaction_mode` triggers
+  //    vtgate's NeedsReservedConn(), which retains stale shard sessions across COMMIT
+  //    (vitessio/vitess#11616). Without ROLLBACK, subsequent queries on this pooled connection
+  //    fail with "multi-db transaction attempted" even for single-shard operations.
+  //
+  // Order matters: SET first (resets the session variable), then ROLLBACK (clears the reserved
+  // connection state created by both the original SET MULTI and the cleanup SET UNSPECIFIED).
+  //
+  // Both are safe in afterCompletion: the Hibernate transaction is already committed (or rolled
+  // back), so ROLLBACK is a data no-op — it only affects vtgate session state. In production where
+  // vtgate defaults to MULTI, SET UNSPECIFIED simply returns to that default.
   hibernateSession.transaction.registerSynchronization(object : Synchronization {
     override fun beforeCompletion() {}
     override fun afterCompletion(status: Int) {
       try {
         hibernateSession.doWork { connection ->
           connection.createStatement().execute("SET transaction_mode = 'unspecified'")
+          connection.createStatement().execute("ROLLBACK")
         }
       } catch (e: Exception) {
         logger.error(e) { "Failed to reset transaction_mode after transaction completion" }
