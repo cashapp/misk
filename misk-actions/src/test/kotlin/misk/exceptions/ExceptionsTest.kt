@@ -34,7 +34,7 @@ class ExceptionsTest {
     val theValue = requireRequestNotNull(value) { "message" }
     assertEquals("value", theValue)
 
-    // note: this is not value!!.length - the contract from the check implies this is non-null
+    // note: this is not value!!.length - the contract from the check implies this is non-null.
     assertEquals("value".length, value.length)
   }
 }
