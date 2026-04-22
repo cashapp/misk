@@ -1,0 +1,15 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.cloud.aws////PointingToDeclaration/misk-aws-api/misk.cloud.aws/index.md
+$dokka.location:misk.cloud.aws//toMiskAwsAccountId/wisp.aws.environment.AwsAccountId#/PointingToDeclaration/misk-aws-api/misk.cloud.aws/to-misk-aws-account-id.md
+$dokka.location:misk.cloud.aws//toMiskAwsRegion/wisp.aws.environment.AwsRegion#/PointingToDeclaration/misk-aws-api/misk.cloud.aws/to-misk-aws-region.md
+$dokka.location:misk.cloud.aws/AwsAccountId///PointingToDeclaration/misk-aws-api/misk.cloud.aws/-aws-account-id/index.md
+$dokka.location:misk.cloud.aws/AwsAccountId/AwsAccountId/#kotlin.String/PointingToDeclaration/misk-aws-api/misk.cloud.aws/-aws-account-id/-aws-account-id.md
+$dokka.location:misk.cloud.aws/AwsAccountId/value/#/PointingToDeclaration/misk-aws-api/misk.cloud.aws/-aws-account-id/value.md
+$dokka.location:misk.cloud.aws/AwsEnvironment///PointingToDeclaration/misk-aws-api/misk.cloud.aws/-aws-environment/index.md
+$dokka.location:misk.cloud.aws/AwsEnvironment/awsAccountId/#wisp.deployment.EnvironmentVariableLoader#kotlin.String/PointingToDeclaration/misk-aws-api/misk.cloud.aws/-aws-environment/aws-account-id.md
+$dokka.location:misk.cloud.aws/AwsEnvironment/awsRegion/#wisp.deployment.EnvironmentVariableLoader#kotlin.collections.List[kotlin.String]#kotlin.String/PointingToDeclaration/misk-aws-api/misk.cloud.aws/-aws-environment/aws-region.md
+$dokka.location:misk.cloud.aws/AwsRegion///PointingToDeclaration/misk-aws-api/misk.cloud.aws/-aws-region/index.md
+$dokka.location:misk.cloud.aws/AwsRegion/AwsRegion/#kotlin.String/PointingToDeclaration/misk-aws-api/misk.cloud.aws/-aws-region/-aws-region.md
+$dokka.location:misk.cloud.aws/AwsRegion/name/#/PointingToDeclaration/misk-aws-api/misk.cloud.aws/-aws-region/name.md
+misk.cloud.aws
