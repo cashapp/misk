@@ -55,7 +55,7 @@ class CustomArgsTest {
           transactionIsolationLevel = DB1_TXN_ISO_LEVEL,
           transactionMode = DB1_TXN_MODE,
           transactionTimeoutSeconds = Duration.ofSeconds(5),
-          vitessImage = "vitess/vttestserver:v23.0.3-mysql84",
+          vitessImage = "ghcr.io/block/vitess/vttestserver:23.0.3-block.1-mysql84",
           vitessVersion = 23,
         )
 
@@ -281,7 +281,7 @@ class CustomArgsTest {
       containerName = "unsupported_scatter_vitess_db",
       enableScatters = false,
       port = DefaultSettings.DYNAMIC_PORT,
-      vitessImage = "vitess/vttestserver:v19.0.9-mysql80",
+      vitessImage = "ghcr.io/block/vitess/vttestserver:mysql84",
       vitessVersion = 19,
     )
   }
