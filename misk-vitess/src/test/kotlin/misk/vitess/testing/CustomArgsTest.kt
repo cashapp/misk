@@ -55,7 +55,7 @@ class CustomArgsTest {
           transactionIsolationLevel = DB1_TXN_ISO_LEVEL,
           transactionMode = DB1_TXN_MODE,
           transactionTimeoutSeconds = Duration.ofSeconds(5),
-          vitessImage = "vitess/vttestserver:v23.0.3-mysql84",
+          vitessImage = "ghcr.io/block/vitess/vttestserver:23.0.3-block.1-mysql84",
           vitessVersion = 23,
         )
 

@@ -45,8 +45,8 @@ import misk.vitess.testing.internal.VitessQueryExecutor
  *   commit. `SINGLE` rejects cross-shard writes unless the session opts in via `SET transaction_mode = 'multi'`.
  *   `TWOPC` enables atomic distributed transactions via two-phase commit.
  * @property transactionTimeoutSeconds The transaction timeout in seconds. Default is `null`.
- * @property vitessImage The Vitess image to be used. Open-source Vitess images can be found at
- *   [Docker Hub](https://hub.docker.com/r/vitess/vttestserver/tags). Default is `vitess/vttestserver:v22.0.2-mysql80`.
+ * @property vitessImage The Vitess image to be used. Block's arm64-compatible images are at
+ *   `ghcr.io/block/vitess/vttestserver`. Default is `ghcr.io/block/vitess/vttestserver:23.0.3-block.1-mysql84`.
  * @property vitessVersion The Vitess major version to be used, which must match the version in `vitessImage`. Default
  *   is `22`.
  */
