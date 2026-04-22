@@ -66,7 +66,7 @@ Other configurable parameters include:
 - `sqlMode` (defaults to the [MySQL 8.4 defaults](https://dev.mysql.com/doc/refman/8.4/en/sql-mode.html)): The server side `sql_mode` setting.
 - `transactionIsolationLevel` (default `REPEATABLE_READ`): The transaction isolation level.
 - `transactionTimeoutSeconds` (default `30s`): the duration in seconds before Vitess times out a transaction. Setting a higher value may be useful for debugging.
-- `vitessImage` (default: `ghcr.io/block/vitess/vttestserver:v23.0.3-block.1-mysql84`): The Docker image to use for the container. Block's multi-arch images are at `ghcr.io/block/vitess/vttestserver`. Upstream DockerHub images (amd64 only) are at https://hub.docker.com/r/vitess/vttestserver/tags.
+- `vitessImage` (default: `ghcr.io/block/vitess/vttestserver:23.0.3-block.1-mysql84`): The Docker image to use for the container. Block's multi-arch images are at `ghcr.io/block/vitess/vttestserver`. Upstream DockerHub images (amd64 only) are at https://hub.docker.com/r/vitess/vttestserver/tags.
 - `vitessVersion` (default: `23`): The version of Vitess to use, which must match the version of `vitessImage`.
 
 ### Connecting to the test database

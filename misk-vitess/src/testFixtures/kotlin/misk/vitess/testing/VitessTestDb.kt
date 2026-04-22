@@ -46,7 +46,7 @@ import misk.vitess.testing.internal.VitessQueryExecutor
  *   `TWOPC` enables atomic distributed transactions via two-phase commit.
  * @property transactionTimeoutSeconds The transaction timeout in seconds. Default is `null`.
  * @property vitessImage The Vitess image to be used. Block's arm64-compatible images are at
- *   `ghcr.io/block/vitess/vttestserver`. Default is `ghcr.io/block/vitess/vttestserver:v23.0.3-block.1-mysql84`.
+ *   `ghcr.io/block/vitess/vttestserver`. Default is `ghcr.io/block/vitess/vttestserver:23.0.3-block.1-mysql84`.
  * @property vitessVersion The Vitess major version to be used, which must match the version in `vitessImage`. Default
  *   is `22`.
  */
