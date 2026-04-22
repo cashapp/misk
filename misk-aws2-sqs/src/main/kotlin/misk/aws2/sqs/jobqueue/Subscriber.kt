@@ -70,6 +70,7 @@ class Subscriber(
             sqsMetrics.handlerDispatchTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
             result
           } catch (e: Exception) {
+            logger.warn(e) { "Handler failed for job ${job.id} from queue ${job.queueName.value}" }
             sqsMetrics.handlerFailures.labels(queueName.value).inc()
             return@withSpan
           }
