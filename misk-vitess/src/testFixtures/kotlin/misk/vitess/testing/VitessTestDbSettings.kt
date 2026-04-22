@@ -30,7 +30,7 @@ object DefaultSettings {
   const val VITESS_DOCKER_NETWORK_TYPE = "bridge"
   const val VITESS_IMAGE = "ghcr.io/block/vitess/vttestserver:23.0.3-block.1-mysql84"
   const val VITESS_VERSION = 23
-  const val VTCTLD_CLIENT_IMAGE = "vitess/vtctldclient:v23.0.3"
+  const val VTCTLD_CLIENT_IMAGE = "ghcr.io/block/vitess/vtctldclient:23.0.3-block.1"
   const val VTGATE_USER = "root"
   const val VTGATE_USER_PASSWORD = ""
 }
