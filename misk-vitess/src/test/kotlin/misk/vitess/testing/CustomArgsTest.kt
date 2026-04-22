@@ -281,7 +281,7 @@ class CustomArgsTest {
       containerName = "unsupported_scatter_vitess_db",
       enableScatters = false,
       port = DefaultSettings.DYNAMIC_PORT,
-      vitessImage = "ghcr.io/block/vitess/vttestserver:mysql84",
+      vitessImage = "ghcr.io/block/vitess/vttestserver:23.0.3-block.1-mysql84",
       vitessVersion = 19,
     )
   }
