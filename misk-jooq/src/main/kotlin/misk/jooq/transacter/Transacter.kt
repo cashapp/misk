@@ -9,7 +9,7 @@ import misk.jooq.TransactionIsolationLevel
  *
  * Example:
  * ```kotlin
- * transacter.readOnly().maxAttempts(3).transaction { session ->
+ * transacter.readOnly().maxRetries(2).transaction { session ->
  *   session.ctx.selectFrom(MY_TABLE).fetch()
  * }
  * ```
@@ -39,10 +39,14 @@ interface Transacter {
    */
   fun <T> replicaRead(closure: (session: JooqSession) -> T): T
 
-  /** Configures the maximum number of attempts for transient failures. */
-  fun maxAttempts(maxAttempts: Int): Transacter
+  /** Configures the maximum number of retries for transient failures. */
+  fun maxRetries(maxRetries: Int): Transacter
 
-  /** Disables retries for the next transaction (equivalent to `maxAttempts(1)`). */
+  /** @deprecated Use [maxRetries] instead. maxAttempts(N) is equivalent to maxRetries(N - 1). */
+  @Deprecated("Use maxRetries instead", replaceWith = ReplaceWith("maxRetries(maxAttempts - 1)"))
+  fun maxAttempts(maxAttempts: Int): Transacter = maxRetries(maxAttempts - 1)
+
+  /** Disables retries for the next transaction (equivalent to `maxRetries(0)`). */
   fun noRetries(): Transacter
 
   /** Configures the maximum delay between retry attempts. */

@@ -87,7 +87,7 @@ class DockerRedis(private val version: String = "7.2") : ExternalDependency {
       throw IllegalStateException("Could not start Docker client. Is Docker running?", tr)
     }
 
-    retry(RetryConfig.Builder(upTo = 100, FlatBackoff(duration = 200.milliseconds.toJavaDuration())).build()) {
+    retry(RetryConfig.Builder(maxRetries = 100, withBackoff = FlatBackoff(duration = 200.milliseconds.toJavaDuration())).build()) {
       redisClient.withConnectionBlocking { check(sync().ping() == "PONG") { "Unexpected reply from Redis. Aborting!" } }
     }
 

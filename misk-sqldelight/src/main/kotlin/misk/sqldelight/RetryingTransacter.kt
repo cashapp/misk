@@ -15,7 +15,7 @@ private val logger = getLogger<RetryingTransacter>()
 data class TransacterOptions
 @JvmOverloads
 constructor(
-  val maxAttempts: Int = RetryDefaults.MAX_ATTEMPTS,
+  val maxRetries: Int = RetryDefaults.MAX_RETRIES,
   val minRetryDelayMillis: Long = RetryDefaults.MIN_RETRY_DELAY_MILLIS,
   val maxRetryDelayMillis: Long = RetryDefaults.MAX_RETRY_DELAY_MILLIS,
   val retryJitterMillis: Long = RetryDefaults.RETRY_JITTER_MILLIS,
@@ -75,8 +75,8 @@ constructor(
         } catch (e: Exception) {
           if (!(exceptionClassifier.isRetryable(e) && outermostTransaction)) throw e
 
-          if (attempt >= options.maxAttempts) {
-            logger.info { "recoverable transaction exception " + "(attempt $attempt), no more attempts" }
+          if (attempt > options.maxRetries) {
+            logger.info { "recoverable transaction exception " + "(attempt $attempt), no more retries" }
 
             throw e
           }
