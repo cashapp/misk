@@ -1,0 +1,72 @@
+package misk.aws2.sqs.jobqueue.leased
+
+import com.google.common.util.concurrent.Service
+import com.google.inject.Key
+import kotlin.reflect.KClass
+import misk.ReadyService
+import misk.ServiceModule
+import misk.aws2.sqs.jobqueue.retryQueue
+import misk.inject.DefaultAsyncSwitchModule
+import misk.inject.KAbstractModule
+import misk.jobqueue.BatchJobHandler
+import misk.jobqueue.JobHandler
+import misk.jobqueue.QueueName
+
+/**
+ * Install this module to register a batch handler for an SQS queue, and if specified, registers its corresponding retry
+ * queue.
+ */
+class LeasedAwsSqsBatchJobHandlerModule<T : BatchJobHandler>
+private constructor(
+  private val queueName: QueueName,
+  private val handler: KClass<T>,
+  private val installRetryQueue: Boolean,
+  private val dependsOn: List<Key<out Service>>,
+) : KAbstractModule() {
+  override fun configure() {
+    newMapBinder<QueueName, BatchJobHandler>().addBinding(queueName).to(handler.java)
+    newMapBinder<QueueName, JobHandler>()
+
+    if (installRetryQueue) {
+      newMapBinder<QueueName, BatchJobHandler>().addBinding(queueName.retryQueue).to(handler.java)
+    }
+
+    install(DefaultAsyncSwitchModule())
+    install(
+      ServiceModule<AwsSqsJobHandlerSubscriptionService>()
+        .dependsOn(dependsOn)
+        .dependsOn<ReadyService>()
+    )
+  }
+
+  companion object {
+    @JvmOverloads
+    inline fun <reified T : BatchJobHandler> create(
+      queueName: QueueName,
+      installRetryQueue: Boolean = true,
+      dependsOn: List<Key<out Service>> = emptyList(),
+    ): LeasedAwsSqsBatchJobHandlerModule<T> = create(queueName, T::class, installRetryQueue, dependsOn)
+
+    @JvmStatic
+    @JvmOverloads
+    fun <T : BatchJobHandler> create(
+      queueName: QueueName,
+      handlerClass: Class<T>,
+      installRetryQueue: Boolean = true,
+      dependsOn: List<Key<out Service>> = emptyList(),
+    ): LeasedAwsSqsBatchJobHandlerModule<T> {
+      return create(queueName, handlerClass.kotlin, installRetryQueue, dependsOn)
+    }
+
+    /** Returns a module that registers a batch handler for an SQS queue. */
+    @JvmOverloads
+    fun <T : BatchJobHandler> create(
+      queueName: QueueName,
+      handlerClass: KClass<T>,
+      installRetryQueue: Boolean = true,
+      dependsOn: List<Key<out Service>> = emptyList(),
+    ): LeasedAwsSqsBatchJobHandlerModule<T> {
+      return LeasedAwsSqsBatchJobHandlerModule(queueName, handlerClass, installRetryQueue, dependsOn)
+    }
+  }
+}
