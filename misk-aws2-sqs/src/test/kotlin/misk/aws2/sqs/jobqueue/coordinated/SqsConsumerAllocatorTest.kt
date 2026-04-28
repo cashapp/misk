@@ -1,13 +1,13 @@
-package misk.aws2.sqs.jobqueue.leased
+package misk.aws2.sqs.jobqueue.coordinated
 
 import jakarta.inject.Inject
 import kotlin.test.assertEquals
 import misk.MiskTestingServiceModule
-import misk.aws2.sqs.jobqueue.leased.AwsSqsJobReceiverPolicy.BALANCED_MAX
-import misk.aws2.sqs.jobqueue.leased.AwsSqsJobReceiverPolicy.ONE_FLAG_ONLY
-import misk.aws2.sqs.jobqueue.leased.SqsJobConsumer.Companion.CONSUMERS_PER_QUEUE
-import misk.aws2.sqs.jobqueue.leased.SqsJobConsumer.Companion.POD_CONSUMERS_PER_QUEUE
-import misk.aws2.sqs.jobqueue.leased.SqsJobConsumer.Companion.POD_MAX_JOBQUEUE_CONSUMERS
+import misk.aws2.sqs.jobqueue.coordinated.AwsSqsJobReceiverPolicy.BALANCED_MAX
+import misk.aws2.sqs.jobqueue.coordinated.AwsSqsJobReceiverPolicy.ONE_FLAG_ONLY
+import misk.aws2.sqs.jobqueue.coordinated.SqsJobConsumer.Companion.CONSUMERS_PER_QUEUE
+import misk.aws2.sqs.jobqueue.coordinated.SqsJobConsumer.Companion.POD_CONSUMERS_PER_QUEUE
+import misk.aws2.sqs.jobqueue.coordinated.SqsJobConsumer.Companion.POD_MAX_JOBQUEUE_CONSUMERS
 import misk.clustering.fake.lease.FakeLeaseManager
 import misk.clustering.fake.lease.FakeLeaseModule
 import misk.feature.testing.FakeFeatureFlags

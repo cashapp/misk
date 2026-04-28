@@ -1,4 +1,4 @@
-package misk.aws2.sqs.jobqueue.leased
+package misk.aws2.sqs.jobqueue.coordinated
 
 import com.squareup.moshi.Moshi
 import io.opentracing.Span

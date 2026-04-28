@@ -1,4 +1,4 @@
-package misk.aws2.sqs.jobqueue.leased
+package misk.aws2.sqs.jobqueue.coordinated
 
 /**
  * An [AwsSqsQueueConfig] tells misk about a queue, potentially in another region and/or another account. If the queue

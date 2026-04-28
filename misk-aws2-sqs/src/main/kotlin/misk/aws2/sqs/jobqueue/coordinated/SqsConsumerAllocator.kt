@@ -1,4 +1,4 @@
-package misk.aws2.sqs.jobqueue.leased
+package misk.aws2.sqs.jobqueue.coordinated
 
 import com.google.common.annotations.VisibleForTesting
 import jakarta.inject.Inject

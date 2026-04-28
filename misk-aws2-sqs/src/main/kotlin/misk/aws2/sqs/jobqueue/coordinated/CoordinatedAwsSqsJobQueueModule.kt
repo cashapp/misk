@@ -1,4 +1,4 @@
-package misk.aws2.sqs.jobqueue.leased
+package misk.aws2.sqs.jobqueue.coordinated
 
 import com.google.inject.Provides
 import jakarta.inject.Singleton
@@ -21,8 +21,8 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClientBuilder
 import software.amazon.awssdk.services.sqs.SqsClientBuilder
 import wisp.lease.LeaseManager
 
-/** [LeasedAwsSqsJobQueueModule] installs leased job queue support provided by SQS. */
-open class LeasedAwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbstractModule() {
+/** [CoordinatedAwsSqsJobQueueModule] installs coordinated job queue support provided by SQS. */
+open class CoordinatedAwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbstractModule() {
   override fun configure() {
     requireBinding<AwsCredentialsProvider>()
     requireBinding<AwsRegion>()

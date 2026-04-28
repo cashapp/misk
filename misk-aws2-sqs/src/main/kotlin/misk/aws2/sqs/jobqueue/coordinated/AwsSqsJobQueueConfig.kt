@@ -1,9 +1,9 @@
-package misk.aws2.sqs.jobqueue.leased
+package misk.aws2.sqs.jobqueue.coordinated
 
 import misk.config.Config
-import misk.aws2.sqs.jobqueue.leased.SqsJobConsumer.Companion.CONSUMERS_PER_QUEUE
-import misk.aws2.sqs.jobqueue.leased.SqsJobConsumer.Companion.POD_CONSUMERS_PER_QUEUE
-import misk.aws2.sqs.jobqueue.leased.SqsJobConsumer.Companion.POD_MAX_JOBQUEUE_CONSUMERS
+import misk.aws2.sqs.jobqueue.coordinated.SqsJobConsumer.Companion.CONSUMERS_PER_QUEUE
+import misk.aws2.sqs.jobqueue.coordinated.SqsJobConsumer.Companion.POD_CONSUMERS_PER_QUEUE
+import misk.aws2.sqs.jobqueue.coordinated.SqsJobConsumer.Companion.POD_MAX_JOBQUEUE_CONSUMERS
 import misk.tasks.RepeatedTaskQueueConfig
 
 /** [AwsSqsJobQueueConfig] is the configuration for job queueing backed by Amazon's Simple Queuing Service */

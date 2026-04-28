@@ -1,4 +1,4 @@
-package misk.aws2.sqs.jobqueue.leased
+package misk.aws2.sqs.jobqueue.coordinated
 
 import java.util.concurrent.CompletionException
 import java.util.concurrent.CompletableFuture

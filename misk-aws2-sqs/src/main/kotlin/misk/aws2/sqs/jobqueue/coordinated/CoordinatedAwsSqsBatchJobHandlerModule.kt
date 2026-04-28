@@ -1,4 +1,4 @@
-package misk.aws2.sqs.jobqueue.leased
+package misk.aws2.sqs.jobqueue.coordinated
 
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
@@ -16,7 +16,7 @@ import misk.jobqueue.QueueName
  * Install this module to register a batch handler for an SQS queue, and if specified, registers its corresponding retry
  * queue.
  */
-class LeasedAwsSqsBatchJobHandlerModule<T : BatchJobHandler>
+class CoordinatedAwsSqsBatchJobHandlerModule<T : BatchJobHandler>
 private constructor(
   private val queueName: QueueName,
   private val handler: KClass<T>,
@@ -45,7 +45,7 @@ private constructor(
       queueName: QueueName,
       installRetryQueue: Boolean = true,
       dependsOn: List<Key<out Service>> = emptyList(),
-    ): LeasedAwsSqsBatchJobHandlerModule<T> = create(queueName, T::class, installRetryQueue, dependsOn)
+    ): CoordinatedAwsSqsBatchJobHandlerModule<T> = create(queueName, T::class, installRetryQueue, dependsOn)
 
     @JvmStatic
     @JvmOverloads
@@ -54,7 +54,7 @@ private constructor(
       handlerClass: Class<T>,
       installRetryQueue: Boolean = true,
       dependsOn: List<Key<out Service>> = emptyList(),
-    ): LeasedAwsSqsBatchJobHandlerModule<T> {
+    ): CoordinatedAwsSqsBatchJobHandlerModule<T> {
       return create(queueName, handlerClass.kotlin, installRetryQueue, dependsOn)
     }
 
@@ -65,8 +65,8 @@ private constructor(
       handlerClass: KClass<T>,
       installRetryQueue: Boolean = true,
       dependsOn: List<Key<out Service>> = emptyList(),
-    ): LeasedAwsSqsBatchJobHandlerModule<T> {
-      return LeasedAwsSqsBatchJobHandlerModule(queueName, handlerClass, installRetryQueue, dependsOn)
+    ): CoordinatedAwsSqsBatchJobHandlerModule<T> {
+      return CoordinatedAwsSqsBatchJobHandlerModule(queueName, handlerClass, installRetryQueue, dependsOn)
     }
   }
 }
