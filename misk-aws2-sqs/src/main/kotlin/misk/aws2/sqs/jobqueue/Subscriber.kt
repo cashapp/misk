@@ -194,6 +194,18 @@ class Subscriber(
       val response = fetchMessages(queueUrl).await()
       sqsMetrics.sqsReceiveTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
 
+      if (!asyncSwitch.isEnabled("sqs")) {
+        if (!wasDisabled) {
+          logger.info { "Async SQS tasks disabled. Polling paused for queue ${queueName.value}." }
+          wasDisabled = true
+        }
+        while (!asyncSwitch.isEnabled("sqs")) {
+          delay(1000)
+        }
+        logger.info { "Async SQS tasks re-enabled. Polling resuming for queue ${queueName.value}." }
+        wasDisabled = false
+      }
+
       sqsMetrics.jobsReceived.labels(queueName.value).inc(response.messages().size.toDouble())
       response.messages().forEach { message ->
         message.attributes()[MessageSystemAttributeName.SENT_TIMESTAMP]?.let {
