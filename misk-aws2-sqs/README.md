@@ -312,6 +312,89 @@ With the above configuration, when the dynamic config is set:
 - The dynamic config completely replaces the YAML config - there is no merging. This keeps the behavior simple and predictable.
 - The `region` default from the AWS environment is automatically applied to both YAML and dynamic config if not explicitly specified.
 
+## Controlled subscriptions
+
+By default, each subscribed queue starts one SQS poller and `concurrency` handler coroutines. Misk represents this as
+one internal always-held slot with `handlersPerSlot = concurrency`. This is the normal v2 behavior and it does not
+require any additional bindings.
+
+For queues that need externally controlled consumption, bind an `SqsConsumptionController` for that `QueueName`. The
+controller returns the slots currently held for the queue. Each held slot starts:
+
+- one SQS poller
+- `handlersPerSlot` handler coroutines
+
+This makes downstream handler traffic proportional to the number of held slots:
+
+```text
+active handler coroutines = held slots * handlersPerSlot
+```
+
+All handler coroutines for the queue share one handler dispatcher limited by the queue's configured `parallelism`.
+Held slots add SQS pollers and handler coroutines, but they do not multiply handler thread parallelism.
+
+When a slot is removed or no longer held, the consumer stops polling for that slot and waits up to
+`slot_drain_timeout_ms` for jobs already delivered to handlers to finish. The consumer refreshes the slot set every
+`slot_refresh_interval_ms`. The default drain timeout is `0`, which cancels handlers immediately. Services that use
+controlled consumption to preserve v1-style lease behavior should set a non-zero drain timeout.
+
+Example:
+
+```kotlin
+import misk.aws2.sqs.jobqueue.SqsConsumerSlot
+import misk.aws2.sqs.jobqueue.SqsConsumptionController
+import misk.inject.KAbstractModule
+import misk.jobqueue.QueueName
+
+private val EXAMPLE_QUEUE = QueueName("example_queue")
+
+class ExampleSqsModule(
+  private val slotController: SqsConsumptionController,
+) : KAbstractModule() {
+  override fun configure() {
+    newMapBinder<QueueName, SqsConsumptionController>()
+      .addBinding(EXAMPLE_QUEUE)
+      .toInstance(slotController)
+  }
+}
+```
+
+A controller can be backed by leases, local process state, or another service-specific policy:
+
+```kotlin
+class ExampleController : SqsConsumptionController {
+  override val handlersPerSlot = 4
+
+  override suspend fun acquireSlots(): Map<String, SqsConsumerSlot> {
+    return heldLeases().associate { lease ->
+      lease.name to LeaseBackedSlot(lease)
+    }
+  }
+}
+
+class LeaseBackedSlot(
+  private val lease: Lease,
+) : SqsConsumerSlot {
+  override fun isHeld(): Boolean = lease.isHeld
+
+  override fun release() {
+    lease.release()
+  }
+}
+```
+
+Keep `SqsConsumerSlot.isHeld()` cheap. The compatibility layer that owns leases should renew or refresh them outside
+the hot polling path, then expose the current local held state through `isHeld()`.
+
+Controlled consumption can be tuned per queue:
+
+```yaml
+aws_sqs:
+  all_queues:
+    slot_refresh_interval_ms: 1000
+    slot_drain_timeout_ms: 10000
+```
+
 ## Threading model
 
 Receiving and processing messages is handled by separate views on the `Dispatchers.IO`:
@@ -340,7 +423,8 @@ It's advised to start with the default settings and adjust based on specific wor
 * uses AWS SDK v2
 * exposes suspending API
 * handlers return status and don't make calls to SQS. Acknowledging jobs is done by the framework code
-* no dependency on the lease module. There will be at least one handler per service instance
+* no dependency on the lease module by default. Services can opt in to externally controlled consumption with
+  `SqsConsumptionController`
 * optional dynamic config support for SQS configuration (requires explicit configuration, see "Dynamic configuration")
 * metrics are updated to v2, names of the metrics have been changed
 

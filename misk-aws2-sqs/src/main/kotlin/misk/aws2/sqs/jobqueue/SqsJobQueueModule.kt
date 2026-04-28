@@ -1,7 +1,6 @@
 package misk.aws2.sqs.jobqueue
 
 import com.google.inject.Provides
-import com.google.inject.multibindings.OptionalBinder
 import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule
@@ -10,6 +9,7 @@ import misk.cloud.aws.AwsRegion
 import misk.feature.DynamicConfig
 import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
+import misk.jobqueue.QueueName
 import misk.jobqueue.v2.JobConsumer
 import misk.jobqueue.v2.JobEnqueuer
 import misk.testing.TestFixture
@@ -23,6 +23,7 @@ constructor(private val config: SqsConfig, private val configureClient: SqsAsync
   override fun configure() {
     requireBinding<AwsCredentialsProvider>()
     requireBinding<AwsRegion>()
+    newMapBinder<QueueName, SqsConsumptionController>()
     bind<JobConsumer>().to<SqsJobConsumer>()
     bind<JobEnqueuer>().to<SqsJobEnqueuer>()
     multibind<TestFixture>().to<SqsJobConsumer>()

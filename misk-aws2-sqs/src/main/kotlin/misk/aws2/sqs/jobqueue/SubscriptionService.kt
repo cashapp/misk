@@ -26,7 +26,6 @@ constructor(
   private val moshi: Moshi,
   private val awsRegion: AwsRegion,
 ) : AbstractIdleService() {
-
   /** The effective config after resolving dynamic config overrides. Available after startup. */
   @VisibleForTesting
   lateinit var effectiveConfig: SqsConfig

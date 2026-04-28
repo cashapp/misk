@@ -19,6 +19,26 @@ class SqsConfigTest {
   }
 
   @Test
+  fun `slot controls have default values`() {
+    val config = SqsQueueConfig()
+
+    assertEquals(1_000, config.slot_refresh_interval_ms)
+    assertEquals(0, config.slot_drain_timeout_ms)
+  }
+
+  @Test
+  fun `slot controls can be customized`() {
+    val config =
+      SqsQueueConfig(
+        slot_refresh_interval_ms = 250,
+        slot_drain_timeout_ms = 5_000,
+      )
+
+    assertEquals(250, config.slot_refresh_interval_ms)
+    assertEquals(5_000, config.slot_drain_timeout_ms)
+  }
+
+  @Test
   fun `config_feature_flag has null default`() {
     val config = SqsConfig()
     assertEquals(null, config.config_feature_flag)

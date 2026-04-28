@@ -5,6 +5,7 @@ import io.opentracing.Tracer
 import io.opentracing.tag.Tags
 import java.time.Clock
 import java.util.concurrent.CompletableFuture
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
@@ -51,7 +52,10 @@ class Subscriber(
 
   suspend fun run() {
     while (true) {
-      val job = tracer.withSpan("channel-receive-queue-${queueName.value}") { channel.receive() }
+      val job =
+        tracer.withSpan("channel-receive-queue-${queueName.value}") {
+          channel.receiveCatching().getOrNull()
+        } ?: return
       tracer.withSpan("process-queue-${queueName.value}") {
         val receiveFromChannelTimestamp = clock.millis()
         sqsMetrics.channelReceiveLag
@@ -167,54 +171,73 @@ class Subscriber(
 
   /** Polls the messages from both the regular and the retry queue. */
   suspend fun poll() {
-    if (queueConfig.install_retry_queue) {
-        merge(messageFlow(queueName), messageFlow(queueName.retryQueue))
+    pollWhile { true }
+  }
+
+  internal suspend fun pollWhile(isPollingAllowed: () -> Boolean) {
+    fun messageFlow(queueName: QueueName) = flow {
+      val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
+      while (isPollingAllowed()) {
+        if (!asyncSwitch.isEnabled("sqs")) {
+          if (!wasDisabled) {
+            logger.info { "Async SQS tasks disabled. Polling paused for queue ${queueName.value}." }
+            wasDisabled = true
+          }
+          delay(1.seconds)
+          continue
+        }
+        if (wasDisabled) {
+          logger.info { "Async SQS tasks re-enabled. Polling resuming for queue ${queueName.value}." }
+          wasDisabled = false
+        }
+        val startTime = clock.millis()
+        val response = fetchMessages(queueUrl).await()
+        if (!isPollingAllowed()) {
+          continue
+        }
+        sqsMetrics.sqsReceiveTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
+
+        sqsMetrics.jobsReceived.labels(queueName.value).inc(response.messages().size.toDouble())
+        for (message in response.messages()) {
+          if (!isPollingAllowed()) {
+            break
+          }
+          message.attributes()[MessageSystemAttributeName.SENT_TIMESTAMP]?.let {
+            val sentTimestamp = it.toLong()
+            val processingLag = clock.instant().minusMillis(sentTimestamp).toEpochMilli().toDouble()
+            val receiveCounter = message.attributes()[MessageSystemAttributeName.APPROXIMATE_RECEIVE_COUNT]?.toInt()
+            if (receiveCounter == 1) {
+              sqsMetrics.queueFirstProcessingLag.labels(queueName.value).observe(processingLag)
+            }
+            sqsMetrics.queueProcessingLag.labels(queueName.value).observe(processingLag)
+          }
+          val publishToChannelTimestamp = clock.millis()
+          emit(
+            SqsJob(
+              queueName = queueName,
+              moshi = moshi,
+              message = message,
+              queueUrl = queueUrl,
+              publishToChannelTimestamp = publishToChannelTimestamp,
+            )
+          )
+        }
+      }
+    }
+
+    val messages =
+      if (queueConfig.install_retry_queue) {
+        merge(
+          messageFlow(queueName),
+          messageFlow(queueName.retryQueue),
+        )
       } else {
         messageFlow(queueName)
       }
-      .collect { received -> channel.send(received) }
-  }
 
-  private fun messageFlow(queueName: QueueName) = flow {
-    val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
-    while (true) {
-      if (!asyncSwitch.isEnabled("sqs")) {
-        if (!wasDisabled) {
-          logger.info { "Async SQS tasks disabled. Polling paused for queue ${queueName.value}." }
-          wasDisabled = true
-        }
-        delay(1000)
-        continue
-      }
-      if (wasDisabled) {
-        logger.info { "Async SQS tasks re-enabled. Polling resuming for queue ${queueName.value}." }
-        wasDisabled = false
-      }
-      val startTime = clock.millis()
-      val response = fetchMessages(queueUrl).await()
-      sqsMetrics.sqsReceiveTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
-
-      sqsMetrics.jobsReceived.labels(queueName.value).inc(response.messages().size.toDouble())
-      response.messages().forEach { message ->
-        message.attributes()[MessageSystemAttributeName.SENT_TIMESTAMP]?.let {
-          val sentTimestamp = it.toLong()
-          val processingLag = clock.instant().minusMillis(sentTimestamp).toEpochMilli().toDouble()
-          val receiveCounter = message.attributes()[MessageSystemAttributeName.APPROXIMATE_RECEIVE_COUNT]?.toInt()
-          if (receiveCounter == 1) {
-            sqsMetrics.queueFirstProcessingLag.labels(queueName.value).observe(processingLag)
-          }
-          sqsMetrics.queueProcessingLag.labels(queueName.value).observe(processingLag)
-        }
-        val publishToChannelTimestamp = clock.millis()
-        emit(
-          SqsJob(
-            queueName = queueName,
-            moshi = moshi,
-            message = message,
-            queueUrl = queueUrl,
-            publishToChannelTimestamp = publishToChannelTimestamp,
-          )
-        )
+    messages.collect { received ->
+      if (isPollingAllowed()) {
+        channel.send(received)
       }
     }
   }

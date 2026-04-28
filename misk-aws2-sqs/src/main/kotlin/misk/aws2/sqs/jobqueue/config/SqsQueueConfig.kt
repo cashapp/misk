@@ -10,7 +10,9 @@ package misk.aws2.sqs.jobqueue.config
  * messages. Defaults to null which will use the queue settings. `visibility_timeout` defines for how long the message
  * will be invisible for subsequent requests. If configured to null, the queue settings will be used. `region` AWS
  * Region of the consumed queue, defaults to the current region. `account_id` AWS Account ID of the consumed queue,
- * defaults to the current account. `queue_name` AWS Queue Name, defaults to the application provided name of the queue.
+ * defaults to the current account. `slot_refresh_interval_ms` defines how often held slots are refreshed.
+ * `slot_drain_timeout_ms` defines how long a removed slot waits for already-delivered jobs to finish before canceling
+ * handlers.
  */
 data class SqsQueueConfig
 @JvmOverloads
@@ -24,4 +26,6 @@ constructor(
   val visibility_timeout: Int? = null,
   val region: String? = null,
   val account_id: String? = null,
+  val slot_refresh_interval_ms: Long = 1_000,
+  val slot_drain_timeout_ms: Long = 0,
 )

@@ -3,8 +3,11 @@ package misk.aws2.sqs.jobqueue
 import jakarta.inject.Inject
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit.SECONDS
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
 import misk.jobqueue.QueueName
@@ -28,7 +31,30 @@ import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 @MiskTest(startService = true)
 class SqsJobConsumerTest {
   @MiskExternalDependency private val dockerSqs = DockerSqs
-  @MiskTestModule private val module = SqsJobQueueTestModule(dockerSqs)
+  private val controlledQueueController = FakeSqsConsumptionController()
+  private val controlledConcurrencyQueueController =
+    FakeSqsConsumptionController(
+      handlersPerSlot = 2,
+      slots = mapOf("slot-1" to FakeSqsConsumerSlot()),
+    )
+  private val controlledSharedParallelismQueueController =
+    FakeSqsConsumptionController(
+      handlersPerSlot = 1,
+      slots =
+        mapOf(
+          "slot-1" to FakeSqsConsumerSlot(),
+          "slot-2" to FakeSqsConsumerSlot(),
+        ),
+    )
+  @MiskTestModule private val module =
+    SqsJobQueueTestModule(
+      dockerSqs,
+      mapOf(
+        QueueName("test-queue-controlled") to controlledQueueController,
+        QueueName("test-queue-controlled-concurrency") to controlledConcurrencyQueueController,
+        QueueName("test-queue-controlled-shared-parallelism") to controlledSharedParallelismQueueController,
+      ),
+    )
 
   @Inject private lateinit var jobConsumer: SqsJobConsumer
 
@@ -233,6 +259,109 @@ class SqsJobConsumerTest {
   }
 
   @Test
+  fun `controlled subscription does not consume without a held slot`() {
+    val queueName = QueueName("test-queue-controlled")
+    val result = createQueue(queueName)
+    val latch = CountDownLatch(1)
+
+    jobConsumer.subscribe(
+      queueName,
+      getHandler(latch),
+      SqsQueueConfig(wait_timeout = 1, install_retry_queue = false, region = "us-west-2"),
+    )
+    sendMessage(result.queueUrl, "message")
+
+    assertEquals(false, latch.await(1, SECONDS), "Message should not be handled before a slot is held")
+
+    controlledQueueController.slots = mapOf("slot-1" to FakeSqsConsumerSlot())
+
+    assertTrue(latch.await(10, SECONDS), "Message should be handled after a slot is held")
+    assertEquals(0, latch.count)
+  }
+
+  @Test
+  fun `controlled subscription uses handlers per slot for handler concurrency`() {
+    val queueName = QueueName("test-queue-controlled-concurrency")
+    val result = createQueue(queueName)
+    val enteredHandler = CountDownLatch(2)
+    val releaseHandler = CountDownLatch(1)
+    val handler =
+      object : SuspendingJobHandler {
+        override suspend fun handleJob(job: Job): JobStatus {
+          enteredHandler.countDown()
+          releaseHandler.await(10, SECONDS)
+          return JobStatus.OK
+        }
+      }
+
+    jobConsumer.subscribe(
+      queueName,
+      handler,
+      SqsQueueConfig(
+        parallelism = 2,
+        max_number_of_messages = 2,
+        wait_timeout = 1,
+        install_retry_queue = false,
+        region = "us-west-2",
+      ),
+    )
+
+    repeat(2) { sendMessage(result.queueUrl, "message $it") }
+
+    assertTrue(enteredHandler.await(10, SECONDS), "Both handlers should run concurrently for one held slot")
+    releaseHandler.countDown()
+  }
+
+  @Test
+  fun `controlled subscription shares handler parallelism across held slots`() {
+    val queueName = QueueName("test-queue-controlled-shared-parallelism")
+    val result = createQueue(queueName)
+    val enteredHandlers = AtomicInteger()
+    val firstHandlerEntered = CountDownLatch(1)
+    val secondHandlerEntered = CountDownLatch(1)
+    val releaseFirstHandler = CountDownLatch(1)
+    val handler =
+      object : SuspendingJobHandler {
+        override suspend fun handleJob(job: Job): JobStatus {
+          when (enteredHandlers.incrementAndGet()) {
+            1 -> {
+              firstHandlerEntered.countDown()
+              releaseFirstHandler.await(10, SECONDS)
+            }
+            2 -> secondHandlerEntered.countDown()
+          }
+          return JobStatus.OK
+        }
+      }
+
+    jobConsumer.subscribe(
+      queueName,
+      handler,
+      SqsQueueConfig(
+        parallelism = 1,
+        max_number_of_messages = 1,
+        wait_timeout = 1,
+        install_retry_queue = false,
+        region = "us-west-2",
+      ),
+    )
+
+    repeat(2) { sendMessage(result.queueUrl, "message $it") }
+
+    assertTrue(firstHandlerEntered.await(10, SECONDS), "First handler should start")
+    try {
+      assertEquals(
+        false,
+        secondHandlerEntered.await(1, SECONDS),
+        "Held slots should share the configured handler parallelism",
+      )
+    } finally {
+      releaseFirstHandler.countDown()
+    }
+    assertTrue(secondHandlerEntered.await(10, SECONDS), "Second handler should start after the first one completes")
+  }
+
+  @Test
   @Disabled("Used for development testing only")
   fun `long running tests - simulates high traffic`() {
     val queueName = QueueName("test-queue-1")
@@ -282,10 +411,10 @@ class SqsJobConsumerTest {
   private fun getDelayingHandler(latch: CountDownLatch): SuspendingJobHandler {
     return object : SuspendingJobHandler {
       override suspend fun handleJob(job: Job): JobStatus {
-        val delay = Random.nextLong(30)
-        logger.info { "Handling job with a delay=$delay: body=${job.body} queue=${job.queueName.value}" }
+        val delayMs = Random.nextLong(30)
+        logger.info { "Handling job with a delay=$delayMs: body=${job.body} queue=${job.queueName.value}" }
         latch.countDown()
-        delay(delay)
+        delay(delayMs.milliseconds)
         return JobStatus.OK
       }
     }
@@ -397,6 +526,23 @@ class SqsJobConsumerTest {
   }
 
   data class CreatedQueues(val queueUrl: String, val retryQueueUrl: String, val dlqQueueUrl: String)
+
+  private class FakeSqsConsumptionController(
+    override var handlersPerSlot: Int = 1,
+    @Volatile var slots: Map<String, SqsConsumerSlot> = emptyMap(),
+  ) : SqsConsumptionController {
+    override suspend fun acquireSlots(): Map<String, SqsConsumerSlot> = slots
+  }
+
+  private class FakeSqsConsumerSlot : SqsConsumerSlot {
+    @Volatile var held = true
+
+    override fun isHeld(): Boolean = held
+
+    override fun release() {
+      held = false
+    }
+  }
 
   companion object {
     val logger = getLogger<SqsJobConsumerTest>()
