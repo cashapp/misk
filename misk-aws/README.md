@@ -1,6 +1,9 @@
 # Module: AWS SQS Module
 **[Module Documentation Pending]**
 
+This AWS SDK v1 SQS jobqueue module is deprecated. Use the AWS SDK v2 SQS jobqueue in
+`misk-aws2-sqs` (`misk.aws2.sqs.jobqueue`) for new integrations and migrations.
+
 ## Metrics
 This module automatically generates metrics related to SQS, including metrics provided by AWS through cloudwatch. These metrics are defined by the `SQSMetrics` class, and are as follows:
 

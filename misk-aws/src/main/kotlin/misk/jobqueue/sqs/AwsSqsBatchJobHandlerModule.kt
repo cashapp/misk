@@ -15,6 +15,10 @@ import misk.jobqueue.QueueName
  * Install this module to register a batch handler for an SQS queue, and if specified, registers its corresponding retry
  * queue.
  */
+@Deprecated(
+  message = "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
+    "misk-aws2-sqs (misk.aws2.sqs.jobqueue) instead."
+)
 class AwsSqsBatchJobHandlerModule<T : BatchJobHandler>
 private constructor(
   private val queueName: QueueName,

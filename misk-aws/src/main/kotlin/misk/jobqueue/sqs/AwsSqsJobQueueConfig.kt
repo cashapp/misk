@@ -7,6 +7,10 @@ import misk.jobqueue.sqs.SqsJobConsumer.Companion.POD_MAX_JOBQUEUE_CONSUMERS
 import misk.tasks.RepeatedTaskQueueConfig
 
 /** [AwsSqsJobQueueConfig] is the configuration for job queueing backed by Amazon's Simple Queuing Service */
+@Deprecated(
+  message = "AWS SDK v1 SQS jobqueue is deprecated. Use misk.aws2.sqs.jobqueue.config.SqsConfig " +
+    "with misk.aws2.sqs.jobqueue.SqsJobQueueModule instead."
+)
 class AwsSqsJobQueueConfig
 @JvmOverloads
 constructor(
@@ -68,6 +72,10 @@ constructor(
  *
  * The [AwsSqsJobReceiverPolicy] gives two options for how consumers are created based on the flags.
  */
+@Deprecated(
+  message = "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
+    "misk-aws2-sqs (misk.aws2.sqs.jobqueue) instead."
+)
 enum class AwsSqsJobReceiverPolicy {
   /**
    * This is the original policy. Naming is hard, but this policy will compute receivers as follows. First we choose one
