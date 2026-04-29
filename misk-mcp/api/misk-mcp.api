@@ -38,6 +38,7 @@ public final class misk/mcp/McpPromptModule : misk/inject/KAbstractModule {
 public final class misk/mcp/McpPromptModule$Companion {
 	public final fun create (Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)Lmisk/mcp/McpPromptModule;
 	public final fun create (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lmisk/mcp/McpPromptModule;
+	public final fun createWithNoGroup (Lkotlin/reflect/KClass;)Lmisk/mcp/McpPromptModule;
 }
 
 public abstract interface class misk/mcp/McpResource {
@@ -60,6 +61,7 @@ public final class misk/mcp/McpResourceModule : misk/inject/KAbstractModule {
 public final class misk/mcp/McpResourceModule$Companion {
 	public final fun create (Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)Lmisk/mcp/McpResourceModule;
 	public final fun create (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lmisk/mcp/McpResourceModule;
+	public final fun createWithNoGroup (Lkotlin/reflect/KClass;)Lmisk/mcp/McpResourceModule;
 }
 
 public abstract interface class misk/mcp/McpResourceTemplate {
@@ -90,12 +92,12 @@ public final class misk/mcp/McpServerModule : misk/inject/KAbstractModule {
 }
 
 public final class misk/mcp/McpServerModule$Companion {
-	public final fun create (Ljava/lang/String;Lmisk/mcp/config/McpConfig;Lcom/google/inject/Provider;Lkotlin/reflect/KClass;Ljava/lang/String;)Lmisk/mcp/McpServerModule;
-	public final fun create (Ljava/lang/String;Lmisk/mcp/config/McpConfig;Ljava/lang/annotation/Annotation;Lcom/google/inject/Provider;Ljava/lang/String;)Lmisk/mcp/McpServerModule;
-	public static synthetic fun create$default (Lmisk/mcp/McpServerModule$Companion;Ljava/lang/String;Lmisk/mcp/config/McpConfig;Lcom/google/inject/Provider;Lkotlin/reflect/KClass;Ljava/lang/String;ILjava/lang/Object;)Lmisk/mcp/McpServerModule;
-	public static synthetic fun create$default (Lmisk/mcp/McpServerModule$Companion;Ljava/lang/String;Lmisk/mcp/config/McpConfig;Ljava/lang/annotation/Annotation;Lcom/google/inject/Provider;Ljava/lang/String;ILjava/lang/Object;)Lmisk/mcp/McpServerModule;
-	public final fun createWithNoGroup (Ljava/lang/String;Lmisk/mcp/config/McpConfig;Lcom/google/inject/Provider;)Lmisk/mcp/McpServerModule;
-	public static synthetic fun createWithNoGroup$default (Lmisk/mcp/McpServerModule$Companion;Ljava/lang/String;Lmisk/mcp/config/McpConfig;Lcom/google/inject/Provider;ILjava/lang/Object;)Lmisk/mcp/McpServerModule;
+	public final fun create (Ljava/lang/String;Lmisk/mcp/config/McpConfig;Ljava/lang/annotation/Annotation;Ljava/lang/String;Lcom/google/inject/Provider;)Lmisk/mcp/McpServerModule;
+	public final fun create (Ljava/lang/String;Lmisk/mcp/config/McpConfig;Lkotlin/reflect/KClass;Ljava/lang/String;Lcom/google/inject/Provider;)Lmisk/mcp/McpServerModule;
+	public static synthetic fun create$default (Lmisk/mcp/McpServerModule$Companion;Ljava/lang/String;Lmisk/mcp/config/McpConfig;Ljava/lang/annotation/Annotation;Ljava/lang/String;Lcom/google/inject/Provider;ILjava/lang/Object;)Lmisk/mcp/McpServerModule;
+	public static synthetic fun create$default (Lmisk/mcp/McpServerModule$Companion;Ljava/lang/String;Lmisk/mcp/config/McpConfig;Lkotlin/reflect/KClass;Ljava/lang/String;Lcom/google/inject/Provider;ILjava/lang/Object;)Lmisk/mcp/McpServerModule;
+	public final fun createWithNoGroup (Ljava/lang/String;Lmisk/mcp/config/McpConfig;Ljava/lang/String;Lcom/google/inject/Provider;)Lmisk/mcp/McpServerModule;
+	public static synthetic fun createWithNoGroup$default (Lmisk/mcp/McpServerModule$Companion;Ljava/lang/String;Lmisk/mcp/config/McpConfig;Ljava/lang/String;Lcom/google/inject/Provider;ILjava/lang/Object;)Lmisk/mcp/McpServerModule;
 }
 
 public abstract interface class misk/mcp/McpSessionHandler {
@@ -164,6 +166,7 @@ public final class misk/mcp/McpToolModule : misk/inject/KAbstractModule {
 public final class misk/mcp/McpToolModule$Companion {
 	public final fun create (Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)Lmisk/mcp/McpToolModule;
 	public final fun create (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lmisk/mcp/McpToolModule;
+	public final fun createWithNoGroup (Lkotlin/reflect/KClass;)Lmisk/mcp/McpToolModule;
 }
 
 public final class misk/mcp/MiskMcpServer : io/modelcontextprotocol/kotlin/sdk/server/Server {
