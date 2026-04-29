@@ -21,6 +21,7 @@ import misk.vitess.Keyspace
 import misk.vitess.Shard
 import misk.vitess.testing.TransactionMode
 import misk.vitess.testing.utilities.DockerVitess
+import kotlin.reflect.KClass
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -95,8 +96,7 @@ class VitessTransactionModeIntegrationTest {
         }
       }
 
-    assertThat(generateSequence(exception as Throwable) { it.cause }.any { it is CrossShardTransactionException })
-      .isTrue()
+    assertThat(exception.hasCause(CrossShardTransactionException::class)).isTrue()
   }
 
   @Test
@@ -111,8 +111,7 @@ class VitessTransactionModeIntegrationTest {
       }
     }
 
-    assertThat(generateSequence(exception as Throwable) { it.cause }.any { it is CrossShardTransactionException })
-      .isTrue()
+    assertThat(exception.hasCause(CrossShardTransactionException::class)).isTrue()
   }
 
   @Test
@@ -151,7 +150,9 @@ class VitessTransactionModeIntegrationTest {
       }
     }
 
-    assertThat(generateSequence(exception as Throwable) { it.cause }.any { it is CrossShardTransactionException })
-      .isTrue()
+    assertThat(exception.hasCause(CrossShardTransactionException::class)).isTrue()
   }
+
+  private fun Throwable.hasCause(type: KClass<*>): Boolean =
+    generateSequence(this) { it.cause }.any { type.isInstance(it) }
 }
