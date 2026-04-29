@@ -29,6 +29,21 @@ This module provides a modern, Kotlin-first interface for working with Amazon Si
 
 This module is designed to be a drop-in replacement for the previous AWS SQS implementation, offering improved performance, better resource utilization, and a more developer-friendly API.
 
+## Coordinated SQS Compatibility
+
+The `misk.aws2.sqs.jobqueue.coordinated` package exists only as a compatibility path for services that
+are migrating from the previous `misk-aws` SQS implementation and are sure they need leases to limit
+global SQS consumption.
+
+Do not use the coordinated modules by default. Limiting consumption with leases is not recommended for new
+services because SQS consumption should usually scale naturally with service pods. Prefer the regular
+`misk.aws2.sqs.jobqueue` modules unless the service has a specific, understood requirement to cap
+cluster-wide consumption independently of pod count.
+
+If a service does need this compatibility path, install the explicitly named coordinated Guice modules:
+`CoordinatedAwsSqsJobQueueModule`, `CoordinatedAwsSqsJobHandlerModule`, or
+`CoordinatedAwsSqsBatchJobHandlerModule`.
+
 ## Installation
 
 Follow these steps to integrate the AWS SQS module into your Misk application:

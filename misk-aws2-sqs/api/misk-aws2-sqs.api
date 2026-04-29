@@ -235,3 +235,113 @@ public final class misk/aws2/sqs/jobqueue/config/SqsQueueConfig {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/aws2/sqs/jobqueue/coordinated/AwsSqsJobQueueConfig : misk/config/Config {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;)V
+	public fun <init> (Ljava/util/Map;I)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;J)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JI)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JII)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIII)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIILmisk/aws2/sqs/jobqueue/coordinated/AwsSqsJobReceiverPolicy;)V
+	public fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIILmisk/aws2/sqs/jobqueue/coordinated/AwsSqsJobReceiverPolicy;Z)V
+	public synthetic fun <init> (Ljava/util/Map;ILmisk/tasks/RepeatedTaskQueueConfig;JIIILmisk/aws2/sqs/jobqueue/coordinated/AwsSqsJobReceiverPolicy;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getAws_sqs_job_receiver_policy ()Lmisk/aws2/sqs/jobqueue/coordinated/AwsSqsJobReceiverPolicy;
+	public final fun getExternal_queues ()Ljava/util/Map;
+	public final fun getMessage_batch_size ()I
+	public final fun getQueue_attribute_importer_frequency_ms ()J
+	public final fun getSafe_shutdown ()Z
+	public final fun getSqs_sending_connect_timeout_ms ()I
+	public final fun getSqs_sending_request_timeout_ms ()I
+	public final fun getSqs_sending_socket_timeout_ms ()I
+	public final fun getTask_queue ()Lmisk/tasks/RepeatedTaskQueueConfig;
+}
+
+public final class misk/aws2/sqs/jobqueue/coordinated/AwsSqsJobReceiverPolicy : java/lang/Enum {
+	public static final field BALANCED_MAX Lmisk/aws2/sqs/jobqueue/coordinated/AwsSqsJobReceiverPolicy;
+	public static final field ONE_FLAG_ONLY Lmisk/aws2/sqs/jobqueue/coordinated/AwsSqsJobReceiverPolicy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/aws2/sqs/jobqueue/coordinated/AwsSqsJobReceiverPolicy;
+	public static fun values ()[Lmisk/aws2/sqs/jobqueue/coordinated/AwsSqsJobReceiverPolicy;
+}
+
+public final class misk/aws2/sqs/jobqueue/coordinated/AwsSqsQueueConfig {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/aws2/sqs/jobqueue/coordinated/AwsSqsQueueConfig;
+	public static synthetic fun copy$default (Lmisk/aws2/sqs/jobqueue/coordinated/AwsSqsQueueConfig;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/aws2/sqs/jobqueue/coordinated/AwsSqsQueueConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAccount_id ()Ljava/lang/String;
+	public final fun getRegion ()Ljava/lang/String;
+	public final fun getSqs_queue_name ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule$Companion;
+	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule;
+	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;Z)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule;
+	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZLjava/util/List;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule;
+}
+
+public final class misk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule$Companion {
+	public final synthetic fun create (Lmisk/jobqueue/QueueName;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;Z)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZLjava/util/List;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;Z)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule;
+	public final synthetic fun create (Lmisk/jobqueue/QueueName;Z)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule;
+	public static synthetic fun create$default (Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZLjava/util/List;ILjava/lang/Object;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule;
+	public static synthetic fun create$default (Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;ILjava/lang/Object;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsBatchJobHandlerModule;
+}
+
+public final class misk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule$Companion;
+	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule;
+	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;Z)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule;
+	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZLjava/util/List;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule;
+}
+
+public final class misk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule$Companion {
+	public final synthetic fun create (Lmisk/jobqueue/QueueName;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;Z)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZLjava/util/List;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;Z)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule;
+	public final fun create (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule;
+	public final synthetic fun create (Lmisk/jobqueue/QueueName;Z)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule;
+	public static synthetic fun create$default (Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZLjava/util/List;ILjava/lang/Object;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule;
+	public static synthetic fun create$default (Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;ILjava/lang/Object;)Lmisk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobHandlerModule;
+}
+
+public class misk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobQueueModule : misk/inject/KAbstractModule {
+	public fun <init> (Lmisk/aws2/sqs/jobqueue/coordinated/AwsSqsJobQueueConfig;)V
+	protected fun configure ()V
+	public fun configureClient (Lsoftware/amazon/awssdk/services/sqs/SqsAsyncClientBuilder;)V
+	public fun configureClient (Lsoftware/amazon/awssdk/services/sqs/SqsClientBuilder;)V
+	public final fun consumerRepeatedTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;Lmisk/aws2/sqs/jobqueue/coordinated/AwsSqsJobQueueConfig;)Lmisk/tasks/RepeatedTaskQueue;
+}
+
+public final class misk/aws2/sqs/jobqueue/coordinated/SqsConsumerAllocator {
+	public static final field Companion Lmisk/aws2/sqs/jobqueue/coordinated/SqsConsumerAllocator$Companion;
+	public fun <init> (Lwisp/lease/LeaseManager;Lmisk/feature/FeatureFlags;)V
+	public final fun computeSqsConsumersForPod (Lmisk/jobqueue/QueueName;Lmisk/aws2/sqs/jobqueue/coordinated/AwsSqsJobReceiverPolicy;)I
+}
+
+public final class misk/aws2/sqs/jobqueue/coordinated/SqsConsumerAllocator$Companion {
+	public final fun leaseName (Lmisk/jobqueue/QueueName;I)Ljava/lang/String;
+}
+

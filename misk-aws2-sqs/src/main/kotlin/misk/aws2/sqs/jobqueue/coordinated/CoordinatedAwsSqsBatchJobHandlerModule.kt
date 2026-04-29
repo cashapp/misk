@@ -1,10 +1,11 @@
-package misk.jobqueue.sqs
+package misk.aws2.sqs.jobqueue.coordinated
 
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import kotlin.reflect.KClass
 import misk.ReadyService
 import misk.ServiceModule
+import misk.aws2.sqs.jobqueue.retryQueue
 import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
 import misk.jobqueue.BatchJobHandler
@@ -12,14 +13,10 @@ import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
 
 /**
- * Install this module to register a handler for an SQS queue, and if specified, registers its corresponding retry
+ * Install this module to register a batch handler for an SQS queue, and if specified, registers its corresponding retry
  * queue.
  */
-@Deprecated(
-  message = "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
-    "misk-aws2-sqs (misk.aws2.sqs.jobqueue.SqsJobHandlerModule) instead."
-)
-class AwsSqsJobHandlerModule<T : JobHandler>
+class CoordinatedAwsSqsBatchJobHandlerModule<T : BatchJobHandler>
 private constructor(
   private val queueName: QueueName,
   private val handler: KClass<T>,
@@ -27,11 +24,11 @@ private constructor(
   private val dependsOn: List<Key<out Service>>,
 ) : KAbstractModule() {
   override fun configure() {
-    newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
-    newMapBinder<QueueName, BatchJobHandler>()
+    newMapBinder<QueueName, BatchJobHandler>().addBinding(queueName).to(handler.java)
+    newMapBinder<QueueName, JobHandler>()
 
     if (installRetryQueue) {
-      newMapBinder<QueueName, JobHandler>().addBinding(queueName.retryQueue).to(handler.java)
+      newMapBinder<QueueName, BatchJobHandler>().addBinding(queueName.retryQueue).to(handler.java)
     }
 
     install(DefaultAsyncSwitchModule())
@@ -44,32 +41,32 @@ private constructor(
 
   companion object {
     @JvmOverloads
-    inline fun <reified T : JobHandler> create(
+    inline fun <reified T : BatchJobHandler> create(
       queueName: QueueName,
       installRetryQueue: Boolean = true,
       dependsOn: List<Key<out Service>> = emptyList(),
-    ): AwsSqsJobHandlerModule<T> = create(queueName, T::class, installRetryQueue, dependsOn)
+    ): CoordinatedAwsSqsBatchJobHandlerModule<T> = create(queueName, T::class, installRetryQueue, dependsOn)
 
     @JvmStatic
     @JvmOverloads
-    fun <T : JobHandler> create(
+    fun <T : BatchJobHandler> create(
       queueName: QueueName,
       handlerClass: Class<T>,
       installRetryQueue: Boolean = true,
       dependsOn: List<Key<out Service>> = emptyList(),
-    ): AwsSqsJobHandlerModule<T> {
+    ): CoordinatedAwsSqsBatchJobHandlerModule<T> {
       return create(queueName, handlerClass.kotlin, installRetryQueue, dependsOn)
     }
 
-    /** Returns a module that registers a handler for an SQS queue. */
+    /** Returns a module that registers a batch handler for an SQS queue. */
     @JvmOverloads
-    fun <T : JobHandler> create(
+    fun <T : BatchJobHandler> create(
       queueName: QueueName,
       handlerClass: KClass<T>,
       installRetryQueue: Boolean = true,
       dependsOn: List<Key<out Service>> = emptyList(),
-    ): AwsSqsJobHandlerModule<T> {
-      return AwsSqsJobHandlerModule(queueName, handlerClass, installRetryQueue, dependsOn)
+    ): CoordinatedAwsSqsBatchJobHandlerModule<T> {
+      return CoordinatedAwsSqsBatchJobHandlerModule(queueName, handlerClass, installRetryQueue, dependsOn)
     }
   }
 }

@@ -1,4 +1,4 @@
-package misk.jobqueue.sqs
+package misk.aws2.sqs.jobqueue.coordinated
 
 import com.google.common.annotations.VisibleForTesting
 import jakarta.inject.Inject
@@ -12,10 +12,6 @@ import wisp.lease.LeaseManager
  * computation is based off of the [AwsSqsJobReceiverPolicy] specification.
  */
 @Singleton
-@Deprecated(
-  message = "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
-    "misk-aws2-sqs (misk.aws2.sqs.jobqueue) instead."
-)
 class SqsConsumerAllocator
 @Inject
 constructor(private val leaseManager: LeaseManager, private val featureFlags: FeatureFlags) {
@@ -37,17 +33,12 @@ constructor(private val leaseManager: LeaseManager, private val featureFlags: Fe
   }
 
   private fun balancedMaxReceivers(queueName: QueueName): Int {
-    // Read the max from the per pod flag.
     val maxPerPod = podMaxJobQueueConsumers(queueName)
-    // Read the global max from the per queue flag.
     val maxGlobal = receiversForQueue(queueName)
 
     var result = 0
     for (candidate in 1..maxGlobal) {
-      // Don't exceed the per pod max.
       if (result >= maxPerPod) break
-
-      // Use the lease to enforce global max.
       if (maybeAcquireConsumerLease(queueName, candidate)) result += 1
     }
     return result
