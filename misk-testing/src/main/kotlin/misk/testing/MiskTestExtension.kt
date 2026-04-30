@@ -3,10 +3,13 @@ package misk.testing
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Injector
+import com.google.inject.Key
 import com.google.inject.Module
 import com.google.inject.testing.fieldbinder.BoundFieldModule
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.util.Collections
+import java.util.LinkedHashMap
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
@@ -24,8 +27,36 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
   companion object {
     private val runningDependencies = ConcurrentHashMap.newKeySet<String>()
     private val runningServices = ConcurrentHashMap.newKeySet<List<Module>>()
-    private val injectedModules = ConcurrentHashMap<List<Module>, Injector>()
     private val log = getLogger<MiskTestExtension>()
+
+    private val maxLruSize: Int? =
+      System.getenv("MISK_TEST_REUSE_LRU_SIZE")?.toIntOrNull()?.takeIf { it > 0 }
+
+    // Access-order LinkedHashMap so the least-recently-used entry is the eviction candidate when
+    // MISK_TEST_REUSE_LRU_SIZE is set. Callers must hold the map's monitor for compound ops
+    // (e.g. getOrPut) since access-order updates the map on read.
+    private val injectedModules: MutableMap<List<Module>, Injector> = Collections.synchronizedMap(
+      object : LinkedHashMap<List<Module>, Injector>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: Map.Entry<List<Module>, Injector>): Boolean {
+          val limit = maxLruSize ?: return false
+          if (size <= limit) return false
+          evictInjector(eldest.key, eldest.value)
+          return true
+        }
+      }
+    )
+
+    private fun evictInjector(key: List<Module>, injector: Injector) {
+      runningServices.remove(key)
+      try {
+        val serviceManager = injector
+          .getExistingBinding(Key.get(ServiceManager::class.java))
+          ?.provider?.get()
+        serviceManager?.stopAsync()?.awaitStopped(45, TimeUnit.SECONDS)
+      } catch (e: Exception) {
+        log.warn(e) { "Failed to stop services for evicted injector cache entry" }
+      }
+    }
   }
 
   override fun beforeEach(context: ExtensionContext) {
@@ -64,7 +95,9 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
     val injector =
       if (context.reuseInjector()) {
-        injectedModules.getOrPut(context.getSortedActionTestModules()) { Guice.createInjector(module) }
+        synchronized(injectedModules) {
+          injectedModules.getOrPut(context.getSortedActionTestModules()) { Guice.createInjector(module) }
+        }
       } else {
         Guice.createInjector(module)
       }
