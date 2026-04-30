@@ -54,6 +54,11 @@ internal class VitessSchemaParser(
         return@forEach
       }
 
+      // Skip SchemaBot config file (https://github.com/block/schemabot)
+      if (schemaDirectoryFile.name == "schemabot.yaml") {
+        return@forEach
+      }
+
       if (!schemaDirectoryFile.isDirectory) {
         exceptions.add("`$schemaDirectoryFile` must be a keyspace directory.")
         return@forEach
