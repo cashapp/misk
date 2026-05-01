@@ -39,9 +39,9 @@ abstract class StartVitessDatabaseTask : DefaultTask() {
 
   @get:Input abstract val sqlMode: Property<String>
 
-  @get:Input abstract val transactionIsolationLevel: Property<TransactionIsolationLevel>
+  @get:Input abstract val transactionIsolationLevel: Property<String>
 
-  @get:Input abstract val transactionMode: Property<TransactionMode>
+  @get:Input abstract val transactionMode: Property<String>
 
   @get:Input abstract val transactionTimeoutSeconds: Property<Duration>
 
@@ -66,8 +66,8 @@ abstract class StartVitessDatabaseTask : DefaultTask() {
         port = port.get(),
         schemaDir = schemaDir.get(),
         sqlMode = sqlMode.get(),
-        transactionIsolationLevel = transactionIsolationLevel.get(),
-        transactionMode = transactionMode.get(),
+        transactionIsolationLevel = TransactionIsolationLevel.valueOf(transactionIsolationLevel.get()),
+        transactionMode = TransactionMode.valueOf(transactionMode.get()),
         transactionTimeoutSeconds = transactionTimeoutSeconds.get(),
         vitessImage = vitessImage.get(),
         vitessVersion = vitessVersion.get(),
