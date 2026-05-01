@@ -25,6 +25,11 @@ internal class VitessExceptionHandler(registry: CollectorRegistry? = null) : SQL
       KnownErrors(sqlState = "hy000", errorCode = 1105),
     )
 
+  private val applicationErrors = setOf(
+    1062, // Duplicate entry
+    1213, // Deadlock found when trying to get lock
+  )
+
   private val badErrorString = listOf(Regex("connection"), Regex("vttable"))
 
   private data class KnownErrors(val sqlState: String, val errorCode: Int)
@@ -38,6 +43,9 @@ internal class VitessExceptionHandler(registry: CollectorRegistry? = null) : SQL
   }
 
   private fun adjudicateInternal(sqlException: SQLException): SQLExceptionOverride.Override {
+    if (sqlException.errorCode in applicationErrors) {
+      return SQLExceptionOverride.Override.MUST_NOT_EVICT
+    }
     return when {
       sqlException.toKnownErrors() in probablyBadState -> SQLExceptionOverride.Override.MUST_EVICT
       containsKnownBadErrorMessage(sqlException.message) -> SQLExceptionOverride.Override.MUST_EVICT
@@ -47,15 +55,16 @@ internal class VitessExceptionHandler(registry: CollectorRegistry? = null) : SQL
 
   override fun adjudicate(sqlException: SQLException): SQLExceptionOverride.Override {
     return adjudicateInternal(sqlException).also { result ->
-      logger.error(
-        "Hikari exception adjudicate: " +
-          "errorCode=${sqlException.errorCode}, " +
-          // the logic around sqlState kotlin this is null safe, but the Java shows it being set
-          // as null. Let's be explicit at the behavir.
-          "state=${sqlException?.sqlState ?: "null"}, " +
-          "message=${sqlException.message}, " +
-          "adjudicate=$result"
-      )
+      val logMessage = "Hikari exception adjudicate: " +
+        "errorCode=${sqlException.errorCode}, " +
+        "state=${sqlException?.sqlState ?: "null"}, " +
+        "message=${sqlException.message}, " +
+        "adjudicate=$result"
+      if (result == SQLExceptionOverride.Override.MUST_NOT_EVICT) {
+        logger.warn(logMessage)
+      } else {
+        logger.error(logMessage)
+      }
       errorCounter
         ?.labels(sqlException.errorCode.toString(), sqlException.sqlState, sqlException.message, result.toString())
         ?.inc()

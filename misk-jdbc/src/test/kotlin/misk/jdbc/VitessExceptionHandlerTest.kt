@@ -1,27 +1,63 @@
 package misk.jdbc
 
-import com.zaxxer.hikari.SQLExceptionOverride
 import java.sql.SQLException
-import org.assertj.core.api.Assertions.assertThat
+import com.zaxxer.hikari.SQLExceptionOverride
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 
 class VitessExceptionHandlerTest {
+  private val handler = VitessExceptionHandler()
+
   @Test
-  fun `matches exception`() {
-    val handler = VitessExceptionHandler()
-    assertThat(handler.adjudicate(SQLException("Key not found")))
-      .isEqualTo(SQLExceptionOverride.Override.CONTINUE_EVICT)
-    assertThat(handler.adjudicate(SQLException("Duplicate entry 'foo_bar'")))
-      .isEqualTo(SQLExceptionOverride.Override.CONTINUE_EVICT)
-    assertThat(handler.adjudicate(SQLException("vtgate connection error")))
-      .isEqualTo(SQLExceptionOverride.Override.MUST_EVICT)
-    assertThat(handler.adjudicate(SQLException("", "42S02", 1146))).isEqualTo(SQLExceptionOverride.Override.MUST_EVICT)
-    assertThat(handler.adjudicate(SQLException("", "42S02", 1147)))
-      .isEqualTo(SQLExceptionOverride.Override.CONTINUE_EVICT)
+  fun duplicateKeyErrorDoesNotEvict() {
+    val exception = SQLException(
+      "target: keyspace.shard.primary: vttablet: rpc error: code = AlreadyExists " +
+        "desc = Duplicate entry 'foo' for key 'PRIMARY' (errno 1062) (sqlstate 23000)",
+      "23000",
+      1062,
+    )
+    assertEquals(SQLExceptionOverride.Override.MUST_NOT_EVICT, handler.adjudicate(exception))
+  }
 
-    assertThat(handler.adjudicate(SQLException("", "hy000", 1105))).isEqualTo(SQLExceptionOverride.Override.MUST_EVICT)
+  @Test
+  fun deadlockErrorDoesNotEvict() {
+    val exception = SQLException(
+      "target: keyspace.shard.primary: vttablet: rpc error: code = Aborted " +
+        "desc = Deadlock found when trying to get lock (errno 1213) (sqlstate 40001)",
+      "40001",
+      1213,
+    )
+    assertEquals(SQLExceptionOverride.Override.MUST_NOT_EVICT, handler.adjudicate(exception))
+  }
 
-    assertThat(handler.adjudicate(SQLException("one of the vttablets: has turned into a pile of slag", "", 0)))
-      .isEqualTo(SQLExceptionOverride.Override.MUST_EVICT)
+  @Test
+  fun connectionErrorEvicts() {
+    val exception = SQLException(
+      "target: keyspace.shard.primary: vttablet: rpc error: code = Unavailable " +
+        "desc = connection refused (errno 2002) (sqlstate HY000)",
+      "HY000",
+      2002,
+    )
+    assertEquals(SQLExceptionOverride.Override.MUST_EVICT, handler.adjudicate(exception))
+  }
+
+  @Test
+  fun knownBadStateEvicts() {
+    val exception = SQLException(
+      "target: keyspace.shard.primary: vttablet: table not found",
+      "42S02",
+      1146,
+    )
+    assertEquals(SQLExceptionOverride.Override.MUST_EVICT, handler.adjudicate(exception))
+  }
+
+  @Test
+  fun unknownErrorWithoutBadPatternContinuesEvict() {
+    val exception = SQLException(
+      "some other error without bad patterns",
+      "HY000",
+      9999,
+    )
+    assertEquals(SQLExceptionOverride.Override.CONTINUE_EVICT, handler.adjudicate(exception))
   }
 }
