@@ -16,7 +16,7 @@ class VitessExceptionHandlerTest {
       "23000",
       1062,
     )
-    assertEquals(SQLExceptionOverride.Override.MUST_NOT_EVICT, handler.adjudicate(exception))
+    assertEquals(SQLExceptionOverride.Override.DO_NOT_EVICT, handler.adjudicate(exception))
   }
 
   @Test
@@ -27,7 +27,7 @@ class VitessExceptionHandlerTest {
       "40001",
       1213,
     )
-    assertEquals(SQLExceptionOverride.Override.MUST_NOT_EVICT, handler.adjudicate(exception))
+    assertEquals(SQLExceptionOverride.Override.DO_NOT_EVICT, handler.adjudicate(exception))
   }
 
   @Test

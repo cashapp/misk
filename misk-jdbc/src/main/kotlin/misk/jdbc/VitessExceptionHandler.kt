@@ -44,7 +44,7 @@ internal class VitessExceptionHandler(registry: CollectorRegistry? = null) : SQL
 
   private fun adjudicateInternal(sqlException: SQLException): SQLExceptionOverride.Override {
     if (sqlException.errorCode in applicationErrors) {
-      return SQLExceptionOverride.Override.MUST_NOT_EVICT
+      return SQLExceptionOverride.Override.DO_NOT_EVICT
     }
     return when {
       sqlException.toKnownErrors() in probablyBadState -> SQLExceptionOverride.Override.MUST_EVICT
@@ -60,7 +60,7 @@ internal class VitessExceptionHandler(registry: CollectorRegistry? = null) : SQL
         "state=${sqlException?.sqlState ?: "null"}, " +
         "message=${sqlException.message}, " +
         "adjudicate=$result"
-      if (result == SQLExceptionOverride.Override.MUST_NOT_EVICT) {
+      if (result == SQLExceptionOverride.Override.DO_NOT_EVICT) {
         logger.warn(logMessage)
       } else {
         logger.error(logMessage)
