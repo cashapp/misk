@@ -4,6 +4,9 @@
 This AWS SDK v1 SQS jobqueue module is deprecated. Use the AWS SDK v2 SQS jobqueue in
 `misk-aws2-sqs` (`misk.aws2.sqs.jobqueue`) for new integrations and migrations.
 
+The AWS SDK v1 S3 module (`misk.s3.RealS3Module`) is also deprecated. Use the AWS SDK v2
+S3 module in `misk-aws2-s3` (`misk.aws2.s3.S3Module`) for new integrations and migrations.
+
 ## Metrics
 This module automatically generates metrics related to SQS, including metrics provided by AWS through cloudwatch. These metrics are defined by the `SQSMetrics` class, and are as follows:
 
