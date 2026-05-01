@@ -153,7 +153,7 @@ constructor(
     properties["cachePrepStmts"] = "true"
     properties["prepStmtCacheSize"] = "250"
     properties["prepStmtCacheSqlLimit"] = "2048"
-    if (type == DataSourceType.MYSQL || type == DataSourceType.VITESS_MYSQL || type == DataSourceType.TIDB) {
+    if (type == DataSourceType.MYSQL || type == DataSourceType.TIDB) {
       properties["useServerPrepStmts"] = "true"
     }
     if (mysql_use_aws_secret_for_credentials) {
@@ -235,7 +235,6 @@ constructor(
         }
 
         if (type == DataSourceType.VITESS_MYSQL) {
-          queryParams += "&useServerPrepStmts=true"
           // If we leave this as the default (true) the logs get spammed with the following errors:
           // "Ignored inapplicable SET {sql_mode } = strict_trans_tables"
           // Since Vitess always uses strict_trans_tables this makes no difference here except it
