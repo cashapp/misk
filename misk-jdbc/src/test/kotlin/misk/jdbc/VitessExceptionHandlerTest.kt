@@ -60,4 +60,32 @@ class VitessExceptionHandlerTest {
     )
     assertEquals(SQLExceptionOverride.Override.CONTINUE_EVICT, handler.adjudicate(exception))
   }
+
+  @Test
+  fun vtgateConnectionErrorEvicts() {
+    val exception = SQLException("vtgate connection error")
+    assertEquals(SQLExceptionOverride.Override.MUST_EVICT, handler.adjudicate(exception))
+  }
+
+  @Test
+  fun knownBadStateHy000Evicts() {
+    val exception = SQLException("", "hy000", 1105)
+    assertEquals(SQLExceptionOverride.Override.MUST_EVICT, handler.adjudicate(exception))
+  }
+
+  @Test
+  fun vttabletErrorWithoutApplicationErrorCodeEvicts() {
+    val exception = SQLException(
+      "one of the vttablets: has turned into a pile of slag",
+      "",
+      0,
+    )
+    assertEquals(SQLExceptionOverride.Override.MUST_EVICT, handler.adjudicate(exception))
+  }
+
+  @Test
+  fun similarButNonMatchingKnownBadStateContinuesEvict() {
+    val exception = SQLException("", "42S02", 1147)
+    assertEquals(SQLExceptionOverride.Override.CONTINUE_EVICT, handler.adjudicate(exception))
+  }
 }
