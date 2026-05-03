@@ -1,6 +1,10 @@
 package misk.testing
 
+import com.google.common.cache.Cache
+import com.google.common.cache.CacheBuilder
+import com.google.common.cache.RemovalCause
 import com.google.common.util.concurrent.ServiceManager
+import com.google.common.util.concurrent.UncheckedExecutionException
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Key
@@ -8,8 +12,6 @@ import com.google.inject.Module
 import com.google.inject.testing.fieldbinder.BoundFieldModule
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import java.util.Collections
-import java.util.LinkedHashMap
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
@@ -32,30 +34,27 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     private val maxLruSize: Int? =
       System.getenv("MISK_TEST_REUSE_LRU_SIZE")?.toIntOrNull()?.takeIf { it > 0 }
 
-    // Access-order LinkedHashMap so the least-recently-used entry is the eviction candidate when
-    // MISK_TEST_REUSE_LRU_SIZE is set. Callers must hold the map's monitor for compound ops
-    // (e.g. getOrPut) since access-order updates the map on read.
-    private val injectedModules: MutableMap<List<Module>, Injector> = Collections.synchronizedMap(
-      object : LinkedHashMap<List<Module>, Injector>(16, 0.75f, true) {
-        override fun removeEldestEntry(eldest: Map.Entry<List<Module>, Injector>): Boolean {
-          val limit = maxLruSize ?: return false
-          if (size <= limit) return false
-          evictInjector(eldest.key, eldest.value)
-          return true
+    // When MISK_TEST_REUSE_LRU_SIZE is set, the cache evicts least-recently-used entries once
+    // the size is exceeded; the removal listener stops services for evicted injectors. Guava's
+    // cache uses ConcurrentMap internally, so callers don't need extra synchronization.
+    private val injectedModules: Cache<List<Module>, Injector> = run {
+      val builder = CacheBuilder.newBuilder()
+        .removalListener<List<Module>, Injector> { notification ->
+          if (notification.cause == RemovalCause.EXPLICIT) return@removalListener
+          val key = notification.key ?: return@removalListener
+          val injector = notification.value ?: return@removalListener
+          runningServices.remove(key)
+          try {
+            val serviceManager = injector
+              .getExistingBinding(Key.get(ServiceManager::class.java))
+              ?.provider?.get()
+            serviceManager?.stopAsync()?.awaitStopped(45, TimeUnit.SECONDS)
+          } catch (e: Exception) {
+            log.warn(e) { "Failed to stop services for evicted injector cache entry" }
+          }
         }
-      }
-    )
-
-    private fun evictInjector(key: List<Module>, injector: Injector) {
-      runningServices.remove(key)
-      try {
-        val serviceManager = injector
-          .getExistingBinding(Key.get(ServiceManager::class.java))
-          ?.provider?.get()
-        serviceManager?.stopAsync()?.awaitStopped(45, TimeUnit.SECONDS)
-      } catch (e: Exception) {
-        log.warn(e) { "Failed to stop services for evicted injector cache entry" }
-      }
+      if (maxLruSize != null) builder.maximumSize(maxLruSize.toLong())
+      builder.build()
     }
   }
 
@@ -95,8 +94,12 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
     val injector =
       if (context.reuseInjector()) {
-        synchronized(injectedModules) {
-          injectedModules.getOrPut(context.getSortedActionTestModules()) { Guice.createInjector(module) }
+        try {
+          injectedModules.get(context.getSortedActionTestModules()) {
+            Guice.createInjector(module)
+          }
+        } catch (e: UncheckedExecutionException) {
+          throw e.cause ?: e
         }
       } else {
         Guice.createInjector(module)
@@ -143,7 +146,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
               } catch (stopError: Exception) {
                 e.addSuppressed(stopError)
               }
-              injectedModules.remove(context.getSortedActionTestModules())
+              injectedModules.invalidate(context.getSortedActionTestModules())
               throw e
             }
           }
