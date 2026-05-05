@@ -128,7 +128,9 @@ public abstract class misk/mcp/McpTool {
 	public fun getOpenWorldHint ()Z
 	public fun getReadOnlyHint ()Z
 	public fun getTitle ()Ljava/lang/String;
-	public abstract fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun handle-7zgdlzo (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun handle-7zgdlzo$default (Lmisk/mcp/McpTool;Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	protected fun toCallToolResult (Lmisk/mcp/McpTool$ToolResult;)Lio/modelcontextprotocol/kotlin/sdk/types/CallToolResult;
 }
 
