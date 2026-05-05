@@ -288,7 +288,7 @@ abstract class McpTool<I : Any> {
    * metadata) should override this overload directly. Subclasses must override either this
    * overload or [handle(input)]; overriding neither results in a runtime error.
    */
-  open suspend fun handle(input: I, meta: RequestMeta? = null): ToolResult = handle(input)
+  open suspend fun handle(input: I, meta: RequestMeta?): ToolResult = handle(input)
 
   /**
    * Handles a tool invocation with the typed [input].
