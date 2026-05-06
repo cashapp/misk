@@ -580,6 +580,47 @@ class WeatherTool @Inject constructor(
 }
 ```
 
+#### Accessing Request Meta (RequestMeta)
+
+When a tool needs access to the inbound `CallToolRequest._meta` field — for example to read a `progressToken` so it can stream progress notifications back, or to inspect related-task metadata — extend one of the meta-aware bridge classes instead of `McpTool` / `StructuredMcpTool`:
+
+- `MetaAwareMcpTool<I>` — for tools that return `ToolResult` (text/media/error content).
+- `MetaAwareStructuredMcpTool<I, O>` — for tools that return structured `O` typed output.
+
+Authors override the meta-aware `handle(input, meta)` overload; the bridge classes seal the input-only `handle(input)` overload to delegate with `meta = null`. The framework's dispatcher routes to the meta-aware overload automatically — no annotation or registration change is needed beyond picking the right base class.
+
+```kotlin
+@Serializable
+data class LongRunningInput(
+  @Description("How many steps the operation should run for")
+  val steps: Int
+)
+
+@ExperimentalMiskApi
+@Singleton
+class LongRunningTool @Inject constructor(
+  private val notifier: ProgressNotifier,
+) : MetaAwareMcpTool<LongRunningInput>() {
+  override val name = "long_running"
+  override val description = "Performs a long-running operation with progress reporting"
+
+  override suspend fun handle(input: LongRunningInput, meta: RequestMeta?): ToolResult {
+    val token = meta?.progressToken
+    repeat(input.steps) { step ->
+      // ... do work ...
+      if (token != null) {
+        notifier.notify(token, progress = step + 1, total = input.steps)
+      }
+    }
+    return ToolResult(TextContent("Completed ${input.steps} steps"))
+  }
+}
+```
+
+Use `MetaAwareStructuredMcpTool<I, O>` the same way; build the typed result with the inherited `ToolResult(result: O, ...)` factories. The interface-level return type is `McpTool.ToolResult`, not `StructuredToolResult<O>` — the typed `O` is preserved at value construction, not at signature.
+
+Tools that don't need meta should keep extending `McpTool` / `StructuredMcpTool` — meta-awareness is strictly opt-in.
+
 Register tools:
 
 ```kotlin
