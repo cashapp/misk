@@ -3,6 +3,7 @@
 package misk.mcp
 
 import io.modelcontextprotocol.kotlin.sdk.ExperimentalMcpApi
+import io.modelcontextprotocol.kotlin.sdk.types.RequestId
 import io.modelcontextprotocol.kotlin.sdk.types.RequestMeta
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.buildCallToolRequest
@@ -12,6 +13,9 @@ import kotlin.test.assertNull
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonPrimitive
 import misk.annotation.ExperimentalMiskApi
 import org.junit.jupiter.api.Test
 
@@ -45,7 +49,9 @@ class McpToolHandleMetaTest {
       arguments { put("name", JsonPrimitive("alice")) }
       meta {
         progressToken("token-42")
-        put("custom-key", "custom-value")
+        put("custom-string", "custom-value")
+        put("custom-int", 42)
+        put("custom-bool", true)
       }
     }
 
@@ -53,7 +59,10 @@ class McpToolHandleMetaTest {
 
     assertEquals(1, tool.captureCount)
     val meta = assertNotNull(tool.capturedMeta, "meta should be forwarded from request")
-    assertEquals("\"custom-value\"", meta.json["custom-key"]?.toString())
+    assertEquals(RequestId.StringId("token-42"), meta.progressToken)
+    assertEquals("custom-value", meta.json["custom-string"]?.jsonPrimitive?.content)
+    assertEquals(42, meta.json["custom-int"]?.jsonPrimitive?.int)
+    assertEquals(true, meta.json["custom-bool"]?.jsonPrimitive?.boolean)
   }
 
   @Test
