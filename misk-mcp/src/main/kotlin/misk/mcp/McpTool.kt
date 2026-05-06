@@ -233,8 +233,8 @@ abstract class McpTool<I : Any> {
           .toCallToolResult()
       }
     val result =
-      if (this is MetaAwareMcpTool<*, *>) {
-        @Suppress("UNCHECKED_CAST") (this as MetaAwareMcpTool<I, ToolResult>).handle(parsedInput, request.meta)
+      if (this is MetaAwareTool<*, *>) {
+        @Suppress("UNCHECKED_CAST") (this as MetaAwareTool<I, ToolResult>).handle(parsedInput, request.meta)
       } else {
         handle(parsedInput)
       }
@@ -287,9 +287,10 @@ abstract class McpTool<I : Any> {
    * Handles a tool invocation with the typed [input].
    *
    * Subclasses must override this method to implement tool behavior. Tools that need access to the
-   * request's [RequestMeta] (e.g. progress tokens, related task metadata) should additionally
-   * implement the [MetaAwareMcpTool] marker interface; the framework dispatches through that
-   * interface's two-arg overload when it is present.
+   * request's [RequestMeta] (e.g. progress tokens, related task metadata) should extend the
+   * [MetaAwareMcpTool] (or [MetaAwareStructuredMcpTool] for structured outputs) abstract bridge
+   * class instead — the bridge implements [MetaAwareTool] and the framework dispatches through
+   * the meta-aware overload when present.
    */
   abstract suspend fun handle(input: I): ToolResult
 
