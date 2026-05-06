@@ -232,6 +232,9 @@ abstract class McpTool<I : Any> {
           )
           .toCallToolResult()
       }
+    // Tools opt into receiving request._meta by mixing in MetaAwareTool (typically via the
+    // MetaAwareMcpTool / MetaAwareStructuredMcpTool bridge classes). Plain subclasses pay no
+    // cost — the unchecked cast is safe because the marker interface is parameterized in I/R.
     val result =
       if (this is MetaAwareTool<*, *>) {
         @Suppress("UNCHECKED_CAST") (this as MetaAwareTool<I, ToolResult>).handle(parsedInput, request.meta)
