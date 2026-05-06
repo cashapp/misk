@@ -23,8 +23,13 @@ class McpToolHandleMetaTest {
 
   @Serializable data class CapturingInput(val name: String)
 
-  /** Tool that overrides only the meta-aware [McpTool.handle] overload and records what it receives. */
-  private class CapturingTool : McpTool<CapturingInput>() {
+  /**
+   * Tool that mixes in [MetaAwareMcpTool] alongside [McpTool] and records what its meta-aware
+   * [handle] overload receives. The interface default fills the abstract no-meta `handle(input)`
+   * slot inherited from [McpTool].
+   */
+  private class CapturingTool :
+    McpTool<CapturingInput>(), MetaAwareMcpTool<CapturingInput, McpTool.ToolResult> {
     override val name = "capturing"
     override val description = "captures the meta passed to handle()"
 
@@ -39,6 +44,12 @@ class McpToolHandleMetaTest {
       captureCount++
       return ToolResult(TextContent("ok"))
     }
+
+    // Kotlin requires explicit disambiguation when an abstract class method shares a signature
+    // with an interface default; delegate to the marker's default so direct callers of the
+    // no-meta overload still hit handle(input, null).
+    override suspend fun handle(input: CapturingInput): ToolResult =
+      super<MetaAwareMcpTool>.handle(input)
   }
 
   @Test

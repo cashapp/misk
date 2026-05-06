@@ -128,8 +128,7 @@ public abstract class misk/mcp/McpTool {
 	public fun getOpenWorldHint ()Z
 	public fun getReadOnlyHint ()Z
 	public fun getTitle ()Ljava/lang/String;
-	public fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun handle-7zgdlzo (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	protected fun toCallToolResult (Lmisk/mcp/McpTool$ToolResult;)Lio/modelcontextprotocol/kotlin/sdk/types/CallToolResult;
 }
 
@@ -165,6 +164,15 @@ public final class misk/mcp/McpToolModule : misk/inject/KAbstractModule {
 public final class misk/mcp/McpToolModule$Companion {
 	public final fun create (Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)Lmisk/mcp/McpToolModule;
 	public final fun create (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lmisk/mcp/McpToolModule;
+}
+
+public abstract interface class misk/mcp/MetaAwareMcpTool {
+	public fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun handle-7zgdlzo (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/MetaAwareMcpTool$DefaultImpls {
+	public static fun handle (Lmisk/mcp/MetaAwareMcpTool;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/MiskMcpServer : io/modelcontextprotocol/kotlin/sdk/server/Server {

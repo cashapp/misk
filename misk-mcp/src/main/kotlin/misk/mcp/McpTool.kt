@@ -232,7 +232,13 @@ abstract class McpTool<I : Any> {
           )
           .toCallToolResult()
       }
-    return handle(parsedInput, request.meta).toCallToolResult()
+    val result =
+      if (this is MetaAwareMcpTool<*, *>) {
+        @Suppress("UNCHECKED_CAST") (this as MetaAwareMcpTool<I, ToolResult>).handle(parsedInput, request.meta)
+      } else {
+        handle(parsedInput)
+      }
+    return result.toCallToolResult()
   }
 
   sealed interface ToolResult {
@@ -278,28 +284,14 @@ abstract class McpTool<I : Any> {
     }
 
   /**
-   * Handles a tool invocation with the typed [input] and the request's optional [meta].
-   *
-   * This is the overload the framework dispatches to. The default implementation forwards to
-   * [handle(input)] for backwards compatibility, so existing subclasses that override only the
-   * input-only overload continue to work unchanged.
-   *
-   * Subclasses that need access to the request's [RequestMeta] (e.g. progress tokens, related task
-   * metadata) should override this overload directly. Subclasses must override either this
-   * overload or [handle(input)]; overriding neither results in a runtime error.
-   */
-  open suspend fun handle(input: I, meta: RequestMeta?): ToolResult = handle(input)
-
-  /**
    * Handles a tool invocation with the typed [input].
    *
-   * Kept for backwards compatibility. Subclasses may override this overload when they don't need
-   * access to the request's [RequestMeta]; the framework reaches it through the default
-   * implementation of [handle(input, meta)]. The default implementation here errors at runtime so
-   * a subclass that overrides neither overload fails fast with a clear message.
+   * Subclasses must override this method to implement tool behavior. Tools that need access to the
+   * request's [RequestMeta] (e.g. progress tokens, related task metadata) should additionally
+   * implement the [MetaAwareMcpTool] marker interface; the framework dispatches through that
+   * interface's two-arg overload when it is present.
    */
-  open suspend fun handle(input: I): ToolResult =
-    error("McpTool subclass must override either handle(input) or handle(input, meta)")
+  abstract suspend fun handle(input: I): ToolResult
 
   private val inputType: KType by lazy {
     @Suppress("UNCHECKED_CAST")
