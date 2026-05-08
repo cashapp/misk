@@ -21,22 +21,20 @@ import okio.ByteString
 /**
  * Provides a mapping from field name to Type definition given a KType. Useful for processes that want to have a schema
  * definition of a type. For example: used by the WebActions admin dashboard tab to show a statically typed form
- * containing request fields for developers to fill out. Currently only supports Wire request type messages; non-Wire
- * messages return an empty mapping.
+ * containing request fields for developers to fill out.
+ *
+ * Wire-generated [Message] types are introspected via their [WireField]-annotated fields. Plain Kotlin
+ * `data class` request types are introspected by walking [declaredMemberProperties] using Kotlin reflection
+ * so generic type parameters (e.g. `List<Foo>`, `Map<String, Bar>`) are first-class.
  */
 class MiskWebFormBuilder
 @JvmOverloads
 constructor(private val documentationProvider: ProtoDocumentationProvider? = null) {
   fun calculateTypes(requestType: KType?): Map<String, Type> {
-    // Type maps can only be calculated for wire messages
     if (requestType == null) {
       return mapOf()
     }
-
-    val requestClass = requestType.classifier as KClass<*>
-    if (Message::class !in requestClass.superclasses) {
-      return mapOf()
-    }
+    val requestClass = requestType.classifier as? KClass<*> ?: return mapOf()
 
     val typesMap = mutableMapOf<String, Type>()
     val stack = LinkedList<KClass<*>>()
@@ -44,34 +42,65 @@ constructor(private val documentationProvider: ProtoDocumentationProvider? = nul
 
     while (stack.isNotEmpty()) {
       val clazz = stack.pop()
+      val canonicalName = clazz.java.canonicalName ?: continue
 
-      // No need to re-process a given type.
-      // This acts as the visited set of our type graph traversal.
-      if (typesMap.containsKey(clazz.java.canonicalName!!)) {
+      // Acts as the visited set of our type graph traversal.
+      if (typesMap.containsKey(canonicalName)) {
         continue
       }
 
-      val fields = mutableListOf<Field>()
-
-      for (property in clazz.declaredMemberProperties) {
-        val field = property.javaField
-        // Use the WireField annotation to identify fields of our proto.
-        if (field?.annotations?.any { it is WireField } == true) {
-          handleField(
-            fieldType = TypeLiteral.get(field.genericType),
-            fieldName = field.name,
-            fields = fields,
-            stack = stack,
-            annotations = property.annotations.filter { it !is WireField },
-          )
-        }
+      val isWireMessage = Message::class in clazz.superclasses
+      // Only Wire messages and Kotlin data classes are meaningfully introspectable here. Skipping
+      // other types preserves the original Wire-only contract for unsupported request types and
+      // also avoids Kotlin reflection errors on synthetic classes (e.g. `Function0` lambdas).
+      if (!isWireMessage && !clazz.isData) {
+        continue
       }
 
+      val fields =
+        if (isWireMessage) {
+          collectWireFields(clazz, stack)
+        } else {
+          collectKotlinFields(clazz, stack)
+        }
+
       val documentationUrl = documentationProvider?.get(clazz.getProtobufType())
-      typesMap[clazz.java.canonicalName!!] = Type(fields.toList(), documentationUrl)
+      typesMap[canonicalName] = Type(fields, documentationUrl)
     }
 
     return typesMap
+  }
+
+  private fun collectWireFields(clazz: KClass<*>, stack: LinkedList<KClass<*>>): List<Field> {
+    val fields = mutableListOf<Field>()
+    for (property in clazz.declaredMemberProperties) {
+      val field = property.javaField
+      // Use the WireField annotation to identify fields of our proto.
+      if (field?.annotations?.any { it is WireField } == true) {
+        handleField(
+          fieldType = TypeLiteral.get(field.genericType),
+          fieldName = field.name,
+          fields = fields,
+          stack = stack,
+          annotations = property.annotations.filter { it !is WireField },
+        )
+      }
+    }
+    return fields
+  }
+
+  private fun collectKotlinFields(clazz: KClass<*>, stack: LinkedList<KClass<*>>): List<Field> {
+    val fields = mutableListOf<Field>()
+    for (property in clazz.declaredMemberProperties) {
+      handleKotlinField(
+        fieldType = property.returnType,
+        fieldName = property.name,
+        fields = fields,
+        stack = stack,
+        annotations = property.annotations,
+      )
+    }
+    return fields
   }
 
   private fun handleField(
@@ -111,6 +140,52 @@ constructor(private val documentationProvider: ProtoDocumentationProvider? = nul
           )
         )
         stack.push(fieldClass.kotlin)
+      }
+    }
+  }
+
+  private fun handleKotlinField(
+    fieldType: KType,
+    fieldName: String,
+    fields: MutableList<Field>,
+    stack: LinkedList<KClass<*>>,
+    repeated: Boolean = false,
+    annotations: List<Annotation>,
+  ) {
+    val fieldClass = fieldType.classifier as? KClass<*> ?: return
+    val javaClass = fieldClass.javaObjectType
+    val maybePrimitiveType = maybeCreatePrimitiveField(javaClass, fieldName, repeated, annotations)
+    when {
+      maybePrimitiveType != null -> fields.add(maybePrimitiveType)
+
+      fieldClass.java.isEnum -> {
+        fields.add(createEnumField(fieldClass.java, fieldName, repeated, annotations))
+      }
+
+      fieldClass.isSubclassOf(Collection::class) -> {
+        val argType = fieldType.arguments.firstOrNull()?.type ?: return
+        handleKotlinField(argType, fieldName, fields, stack, repeated = true, annotations = annotations)
+      }
+
+      fieldClass.isSubclassOf(Map::class) -> {
+        val args = fieldType.arguments
+        if (args.size < 2) return
+        // key type can never be a nested message so we skip it
+        val valueType = args[1].type ?: return
+        handleKotlinField(valueType, fieldName, fields, stack, repeated = true, annotations = annotations)
+      }
+
+      else -> {
+        val canonicalName = fieldClass.java.canonicalName ?: return
+        fields.add(
+          Field(
+            name = fieldName,
+            type = canonicalName,
+            repeated = repeated,
+            annotations = annotations.toStrings(),
+          )
+        )
+        stack.push(fieldClass)
       }
     }
   }

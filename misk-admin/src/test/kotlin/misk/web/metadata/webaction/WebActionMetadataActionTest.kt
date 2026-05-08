@@ -5,8 +5,12 @@ import com.squareup.protos.test.parsing.Warehouse
 import jakarta.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.MiskWebFormBuilder
 import misk.web.actions.CustomCapabilityAccessAction
 import misk.web.actions.CustomServiceAccessAction
+import misk.web.actions.DataClassEntry
+import misk.web.actions.DataClassRequest
+import misk.web.actions.DataClassRequestAction
 import misk.web.actions.GrpcAction
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.MetadataTestingModule
@@ -63,5 +67,31 @@ class WebActionMetadataActionTest {
     assertThat(metadata.requestType).isEqualTo(Shipment::class.qualifiedName)
     assertThat(metadata.returnType).isEqualTo(Warehouse::class.qualifiedName)
     assertThat(metadata.types).isNotEmpty
+  }
+
+  @Test
+  fun `data class request body is introspected for form metadata`() {
+    val response = webActionMetadataAction.getAll()
+    val metadata = response.webActionMetadata.find { it.name == DataClassRequestAction::class.simpleName }!!
+
+    val requestTypeKey = DataClassRequest::class.qualifiedName!!
+    val entryTypeKey = DataClassEntry::class.qualifiedName!!
+
+    assertThat(metadata.types).containsKeys(requestTypeKey, entryTypeKey)
+
+    val requestType = metadata.types[requestTypeKey]!!
+    assertThat(requestType.fields)
+      .containsExactlyInAnyOrder(
+        MiskWebFormBuilder.Field("token", "String", repeated = false, annotations = emptyList()),
+        MiskWebFormBuilder.Field("count", "Int", repeated = false, annotations = emptyList()),
+        MiskWebFormBuilder.Field("entries", entryTypeKey, repeated = true, annotations = emptyList()),
+      )
+
+    val entryType = metadata.types[entryTypeKey]!!
+    assertThat(entryType.fields)
+      .containsExactlyInAnyOrder(
+        MiskWebFormBuilder.Field("id", "Long", repeated = false, annotations = emptyList()),
+        MiskWebFormBuilder.Field("note", "String", repeated = false, annotations = emptyList()),
+      )
   }
 }
