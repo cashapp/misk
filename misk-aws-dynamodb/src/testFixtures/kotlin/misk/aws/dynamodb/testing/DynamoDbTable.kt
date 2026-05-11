@@ -12,6 +12,11 @@ import kotlin.reflect.full.findAnnotation
  * Use [configureTable] to customize the table creation request for testing, such as to configure the secondary indexes
  * required by `ProjectionType.ALL`.
  */
+@Deprecated(
+  message =
+    "AWS SDK v1 DynamoDB is deprecated. Use the AWS SDK v2 DynamoDB testing module in " +
+      "misk-aws2-dynamodb (misk.aws2.dynamodb.testing.DynamoDbTable) instead."
+)
 data class DynamoDbTable(
   val tableClass: KClass<*>,
   val configureTable: (CreateTableRequest) -> CreateTableRequest = { it },
