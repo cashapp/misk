@@ -14,6 +14,11 @@ import misk.dynamodb.DynamoDbService
 import misk.dynamodb.RequiredDynamoDbTable
 import misk.inject.KAbstractModule
 
+@Deprecated(
+  message =
+    "AWS SDK v1 DynamoDB is deprecated. Use the AWS SDK v2 DynamoDB testing module in " +
+      "misk-aws2-dynamodb (misk.aws2.dynamodb.testing.ExternalTestDynamoDbClientModule) instead."
+)
 class TestDynamoDbClientModule(private val port: Int, private val tables: List<DynamoDbTable>) : KAbstractModule() {
 
   constructor(port: Int, vararg tables: DynamoDbTable) : this(port, tables.toList())

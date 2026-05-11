@@ -166,6 +166,22 @@ public final class misk/mcp/McpToolModule$Companion {
 	public final fun create (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lmisk/mcp/McpToolModule;
 }
 
+public abstract class misk/mcp/MetaAwareMcpTool : misk/mcp/McpTool, misk/mcp/MetaAwareTool {
+	public fun <init> ()V
+	public final fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun handle-7zgdlzo (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class misk/mcp/MetaAwareStructuredMcpTool : misk/mcp/StructuredMcpTool, misk/mcp/MetaAwareTool {
+	public fun <init> ()V
+	public final fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun handle-7zgdlzo (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class misk/mcp/MetaAwareTool {
+	public abstract fun handle-7zgdlzo (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public final class misk/mcp/MiskMcpServer : io/modelcontextprotocol/kotlin/sdk/server/Server {
 	public final fun getConfig ()Lmisk/mcp/config/McpServerConfig;
 	public final fun getName ()Ljava/lang/String;
