@@ -838,6 +838,7 @@ internal class VitessDockerContainer(
       keyspaces = vitessSchemaPreparer.keyspaces,
       mysqlPort = mysqlPort,
       schemaDir = schemaDir,
+      vitessImage = vitessImage,
       vtgatePort = vtgatePort,
       vtgateUser = VTGATE_USER,
       vtgateUserPassword = VTGATE_USER_PASSWORD,

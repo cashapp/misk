@@ -27,7 +27,6 @@ import misk.vitess.testing.VitessTestDbException
 import misk.vitess.testing.DdlUpdate
 import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_GRPC
 import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_NAME
-import misk.vitess.testing.DefaultSettings.VTCTLD_CLIENT_IMAGE
 import misk.vitess.testing.VSchemaUpdate
 import misk.vitess.testing.VitessTableType
 import misk.vitess.testing.VitessTestDbStartupException
@@ -47,14 +46,11 @@ internal class VitessSchemaApplier(
   private val hostname: String,
   private val mysqlPort: Int,
   private val schemaDir: String,
+  private val vitessImage: String,
   private val vtgatePort: Int,
   private val vtgateUser: String,
   private val vtgateUserPassword: String,
 ) {
-  private companion object {
-    const val VTCTLDCLIENT_CONTAINER_START_DELAY_MS = 10000L
-    const val VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS = "10000ms"
-  }
 
   private val spirit = Spirit()
 
@@ -324,7 +320,7 @@ internal class VitessSchemaApplier(
     printDebug("Creating new vtctldclient container.")
     val createContainerResponse =
       dockerClient
-        .createContainerCmd(VTCTLD_CLIENT_IMAGE)
+        .createContainerCmd(deriveVtctldClientImage(vitessImage))
         .withName(vtctldClientContainerName)
         .withHostConfig(HostConfig.newHostConfig().withNetworkMode(VITESS_DOCKER_NETWORK_NAME))
         .withCmd(command)
@@ -475,11 +471,17 @@ internal class VitessSchemaApplier(
       .sortedBy { it.first }
 
   private fun prepareVtctldClientImage() {
-    val images: List<Image> = dockerClient.listImagesCmd().withReferenceFilter(VTCTLD_CLIENT_IMAGE).exec()
+    val vtctldClientImage = deriveVtctldClientImage(vitessImage)
+    val images: List<Image> = dockerClient.listImagesCmd().withReferenceFilter(vtctldClientImage).exec()
     if (images.isEmpty()) {
-      printDebug("vtctldclient image `$VTCTLD_CLIENT_IMAGE` does not exist, proceeding to pull.")
-      dockerClient.pullImageCmd(VTCTLD_CLIENT_IMAGE).start().awaitCompletion()
+      printDebug("vtctldclient image `$vtctldClientImage` does not exist, proceeding to pull.")
+      dockerClient.pullImageCmd(vtctldClientImage).start().awaitCompletion()
     }
+  }
+
+  private companion object {
+    const val VTCTLDCLIENT_CONTAINER_START_DELAY_MS = 10000L
+    const val VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS = "10000ms"
   }
 
   private fun findExistingContainer(containerName: String): Container? {
