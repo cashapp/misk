@@ -9,6 +9,7 @@ import misk.cloud.aws.AwsRegion
 import misk.logging.getLogger
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration
+import software.amazon.awssdk.http.apache.ApacheHttpClient
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.SqsAsyncClientBuilder
@@ -19,7 +20,9 @@ import software.amazon.awssdk.services.sqs.batchmanager.SqsAsyncBatchManager
 
 internal interface SqsClientFactory {
   fun getForSending(region: AwsRegion): SqsClient
+
   fun getForReceiving(region: AwsRegion): SqsClient
+
   fun getBatchManager(region: AwsRegion): SqsAsyncBatchManager
 }
 
@@ -41,6 +44,7 @@ internal class RealSqsClientFactory(
         .credentialsProvider(credentialsProvider)
         .region(Region.of(region.name))
         .overrideConfiguration(sendingOverrideConfiguration())
+        .httpClientBuilder(sendingHttpClientBuilder())
         .also(configureSyncClient)
         .build()
     }
@@ -52,6 +56,7 @@ internal class RealSqsClientFactory(
         .credentialsProvider(credentialsProvider)
         .region(Region.of(region.name))
         .overrideConfiguration(receivingOverrideConfiguration())
+        .httpClientBuilder(receivingHttpClientBuilder())
         .also(configureSyncClient)
         .build()
     }
@@ -69,9 +74,7 @@ internal class RealSqsClientFactory(
             .client(getAsyncForSending(region))
             .scheduledExecutor(executor)
             .overrideConfiguration(
-              BatchOverrideConfiguration.builder()
-                .sendRequestFrequency(BUFFERED_SEND_FREQUENCY)
-                .build()
+              BatchOverrideConfiguration.builder().sendRequestFrequency(BUFFERED_SEND_FREQUENCY).build()
             )
             .build()
         scheduledExecutors[region] = executor
@@ -142,14 +145,29 @@ internal class RealSqsClientFactory(
   }
 
   private fun receivingOverrideConfiguration(): ClientOverrideConfiguration {
-    return ClientOverrideConfiguration.builder()
-      .apiCallAttemptTimeout(RECEIVING_ATTEMPT_TIMEOUT)
-      .build()
+    return ClientOverrideConfiguration.builder().apiCallAttemptTimeout(RECEIVING_ATTEMPT_TIMEOUT).build()
+  }
+
+  private fun sendingHttpClientBuilder(): ApacheHttpClient.Builder {
+    return ApacheHttpClient.builder()
+      .socketTimeout(Duration.ofMillis(config.sqs_sending_socket_timeout_ms.toLong()))
+      .connectionTimeout(Duration.ofMillis(config.sqs_sending_connect_timeout_ms.toLong()))
+  }
+
+  private fun receivingHttpClientBuilder(): ApacheHttpClient.Builder {
+    return ApacheHttpClient.builder()
+      .socketTimeout(RECEIVING_ATTEMPT_TIMEOUT)
+      .connectionTimeout(RECEIVING_CONNECTION_TIMEOUT)
+      // Do not artificially constrain the # of connections to SQS. Instead we rely on higher
+      // level resource limiting knobs (e.g # of parallel receivers).
+      // We only do this for receiving, as sending does not have equivalent knobs.
+      .maxConnections(Int.MAX_VALUE)
   }
 
   companion object {
     private val log = getLogger<RealSqsClientFactory>()
     private val BUFFERED_SEND_FREQUENCY = Duration.ofMillis(200)
     private val RECEIVING_ATTEMPT_TIMEOUT = Duration.ofMillis(25_000)
+    private val RECEIVING_CONNECTION_TIMEOUT = Duration.ofMillis(1_000)
   }
 }

@@ -39,6 +39,7 @@ apacheCommonsPool = { module = "org.apache.commons:commons-pool2", version = "2.
 assertj = { module = "org.assertj:assertj-core", version = "3.27.7" }
 awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
 awaitilityKotlin = { module = "org.awaitility:awaitility-kotlin", version.ref = "awaitility" }
+aws2ApacheClient = { module = "software.amazon.awssdk:apache-client", version.ref = "aws2" }
 aws2Auth = { module = "software.amazon.awssdk:auth", version.ref = "aws2" }
 aws2Bom = { module = "software.amazon.awssdk:bom", version.ref = "aws2" }
 aws2Core = { module = "software.amazon.awssdk:aws-core", version.ref = "aws2" }

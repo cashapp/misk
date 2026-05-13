@@ -26,6 +26,7 @@ dependencies {
   api(project(":misk-testing-api"))
   api(project(":wisp:wisp-lease"))
   api(project(":wisp:wisp-token"))
+  implementation(libs.aws2ApacheClient)
   implementation(libs.aws2Core)
   implementation(libs.aws2Regions)
   implementation(libs.awsSdkCore)
