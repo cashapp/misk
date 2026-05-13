@@ -28,6 +28,7 @@ dependencies {
   api(project(":wisp:wisp-token"))
   implementation(libs.aws2ApacheClient)
   implementation(libs.aws2Core)
+  implementation(libs.aws2HttpClientSpi)
   implementation(libs.aws2Regions)
   implementation(libs.awsSdkCore)
   implementation(libs.loggingApi)
