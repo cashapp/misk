@@ -29,6 +29,7 @@ internal interface SqsClientFactory {
 internal class RealSqsClientFactory(
   private val config: AwsSqsJobQueueConfig,
   private val credentialsProvider: AwsCredentialsProvider,
+  private val connectionPoolMetrics: SqsConnectionPoolMetrics,
   private val configureSyncClient: (SqsClientBuilder) -> Unit,
   private val configureAsyncClient: (SqsAsyncClientBuilder) -> Unit,
 ) : SqsClientFactory, AbstractIdleService() {
@@ -141,11 +142,15 @@ internal class RealSqsClientFactory(
     return ClientOverrideConfiguration.builder()
       .apiCallAttemptTimeout(Duration.ofMillis(config.sqs_sending_socket_timeout_ms.toLong()))
       .apiCallTimeout(Duration.ofMillis(config.sqs_sending_request_timeout_ms.toLong()))
+      .addMetricPublisher(connectionPoolMetrics.publisherFor(SqsConnectionPoolMetrics.ClientType.SENDING))
       .build()
   }
 
   private fun receivingOverrideConfiguration(): ClientOverrideConfiguration {
-    return ClientOverrideConfiguration.builder().apiCallAttemptTimeout(RECEIVING_ATTEMPT_TIMEOUT).build()
+    return ClientOverrideConfiguration.builder()
+      .apiCallAttemptTimeout(RECEIVING_ATTEMPT_TIMEOUT)
+      .addMetricPublisher(connectionPoolMetrics.publisherFor(SqsConnectionPoolMetrics.ClientType.RECEIVING))
+      .build()
   }
 
   private fun sendingHttpClientBuilder(): ApacheHttpClient.Builder {

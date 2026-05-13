@@ -46,6 +46,7 @@ aws2Core = { module = "software.amazon.awssdk:aws-core", version.ref = "aws2" }
 aws2Dynamodb = { module = "software.amazon.awssdk:dynamodb", version.ref = "aws2" }
 aws2DynamodbEnhanced = { module = "software.amazon.awssdk:dynamodb-enhanced", version.ref = "aws2" }
 aws2HttpClientSpi = { module = "software.amazon.awssdk:http-client-spi", version.ref = "aws2" }
+aws2MetricsSpi = { module = "software.amazon.awssdk:metrics-spi", version.ref = "aws2" }
 aws2Regions = { module = "software.amazon.awssdk:regions", version.ref = "aws2" }
 aws2S3 = { module = "software.amazon.awssdk:s3", version.ref = "aws2" }
 aws2Sqs = { module = "software.amazon.awssdk:sqs", version.ref = "aws2" }

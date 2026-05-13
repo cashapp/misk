@@ -54,8 +54,11 @@ open class CoordinatedAwsSqsJobQueueModule(private val config: AwsSqsJobQueueCon
 
   @Provides
   @Singleton
-  internal fun realSqsClientFactory(credentials: AwsCredentialsProvider): RealSqsClientFactory {
-    return RealSqsClientFactory(config, credentials, ::configureClient, ::configureClient)
+  internal fun realSqsClientFactory(
+    credentials: AwsCredentialsProvider,
+    connectionPoolMetrics: SqsConnectionPoolMetrics,
+  ): RealSqsClientFactory {
+    return RealSqsClientFactory(config, credentials, connectionPoolMetrics, ::configureClient, ::configureClient)
   }
 
   @Provides

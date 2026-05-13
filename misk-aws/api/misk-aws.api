@@ -79,8 +79,8 @@ public class misk/jobqueue/sqs/AwsSqsJobQueueModule : misk/inject/KAbstractModul
 	protected fun configure ()V
 	public fun configureClient (Lcom/amazonaws/client/builder/AwsClientBuilder;)V
 	public final fun consumerRepeatedTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;Lmisk/jobqueue/sqs/AwsSqsJobQueueConfig;)Lmisk/tasks/RepeatedTaskQueue;
-	public final fun provideSQSClient (Ljava/lang/String;Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;Lmisk/feature/FeatureFlags;)Lcom/amazonaws/services/sqs/AmazonSQS;
-	public final fun provideSQSClientForReceiving (Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;)Lcom/amazonaws/services/sqs/AmazonSQS;
+	public final fun provideSQSClient (Ljava/lang/String;Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;Lmisk/feature/FeatureFlags;Lmisk/jobqueue/sqs/SqsConnectionPoolMetrics;)Lcom/amazonaws/services/sqs/AmazonSQS;
+	public final fun provideSQSClientForReceiving (Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;Lmisk/jobqueue/sqs/SqsConnectionPoolMetrics;)Lcom/amazonaws/services/sqs/AmazonSQS;
 }
 
 public final class misk/jobqueue/sqs/AwsSqsJobQueueModule$Companion {
@@ -185,6 +185,13 @@ public final class misk/jobqueue/sqs/QueueResolverKt {
 	public static final fun getParentQueue (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/QueueName;
 	public static final fun getRetryQueue (Lmisk/jobqueue/QueueName;)Lmisk/jobqueue/QueueName;
 	public static final fun isRetryQueue (Lmisk/jobqueue/QueueName;)Z
+}
+
+public final class misk/jobqueue/sqs/SqsConnectionPoolMetrics {
+	public static final field Companion Lmisk/jobqueue/sqs/SqsConnectionPoolMetrics$Companion;
+}
+
+public final class misk/jobqueue/sqs/SqsConnectionPoolMetrics$Companion {
 }
 
 public final class misk/jobqueue/sqs/SqsConsumerAllocator {

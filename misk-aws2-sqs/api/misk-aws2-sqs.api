@@ -335,6 +335,13 @@ public class misk/aws2/sqs/jobqueue/coordinated/CoordinatedAwsSqsJobQueueModule 
 	public final fun consumerRepeatedTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;Lmisk/aws2/sqs/jobqueue/coordinated/AwsSqsJobQueueConfig;)Lmisk/tasks/RepeatedTaskQueue;
 }
 
+public final class misk/aws2/sqs/jobqueue/coordinated/SqsConnectionPoolMetrics {
+	public static final field Companion Lmisk/aws2/sqs/jobqueue/coordinated/SqsConnectionPoolMetrics$Companion;
+}
+
+public final class misk/aws2/sqs/jobqueue/coordinated/SqsConnectionPoolMetrics$Companion {
+}
+
 public final class misk/aws2/sqs/jobqueue/coordinated/SqsConsumerAllocator {
 	public static final field Companion Lmisk/aws2/sqs/jobqueue/coordinated/SqsConsumerAllocator$Companion;
 	public fun <init> (Lwisp/lease/LeaseManager;Lmisk/feature/FeatureFlags;)V

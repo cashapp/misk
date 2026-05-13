@@ -31,8 +31,9 @@ import wisp.lease.LeaseManager
 
 /** [AwsSqsJobQueueModule] installs job queue support provided by SQS. */
 @Deprecated(
-  message = "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
-    "misk-aws2-sqs (misk.aws2.sqs.jobqueue.SqsJobQueueModule) instead."
+  message =
+    "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
+      "misk-aws2-sqs (misk.aws2.sqs.jobqueue.SqsJobQueueModule) instead."
 )
 open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbstractModule() {
   override fun configure() {
@@ -77,6 +78,8 @@ open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbs
           .toProvider(AmazonSQSProvider(config, it, true, ::configureSyncClient, ::configureAsyncClient))
       }
 
+    bind<SqsConnectionPoolMetrics>().asEagerSingleton()
+
     // Bind the configs for external queues
     val externalQueueConfigBinder = newMapBinder<QueueName, AwsSqsQueueConfig>()
     config.external_queues
@@ -84,9 +87,7 @@ open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbs
       .forEach { (queueName, config) -> externalQueueConfigBinder.addBinding(queueName).toInstance(config) }
 
     install(DefaultAsyncSwitchModule())
-    install(
-      ServiceModule<RepeatedTaskQueue, ForSqsHandling>().dependsOn<ReadyService>()
-    )
+    install(ServiceModule<RepeatedTaskQueue, ForSqsHandling>().dependsOn<ReadyService>())
   }
 
   open fun <BuilderT : AwsClientBuilder<BuilderT, ClientT>, ClientT> configureClient(builder: BuilderT) {}
@@ -102,15 +103,20 @@ open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbs
     region: AwsRegion,
     credentials: AWSCredentialsProvider,
     features: FeatureFlags,
+    connectionPoolMetrics: SqsConnectionPoolMetrics,
   ): AmazonSQS {
-    return buildClient(appName, config, credentials, region, features, ::configureAsyncClient)
+    return buildClient(appName, config, credentials, region, features, connectionPoolMetrics, ::configureAsyncClient)
   }
 
   @Provides
   @Singleton
   @ForSqsReceiving
-  fun provideSQSClientForReceiving(region: AwsRegion, credentials: AWSCredentialsProvider): AmazonSQS {
-    return buildReceivingClient(credentials, region, ::configureSyncClient)
+  fun provideSQSClientForReceiving(
+    region: AwsRegion,
+    credentials: AWSCredentialsProvider,
+    connectionPoolMetrics: SqsConnectionPoolMetrics,
+  ): AmazonSQS {
+    return buildReceivingClient(credentials, region, connectionPoolMetrics, ::configureSyncClient)
   }
 
   @Provides
@@ -139,11 +145,13 @@ open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbs
 
     @Inject @AppName lateinit var appName: String
 
+    @Inject lateinit var connectionPoolMetrics: SqsConnectionPoolMetrics
+
     override fun get(): AmazonSQS {
       return if (forSqsReceiving) {
-        buildReceivingClient(credentials, region, configureClient)
+        buildReceivingClient(credentials, region, connectionPoolMetrics, configureClient)
       } else {
-        buildClient(appName, config, credentials, region, features, configureAsyncClient)
+        buildClient(appName, config, credentials, region, features, connectionPoolMetrics, configureAsyncClient)
       }
     }
   }
@@ -153,6 +161,7 @@ open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbs
     private fun buildReceivingClient(
       credentials: AWSCredentialsProvider,
       region: AwsRegion,
+      connectionPoolMetrics: SqsConnectionPoolMetrics,
       configureClient: (AmazonSQSClientBuilder) -> Unit,
     ): AmazonSQS {
       // We don't need any buffering functionality for receiving; build a regular sync client.
@@ -160,6 +169,7 @@ open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbs
         AmazonSQSClientBuilder.standard()
           .withCredentials(credentials)
           .withRegion(region.name)
+          .withMetricsCollector(connectionPoolMetrics.collectorFor(SqsConnectionPoolMetrics.ClientType.RECEIVING))
           .withClientConfiguration(
             ClientConfiguration()
               .withSocketTimeout(25_000)
@@ -180,6 +190,7 @@ open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbs
       credentials: AWSCredentialsProvider,
       region: AwsRegion,
       features: FeatureFlags,
+      connectionPoolMetrics: SqsConnectionPoolMetrics,
       configureAsyncClient: (AmazonSQSAsyncClientBuilder) -> Unit,
     ): AmazonSQS {
       // Use a buffered client for sending, to group enqueues and deletes into batches.
@@ -191,6 +202,7 @@ open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbs
         AmazonSQSAsyncClientBuilder.standard()
           .withCredentials(credentials)
           .withRegion(region.name)
+          .withMetricsCollector(connectionPoolMetrics.collectorFor(SqsConnectionPoolMetrics.ClientType.SENDING))
           .withClientConfiguration(
             ClientConfiguration()
               .withSocketTimeout(config.sqs_sending_socket_timeout_ms)
@@ -218,8 +230,9 @@ open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbs
 
 /** Modify a [QueueBufferConfig] to disable all receive pre-fetching settings. */
 @Deprecated(
-  message = "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
-    "misk-aws2-sqs (misk.aws2.sqs.jobqueue) instead."
+  message =
+    "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
+      "misk-aws2-sqs (misk.aws2.sqs.jobqueue) instead."
 )
 fun QueueBufferConfig.withNoPrefetching(): QueueBufferConfig {
   return withMaxInflightReceiveBatches(0).withAdapativePrefetching(false).withMaxDoneReceiveBatches(0)
