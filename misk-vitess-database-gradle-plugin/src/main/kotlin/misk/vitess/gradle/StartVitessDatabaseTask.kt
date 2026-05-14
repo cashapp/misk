@@ -19,6 +19,8 @@ abstract class StartVitessDatabaseTask : DefaultTask() {
 
   @get:Input abstract val debugStartup: Property<Boolean>
 
+  @get:Input abstract val dockerNetworkName: Property<String>
+
   @get:Input abstract val enableDeclarativeSchemaChanges: Property<Boolean>
 
   @get:Input abstract val enableInMemoryStorage: Property<Boolean>
@@ -56,6 +58,7 @@ abstract class StartVitessDatabaseTask : DefaultTask() {
         autoApplySchemaChanges = autoApplySchemaChanges.get(),
         containerName = containerName.get(),
         debugStartup = debugStartup.get(),
+        dockerNetworkName = dockerNetworkName.get(),
         enableDeclarativeSchemaChanges = enableDeclarativeSchemaChanges.get(),
         enableInMemoryStorage = enableInMemoryStorage.get(),
         enableScatters = enableScatters.get(),

@@ -27,9 +27,17 @@ class DockerVitess(
   containerName: String = DefaultSettings.CONTAINER_NAME,
   /** The port to connect to the database, which represents the vtgate. */
   port: Int = DefaultSettings.PORT,
+  /** The Docker bridge network the Vitess container attaches to. See `VitessTestDb` for guidance. */
+  dockerNetworkName: String = DefaultSettings.VITESS_DOCKER_NETWORK_NAME,
 ) : ExternalDependency {
 
-  private val vitessTestDb = VitessTestDb(containerName = containerName, enableScatters = enableScatters, transactionMode = transactionMode, port = port)
+  private val vitessTestDb = VitessTestDb(
+    containerName = containerName,
+    dockerNetworkName = dockerNetworkName,
+    enableScatters = enableScatters,
+    transactionMode = transactionMode,
+    port = port,
+  )
 
   override fun startup() {
     vitessTestDb.run()
