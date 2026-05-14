@@ -55,6 +55,7 @@ Other configurable parameters include:
 - `autoApplySchema` (default `true`): Whether to apply the schema on start-up. If set to `false`, the schema can be applied at run-time via `applySchema()` or externally.
 - `containerName` (default `vitess_test_db`): The name assigned to the Docker container that gets created.
 - `debugStartup` (default `false`): Whether to print debug logs during the startup process.
+- `dockerNetworkName` (default `vitess-network`): The name of the Docker bridge network the Vitess container and its sidecar `vtctldclient` containers attach to. The default network is shared across every `VitessTestDb` instance on the same Docker daemon. Highly-parallel CI environments running many `VitessTestDb` instances against one daemon can exhaust that single network's IPv4 address pool; in that case, set this to a unique value per instance (e.g. `"vitess-network-$containerName"`) so each instance gets its own bridge subnet.
 - `enableDeclarativeSchemaChanges` (default `false`): Whether to use declarative schema changes.
 - `enableInMemoryStorage` (default `false`): Whether to use in-memory storage (tmpfs) for faster performance.
 - `enableScatters` (default `true`): Whether to enable scatter queries, which are queries that fan out to all shards. Requires a Vitess image version >= 20.

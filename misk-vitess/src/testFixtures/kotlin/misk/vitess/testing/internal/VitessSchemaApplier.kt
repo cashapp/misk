@@ -26,7 +26,6 @@ import misk.vitess.testing.ApplySchemaResult
 import misk.vitess.testing.VitessTestDbException
 import misk.vitess.testing.DdlUpdate
 import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_GRPC
-import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_NAME
 import misk.vitess.testing.VSchemaUpdate
 import misk.vitess.testing.VitessTableType
 import misk.vitess.testing.VitessTestDbStartupException
@@ -41,6 +40,7 @@ internal class VitessSchemaApplier(
   private val dbaUserPassword: String,
   private val debugStartup: Boolean,
   private val dockerClient: DockerClient,
+  private val dockerNetworkName: String,
   private val enableDeclarativeSchemaChanges: Boolean,
   private val keyspaces: List<VitessKeyspace>,
   private val hostname: String,
@@ -312,9 +312,9 @@ internal class VitessSchemaApplier(
     }
 
     val networks = dockerClient.listNetworksCmd().exec()
-    networks.find { it.name == VITESS_DOCKER_NETWORK_NAME }
+    networks.find { it.name == dockerNetworkName }
       ?: throw VitessSchemaManagerException(
-        "VitessSchemaManager could not find the correct Docker Network named `$VITESS_DOCKER_NETWORK_NAME`. The network may have failed to initialize or VitessDockerContainer.createContainer may not have been run."
+        "VitessSchemaManager could not find the correct Docker Network named `$dockerNetworkName`. The network may have failed to initialize or VitessDockerContainer.createContainer may not have been run."
       )
 
     printDebug("Creating new vtctldclient container.")
@@ -322,7 +322,7 @@ internal class VitessSchemaApplier(
       dockerClient
         .createContainerCmd(deriveVtctldClientImage(vitessImage))
         .withName(vtctldClientContainerName)
-        .withHostConfig(HostConfig.newHostConfig().withNetworkMode(VITESS_DOCKER_NETWORK_NAME))
+        .withHostConfig(HostConfig.newHostConfig().withNetworkMode(dockerNetworkName))
         .withCmd(command)
         .withAttachStdout(true)
         .withAttachStdin(true)

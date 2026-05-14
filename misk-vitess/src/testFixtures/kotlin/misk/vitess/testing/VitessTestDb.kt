@@ -12,6 +12,12 @@ import misk.vitess.testing.internal.VitessQueryExecutor
  * @property autoApplySchemaChanges Whether to automatically apply schema changes. Default is `true`.
  * @property containerName The name of the container that runs the database. Default is `vitess_test_db`.
  * @property debugStartup Whether to print debug logs during the startup process. Default is `false`.
+ * @property dockerNetworkName The name of the Docker bridge network the Vitess container and its sidecar
+ *   `vtctldclient` containers are attached to. Default is `vitess-network` (shared across all `VitessTestDb`
+ *   instances). For highly-parallel CI environments running many `VitessTestDb` instances on the same Docker
+ *   daemon, set a unique name per instance (e.g. `"vitess-network-$containerName"`) so each instance gets its
+ *   own bridge subnet — Docker assigns one subnet per network and a single shared `/24` exhausts its IPv4
+ *   address pool around 8+ concurrent instances.
  * @property enableDeclarativeSchemaChanges Whether to use declarative schema changes. Default is `false`.
  * @property enableInMemoryStorage Whether to use in-memory storage (tmpfs) for faster performance. Default is `false`.
  * @property enableScatters Whether to enable scatter queries, which fan out to all shards. Default is `true`.
@@ -54,6 +60,7 @@ class VitessTestDb(
   private var autoApplySchemaChanges: Boolean = DefaultSettings.AUTO_APPLY_SCHEMA_CHANGES,
   val containerName: String = DefaultSettings.CONTAINER_NAME,
   private var debugStartup: Boolean = DefaultSettings.DEBUG_STARTUP,
+  private var dockerNetworkName: String = DefaultSettings.VITESS_DOCKER_NETWORK_NAME,
   private var enableDeclarativeSchemaChanges: Boolean = DefaultSettings.ENABLE_DECLARATIVE_SCHEMA_CHANGES,
   private var enableInMemoryStorage: Boolean = DefaultSettings.ENABLE_IN_MEMORY_STORAGE,
   private var enableScatters: Boolean = DefaultSettings.ENABLE_SCATTERS,
@@ -78,6 +85,7 @@ class VitessTestDb(
     private var autoApplySchemaChanges: Boolean = DefaultSettings.AUTO_APPLY_SCHEMA_CHANGES
     private var containerName: String = DefaultSettings.CONTAINER_NAME
     private var debugStartup: Boolean = DefaultSettings.DEBUG_STARTUP
+    private var dockerNetworkName: String = DefaultSettings.VITESS_DOCKER_NETWORK_NAME
     private var enableDeclarativeSchemaChanges: Boolean = DefaultSettings.ENABLE_DECLARATIVE_SCHEMA_CHANGES
     private var enableInMemoryStorage: Boolean = DefaultSettings.ENABLE_IN_MEMORY_STORAGE
     private var enableScatters: Boolean = DefaultSettings.ENABLE_SCATTERS
@@ -101,6 +109,8 @@ class VitessTestDb(
     fun containerName(containerName: String) = apply { this.containerName = containerName }
 
     fun debugStartup(debugStartup: Boolean) = apply { this.debugStartup = debugStartup }
+
+    fun dockerNetworkName(dockerNetworkName: String) = apply { this.dockerNetworkName = dockerNetworkName }
 
     fun enableDeclarativeSchemaChanges(enableDeclarativeSchemaChanges: Boolean) = apply {
       this.enableDeclarativeSchemaChanges = enableDeclarativeSchemaChanges
@@ -147,6 +157,7 @@ class VitessTestDb(
         autoApplySchemaChanges,
         containerName,
         debugStartup,
+        dockerNetworkName,
         enableDeclarativeSchemaChanges,
         enableInMemoryStorage,
         enableScatters,
@@ -358,6 +369,7 @@ class VitessTestDb(
         autoApplySchemaChanges = autoApplySchemaChanges,
         containerName = containerName,
         debugStartup = debugStartup,
+        dockerNetworkName = dockerNetworkName,
         enableDeclarativeSchemaChanges = enableDeclarativeSchemaChanges,
         enableInMemoryStorage = enableInMemoryStorage,
         enableScatters = enableScatters,

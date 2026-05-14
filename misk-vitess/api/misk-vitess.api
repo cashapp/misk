@@ -275,8 +275,8 @@ public final class misk/vitess/testing/VitessTableType : java/lang/Enum {
 public final class misk/vitess/testing/VitessTestDb {
 	public static final field Companion Lmisk/vitess/testing/VitessTestDb$Companion;
 	public fun <init> ()V
-	public fun <init> (ZLjava/lang/String;ZZZZLjava/lang/String;ZZLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Lmisk/vitess/testing/TransactionIsolationLevel;Lmisk/vitess/testing/TransactionMode;Ljava/time/Duration;Ljava/lang/String;I)V
-	public synthetic fun <init> (ZLjava/lang/String;ZZZZLjava/lang/String;ZZLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Lmisk/vitess/testing/TransactionIsolationLevel;Lmisk/vitess/testing/TransactionMode;Ljava/time/Duration;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLjava/lang/String;ZLjava/lang/String;ZZZLjava/lang/String;ZZLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Lmisk/vitess/testing/TransactionIsolationLevel;Lmisk/vitess/testing/TransactionMode;Ljava/time/Duration;Ljava/lang/String;I)V
+	public synthetic fun <init> (ZLjava/lang/String;ZLjava/lang/String;ZZZLjava/lang/String;ZZLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Lmisk/vitess/testing/TransactionIsolationLevel;Lmisk/vitess/testing/TransactionMode;Ljava/time/Duration;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public static final fun Builder ()Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun applySchema ()Lmisk/vitess/testing/ApplySchemaResult;
 	public final fun executeQuery (Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
@@ -303,6 +303,7 @@ public final class misk/vitess/testing/VitessTestDb$Builder {
 	public final fun build ()Lmisk/vitess/testing/VitessTestDb;
 	public final fun containerName (Ljava/lang/String;)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun debugStartup (Z)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun dockerNetworkName (Ljava/lang/String;)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun enableDeclarativeSchemaChanges (Z)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun enableInMemoryStorage (Z)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun enableScatters (Z)Lmisk/vitess/testing/VitessTestDb$Builder;
@@ -482,8 +483,8 @@ public final class misk/vitess/testing/internal/VschemaAdapter {
 
 public final class misk/vitess/testing/utilities/DockerVitess : misk/testing/ExternalDependency {
 	public fun <init> ()V
-	public fun <init> (ZLmisk/vitess/testing/TransactionMode;Ljava/lang/String;I)V
-	public synthetic fun <init> (ZLmisk/vitess/testing/TransactionMode;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLmisk/vitess/testing/TransactionMode;Ljava/lang/String;ILjava/lang/String;)V
+	public synthetic fun <init> (ZLmisk/vitess/testing/TransactionMode;Ljava/lang/String;ILjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun afterEach ()V
 	public fun beforeEach ()V
 	public fun getId ()Ljava/lang/String;

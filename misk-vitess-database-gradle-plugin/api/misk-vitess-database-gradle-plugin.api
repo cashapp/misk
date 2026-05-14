@@ -3,6 +3,7 @@ public abstract class misk/vitess/gradle/StartVitessDatabaseTask : org/gradle/ap
 	public abstract fun getAutoApplySchemaChanges ()Lorg/gradle/api/provider/Property;
 	public abstract fun getContainerName ()Lorg/gradle/api/provider/Property;
 	public abstract fun getDebugStartup ()Lorg/gradle/api/provider/Property;
+	public abstract fun getDockerNetworkName ()Lorg/gradle/api/provider/Property;
 	public abstract fun getEnableDeclarativeSchemaChanges ()Lorg/gradle/api/provider/Property;
 	public abstract fun getEnableInMemoryStorage ()Lorg/gradle/api/provider/Property;
 	public abstract fun getEnableScatters ()Lorg/gradle/api/provider/Property;

@@ -13,6 +13,7 @@ class VitessDatabasePlugin : Plugin<Project> {
       it.autoApplySchemaChanges.convention(DefaultSettings.AUTO_APPLY_SCHEMA_CHANGES)
       it.containerName.convention(DefaultSettings.CONTAINER_NAME)
       it.debugStartup.convention(DefaultSettings.DEBUG_STARTUP)
+      it.dockerNetworkName.convention(DefaultSettings.VITESS_DOCKER_NETWORK_NAME)
       it.enableDeclarativeSchemaChanges.convention(DefaultSettings.ENABLE_DECLARATIVE_SCHEMA_CHANGES)
       it.enableInMemoryStorage.convention(DefaultSettings.ENABLE_IN_MEMORY_STORAGE)
       it.enableScatters.convention(DefaultSettings.ENABLE_SCATTERS)
