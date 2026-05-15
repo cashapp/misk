@@ -30,15 +30,16 @@ class UnifiedTransacterTest {
   }
 
   @Test
-  fun `retries respects max attempts`() {
-    var attempts = 0
+  fun `retries respects max retries`() {
+    val maxRetries = 1
+    var executions = 0
     assertThrows<DataAccessException> {
-      transacter.maxAttempts(2).transaction {
-        attempts++
+      transacter.maxRetries(maxRetries).transaction {
+        executions++
         throw DataAccessException("boom")
       }
     }
-    assertThat(attempts).isEqualTo(2)
+    assertThat(executions).isEqualTo(maxRetries + 1)
   }
 
   @Test
@@ -224,13 +225,13 @@ class UnifiedTransacterTest {
 
     transacter
       .readOnly()
-      .maxAttempts(5)
+      .maxRetries(5)
       .maxRetryDelay(2.seconds.toJavaDuration())
       .isolationLevel(TransactionIsolationLevel.SERIALIZABLE)
       .transaction {
         val options = realTransacter.options
         assertThat(options.readOnly).isTrue()
-        assertThat(options.maxAttempts).isEqualTo(5)
+        assertThat(options.maxRetries).isEqualTo(5)
         assertThat(options.maxRetryDelayMillis).isEqualTo(2000)
         assertThat(options.isolationLevel).isEqualTo(TransactionIsolationLevel.SERIALIZABLE)
       }

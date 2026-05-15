@@ -29,7 +29,7 @@ public final class misk/sqldelight/TransacterOptions {
 	public final fun copy (IJJJ)Lmisk/sqldelight/TransacterOptions;
 	public static synthetic fun copy$default (Lmisk/sqldelight/TransacterOptions;IJJJILjava/lang/Object;)Lmisk/sqldelight/TransacterOptions;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getMaxAttempts ()I
+	public final fun getMaxRetries ()I
 	public final fun getMaxRetryDelayMillis ()J
 	public final fun getMinRetryDelayMillis ()J
 	public final fun getRetryJitterMillis ()J

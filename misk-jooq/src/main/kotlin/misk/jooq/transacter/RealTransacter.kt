@@ -33,13 +33,13 @@ internal class RealTransacter(
     return internalTransaction(readerJooqTransacter, closure)
   }
 
-  override fun maxAttempts(maxAttempts: Int): Transacter {
-    threadTxnOptions.set(options.copy(maxAttempts = maxAttempts))
+  override fun maxRetries(maxRetries: Int): Transacter {
+    threadTxnOptions.set(options.copy(maxRetries = maxRetries))
     return this
   }
 
   override fun noRetries(): Transacter {
-    threadTxnOptions.set(options.copy(maxAttempts = 1))
+    threadTxnOptions.set(options.copy(maxRetries = 0))
     return this
   }
 
