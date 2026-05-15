@@ -15,6 +15,7 @@ import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -191,6 +192,15 @@ internal constructor(
         } catch (e: ApiCallAttemptTimeoutException) {
           log.info("timed out long polling for messages from ${queue.queueName}")
           emptyList<Message>()
+        } catch (e: RejectedExecutionException) {
+          // SqsClient.close() shuts down the SDK's per-attempt SyncTimeoutTask scheduler, so a
+          // long-poll racing pod shutdown can throw REE; only swallow it once we've stopped.
+          if (!shouldKeepRunning.get()) {
+            log.info("SQS client was shut down during long poll for ${queue.queueName}")
+            emptyList<Message>()
+          } else {
+            throw e
+          }
         }
 
       for (message in messages) {
