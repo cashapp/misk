@@ -601,6 +601,12 @@ public abstract interface class misk/jdbc/Session {
 	public abstract fun useConnection (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 }
 
+public final class misk/jdbc/SharedLeaseDatabasePool : misk/jdbc/DatabasePool {
+	public fun <init> (Lmisk/jdbc/DatabasePool;)V
+	public fun releaseDatabase (Lmisk/jdbc/DataSourceConfig;)V
+	public fun takeDatabase (Lmisk/jdbc/DataSourceConfig;)Lmisk/jdbc/DataSourceConfig;
+}
+
 public final class misk/jdbc/SpanInjector : misk/jdbc/DataSourceDecorator, net/ttddyy/dsproxy/transform/QueryTransformer {
 	public fun <init> (Lio/opentracing/Tracer;Lmisk/jdbc/DataSourceConfig;)V
 	public fun decorate (Ljavax/sql/DataSource;)Ljavax/sql/DataSource;

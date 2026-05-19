@@ -116,6 +116,38 @@ class TestDatabasePoolTest {
   }
 
   @Test
+  fun sharedLeaseDatabasePoolSharesLeaseUntilAllReferencesAreReleased() {
+    val sharedDatabasePool = SharedLeaseDatabasePool(testDatabasePool)
+
+    val writerConfig = sharedDatabasePool.takeDatabase(config)
+    val readerConfig = sharedDatabasePool.takeDatabase(config)
+
+    assertThat(writerConfig.database).isEqualTo("test__20180101__1")
+    assertThat(readerConfig.database).isEqualTo(writerConfig.database)
+    assertThat(testDatabasePool.getPool(config).pool).isEmpty()
+
+    sharedDatabasePool.releaseDatabase(writerConfig)
+
+    assertThat(testDatabasePool.getPool(config).pool).isEmpty()
+
+    sharedDatabasePool.releaseDatabase(readerConfig)
+
+    assertThat(testDatabasePool.getPool(config).pool).containsExactly("test__20180101__1")
+  }
+
+  @Test
+  fun sharedLeaseDatabasePoolKeepsDifferentDatabasesIndependent() {
+    val sharedDatabasePool = SharedLeaseDatabasePool(testDatabasePool)
+    val otherConfig = config.copy(database = "other")
+
+    val firstConfig = sharedDatabasePool.takeDatabase(config)
+    val otherLeasedConfig = sharedDatabasePool.takeDatabase(otherConfig)
+
+    assertThat(firstConfig.database).isEqualTo("test__20180101__1")
+    assertThat(otherLeasedConfig.database).isEqualTo("other__20180101__1")
+  }
+
+  @Test
   fun integrationTest() {
     val realDatabasePool = TestDatabasePool(MySqlTestDatabasePoolBackend(config), clock)
     realDatabasePool.getPool(config)

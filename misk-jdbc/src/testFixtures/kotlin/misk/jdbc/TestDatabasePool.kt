@@ -23,6 +23,60 @@ val SHARED_TEST_DATABASE_POOL =
   )
 
 /**
+ * Shares a single database lease across multiple data sources for the same test database.
+ *
+ * Use this for tests that configure a writer and reader against the same local database. The wrapped pool still
+ * isolates independent test suites, but concurrent writer and reader data sources in one test injector point at the
+ * same leased database.
+ */
+class SharedLeaseDatabasePool(private val delegate: DatabasePool) : DatabasePool {
+  private val leasesByKey = mutableMapOf<LeaseKey, Lease>()
+
+  override fun takeDatabase(config: DataSourceConfig): DataSourceConfig =
+    synchronized(this) {
+      val key = config.leaseKey()
+      val existingLease = leasesByKey[key]
+      if (existingLease != null) {
+        existingLease.referenceCount += 1
+        config.copy(database = existingLease.config.database)
+      } else {
+        val leasedConfig = delegate.takeDatabase(config)
+        leasesByKey[key] = Lease(config = leasedConfig, referenceCount = 1)
+        leasedConfig
+      }
+    }
+
+  override fun releaseDatabase(config: DataSourceConfig): Unit =
+    synchronized(this) {
+      val key =
+        leasesByKey.entries
+          .firstOrNull { (_, lease) -> lease.config.database == config.database }
+          ?.key ?: return
+
+      val lease = leasesByKey.getValue(key)
+      lease.referenceCount -= 1
+      if (lease.referenceCount == 0) {
+        leasesByKey.remove(key)
+        delegate.releaseDatabase(lease.config)
+      }
+    }
+
+  private fun DataSourceConfig.leaseKey() = LeaseKey(type = type, host = host, port = port, database = database)
+
+  private data class Lease(
+    val config: DataSourceConfig,
+    var referenceCount: Int,
+  )
+
+  private data class LeaseKey(
+    val type: DataSourceType,
+    val host: String?,
+    val port: Int?,
+    val database: String?,
+  )
+}
+
+/**
  * Manages an inventory of databases for testing. Databases are named like `movies__20190730__5` where `movies` is the
  * database name in a [DataSourceConfig], `20190730` is today's date, and 5 is a sequence number.
  *
