@@ -15,6 +15,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.jooq.exception.DataAccessException
+import org.jooq.exception.DataChangedException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -32,10 +33,10 @@ class UnifiedTransacterTest {
   @Test
   fun `retries respects max attempts`() {
     var attempts = 0
-    assertThrows<DataAccessException> {
+    assertThrows<DataChangedException> {
       transacter.maxAttempts(2).transaction {
         attempts++
-        throw DataAccessException("boom")
+        throw DataChangedException("optimistic lock conflict")
       }
     }
     assertThat(attempts).isEqualTo(2)
