@@ -21,6 +21,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.jooq.exception.DataAccessException
+import org.jooq.exception.DataChangedException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -33,26 +34,26 @@ internal class JooqTransacterTest {
   @Inject @JooqDBReadOnlyIdentifier private lateinit var readTransacter: JooqTransacter
 
   @Test
-  fun `retries to the max number of retries in case of a data access exception`() {
+  fun `retries to the max number of retries in case of an optimistic lock conflict`() {
     var numberOfRetries = 0
-    assertThatExceptionOfType(DataAccessException::class.java).isThrownBy {
+    assertThatExceptionOfType(DataChangedException::class.java).isThrownBy {
       transacter.transaction {
         numberOfRetries++
-        throw DataAccessException("")
+        throw DataChangedException("optimistic lock conflict")
       }
     }
     assertThat(numberOfRetries).isEqualTo(3)
   }
 
   @Test
-  fun `retries and succeeds after the first attempt in case of a data access exception`() {
+  fun `retries and succeeds after the first attempt in case of an optimistic lock conflict`() {
     var numberOfRetries = 0
     assertThatCode {
         transacter.transaction {
           numberOfRetries++
           // Throw an exception only once
           if (numberOfRetries <= 1) {
-            throw DataAccessException("")
+            throw DataChangedException("optimistic lock conflict")
           }
         }
       }
@@ -62,7 +63,19 @@ internal class JooqTransacterTest {
   }
 
   @Test
-  fun `does not retry in case of any other exception except DataAccessException`() {
+  fun `does not retry bare DataAccessException without a retryable cause`() {
+    var numberOfAttempts = 0
+    assertThatExceptionOfType(DataAccessException::class.java).isThrownBy {
+      transacter.transaction {
+        numberOfAttempts++
+        throw DataAccessException("syntax error")
+      }
+    }
+    assertThat(numberOfAttempts).isEqualTo(1)
+  }
+
+  @Test
+  fun `does not retry in case of any other exception`() {
     var numberOfRetries = 0
     assertThatExceptionOfType(IllegalStateException::class.java).isThrownBy {
       transacter.transaction {
