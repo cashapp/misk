@@ -33,6 +33,16 @@ object JooqTransactionContext {
  *
  * Use this from repository methods that may be invoked either standalone or from within an outer transaction, so each
  * path participates in a single commit boundary instead of nesting.
+ *
+ * **Not safe to use with Kotlin coroutines.** This function tracks the active session in a `ThreadLocal`, so it only
+ * works when the whole transaction runs on a single thread. If you call it from a `suspend` function and the coroutine
+ * suspends inside [block], it may resume on a different thread. When that happens:
+ * 1. The ambient lookup misses, so a nested call opens a brand new transaction instead of reusing the outer one.
+ * 2. Worse, the underlying JDBC connection is not safe to share across threads, so reusing the same [JooqSession] from
+ *    a different thread can corrupt the transaction.
+ *
+ * Rule of thumb: only call this from regular (non-`suspend`) code, or from a `suspend` function where you have already
+ * confined the work to one thread (for example by wrapping the call in `withContext` on a single-thread dispatcher).
  */
 fun <T> JooqTransacter.transactionOrAmbient(block: (JooqSession) -> T): T {
   val session = JooqTransactionContext.get(this)
