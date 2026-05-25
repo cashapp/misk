@@ -97,6 +97,16 @@ public final class misk/jooq/JooqTransacter$TransacterOptions {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/jooq/JooqTransactionContext {
+	public static final field INSTANCE Lmisk/jooq/JooqTransactionContext;
+	public final fun get (Lmisk/jooq/JooqTransacter;)Lmisk/jooq/JooqSession;
+	public final fun withSession (Lmisk/jooq/JooqTransacter;Lmisk/jooq/JooqSession;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public final class misk/jooq/JooqTransactionContextKt {
+	public static final fun transactionOrAmbient (Lmisk/jooq/JooqTransacter;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
 public final class misk/jooq/TransactionIsolationLevel : java/lang/Enum {
 	public static final field READ_COMMITTED Lmisk/jooq/TransactionIsolationLevel;
 	public static final field READ_UNCOMMITTED Lmisk/jooq/TransactionIsolationLevel;
