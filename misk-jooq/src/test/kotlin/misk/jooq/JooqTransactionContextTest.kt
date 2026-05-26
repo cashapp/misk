@@ -3,7 +3,6 @@ package misk.jooq
 import jakarta.inject.Inject
 import misk.jooq.config.ClientJooqTestingModule
 import misk.jooq.config.JooqDBIdentifier
-import misk.jooq.config.JooqDBReadOnlyIdentifier
 import misk.jooq.model.Genre
 import misk.jooq.testgen.tables.references.MOVIE
 import misk.testing.MiskTest
@@ -16,33 +15,25 @@ import org.junit.jupiter.api.Test
 internal class JooqTransactionContextTest {
   @MiskTestModule @Suppress("unused") private var module = ClientJooqTestingModule()
   @Inject @JooqDBIdentifier private lateinit var transacter: JooqTransacter
-  @Inject @JooqDBReadOnlyIdentifier private lateinit var readTransacter: JooqTransacter
 
   @Test
-  fun `opens a new transaction when no ambient session is active`() {
-    assertThat(JooqTransactionContext.get(transacter)).isNull()
-
-    val sessionSeenInside =
-      transacter.transactionOrAmbient { session ->
-        assertThat(JooqTransactionContext.get(transacter)).isSameAs(session)
-        session
-      }
-
+  fun `opens a new transaction when no ambient session is supplied`() {
+    val sessionSeenInside = transacter.transactionOrAmbient { session -> session }
     assertThat(sessionSeenInside).isNotNull
-    assertThat(JooqTransactionContext.get(transacter)).isNull()
   }
 
   @Test
-  fun `nested call reuses the outer session`() {
+  fun `nested call reuses the supplied ambient session`() {
     transacter.transactionOrAmbient { outer ->
-      transacter.transactionOrAmbient { inner -> assertThat(inner).isSameAs(outer) }
+      transacter.transactionOrAmbient(ambient = outer) { inner -> assertThat(inner).isSameAs(outer) }
     }
   }
 
   @Test
   fun `nested writes participate in the outer transaction's commit`() {
     val movieId =
-      transacter.transactionOrAmbient { (outerCtx) ->
+      transacter.transactionOrAmbient { outer ->
+        val (outerCtx) = outer
         val record =
           outerCtx.newRecord(MOVIE).apply {
             name = "Outer"
@@ -51,13 +42,15 @@ internal class JooqTransactionContextTest {
         record.store()
         val outerId = record.id!!
 
-        transacter.transactionOrAmbient { (innerCtx) ->
-          val nested =
-            innerCtx.newRecord(MOVIE).apply {
+        transacter.transactionOrAmbient(ambient = outer) { inner ->
+          val (innerCtx) = inner
+          innerCtx
+            .newRecord(MOVIE)
+            .apply {
               name = "Inner"
               genre = Genre.HORROR.name
             }
-          nested.store()
+            .store()
         }
 
         outerId
@@ -72,7 +65,8 @@ internal class JooqTransactionContextTest {
   @Test
   fun `outer rollback discards nested writes`() {
     assertThatExceptionOfType(RuntimeException::class.java).isThrownBy {
-      transacter.transactionOrAmbient { (outerCtx) ->
+      transacter.transactionOrAmbient { outer ->
+        val (outerCtx) = outer
         outerCtx
           .newRecord(MOVIE)
           .apply {
@@ -81,7 +75,8 @@ internal class JooqTransactionContextTest {
           }
           .store()
 
-        transacter.transactionOrAmbient { (innerCtx) ->
+        transacter.transactionOrAmbient(ambient = outer) { inner ->
+          val (innerCtx) = inner
           innerCtx
             .newRecord(MOVIE)
             .apply {
@@ -103,50 +98,9 @@ internal class JooqTransactionContextTest {
   }
 
   @Test
-  fun `ambient on one transacter does not leak to another`() {
-    transacter.transactionOrAmbient { writerSession ->
-      assertThat(JooqTransactionContext.get(transacter)).isSameAs(writerSession)
-      assertThat(JooqTransactionContext.get(readTransacter)).isNull()
-
-      readTransacter.transactionOrAmbient { readerSession ->
-        assertThat(readerSession).isNotSameAs(writerSession)
-        assertThat(JooqTransactionContext.get(readTransacter)).isSameAs(readerSession)
-        assertThat(JooqTransactionContext.get(transacter)).isSameAs(writerSession)
-      }
-
-      assertThat(JooqTransactionContext.get(readTransacter)).isNull()
-    }
-
-    assertThat(JooqTransactionContext.get(transacter)).isNull()
-    assertThat(JooqTransactionContext.get(readTransacter)).isNull()
-  }
-
-  @Test
-  fun `withSession restores the previous ambient session after the block exits`() {
-    val outer = transacter.transaction { it }
-    val inner = transacter.transaction { it }
-
-    JooqTransactionContext.withSession(transacter, outer) {
-      assertThat(JooqTransactionContext.get(transacter)).isSameAs(outer)
-
-      JooqTransactionContext.withSession(transacter, inner) {
-        assertThat(JooqTransactionContext.get(transacter)).isSameAs(inner)
-      }
-
-      assertThat(JooqTransactionContext.get(transacter)).isSameAs(outer)
-    }
-
-    assertThat(JooqTransactionContext.get(transacter)).isNull()
-  }
-
-  @Test
-  fun `withSession clears the thread-local map once the last entry is removed`() {
-    val session = transacter.transaction { it }
-
-    JooqTransactionContext.withSession(transacter, session) {
-      assertThat(JooqTransactionContext.get(transacter)).isSameAs(session)
-    }
-
-    assertThat(JooqTransactionContext.get(transacter)).isNull()
+  fun `omitting ambient opens a new independent transaction`() {
+    val outerSession = transacter.transactionOrAmbient { it }
+    val innerSession = transacter.transactionOrAmbient { it }
+    assertThat(innerSession).isNotSameAs(outerSession)
   }
 }
