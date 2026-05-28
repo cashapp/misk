@@ -87,6 +87,11 @@ constructor(
     hikariConfig.maxLifetime = config.connection_max_lifetime.toMillis()
     hikariConfig.keepaliveTime = config.keepalive_time.toMillis()
 
+    // Set default transaction isolation level if configured
+    config.default_transaction_isolation?.let { isolationLevel ->
+      hikariConfig.transactionIsolation = isolationLevel.hikariValue
+    }
+
     if (config.type != DataSourceType.VITESS_MYSQL) {
       // Our Hibernate settings expect autocommit to be disabled, see
       // CONNECTION_PROVIDER_DISABLES_AUTOCOMMIT in SessionFactoryService
