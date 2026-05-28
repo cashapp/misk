@@ -1,0 +1,11 @@
+CREATE TABLE orders (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `customer_id` BIGINT NOT NULL,
+    `status` VARCHAR(50) NOT NULL DEFAULT 'pending',
+    `total_cents` INT NOT NULL,
+    `currency` VARCHAR(3) NOT NULL DEFAULT 'USD',
+    `notes` TEXT,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`customer_id`) REFERENCES customers(`id`)
+)
