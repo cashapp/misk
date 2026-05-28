@@ -10,7 +10,8 @@ import misk.logging.getLogger
 import org.jooq.Configuration
 import org.jooq.impl.DSL
 
-class JooqTransacter internal constructor(
+class JooqTransacter
+internal constructor(
   private val configurationFactory: (TransacterOptions) -> Configuration,
   private val dataSourceType: DataSourceType? = null,
 ) {
@@ -21,17 +22,47 @@ class JooqTransacter internal constructor(
     options: TransacterOptions = TransacterOptions(),
     callback: (jooqSession: JooqSession) -> RETURN_TYPE,
   ): RETURN_TYPE {
-    val backoff = ExponentialBackoff(
-      baseDelay = Duration.ofMillis(options.minRetryDelayMillis),
-      maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
-      jitter = Duration.ofMillis(options.retryJitterMillis),
-    )
-    val retryConfig = RetryConfig.Builder(options.maxAttempts, backoff)
-      .shouldRetry { exceptionClassifier.isRetryable(it) }
-      .onRetry { attempt, e -> log.info(e) { "jOOQ transaction failed, retrying (attempt $attempt)" } }
-      .build()
+    val backoff =
+      ExponentialBackoff(
+        baseDelay = Duration.ofMillis(options.minRetryDelayMillis),
+        maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
+        jitter = Duration.ofMillis(options.retryJitterMillis),
+      )
+    val retryConfig =
+      RetryConfig.Builder(options.maxAttempts, backoff)
+        .shouldRetry { exceptionClassifier.isRetryable(it) }
+        .onRetry { attempt, e -> log.info(e) { "jOOQ transaction failed, retrying (attempt $attempt)" } }
+        .build()
     return retry(retryConfig) { performInTransaction(options, callback) }
   }
+
+  /**
+   * Runs [block] inside [ambient] if supplied; otherwise opens a new transaction and passes its [JooqSession] to
+   * [block].
+   *
+   * Designed for repository methods that may run standalone or be called from within an outer transaction. Callers that
+   * already hold a session pass it as [ambient] so the work participates in the outer commit boundary instead of
+   * opening a nested transaction.
+   *
+   * ```
+   * fun create(name: String, ambient: JooqSession? = null) =
+   *   transacter.transactionOrAmbient(ambient) { session -> ... }
+   *
+   * transacter.transactionOrAmbient { outer -> repo.create("foo", ambient = outer) }
+   * ```
+   *
+   * When [ambient] is non-null no new transaction is opened and retry/backoff is skipped — the outer transaction owns
+   * those concerns. When [ambient] is null this delegates to [transaction] with default options.
+   *
+   * Coroutine-safe by construction: the active session is passed explicitly through the call chain rather than tracked
+   * in thread-local state, so suspension and dispatcher hops cannot desynchronize the lookup from the underlying JDBC
+   * connection.
+   */
+  @JvmOverloads
+  fun <RETURN_TYPE> transactionOrAmbient(
+    ambient: JooqSession? = null,
+    block: (JooqSession) -> RETURN_TYPE,
+  ): RETURN_TYPE = if (ambient != null) block(ambient) else transaction(callback = block)
 
   private fun <RETURN_TYPE> performInTransaction(
     options: TransacterOptions,
