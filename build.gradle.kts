@@ -252,12 +252,12 @@ subprojects {
   plugins.withType<KotlinPluginWrapper> {
     tasks.withType<KotlinCompile>().configureEach {
       compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_11)
-        freeCompilerArgs.add("-Xjdk-release=11")
+        jvmTarget.set(JvmTarget.JVM_17)
+        freeCompilerArgs.add("-Xjdk-release=17")
       }
     }
     tasks.withType<JavaCompile>().configureEach {
-      options.release.set(11)
+      options.release.set(17)
     }
 
     dependencies {
