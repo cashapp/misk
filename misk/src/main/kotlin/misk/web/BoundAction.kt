@@ -2,8 +2,8 @@ package misk.web
 
 import com.google.inject.Key
 import com.google.inject.Provider
+import jakarta.servlet.http.HttpServletRequest
 import java.util.regex.Matcher
-import javax.servlet.http.HttpServletRequest
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
 import misk.Action

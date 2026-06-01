@@ -11,14 +11,14 @@ import com.squareup.moshi.JsonDataException
 import com.squareup.wire.GrpcException
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import jakarta.servlet.http.HttpServlet
+import jakarta.servlet.http.HttpServletRequest
 import java.io.IOException
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import javax.servlet.http.HttpServlet
-import javax.servlet.http.HttpServletRequest
 import kotlin.math.min
 import misk.Action
 import misk.ApplicationInterceptor

@@ -135,14 +135,14 @@ jerseyBom = { module = "org.glassfish.jersey:jersey-bom", version = "3.1.11" }
 jetbrainsAnnotations = { module = "org.jetbrains:annotations", version = "26.0.2-1" }
 jettyAlpnServer = { module = "org.eclipse.jetty:jetty-alpn-server" }
 jettyAlpnServerJava = { module = "org.eclipse.jetty:jetty-alpn-java-server" }
-jettyBom = { module = "org.eclipse.jetty:jetty-bom", version = "10.0.26" }
+jettyBom = { module = "org.eclipse.jetty:jetty-bom", version = "11.0.25" }
 jettyHttp = { module = "org.eclipse.jetty:jetty-http" }
 jettyHttp2 = { module = "org.eclipse.jetty.http2:http2-server" }
 jettyHttp2Common = { module = "org.eclipse.jetty.http2:http2-common" }
 jettyIo = { module = "org.eclipse.jetty:jetty-io" }
 jettyServer = { module = "org.eclipse.jetty:jetty-server" }
 jettyServlet = { module = "org.eclipse.jetty:jetty-servlet" }
-jettyServletApi = { module = "org.eclipse.jetty.toolchain:jetty-servlet-api", version = "4.0.6" }
+jettyServletApi = { module = "org.eclipse.jetty.toolchain:jetty-jakarta-servlet-api", version = "5.0.2" }
 jettyServlets = { module = "org.eclipse.jetty:jetty-servlets" }
 jettyUds = { module = "org.eclipse.jetty:jetty-unixdomain-server" }
 jettyUnixSocket = { module = "org.eclipse.jetty:jetty-unixsocket-server" }
@@ -233,7 +233,7 @@ retrofitMoshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref
 retrofitProtobuf = { module = "com.squareup.retrofit2:converter-protobuf", version.ref = "retrofit" }
 retrofitScalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "retrofit" }
 retrofitWire = { module = "com.squareup.retrofit2:converter-wire", version.ref = "retrofit" }
-servletApi = { module = "javax.servlet:javax.servlet-api", version = "4.0.1" }
+servletApi = { module = "jakarta.servlet:jakarta.servlet-api", version = "5.0.0" }
 slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.17" }
 sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version.ref = "sqldelight" }
 sqldelightMysqlDialect = { module = "app.cash.sqldelight:mysql-dialect", version.ref = "sqldelight" }
