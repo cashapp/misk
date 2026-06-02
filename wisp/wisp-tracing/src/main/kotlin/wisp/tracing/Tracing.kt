@@ -7,8 +7,7 @@ import io.opentracing.Tracer
 data class SpanAndScope(val span: Span, val scope: Scope)
 
 /**
- * Traces a [block] using a new [Span] with [name], which is automatically finished when the
- * block completes execution.
+ * Traces a [block] using a new [Span] with [name], which is automatically finished when the block completes execution.
  *
  * Use this method where you would otherwise use try-with-resources with the Java API.
  *
@@ -22,27 +21,22 @@ data class SpanAndScope(val span: Span, val scope: Scope)
  * ```
  *
  * With wisp-tracing, simply do:
- *
  * ```kotlin
  * tracer.spanned("operation-name") { ... }
  * ```
  *
- * If you need to start a new span independent of the active span, set [ignoreActiveSpan] to true,
- * and optionally [retainBaggage].
+ * If you need to start a new span independent of the active span, set [ignoreActiveSpan] to true, and optionally
+ * [retainBaggage].
  */
-@Deprecated(
-  message = "Use tracer.traceWithSpan or tracer.traceWithNewRootSpan instead",
-)
-inline fun <T: Any?> Tracer.spanned(
+@Deprecated(message = "Use tracer.traceWithSpan or tracer.traceWithNewRootSpan instead")
+inline fun <T : Any?> Tracer.spanned(
   name: String,
   ignoreActiveSpan: Boolean = false,
   retainBaggage: Boolean = false,
-  crossinline block: SpanAndScope.() -> T
+  crossinline block: SpanAndScope.() -> T,
 ): T {
   val activeSpan: Span? = this.activeSpan()
-  val span = buildSpan(name)
-    .apply { if (ignoreActiveSpan) ignoreActiveSpan() }
-    .start()
+  val span = buildSpan(name).apply { if (ignoreActiveSpan) ignoreActiveSpan() }.start()
 
   if (retainBaggage && ignoreActiveSpan) {
     val baggage = activeSpan?.context()?.baggageItems() ?: emptyList()
@@ -54,20 +48,18 @@ inline fun <T: Any?> Tracer.spanned(
   this.scopeManager().activate(span)
 
   return try {
-    this.scopeManager().activate(span).use { scope ->
-      block(SpanAndScope(span, scope))
-    }
+    this.scopeManager().activate(span).use { scope -> block(SpanAndScope(span, scope)) }
   } finally {
     span.finish()
   }
 }
 
 /**
- * Instruments [block] with a new scope. Like [spanned], but uses the provided [span].
- * The span may optionally be finished after [block] completes.
+ * Instruments [block] with a new scope. Like [spanned], but uses the provided [span]. The span may optionally be
+ * finished after [block] completes.
  *
- * This is helpful if you need to create a new [Scope] for an existing [Span], for example, if you
- * are switching threads (since Scopes are not thread-safe).
+ * This is helpful if you need to create a new [Scope] for an existing [Span], for example, if you are switching threads
+ * (since Scopes are not thread-safe).
  *
  * ```kotlin
  * tracer.scoped(span) {
@@ -80,13 +72,9 @@ inline fun <T: Any?> Tracer.spanned(
  */
 @Deprecated(
   message = "Use Tracer.withNewScope instead",
-  replaceWith = ReplaceWith("this.withNewScope(span, block)", imports = ["wisp.tracing.withNewScope"])
+  replaceWith = ReplaceWith("this.withNewScope(span, block)", imports = ["wisp.tracing.withNewScope"]),
 )
-inline fun <T: Any?> Tracer.scoped(
-  span: Span,
-  finishSpan: Boolean = false,
-  crossinline block: (Scope) -> T
-): T {
+inline fun <T : Any?> Tracer.scoped(span: Span, finishSpan: Boolean = false, crossinline block: (Scope) -> T): T {
   return try {
     this.scopeManager().activate(span).use(block)
   } finally {
@@ -96,10 +84,6 @@ inline fun <T: Any?> Tracer.scoped(
   }
 }
 
-/**
- * Creates a span called [name] which is a child of [parent].
- */
+/** Creates a span called [name] which is a child of [parent]. */
 @Deprecated("Use Tracer.trace or Tracer.traceWithSpan instead")
-fun Tracer.childSpan(name: String, parent: Span): Span =
-  this.buildSpan(name).asChildOf(parent).start()
-
+fun Tracer.childSpan(name: String, parent: Span): Span = this.buildSpan(name).asChildOf(parent).start()

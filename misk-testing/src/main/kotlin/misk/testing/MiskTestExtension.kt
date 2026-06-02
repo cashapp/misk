@@ -1,31 +1,58 @@
 package misk.testing
 
+import com.google.common.cache.Cache
+import com.google.common.cache.CacheBuilder
+import com.google.common.cache.RemovalCause
 import com.google.common.util.concurrent.ServiceManager
+import com.google.common.util.concurrent.UncheckedExecutionException
 import com.google.inject.Guice
 import com.google.inject.Injector
+import com.google.inject.Key
 import com.google.inject.Module
 import com.google.inject.testing.fieldbinder.BoundFieldModule
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 import misk.inject.KAbstractModule
 import misk.inject.ReusableTestModule
 import misk.inject.getInstance
 import misk.inject.uninject
+import misk.logging.getLogger
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
-import misk.logging.getLogger
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
 
 internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
   companion object {
     private val runningDependencies = ConcurrentHashMap.newKeySet<String>()
     private val runningServices = ConcurrentHashMap.newKeySet<List<Module>>()
-    private val injectedModules = ConcurrentHashMap<List<Module>, Injector>()
     private val log = getLogger<MiskTestExtension>()
+
+    private val maxLruSize: Int? = System.getenv("MISK_TEST_REUSE_LRU_SIZE")?.toIntOrNull()?.takeIf { it > 0 }
+
+    // When MISK_TEST_REUSE_LRU_SIZE is set, the cache evicts least-recently-used entries once
+    // the size is exceeded; the removal listener stops services for evicted injectors. Guava's
+    // cache uses ConcurrentMap internally, so callers don't need extra synchronization.
+    private val injectedModules: Cache<List<Module>, Injector> = run {
+      val builder =
+        CacheBuilder.newBuilder().removalListener<List<Module>, Injector> { notification ->
+          if (notification.cause == RemovalCause.EXPLICIT) return@removalListener
+          val key = notification.key ?: return@removalListener
+          val injector = notification.value ?: return@removalListener
+          runningServices.remove(key)
+          try {
+            val serviceManager = injector.getExistingBinding(Key.get(ServiceManager::class.java))?.provider?.get()
+            serviceManager?.stopAsync()?.awaitStopped(45, TimeUnit.SECONDS)
+          } catch (e: Exception) {
+            log.warn(e) { "Failed to stop services for evicted injector cache entry" }
+          }
+        }
+      if (maxLruSize != null) builder.maximumSize(maxLruSize.toLong())
+      builder.build()
+    }
   }
 
   override fun beforeEach(context: ExtensionContext) {
@@ -37,37 +64,41 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
       dep.beforeEach()
     }
 
-    val module = object : KAbstractModule() {
-      override fun configure() {
-        binder().requireAtInjectOnConstructors()
+    val module =
+      object : KAbstractModule() {
+        override fun configure() {
+          binder().requireAtInjectOnConstructors()
 
-        if (context.startService() && !context.reuseInjector()) {
-          multibind<AfterEachCallback>().to<StopServicesAfterEach>()
+          if (context.startService() && !context.reuseInjector()) {
+            multibind<AfterEachCallback>().to<StopServicesAfterEach>()
+          }
+
+          for (module in context.getActionTestModules()) {
+            install(module)
+          }
+
+          context.requiredTestInstances.allInstances.forEach { install(BoundFieldModule.of(it)) }
+
+          multibind<BeforeEachCallback>().to<InjectUninject>()
+          multibind<AfterEachCallback>().to<InjectUninject>()
+
+          // Initialize empty sets for our multibindings.
+          newMultibinder<BeforeEachCallback>()
+          newMultibinder<AfterEachCallback>()
+          newMultibinder<TestFixture>()
         }
-
-        for (module in context.getActionTestModules()) {
-          install(module)
-        }
-
-        context.requiredTestInstances.allInstances.forEach { install(BoundFieldModule.of(it)) }
-
-        multibind<BeforeEachCallback>().to<InjectUninject>()
-        multibind<AfterEachCallback>().to<InjectUninject>()
-
-        // Initialize empty sets for our multibindings.
-        newMultibinder<BeforeEachCallback>()
-        newMultibinder<AfterEachCallback>()
-        newMultibinder<TestFixture>()
       }
-    }
 
-    val injector = if (context.reuseInjector()) {
-      injectedModules.getOrPut(context.getActionTestModules().toList()) {
+    val injector =
+      if (context.reuseInjector()) {
+        try {
+          injectedModules.get(context.getSortedActionTestModules()) { Guice.createInjector(module) }
+        } catch (e: UncheckedExecutionException) {
+          throw e.cause ?: e
+        }
+      } else {
         Guice.createInjector(module)
       }
-    } else {
-      Guice.createInjector(module)
-    }
     context.store("injector", injector)
     injector.getInstance<Callbacks>().beforeEach(context)
   }
@@ -89,10 +120,12 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     fun beforeEach(context: ExtensionContext) {
       if (context.startService()) {
         if (serviceManager == null) {
-          throw IllegalStateException("This test is configured with `startService` set to true, " +
-            "but no ServiceManager is bound. Did you forget to install MiskTestingServiceModule?")
+          throw IllegalStateException(
+            "This test is configured with `startService` set to true, " +
+              "but no ServiceManager is bound. Did you forget to install MiskTestingServiceModule?"
+          )
         }
-        if (context.reuseInjector() && runningServices.contains(context.getActionTestModules())) {
+        if (context.reuseInjector() && runningServices.contains(context.getSortedActionTestModules())) {
           return
         }
         try {
@@ -108,17 +141,13 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
               } catch (stopError: Exception) {
                 e.addSuppressed(stopError)
               }
-              injectedModules.remove(context.getActionTestModules())
+              injectedModules.invalidate(context.getSortedActionTestModules())
               throw e
             }
           }
-          runningServices.add(context.getActionTestModules().toList())
+          runningServices.add(context.getSortedActionTestModules())
           if (context.reuseInjector()) {
-            Runtime.getRuntime().addShutdownHook(
-              thread(start = false) {
-                serviceManager!!.stop(context)
-              }
-            )
+            Runtime.getRuntime().addShutdownHook(thread(start = false) { serviceManager!!.stop(context) })
           }
         } catch (e: IllegalStateException) {
           // Unwrap and throw the real service failure
@@ -134,8 +163,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
   }
 
   class StopServicesAfterEach @Inject constructor() : AfterEachCallback {
-    @Inject
-    lateinit var serviceManager: ServiceManager
+    @Inject lateinit var serviceManager: ServiceManager
 
     override fun afterEach(context: ExtensionContext) {
       if (context.startService()) {
@@ -157,7 +185,9 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     }
   }
 
-  class Callbacks @Inject constructor(
+  class Callbacks
+  @Inject
+  constructor(
     private val startServicesBeforeEach: StartServicesBeforeEach,
     private val beforeEachCallbacks: Set<BeforeEachCallback>,
     private val afterEachCallbacks: Set<AfterEachCallback>,
@@ -185,12 +215,13 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     if (!runningDependencies.contains(id)) {
       log.info { "starting $id" }
       startup()
-      Runtime.getRuntime().addShutdownHook(
-        Thread {
-          log.info { "stopping $id" }
-          shutdown()
-        }
-      )
+      Runtime.getRuntime()
+        .addShutdownHook(
+          Thread {
+            log.info { "stopping $id" }
+            shutdown()
+          }
+        )
       runningDependencies.add(id)
     } else {
       log.info { "$id already running, not starting anything" }
@@ -216,6 +247,10 @@ private fun ExtensionContext.reuseInjector(): Boolean {
 
 private fun ExtensionContext.getActionTestModules(): Iterable<Module> {
   return getFromStoreOrCompute("module") { fieldsAnnotatedBy<MiskTestModule, Module>() }
+}
+
+private fun ExtensionContext.getSortedActionTestModules(): List<Module> {
+  return getActionTestModules().sortedBy { it.javaClass.name }
 }
 
 private fun ExtensionContext.getExternalDependencies(): Iterable<ExternalDependency> {

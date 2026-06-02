@@ -1,12 +1,12 @@
 package misk.hibernate
 
-import org.hibernate.engine.spi.SharedSessionContractImplementor
-import org.hibernate.id.ResultSetIdentifierConsumer
-import org.hibernate.usertype.UserType
 import java.io.Serializable
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
+import org.hibernate.engine.spi.SharedSessionContractImplementor
+import org.hibernate.id.ResultSetIdentifierConsumer
+import org.hibernate.usertype.UserType
 
 /** Binds Id<*> in the DB to a bigint in MySQL. */
 class IdType : UserType, ResultSetIdentifierConsumer {
@@ -25,12 +25,7 @@ class IdType : UserType, ResultSetIdentifierConsumer {
 
   override fun disassemble(value: Any?) = (value as Id<*>).id
 
-  override fun nullSafeSet(
-    st: PreparedStatement,
-    value: Any?,
-    index: Int,
-    session: SharedSessionContractImplementor?
-  ) {
+  override fun nullSafeSet(st: PreparedStatement, value: Any?, index: Int, session: SharedSessionContractImplementor?) {
     if (value == null) {
       st.setNull(index, Types.BIGINT)
     } else {
@@ -42,7 +37,7 @@ class IdType : UserType, ResultSetIdentifierConsumer {
     rs: ResultSet,
     names: Array<out String>,
     session: SharedSessionContractImplementor?,
-    owner: Any?
+    owner: Any?,
   ): Any? {
     val result = rs.getLong(names[0])
     return if (result != 0L) Id<DbPlaceholder>(result) else null
@@ -52,12 +47,11 @@ class IdType : UserType, ResultSetIdentifierConsumer {
 
   override fun sqlTypes() = intArrayOf(Types.BIGINT)
 
-  override fun consumeIdentifier(resultSet: ResultSet): Serializable = Id<DbPlaceholder>(
-    resultSet.getLong(1)
-  )
+  override fun consumeIdentifier(resultSet: ResultSet): Serializable = Id<DbPlaceholder>(resultSet.getLong(1))
 
   /** This placeholder exists so we can create an Id<*>() without a type parameter. */
   private class DbPlaceholder : DbEntity<DbPlaceholder> {
-    override val id: Id<DbPlaceholder> get() = throw IllegalStateException("unreachable")
+    override val id: Id<DbPlaceholder>
+      get() = throw IllegalStateException("unreachable")
   }
 }

@@ -1,11 +1,11 @@
 package misk.crypto
 
+import java.io.ByteArrayOutputStream
+import java.nio.ByteBuffer
 import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
 
 @MiskTest
 class CiphertextFormatTest {
@@ -21,9 +21,7 @@ class CiphertextFormatTest {
     output.write(1) // VERSION
     output.writeBytes(byteArrayOf(0, 0, 0, 0)) // BITMASK
     output.write(2) // ENCRYPTION_CONTEXT
-    val ecLength = ByteBuffer.allocate(2)
-      .putShort(aad.size.toShort())
-      .array()
+    val ecLength = ByteBuffer.allocate(2).putShort(aad.size.toShort()).array()
     output.writeBytes(ecLength) // EXPANDED_CONTEXT length
     output.writeBytes(aad)
     output.write(4) // CIPHERTEXT
@@ -40,14 +38,10 @@ class CiphertextFormatTest {
     val output = ByteArrayOutputStream()
     output.write(1) // VERSION
     val bitmask = 1 shl 1 // TABLE_NAME
-    val bitmaskBytes = ByteBuffer.allocate(4)
-      .putInt(bitmask)
-      .array()
+    val bitmaskBytes = ByteBuffer.allocate(4).putInt(bitmask).array()
     output.writeBytes(bitmaskBytes) // BITMASK
     output.write(1) // EXPANDED_CONTEXT_DESCRIPTION
-    val ecLength = ByteBuffer.allocate(2)
-      .putShort(aad.size.toShort())
-      .array()
+    val ecLength = ByteBuffer.allocate(2).putShort(aad.size.toShort()).array()
     output.writeBytes(ecLength) // EXPANDED_CONTEXT length
     output.writeBytes(aad)
     output.write(4) // CIPHERTEXT
@@ -65,14 +59,10 @@ class CiphertextFormatTest {
     val output = ByteArrayOutputStream()
     output.write(1) // VERSION
     val bitmask = 1 shl 1 // TABLE_NAME
-    val bitmaskBytes = ByteBuffer.allocate(4)
-      .putInt(bitmask)
-      .array()
+    val bitmaskBytes = ByteBuffer.allocate(4).putInt(bitmask).array()
     output.writeBytes(bitmaskBytes) // BITMASK
     output.write(2) // ENCRYPTION_CONTEXT
-    val ecLength = ByteBuffer.allocate(2)
-      .putShort(aad.size.toShort())
-      .array()
+    val ecLength = ByteBuffer.allocate(2).putShort(aad.size.toShort()).array()
     output.writeBytes(ecLength) // EXPANDED_CONTEXT length
     output.writeBytes(aad)
     output.write(4) // CIPHERTEXT
@@ -116,9 +106,7 @@ class CiphertextFormatTest {
     val output = ByteArrayOutputStream()
     output.write(1) // VERSION
     val bitmask = 1 shl 1 // TABLE_NAME
-    val bitmaskBytes = ByteBuffer.allocate(4)
-      .putInt(bitmask)
-      .array()
+    val bitmaskBytes = ByteBuffer.allocate(4).putInt(bitmask).array()
     output.writeBytes(bitmaskBytes) // BITMASK
     output.write(4) // CIPHERTEXT
     output.writeBytes(fauxCiphertext)
@@ -130,17 +118,13 @@ class CiphertextFormatTest {
 
   @Test
   fun testInvalidPacketWithNoCiphertext() {
-    val output =
-      byteArrayOf(1, 0, 0, 0, 0, 5) // represents a V1 encryption packet with an invalid type
-    assertThatThrownBy { CiphertextFormat.deserializeFleFormat(output) }
-      .hasMessage("no ciphertext found")
+    val output = byteArrayOf(1, 0, 0, 0, 0, 5) // represents a V1 encryption packet with an invalid type
+    assertThatThrownBy { CiphertextFormat.deserializeFleFormat(output) }.hasMessage("no ciphertext found")
   }
 
   @Test
   fun testInvalidPacketWithInvalidBitmask() {
-    val output =
-      byteArrayOf(1, 0, 1, 0, 0) // represents a V1 packet with a bitmask > Short.MAX_VALUE
-    assertThatThrownBy { CiphertextFormat.deserializeFleFormat(output) }
-      .hasMessage("invalid bitmask")
+    val output = byteArrayOf(1, 0, 1, 0, 0) // represents a V1 packet with a bitmask > Short.MAX_VALUE
+    assertThatThrownBy { CiphertextFormat.deserializeFleFormat(output) }.hasMessage("invalid bitmask")
   }
 }

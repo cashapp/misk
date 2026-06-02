@@ -26,7 +26,7 @@ class InProcessDynamoDbTest : AbstractDynamoDbTest() {
                 .build()
             )
           },
-          DynamoDbTable("characters", DyCharacter::class)
+          DynamoDbTable("characters", DyCharacter::class),
         )
       )
     }

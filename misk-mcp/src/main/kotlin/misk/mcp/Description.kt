@@ -1,22 +1,23 @@
 package misk.mcp
 
 import kotlin.annotation.AnnotationRetention.RUNTIME
-import kotlin.annotation.AnnotationTarget.VALUE_PARAMETER
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialInfo
 
 /**
- * Annotation used to provide human-readable descriptions for data class parameters in MCP (Model Context Protocol) tools.
+ * Annotation used to provide human-readable descriptions for data class parameters in MCP (Model Context Protocol)
+ * tools.
  *
- * When applied to a parameter in a data class that is used as input for an MCP tool, this annotation
- * adds a `description` field to the generated JSON schema. This description helps users understand
- * the purpose and expected format of each parameter when interacting with the tool.
+ * When applied to a parameter in a data class that is used as input for an MCP tool, this annotation adds a
+ * `description` field to the generated JSON schema. This description helps users understand the purpose and expected
+ * format of each parameter when interacting with the tool.
  *
- * The annotation is processed during JSON schema generation and the description text is included
- * in the resulting schema to provide better documentation for API consumers.
+ * The annotation is processed during JSON schema generation and the description text is included in the resulting
+ * schema to provide better documentation for API consumers.
  *
  * ## Usage
  *
  * Apply this annotation to data class parameters that will be used as MCP tool inputs:
- *
  * ```kotlin
  * data class CreateUserRequest(
  *   @Description("The unique username for the new user account")
@@ -36,7 +37,6 @@ import kotlin.annotation.AnnotationTarget.VALUE_PARAMETER
  * ## Generated JSON Schema
  *
  * The above example would generate a JSON schema similar to:
- *
  * ```json
  * {
  *   "type": "object",
@@ -63,9 +63,8 @@ import kotlin.annotation.AnnotationTarget.VALUE_PARAMETER
  * ```
  *
  * ## Best Practices
- *
- * - **Be descriptive but concise**: Provide enough information to understand the parameter's purpose
- *   without being overly verbose
+ * - **Be descriptive but concise**: Provide enough information to understand the parameter's purpose without being
+ *   overly verbose
  * - **Include format expectations**: Mention expected formats, ranges, or constraints when relevant
  * - **Explain business context**: Help users understand not just what the parameter is, but why it's needed
  * - **Use consistent terminology**: Maintain consistent language across related parameters and tools
@@ -80,12 +79,13 @@ import kotlin.annotation.AnnotationTarget.VALUE_PARAMETER
  * - Nested data classes
  * - Optional parameters with default values
  *
- * @param value The human-readable description text that will be included in the generated JSON schema.
- *              Should be a clear, concise explanation of the parameter's purpose and any relevant constraints.
- *
+ * @param value The human-readable description text that will be included in the generated JSON schema. Should be a
+ *   clear, concise explanation of the parameter's purpose and any relevant constraints.
  * @see misk.mcp.internal.generateJsonSchema
  * @since 1.0.0
  */
-@Target(VALUE_PARAMETER)
+@OptIn(ExperimentalSerializationApi::class)
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.CLASS)
 @Retention(RUNTIME)
+@SerialInfo
 annotation class Description(val value: String)

@@ -6,18 +6,17 @@ import com.squareup.wire.reflector.SchemaReflector
 import grpc.reflection.v1alpha.ServerReflectionRequest
 import grpc.reflection.v1alpha.ServerReflectionResponse
 import grpc.reflection.v1alpha.ServerReflectionServerReflectionInfoBlockingServer
+import jakarta.inject.Inject
 import misk.security.authz.Unauthenticated
 import misk.web.actions.WebAction
-import jakarta.inject.Inject
 
 // https://raw.githubusercontent.com/grpc/grpc/master/src/proto/grpc/reflection/v1alpha/reflection.proto
-class ServerReflectionApi @Inject constructor(
-  private val reflector: SchemaReflector,
-) : ServerReflectionServerReflectionInfoBlockingServer, WebAction {
+class ServerReflectionApi @Inject constructor(private val reflector: SchemaReflector) :
+  ServerReflectionServerReflectionInfoBlockingServer, WebAction {
   @Unauthenticated
   override fun ServerReflectionInfo(
     requests: MessageSource<ServerReflectionRequest>,
-    responses: MessageSink<ServerReflectionResponse>
+    responses: MessageSink<ServerReflectionResponse>,
   ) {
     requests.use {
       responses.use {

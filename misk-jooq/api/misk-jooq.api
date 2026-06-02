@@ -5,8 +5,6 @@ public final class misk/jooq/IsolationLevelAwareConnectionProvider : org/jooq/Co
 }
 
 public final class misk/jooq/JooqExtensionsKt {
-	public static final fun fetchOneOrNull (Lorg/jooq/ResultQuery;)Lorg/jooq/Record;
-	public static final fun getOrThrow (Ljava/lang/Object;)Ljava/lang/Object;
 	public static final fun ifNotNull (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Lorg/jooq/Condition;
 	public static final fun toInstant (Ljava/time/LocalDateTime;)Ljava/time/Instant;
 	public static final fun toLocalDateTime (Ljava/time/Instant;)Ljava/time/LocalDateTime;
@@ -31,20 +29,22 @@ public final class misk/jooq/JooqModule : misk/inject/KAbstractModule {
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;Z)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;ZZ)V
-	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;ZZLkotlin/jvm/functions/Function1;)V
-	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;ZZLkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;ZZZ)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;ZZZLkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceClusterConfig;Ljava/lang/String;Lmisk/jdbc/DatabasePool;Lkotlin/reflect/KClass;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;ZZZLkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class misk/jooq/JooqSession : misk/jdbc/Session {
-	public fun <init> (Lorg/jooq/DSLContext;)V
 	public final fun add (Ljava/util/concurrent/ConcurrentMap;Lmisk/jooq/JooqSession$HookType;Lkotlin/jvm/functions/Function0;)V
 	public final fun component1 ()Lorg/jooq/DSLContext;
 	public final fun executePostCommitHooks ()V
 	public final fun executePreCommitHooks ()V
+	public final fun executeRollbackHooks (Ljava/lang/Throwable;)V
 	public final fun executeSessionCloseHooks ()V
 	public final fun getCtx ()Lorg/jooq/DSLContext;
 	public fun onPostCommit (Lkotlin/jvm/functions/Function0;)V
 	public fun onPreCommit (Lkotlin/jvm/functions/Function0;)V
+	public fun onRollback (Lkotlin/jvm/functions/Function1;)V
 	public fun onSessionClose (Lkotlin/jvm/functions/Function0;)V
 	public fun useConnection (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 }
@@ -60,13 +60,12 @@ public final class misk/jooq/JooqSession$HookType : java/lang/Enum {
 
 public final class misk/jooq/JooqTransacter {
 	public static final field Companion Lmisk/jooq/JooqTransacter$Companion;
-	public fun <init> (Lmisk/jdbc/DataSourceService;Lmisk/jdbc/DataSourceConfig;Ljava/lang/String;Ljava/time/Clock;)V
-	public fun <init> (Lmisk/jdbc/DataSourceService;Lmisk/jdbc/DataSourceConfig;Ljava/lang/String;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;Ljava/time/Clock;)V
-	public fun <init> (Lmisk/jdbc/DataSourceService;Lmisk/jdbc/DataSourceConfig;Ljava/lang/String;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;Ljava/time/Clock;Lkotlin/jvm/functions/Function1;)V
-	public synthetic fun <init> (Lmisk/jdbc/DataSourceService;Lmisk/jdbc/DataSourceConfig;Ljava/lang/String;Lmisk/jooq/listeners/JooqTimestampRecordListenerOptions;Ljava/time/Clock;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public final fun transaction (Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public static synthetic fun transaction$default (Lmisk/jooq/JooqTransacter;Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun transactionOrAmbient (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public final fun transactionOrAmbient (Lmisk/jooq/JooqSession;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static synthetic fun transactionOrAmbient$default (Lmisk/jooq/JooqTransacter;Lmisk/jooq/JooqSession;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class misk/jooq/JooqTransacter$Companion {
@@ -77,17 +76,26 @@ public final class misk/jooq/JooqTransacter$TransacterOptions {
 	public fun <init> ()V
 	public fun <init> (I)V
 	public fun <init> (IJ)V
-	public fun <init> (IJLmisk/jooq/TransactionIsolationLevel;)V
-	public synthetic fun <init> (IJLmisk/jooq/TransactionIsolationLevel;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (IJJ)V
+	public fun <init> (IJJJ)V
+	public fun <init> (IJJJLmisk/jooq/TransactionIsolationLevel;)V
+	public fun <init> (IJJJLmisk/jooq/TransactionIsolationLevel;Z)V
+	public synthetic fun <init> (IJJJLmisk/jooq/TransactionIsolationLevel;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component2 ()J
-	public final fun component3 ()Lmisk/jooq/TransactionIsolationLevel;
-	public final fun copy (IJLmisk/jooq/TransactionIsolationLevel;)Lmisk/jooq/JooqTransacter$TransacterOptions;
-	public static synthetic fun copy$default (Lmisk/jooq/JooqTransacter$TransacterOptions;IJLmisk/jooq/TransactionIsolationLevel;ILjava/lang/Object;)Lmisk/jooq/JooqTransacter$TransacterOptions;
+	public final fun component3 ()J
+	public final fun component4 ()J
+	public final fun component5 ()Lmisk/jooq/TransactionIsolationLevel;
+	public final fun component6 ()Z
+	public final fun copy (IJJJLmisk/jooq/TransactionIsolationLevel;Z)Lmisk/jooq/JooqTransacter$TransacterOptions;
+	public static synthetic fun copy$default (Lmisk/jooq/JooqTransacter$TransacterOptions;IJJJLmisk/jooq/TransactionIsolationLevel;ZILjava/lang/Object;)Lmisk/jooq/JooqTransacter$TransacterOptions;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getIsolationLevel ()Lmisk/jooq/TransactionIsolationLevel;
 	public final fun getMaxAttempts ()I
 	public final fun getMaxRetryDelayMillis ()J
+	public final fun getMinRetryDelayMillis ()J
+	public final fun getReadOnly ()Z
+	public final fun getRetryJitterMillis ()J
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -389,5 +397,25 @@ public class misk/jooq/testgen/tables/records/RecordSignatureTestRecord : org/jo
 public final class misk/jooq/testgen/tables/references/TablesKt {
 	public static final fun getMOVIE ()Lmisk/jooq/testgen/tables/Movie;
 	public static final fun getRECORD_SIGNATURE_TEST ()Lmisk/jooq/testgen/tables/RecordSignatureTest;
+}
+
+public final class misk/jooq/transacter/JooqUnifiedTransacterModule : misk/inject/KAbstractModule {
+	public fun <init> (Lkotlin/reflect/KClass;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jooq/JooqTransacter$TransacterOptions;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/reflect/KClass;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jooq/JooqTransacter$TransacterOptions;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface class misk/jooq/transacter/Transacter {
+	public abstract fun getInTransaction ()Z
+	public abstract fun isolationLevel (Lmisk/jooq/TransactionIsolationLevel;)Lmisk/jooq/transacter/Transacter;
+	public abstract fun maxAttempts (I)Lmisk/jooq/transacter/Transacter;
+	public abstract fun maxRetryDelay (Ljava/time/Duration;)Lmisk/jooq/transacter/Transacter;
+	public abstract fun noRetries ()Lmisk/jooq/transacter/Transacter;
+	public abstract fun readOnly ()Lmisk/jooq/transacter/Transacter;
+	public abstract fun replicaRead (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public abstract fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public abstract fun writable ()Lmisk/jooq/transacter/Transacter;
 }
 

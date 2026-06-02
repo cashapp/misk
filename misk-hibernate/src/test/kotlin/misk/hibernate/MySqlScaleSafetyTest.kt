@@ -1,5 +1,7 @@
 package misk.hibernate
 
+import jakarta.inject.Inject
+import java.time.LocalDate
 import misk.jdbc.Check
 import misk.jdbc.DataSourceType
 import misk.jdbc.TableScanException
@@ -9,16 +11,11 @@ import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
-import jakarta.inject.Inject
 
-/**
- * Verifies that we're constraining a few things that makes apps hard to scale out.
- */
+/** Verifies that we're constraining a few things that makes apps hard to scale out. */
 @MiskTest(startService = true)
 class MySqlScaleSafetyTest {
-  @MiskTestModule
-  val module = MoviesTestModule(DataSourceType.MYSQL)
+  @MiskTestModule val module = MoviesTestModule(DataSourceType.MYSQL)
 
   @Inject @Movies lateinit var transacter: Transacter
 
@@ -33,11 +30,10 @@ class MySqlScaleSafetyTest {
       assertThrows<TableScanException> {
         session.useConnection { connection ->
           connection.createStatement().use { statement ->
-            connection.prepareStatement("SELECT COUNT(*) FROM characters WHERE name = ?")
-              .use { s ->
-                s.setString(1, "Leia Organa")
-                s.executeQuery().uniqueLong()
-              }
+            connection.prepareStatement("SELECT COUNT(*) FROM characters WHERE name = ?").use { s ->
+              s.setString(1, "Leia Organa")
+              s.executeQuery().uniqueLong()
+            }
           }
         }
       }

@@ -4,20 +4,26 @@ import com.vanniktech.maven.publish.KotlinJvm
 plugins {
   id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
+  id("java-test-fixtures")
+  id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 dependencies {
   api(libs.guice)
   api(libs.jakartaInject)
   api(libs.kotlinxSerializationJson)
-  api(libs.mcpKotlinSdk)
+  api(libs.mcpKotlinSdkCore)
+  api(libs.mcpKotlinSdkServer){
+    exclude(group = "io.ktor", module = "ktor-server-core")
+    exclude(group = "io.ktor", module = "ktor-server-sse")
+  }
+
   api(project(":misk-actions"))
   api(project(":misk-api"))
   api(project(":misk-inject"))
   api(project(":misk"))
-  api(project(":wisp:wisp-config"))
+  api(project(":misk-config"))
 
-  
   implementation(libs.kotlinReflect)
   implementation(libs.kotlinxCoroutinesCore)
   implementation(libs.kotlinxSerializationCore)
@@ -25,13 +31,30 @@ dependencies {
   implementation(libs.loggingApi)
   implementation(project(":misk-core"))
   implementation(project(":misk-logging"))
+  implementation(project(":misk-metrics"))
   implementation(libs.okHttp)
   implementation(libs.okio)
+  implementation(libs.prometheusClient)
 
+  testImplementation(libs.jsonSchemaValidator)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.kotlinxCoroutinesTest)
   testImplementation(libs.mockk)
+  testImplementation(testFixtures(project(":misk-mcp")))
+  testImplementation(testFixtures(project(":misk-metrics")))
+  testImplementation(project(":misk-testing"))
+
+  testFixturesApi(libs.mcpKotlinSdkClient)
+  testFixturesImplementation(libs.kotlinxSerializationJson)
+  testFixturesApi(libs.ktorClientContentNegotiation)
+  testFixturesApi(libs.ktorClientCore)
+  testFixturesApi(libs.ktorClientEncoding)
+  testFixturesApi(libs.ktorClientLogging)
+  testFixturesApi(libs.ktorClientOkhttp)
+  testFixturesApi(libs.ktorSerializationKotlinxJson)
+
+  testFixturesImplementation(libs.ktorSerializationKotlinxJson)
 }
 
 mavenPublishing {

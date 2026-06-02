@@ -9,33 +9,31 @@ import jakarta.inject.Inject
 import jakarta.inject.Qualifier
 import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
+import misk.logging.getLogger
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import misk.logging.getLogger
 
 @MiskTest
 class CoordinatedServiceToStringTest {
-  @Retention(AnnotationRetention.RUNTIME)
-  @Qualifier
-  internal annotation class TestAnnotation
+  @Retention(AnnotationRetention.RUNTIME) @Qualifier internal annotation class TestAnnotation
 
   @MiskTestModule
-  val module = Modules.combine(
-    MiskTestingServiceModule(),
-    ServiceModule<TestCoordinatedService>(),
-    ServiceModule<TestCoordinatedService>(TestAnnotation::class),
-    AnnotatedInstanceModule()
-  )
+  val module =
+    Modules.combine(
+      MiskTestingServiceModule(),
+      ServiceModule<TestCoordinatedService>(),
+      ServiceModule<TestCoordinatedService>(TestAnnotation::class),
+      AnnotatedInstanceModule(),
+    )
 
   @Inject lateinit var serviceManager: ServiceManager
 
-  @Test fun toStringDoesntInjectInstance() {
+  @Test
+  fun toStringDoesntInjectInstance() {
     val coordinatedTestCoordinatedService =
-      serviceManager.servicesByState().get(Service.State.NEW).find {
-        it.toString() == "TestCoordinatedService [NEW]"
-      }
+      serviceManager.servicesByState().get(Service.State.NEW).find { it.toString() == "TestCoordinatedService [NEW]" }
 
     val coordinatedTestCoordinatedServiceAnnotated =
       serviceManager.servicesByState().get(Service.State.NEW).find {
@@ -48,7 +46,8 @@ class CoordinatedServiceToStringTest {
 
     assertThat(coordinatedTestCoordinatedServiceAnnotated).isNotNull
     assertThat(coordinatedTestCoordinatedServiceAnnotated is CoordinatedService)
-    assertThat(coordinatedTestCoordinatedServiceAnnotated.toString()).isEqualTo("@TestAnnotation TestCoordinatedService [NEW]")
+    assertThat(coordinatedTestCoordinatedServiceAnnotated.toString())
+      .isEqualTo("@TestAnnotation TestCoordinatedService [NEW]")
 
     assertThat(TestCoordinatedService.instances).isEqualTo(0)
 
@@ -63,7 +62,8 @@ class CoordinatedServiceToStringTest {
     serviceManager.awaitStopped()
 
     assertThat(coordinatedTestCoordinatedService.toString()).isEqualTo("[1] TestCoordinatedService [TERMINATED]")
-    assertThat(coordinatedTestCoordinatedServiceAnnotated.toString()).isEqualTo("[2] TestCoordinatedService [TERMINATED]")
+    assertThat(coordinatedTestCoordinatedServiceAnnotated.toString())
+      .isEqualTo("[2] TestCoordinatedService [TERMINATED]")
   }
 
   @Singleton
@@ -83,8 +83,7 @@ class CoordinatedServiceToStringTest {
       logger.info { "Shutdown" }
     }
 
-    override fun toString(): String =
-      "[$id] ${this::class.simpleName} [${state()}]"
+    override fun toString(): String = "[$id] ${this::class.simpleName} [${state()}]"
 
     companion object {
       private val logger = getLogger<TestCoordinatedService>()

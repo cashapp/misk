@@ -28,8 +28,8 @@ import kotlin.time.toJavaInstant
 /**
  * Creates [MigrateArgs] for configuring Redis key migration options.
  *
- * This function provides a type-safe builder for the MIGRATE command arguments,
- * supporting various migration options between Redis instances.
+ * This function provides a type-safe builder for the MIGRATE command arguments, supporting various migration options
+ * between Redis instances.
  *
  * Example with basic migration:
  * ```kotlin
@@ -63,8 +63,8 @@ inline fun <K> migrateArgs(builder: MigrateArgs<K>.() -> Unit) = MigrateArgs<K>(
 /**
  * Creates [RestoreArgs] for configuring Redis key restoration options.
  *
- * This function provides a type-safe builder for the RESTORE command arguments,
- * supporting various restoration options for serialized Redis values.
+ * This function provides a type-safe builder for the RESTORE command arguments, supporting various restoration options
+ * for serialized Redis values.
  *
  * Example with basic restore:
  * ```kotlin
@@ -92,12 +92,11 @@ inline fun <K> migrateArgs(builder: MigrateArgs<K>.() -> Unit) = MigrateArgs<K>(
  */
 inline fun restoreArgs(builder: RestoreArgs.() -> Unit) = RestoreArgs().apply { builder() }
 
-
 /**
  * Creates [AclSetuserArgs] for configuring Redis ACL user settings.
  *
- * This function provides a type-safe builder for the ACL SETUSER command arguments,
- * supporting comprehensive user permission configuration.
+ * This function provides a type-safe builder for the ACL SETUSER command arguments, supporting comprehensive user
+ * permission configuration.
  *
  * Example with basic permissions:
  * ```kotlin
@@ -155,12 +154,11 @@ inline fun restoreArgs(builder: RestoreArgs.() -> Unit) = RestoreArgs().apply { 
  */
 inline fun aclSetuserArgs(builder: AclSetuserArgs.() -> Unit) = AclSetuserArgs().apply { builder() }
 
-
 /**
  * Creates [SetArgs] for configuring Redis SET command options.
  *
- * This function provides a type-safe builder for SET command arguments, supporting
- * expiration, existence conditions, and keep TTL options.
+ * This function provides a type-safe builder for SET command arguments, supporting expiration, existence conditions,
+ * and keep TTL options.
  *
  * Example with expiration:
  * ```kotlin
@@ -201,8 +199,8 @@ inline fun setArgs(builder: SetArgs.() -> Unit) = SetArgs().apply { builder() }
 /**
  * Sets the expiration time in seconds using Kotlin [Duration].
  *
- * This extension function provides a Kotlin-friendly way to set expiration time
- * using Kotlin's [Duration] API instead of Java's Duration.
+ * This extension function provides a Kotlin-friendly way to set expiration time using Kotlin's [Duration] API instead
+ * of Java's Duration.
  *
  * Example:
  * ```kotlin
@@ -221,8 +219,8 @@ fun SetArgs.ex(duration: Duration): SetArgs = ex(duration.toJavaDuration())
 /**
  * Sets the absolute expiration time in seconds using Kotlin [Instant].
  *
- * This extension function provides a Kotlin-friendly way to set absolute expiration time
- * using Kotlin's [Instant] API instead of Java's Instant.
+ * This extension function provides a Kotlin-friendly way to set absolute expiration time using Kotlin's [Instant] API
+ * instead of Java's Instant.
  *
  * Example:
  * ```kotlin
@@ -241,8 +239,8 @@ fun SetArgs.exAt(instant: Instant): SetArgs = exAt(instant.toJavaInstant())
 /**
  * Sets the expiration time in milliseconds using Kotlin [Duration].
  *
- * This extension function provides a Kotlin-friendly way to set expiration time
- * with millisecond precision using Kotlin's [Duration] API instead of Java's Duration.
+ * This extension function provides a Kotlin-friendly way to set expiration time with millisecond precision using
+ * Kotlin's [Duration] API instead of Java's Duration.
  *
  * Example:
  * ```kotlin
@@ -261,8 +259,8 @@ fun SetArgs.px(duration: Duration): SetArgs = px(duration.toJavaDuration())
 /**
  * Sets the absolute expiration time in milliseconds using Kotlin [Instant].
  *
- * This extension function provides a Kotlin-friendly way to set absolute expiration time
- * with millisecond precision using Kotlin's [Instant] API instead of Java's Instant.
+ * This extension function provides a Kotlin-friendly way to set absolute expiration time with millisecond precision
+ * using Kotlin's [Instant] API instead of Java's Instant.
  *
  * Example:
  * ```kotlin
@@ -281,8 +279,7 @@ fun SetArgs.pxAt(instant: Instant): SetArgs = pxAt(instant.toJavaInstant())
 /**
  * Creates [GetExArgs] for configuring Redis GET with expiration command options.
  *
- * This function provides a type-safe builder for GETEX command arguments, supporting
- * various expiration options.
+ * This function provides a type-safe builder for GETEX command arguments, supporting various expiration options.
  *
  * Example with absolute expiration:
  * ```kotlin
@@ -310,8 +307,8 @@ inline fun getExArgs(builder: GetExArgs.() -> Unit) = GetExArgs().apply { builde
 /**
  * Creates [ScanArgs] for configuring Redis SCAN command options.
  *
- * This function provides a type-safe builder for SCAN command arguments, supporting
- * pattern matching and result count limits.
+ * This function provides a type-safe builder for SCAN command arguments, supporting pattern matching and result count
+ * limits.
  *
  * Example with pattern matching:
  * ```kotlin
@@ -340,8 +337,8 @@ inline fun scanArgs(builder: ScanArgs.() -> Unit) = ScanArgs().apply { builder()
 /**
  * Creates [ZAddArgs] for configuring Redis ZADD command options.
  *
- * This function provides a type-safe builder for ZADD command arguments, supporting
- * various score update modes and condition flags.
+ * This function provides a type-safe builder for ZADD command arguments, supporting various score update modes and
+ * condition flags.
  *
  * Example with score updates:
  * ```kotlin
@@ -373,8 +370,8 @@ inline fun zAddArgs(builder: ZAddArgs.() -> Unit) = ZAddArgs().apply { builder()
 /**
  * Creates [SortArgs] for configuring Redis SORT command options.
  *
- * This function provides a type-safe builder for SORT command arguments, supporting
- * sorting patterns, limits, and external key references.
+ * This function provides a type-safe builder for SORT command arguments, supporting sorting patterns, limits, and
+ * external key references.
  *
  * Example with basic sorting:
  * ```kotlin
@@ -408,8 +405,8 @@ inline fun sortArgs(builder: SortArgs.() -> Unit) = SortArgs().apply { builder()
 /**
  * Creates [BitFieldArgs] for configuring Redis BITFIELD command options.
  *
- * This function provides a type-safe builder for BITFIELD command arguments, supporting
- * complex bit manipulation operations.
+ * This function provides a type-safe builder for BITFIELD command arguments, supporting complex bit manipulation
+ * operations.
  *
  * Example with get operations:
  * ```kotlin
@@ -442,8 +439,8 @@ inline fun bitFieldArgs(builder: BitFieldArgs.() -> Unit) = BitFieldArgs().apply
 /**
  * Creates [GeoArgs] for configuring Redis geospatial command options.
  *
- * This function provides a type-safe builder for geospatial command arguments,
- * supporting distance calculations and result formatting.
+ * This function provides a type-safe builder for geospatial command arguments, supporting distance calculations and
+ * result formatting.
  *
  * Example with distance and coordinates:
  * ```kotlin
@@ -472,8 +469,8 @@ inline fun geoArgs(builder: GeoArgs.() -> Unit) = GeoArgs().apply { builder() }
 /**
  * Creates [XAddArgs] for configuring Redis Stream XADD command options.
  *
- * This function provides a type-safe builder for stream entry creation arguments,
- * supporting maximum length trimming and entry ID options.
+ * This function provides a type-safe builder for stream entry creation arguments, supporting maximum length trimming
+ * and entry ID options.
  *
  * Example with trimming:
  * ```kotlin
@@ -506,8 +503,8 @@ inline fun xAddArgs(builder: XAddArgs.() -> Unit) = XAddArgs().apply { builder()
 /**
  * Creates [XReadArgs] for configuring Redis Stream XREAD command options.
  *
- * This function provides a type-safe builder for stream reading arguments,
- * supporting blocking operations and result count limits.
+ * This function provides a type-safe builder for stream reading arguments, supporting blocking operations and result
+ * count limits.
  *
  * Example with blocking read:
  * ```kotlin
@@ -539,8 +536,8 @@ inline fun xReadArgs(builder: XReadArgs.() -> Unit) = XReadArgs().apply { builde
 /**
  * Creates [XGroupCreateArgs] for configuring Redis Stream consumer group creation.
  *
- * This function provides a type-safe builder for consumer group creation arguments,
- * supporting various creation options.
+ * This function provides a type-safe builder for consumer group creation arguments, supporting various creation
+ * options.
  *
  * Example with basic group:
  * ```kotlin
@@ -573,8 +570,7 @@ inline fun xGroupCreateArgs(builder: XGroupCreateArgs.() -> Unit) = XGroupCreate
 /**
  * Creates [XClaimArgs] for configuring Redis Stream message claiming.
  *
- * This function provides a type-safe builder for message claiming arguments,
- * supporting various claiming options.
+ * This function provides a type-safe builder for message claiming arguments, supporting various claiming options.
  *
  * Example with basic claim:
  * ```kotlin
@@ -608,8 +604,8 @@ inline fun xClaimArgs(builder: XClaimArgs.() -> Unit) = XClaimArgs().apply { bui
 /**
  * Creates [ZAggregateArgs] for configuring Redis sorted set aggregation options.
  *
- * This function provides a type-safe builder for sorted set aggregation arguments,
- * supporting various aggregation modes and weights.
+ * This function provides a type-safe builder for sorted set aggregation arguments, supporting various aggregation modes
+ * and weights.
  *
  * Example with weights:
  * ```kotlin
@@ -642,8 +638,7 @@ inline fun zAggregateArgs(builder: ZAggregateArgs.() -> Unit) = ZAggregateArgs()
 /**
  * Creates [LPosArgs] for configuring Redis list position query options.
  *
- * This function provides a type-safe builder for list position arguments,
- * supporting rank and count options.
+ * This function provides a type-safe builder for list position arguments, supporting rank and count options.
  *
  * Example with rank:
  * ```kotlin

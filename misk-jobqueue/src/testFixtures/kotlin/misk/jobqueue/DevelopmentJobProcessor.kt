@@ -1,16 +1,18 @@
-package misk.jobqueue;
+package misk.jobqueue
 
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.ServiceManager
+import com.google.inject.Provider
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.time.Duration
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
-import java.time.Duration
-import jakarta.inject.Inject
-import com.google.inject.Provider
-import jakarta.inject.Singleton
 
 @Singleton
-internal class DevelopmentJobProcessor @Inject constructor(
+internal class DevelopmentJobProcessor
+@Inject
+constructor(
   @ForDevelopmentHandling private val taskQueue: RepeatedTaskQueue,
   private val fakeJobQueue: FakeJobQueue,
   private val serviceManagerProvider: Provider<ServiceManager>,

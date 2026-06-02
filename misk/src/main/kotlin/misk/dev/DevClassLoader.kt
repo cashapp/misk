@@ -1,12 +1,13 @@
 package misk.dev
 
 import java.io.File
+import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
 
 /**
- * A class loader that allows for hot reloads. If changes are detected in underlying class files this class loader
- * can be discarded and a new instance created.
+ * A class loader that allows for hot reloads. If changes are detected in underlying class files this class loader can
+ * be discarded and a new instance created.
  */
 internal class DevClassLoader(parent: ClassLoader) : ClassLoader(parent) {
 
@@ -14,24 +15,25 @@ internal class DevClassLoader(parent: ClassLoader) : ClassLoader(parent) {
   private val classFiles: MutableMap<String, Long> = ConcurrentHashMap()
   private val classRoots: MutableSet<String> = ConcurrentSkipListSet()
 
-  companion object {
-    init {
-      registerAsParallelCapable()
-    }
-  }
-
   override fun loadClass(className: String, resolve: Boolean): Class<*>? {
     val existing = findLoadedClass(className)
     if (existing != null) return existing
-    if (className.startsWith("misk.") || className.startsWith("wisp.") ) {
+    if (className.startsWith("misk.") || className.startsWith("wisp.")) {
       // Needed for the exemplar in the Misk repo itself
       return super.loadClass(className, resolve)
     }
     val classPath = className.replace('.', '/') + ".class"
-    val uri = parent.getResource(classPath)
-    if (uri == null) {
+    val uris = parent.getResources(classPath)
+    val elements = arrayListOf<URL>()
+    while (uris.hasMoreElements()) {
+      elements.add(uris.nextElement())
+    }
+    if (elements.size != 1) {
+      // If we have more than one class this element is not considered hot reloadable
+      // This can happen if protos are generated in both the project and a library
       return super.loadClass(className, resolve)
     }
+    val uri = elements[0]
     if (uri.protocol != "file") {
       return super.loadClass(className, resolve)
     }

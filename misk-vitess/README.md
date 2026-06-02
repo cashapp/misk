@@ -55,19 +55,20 @@ Other configurable parameters include:
 - `autoApplySchema` (default `true`): Whether to apply the schema on start-up. If set to `false`, the schema can be applied at run-time via `applySchema()` or externally.
 - `containerName` (default `vitess_test_db`): The name assigned to the Docker container that gets created.
 - `debugStartup` (default `false`): Whether to print debug logs during the startup process.
+- `dockerNetworkName` (default `vitess-network`): The name of the Docker bridge network the Vitess container and its sidecar `vtctldclient` containers attach to. The default network is shared across every `VitessTestDb` instance on the same Docker daemon. Highly-parallel CI environments running many `VitessTestDb` instances against one daemon can exhaust that single network's IPv4 address pool; in that case, set this to a unique value per instance (e.g. `"vitess-network-$containerName"`) so each instance gets its own bridge subnet.
 - `enableDeclarativeSchemaChanges` (default `false`): Whether to use declarative schema changes.
 - `enableInMemoryStorage` (default `false`): Whether to use in-memory storage (tmpfs) for faster performance.
 - `enableScatters` (default `true`): Whether to enable scatter queries, which are queries that fan out to all shards. Requires a Vitess image version >= 20.
 - `inMemoryStorageSize` (default `1024M`): The size of in-memory storage (tmpfs) when `enableInMemoryStorage` is set to `true`.
 - `keepAlive` (default `true`): Whether to keep the container running between test runs. It will detect schema changes and argument changes and restart the container if needed.
 - `lintSchema` (default `false`): Whether to lint the schema before starting the test database, which can help detect errors early.
-- `mysqlVersion` (default `8.0.36`): The MySQL version to use.
+- `mysqlVersion` (default `8.4.3`): The MySQL version to use.
 - `port` (default `27003`): The port used to connect to the sharded database, aka the vtgate.
-- `sqlMode` (defaults to the [MySQL8 defaults](https://dev.mysql.com/doc/refman/8.0/en/sql-mode.html)): The server side `sql_mode` setting.
+- `sqlMode` (defaults to the [MySQL 8.4 defaults](https://dev.mysql.com/doc/refman/8.4/en/sql-mode.html)): The server side `sql_mode` setting.
 - `transactionIsolationLevel` (default `REPEATABLE_READ`): The transaction isolation level.
 - `transactionTimeoutSeconds` (default `30s`): the duration in seconds before Vitess times out a transaction. Setting a higher value may be useful for debugging.
-- `vitessImage` (default: `vitess/vttestserver:v21.0.4-mysql80`): The Docker image to use for the container. DockerHub Images can be  found at https://hub.docker.com/r/vitess/vttestserver/tags. Custom ECR images can also be passed in.
-- `vitessVersion` (default: `21`): The version of Vitess to use, which must match the version of `vitessImage`.
+- `vitessImage` (default: `ghcr.io/block/vitess/vttestserver:23.0.3-block.1-mysql84`): The Docker image to use for the container. Block's multi-arch images are at `ghcr.io/block/vitess/vttestserver`. Upstream DockerHub images (amd64 only) are at https://hub.docker.com/r/vitess/vttestserver/tags.
+- `vitessVersion` (default: `23`): The version of Vitess to use, which must match the version of `vitessImage`.
 
 ### Connecting to the test database
 After you start the test database, you can connect to it via a standard connection or through the MySQL CLI.

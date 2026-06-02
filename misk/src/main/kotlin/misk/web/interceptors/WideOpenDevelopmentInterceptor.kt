@@ -1,10 +1,10 @@
 package misk.web.interceptors
 
+import jakarta.inject.Inject
 import misk.Action
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import wisp.deployment.Deployment
-import jakarta.inject.Inject
 
 class WideOpenDevelopmentInterceptor @Inject constructor() : NetworkInterceptor {
   override fun intercept(chain: NetworkChain) {
@@ -13,9 +13,11 @@ class WideOpenDevelopmentInterceptor @Inject constructor() : NetworkInterceptor 
   }
 }
 
-class WideOpenDevelopmentInterceptorFactory @Inject constructor(
+class WideOpenDevelopmentInterceptorFactory
+@Inject
+constructor(
   private val wideOpenDevelopmentInterceptor: WideOpenDevelopmentInterceptor,
-  private val deployment: Deployment
+  private val deployment: Deployment,
 ) : NetworkInterceptor.Factory {
 
   override fun create(action: Action): NetworkInterceptor? {

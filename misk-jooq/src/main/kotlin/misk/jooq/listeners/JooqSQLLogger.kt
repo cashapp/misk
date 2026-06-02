@@ -1,5 +1,7 @@
 package misk.jooq.listeners
 
+import java.util.Arrays
+import misk.logging.getLogger
 import org.jooq.Configuration
 import org.jooq.ExecuteContext
 import org.jooq.ExecuteListener
@@ -12,8 +14,6 @@ import org.jooq.VisitListenerProvider
 import org.jooq.impl.DSL
 import org.jooq.impl.DefaultVisitListenerProvider
 import org.jooq.tools.StringUtils
-import misk.logging.getLogger
-import java.util.Arrays
 
 class JooqSQLLogger : ExecuteListener {
   override fun renderEnd(ctx: ExecuteContext) {
@@ -29,47 +29,34 @@ class JooqSQLLogger : ExecuteListener {
       val inlined = DSL.using(configuration).renderInlined(ctx.query())
       if (ctx.sql() != inlined) log.info { "-> with bind values ${newline + inlined} " }
     } else if (!StringUtils.isBlank(ctx.sql())) {
-      if (ctx.type() == BATCH) log.info {
-        "Executing batch query ${newline + ctx.sql()}"
-      } else log.info { "Executing query ${newline + ctx.sql()}" }
+      if (ctx.type() == BATCH) log.info { "Executing batch query ${newline + ctx.sql()}" }
+      else log.info { "Executing query ${newline + ctx.sql()}" }
     } else if (batchSQL.isNotEmpty()) {
-      if (batchSQL[batchSQL.size - 1] != null) for (sql in batchSQL) log.info {
-        "Executing batch query ${newline + sql}"
-      }
+      if (batchSQL[batchSQL.size - 1] != null)
+        for (sql in batchSQL) log.info { "Executing batch query ${newline + sql}" }
     }
   }
 
-  override fun recordEnd(ctx: ExecuteContext) {
-  }
+  override fun recordEnd(ctx: ExecuteContext) {}
 
   override fun resultEnd(ctx: ExecuteContext) {
     if (ctx.result() != null) {
-      logMultiline(
-        "Fetched result",
-        ctx.result()!!
-          .format(TXTFormat.DEFAULT.maxRows(5).maxColWidth(50))
-      )
+      logMultiline("Fetched result", ctx.result()!!.format(TXTFormat.DEFAULT.maxRows(5).maxColWidth(50)))
       log.info { "Fetched row(s) ${ctx.result()!!.size}" }
     }
   }
 
   override fun executeEnd(ctx: ExecuteContext) {
-    if (ctx.rows() >= 0) log.info {
-      "Affected row(s) ${ctx.rows()}"
-    }
+    if (ctx.rows() >= 0) log.info { "Affected row(s) ${ctx.rows()}" }
   }
 
-  override fun outEnd(ctx: ExecuteContext) {
-  }
+  override fun outEnd(ctx: ExecuteContext) {}
 
   override fun exception(ctx: ExecuteContext) {
     log.info(ctx.exception()) { "Exception" }
   }
 
-  private fun logMultiline(
-    comment: String,
-    message: String,
-  ) {
+  private fun logMultiline(comment: String, message: String) {
     var commentToUse: String? = comment
     for (line in message.split("\n".toRegex()).toTypedArray()) {
       log.info { "$commentToUse $line" }
@@ -77,9 +64,7 @@ class JooqSQLLogger : ExecuteListener {
     }
   }
 
-  /**
-   * Add a VisitListener that transforms all bind variables by abbreviating them.
-   */
+  /** Add a VisitListener that transforms all bind variables by abbreviating them. */
   private fun abbreviateBindVariables(configuration: Configuration): Configuration {
     val oldProviders = configuration.visitListenerProviders()
     val newProviders = arrayOfNulls<VisitListenerProvider>(oldProviders.size + 1)
@@ -90,6 +75,7 @@ class JooqSQLLogger : ExecuteListener {
 
   private class BindValueAbbreviator : VisitListener {
     private var anyAbbreviations = false
+
     override fun visitStart(context: VisitContext) {
       if (context.renderContext() != null) {
         val part = context.queryPart()
@@ -109,7 +95,8 @@ class JooqSQLLogger : ExecuteListener {
     override fun visitEnd(context: VisitContext) {
       if (anyAbbreviations) {
         if (context.queryPartsLength() == 1) {
-          context.renderContext()!!
+          context
+            .renderContext()!!
             .sql(
               " -- Bind values may have been abbreviated for DEBUG logging. Use TRACE logging for very large bind variables."
             )

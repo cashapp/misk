@@ -1,8 +1,10 @@
 package misk.clustering.dynamo
 
-import wisp.config.Config
+import misk.config.Config
 
-data class DynamoClusterConfig @JvmOverloads constructor(
+data class DynamoClusterConfig
+@JvmOverloads
+constructor(
   val appName: String = System.getenv("SERVICE_NAME") ?: "<invalid-service-name>",
   var table_name: String = "$appName.misk-cluster-members",
   val update_frequency_seconds: Long = 30,

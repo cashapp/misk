@@ -8,9 +8,8 @@ import kotlin.reflect.full.callSuspendBy
 import kotlin.reflect.jvm.javaMethod
 
 /**
- * Returns a function that delegates everything to this. It promotes all annotations from overridden
- * functions to the returned function, and all annotations from overridden parameters to the
- * returned function.
+ * Returns a function that delegates everything to this. It promotes all annotations from overridden functions to the
+ * returned function, and all annotations from overridden parameters to the returned function.
  *
  * Use this to make it easy to get annotations on overridden functions 'for free'.
  */
@@ -18,9 +17,7 @@ internal fun <R> KFunction<R>.withOverrides(): KFunction<R> = FunctionWithOverri
 
 /** Returns the overrides of this method with overriding methods preceding overridden methods. */
 internal fun Method.overrides(): Set<Method> {
-  return declaringClass.superclasses()
-    .mapNotNull { it.getOverriddenMethod(this@overrides) }
-    .toSet()
+  return declaringClass.superclasses().mapNotNull { it.getOverriddenMethod(this@overrides) }.toSet()
 }
 
 /** Returns the method that [override] overrides. */
@@ -35,8 +32,8 @@ private fun Class<*>.getOverriddenMethod(override: Method): Method? {
 }
 
 /**
- * Returns a set containing this class and all of its transitive superclasses. The returned set
- * starts with this and iterates in breadth-first order.
+ * Returns a set containing this class and all of its transitive superclasses. The returned set starts with this and
+ * iterates in breadth-first order.
  */
 internal fun Class<*>.superclasses(): Set<Class<*>> {
   val queue = ArrayDeque<Class<*>>()
@@ -56,15 +53,13 @@ internal fun Class<*>.superclasses(): Set<Class<*>> {
 }
 
 /**
- * Attempts to find a non-synthetic method with the same declaring class, name, and parameters. If
- * this is already non-synthetic it is returned immediately. If no non-synthetic method is found
- * this method is returned.
+ * Attempts to find a non-synthetic method with the same declaring class, name, and parameters. If this is already
+ * non-synthetic it is returned immediately. If no non-synthetic method is found this method is returned.
  *
  * ### Synthetic Methods?
  *
- * Sometimes the compiler generates multiple methods with the same name and parameters, but
- * different return types. This is caused by covariant return types. Consider this class:
- *
+ * Sometimes the compiler generates multiple methods with the same name and parameters, but different return types. This
+ * is caused by covariant return types. Consider this class:
  * ```
  * class PointIterator implements Iterator<Point> {
  *   override boolean hasNext() { ... }
@@ -72,9 +67,8 @@ internal fun Class<*>.superclasses(): Set<Class<*>> {
  * }
  * ```
  *
- * When compiled, javac creates a synthetic `next()` method that returns `Object` to conform to the
- * `Iterator` interface:
- *
+ * When compiled, javac creates a synthetic `next()` method that returns `Object` to conform to the `Iterator`
+ * interface:
  * ```
  * public boolean hasNext()
  * public Point next()
@@ -87,10 +81,7 @@ internal fun Method.preferNonSynthetic(): Method {
   if (!isSynthetic) return this
 
   for (peer in declaringClass.methods) {
-    if (!peer.isSynthetic &&
-      peer.name == name &&
-      peer.parameterTypes.contentEquals(parameterTypes)
-    ) {
+    if (!peer.isSynthetic && peer.name == name && peer.parameterTypes.contentEquals(parameterTypes)) {
       return peer
     }
   }
@@ -101,13 +92,10 @@ internal fun Method.preferNonSynthetic(): Method {
 internal val KFunction<*>.javaMethod: Method?
   get() = (this as? FunctionWithOverrides)?.function?.javaMethod ?: this.javaMethod
 
-internal class FunctionWithOverrides<out R>(
-  val function: KFunction<R>
-) : KFunction<R> by function {
+internal class FunctionWithOverrides<out R>(val function: KFunction<R>) : KFunction<R> by function {
   private val methodOverrides = function.javaMethod!!.overrides()
 
-  override val annotations: List<Annotation> =
-    methodOverrides.flatMap { it.annotations.toList() }
+  override val annotations: List<Annotation> = methodOverrides.flatMap { it.annotations.toList() }
 
   override val parameters: List<KParameter> =
     function.parameters.mapIndexed { index, parameter ->
@@ -118,21 +106,17 @@ internal class FunctionWithOverrides<out R>(
             0 -> listOf()
             else -> override.parameters[index - 1].annotations.toList()
           }
-        }
+        },
       )
     }
 
   override fun callBy(args: Map<KParameter, Any?>): R {
-    val parameters = args.mapKeys { (key, _) ->
-      function.parameters[key.index]
-    }
+    val parameters = args.mapKeys { (key, _) -> function.parameters[key.index] }
     return function.callBy(parameters)
   }
 
   suspend fun callSuspendBy(args: Map<KParameter, Any?>): R {
-    val parameters = args.mapKeys { (key, _) ->
-      function.parameters[key.index]
-    }
+    val parameters = args.mapKeys { (key, _) -> function.parameters[key.index] }
     return function.callSuspendBy(parameters)
   }
 
@@ -141,7 +125,5 @@ internal class FunctionWithOverrides<out R>(
   }
 }
 
-private class ParameterWithOverrides(
-  val parameter: KParameter,
-  override val annotations: List<Annotation>,
-) : KParameter by parameter
+private class ParameterWithOverrides(val parameter: KParameter, override val annotations: List<Annotation>) :
+  KParameter by parameter

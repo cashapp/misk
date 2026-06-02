@@ -15,7 +15,6 @@ dependencies {
   api(project(":misk-logging")) // TODO remove once all usages depend on misk-logging directly
   api(project(":misk-sampling")) // TODO remove once all usages depend on misk-sampling directly
   api(project(":misk-tokens")) // TODO remove once all usages depend on misk-tokens directly
-  api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-ssl"))
   implementation(libs.bouncyCastleProvider)
   implementation(libs.kotlinStdLibJdk8)
@@ -36,7 +35,7 @@ dependencies {
   testImplementation(libs.kotestAssertions)
   testImplementation(libs.kotestAssertionsShared)
   testImplementation(libs.kotestCommon)
-  testImplementation(libs.kotestFrameworkApi)
+  testImplementation(libs.kotestFrameworkEngine)
   testRuntimeOnly(libs.junitEngine)
   testRuntimeOnly(libs.kotestJunitRunnerJvm)
 }

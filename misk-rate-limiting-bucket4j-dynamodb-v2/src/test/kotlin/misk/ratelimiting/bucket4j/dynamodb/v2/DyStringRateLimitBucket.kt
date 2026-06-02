@@ -5,6 +5,5 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbParti
 
 @DynamoDbBean
 class DyStringRateLimitBucket {
-  @get:DynamoDbPartitionKey
-  var key: String = ""
+  @get:DynamoDbPartitionKey var key: String = ""
 }

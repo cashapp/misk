@@ -1,24 +1,20 @@
 package misk.web.jetty
 
-import org.eclipse.jetty.io.Connection
-import org.eclipse.jetty.util.component.AbstractLifeCycle
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
+import org.eclipse.jetty.io.Connection
+import org.eclipse.jetty.util.component.AbstractLifeCycle
 
-internal class ConnectionListener(
-  protocol: String,
-  port: Int,
-  private val metrics: ConnectionMetrics
-) : AbstractLifeCycle(), Connection.Listener {
+internal class ConnectionListener(protocol: String, port: Int, private val metrics: ConnectionMetrics) :
+  AbstractLifeCycle(), Connection.Listener {
 
   // not thread safe since it's only used by refreshMetrics
   private var previousSnapshot = Snapshot.empty()
 
   // see the Accumulator doc for thread safety
   private val removedTotals = Accumulator()
-  private val activeConnections =
-    Collections.newSetFromMap(ConcurrentHashMap<ConnectionKey, Boolean>())
+  private val activeConnections = Collections.newSetFromMap(ConcurrentHashMap<ConnectionKey, Boolean>())
   private val labels = ConnectionMetrics.forPort(protocol, port)
 
   override fun onOpened(connection: Connection) {
@@ -82,14 +78,12 @@ internal class ConnectionListener(
     override fun hashCode() = System.identityHashCode(connection)
   }
 
-  /**
-   * An immutable snapshot from an [Accumulator]
-   */
+  /** An immutable snapshot from an [Accumulator] */
   private data class Snapshot(
     val bytesReceived: Long,
     val bytesSent: Long,
     val messagesReceived: Long,
-    val messagesSent: Long
+    val messagesSent: Long,
   ) {
 
     operator fun minus(other: Snapshot): Snapshot {
@@ -97,7 +91,7 @@ internal class ConnectionListener(
         bytesReceived - other.bytesReceived,
         bytesSent - other.bytesSent,
         messagesReceived - other.messagesReceived,
-        messagesSent - other.messagesSent
+        messagesSent - other.messagesSent,
       )
     }
 
@@ -109,22 +103,19 @@ internal class ConnectionListener(
   /**
    * A mutable accumulator of metric data.
    *
-   * This Accumulator is not entirely thread safe as an intentional trade off to avoid locking. The
-   * individual accumulated metrics are thread safe (use AtomicLongs), but the group of metrics is
-   * not updated atomically. When a snapshot is generated it might include a partial set of metrics
-   * from an in-flight addition. Since metrics are inherently lossy and compressed this is a reasonable
-   * trade off to avoid locking every jetty thread.
+   * This Accumulator is not entirely thread safe as an intentional trade off to avoid locking. The individual
+   * accumulated metrics are thread safe (use AtomicLongs), but the group of metrics is not updated atomically. When a
+   * snapshot is generated it might include a partial set of metrics from an in-flight addition. Since metrics are
+   * inherently lossy and compressed this is a reasonable trade off to avoid locking every jetty thread.
    */
   private data class Accumulator(
     private val bytesReceived: AtomicLong = AtomicLong(),
     private val bytesSent: AtomicLong = AtomicLong(),
     private val messagesReceived: AtomicLong = AtomicLong(),
-    private val messagesSent: AtomicLong = AtomicLong()
+    private val messagesSent: AtomicLong = AtomicLong(),
   ) {
 
-    /**
-     * Update the accumulator with metrics from the [Connection].
-     */
+    /** Update the accumulator with metrics from the [Connection]. */
     fun addConnection(connection: Connection) {
       bytesReceived.addAndGet(connection.bytesIn)
       bytesSent.addAndGet(connection.bytesOut)
@@ -132,9 +123,7 @@ internal class ConnectionListener(
       messagesSent.addAndGet(connection.messagesOut)
     }
 
-    /**
-     * Update the accumulator with metrics from a [Snapshot].
-     */
+    /** Update the accumulator with metrics from a [Snapshot]. */
     fun addSnapshot(snapshot: Snapshot) {
       bytesReceived.addAndGet(snapshot.bytesReceived)
       bytesSent.addAndGet(snapshot.bytesSent)
@@ -147,7 +136,7 @@ internal class ConnectionListener(
         bytesReceived.getAndSet(0),
         bytesSent.getAndSet(0),
         messagesReceived.getAndSet(0),
-        messagesSent.getAndSet(0)
+        messagesSent.getAndSet(0),
       )
     }
   }

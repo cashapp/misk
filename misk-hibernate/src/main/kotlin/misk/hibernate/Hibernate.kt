@@ -2,22 +2,20 @@ package misk.hibernate
 
 import com.google.common.collect.ImmutableMultimap
 import com.google.common.collect.Multimap
+import java.lang.reflect.Field
+import java.util.Properties
 import org.hibernate.boot.Metadata
 import org.hibernate.mapping.Component
 import org.hibernate.mapping.PersistentClass
 import org.hibernate.mapping.Property
 import org.hibernate.mapping.SimpleValue
-import java.lang.reflect.Field
-import java.util.Properties
 
 /** Returns all properties (IDs, joined columns, regular columns) of this persistent class. */
 private val PersistentClass.allProperties: List<Property>
   get() {
     val result = mutableListOf<Property>()
 
-    identifierProperty?.let {
-      result.add(it)
-    }
+    identifierProperty?.let { result.add(it) }
 
     @Suppress("UNCHECKED_CAST") // This Hibernate method returns raw types!
     val i = propertyIterator as MutableIterator<Property>
@@ -38,11 +36,14 @@ internal val Metadata.allProperties: Multimap<Class<*>, Property>
         if (value is Component) {
           for (subProperty in value.propertyIterator) {
             if (subProperty is Property) {
-              result.put(Class.forName(value.componentClass.name), subProperty)
+              result.put(
+                Class.forName(value.componentClass.name, false, Thread.currentThread().contextClassLoader),
+                subProperty,
+              )
             }
           }
         } else {
-          result.put(Class.forName(entityBinding.className), property)
+          result.put(Class.forName(entityBinding.className, false, Thread.currentThread().contextClassLoader), property)
         }
       }
     }
@@ -70,7 +71,7 @@ internal fun Properties.getField(name: String): Field? {
   val declaringClassName = getProperty("${name}DeclaringClass") ?: return null
   val fieldName = getProperty("${name}Name") ?: return null
 
-  val entityClass = Class.forName(declaringClassName)
+  val entityClass = Class.forName(declaringClassName, false, Thread.currentThread().contextClassLoader)
   return entityClass.getDeclaredField(fieldName)
 }
 

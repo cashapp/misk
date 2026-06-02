@@ -24,13 +24,11 @@ internal class RetriesTest {
       runBlocking {
         retryWithHooks(
           policy,
-          beforeRetryHook = {
-            reads++
-          },
+          beforeRetryHook = { reads++ },
           op = {
             writes++
             throw DummyException()
-          }
+          },
         )
       }
     }
@@ -50,13 +48,11 @@ internal class RetriesTest {
       runBlocking {
         retryWithHooks(
           policy,
-          beforeRetryHook = {
-            reads++
-          },
+          beforeRetryHook = { reads++ },
           op = {
             writes++
             throw DummyException()
-          }
+          },
         )
       }
     }

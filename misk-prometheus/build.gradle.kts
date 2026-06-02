@@ -10,7 +10,7 @@ dependencies {
   api(libs.guava)
   api(libs.jakartaInject)
   api(project(":misk-inject"))
-  api(project(":wisp:wisp-config"))
+  api(project(":misk-config"))
   implementation(libs.guice)
   implementation(libs.loggingApi)
   implementation(libs.prometheusClient)

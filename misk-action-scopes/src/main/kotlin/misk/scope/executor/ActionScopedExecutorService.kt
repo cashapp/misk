@@ -2,19 +2,16 @@ package misk.scope.executor
 
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import misk.concurrent.WrappingListeningExecutorService
-import misk.scope.ActionScope
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
+import misk.concurrent.WrappingListeningExecutorService
+import misk.scope.ActionScope
 
 /**
- * Wraps a [ListeningExecutorService] to propagate the current action scope to any tasks
- * submitted by the current thread
+ * Wraps a [ListeningExecutorService] to propagate the current action scope to any tasks submitted by the current thread
  */
-class ActionScopedExecutorService(
-  target: ExecutorService,
-  private val scope: ActionScope
-) : WrappingListeningExecutorService() {
+class ActionScopedExecutorService(target: ExecutorService, private val scope: ActionScope) :
+  WrappingListeningExecutorService() {
 
   private val target = MoreExecutors.listeningDecorator(target)
 

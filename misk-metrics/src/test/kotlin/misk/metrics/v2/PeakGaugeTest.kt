@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test
 internal class PeakGaugeTest {
 
   /**
-   * Verifies that a peak gauge records the correct maximum value and resets to the initial value
-   * after [PeakGauge.Child.getAndClear]
+   * Verifies that a peak gauge records the correct maximum value and resets to the initial value after
+   * [PeakGauge.Child.getAndClear]
    */
-  @Test fun `records maximum and resets on getAndClear`() {
-    val builder =
-      PeakGauge.builder("some_name", "some help text").labelNames("some_label_name").create();
+  @Test
+  fun `records maximum and resets on getAndClear`() {
+    val builder = PeakGauge.builder("some_name", "some help text").labelNames("some_label_name").create()
     val gauge = builder.labels("some_label_value")
 
     // 0 is our implicit initial value
@@ -34,14 +34,11 @@ internal class PeakGaugeTest {
     assertThat(gauge.getAndClear()).isEqualTo(20.0)
   }
 
-  /**
-   * Verifies that [PeakGauge.collect] returns correct information and from and resets each
-   * [PeakGauge.Child].
-   */
-  @Test fun `collection returns correct information and resets each child`() {
+  /** Verifies that [PeakGauge.collect] returns correct information and from and resets each [PeakGauge.Child]. */
+  @Test
+  fun `collection returns correct information and resets each child`() {
     val builder =
-      PeakGauge.builder("some_name", "some help text")
-        .labelNames("some_label_name", "another_label_name").create();
+      PeakGauge.builder("some_name", "some help text").labelNames("some_label_name", "another_label_name").create()
     val gauge1 = builder.labels("some_label_value", "another_label_value")
     gauge1.record(36.0)
     gauge1.record(37.0)
@@ -58,7 +55,7 @@ internal class PeakGaugeTest {
     assertThat(gauge2.getAndClear()).isEqualTo(0.0)
 
     // We have one set of label names
-    assertThat(collection).hasSize(1);
+    assertThat(collection).hasSize(1)
 
     // We have 2 gauges with distinct label values: gauge1 and gauge2
     val byValue = collection[0].samples.groupBy { it.value }
@@ -66,20 +63,11 @@ internal class PeakGaugeTest {
 
     // The first gauge should have peak of 37
     assertThat(byValue.get(37.0)).hasSize(1)
-    assertThat(byValue.get(37.0)!!.get(0).labelValues).isEqualTo(
-      listOf(
-        "some_label_value",
-        "another_label_value"
-      )
-    )
+    assertThat(byValue.get(37.0)!!.get(0).labelValues).isEqualTo(listOf("some_label_value", "another_label_value"))
 
     // The second gauge should have a peak of 31
     assertThat(byValue.get(31.0)).hasSize(1)
-    assertThat(byValue.get(31.0)!!.get(0).labelValues).isEqualTo(
-      listOf(
-        "different_label_value",
-        "another_different_label_value"
-      )
-    )
+    assertThat(byValue.get(31.0)!!.get(0).labelValues)
+      .isEqualTo(listOf("different_label_value", "another_different_label_value"))
   }
 }

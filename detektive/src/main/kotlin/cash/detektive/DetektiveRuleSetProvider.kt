@@ -10,11 +10,6 @@ class DetektiveRuleSetProvider : RuleSetProvider {
   override val ruleSetId: String = "detektive"
 
   override fun instance(config: Config): RuleSet {
-    return RuleSet(
-      ruleSetId,
-      listOf(
-        AnnotatePublicApisWithJvmOverloads(config)
-      )
-    )
+    return RuleSet(ruleSetId, listOf(AnnotatePublicApisWithJvmOverloads(config)))
   }
 }

@@ -4,6 +4,7 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    open-pull-requests-limit: 10
     ignore:
       - dependency-name: "com.datadoghq:dd-trace-ot"
       - dependency-name: "com.datadoghq:dd-trace-api"
@@ -11,3 +12,4 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    open-pull-requests-limit: 10

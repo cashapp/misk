@@ -15,10 +15,8 @@ fun <T : DbEntity<T>> idDescPaginator(idPath: String = "id"): Paginator<T, Query
   return IdPaginator(idPath, Operator.LT)
 }
 
-internal class IdPaginator<T : DbEntity<T>>(
-  private val idPath: String,
-  private val operator: Operator
-) : Paginator<T, Query<T>> {
+internal class IdPaginator<T : DbEntity<T>>(private val idPath: String, private val operator: Operator) :
+  Paginator<T, Query<T>> {
 
   init {
     require(operator == Operator.GT || operator == Operator.LT)

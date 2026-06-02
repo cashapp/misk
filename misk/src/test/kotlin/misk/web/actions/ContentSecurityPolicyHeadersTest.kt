@@ -1,6 +1,8 @@
 package misk.web.actions
 
 import com.google.inject.util.Modules
+import jakarta.inject.Inject
+import kotlin.test.assertEquals
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientFactory
 import misk.inject.KAbstractModule
@@ -18,13 +20,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
-import kotlin.test.assertEquals
 
 @MiskTest(startService = true)
 class ContentSecurityPolicyHeadersTest {
-  @MiskTestModule
-  val module = Modules.combine(TestWebActionModule(), TestModule())
+  @MiskTestModule val module = Modules.combine(TestWebActionModule(), TestModule())
   @Inject private lateinit var httpClientFactory: HttpClientFactory
 
   @Inject private lateinit var jetty: JettyService
@@ -47,8 +46,7 @@ class ContentSecurityPolicyHeadersTest {
     val client = createOkHttpClient()
 
     val baseUrl = jetty.httpServerUrl
-    val requestBuilder = Request.Builder()
-      .url(baseUrl.resolve("/csp")!!)
+    val requestBuilder = Request.Builder().url(baseUrl.resolve("/csp")!!)
 
     val call = client.newCall(requestBuilder.build())
     return call.execute()
@@ -59,9 +57,6 @@ class ContentSecurityPolicyHeadersTest {
     return httpClientFactory.create(config)
   }
 
-
-
-
   class CspWebAction @Inject constructor() : WebAction {
     @ContentSecurityPolicy(["rule1", "rule2"])
     @Get("/csp")
@@ -69,5 +64,4 @@ class ContentSecurityPolicyHeadersTest {
     @Unauthenticated
     fun get() = "hello world".toResponseBody()
   }
-
 }

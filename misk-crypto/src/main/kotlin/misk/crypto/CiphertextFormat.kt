@@ -1,6 +1,5 @@
 package misk.crypto
 
-import com.google.common.annotations.VisibleForTesting
 import com.google.common.io.ByteStreams
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -10,11 +9,9 @@ import java.security.GeneralSecurityException
 /**
  * Wraps a ciphertext and the encryption context associated with it in a [ByteArray].
  *
- * Misk uses Tink to encrypt data, which uses Encryption Context (EC),
- * or Additional Authentication Data (AAD) to authenticate ciphertext.
- * This class introduces a new, higher level abstraction, that’ll be used instead of the
- * AAD byte array interfaces Tink exposes to users.
- * The main reasons to do this are:
+ * Misk uses Tink to encrypt data, which uses Encryption Context (EC), or Additional Authentication Data (AAD) to
+ * authenticate ciphertext. This class introduces a new, higher level abstraction, that’ll be used instead of the AAD
+ * byte array interfaces Tink exposes to users. The main reasons to do this are:
  * - Preventing the misuse of AAD
  * - Preventing undecipherable ciphertext from being created
  * - Exposing a friendlier user interface
@@ -23,8 +20,8 @@ import java.security.GeneralSecurityException
  * - `Map<String, String>`
  * - The map must contain at least 1 entry
  * - No blank/empty/null strings in either the map's keys or values
- * - The map is optional, and can be completely omitted from the encryption operation
- * The encryption context will be serialized using the following format:
+ * - The map is optional, and can be completely omitted from the encryption operation The encryption context will be
+ *   serialized using the following format:
  * ```
  * [ AAD:
  * [ varint: pair count ]
@@ -49,20 +46,15 @@ import java.security.GeneralSecurityException
 class CiphertextFormat private constructor() {
 
   companion object {
-    /**
-     * Current version of the encryption packet schema
-     */
+    /** Current version of the encryption packet schema */
     const val CURRENT_VERSION = 0xEE
 
-    /**
-     * Serializes the given [ciphertext] and associated encryption context to a [ByteArray]
-     */
+    /** Serializes the given [ciphertext] and associated encryption context to a [ByteArray] */
     @Deprecated(
-      message = "This function has been moved to its own library. " +
-        "See https://github.com/squareup/cash-ciphertext-format",
+      message =
+        "This function has been moved to its own library. " + "See https://github.com/squareup/cash-ciphertext-format",
       level = DeprecationLevel.WARNING,
-      replaceWith = ReplaceWith("CiphertextFormat.serialize",
-        "com.squareup.cash.crypto.format.CiphertextFormat")
+      replaceWith = ReplaceWith("CiphertextFormat.serialize", "com.squareup.cash.crypto.format.CiphertextFormat"),
     )
     fun serialize(ciphertext: ByteArray, aad: ByteArray?): ByteArray {
       val outputStream = ByteStreams.newDataOutput()
@@ -80,31 +72,29 @@ class CiphertextFormat private constructor() {
     /**
      * Extracts the ciphertext and associated authentication data from the [serialized] ByteArray.
      *
-     * This method also compares the given [context] to the serialized AAD
-     * and will throw an exception if they do not match.
+     * This method also compares the given [context] to the serialized AAD and will throw an exception if they do not
+     * match.
      */
     @Deprecated(
-      message = "This function has been moved to its own library. " +
-        "See https://github.com/squareup/cash-ciphertext-format",
+      message =
+        "This function has been moved to its own library. " + "See https://github.com/squareup/cash-ciphertext-format",
       level = DeprecationLevel.WARNING,
-      replaceWith = ReplaceWith("CiphertextFormat.deserialize",
-        "com.squareup.cash.crypto.format.CiphertextFormat")
+      replaceWith = ReplaceWith("CiphertextFormat.deserialize", "com.squareup.cash.crypto.format.CiphertextFormat"),
     )
-    fun deserialize(
-      serialized: ByteArray,
-      context: Map<String, String>?
-    ): Pair<ByteArray, ByteArray?> {
+    fun deserialize(serialized: ByteArray, context: Map<String, String>?): Pair<ByteArray, ByteArray?> {
       val src = DataInputStream(ByteArrayInputStream(serialized))
       val version = src.readByte()
       if (version != CURRENT_VERSION.toByte()) {
         throw InvalidCiphertextFormatException("invalid version: $version")
       }
       val ecSize = decodeVarInt(src)
-      val aad = if (ecSize > 0) {
-        ByteArray(ecSize)
-      } else {
-        null
-      }?.also { src.readFully(it) }
+      val aad =
+        if (ecSize > 0) {
+            ByteArray(ecSize)
+          } else {
+            null
+          }
+          ?.also { src.readFully(it) }
 
       val serializedEncryptionContext = serializeEncryptionContext(context)
       if (aad == null && serializedEncryptionContext != null) {
@@ -120,8 +110,7 @@ class CiphertextFormat private constructor() {
     }
 
     /**
-     * Serializes the encryption context to a [ByteArray] so it could be passed to Tink's
-     * encryption/decryption methods.
+     * Serializes the encryption context to a [ByteArray] so it could be passed to Tink's encryption/decryption methods.
      */
     private fun serializeEncryptionContext(context: Map<String, String>?): ByteArray? {
       if (context == null || context.isEmpty()) {
@@ -219,10 +208,7 @@ class CiphertextFormat private constructor() {
       var ciphertext: ByteArray? = null
       if (bitmask != 0) {
         context.putAll(
-          ContextKey.values()
-            .filter { it.index and bitmask != 0 }
-            .map { it.name.lowercase() to null }
-            .toMap()
+          ContextKey.values().filter { it.index and bitmask != 0 }.map { it.name.lowercase() to null }.toMap()
         )
       }
 
@@ -231,18 +217,14 @@ class CiphertextFormat private constructor() {
           val size = src.readUnsignedShort()
           val serializedExpandedContextDescription = ByteArray(size)
           src.readFully(serializedExpandedContextDescription)
-          val expanded = deserializeEncryptionContext(
-            serializedExpandedContextDescription.toString(Charsets.UTF_8)
-          )
+          val expanded = deserializeEncryptionContext(serializedExpandedContextDescription.toString(Charsets.UTF_8))
           context.putAll(expanded!!)
         }
         EntryType.ENCRYPTION_CONTEXT.type -> {
           val size = src.readUnsignedShort()
           val serializedContext = ByteArray(size)
           src.readFully(serializedContext)
-          context = deserializeEncryptionContext(
-            serializedContext.toString(Charsets.UTF_8)
-          )!!.toMutableMap()
+          context = deserializeEncryptionContext(serializedContext.toString(Charsets.UTF_8))!!.toMutableMap()
         }
         EntryType.CIPHERTEXT.type -> {
           ciphertext = readCiphertext(src)
@@ -263,7 +245,8 @@ class CiphertextFormat private constructor() {
         return mapOf()
       }
 
-      return serialized.split("|")
+      return serialized
+        .split("|")
         .map { pair ->
           val components = pair.split("=")
           components.first() to components.getOrNull(1)
@@ -277,12 +260,12 @@ class CiphertextFormat private constructor() {
     EXPANDED_CONTEXT_DESCRIPTION(1),
     ENCRYPTION_CONTEXT(2),
     SIZED_CIPHERTEXT(3),
-    CIPHERTEXT(4)
+    CIPHERTEXT(4),
   }
 
   /**
-   * Some common context keys are typically taken from the environment
-   * and can be compactly encoded via a bitmask; keys and their bit offsets are defined below.
+   * Some common context keys are typically taken from the environment and can be compactly encoded via a bitmask; keys
+   * and their bit offsets are defined below.
    *
    * Maximum value types supported is 15.
    */
@@ -299,12 +282,12 @@ class CiphertextFormat private constructor() {
   }
 
   class InvalidCiphertextFormatException(message: String) : GeneralSecurityException(message)
-  class EncryptionContextMismatchException(message: String) : GeneralSecurityException(message)
-  class MissingEncryptionContextException :
-    GeneralSecurityException("expected a non empty map of strings")
 
-  class UnexpectedEncryptionContextException :
-    GeneralSecurityException("expected null as encryption context")
+  class EncryptionContextMismatchException(message: String) : GeneralSecurityException(message)
+
+  class MissingEncryptionContextException : GeneralSecurityException("expected a non empty map of strings")
+
+  class UnexpectedEncryptionContextException : GeneralSecurityException("expected null as encryption context")
 
   class InvalidEncryptionContextException(message: String) : GeneralSecurityException(message)
 }

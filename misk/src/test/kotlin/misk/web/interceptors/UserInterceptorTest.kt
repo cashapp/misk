@@ -1,5 +1,6 @@
 package misk.web.interceptors
 
+import jakarta.inject.Inject
 import misk.Action
 import misk.ApplicationInterceptor
 import misk.Chain
@@ -23,12 +24,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class UserInterceptorTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject internal lateinit var jettyService: JettyService
 
@@ -76,9 +75,7 @@ class UserInterceptorTest {
         "text" -> {
           chain.httpCall.statusCode = 410
           chain.httpCall.addResponseHeaders(TEXT_HEADERS)
-          chain.httpCall.takeResponseBody()!!.use {
-            it.writeUtf8("net text response")
-          }
+          chain.httpCall.takeResponseBody()!!.use { it.writeUtf8("net text response") }
         }
         "throw" -> throw Exception("Don't throw exceptions like this")
         else -> chain.proceed(chain.httpCall)
@@ -91,12 +88,13 @@ class UserInterceptorTest {
   }
 
   internal class UserCreatedInterceptor : ApplicationInterceptor {
-    override fun intercept(chain: Chain): Any = when (chain.args.firstOrNull()) {
-      "text" -> "text"
-      "textResponse" -> Response("text response", TEXT_HEADERS, 418)
-      "throw" -> throw Exception("Don't throw exceptions like this")
-      else -> chain.proceed(chain.args)
-    }
+    override fun intercept(chain: Chain): Any =
+      when (chain.args.firstOrNull()) {
+        "text" -> "text"
+        "textResponse" -> Response("text response", TEXT_HEADERS, 418)
+        "throw" -> throw Exception("Don't throw exceptions like this")
+        else -> chain.proceed(chain.args)
+      }
 
     class Factory : ApplicationInterceptor.Factory {
       override fun create(action: Action): ApplicationInterceptor? = UserCreatedInterceptor()
@@ -113,12 +111,13 @@ class UserInterceptorTest {
 
   internal data class TestActionResponse(val text: String)
 
-  private fun get(path: String, mode: String = "normal"): okhttp3.Response = call(
-    Request.Builder()
-      .addHeader("mode", mode)
-      .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
-      .get()
-  )
+  private fun get(path: String, mode: String = "normal"): okhttp3.Response =
+    call(
+      Request.Builder()
+        .addHeader("mode", mode)
+        .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
+        .get()
+    )
 
   private fun call(request: Request.Builder): okhttp3.Response {
     val httpClient = OkHttpClient()
@@ -138,8 +137,6 @@ class UserInterceptorTest {
   }
 
   companion object {
-    internal val TEXT_HEADERS: Headers = Headers.Builder()
-      .set("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
-      .build()
+    internal val TEXT_HEADERS: Headers = Headers.Builder().set("Content-Type", MediaTypes.TEXT_PLAIN_UTF8).build()
   }
 }

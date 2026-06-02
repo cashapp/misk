@@ -16,8 +16,6 @@ object ExemplarLogging {
 
   /** Don't dump uncaught exceptions to System.out; format them properly with logging. */
   private fun installUncaughtExceptionHandler() {
-    Thread.setDefaultUncaughtExceptionHandler { _, throwable ->
-      rootLogger.error("Uncaught exception!", throwable)
-    }
+    Thread.setDefaultUncaughtExceptionHandler { _, throwable -> rootLogger.error("Uncaught exception!", throwable) }
   }
 }

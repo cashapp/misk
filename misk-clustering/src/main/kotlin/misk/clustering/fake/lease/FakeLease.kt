@@ -2,58 +2,50 @@ package misk.clustering.fake.lease
 
 import wisp.lease.Lease
 
-class FakeLease(
-  override val name: String,
-  private val manager: FakeLeaseManager
-) : Lease {
+class FakeLease(override val name: String, private val manager: FakeLeaseManager) : Lease {
   private val listeners = mutableListOf<Lease.StateChangeListener>()
 
-  override fun checkHeld() = manager.isLeaseHeld(name)
+  override fun shouldHold(): Boolean = true
 
-  /**
-   * @return true if the other process holds the lease.
-   */
+  override fun isHeld() = manager.isLeaseHeld(name)
+
+  override fun checkHeld() = isHeld()
+
+  /** @return true if the other process holds the lease. */
   override fun checkHeldElsewhere() = manager.isLeaseHeldElsewhere(name)
 
-  /**
-   * @return true if this process acquires the lease.
-   */
+  /** @return true if this process acquires the lease. */
   override fun acquire(): Boolean {
-    val result = checkHeld()
-    if (checkHeld()) {
+    val result = isHeld()
+    if (result) {
       notifyAfterAcquire()
     }
     return result
   }
 
-  /**
-   * Release the lease.  This will return true if released.  Note that it will return false
-   * if the lease was not held.
-   */
+  /** Release the lease. This will return true if released. Note that it will return false if the lease was not held. */
   override fun release(): Boolean {
-    if (!checkHeld()) {
+    if (!isHeld()) {
       return false
     }
     notifyBeforeRelease()
     return true
   }
 
+  override fun release(lazy: Boolean): Boolean = release()
+
   override fun addListener(listener: Lease.StateChangeListener) {
     listeners.add(listener)
-    if (checkHeld()) {
+    if (isHeld()) {
       listener.afterAcquire(this)
     }
   }
 
   fun notifyAfterAcquire() {
-    listeners.forEach {
-      it.afterAcquire(this)
-    }
+    listeners.forEach { it.afterAcquire(this) }
   }
 
   fun notifyBeforeRelease() {
-    listeners.forEach {
-      it.beforeRelease(this)
-    }
+    listeners.forEach { it.beforeRelease(this) }
   }
 }

@@ -12,15 +12,13 @@ internal class WebActionExceptionMapperTest {
   fun clientExceptionLoggingLevel() {
     val config = ActionExceptionLogLevelConfig(client_error_level = Level.INFO)
     val mapper = WebActionExceptionMapper(config)
-    assertThat(mapper.loggingLevel(NotFoundException()))
-      .isEqualTo(Level.INFO)
+    assertThat(mapper.loggingLevel(NotFoundException())).isEqualTo(Level.INFO)
   }
 
   @Test
   fun serverExceptionLoggingLevel() {
     val config = ActionExceptionLogLevelConfig(server_error_level = Level.INFO)
     val mapper = WebActionExceptionMapper(config)
-    assertThat(mapper.loggingLevel(ResourceUnavailableException()))
-      .isEqualTo(Level.INFO)
+    assertThat(mapper.loggingLevel(ResourceUnavailableException())).isEqualTo(Level.INFO)
   }
 }

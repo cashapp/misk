@@ -1,14 +1,13 @@
 package misk.web.jetty
 
 import com.google.common.util.concurrent.AbstractScheduledService
-import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.util.concurrent.TimeUnit
 
 @Singleton
-internal class JettyThreadPoolMetricsCollector @Inject internal constructor(
-  private val metrics: ThreadPoolMetrics
-) : AbstractScheduledService() {
+internal class JettyThreadPoolMetricsCollector @Inject internal constructor(private val metrics: ThreadPoolMetrics) :
+  AbstractScheduledService() {
   override fun scheduler(): Scheduler =
     Scheduler.newFixedDelaySchedule(REFRESH_RATE_MS, REFRESH_RATE_MS, TimeUnit.MILLISECONDS)
 

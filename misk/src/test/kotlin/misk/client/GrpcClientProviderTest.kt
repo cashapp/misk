@@ -15,6 +15,9 @@ import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.time.Duration
+import java.util.concurrent.LinkedBlockingDeque
+import kotlin.test.assertFailsWith
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
@@ -32,14 +35,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import java.time.Duration
-import java.util.concurrent.LinkedBlockingDeque
-import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 internal class GrpcClientProviderTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var jetty: JettyService
   private lateinit var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
@@ -56,70 +55,65 @@ internal class GrpcClientProviderTest {
   @Disabled("gRPC tests are flaky, see https://github.com/cashapp/misk/issues/1853")
   @Test
   fun happyPath() {
-    assertThat(log).containsExactlyInAnyOrder(
-      "create robots.Locate[${Robot::class.qualifiedName}]: ${Warehouse::class.qualifiedName}",
-      "create robots.SayHello[${HelloRequest::class.qualifiedName}]: " +
-        "${HelloReply::class.qualifiedName}"
-    )
+    assertThat(log)
+      .containsExactlyInAnyOrder(
+        "create robots.Locate[${Robot::class.qualifiedName}]: ${Warehouse::class.qualifiedName}",
+        "create robots.SayHello[${HelloRequest::class.qualifiedName}]: " + "${HelloReply::class.qualifiedName}",
+      )
     log.clear()
 
-    val request1 = HelloRequest.Builder()
-      .name("r2d2")
-      .build()
-    assertThat(robotLocator.SayHello().executeBlocking(request1)).isEqualTo(
-      HelloReply.Builder()
-        .message("boop r2d2")
-        .build()
-    )
-    assertThat(log).containsExactly(
-      ">> ApplicationInterceptor robots.SayHello /RobotLocator/SayHello",
-      ">> NetworkInterceptor robots.SayHello /RobotLocator/SayHello",
-      "<< NetworkInterceptor robots.SayHello /RobotLocator/SayHello 200",
-      "<< ApplicationInterceptor robots.SayHello /RobotLocator/SayHello 200",
-    )
+    val request1 = HelloRequest.Builder().name("r2d2").build()
+    assertThat(robotLocator.SayHello().executeBlocking(request1))
+      .isEqualTo(HelloReply.Builder().message("boop r2d2").build())
+    assertThat(log)
+      .containsExactly(
+        ">> ApplicationInterceptor robots.SayHello /RobotLocator/SayHello",
+        ">> NetworkInterceptor robots.SayHello /RobotLocator/SayHello",
+        "<< NetworkInterceptor robots.SayHello /RobotLocator/SayHello 200",
+        "<< ApplicationInterceptor robots.SayHello /RobotLocator/SayHello 200",
+      )
     log.clear()
 
-    val request2 = Robot.Builder()
-      .robot_id(3)
-      .robot_token("c3po")
-      .build()
-    assertThat(robotLocator.Locate().executeBlocking(request2)).isEqualTo(
-      Warehouse.Builder()
-        .warehouse_id(100L)
-        .robots(mapOf(3 to request2))
-        .build()
-    )
-    assertThat(log).containsExactly(
-      ">> ApplicationInterceptor robots.Locate /RobotLocator/Locate",
-      ">> NetworkInterceptor robots.Locate /RobotLocator/Locate",
-      "<< NetworkInterceptor robots.Locate /RobotLocator/Locate 200",
-      "<< ApplicationInterceptor robots.Locate /RobotLocator/Locate 200",
-    )
+    val request2 = Robot.Builder().robot_id(3).robot_token("c3po").build()
+    assertThat(robotLocator.Locate().executeBlocking(request2))
+      .isEqualTo(Warehouse.Builder().warehouse_id(100L).robots(mapOf(3 to request2)).build())
+    assertThat(log)
+      .containsExactly(
+        ">> ApplicationInterceptor robots.Locate /RobotLocator/Locate",
+        ">> NetworkInterceptor robots.Locate /RobotLocator/Locate",
+        "<< NetworkInterceptor robots.Locate /RobotLocator/Locate 200",
+        "<< ApplicationInterceptor robots.Locate /RobotLocator/Locate 200",
+      )
     assertThat(
-      clientMetricsInterceptorFactory.requestDurationSummary!!.labels("robots.SayHello", "200")
-        .get().count.toInt()
-    ).isEqualTo(1)
+        clientMetricsInterceptorFactory.requestDurationSummary!!.labels("robots.SayHello", "200").get().count.toInt()
+      )
+      .isEqualTo(1)
     assertThat(
-      clientMetricsInterceptorFactory.requestDurationHistogram.labels(
-        "robots.SayHello",
-        "200"
-      ).get().buckets.last().toInt()
-    ).isEqualTo(1)
+        clientMetricsInterceptorFactory.requestDurationHistogram
+          .labels("robots.SayHello", "200")
+          .get()
+          .buckets
+          .last()
+          .toInt()
+      )
+      .isEqualTo(1)
   }
 
   @Test
   fun misconfigurationFailsFast() {
-    val exception = assertFailsWith<CreationException> {
-      Guice.createInjector(object : KAbstractModule() {
-        override fun configure() {
-          install(ClientModule(jetty))
-          install(GrpcClientModule.create<MisconfiguredService, GrpcMisconfiguredService>("misconfigured"))
-        }
-      })
-    }
-    assertThat(exception.message).contains(
-      "No HTTP endpoint configured for 'misconfigured'... update your yaml to include it?"
-    )
+    val exception =
+      assertFailsWith<CreationException> {
+        Guice.createInjector(
+          object : KAbstractModule() {
+            override fun configure() {
+              install(ClientModule(jetty))
+              install(GrpcClientModule.create<MisconfiguredService, GrpcMisconfiguredService>("misconfigured"))
+            }
+          }
+        )
+      }
+    assertThat(exception.message)
+      .contains("No HTTP endpoint configured for 'misconfigured'... update your yaml to include it?")
   }
 
   @Test
@@ -133,20 +127,18 @@ internal class GrpcClientProviderTest {
       install(GrpcClientModule.create<RobotLocator, GrpcRobotLocator>("robots"))
       install(ClientNetworkInterceptorsModule())
       multibind<ClientNetworkInterceptor.Factory>().toInstance(SimpleInterceptorFactory())
-      multibind<ClientApplicationInterceptorFactory>().toInstance(
-        object : ClientApplicationInterceptorFactory {
-          override fun create(action: ClientAction) = SimpleApplicationInterceptor(action)
-        })
+      multibind<ClientApplicationInterceptorFactory>()
+        .toInstance(
+          object : ClientApplicationInterceptorFactory {
+            override fun create(action: ClientAction) = SimpleApplicationInterceptor(action)
+          }
+        )
     }
 
     @Provides
     @Singleton
     fun provideHttpClientConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
-        endpoints = mapOf(
-          "robots" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-        )
-      )
+      return HttpClientsConfig(endpoints = mapOf("robots" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())))
     }
   }
 
@@ -178,50 +170,46 @@ internal class GrpcClientProviderTest {
 
   interface RobotLocator : Service {
     fun Locate(): GrpcCall<Robot, Warehouse>
+
     fun SayHello(): GrpcCall<HelloRequest, HelloReply>
   }
 
-  class GrpcRobotLocator(
-    private val client: GrpcClient
-  ) : RobotLocator {
-    override fun Locate(): GrpcCall<Robot, Warehouse> = client.newCall(
-      GrpcMethod(
-        path = "/RobotLocator/Locate",
-        requestAdapter = Robot.ADAPTER,
-        responseAdapter = Warehouse.ADAPTER
+  class GrpcRobotLocator(private val client: GrpcClient) : RobotLocator {
+    override fun Locate(): GrpcCall<Robot, Warehouse> =
+      client.newCall(
+        GrpcMethod(path = "/RobotLocator/Locate", requestAdapter = Robot.ADAPTER, responseAdapter = Warehouse.ADAPTER)
       )
-    )
 
-    override fun SayHello(): GrpcCall<HelloRequest, HelloReply> = client.newCall(
-      GrpcMethod(
-        path = "/RobotLocator/SayHello",
-        requestAdapter = HelloRequest.ADAPTER,
-        responseAdapter = HelloReply.ADAPTER
+    override fun SayHello(): GrpcCall<HelloRequest, HelloReply> =
+      client.newCall(
+        GrpcMethod(
+          path = "/RobotLocator/SayHello",
+          requestAdapter = HelloRequest.ADAPTER,
+          responseAdapter = HelloReply.ADAPTER,
+        )
       )
-    )
   }
 
   interface MisconfiguredService : Service {
     fun SayHello(): GrpcCall<HelloRequest, HelloReply>
   }
 
-  class GrpcMisconfiguredService(
-    private val client: GrpcClient
-  ) : MisconfiguredService {
-    override fun SayHello(): GrpcCall<HelloRequest, HelloReply> = client.newCall(
-      GrpcMethod(
-        path = "/MisconfiguredService/SayHello",
-        requestAdapter = HelloRequest.ADAPTER,
-        responseAdapter = HelloReply.ADAPTER
+  class GrpcMisconfiguredService(private val client: GrpcClient) : MisconfiguredService {
+    override fun SayHello(): GrpcCall<HelloRequest, HelloReply> =
+      client.newCall(
+        GrpcMethod(
+          path = "/MisconfiguredService/SayHello",
+          requestAdapter = HelloRequest.ADAPTER,
+          responseAdapter = HelloReply.ADAPTER,
+        )
       )
-    )
   }
 
   interface RobotLocatorLocateBlockingServer : Service {
     @WireRpc(
       path = "/RobotLocator/Locate",
       requestAdapter = "com.squareup.protos.test.parsing.Robot#ADAPTER",
-      responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER"
+      responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER",
     )
     fun Locate(request: Robot): Warehouse
   }
@@ -230,25 +218,20 @@ internal class GrpcClientProviderTest {
     @WireRpc(
       path = "/RobotLocator/SayHello",
       requestAdapter = "com.squareup.protos.test.grpc.HelloRequest#ADAPTER",
-      responseAdapter = "com.squareup.protos.test.grpc.HelloReply#ADAPTER"
+      responseAdapter = "com.squareup.protos.test.grpc.HelloReply#ADAPTER",
     )
     fun SayHello(request: HelloRequest): HelloReply
   }
 
   class LocateGrpcAction @Inject constructor() : RobotLocatorLocateBlockingServer, WebAction {
     override fun Locate(request: Robot): Warehouse {
-      return Warehouse.Builder()
-        .warehouse_id(100L)
-        .robots(mapOf(request.robot_id to request))
-        .build()
+      return Warehouse.Builder().warehouse_id(100L).robots(mapOf(request.robot_id to request)).build()
     }
   }
 
   class SayHelloGrpcAction @Inject constructor() : RobotLocatorSayHelloBlockingServer, WebAction {
     override fun SayHello(request: HelloRequest): HelloReply {
-      return HelloReply.Builder()
-        .message("boop ${request.name}")
-        .build()
+      return HelloReply.Builder().message("boop ${request.name}").build()
     }
   }
 
@@ -265,29 +248,31 @@ internal class GrpcClientProviderTest {
     @Singleton
     fun provideHttpClientsConfig(jetty: JettyService): HttpClientsConfig {
       return HttpClientsConfig(
-        endpoints = mapOf(
-          "robots" to HttpClientEndpointConfig(
-            url = jetty.httpsServerUrl.toString(),
-            clientConfig = HttpClientConfig(
-              ssl = HttpClientSSLConfig(
-                cert_store = null,
-                trust_store = TrustStoreConfig(
-                  resource = "classpath:/ssl/server_cert.pem",
-                  format = SslLoader.FORMAT_PEM
-                )
-              ),
-              callTimeout = Duration.ofSeconds(5),
-              connectTimeout = Duration.ofSeconds(6),
-              readTimeout = Duration.ofSeconds(7),
-              writeTimeout = Duration.ofSeconds(8),
-              pingInterval = Duration.ofSeconds(9),
-              maxIdleConnections = 10,
-              keepAliveDuration = Duration.ofMinutes(11),
-              maxRequests = 12,
-              maxRequestsPerHost = 13
-            )
+        endpoints =
+          mapOf(
+            "robots" to
+              HttpClientEndpointConfig(
+                url = jetty.httpsServerUrl.toString(),
+                clientConfig =
+                  HttpClientConfig(
+                    ssl =
+                      HttpClientSSLConfig(
+                        cert_store = null,
+                        trust_store =
+                          TrustStoreConfig(resource = "classpath:/ssl/server_cert.pem", format = SslLoader.FORMAT_PEM),
+                      ),
+                    callTimeout = Duration.ofSeconds(5),
+                    connectTimeout = Duration.ofSeconds(6),
+                    readTimeout = Duration.ofSeconds(7),
+                    writeTimeout = Duration.ofSeconds(8),
+                    pingInterval = Duration.ofSeconds(9),
+                    maxIdleConnections = 10,
+                    keepAliveDuration = Duration.ofMinutes(11),
+                    maxRequests = 12,
+                    maxRequestsPerHost = 13,
+                  ),
+              )
           )
-        )
       )
     }
   }

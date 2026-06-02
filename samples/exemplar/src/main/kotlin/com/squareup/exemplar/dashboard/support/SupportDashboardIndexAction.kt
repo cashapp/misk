@@ -11,15 +11,13 @@ import misk.web.mediatype.MediaTypes
 import misk.web.v2.DashboardPageLayout
 
 @Singleton
-class SupportDashboardIndexAction @Inject constructor(
-  private val dashboardPageLayout: DashboardPageLayout,
-) : WebAction {
+class SupportDashboardIndexAction @Inject constructor(private val dashboardPageLayout: DashboardPageLayout) :
+  WebAction {
   @Get("/support/")
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @SupportDashboardAccess
-  fun get(): String = dashboardPageLayout
-    .newBuilder()
-    .build { appName, _, _ ->
+  fun get(): String =
+    dashboardPageLayout.newBuilder().build { appName, _, _ ->
       h1 { +"""This is a custom Support dashboard for $appName""" }
     }
 }

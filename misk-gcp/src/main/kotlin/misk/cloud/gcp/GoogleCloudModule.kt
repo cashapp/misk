@@ -10,23 +10,21 @@ import com.google.cloud.storage.Storage
 import com.google.cloud.storage.StorageOptions
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Provides
+import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.nio.file.Paths
 import misk.ReadyService
 import misk.ServiceModule
 import misk.cloud.gcp.datastore.DatastoreConfig
 import misk.cloud.gcp.storage.LocalStorageRpc
 import misk.cloud.gcp.storage.StorageConfig
 import misk.inject.KAbstractModule
-import wisp.deployment.Deployment
 import misk.logging.getLogger
-import java.nio.file.Paths
-import jakarta.inject.Inject
+import wisp.deployment.Deployment
 
 /** Installs support for talking to real GCP services, either direct or via emulator */
-class GoogleCloudModule(
-  private val datastoreConfig: DatastoreConfig,
-  private val storageConfig: StorageConfig
-) : KAbstractModule() {
+class GoogleCloudModule(private val datastoreConfig: DatastoreConfig, private val storageConfig: StorageConfig) :
+  KAbstractModule() {
   override fun configure() {
     bind<DatastoreConfig>().toInstance(datastoreConfig)
     bind<StorageConfig>().toInstance(storageConfig)
@@ -58,15 +56,12 @@ class GoogleCloudModule(
   @Singleton
   fun provideCloudStorage(credentials: Credentials, config: StorageConfig): Storage {
     if (config.use_local_storage) {
-      val localStorageConfig = config.local_storage
-        ?: throw IllegalArgumentException(
-          "if use_local_storage is true, local_storage.data_dir must be set"
-        )
+      val localStorageConfig =
+        config.local_storage
+          ?: throw IllegalArgumentException("if use_local_storage is true, local_storage.data_dir must be set")
 
       val dataDir = localStorageConfig.data_dir
-      require(dataDir.isNotBlank()) {
-        "if use_local_storage is true, local_storage.data_dir must be set"
-      }
+      require(dataDir.isNotBlank()) { "if use_local_storage is true, local_storage.data_dir must be set" }
 
       val localStorageRpc = LocalStorageRpc(Paths.get(dataDir))
       return StorageOptions.newBuilder()
@@ -92,16 +87,12 @@ class GoogleCloudModule(
 
 /** Logs cloud configuration on startup */
 @Singleton
-private class GoogleCloud @Inject constructor(
-  private val datastore: Datastore,
-  private val storage: Storage
-) : AbstractIdleService() {
+private class GoogleCloud @Inject constructor(private val datastore: Datastore, private val storage: Storage) :
+  AbstractIdleService() {
   override fun startUp() {
     log.info { "running as project ${datastore.options.projectId}" }
     log.info { "connected to datastore on ${datastore.options.host}" }
-    log.info {
-      "connected to GCS as ${storage.options.rpc.javaClass.simpleName} on ${storage.options.host}"
-    }
+    log.info { "connected to GCS as ${storage.options.rpc.javaClass.simpleName} on ${storage.options.host}" }
   }
 
   override fun shutDown() {}

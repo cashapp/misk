@@ -7,11 +7,13 @@ import java.time.ZoneId
 import java.util.Date
 
 object LocalDateAdapter {
-  @FromJson fun fromJson(date: Date?): LocalDate? {
+  @FromJson
+  fun fromJson(date: Date?): LocalDate? {
     return LocalDate.ofInstant(date?.toInstant(), ZoneId.systemDefault())
   }
 
-  @ToJson fun toJson(value: LocalDate?): Date? {
+  @ToJson
+  fun toJson(value: LocalDate?): Date? {
     return when {
       value != null -> Date.from(value.atStartOfDay(ZoneId.systemDefault()).toInstant())
       else -> null

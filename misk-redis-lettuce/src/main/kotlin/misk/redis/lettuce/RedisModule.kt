@@ -4,20 +4,20 @@ import com.google.inject.multibindings.Multibinder
 import io.lettuce.core.AbstractRedisClient
 import io.lettuce.core.codec.RedisCodec
 import io.lettuce.core.codec.StringCodec
+import kotlin.reflect.KClass
 import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.metrics.v2.Metrics
 import misk.redis.lettuce.cluster.RedisClusterModule
 import misk.redis.lettuce.standalone.RedisStandaloneModule
-import kotlin.reflect.KClass
 
 /**
  * A Misk/Guice module for configuring Redis clients and connection management.
  *
- * This module provides Redis connectivity for both standalone and cluster configurations,
- * supporting different key-value type combinations and custom codecs. It automatically
- * handles connection management, pooling, and lifecycle based on the provided configuration.
+ * This module provides Redis connectivity for both standalone and cluster configurations, supporting different
+ * key-value type combinations and custom codecs. It automatically handles connection management, pooling, and lifecycle
+ * based on the provided configuration.
  *
  * Key features:
  * - Support for both standalone and cluster Redis configurations
@@ -101,7 +101,8 @@ import kotlin.reflect.KClass
  * install(redisModule)
  * ```
  */
-class RedisModule<K : Any, V : Any> internal constructor(
+class RedisModule<K : Any, V : Any>
+internal constructor(
   private val keyType: KClass<K>,
   private val valueType: KClass<V>,
   private val config: AbstractRedisConfig,
@@ -116,24 +117,10 @@ class RedisModule<K : Any, V : Any> internal constructor(
 
     when (config) {
       is RedisConfig ->
-        install(
-          RedisStandaloneModule(
-            config = config,
-            keyType = keyType,
-            valueType = valueType,
-            codec = codec,
-          )
-        )
+        install(RedisStandaloneModule(config = config, keyType = keyType, valueType = valueType, codec = codec))
 
       is RedisClusterConfig ->
-        install(
-          RedisClusterModule(
-            config = config,
-            keyType = keyType,
-            valueType = valueType,
-            codec = codec,
-          )
-        )
+        install(RedisClusterModule(config = config, keyType = keyType, valueType = valueType, codec = codec))
     }
     install(ServiceModule<RedisService>().enhancedBy<ReadyService>())
   }
@@ -142,8 +129,8 @@ class RedisModule<K : Any, V : Any> internal constructor(
     /**
      * Creates a [RedisModule] with explicit key and value types.
      *
-     * This factory method allows full control over the Redis configuration, including
-     * key/value types and the codec used for serialization.
+     * This factory method allows full control over the Redis configuration, including key/value types and the codec
+     * used for serialization.
      */
     fun <K : Any, V : Any> create(
       keyType: KClass<K>,
@@ -155,8 +142,8 @@ class RedisModule<K : Any, V : Any> internal constructor(
     /**
      * Creates a [RedisModule] with reified type parameters.
      *
-     * This factory method uses Kotlin's reified generics to automatically determine
-     * the key and value types, while still allowing custom codec configuration.
+     * This factory method uses Kotlin's reified generics to automatically determine the key and value types, while
+     * still allowing custom codec configuration.
      *
      * Example:
      * ```kotlin
@@ -167,17 +154,14 @@ class RedisModule<K : Any, V : Any> internal constructor(
      * ```
      */
     @Suppress("SameParameterValue")
-    inline fun <reified K : Any, reified V : Any> create(
-      config: AbstractRedisConfig,
-      codec: RedisCodec<K, V>,
-    ) = create(K::class, V::class, config, codec)
+    inline fun <reified K : Any, reified V : Any> create(config: AbstractRedisConfig, codec: RedisCodec<K, V>) =
+      create(K::class, V::class, config, codec)
 
     /**
      * Creates a [RedisModule] with default String codec.
      *
-     * This is a convenience factory method that creates a module using UTF-8 String
-     * codec for both keys and values. It's suitable for simple use cases where both
-     * keys and values are strings.
+     * This is a convenience factory method that creates a module using UTF-8 String codec for both keys and values.
+     * It's suitable for simple use cases where both keys and values are strings.
      *
      * Example:
      * ```kotlin
@@ -192,8 +176,6 @@ class RedisModule<K : Any, V : Any> internal constructor(
      * )
      * ```
      */
-    fun create(
-      config: AbstractRedisConfig,
-    ) = create(config, StringCodec.UTF8)
+    fun create(config: AbstractRedisConfig) = create(config, StringCodec.UTF8)
   }
 }

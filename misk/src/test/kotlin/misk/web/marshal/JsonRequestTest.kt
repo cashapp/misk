@@ -1,6 +1,8 @@
 package misk.web.marshal
 
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
+import java.io.ByteArrayInputStream
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -19,15 +21,12 @@ import okio.buffer
 import okio.source
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.io.ByteArrayInputStream
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class JsonRequestTest {
   data class Packet(val message: String)
 
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject lateinit var moshi: Moshi
   @Inject lateinit var webTestClient: WebTestClient
@@ -56,7 +55,8 @@ internal class JsonRequestTest {
 
   class PassAsString @Inject constructor() : WebAction {
     @Inject lateinit var moshi: Moshi
-    private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
+    private val packetJsonAdapter
+      get() = moshi.adapter(Packet::class.java)
 
     @Post("/as-string")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
@@ -69,7 +69,8 @@ internal class JsonRequestTest {
 
   class PassAsByteString @Inject constructor() : WebAction {
     @Inject lateinit var moshi: Moshi
-    private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
+    private val packetJsonAdapter
+      get() = moshi.adapter(Packet::class.java)
 
     @Post("/as-byte-string")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
@@ -91,9 +92,12 @@ internal class JsonRequestTest {
     }
   }
 
-  private fun post(path: String, packet: Packet): Packet = webTestClient.post(path, packet)
-    .apply {
-      assertThat(response.code).isEqualTo(200)
-      assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.APPLICATION_JSON)
-    }.parseJson()
+  private fun post(path: String, packet: Packet): Packet =
+    webTestClient
+      .post(path, packet)
+      .apply {
+        assertThat(response.code).isEqualTo(200)
+        assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.APPLICATION_JSON)
+      }
+      .parseJson()
 }

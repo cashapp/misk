@@ -3,18 +3,11 @@
  */
 package misk.jooq.testgen.tables.references
 
-
 import misk.jooq.testgen.tables.Movie
 import misk.jooq.testgen.tables.RecordSignatureTest
 
-
-
-/**
- * The table <code>jooq.movie</code>.
- */
+/** The table <code>jooq.movie</code>. */
 val MOVIE: Movie = Movie.MOVIE
 
-/**
- * The table <code>jooq.record_signature_test</code>.
- */
+/** The table <code>jooq.record_signature_test</code>. */
 val RECORD_SIGNATURE_TEST: RecordSignatureTest = RecordSignatureTest.RECORD_SIGNATURE_TEST

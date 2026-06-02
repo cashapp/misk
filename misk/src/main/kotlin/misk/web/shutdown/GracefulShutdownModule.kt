@@ -9,19 +9,15 @@ import misk.web.WebConfig
 import misk.web.jetty.JettyHealthService.Companion.jettyHealthServiceEnabled
 import misk.web.jetty.JettyService
 
-internal class GracefulShutdownModule (private val config: WebConfig): KAbstractModule() {
+internal class GracefulShutdownModule(private val config: WebConfig) : KAbstractModule() {
   @OptIn(ExperimentalMiskApi::class)
   override fun configure() {
     if (!config.jettyHealthServiceEnabled() || config.graceful_shutdown_config?.disabled != false) {
       return
     }
 
-    install(
-      ServiceModule<GracefulShutdownService>()
-        .dependsOn<JettyService>()
-    )
+    install(ServiceModule<GracefulShutdownService>().dependsOn<JettyService>())
 
-    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-      .to<GracefulShutdownInterceptorFactory>()
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class).to<GracefulShutdownInterceptorFactory>()
   }
 }

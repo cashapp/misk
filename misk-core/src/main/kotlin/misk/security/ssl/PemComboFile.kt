@@ -1,29 +1,28 @@
 package misk.security.ssl
 
-import okio.Buffer
-import okio.BufferedSource
-import okio.ByteString
-import okio.ByteString.Companion.decodeBase64
-import org.bouncycastle.asn1.ASN1Sequence
-import org.bouncycastle.asn1.pkcs.RSAPrivateKey
 import java.io.IOException
 import java.security.KeyStore
 import java.security.cert.Certificate
 import java.security.cert.CertificateFactory
 import java.security.spec.KeySpec
 import java.security.spec.RSAPrivateCrtKeySpec
+import okio.Buffer
+import okio.BufferedSource
+import okio.ByteString
+import okio.ByteString.Companion.decodeBase64
+import org.bouncycastle.asn1.ASN1Sequence
+import org.bouncycastle.asn1.pkcs.RSAPrivateKey
 
 /**
- * A file containing a mix of PEM-encoded certificates and PEM-encoded private
- * keys. Can be used both for trust stores (which certificate authorities a TLS
- * client trusts) and also for TLS servers (which certificate chain a TLS server
+ * A file containing a mix of PEM-encoded certificates and PEM-encoded private keys. Can be used both for trust stores
+ * (which certificate authorities a TLS client trusts) and also for TLS servers (which certificate chain a TLS server
  * serves).
  */
 internal data class PemComboFile(
   val certificates: List<ByteString>,
   val privateRsaKeys: List<ByteString>,
   val privateKeys: List<ByteString>,
-  val passphrase: String
+  val passphrase: String,
 ) {
   fun newEmptyKeyStore(): KeyStore {
     val password = passphrase.toCharArray() // Any password will work.
@@ -35,9 +34,7 @@ internal data class PemComboFile(
 
   fun decodeCertificates(): List<Certificate> {
     val certificateFactory = CertificateFactory.getInstance("X.509")
-    return certificates.map {
-      certificateFactory.generateCertificate(Buffer().write(it).inputStream())
-    }
+    return certificates.map { certificateFactory.generateCertificate(Buffer().write(it).inputStream()) }
   }
 
   companion object {
@@ -52,32 +49,20 @@ internal data class PemComboFile(
 
         when {
           line.matches(Regex("-+BEGIN CERTIFICATE-+")) -> {
-            certificates += decodeBase64Until(
-              lines,
-              Regex("-+END CERTIFICATE-+")
-            )
+            certificates += decodeBase64Until(lines, Regex("-+END CERTIFICATE-+"))
           }
           line.matches(Regex("-+BEGIN RSA PRIVATE KEY-+")) -> {
-            privateRsaKeys += decodeBase64Until(
-              lines,
-              Regex("-+END RSA PRIVATE KEY-+")
-            )
+            privateRsaKeys += decodeBase64Until(lines, Regex("-+END RSA PRIVATE KEY-+"))
           }
           line.matches(Regex("-+BEGIN PRIVATE KEY-+")) -> {
-            privateKeys += decodeBase64Until(
-              lines,
-              Regex("-+END PRIVATE KEY-+")
-            )
+            privateKeys += decodeBase64Until(lines, Regex("-+END PRIVATE KEY-+"))
           }
 
-          // Ignore everything else
+        // Ignore everything else
         }
       }
 
-      return PemComboFile(
-        certificates, privateRsaKeys, privateKeys,
-        passphrase ?: "password"
-      )
+      return PemComboFile(certificates, privateRsaKeys, privateKeys, passphrase ?: "password")
     }
 
     fun convertPKCS1toPKCS8(pkcs1Key: ByteString): KeySpec {
@@ -92,7 +77,7 @@ internal data class PemComboFile(
         rsaPrivateKey.prime2,
         rsaPrivateKey.exponent1,
         rsaPrivateKey.exponent2,
-        rsaPrivateKey.coefficient
+        rsaPrivateKey.coefficient,
       )
     }
 

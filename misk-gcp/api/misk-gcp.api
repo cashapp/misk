@@ -24,7 +24,7 @@ public final class misk/cloud/gcp/TransportConfig {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/cloud/gcp/datastore/DatastoreConfig : wisp/config/Config {
+public final class misk/cloud/gcp/datastore/DatastoreConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Lmisk/cloud/gcp/TransportConfig;)V
 	public synthetic fun <init> (Lmisk/cloud/gcp/TransportConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -66,7 +66,7 @@ public final class misk/cloud/gcp/datastore/Keys {
 	public final fun newKey (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/google/cloud/datastore/Key;
 }
 
-public final class misk/cloud/gcp/logging/StackDriverLoggingConfig : wisp/config/Config {
+public final class misk/cloud/gcp/logging/StackDriverLoggingConfig : misk/config/Config {
 	public fun <init> (Lch/qos/logback/classic/Level;Lch/qos/logback/classic/Level;Ljava/lang/String;)V
 	public fun <init> (Lch/qos/logback/classic/Level;Lch/qos/logback/classic/Level;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Lch/qos/logback/classic/Level;Lch/qos/logback/classic/Level;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -108,7 +108,7 @@ public final class misk/cloud/gcp/security/keys/GcpKeyManagementModule : misk/in
 	public final fun providesKms (Ljava/lang/String;)Lcom/google/api/services/cloudkms/v1/CloudKMS;
 }
 
-public final class misk/cloud/gcp/security/keys/GcpKmsConfig : wisp/config/Config {
+public final class misk/cloud/gcp/security/keys/GcpKmsConfig : misk/config/Config {
 	public fun <init> (Ljava/lang/String;Ljava/util/Map;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/util/Map;
@@ -160,7 +160,7 @@ public final class misk/cloud/gcp/spanner/GoogleSpannerService : com/google/comm
 public final class misk/cloud/gcp/spanner/GoogleSpannerService$Companion {
 }
 
-public final class misk/cloud/gcp/spanner/SpannerConfig : wisp/config/Config {
+public final class misk/cloud/gcp/spanner/SpannerConfig : misk/config/Config {
 	public fun <init> (Lcom/google/auth/Credentials;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Lcom/google/auth/Credentials;Ljava/lang/String;Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Lcom/google/auth/Credentials;Ljava/lang/String;Lmisk/cloud/gcp/spanner/SpannerEmulatorConfig;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;)V
@@ -327,7 +327,7 @@ public final class misk/cloud/gcp/storage/LocalStorageRpcKt {
 	public static final fun withLock (Ljava/nio/channels/FileChannel;ZLkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
-public final class misk/cloud/gcp/storage/StorageConfig : wisp/config/Config {
+public final class misk/cloud/gcp/storage/StorageConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Z)V
 	public fun <init> (ZLmisk/cloud/gcp/storage/LocalStorageConfig;)V

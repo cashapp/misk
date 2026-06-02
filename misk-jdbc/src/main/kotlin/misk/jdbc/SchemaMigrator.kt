@@ -2,14 +2,10 @@ package misk.jdbc
 
 interface SchemaMigrator {
 
-  /**
-   * Applies available migration to the database.
-   */
+  /** Applies available migration to the database. */
   fun applyAll(author: String): MigrationStatus
 
-  /**
-   * Validates that all migrations have been applied to the database.
-   */
+  /** Validates that all migrations have been applied to the database. */
   fun requireAll(): MigrationStatus
 }
 

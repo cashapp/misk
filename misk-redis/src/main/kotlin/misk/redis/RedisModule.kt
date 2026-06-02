@@ -13,10 +13,8 @@ import redis.clients.jedis.UnifiedJedis
 import wisp.deployment.Deployment
 
 /**
- * Configures a [Redis] client with metrics, this also installs a [ServiceModule] for [RedisService].
- * If other services require a working client connection to Redis before they can be used, specify a
- * dependency like:
- *
+ * Configures a [Redis] client with metrics, this also installs a [ServiceModule] for [RedisService]. If other services
+ * require a working client connection to Redis before they can be used, specify a dependency like:
  * ```
  * install(ServiceModule<MyService>()
  *     .dependsOn(keyOf<RedisService>())
@@ -25,16 +23,17 @@ import wisp.deployment.Deployment
  *
  * You must pass in configuration for your Redis client.
  *
- * [redisReplicationGroupConfig]: Only one replication group config is supported.
- * An empty [RedisReplicationGroupConfig.redis_auth_password] is only permitted in fake
- * environments. See [Deployment].
+ * [redisReplicationGroupConfig]: Only one replication group config is supported. An empty
+ * [RedisReplicationGroupConfig.redis_auth_password] is only permitted in fake environments. See [Deployment].
  *
- * [connectionPoolConfig]: Misk-redis is backed by a [JedisPooled], you may not want to use the
- * [ConnectionPoolConfig] defaults! Be sure to understand them!
+ * [connectionPoolConfig]: Misk-redis is backed by a [JedisPooled], you may not want to use the [ConnectionPoolConfig]
+ * defaults! Be sure to understand them!
  *
  * See: https://github.com/xetorthio/jedis/wiki/Getting-started#using-jedis-in-a-multithreaded-environment
  */
-class RedisModule @JvmOverloads constructor(
+class RedisModule
+@JvmOverloads
+constructor(
   private val redisReplicationGroupConfig: RedisReplicationGroupConfig,
   private val connectionPoolConfig: ConnectionPoolConfig,
   private val useSsl: Boolean = true,
@@ -48,7 +47,7 @@ class RedisModule @JvmOverloads constructor(
   ) : this(
     getFirstReplicationGroup(redisConfig),
     connectionPoolConfig = jedisPoolConfig.toConnectionPoolConfig(),
-    useSsl = useSsl
+    useSsl = useSsl,
   )
 
   @Deprecated("Please use RedisReplicationGroupConfig to pass specific redis cluster configuration.")
@@ -56,11 +55,7 @@ class RedisModule @JvmOverloads constructor(
     redisConfig: RedisConfig,
     connectionPoolConfig: ConnectionPoolConfig,
     useSsl: Boolean = true,
-  ) : this(
-    getFirstReplicationGroup(redisConfig),
-    connectionPoolConfig = connectionPoolConfig,
-    useSsl = useSsl,
-  )
+  ) : this(getFirstReplicationGroup(redisConfig), connectionPoolConfig = connectionPoolConfig, useSsl = useSsl)
 
   override fun configure() {
     bind<RedisReplicationGroupConfig>().toInstance(redisReplicationGroupConfig)
@@ -68,13 +63,13 @@ class RedisModule @JvmOverloads constructor(
     requireBinding<Metrics>()
   }
 
-  @Provides @Singleton
-  internal fun provideRedisClient(
-    clientMetrics: RedisClientMetrics,
-    unifiedJedis: UnifiedJedis,
-  ): Redis = RealRedis(unifiedJedis, clientMetrics)
+  @Provides
+  @Singleton
+  internal fun provideRedisClient(clientMetrics: RedisClientMetrics, unifiedJedis: UnifiedJedis): Redis =
+    RealRedis(unifiedJedis, clientMetrics)
 
-  @Provides @Singleton
+  @Provides
+  @Singleton
   internal fun provideUnifiedJedis(
     clientMetrics: RedisClientMetrics,
     redisReplicationGroupConfig: RedisReplicationGroupConfig,
@@ -86,7 +81,7 @@ class RedisModule @JvmOverloads constructor(
       poolConfig = connectionPoolConfig,
       replicationGroupConfig = redisReplicationGroupConfig,
       ssl = useSsl,
-      requiresPassword = deployment.isReal
+      requiresPassword = deployment.isReal,
     )
   }
 
@@ -99,16 +94,17 @@ class RedisModule @JvmOverloads constructor(
   }
 }
 
-private fun JedisPoolConfig.toConnectionPoolConfig() = ConnectionPoolConfig().apply {
-  maxTotal = this@toConnectionPoolConfig.maxTotal
-  maxIdle = this@toConnectionPoolConfig.maxIdle
-  minIdle = this@toConnectionPoolConfig.minIdle
-  blockWhenExhausted = this@toConnectionPoolConfig.blockWhenExhausted
-  testOnCreate = this@toConnectionPoolConfig.testOnCreate
-  testOnBorrow = this@toConnectionPoolConfig.testOnBorrow
-  testOnReturn = this@toConnectionPoolConfig.testOnReturn
-  testWhileIdle = this@toConnectionPoolConfig.testWhileIdle
-  timeBetweenEvictionRuns = this@toConnectionPoolConfig.durationBetweenEvictionRuns
-  minEvictableIdleTime = this@toConnectionPoolConfig.minEvictableIdleDuration
-  setMaxWait(this@toConnectionPoolConfig.maxWaitDuration)
-}
+private fun JedisPoolConfig.toConnectionPoolConfig() =
+  ConnectionPoolConfig().apply {
+    maxTotal = this@toConnectionPoolConfig.maxTotal
+    maxIdle = this@toConnectionPoolConfig.maxIdle
+    minIdle = this@toConnectionPoolConfig.minIdle
+    blockWhenExhausted = this@toConnectionPoolConfig.blockWhenExhausted
+    testOnCreate = this@toConnectionPoolConfig.testOnCreate
+    testOnBorrow = this@toConnectionPoolConfig.testOnBorrow
+    testOnReturn = this@toConnectionPoolConfig.testOnReturn
+    testWhileIdle = this@toConnectionPoolConfig.testWhileIdle
+    timeBetweenEvictionRuns = this@toConnectionPoolConfig.durationBetweenEvictionRuns
+    minEvictableIdleTime = this@toConnectionPoolConfig.minEvictableIdleDuration
+    setMaxWait(this@toConnectionPoolConfig.maxWaitDuration)
+  }

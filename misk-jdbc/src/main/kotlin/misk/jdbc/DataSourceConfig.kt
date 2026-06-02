@@ -1,74 +1,69 @@
 package misk.jdbc
 
+import java.time.Duration
+import java.util.Properties
+import misk.config.Config
 import misk.config.Redact
-import wisp.config.Config
 import misk.containers.ContainerUtil
 import wisp.deployment.Deployment
-import java.time.Duration
 
 /** Defines a type of datasource */
-enum class DataSourceType(
-  val driverClassName: String,
-  val hibernateDialect: String,
-  val isVitess: Boolean
-) {
+enum class DataSourceType(val driverClassName: String, val hibernateDialect: String, val isVitess: Boolean) {
   MYSQL(
     driverClassName = "io.opentracing.contrib.jdbc.TracingDriver",
     hibernateDialect = "org.hibernate.dialect.MySQL8Dialect",
-    isVitess = false
+    isVitess = false,
   ),
   HSQLDB(
     driverClassName = "org.hsqldb.jdbcDriver",
     hibernateDialect = "org.hibernate.dialect.H2Dialect",
-    isVitess = false
+    isVitess = false,
   ),
   VITESS_MYSQL(
     driverClassName = MYSQL.driverClassName,
     hibernateDialect = "misk.hibernate.vitess.VitessDialect",
-    isVitess = true
+    isVitess = true,
   ),
   COCKROACHDB(
     driverClassName = "org.postgresql.Driver",
     hibernateDialect = "org.hibernate.dialect.PostgreSQL95Dialect",
-    isVitess = false
+    isVitess = false,
   ),
   POSTGRESQL(
     driverClassName = "org.postgresql.Driver",
     hibernateDialect = "org.hibernate.dialect.PostgreSQL95Dialect",
-    isVitess = false
+    isVitess = false,
   ),
   TIDB(
     driverClassName = "io.opentracing.contrib.jdbc.TracingDriver",
     hibernateDialect = "org.hibernate.dialect.MySQL8Dialect",
-    isVitess = false
+    isVitess = false,
   ),
 }
 
 enum class MigrationsFormat {
-  /**
-   * Traditional migrations format where each migration file represents DB schema change
-   */
+  /** Traditional migrations format where each migration file represents DB schema change */
   TRADITIONAL,
-  /**
-   * Declarative migrations format where each migration file represents a DB table
-   */
+
+  /** Declarative migrations format where each migration file represents a DB table */
   DECLARATIVE,
   /**
-   * Externally managed migrations where schema migrations are handled outside of the application.
-   * When this format is used, SchemaMigratorService will not be installed.
+   * Externally managed migrations where schema migrations are handled outside of the application. When this format is
+   * used, SchemaMigratorService will not be installed.
    */
-  EXTERNALLY_MANAGED
+  EXTERNALLY_MANAGED,
 }
 
 /** Configuration element for an individual datasource */
-data class DataSourceConfig @JvmOverloads constructor(
+data class DataSourceConfig
+@JvmOverloads
+constructor(
   val type: DataSourceType,
   val host: String? = null,
   val port: Int? = null,
   val database: String? = null,
   val username: String? = null,
-  @Redact
-  val password: String? = null,
+  @Redact val password: String? = null,
   val fixed_pool_size: Int = 10,
   val connection_timeout: Duration = Duration.ofSeconds(10),
   val validation_timeout: Duration = Duration.ofSeconds(3),
@@ -78,28 +73,24 @@ data class DataSourceConfig @JvmOverloads constructor(
   val keepalive_time: Duration = Duration.ofSeconds(0),
   val migrations_resource: String? = null,
   val migrations_resources: List<String>? = null,
-  /**
-   * List of filenames to exclude from being processed in database schema migrations
-   */
+  /** List of filenames to exclude from being processed in database schema migrations */
   val migrations_resources_exclusion: List<String>? = null,
   /**
-   * Regular expression *traditional* migration files names should match.
-   * Any migration filename that doesn't match the given regular expression will cause an exception,
-   * unless it was explicitly mentioned in [migrations_resources_exclusion].
-   * Declarative schema migrator will enforce the opposite - all migration files should not match the given regular expression.
+   * Regular expression *traditional* migration files names should match. Any migration filename that doesn't match the
+   * given regular expression will cause an exception, unless it was explicitly mentioned in
+   * [migrations_resources_exclusion]. Declarative schema migrator will enforce the opposite - all migration files
+   * should not match the given regular expression.
    */
   val migrations_resources_regex: String = "(^|.*/)v(\\d+)__[^/]+\\.sql",
   val vitess_schema_resource_root: String? = null,
   /*
-     See https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-using-ssl.html for
-     trust_certificate_key_store_* details.
-   */
+    See https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-using-ssl.html for
+    trust_certificate_key_store_* details.
+  */
   val trust_certificate_key_store_url: String? = null,
-  @Redact
-  val trust_certificate_key_store_password: String? = null,
+  @Redact val trust_certificate_key_store_password: String? = null,
   val client_certificate_key_store_url: String? = null,
-  @Redact
-  val client_certificate_key_store_password: String? = null,
+  @Redact val client_certificate_key_store_password: String? = null,
   // Vitess driver doesn't support passing in URLs so support paths and prefer this for Vitess
   // going forward
   val trust_certificate_key_store_path: String? = null,
@@ -134,18 +125,51 @@ data class DataSourceConfig @JvmOverloads constructor(
   val mysql_enforce_writable_connections: Boolean = false,
   val migrations_format: MigrationsFormat = MigrationsFormat.TRADITIONAL,
   val declarative_schema_config: DeclarativeSchemaConfig? = null,
+  val mysql_use_aws_secret_for_credentials: Boolean = false,
+  val mysql_aws_secret_name: String? = null,
 ) {
   init {
     if (migrations_format == MigrationsFormat.DECLARATIVE) {
-      require(type == DataSourceType.MYSQL) {
-        "Declarative migrations are only supported for MySQL"
-      }
+      require(type == DataSourceType.MYSQL) { "Declarative migrations are only supported for MySQL" }
     } else if (migrations_format == MigrationsFormat.TRADITIONAL) {
       require(declarative_schema_config == null) {
         "declarative_schmea_config.excluded_tables is only supported for declarative migrations"
       }
     }
   }
+
+  fun getDriverClassName(): String {
+    return if (mysql_use_aws_secret_for_credentials) {
+      "com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver"
+    } else {
+      type.driverClassName
+    }
+  }
+
+  fun getDataSourceProperties(): Properties {
+    // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
+    val properties = Properties()
+
+    properties["cachePrepStmts"] = "true"
+    properties["prepStmtCacheSize"] = "250"
+    properties["prepStmtCacheSqlLimit"] = "2048"
+    if (type == DataSourceType.MYSQL || type == DataSourceType.TIDB) {
+      properties["useServerPrepStmts"] = "true"
+    }
+    if (mysql_use_aws_secret_for_credentials) {
+      properties["user"] = mysql_aws_secret_name
+    }
+    properties["useLocalSessionState"] = "true"
+    properties["rewriteBatchedStatements"] = "true"
+    properties["cacheResultSetMetadata"] = "true"
+    properties["cacheServerConfiguration"] = "true"
+    properties["elideSetAutoCommits"] = "true"
+    properties["maintainTimeStats"] = "false"
+    properties["characterEncoding"] = "UTF-8"
+
+    return properties
+  }
+
   fun withDefaults(): DataSourceConfig {
     val server_hostname = ContainerUtil.dockerTargetOrLocalIp()
     return when (type) {
@@ -153,40 +177,27 @@ data class DataSourceConfig @JvmOverloads constructor(
         copy(
           port = port ?: 3306,
           host = host ?: System.getenv("MYSQL_HOST") ?: server_hostname,
-          database = database ?: ""
+          database = database ?: "",
         )
       }
       DataSourceType.TIDB -> {
-        copy(
-          port = port ?: 4000,
-          host = host ?: server_hostname,
-          database = database ?: ""
-        )
+        copy(port = port ?: 4000, host = host ?: server_hostname, database = database ?: "")
       }
       DataSourceType.VITESS_MYSQL -> {
         copy(
           port = port ?: 27003,
           host = host ?: System.getenv("VITESS_HOST") ?: server_hostname,
-          database = database ?: "@primary"
+          database = database ?: "@primary",
         )
       }
       DataSourceType.HSQLDB -> {
         this
       }
       DataSourceType.COCKROACHDB -> {
-        copy(
-          username = "root",
-          port = port ?: 26257,
-          host = host ?: server_hostname,
-          database = database ?: ""
-        )
+        copy(username = "root", port = port ?: 26257, host = host ?: server_hostname, database = database ?: "")
       }
       DataSourceType.POSTGRESQL -> {
-        copy(
-          port = port ?: 5432,
-          host = host ?: server_hostname,
-          database = database ?: ""
-        )
+        copy(port = port ?: 5432, host = host ?: server_hostname, database = database ?: "")
       }
     }
   }
@@ -194,16 +205,23 @@ data class DataSourceConfig @JvmOverloads constructor(
   fun buildJdbcUrl(deployment: Deployment): String {
     val config = withDefaults()
 
-    require(config.client_certificate_key_store_path.isNullOrBlank() || config.client_certificate_key_store_url.isNullOrBlank()) {
+    require(
+      config.client_certificate_key_store_path.isNullOrBlank() ||
+        config.client_certificate_key_store_url.isNullOrBlank()
+    ) {
       "can optionally set client_certificate_key_store_path or client_certificate_key_store_url, but not both"
     }
 
-    require(config.trust_certificate_key_store_path.isNullOrBlank() || config.trust_certificate_key_store_url.isNullOrBlank()) {
+    require(
+      config.trust_certificate_key_store_path.isNullOrBlank() || config.trust_certificate_key_store_url.isNullOrBlank()
+    ) {
       "can optionally set trust_certificate_key_store_path or trust_certificate_key_store_url, but not both"
     }
 
     return when (type) {
-      DataSourceType.MYSQL, DataSourceType.VITESS_MYSQL, DataSourceType.TIDB -> {
+      DataSourceType.MYSQL,
+      DataSourceType.VITESS_MYSQL,
+      DataSourceType.TIDB -> {
         var queryParams = "?useLegacyDatetimeCode=false"
 
         if (deployment.isTest || deployment.isLocalDevelopment) {
@@ -217,8 +235,6 @@ data class DataSourceConfig @JvmOverloads constructor(
         }
 
         if (type == DataSourceType.VITESS_MYSQL) {
-          queryParams += "&useServerPrepStmts=true"
-          queryParams += "&useUnicode=true"
           // If we leave this as the default (true) the logs get spammed with the following errors:
           // "Ignored inapplicable SET {sql_mode } = strict_trans_tables"
           // Since Vitess always uses strict_trans_tables this makes no difference here except it
@@ -263,13 +279,14 @@ data class DataSourceConfig @JvmOverloads constructor(
           useSSL = true
         }
 
-        val sslMode = if (useSSL && verify_server_identity) {
-          "VERIFY_IDENTITY"
-        } else if (useSSL) {
-          "VERIFY_CA"
-        } else {
-          "PREFERRED"
-        }
+        val sslMode =
+          if (useSSL && verify_server_identity) {
+            "VERIFY_IDENTITY"
+          } else if (useSSL) {
+            "VERIFY_CA"
+          } else {
+            "PREFERRED"
+          }
         queryParams += "&sslMode=$sslMode"
 
         if (enabledTlsProtocols.isNotEmpty()) {
@@ -280,16 +297,19 @@ data class DataSourceConfig @JvmOverloads constructor(
           queryParams += "&allowPublicKeyRetrieval=true"
         }
 
-        jdbc_url_query_parameters.entries.forEach { (key, value) ->
-          queryParams += "&$key=$value"
-        }
+        jdbc_url_query_parameters.entries.forEach { (key, value) -> queryParams += "&$key=$value" }
 
-        "jdbc:tracing:mysql://${config.host}:${config.port}/${config.database}$queryParams"
+        if (mysql_use_aws_secret_for_credentials) {
+          "jdbc-secretsmanager:mysql://${config.host}:${config.port}/${config.database}$queryParams"
+        } else {
+          "jdbc:tracing:mysql://${config.host}:${config.port}/${config.database}$queryParams"
+        }
       }
       DataSourceType.HSQLDB -> {
         "jdbc:hsqldb:mem:${database!!};sql.syntax_mys=true"
       }
-      DataSourceType.COCKROACHDB, DataSourceType.POSTGRESQL -> {
+      DataSourceType.COCKROACHDB,
+      DataSourceType.POSTGRESQL -> {
         var params = "ssl=false&user=${config.username}"
         if (deployment.isTest || deployment.isLocalDevelopment) {
           params += "&createDatabaseIfNotExist=true"
@@ -349,32 +369,26 @@ data class DataSourceConfig @JvmOverloads constructor(
       this.enabledTlsProtocols,
       this.show_sql,
       this.generate_hibernate_stats,
-      migrations_format = this.migrations_format
+      migrations_format = this.migrations_format,
     )
   }
 
-  fun canRecoverOnReplica() = this.type in listOf(
-    DataSourceType.COCKROACHDB,
-    DataSourceType.TIDB,
-  )
-
+  fun canRecoverOnReplica() = this.type in listOf(DataSourceType.COCKROACHDB, DataSourceType.TIDB)
 }
 
 /** Configuration element for a cluster of DataSources */
-data class DataSourceClusterConfig(
-  val writer: DataSourceConfig,
-  val reader: DataSourceConfig?
-)
+data class DataSourceClusterConfig(val writer: DataSourceConfig, val reader: DataSourceConfig?)
 
 /** Top-level configuration element for all datasource clusters */
 class DataSourceClustersConfig : LinkedHashMap<String, DataSourceClusterConfig>, Config {
   constructor() : super()
+
   constructor(m: Map<String, DataSourceClusterConfig>) : super(m)
 }
 
-data class DeclarativeSchemaConfig @JvmOverloads constructor(
-  /**
-   * List of tables to exclude from schema validation
-   */
-  val excluded_tables: List<String> = listOf(),
+data class DeclarativeSchemaConfig
+@JvmOverloads
+constructor(
+  /** List of tables to exclude from schema validation */
+  val excluded_tables: List<String> = listOf()
 )

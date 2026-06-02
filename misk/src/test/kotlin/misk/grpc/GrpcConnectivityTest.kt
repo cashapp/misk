@@ -6,6 +6,10 @@ import com.squareup.protos.test.grpc.HelloRequest
 import com.squareup.wire.GrpcStatus
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.io.InterruptedIOException
+import java.time.Duration
 import misk.MiskTestingServiceModule
 import misk.exceptions.BadRequestException
 import misk.inject.KAbstractModule
@@ -30,24 +34,18 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import java.io.InterruptedIOException
-import java.time.Duration
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 /**
- * This test gets Misk running as a GRPC server and then acts as a basic GRPC client to send a
- * request. It's intended to be interoperable with with the
- * [GRPC 'hello world' sample](https://github.com/grpc/grpc-java/tree/master/examples).
+ * This test gets Misk running as a GRPC server and then acts as a basic GRPC client to send a request. It's intended to
+ * be interoperable with with the [GRPC 'hello world' sample](https://github.com/grpc/grpc-java/tree/master/examples).
  *
- * That sample includes a client and a server that connect to each other. You can also connect this
- * test's client to that sample server, or that sample client to this test's server.
+ * That sample includes a client and a server that connect to each other. You can also connect this test's client to
+ * that sample server, or that sample client to this test's server.
  */
 @Disabled("gRPC tests are flaky in CI, see https://github.com/cashapp/misk/issues/1853")
 @MiskTest(startService = true)
 class GrpcConnectivityTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var helloRpcAction: HelloRpcAction
@@ -59,31 +57,35 @@ class GrpcConnectivityTest {
     val clientInjector = Guice.createInjector(Http2ClientTestingModule(jetty))
     client = clientInjector.getInstance(OkHttpClient::class.java)
   }
-  
+
   @ParameterizedTest
   @MethodSource("provideMediaTypes")
   fun happyPath(mediaType: MediaType) {
-    val request = Request.Builder()
-      .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
-      .addHeader("grpc-trace-bin", "")
-      .addHeader("grpc-accept-encoding", "gzip")
-      .addHeader("grpc-encoding", "gzip")
-      .post(object : RequestBody() {
-        override fun contentType(): MediaType? {
-          return mediaType
-        }
+    val request =
+      Request.Builder()
+        .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
+        .addHeader("grpc-trace-bin", "")
+        .addHeader("grpc-accept-encoding", "gzip")
+        .addHeader("grpc-encoding", "gzip")
+        .post(
+          object : RequestBody() {
+            override fun contentType(): MediaType? {
+              return mediaType
+            }
 
-        override fun writeTo(sink: BufferedSink) {
-          val writer = GrpcMessageSink(
-            sink = sink,
-            minMessageToCompress = 0,
-            messageAdapter = HelloRequest.ADAPTER,
-            grpcEncoding = "gzip"
-          )
-          writer.write(HelloRequest("jesse!"))
-        }
-      })
-      .build()
+            override fun writeTo(sink: BufferedSink) {
+              val writer =
+                GrpcMessageSink(
+                  sink = sink,
+                  minMessageToCompress = 0,
+                  messageAdapter = HelloRequest.ADAPTER,
+                  grpcEncoding = "gzip",
+                )
+              writer.write(HelloRequest("jesse!"))
+            }
+          }
+        )
+        .build()
 
     val call = client.newCall(request)
     val response = call.execute()
@@ -93,10 +95,7 @@ class GrpcConnectivityTest {
       assertThat(response.headers["grpc-encoding"]).isEqualTo("gzip")
       assertThat(response.body!!.contentType()).isEqualTo("application/grpc".toMediaType())
 
-      val reader = GrpcMessageSource(
-        response.body!!.source(), HelloReply.ADAPTER,
-        response.header("grpc-encoding")
-      )
+      val reader = GrpcMessageSource(response.body!!.source(), HelloReply.ADAPTER, response.header("grpc-encoding"))
       assertThat(reader.read()).isEqualTo(HelloReply("howdy, jesse!"))
       assertThat(reader.read()).isNull()
       assertThat(response.trailers()).isEqualTo(headersOf("grpc-status", "0"))
@@ -107,27 +106,31 @@ class GrpcConnectivityTest {
   fun serviceThrowsException() {
     helloRpcAction.failNextRequest = true
 
-    val request = Request.Builder()
-      .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
-      .addHeader("grpc-trace-bin", "")
-      .addHeader("grpc-accept-encoding", "gzip")
-      .addHeader("grpc-encoding", "gzip")
-      .post(object : RequestBody() {
-        override fun contentType(): MediaType? {
-          return MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
-        }
+    val request =
+      Request.Builder()
+        .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
+        .addHeader("grpc-trace-bin", "")
+        .addHeader("grpc-accept-encoding", "gzip")
+        .addHeader("grpc-encoding", "gzip")
+        .post(
+          object : RequestBody() {
+            override fun contentType(): MediaType? {
+              return MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
+            }
 
-        override fun writeTo(sink: BufferedSink) {
-          val writer = GrpcMessageSink(
-            sink = sink,
-            minMessageToCompress = 0,
-            messageAdapter = HelloRequest.ADAPTER,
-            grpcEncoding = "gzip"
-          )
-          writer.write(HelloRequest("jesse!"))
-        }
-      })
-      .build()
+            override fun writeTo(sink: BufferedSink) {
+              val writer =
+                GrpcMessageSink(
+                  sink = sink,
+                  minMessageToCompress = 0,
+                  messageAdapter = HelloRequest.ADAPTER,
+                  grpcEncoding = "gzip",
+                )
+              writer.write(HelloRequest("jesse!"))
+            }
+          }
+        )
+        .build()
 
     val call = client.newCall(request)
     val response = call.execute()
@@ -144,27 +147,31 @@ class GrpcConnectivityTest {
   fun serviceCallTimesOut() {
     helloRpcAction.sleep = Duration.ofMillis(1001)
 
-    val request = Request.Builder()
-      .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
-      .addHeader("grpc-trace-bin", "")
-      .addHeader("grpc-accept-encoding", "gzip")
-      .addHeader("grpc-encoding", "gzip")
-      .post(object : RequestBody() {
-        override fun contentType(): MediaType? {
-          return MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
-        }
+    val request =
+      Request.Builder()
+        .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
+        .addHeader("grpc-trace-bin", "")
+        .addHeader("grpc-accept-encoding", "gzip")
+        .addHeader("grpc-encoding", "gzip")
+        .post(
+          object : RequestBody() {
+            override fun contentType(): MediaType? {
+              return MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
+            }
 
-        override fun writeTo(sink: BufferedSink) {
-          val writer = GrpcMessageSink(
-            sink = sink,
-            minMessageToCompress = 0,
-            messageAdapter = HelloRequest.ADAPTER,
-            grpcEncoding = "gzip"
-          )
-          writer.write(HelloRequest("jp!"))
-        }
-      })
-      .build()
+            override fun writeTo(sink: BufferedSink) {
+              val writer =
+                GrpcMessageSink(
+                  sink = sink,
+                  minMessageToCompress = 0,
+                  messageAdapter = HelloRequest.ADAPTER,
+                  grpcEncoding = "gzip",
+                )
+              writer.write(HelloRequest("jp!"))
+            }
+          }
+        )
+        .build()
 
     assertThrows<InterruptedIOException> { client.newCall(request).execute() }
   }
@@ -178,9 +185,7 @@ class GrpcConnectivityTest {
       Thread.sleep(sleep.toMillis())
       if (failNextRequest) throw BadRequestException("bad request!")
 
-      return HelloReply.Builder()
-        .message("howdy, ${request.name}")
-        .build()
+      return HelloReply.Builder().message("howdy, ${request.name}").build()
     }
   }
 
@@ -188,18 +193,14 @@ class GrpcConnectivityTest {
     @WireRpc(
       path = "/helloworld.Greeter/SayHello",
       requestAdapter = "com.squareup.protos.test.grpc.HelloRequest#ADAPTER",
-      responseAdapter = "com.squareup.protos.test.grpc.HelloReply#ADAPTER"
+      responseAdapter = "com.squareup.protos.test.grpc.HelloReply#ADAPTER",
     )
     fun sayHello(request: HelloRequest): HelloReply
   }
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(
-        WebServerTestingModule(
-          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(grpcGzip = true)
-        )
-      )
+      install(WebServerTestingModule(webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(grpcGzip = true)))
       install(MiskTestingServiceModule())
       install(WebActionModule.create<HelloRpcAction>())
     }
@@ -207,6 +208,7 @@ class GrpcConnectivityTest {
 
   companion object {
     @JvmStatic
-    fun provideMediaTypes() = listOf(MediaTypes.APPLICATION_GRPC_MEDIA_TYPE, MediaTypes.APPLICATION_GRPC_PROTOBUF_MEDIA_TYPE)
+    fun provideMediaTypes() =
+      listOf(MediaTypes.APPLICATION_GRPC_MEDIA_TYPE, MediaTypes.APPLICATION_GRPC_PROTOBUF_MEDIA_TYPE)
   }
 }

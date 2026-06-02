@@ -1,9 +1,9 @@
 package misk.service
 
-import org.junit.jupiter.api.Test
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 internal class CachedTestServiceTest {
   class ServiceA : CachedTestService() {
@@ -34,7 +34,8 @@ internal class CachedTestServiceTest {
     }
   }
 
-  @Test fun cachedTestServiceWithMultipleServices() {
+  @Test
+  fun cachedTestServiceWithMultipleServices() {
     val serviceA = ServiceA()
     val serviceB = ServiceB()
 

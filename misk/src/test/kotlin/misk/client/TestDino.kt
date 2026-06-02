@@ -2,6 +2,8 @@ package misk.client
 
 import com.google.inject.Provides
 import helpers.protos.Dinosaur
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
 import misk.web.Post
 import misk.web.RequestBody
@@ -13,21 +15,16 @@ import misk.web.mediatype.MediaTypes
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 internal interface ReturnADinosaur {
-  @POST("/cooldinos")
-  fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
+  @POST("/cooldinos") fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
 }
 
 internal class ReturnADinosaurAction @Inject constructor() : WebAction {
   @Post("/cooldinos")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  fun getDinosaur(@RequestBody request: Dinosaur): Dinosaur = request.newBuilder()
-    .name("super${request.name}")
-    .build()
+  fun getDinosaur(@RequestBody request: Dinosaur): Dinosaur = request.newBuilder().name("super${request.name}").build()
 }
 
 internal class DinoClientModule(private val jetty: JettyService) : KAbstractModule() {
@@ -39,10 +36,6 @@ internal class DinoClientModule(private val jetty: JettyService) : KAbstractModu
   @Provides
   @Singleton
   fun provideHttpClientConfig(): HttpClientsConfig {
-    return HttpClientsConfig(
-      endpoints = mapOf(
-        "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-      )
-    )
+    return HttpClientsConfig(endpoints = mapOf("dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())))
   }
 }

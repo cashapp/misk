@@ -1,53 +1,37 @@
 package misk.hibernate
 
 interface PrimitiveTourQuery : Query<DbPrimitiveTour> {
-  @Constraint(path = "i1")
-  fun i1(i1: Boolean): PrimitiveTourQuery
+  @Constraint(path = "i1") fun i1(i1: Boolean): PrimitiveTourQuery
 
-  @Select
-  fun listAsPrimitiveTour(session: Session): List<PrimitiveTour>
+  @Select fun listAsPrimitiveTour(session: Session): List<PrimitiveTour>
 
-  @Select(path = "i64", aggregation = AggregationType.AVG)
-  fun averageI64(session: Session): Double?
+  @Select(path = "i64", aggregation = AggregationType.AVG) fun averageI64(session: Session): Double?
 
-  @Select(path = "i64", aggregation = AggregationType.COUNT)
-  fun countI64(session: Session): Long?
+  @Select(path = "i64", aggregation = AggregationType.COUNT) fun countI64(session: Session): Long?
 
-  @Select(path = "i64", aggregation = AggregationType.COUNT_DISTINCT)
-  fun countDistinctI64(session: Session): Long?
+  @Select(path = "i64", aggregation = AggregationType.COUNT_DISTINCT) fun countDistinctI64(session: Session): Long?
 
-  @Select(path = "i64", aggregation = AggregationType.MAX)
-  fun maxI64(session: Session): Long?
+  @Select(path = "i64", aggregation = AggregationType.MAX) fun maxI64(session: Session): Long?
 
-  @Select(path = "i64", aggregation = AggregationType.MIN)
-  fun minI64(session: Session): Long?
+  @Select(path = "i64", aggregation = AggregationType.MIN) fun minI64(session: Session): Long?
 
-  @Select(path = "i64", aggregation = AggregationType.SUM)
-  fun sumI64(session: Session): Long?
+  @Select(path = "i64", aggregation = AggregationType.SUM) fun sumI64(session: Session): Long?
 
-  @Select
-  fun averageAll(session: Session): AveragePrimitiveTour?
+  @Select fun averageAll(session: Session): AveragePrimitiveTour?
 
-  @Select
-  fun countAll(session: Session): CountPrimitiveTour?
+  @Select fun countAll(session: Session): CountPrimitiveTour?
 
-  @Select
-  fun countDistinctAll(session: Session): CountDistinctPrimitiveTour?
+  @Select fun countDistinctAll(session: Session): CountDistinctPrimitiveTour?
 
-  @Select
-  fun maxAll(session: Session): MaxPrimitiveTour?
+  @Select fun maxAll(session: Session): MaxPrimitiveTour?
 
-  @Select
-  fun minAll(session: Session): MinPrimitiveTour?
+  @Select fun minAll(session: Session): MinPrimitiveTour?
 
-  @Select
-  fun sumAll(session: Session): SumPrimitiveTour?
+  @Select fun sumAll(session: Session): SumPrimitiveTour?
 
-  @Group(paths = ["i1", "c16"])
-  fun groupByI1AndC16(): PrimitiveTourQuery
+  @Group(paths = ["i1", "c16"]) fun groupByI1AndC16(): PrimitiveTourQuery
 
-  @Select
-  fun listI1C16AndMaxI8(session: Session): List<I1C16AndMaxI8>
+  @Select fun listI1C16AndMaxI8(session: Session): List<I1C16AndMaxI8>
 }
 
 data class PrimitiveTour(
@@ -58,7 +42,7 @@ data class PrimitiveTour(
   @Property("i64") var i64: Long,
   @Property("c16") var c16: Char,
   @Property("f32") var f32: Float,
-  @Property("f64") var f64: Double
+  @Property("f64") var f64: Double,
 ) : Projection
 
 data class AveragePrimitiveTour(
@@ -100,7 +84,7 @@ data class MaxPrimitiveTour(
   @Property("i64", aggregation = AggregationType.MAX) var i64: Long?,
   @Property("c16", aggregation = AggregationType.MAX) var c16: Char?,
   @Property("f32", aggregation = AggregationType.MAX) var f32: Float?,
-  @Property("f64", aggregation = AggregationType.MAX) var f64: Double?
+  @Property("f64", aggregation = AggregationType.MAX) var f64: Double?,
 ) : Projection
 
 data class MinPrimitiveTour(
@@ -122,7 +106,6 @@ data class SumPrimitiveTour(
   @Property("f32", aggregation = AggregationType.SUM) var f32: Double?,
   @Property("f64", aggregation = AggregationType.SUM) var f64: Double?,
 ) : Projection
-
 
 data class I1C16AndMaxI8(
   @Property("i1") var i1: Boolean,

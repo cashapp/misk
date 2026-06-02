@@ -1,23 +1,21 @@
 package misk.hibernate
 
+import jakarta.inject.Inject
+import java.time.LocalDate
+import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.vitess.testing.utilities.DockerVitess
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.TypeMismatchException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
-import jakarta.inject.Inject
-import misk.testing.MiskExternalDependency
-import misk.vitess.testing.utilities.DockerVitess
 
 @MiskTest(startService = true)
 class ChildEntityTest {
-  @MiskExternalDependency
-  private val dockerVitess = DockerVitess()
+  @MiskExternalDependency private val dockerVitess = DockerVitess()
 
-  @MiskTestModule
-  val module = MoviesTestModule()
+  @MiskTestModule val module = MoviesTestModule()
 
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
@@ -32,10 +30,8 @@ class ChildEntityTest {
     }
 
     transacter.transaction { session ->
-      val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
-        .allowTableScan()
-        .name("Ian Malcolm")
-        .uniqueResult(session)!!
+      val ianMalcolm =
+        queryFactory.newQuery<CharacterQuery>().allowTableScan().name("Ian Malcolm").uniqueResult(session)!!
       val ianMalcolmByGid = session.loadSharded(ianMalcolm.gid)
       assertThat(ianMalcolm).isEqualTo(ianMalcolmByGid)
     }
@@ -43,20 +39,15 @@ class ChildEntityTest {
 
   @Test
   fun exceptionWhenLoadingChildEntityById() {
-    val movieId = transacter.transaction { session ->
-      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-    }
-    val actorId = transacter.transaction { session ->
-      session.save(DbActor("Carrie Fisher", null))
-    }
-    val charId = transacter.transaction { session ->
-      session.save(DbCharacter("Leia Organa", session.load(movieId), session.load(actorId)))
-    }
+    val movieId = transacter.transaction { session -> session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25))) }
+    val actorId = transacter.transaction { session -> session.save(DbActor("Carrie Fisher", null)) }
+    val charId =
+      transacter.transaction { session ->
+        session.save(DbCharacter("Leia Organa", session.load(movieId), session.load(actorId)))
+      }
 
     assertThrows<TypeMismatchException> {
-      transacter.transaction { session ->
-        session.load(charId, DbCharacter::class)
-      }
+      transacter.transaction { session -> session.load(charId, DbCharacter::class) }
     }
   }
 }

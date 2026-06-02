@@ -1,6 +1,8 @@
 package misk.grpc
 
 import com.google.inject.Provides
+import jakarta.inject.Singleton
+import java.time.Duration
 import misk.MiskTestingServiceModule
 import misk.client.HttpClientConfig
 import misk.client.HttpClientEndpointConfig
@@ -11,14 +13,12 @@ import misk.inject.KAbstractModule
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import misk.web.jetty.JettyService
-import java.time.Duration
-import jakarta.inject.Singleton
 
 /**
  * Configures an OkHttp client with HTTPS and HTTP/2.
  *
- * Create a client-specific injector for this. This is necessary because the server doesn't get a
- * port until after it starts.
+ * Create a client-specific injector for this. This is necessary because the server doesn't get a port until after it
+ * starts.
  */
 class Http2ClientTestingModule(val jetty: JettyService) : KAbstractModule() {
   override fun configure() {
@@ -30,21 +30,23 @@ class Http2ClientTestingModule(val jetty: JettyService) : KAbstractModule() {
   @Singleton
   fun provideHttpClientsConfig(): HttpClientsConfig {
     return HttpClientsConfig(
-      endpoints = mapOf(
-        "default" to HttpClientEndpointConfig(
-          url = "http://example.com/",
-          clientConfig = HttpClientConfig(
-            ssl = HttpClientSSLConfig(
-              cert_store = null,
-              trust_store = TrustStoreConfig(
-                resource = "classpath:/ssl/server_cert.pem",
-                format = SslLoader.FORMAT_PEM
-              )
-            ),
-            callTimeout = Duration.ofMillis(1000)
-          )
+      endpoints =
+        mapOf(
+          "default" to
+            HttpClientEndpointConfig(
+              url = "http://example.com/",
+              clientConfig =
+                HttpClientConfig(
+                  ssl =
+                    HttpClientSSLConfig(
+                      cert_store = null,
+                      trust_store =
+                        TrustStoreConfig(resource = "classpath:/ssl/server_cert.pem", format = SslLoader.FORMAT_PEM),
+                    ),
+                  callTimeout = Duration.ofMillis(1000),
+                ),
+            )
         )
-      )
     )
   }
 }

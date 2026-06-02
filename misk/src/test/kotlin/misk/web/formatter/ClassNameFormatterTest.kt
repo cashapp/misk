@@ -1,32 +1,32 @@
 package misk.web.formatter
 
 import com.google.common.base.CharMatcher
-import misk.testing.MiskTest
-import misk.web.NetworkChain
-import misk.web.NetworkInterceptor
-import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import misk.testing.MiskTest
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
+import org.junit.jupiter.api.Test
 
 @MiskTest(startService = false)
 class ClassNameFormatterTest {
   fun isValid(className: String) {
     assertTrue(className.isNotBlank())
     assertNotNull(className)
-    assertTrue(
-      CharMatcher.inRange('A', 'Z').or(CharMatcher.inRange('a', 'z')).matchesAnyOf(className)
-    )
+    assertTrue(CharMatcher.inRange('A', 'Z').or(CharMatcher.inRange('a', 'z')).matchesAnyOf(className))
   }
 
-  @Test fun validQualifiedName() {
+  @Test
+  fun validQualifiedName() {
     val formatted = ClassNameFormatter.format(ValidQualifiedNameClass::class)
     isValid(formatted)
     assertEquals(formatted, ValidQualifiedNameClass::class.qualifiedName.toString())
   }
 
-  @Test fun missingQualifiedName() {
+  @Test
+  fun missingQualifiedName() {
     val noQualifiedNameClass = NoQualifiedNameFactory().create()
     assertNull(noQualifiedNameClass::class.qualifiedName)
 
@@ -44,9 +44,9 @@ class NoQualifiedNameFactory {
   }
 
   private companion object {
-    val NoQualifiedNameClass = object : NetworkInterceptor {
-      override fun intercept(chain: NetworkChain) {
+    val NoQualifiedNameClass =
+      object : NetworkInterceptor {
+        override fun intercept(chain: NetworkChain) {}
       }
-    }
   }
 }

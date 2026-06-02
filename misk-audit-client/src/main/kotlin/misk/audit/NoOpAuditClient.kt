@@ -10,7 +10,7 @@ import java.time.Instant
  * This is useful for testing or when you don't want to send audit events to a remote service.
  */
 @Singleton
-class NoOpAuditClient @Inject constructor(): AuditClient {
+class NoOpAuditClient @Inject constructor() : AuditClient {
   override fun logEvent(
     target: String,
     description: String,

@@ -13,38 +13,33 @@ import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyDataDecryptorFactory
 import org.bouncycastle.util.io.Streams
 
 /**
- * RealPgpDecrypter is a simple PGP decryption helper.
- * The implementation makes a  couple key assumptions:
+ * RealPgpDecrypter is a simple PGP decryption helper. The implementation makes a couple key assumptions:
  * - The input data is public key encrypted.
  * - The input data contains only ONE encrypted payload.
  * - The first OR second packet in the input must be the encryption method packet.
  * - No signature verification.
  */
-internal class RealPgpDecrypter(
-  private val privateKeys: Map<Long, PGPPrivateKey>
-) : PgpDecrypter {
+internal class RealPgpDecrypter(private val privateKeys: Map<Long, PGPPrivateKey>) : PgpDecrypter {
   override fun decrypt(ciphertext: ByteArray): ByteArray {
     val buffer = okio.Buffer()
     val outputStream = buffer.outputStream()
     val decoderStream = PGPUtil.getDecoderStream(ciphertext.inputStream())
     val jcaPGPObjectFactory = JcaPGPObjectFactory(decoderStream)
 
-    val pgpEncryptedDataList = when (val nextObject = jcaPGPObjectFactory.nextObject()) {
-      is PGPEncryptedDataList -> nextObject
-      else -> jcaPGPObjectFactory.nextObject() as PGPEncryptedDataList
-    }
+    val pgpEncryptedDataList =
+      when (val nextObject = jcaPGPObjectFactory.nextObject()) {
+        is PGPEncryptedDataList -> nextObject
+        else -> jcaPGPObjectFactory.nextObject() as PGPEncryptedDataList
+      }
 
     // Assuming that the first element in the EncryptedDataList is public key encrypted.
-    val pgpPublicKeyEncryptedData =
-      pgpEncryptedDataList.encryptedDataObjects.next() as PGPPublicKeyEncryptedData
+    val pgpPublicKeyEncryptedData = pgpEncryptedDataList.encryptedDataObjects.next() as PGPPublicKeyEncryptedData
 
-    val pgpSecretKey = privateKeys[pgpPublicKeyEncryptedData.keyID]
-      ?: error("no private key able to decrypt this message")
+    val pgpSecretKey =
+      privateKeys[pgpPublicKeyEncryptedData.keyID] ?: error("no private key able to decrypt this message")
 
-    val publicKeyDataDecryptorFactory = JcePublicKeyDataDecryptorFactoryBuilder()
-      .setProvider("BC")
-      .setContentProvider("BC")
-      .build(pgpSecretKey)
+    val publicKeyDataDecryptorFactory =
+      JcePublicKeyDataDecryptorFactoryBuilder().setProvider("BC").setContentProvider("BC").build(pgpSecretKey)
 
     val clear = pgpPublicKeyEncryptedData.getDataStream(publicKeyDataDecryptorFactory)
     val plainFactory = JcaPGPObjectFactory(clear)

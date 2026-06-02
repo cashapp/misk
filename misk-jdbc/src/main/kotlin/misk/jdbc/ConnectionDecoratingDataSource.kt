@@ -5,7 +5,7 @@ import javax.sql.DataSource
 
 internal class ConnectionDecoratingDataSource(
   private val connectionDecorator: (Connection) -> Connection,
-  private val dataSource: DataSource
+  private val dataSource: DataSource,
 ) : DataSource by dataSource {
   override fun getConnection(): Connection {
     return connectionDecorator(dataSource.connection)

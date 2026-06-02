@@ -6,6 +6,8 @@ import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.util.Modules
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
+import java.util.Base64
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig.RealSecret
 import misk.crypto.pgp.internal.PgpKeyJsonFile
@@ -21,8 +23,6 @@ import org.bouncycastle.openpgp.PGPException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import wisp.deployment.TESTING
-import java.util.Base64
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class PgpKeyTest {
@@ -34,7 +34,8 @@ class PgpKeyTest {
   @Inject private lateinit var moshi: Moshi
   @Inject private lateinit var resourceLoader: ResourceLoader
 
-  @Test fun `encrypt and decrypt byte array armored`() {
+  @Test
+  fun `encrypt and decrypt byte array armored`() {
     val secretMessage = "foo bar baz here's a very secret message".toByteArray()
 
     val injector = getInjector()
@@ -48,7 +49,8 @@ class PgpKeyTest {
     assertThat(decryptedBytes).isEqualTo(secretMessage)
   }
 
-  @Test fun `encrypt and byte array stream`() {
+  @Test
+  fun `encrypt and byte array stream`() {
     val secretMessage = "foo bar baz here's a very secret message".toByteArray()
 
     val injector = getInjector()
@@ -62,12 +64,14 @@ class PgpKeyTest {
     assertThat(decryptedBytes).isEqualTo(secretMessage)
   }
 
-  @Test fun `basic gpg generated message`() {
+  @Test
+  fun `basic gpg generated message`() {
     val secretMessage = "foo bar baz\n"
     // Generated via `gpg -ea -r misk-crypto-example` using the public key.
-    val cypherText = """
+    val cypherText =
+      """
       -----BEGIN PGP MESSAGE-----
-      
+
       hQIMAx0PAQ5Y+arHAQ/+PcL0Owd3X1DstQ85cyN6UfkLSNVyIxBuFsw5eXFMj8KP
       pvsoxFEDM5DiVeQqlra637w7Df/d9bLL2jA/pLR4rQPMdw5PZAUJ+ZRQHiGQC7SK
       JCB3eVXLbR/6gyCFlNmXEmSp+eQYizc6z7XQrLjwzhSmptCb/geyc7ZZJaRvhcli
@@ -83,7 +87,8 @@ class PgpKeyTest {
       Gnclp/iVFX4=
       =qmV6
       -----END PGP MESSAGE-----
-    """.trimIndent()
+      """
+        .trimIndent()
 
     val injector = getInjector()
     val pgpDecrypter = injector.getInstance(PgpDecrypterManager::class.java)["pgp_decrypter"]
@@ -91,13 +96,15 @@ class PgpKeyTest {
     assertThat(plaintext).isEqualTo(secretMessage)
   }
 
-  @Test fun `uncompressed gpg generated message`() {
+  @Test
+  fun `uncompressed gpg generated message`() {
     val secretMessage = "foo bar baz\n"
     // Generated via `gpg -ea --compress-algo none -r misk-crypto-example`
     // using the public key.
-    val cypherText = """
+    val cypherText =
+      """
       -----BEGIN PGP MESSAGE-----
-      
+
       hQIMAx0PAQ5Y+arHAQ/8DsQlRHLxg1h0kCRo5UklJNj/zW1j+R16Wm0GQGEagdVl
       btXMJlFlLMm3onHeVr9Bi6P6ShBcKePRg7qipzpgbw9I7h5KLB2g28Ac2xBrqbVU
       gYTvE9lGT9ma5F88iRDdzwk/6GFX6M7PPYeJPlO/G8aI0iD6RqWsYp2YcBh51t3D
@@ -113,7 +120,8 @@ class PgpKeyTest {
       tk38rqcb
       =E7kq
       -----END PGP MESSAGE-----
-    """.trimIndent()
+      """
+        .trimIndent()
 
     val injector = getInjector()
     val pgpDecrypter = injector.getInstance(PgpDecrypterManager::class.java)["pgp_decrypter"]
@@ -121,14 +129,16 @@ class PgpKeyTest {
     assertThat(plaintext).isEqualTo(secretMessage)
   }
 
-  @Test fun `signed gpg generated message`() {
+  @Test
+  fun `signed gpg generated message`() {
     // TODO: Support signning for both encryption and decryption.
 
     // Generated via `gpg -ea --sign -r misk-crypto-example` using the
     // public and private key.
-    val cypherText = """
+    val cypherText =
+      """
       -----BEGIN PGP MESSAGE-----
-      
+
       hQIMAx0PAQ5Y+arHAQ/+N8uDtjbAqAPZ6U8Rmm02ni3frpzIMhddn6phMqY9heeg
       +pCzSPYTeCRL5O432BYhvjc0vzW9U06R7fStPDrFQtS3dgGfS3l5cK5GhmGNzYIX
       ER6uGdGy7jB2X5hfm4hPxVhzEIIsqqweKsxzcay9aft5AYnhA8PTGpzKXKGDpNb+
@@ -156,23 +166,17 @@ class PgpKeyTest {
       2RN3wiW85ffECFl6oN5HPhFp7A==
       =Qktu
       -----END PGP MESSAGE-----
-    """.trimIndent()
+      """
+        .trimIndent()
 
     val injector = getInjector()
     val pgpDecrypter = injector.getInstance(PgpDecrypterManager::class.java)["pgp_decrypter"]
-    assertThrows<PGPException> {
-      pgpDecrypter.decrypt(cypherText.toByteArray()).decodeToString()
-    }
+    assertThrows<PGPException> { pgpDecrypter.decrypt(cypherText.toByteArray()).decodeToString() }
   }
 
   private fun getInjector(): Injector {
-    val publicKeyContents =
-      resourceLoader.utf8(publicKeyPath) ?: error("couldn't find $publicKeyPath")
-    val encryptKey = Key(
-      "pgp_encrypter",
-      KeyType.PGP_ENCRYPT,
-      RealSecret(publicKeyContents)
-    )
+    val publicKeyContents = resourceLoader.utf8(publicKeyPath) ?: error("couldn't find $publicKeyPath")
+    val encryptKey = Key("pgp_encrypter", KeyType.PGP_ENCRYPT, RealSecret(publicKeyContents))
 
     val privateKeyContents = resourceLoader.utf8(privateKeyJsonPath)!!
     val jsonAdapter = moshi.adapter<PgpKeyJsonFile>()
@@ -182,22 +186,19 @@ class PgpKeyTest {
     val toPlaintextSecretKey = Base64.getDecoder().decode(keyJsonFile.encrypted_private_key)
     val fakeEncryptedPrivateKey = kek.encrypt(toPlaintextSecretKey, null)
 
-    val privateKeyJsonWithFakeEncryption = keyJsonFile.copy(
-      encrypted_private_key = Base64.getEncoder().encodeToString(fakeEncryptedPrivateKey)
-    )
+    val privateKeyJsonWithFakeEncryption =
+      keyJsonFile.copy(encrypted_private_key = Base64.getEncoder().encodeToString(fakeEncryptedPrivateKey))
 
-    val decryptKey = Key(
-      "pgp_decrypter",
-      KeyType.PGP_DECRYPT,
-      RealSecret(jsonAdapter.toJson(privateKeyJsonWithFakeEncryption))
-    )
+    val decryptKey =
+      Key("pgp_decrypter", KeyType.PGP_DECRYPT, RealSecret(jsonAdapter.toJson(privateKeyJsonWithFakeEncryption)))
 
     val config = CryptoConfig(listOf(encryptKey, decryptKey), "test_master_key")
     val deploymentModule = DeploymentModule(TESTING)
     return Guice.createInjector(
       CryptoTestModule(config),
-      MiskTestingServiceModule(), LogCollectorModule(),
-      deploymentModule
+      MiskTestingServiceModule(),
+      LogCollectorModule(),
+      deploymentModule,
     )
   }
 

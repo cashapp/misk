@@ -12,6 +12,4 @@ interface Mdc {
   fun setContextMap(context: MdcContextMap)
 
   fun getCopyOfContextMap(): MdcContextMap?
-
 }
-

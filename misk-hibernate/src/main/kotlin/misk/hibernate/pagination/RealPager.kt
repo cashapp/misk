@@ -8,7 +8,7 @@ internal class RealPager<T : DbEntity<T>, Q : Query<T>>(
   private val query: Q,
   private val paginator: Paginator<T, Q>,
   initialOffset: Offset? = null,
-  private val pageSize: Int
+  private val pageSize: Int,
 ) : Pager<T> {
 
   private var hasNext = true
@@ -21,15 +21,15 @@ internal class RealPager<T : DbEntity<T>, Q : Query<T>>(
   override fun nextPage(session: Session): Page<T>? {
     if (!hasNext) return null
 
-    @Suppress("UNCHECKED_CAST")
-    val query = query.clone<Q>()
+    @Suppress("UNCHECKED_CAST") val query = query.clone<Q>()
     paginator.applyOffset(query, nextOffset)
     val (contents, hasNext) = query.listWithHasNext(session, pageSize)
-    nextOffset = if (hasNext) {
-      contents.lastOrNull()?.let(paginator::getOffset)
-    } else {
-      null
-    }
+    nextOffset =
+      if (hasNext) {
+        contents.lastOrNull()?.let(paginator::getOffset)
+      } else {
+        null
+      }
     this.hasNext = hasNext
     return Page(contents, nextOffset)
   }

@@ -1,10 +1,10 @@
 package misk.sampling
 
+import java.util.concurrent.TimeUnit
+import kotlin.test.assertFailsWith
 import misk.concurrent.FakeTicker
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.util.concurrent.TimeUnit
-import kotlin.test.assertFailsWith
 
 class RateLimiterTest {
   private val ticker = FakeTicker()
@@ -18,17 +18,13 @@ class RateLimiterTest {
 
   @Test
   fun `cannot acquire zero permits`() {
-    val exception = assertFailsWith<IllegalArgumentException> {
-      rateLimiter.tryAcquire(0L, 0, TimeUnit.MILLISECONDS)
-    }
+    val exception = assertFailsWith<IllegalArgumentException> { rateLimiter.tryAcquire(0L, 0, TimeUnit.MILLISECONDS) }
     assertThat(exception).hasMessage("unexpected permitCount: 0")
   }
 
   @Test
   fun `cannot use negative timeout`() {
-    val exception = assertFailsWith<IllegalArgumentException> {
-      rateLimiter.tryAcquire(1L, -1L, TimeUnit.MILLISECONDS)
-    }
+    val exception = assertFailsWith<IllegalArgumentException> { rateLimiter.tryAcquire(1L, -1L, TimeUnit.MILLISECONDS) }
     assertThat(exception).hasMessage("unexpected timeout: -1")
   }
 
@@ -152,7 +148,8 @@ class RateLimiterTest {
     assertThat(ticker.nowMs).isEqualTo(200L)
   }
 
-  @Test fun `permit count exceeds window size`() {
+  @Test
+  fun `permit count exceeds window size`() {
     rateLimiter.permitsPerSecond = 2L
 
     assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 2_000)).isEqualTo(2L)
@@ -162,14 +159,16 @@ class RateLimiterTest {
     assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 2_000)).isEqualTo(2L)
   }
 
-  @Test fun `QPS is set to 0`(){
+  @Test
+  fun `QPS is set to 0`() {
     rateLimiter.permitsPerSecond = 0L
 
     assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 500)).isEqualTo(0L)
     assertThat(rateLimiter.tryAcquire(1L, 500, TimeUnit.MILLISECONDS)).isFalse()
   }
 
-  @Test fun `QPS is set to a negative value`(){
+  @Test
+  fun `QPS is set to a negative value`() {
     rateLimiter.permitsPerSecond = -1L
 
     assertThat(rateLimiter.getPermitsRemaining(TimeUnit.MILLISECONDS, 500)).isEqualTo(0L)

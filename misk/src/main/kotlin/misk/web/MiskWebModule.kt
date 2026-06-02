@@ -7,10 +7,19 @@ import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
-import com.google.inject.multibindings.OptionalBinder
+import com.squareup.moshi.JsonDataException
 import com.squareup.wire.GrpcException
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.io.IOException
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
+import javax.servlet.http.HttpServlet
+import javax.servlet.http.HttpServletRequest
+import kotlin.math.min
 import misk.Action
 import misk.ApplicationInterceptor
 import misk.MiskCaller
@@ -41,11 +50,13 @@ import misk.web.actions.StatusAction
 import misk.web.concurrencylimits.ConcurrencyLimiterFactory
 import misk.web.concurrencylimits.ConcurrencyLimitsModule
 import misk.web.exceptions.ActionExceptionLogLevelConfig
+import misk.web.exceptions.DeadlineExceededExceptionMapper
 import misk.web.exceptions.EofExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
 import misk.web.exceptions.GrpcExceptionMapper
 import misk.web.exceptions.IOExceptionMapper
+import misk.web.exceptions.JsonDataExceptionMapper
 import misk.web.exceptions.RequestBodyExceptionMapper
 import misk.web.exceptions.WebActionExceptionMapper
 import misk.web.extractors.FormValueFeatureBinding
@@ -84,6 +95,7 @@ import misk.web.jetty.MeasuredQueuedThreadPool
 import misk.web.jetty.MeasuredThreadPool
 import misk.web.jetty.MeasuredThreadPoolExecutor
 import misk.web.jetty.ThreadPoolQueueMetrics
+import misk.web.jetty.WebActionsServlet
 import misk.web.marshal.JsonMarshaller
 import misk.web.marshal.JsonUnmarshaller
 import misk.web.marshal.Marshaller
@@ -98,6 +110,7 @@ import misk.web.mdc.RequestProtocolLogContextProvider
 import misk.web.mdc.RequestRemoteAddressLogContextProvider
 import misk.web.mdc.RequestURILogContextProvider
 import misk.web.proxy.WebProxyEntry
+import misk.web.requestdeadlines.DeadlineExceededException
 import misk.web.resources.StaticResourceEntry
 import misk.web.shutdown.GracefulShutdownModule
 import misk.web.sse.ServerSentEventMarshaller
@@ -110,55 +123,42 @@ import org.eclipse.jetty.util.thread.ExecutorThreadPool
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.util.thread.ThreadPool
 import wisp.deployment.Deployment
-import java.io.IOException
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
-import javax.servlet.http.HttpServletRequest
-import kotlin.math.min
 
-class MiskWebModule @JvmOverloads constructor(
-  private val config: WebConfig,
-  private val jettyDependsOn: List<Key<out Service>> = emptyList(),
-) : KAbstractModule() {
+class MiskWebModule
+@JvmOverloads
+constructor(private val config: WebConfig, private val jettyDependsOn: List<Key<out Service>> = emptyList()) :
+  KAbstractModule() {
   override fun configure() {
     bind<WebConfig>().toInstance(config)
     bind<ActionExceptionLogLevelConfig>().toInstance(config.action_exception_log_level)
 
-    install(
-      ServiceModule(
-        key = JettyService::class.toKey(),
-        dependsOn = jettyDependsOn
-      ).dependsOn<ReadyService>()
-    )
-    install(
-      ServiceModule<JettyThreadPoolMetricsCollector>()
-        .enhancedBy<ReadyService>()
-    )
-    install(
-      ServiceModule<JettyConnectionMetricsCollector>()
-        .enhancedBy<ReadyService>()
-    )
-    install(
-      ServiceModule<ReadinessCheckService>()
-        .enhancedBy<ReadyService>()
-    )
+    if (!config.disable_jetty) {
+      install(ServiceModule(key = JettyService::class.toKey(), dependsOn = jettyDependsOn).dependsOn<ReadyService>())
+      install(ServiceModule<JettyThreadPoolMetricsCollector>().enhancedBy<ReadyService>())
+      install(ServiceModule<JettyConnectionMetricsCollector>().enhancedBy<ReadyService>())
+      install(ServiceModule<ReadinessCheckService>().enhancedBy<ReadyService>())
+    }
+
+    // Expose WebActionsServlet for externally managed servlet container
+    bind<HttpServlet>().annotatedWith<MiskServlet>().to<WebActionsServlet>()
+
+    bind<UrlMatcher>().to<RealUrlMatcher>()
 
     install(ServiceModule<RepeatedTaskQueue>(ReadinessRefreshQueue::class))
 
     // Install support for accessing the current request and caller as ActionScoped types
-    install(object : ActionScopedProviderModule() {
-      override fun configureProviders() {
-        bindSeedData(HttpCall::class)
-        bindSeedData(HttpRequest::class)
-        bindSeedData(HttpServletRequest::class)
-        bindSeedData(Action::class)
-        bindProvider(miskCallerType, MiskCallerProvider::class)
-        newMultibinder<MiskCallerAuthenticator>()
+    install(
+      object : ActionScopedProviderModule() {
+        override fun configureProviders() {
+          bindSeedData(HttpCall::class)
+          bindSeedData(HttpRequest::class)
+          bindSeedData(HttpServletRequest::class)
+          bindSeedData(Action::class)
+          bindProvider(miskCallerType, MiskCallerProvider::class)
+          newMultibinder<MiskCallerAuthenticator>()
+        }
       }
-    })
+    )
 
     // Register built-in marshallers and unmarshallers
     multibind<Marshaller.Factory>().to<PlainTextMarshaller.Factory>()
@@ -176,18 +176,17 @@ class MiskWebModule @JvmOverloads constructor(
     newMultibinder<ApplicationInterceptor.Factory>()
     newMultibinder<StaticResourceEntry>()
     newMultibinder<WebProxyEntry>()
-    val logContextProviderBinder = MapBinder.newMapBinder(
-      binder(),
-      String::class.java, LogContextProvider::class.java
-    )
-    logContextProviderBinder.addBinding(RequestLogContextInterceptor.MDC_HTTP_METHOD)
+    val logContextProviderBinder = MapBinder.newMapBinder(binder(), String::class.java, LogContextProvider::class.java)
+    logContextProviderBinder
+      .addBinding(RequestLogContextInterceptor.MDC_HTTP_METHOD)
       .to<RequestHttpMethodLogContextProvider>()
-    logContextProviderBinder.addBinding(RequestLogContextInterceptor.MDC_PROTOCOL)
+    logContextProviderBinder
+      .addBinding(RequestLogContextInterceptor.MDC_PROTOCOL)
       .to<RequestProtocolLogContextProvider>()
-    logContextProviderBinder.addBinding(RequestLogContextInterceptor.MDC_REMOTE_ADDR)
+    logContextProviderBinder
+      .addBinding(RequestLogContextInterceptor.MDC_REMOTE_ADDR)
       .to<RequestRemoteAddressLogContextProvider>()
-    logContextProviderBinder.addBinding(RequestLogContextInterceptor.MDC_REQUEST_URI)
-      .to<RequestURILogContextProvider>()
+    logContextProviderBinder.addBinding(RequestLogContextInterceptor.MDC_REQUEST_URI).to<RequestURILogContextProvider>()
 
     // Register built-in interceptors. Interceptors run in the order in which they are
     // installed, and the order of these interceptors is critical.
@@ -195,65 +194,54 @@ class MiskWebModule @JvmOverloads constructor(
     newMultibinder<NetworkInterceptor.Factory>(BeforeContentEncoding::class)
 
     // Inflates a gzip compressed request
-    multibind<NetworkInterceptor.Factory>(ForContentEncoding::class)
-      .to<GunzipRequestBodyInterceptor.Factory>()
+    multibind<NetworkInterceptor.Factory>(ForContentEncoding::class).to<GunzipRequestBodyInterceptor.Factory>()
 
-    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-      .to<RebalancingInterceptor.Factory>()
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class).to<RebalancingInterceptor.Factory>()
 
     // Handle all unexpected errors that occur during dispatch
-    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-      .to<InternalErrorInterceptorFactory>()
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class).to<InternalErrorInterceptorFactory>()
 
     // Add request related fields to MDC for logging
-    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-      .to<RequestLogContextInterceptor.Factory>()
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class).to<RequestLogContextInterceptor.Factory>()
 
     // Collect metrics on the status of results and response times of requests
-    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-      .to<MetricsInterceptor.Factory>()
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class).to<MetricsInterceptor.Factory>()
 
     newMultibinder<ConcurrencyLimiterFactory>()
     if (!config.concurrency_limiter_disabled && config.concurrency_limiter?.disabled != true) {
       // Shed calls when we're degraded.
-      multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-        .to<ConcurrencyLimitsInterceptor.Factory>()
+      multibind<NetworkInterceptor.Factory>(MiskDefault::class).to<ConcurrencyLimitsInterceptor.Factory>()
 
       // Configure custom concurrency limiting configuration. Use the defaults from the web config
       // if not set in the limiter config.
-      val concurrencyLimiterConfig = config.concurrency_limiter?.copy(
-        // 2 is chosen somewhat arbitrarily here. Most services have one or two endpoints that
-        // receive the majority of traffic (power law, yay!), and those endpoints should _start up_
-        // without triggering the concurrency limiter at the parallelism that we configured Jetty
-        // to support.
-        initial_limit = config.concurrency_limiter.initial_limit
-          ?: (config.jetty_max_thread_pool_size / 2),
-      )
+      val concurrencyLimiterConfig =
+        config.concurrency_limiter?.copy(
+          // 2 is chosen somewhat arbitrarily here. Most services have one or two endpoints that
+          // receive the majority of traffic (power law, yay!), and those endpoints should _start up_
+          // without triggering the concurrency limiter at the parallelism that we configured Jetty
+          // to support.
+          initial_limit = config.concurrency_limiter.initial_limit ?: (config.jetty_max_thread_pool_size / 2)
+        )
       concurrencyLimiterConfig?.let { install(ConcurrencyLimitsModule(it)) }
     }
 
     // Traces requests as they work their way through the system.
-    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-      .to<TracingInterceptor.Factory>()
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class).to<TracingInterceptor.Factory>()
 
     // Convert and log application level exceptions into their appropriate response format
-    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-      .to<ExceptionHandlingInterceptor.Factory>()
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class).to<ExceptionHandlingInterceptor.Factory>()
 
     // Optionally audit, log...etc request and response details
     newMultibinder<RequestResponseHook.Factory>()
     multibind<RequestResponseHook.Factory>().to<RequestResponseLoggingHook.Factory>()
     newMultibinder<RequestLoggingConfig>()
-    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-      .to<RequestLoggingInterceptor.Factory>()
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class).to<RequestLoggingInterceptor.Factory>()
 
     // Adds CSP Interceptor
-    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-      .to<ContentSecurityPolicyInterceptor.Factory>()
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class).to<ContentSecurityPolicyInterceptor.Factory>()
 
     // Optionally log request and response body
-    multibind<ApplicationInterceptor.Factory>(MiskDefault::class)
-      .to<RequestBodyLoggingInterceptor.Factory>()
+    multibind<ApplicationInterceptor.Factory>(MiskDefault::class).to<RequestBodyLoggingInterceptor.Factory>()
 
     // Optionally wait for service to drain before shutting down Jetty.
     install(GracefulShutdownModule(config))
@@ -266,6 +254,8 @@ class MiskWebModule @JvmOverloads constructor(
     install(ExceptionMapperModule.create<IOException, IOExceptionMapper>())
     install(ExceptionMapperModule.create<EofException, EofExceptionMapper>())
     install(ExceptionMapperModule.create<RequestBodyException, RequestBodyExceptionMapper>())
+    install(ExceptionMapperModule.create<DeadlineExceededException, DeadlineExceededExceptionMapper>())
+    install(ExceptionMapperModule.create<JsonDataException, JsonDataExceptionMapper>())
 
     // Register built-in feature bindings.
     multibind<FeatureBinding.Factory>().toInstance(PathParamFeatureBinding.Factory)
@@ -298,12 +288,13 @@ class MiskWebModule @JvmOverloads constructor(
     val minThreads = min(config.jetty_min_thread_pool_size, maxThreads)
     val idleTimeout = 60_000
     if (config.jetty_max_thread_pool_queue_size > 0) {
-      val threadPool = QueuedThreadPool(
-        maxThreads,
-        minThreads,
-        idleTimeout,
-        provideThreadPoolQueue(getProvider(ThreadPoolQueueMetrics::class.java))
-      )
+      val threadPool =
+        QueuedThreadPool(
+          maxThreads,
+          minThreads,
+          idleTimeout,
+          provideThreadPoolQueue(getProvider(ThreadPoolQueueMetrics::class.java)),
+        )
       if (config.use_virtual_threads && VirtualThreads.areSupported()) {
         threadPool.virtualThreadsExecutor = VirtualThreads.getDefaultVirtualThreadsExecutor()
       }
@@ -311,13 +302,8 @@ class MiskWebModule @JvmOverloads constructor(
       bind<ThreadPool>().toInstance(threadPool)
       bind<MeasuredThreadPool>().toInstance(MeasuredQueuedThreadPool(threadPool))
     } else {
-      val executor = ThreadPoolExecutor(
-        minThreads,
-        maxThreads,
-        idleTimeout.toLong(),
-        TimeUnit.MILLISECONDS,
-        SynchronousQueue()
-      )
+      val executor =
+        ThreadPoolExecutor(minThreads, maxThreads, idleTimeout.toLong(), TimeUnit.MILLISECONDS, SynchronousQueue())
       val threadPool = ExecutorThreadPool(executor)
       threadPool.name = "jetty-thread"
       if (config.use_virtual_threads && VirtualThreads.areSupported()) {
@@ -331,7 +317,7 @@ class MiskWebModule @JvmOverloads constructor(
     }
 
     // TODO(adrw) replace this with a config YAML approach to avoid optional Guice bindings
-    OptionalBinder.newOptionalBinder(binder(), ProtoDocumentationProvider::class.java)
+    bindOptional<ProtoDocumentationProvider>()
   }
 
   @Provides
@@ -356,10 +342,7 @@ class MiskWebModule @JvmOverloads constructor(
   @Provides
   @ReadinessRefreshQueue
   @Singleton
-  fun readinessRefreshQueue(
-    queueFactory: RepeatedTaskQueueFactory,
-    deployment: Deployment
-  ): RepeatedTaskQueue {
+  fun readinessRefreshQueue(queueFactory: RepeatedTaskQueueFactory, deployment: Deployment): RepeatedTaskQueue {
     val queueName = "readiness-refresh-queue"
     return if (deployment.isReal) {
       queueFactory.new(queueName)
@@ -368,25 +351,18 @@ class MiskWebModule @JvmOverloads constructor(
     }
   }
 
-  private fun provideThreadPoolQueue(
-    metrics: Provider<ThreadPoolQueueMetrics>
-  ): BlockingQueue<Runnable> {
+  private fun provideThreadPoolQueue(metrics: Provider<ThreadPoolQueueMetrics>): BlockingQueue<Runnable> {
     return if (config.enable_thread_pool_queue_metrics) {
-      TimedBlockingQueue(
-        config.jetty_max_thread_pool_queue_size
-      ) { d -> metrics.get().recordQueueLatency(d) }
+      TimedBlockingQueue(config.jetty_max_thread_pool_queue_size) { d -> metrics.get().recordQueueLatency(d) }
     } else {
       ArrayBlockingQueue(config.jetty_max_thread_pool_queue_size)
     }
   }
 
-  class MiskCallerProvider @Inject constructor(
-    private val authenticators: List<MiskCallerAuthenticator>
-  ) : ActionScopedProvider<MiskCaller?> {
+  class MiskCallerProvider @Inject constructor(private val authenticators: List<MiskCallerAuthenticator>) :
+    ActionScopedProvider<MiskCaller?> {
     override fun get(): MiskCaller? {
-      return authenticators.firstNotNullOfOrNull {
-        it.getAuthenticatedCaller()
-      }
+      return authenticators.firstNotNullOfOrNull { it.getAuthenticatedCaller() }
     }
   }
 

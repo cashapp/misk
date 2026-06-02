@@ -1,12 +1,12 @@
 package misk.cloud.fake.security.keys
 
-import misk.security.keys.KeyService
-import okio.ByteString
-import okio.ByteString.Companion.toByteString
 import java.nio.ByteBuffer
 import java.security.Key
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
+import misk.security.keys.KeyService
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 
 class FakeKeyService : KeyService {
   override fun encrypt(keyAlias: String, plainText: ByteString): ByteString {
@@ -24,11 +24,12 @@ class FakeKeyService : KeyService {
   }
 
   private fun newSymmetricKey(keyText: String): Key {
-    val keyInput = when (keyText.length) {
-      in 1..31 -> keyText + " ".repeat(32 - keyText.length)
-      32 -> keyText
-      else -> keyText.take(32)
-    }
+    val keyInput =
+      when (keyText.length) {
+        in 1..31 -> keyText + " ".repeat(32 - keyText.length)
+        32 -> keyText
+        else -> keyText.take(32)
+      }
     return SecretKeySpec(keyInput.toByteArray(Charsets.US_ASCII), "AES")
   }
 }

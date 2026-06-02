@@ -2,9 +2,15 @@ package misk.web.interceptors.hooks
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.time.Duration
+import kotlin.reflect.full.findAnnotation
 import misk.Action
 import misk.MiskCaller
 import misk.annotation.ExperimentalMiskApi
+import misk.logging.SmartTagsThreadLocalHandler
+import misk.logging.Tag
+import misk.logging.getLogger
+import misk.logging.log
 import misk.random.ThreadLocalRandom
 import misk.web.HttpCall
 import misk.web.exceptions.ExceptionMapperResolver
@@ -19,18 +25,13 @@ import misk.web.interceptors.RequestLoggingMode
 import misk.web.interceptors.RequestResponseBody
 import org.slf4j.event.Level
 import wisp.deployment.Deployment
-import misk.logging.SmartTagsThreadLocalHandler
-import misk.logging.Tag
-import misk.logging.getLogger
-import misk.logging.log
-import java.time.Duration
-import kotlin.reflect.full.findAnnotation
 
 /** For backwards compatibility, the interceptor logger is used since that is where the functionality used to live. */
 private val logger = getLogger<RequestLoggingInterceptor>()
 
 @OptIn(ExperimentalMiskApi::class)
-internal class RequestResponseLoggingHook private constructor(
+internal class RequestResponseLoggingHook
+private constructor(
   private val action: Action,
   private val random: ThreadLocalRandom,
   private val logRateLimiter: LogRateLimiter,
@@ -39,7 +40,9 @@ internal class RequestResponseLoggingHook private constructor(
   val config: ActionLoggingConfig,
 ) : RequestResponseHook {
   @Singleton
-  class Factory @Inject constructor(
+  class Factory
+  @Inject
+  constructor(
     private val random: ThreadLocalRandom,
     private val logRateLimiter: LogRateLimiter,
     private val deployment: Deployment,
@@ -48,20 +51,15 @@ internal class RequestResponseLoggingHook private constructor(
     private val configs: Set<RequestLoggingConfig>,
   ) : RequestResponseHook.Factory {
     override fun create(action: Action): RequestResponseHook? {
-      val annotation = action.function.findAnnotation<LogRequestResponse>()
-        ?: return null
+      val annotation = action.function.findAnnotation<LogRequestResponse>() ?: return null
 
       val config = ActionLoggingConfig.fromConfigMapOrAnnotation(action, configs, annotation)
 
       if (config.excludedEnvironments.contains(deployment.name)) {
         return null
       }
-      require(config.ratePerSecond >= 0L) {
-        "${action.name} @LogRequestResponse ratePerSecond must be >= 0"
-      }
-      require(config.errorRatePerSecond >= 0L) {
-        "${action.name} @LogRequestResponse errorRatePerSecond must be >= 0"
-      }
+      require(config.ratePerSecond >= 0L) { "${action.name} @LogRequestResponse ratePerSecond must be >= 0" }
+      require(config.errorRatePerSecond >= 0L) { "${action.name} @LogRequestResponse errorRatePerSecond must be >= 0" }
       require(config.bodySampling in 0.0..1.0) {
         "${action.name} @LogRequestResponse bodySampling must be in the range (0.0, 1.0]"
       }
@@ -86,7 +84,7 @@ internal class RequestResponseLoggingHook private constructor(
     requestResponse: RequestResponseBody?,
     elapsed: Duration,
     elapsedToString: String,
-    error: Throwable?
+    error: Throwable?,
   ) {
     requestResponseLoggedCapture.reset()
 
@@ -106,10 +104,7 @@ internal class RequestResponseLoggingHook private constructor(
     val randomDouble = random.current().nextDouble()
     val includeBody = randomDouble < sampling
 
-    var additionalTags: Set<Tag> = setOf(
-      "response_code" to statusCode,
-      "response_time_millis" to elapsed.toMillis(),
-   )
+    var additionalTags: Set<Tag> = setOf("response_code" to statusCode, "response_time_millis" to elapsed.toMillis())
 
     val error = error?.unwrap()
     var level = Level.INFO
@@ -122,11 +117,7 @@ internal class RequestResponseLoggingHook private constructor(
 
     requestResponseLoggedCapture.onLogged()
 
-    logger.log(
-      level = level,
-      th = error,
-      tags = additionalTags.toTypedArray(),
-    ) {
+    logger.log(level = level, th = error, tags = additionalTags.toTypedArray()) {
       buildDescription(
         caller = caller,
         httpCall = httpCall,
@@ -158,35 +149,26 @@ internal class RequestResponseLoggingHook private constructor(
 
     if (includeBody) {
       requestResponse?.let {
-        requestResponse.request?.let {
-          append(" request=${requestResponse.request}")
-        }
+        requestResponse.request?.let { append(" request=${requestResponse.request}") }
         if (config.includeRequestHeaders) {
-          requestResponse.requestHeaders?.let {
-            append(" requestHeaders=${requestResponse.requestHeaders}")
-          }
+          requestResponse.requestHeaders?.let { append(" requestHeaders=${requestResponse.requestHeaders}") }
         }
-        requestResponse.response?.let {
-          append(" response=${requestResponse.response}")
-        }
+        requestResponse.response?.let { append(" response=${requestResponse.response}") }
         if (config.includeResponseHeaders) {
-          requestResponse.responseHeaders?.let {
-            append(" responseHeaders=${requestResponse.responseHeaders}")
-          }
+          requestResponse.responseHeaders?.let { append(" responseHeaders=${requestResponse.responseHeaders}") }
         }
       }
     }
   }
 }
 
-/**
- * Captures whether the RequestResponseLogger has already logged the response to avoid double logging.
- */
+/** Captures whether the RequestResponseLogger has already logged the response to avoid double logging. */
 internal class RequestResponseLoggedCapture @Inject constructor() {
   companion object {
-    private val capture = object : ThreadLocal<Boolean>() {
-      override fun initialValue() = false
-    }
+    private val capture =
+      object : ThreadLocal<Boolean>() {
+        override fun initialValue() = false
+      }
   }
 
   fun isLogged(): Boolean = capture.get()

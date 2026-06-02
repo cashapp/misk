@@ -38,16 +38,13 @@ interface TokenGenerator2 {
     }
 
     /**
-     * Returns a token semantically equal to `token` but using only characters from the Crockford
-     * Base32 alphabet. This maps visually similar characters like `o` to the corresponding
-     * encoding character like `0`. Spaces are omitted.
+     * Returns a token semantically equal to `token` but using only characters from the Crockford Base32 alphabet. This
+     * maps visually similar characters like `o` to the corresponding encoding character like `0`. Spaces are omitted.
      *
-     * Call this when accepting tokens that may have been transcribed by a user. It is not necessary
-     * to canonicalize tokens that haven't been manually entered; they will already be in canonical
-     * form.
+     * Call this when accepting tokens that may have been transcribed by a user. It is not necessary to canonicalize
+     * tokens that haven't been manually entered; they will already be in canonical form.
      *
-     * @throws IllegalArgumentException if `token` contains a character that cannot be mapped and
-     *     that is not a space.
+     * @throws IllegalArgumentException if `token` contains a character that cannot be mapped and that is not a space.
      */
     fun canonicalize(token: String): String {
       val result = StringBuilder()

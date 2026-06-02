@@ -17,21 +17,15 @@ class Windower(windowSecs: Int, stagger: Int) {
   internal val startSecs: List<Int>
 
   /**
-   * Creates a new Windower, which will create windows of windowSecs duration.
-   * The size of the window must be in the range of 1 to 60 seconds, and must divide 60 without any remainder:
-   * 1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30 second window sizes are permitted.
-   * Stagger defines how many windows will contain a single time; a value of 1 means windows never overlap.
+   * Creates a new Windower, which will create windows of windowSecs duration. The size of the window must be in the
+   * range of 1 to 60 seconds, and must divide 60 without any remainder: 1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30 second
+   * window sizes are permitted. Stagger defines how many windows will contain a single time; a value of 1 means windows
+   * never overlap.
    */
   init {
-    require(windowSecs > 0 || windowSecs <= 60) {
-      "windowSecs must be in the range of (0, 60]"
-    }
-    require(60 % windowSecs == 0) {
-      "60 % windowSecs must be 0, not ${60 % windowSecs}"
-    }
-    require(stagger in 1..windowSecs) {
-      "stagger must be >= 1 and <= windowSecs"
-    }
+    require(windowSecs > 0 || windowSecs <= 60) { "windowSecs must be in the range of (0, 60]" }
+    require(60 % windowSecs == 0) { "60 % windowSecs must be 0, not ${60 % windowSecs}" }
+    require(stagger in 1..windowSecs) { "stagger must be >= 1 and <= windowSecs" }
     var start = 0
     val startSecsMutableList = mutableListOf<Int>()
     while (start < 60) {
@@ -47,10 +41,8 @@ class Windower(windowSecs: Int, stagger: Int) {
   }
 
   /**
-   * Returns all windows that the given time falls into.
-   * The returned slice will be ordered by window start time, and
-   * the number of windows in the returned slice will the same as the stagger
-   * given when the Windower was created.
+   * Returns all windows that the given time falls into. The returned slice will be ordered by window start time, and
+   * the number of windows in the returned slice will the same as the stagger given when the Windower was created.
    */
   fun windowsContaining(t: ZonedDateTime): List<Window> {
     // Find the earliest possible time the window could start,
@@ -93,10 +85,7 @@ class Windower(windowSecs: Int, stagger: Int) {
     return i + 1
   }
 
-  /**
-   * Returns the start time of the next window and boundary index of where
-   * the window is within the current minute
-   */
+  /** Returns the start time of the next window and boundary index of where the window is within the current minute */
   private fun nextTime(start: ZonedDateTime, startBoundary: Int): Pair<ZonedDateTime, Int> {
     val boundaryIndex = nextBoundaryIndex(startBoundary)
     if (boundaryIndex == 0) {

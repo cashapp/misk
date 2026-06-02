@@ -1,47 +1,45 @@
 package misk.resources
 
-import okio.BufferedSource
-import okio.ByteString
-import java.nio.file.Path
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import kotlinx.html.Entities
-import okio.ByteString.Companion.encodeUtf8
-import okio.buffer
-import okio.sink
 import java.nio.file.Files
+import java.nio.file.Path
 import java.util.Collections
 import kotlin.collections.Map
 import kotlin.collections.mapValues
+import okio.BufferedSource
+import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
+import okio.buffer
+import okio.sink
 
 /**
- * ResourceLoader is a testable API for loading resources from the classpath, from the filesystem,
- * from memory, or from another [Backend] source.
+ * ResourceLoader is a testable API for loading resources from the classpath, from the filesystem, from memory, or from
+ * another [Backend] source.
  *
- * Resource addresses have a scheme name, a colon, and an absolute filesystem-like path:
- * `classpath:/migrations/v1.sql`. Schemes identify backends `classpath:` or `memory:`. Paths start
- * with a slash and have any number of segments.
+ * Resource addresses have a scheme name, a colon, and an absolute filesystem-like path: `classpath:/migrations/v1.sql`.
+ * Schemes identify backends `classpath:` or `memory:`. Paths start with a slash and have any number of segments.
  *
- * **Classpath resources** use the scheme `classpath:`. The backend reads data from the
- * `src/main/resources` of the project's modules and the contents of all library `.jar` files.
- * Classpath resources are read-only.
+ * **Classpath resources** use the scheme `classpath:`. The backend reads data from the `src/main/resources` of the
+ * project's modules and the contents of all library `.jar` files. Classpath resources are read-only.
  *
- * **Filesystem resources** use the scheme `filesystem:`. The backend reads data from the host
- * machine's local filesystem. It is read-only and does not support [list].
+ * **Filesystem resources** use the scheme `filesystem:`. The backend reads data from the host machine's local
+ * filesystem. It is read-only and does not support [list].
  *
- * **Memory resources** use the scheme `memory:`. The backend starts empty and is populated by calls
- * to [put].
+ * **Memory resources** use the scheme `memory:`. The backend starts empty and is populated by calls to [put].
  *
- * Other backends are permitted. They should be registered with a `MapBinder` with the backend
- * scheme like `classpath:` as the key.
+ * Other backends are permitted. They should be registered with a `MapBinder` with the backend scheme like `classpath:`
+ * as the key.
  */
 @Singleton
-class ResourceLoader  @Inject constructor(val backends: Map<String, Backend>) {
+class ResourceLoader @Inject constructor(val backends: Map<String, Backend>) {
 
   /** Returns valid scheme prefixes for resource loader backends. */
   val schemes: Set<String> = backends.keys
   val delegate by lazy {
-    wisp.resources.ResourceLoader(this.backends.mapValues { BackendAdaptor(it.value) as wisp.resources.ResourceLoader.Backend })
+    wisp.resources.ResourceLoader(
+      this.backends.mapValues { BackendAdaptor(it.value) as wisp.resources.ResourceLoader.Backend }
+    )
   }
 
   init {
@@ -124,35 +122,29 @@ class ResourceLoader  @Inject constructor(val backends: Map<String, Backend>) {
   }
 
   /**
-   * Return the contents of `address` as a string, or null if no such resource exists. Note that
-   * this method decodes the resource on every use. It is the caller's responsibility to cache the
-   * result if it is to be loaded frequently.
+   * Return the contents of `address` as a string, or null if no such resource exists. Note that this method decodes the
+   * resource on every use. It is the caller's responsibility to cache the result if it is to be loaded frequently.
    */
   fun utf8(address: String): String? {
     val source = open(address) ?: return null
     return source.use { it.readUtf8() }
   }
 
-  /**
-   * Like [utf8], but throws [IllegalStateException] if the resource is missing.
-   */
+  /** Like [utf8], but throws [IllegalStateException] if the resource is missing. */
   fun requireUtf8(address: String): String {
     return utf8(address) ?: error("could not load resource $address")
   }
 
   /**
-   * Return the contents of `address` as bytes, or null if no such resource exists. Note that
-   * this method reads the resource on every use. It is the caller's responsibility to cache the
-   * result if it is to be loaded frequently.
+   * Return the contents of `address` as bytes, or null if no such resource exists. Note that this method reads the
+   * resource on every use. It is the caller's responsibility to cache the result if it is to be loaded frequently.
    */
   fun bytes(address: String): ByteString? {
     val source = open(address) ?: return null
     return source.use { it.readByteString() }
   }
 
-  /**
-   * Like [bytes], but throws [IllegalStateException] if the resource is missing.
-   */
+  /** Like [bytes], but throws [IllegalStateException] if the resource is missing. */
   fun requireBytes(address: String): ByteString {
     return bytes(address) ?: error("could not load resource $address")
   }
@@ -162,8 +154,8 @@ class ResourceLoader  @Inject constructor(val backends: Map<String, Backend>) {
   }
 
   /**
-   * Decodes an address like `classpath:/migrations/v1.sql` into a backend scheme like `classpath:`
-   * and a backend-specific path like `/migrations/v1.sql`.
+   * Decodes an address like `classpath:/migrations/v1.sql` into a backend scheme like `classpath:` and a
+   * backend-specific path like `/migrations/v1.sql`.
    */
   private fun parseAddress(path: String): Address {
     val colon = path.indexOf(':')
@@ -171,9 +163,7 @@ class ResourceLoader  @Inject constructor(val backends: Map<String, Backend>) {
     return Address(path.substring(0, colon + 1), path.substring(colon + 1))
   }
 
-  /**
-   * Copies all resources with [root] as a prefix to the directory [dir].
-   */
+  /** Copies all resources with [root] as a prefix to the directory [dir]. */
   fun copyTo(root: String, dir: Path) {
     val prefix = if (root.endsWith("/")) root else "$root/"
     for (resource in walk(root)) {
@@ -182,17 +172,10 @@ class ResourceLoader  @Inject constructor(val backends: Map<String, Backend>) {
     }
   }
 
-  /**
-   * Copy the resource to the specified filename [destination], creating all of the parent
-   * directories if necessary.
-   */
+  /** Copy the resource to the specified filename [destination], creating all of the parent directories if necessary. */
   private fun copyResource(address: String, destination: Path) {
     Files.createDirectories(destination.parent)
-    open(address).use { i ->
-      destination.sink().buffer().use { o ->
-        o.writeAll(i!!)
-      }
-    }
+    open(address).use { i -> destination.sink().buffer().use { o -> o.writeAll(i!!) } }
   }
 
   fun watch(address: String, resourceChangedListener: (address: String) -> Unit) {
@@ -261,22 +244,22 @@ class ResourceLoader  @Inject constructor(val backends: Map<String, Backend>) {
     }
   }
 
-
   companion object {
-    val SYSTEM = ResourceLoader(
-      mapOf(
-        ClasspathResourceLoaderBackend.SCHEME to ClasspathResourceLoaderBackend,
-        FilesystemLoaderBackend.SCHEME to FilesystemLoaderBackend,
-        EnvironmentResourceLoaderBackend.SCHEME to EnvironmentResourceLoaderBackend
+    val SYSTEM =
+      ResourceLoader(
+        mapOf(
+          ClasspathResourceLoaderBackend.SCHEME to ClasspathResourceLoaderBackend,
+          FilesystemLoaderBackend.SCHEME to FilesystemLoaderBackend,
+          EnvironmentResourceLoaderBackend.SCHEME to EnvironmentResourceLoaderBackend,
+        )
       )
-    )
   }
 }
 
-internal class BackendAdaptor(val delegate : ResourceLoader.Backend) : wisp.resources.ResourceLoader.Backend() {
+internal class BackendAdaptor(val delegate: ResourceLoader.Backend) : wisp.resources.ResourceLoader.Backend() {
 
   override fun open(path: String): BufferedSource? {
-   return delegate.open(path)
+    return delegate.open(path)
   }
 
   override fun exists(path: String): Boolean {

@@ -1,0 +1,5 @@
+# Run this command to always ignore formatting commits in `git blame`
+# git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# Formatted the repo with block/kotlin-formatter
+ddda6180ff72f0cea9ef17a44e445578e4b4ed03

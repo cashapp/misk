@@ -8,8 +8,8 @@ import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.crypto.tink.proto.KeyTemplate
 import jakarta.inject.Inject
-import misk.logging.getLogger
 import java.security.GeneralSecurityException
+import misk.logging.getLogger
 
 open class KeyReader {
   companion object {

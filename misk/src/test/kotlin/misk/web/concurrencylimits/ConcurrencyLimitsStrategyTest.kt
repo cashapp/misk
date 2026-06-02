@@ -8,6 +8,7 @@ import com.netflix.concurrency.limits.limit.GradientLimit
 import com.netflix.concurrency.limits.limit.SettableLimit
 import com.netflix.concurrency.limits.limit.VegasLimit
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.asAction
 import misk.inject.KAbstractModule
@@ -24,7 +25,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import wisp.deployment.Deployment
 import wisp.deployment.TESTING
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class ConcurrencyLimitsStrategyTest {
@@ -32,34 +32,31 @@ class ConcurrencyLimitsStrategyTest {
   private var maxConcurrency: Int? = null
 
   @MiskTestModule
-  val module = object : KAbstractModule() {
-    override fun configure() {
-      bind<Deployment>().toInstance(TESTING)
+  val module =
+    object : KAbstractModule() {
+      override fun configure() {
+        bind<Deployment>().toInstance(TESTING)
 
-      install(MiskTestingServiceModule())
+        install(MiskTestingServiceModule())
 
-      newMultibinder<ConcurrencyLimiterFactory>()
-      install(
-        MiskWebModule(
-          WebConfig(
-            port = 0,
-            concurrency_limiter_disabled = false,
-            concurrency_limiter = ConcurrencyLimiterConfig(
-              strategy = strategy,
-              max_concurrency = maxConcurrency,
+        newMultibinder<ConcurrencyLimiterFactory>()
+        install(
+          MiskWebModule(
+            WebConfig(
+              port = 0,
+              concurrency_limiter_disabled = false,
+              concurrency_limiter = ConcurrencyLimiterConfig(strategy = strategy, max_concurrency = maxConcurrency),
             )
           )
         )
-      )
+      }
     }
-  }
 
   @Inject private lateinit var limiterFactories: List<ConcurrencyLimiterFactory>
   @Inject private lateinit var limit: Limit
 
   private class HelloAction : WebAction {
-    @Get("/hello")
-    fun call(): String = "hello"
+    @Get("/hello") fun call(): String = "hello"
   }
 
   private fun List<ConcurrencyLimiterFactory>.createLimit() =

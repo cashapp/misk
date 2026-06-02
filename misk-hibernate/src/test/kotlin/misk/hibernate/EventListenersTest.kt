@@ -1,33 +1,33 @@
 package misk.hibernate
 
 import com.google.inject.util.Modules
+import jakarta.inject.Inject
+import java.time.LocalDate
+import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.vitess.testing.utilities.DockerVitess
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.event.spi.EventType
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import jakarta.inject.Inject
-import misk.testing.MiskExternalDependency
-import misk.vitess.testing.utilities.DockerVitess
 
 @MiskTest(startService = true)
 class EventListenersTest {
-  @MiskExternalDependency
-  private val dockerVitess = DockerVitess()
+  @MiskExternalDependency private val dockerVitess = DockerVitess()
 
   @MiskTestModule
-  val module = Modules.combine(
-    MoviesTestModule(),
-    object : HibernateEntityModule(Movies::class) {
-      override fun configureHibernate() {
-        bindListener(EventType.PRE_LOAD).to<FakeEventListener>()
-        bindListener(EventType.PRE_INSERT).to<FakeEventListener>()
-        bindListener(EventType.PRE_UPDATE).to<FakeEventListener>()
-        bindListener(EventType.PRE_DELETE).to<FakeEventListener>()
-      }
-    }
-  )
+  val module =
+    Modules.combine(
+      MoviesTestModule(),
+      object : HibernateEntityModule(Movies::class) {
+        override fun configureHibernate() {
+          bindListener(EventType.PRE_LOAD).to<FakeEventListener>()
+          bindListener(EventType.PRE_INSERT).to<FakeEventListener>()
+          bindListener(EventType.PRE_UPDATE).to<FakeEventListener>()
+          bindListener(EventType.PRE_DELETE).to<FakeEventListener>()
+        }
+      },
+    )
 
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
@@ -48,9 +48,7 @@ class EventListenersTest {
     }
 
     transacter.transaction { session ->
-      val movie = queryFactory.newQuery<MovieQuery>()
-        .allowTableScan()
-        .uniqueResult(session)!!
+      val movie = queryFactory.newQuery<MovieQuery>().allowTableScan().uniqueResult(session)!!
       assertThat(eventListener.takeEvents()).containsExactly("preload")
 
       session.hibernateSession.delete(movie) // TODO(jwilson): expose session.delete() directly.

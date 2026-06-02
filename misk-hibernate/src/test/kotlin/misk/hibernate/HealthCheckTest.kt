@@ -3,10 +3,12 @@ package misk.hibernate
 import com.google.common.util.concurrent.Service
 import com.google.inject.Provider
 import jakarta.inject.Inject
+import java.time.Instant
 import misk.healthchecks.HealthCheck
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.time.FakeClock
 import misk.vitess.testing.utilities.DockerVitess
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.HibernateException
@@ -14,16 +16,12 @@ import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import misk.time.FakeClock
-import java.time.Instant
 
 @MiskTest(startService = true)
 class HealthCheckTest {
-  @MiskExternalDependency
-  private val dockerVitess = DockerVitess()
+  @MiskExternalDependency private val dockerVitess = DockerVitess()
 
-  @MiskTestModule
-  val module = MoviesTestModule()
+  @MiskTestModule val module = MoviesTestModule()
 
   @Inject @Movies private lateinit var sessionFactory: Provider<SessionFactoryService>
   @Inject private lateinit var fakeClock: FakeClock
@@ -57,9 +55,7 @@ class HealthCheckTest {
 
     val status = HibernateHealthCheck(Movies::class, sessionFactory, fakeClock).status()
     assertThat(status.isHealthy).isFalse
-    assertThat(status.messages).anyMatch {
-      it.startsWith("Hibernate: host and Movies database clocks have drifted")
-    }
+    assertThat(status.messages).anyMatch { it.startsWith("Hibernate: host and Movies database clocks have drifted") }
   }
 
   @Test

@@ -5,6 +5,9 @@ import com.google.inject.Injector
 import com.google.inject.Provides
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import kotlin.test.assertFailsWith
 import kotlinx.coroutines.runBlocking
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
@@ -27,14 +30,10 @@ import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 internal class TypedHttpClientTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var jetty: JettyService
 
@@ -79,22 +78,19 @@ internal class TypedHttpClientTest {
   }
 
   private fun testBuildAndUseDynamicClient(typedClientFactory: TypedClientFactory) {
-    val dinoClient = typedClientFactory.build<ReturnADinosaur>(
-      HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
-      "dynamicDino"
-    )
+    val dinoClient =
+      typedClientFactory.build<ReturnADinosaur>(HttpClientEndpointConfig(jetty.httpServerUrl.toString()), "dynamicDino")
     val response = dinoClient.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
     assertThat(response.code()).isEqualTo(200)
     assertThat(response.body()).isNotNull()
     assertThat(response.body()?.name!!).isEqualTo("supertrex")
 
-    val protoDinoClient = typedClientFactory.build<ReturnAProtoDinosaur>(
-      HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
-      "dynamicProtoDino"
-    )
-    val protoResponse = protoDinoClient.getDinosaur(
-      Dinosaur.Builder().name("trex").build()
-    ).execute()
+    val protoDinoClient =
+      typedClientFactory.build<ReturnAProtoDinosaur>(
+        HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
+        "dynamicProtoDino",
+      )
+    val protoResponse = protoDinoClient.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
     assertThat(protoResponse.code()).isEqualTo(200)
     assertThat(protoResponse.body()).isNotNull()
     assertThat(protoResponse.body()?.name!!).isEqualTo("supertrex")
@@ -104,52 +100,43 @@ internal class TypedHttpClientTest {
   fun mustBeRetrofitInterface() {
     val typedClientFactory = clientInjector.getInstance(TypedClientFactory::class.java)
 
-    val exception = assertFailsWith<IllegalArgumentException> {
-      typedClientFactory.build<NotARetrofitInterface>(
-        HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
-        "notARetrofitInterface"
-      )
-    }
-    assertThat(exception).hasMessage(
-      "${NotARetrofitInterface::class} is not a Retrofit interface (no @POST or @GET methods)"
-    )
+    val exception =
+      assertFailsWith<IllegalArgumentException> {
+        typedClientFactory.build<NotARetrofitInterface>(
+          HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
+          "notARetrofitInterface",
+        )
+      }
+    assertThat(exception)
+      .hasMessage("${NotARetrofitInterface::class} is not a Retrofit interface (no @POST or @GET methods)")
   }
 
   @Test
   fun suspendingMethod() {
-    val client: ReturnADinosaurNonBlocking = clientInjector.getInstance(
-      Names.named("nonblockingDinosaur")
-    )
-    val response = runBlocking {
-      client.getDinosaur(Dinosaur.Builder().name("trex").build())
-    }
+    val client: ReturnADinosaurNonBlocking = clientInjector.getInstance(Names.named("nonblockingDinosaur"))
+    val response = runBlocking { client.getDinosaur(Dinosaur.Builder().name("trex").build()) }
     assertThat(response.name!!).isEqualTo("supertrex")
   }
 
   interface ReturnADinosaur {
-    @POST("/cooldinos")
-    fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
+    @POST("/cooldinos") fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
   }
 
   interface ReturnADinosaurNonBlocking {
-    @POST("/cooldinos")
-    suspend fun getDinosaur(@Body request: Dinosaur): Dinosaur
+    @POST("/cooldinos") suspend fun getDinosaur(@Body request: Dinosaur): Dinosaur
   }
 
   class ReturnADinosaurAction @Inject constructor() : WebAction {
     @Post("/cooldinos")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun getDinosaur(@RequestBody request: Dinosaur):
-      Dinosaur = request.newBuilder().name("super${request.name}").build()
+    fun getDinosaur(@RequestBody request: Dinosaur): Dinosaur =
+      request.newBuilder().name("super${request.name}").build()
   }
 
   interface ReturnAProtoDinosaur {
     @POST("/protodinos")
-    @Headers(
-      "Accept: " + MediaTypes.APPLICATION_PROTOBUF,
-      "Content-type: " + MediaTypes.APPLICATION_PROTOBUF
-    )
+    @Headers("Accept: " + MediaTypes.APPLICATION_PROTOBUF, "Content-type: " + MediaTypes.APPLICATION_PROTOBUF)
     fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
   }
 
@@ -178,23 +165,19 @@ internal class TypedHttpClientTest {
     override fun configure() {
       install(MiskTestingServiceModule())
       install(TypedHttpClientModule.create<ReturnADinosaur>("dinosaur", Names.named("dinosaur")))
-      install(TypedHttpClientModule.create<ReturnADinosaurNonBlocking>(
-        "dinosaur",
-        Names.named("nonblockingDinosaur")
-      ))
-      install(
-        TypedHttpClientModule.create<ReturnAProtoDinosaur>("protoDino", Names.named("protoDino"))
-      )
+      install(TypedHttpClientModule.create<ReturnADinosaurNonBlocking>("dinosaur", Names.named("nonblockingDinosaur")))
+      install(TypedHttpClientModule.create<ReturnAProtoDinosaur>("protoDino", Names.named("protoDino")))
     }
 
     @Provides
     @Singleton
     fun provideHttpClientConfig(): HttpClientsConfig {
       return HttpClientsConfig(
-        endpoints = mapOf(
-          "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
-          "protoDino" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-        )
+        endpoints =
+          mapOf(
+            "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
+            "protoDino" to HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
+          )
       )
     }
   }

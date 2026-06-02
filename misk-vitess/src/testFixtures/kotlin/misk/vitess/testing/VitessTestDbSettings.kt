@@ -1,7 +1,7 @@
 package misk.vitess.testing
 
-import misk.containers.ContainerUtil
 import java.time.Duration
+import misk.containers.ContainerUtil
 
 object DefaultSettings {
   const val AUTO_APPLY_SCHEMA_CHANGES = true
@@ -18,18 +18,19 @@ object DefaultSettings {
   const val IN_MEMORY_STORAGE_SIZE = "1024M"
   const val KEEP_ALIVE = true
   const val LINT_SCHEMA = false
-  const val MYSQL_VERSION = "8.0.36"
+  const val MYSQL_VERSION = "8.4.3"
   const val PORT = 27003
   const val SCHEMA_DIR = "classpath:/vitess/schema"
   const val SQL_MODE: String =
     "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
   @JvmField var TRANSACTION_ISOLATION_LEVEL: TransactionIsolationLevel = TransactionIsolationLevel.REPEATABLE_READ
+  @JvmField val TRANSACTION_MODE: TransactionMode = TransactionMode.MULTI
   @JvmField var TRANSACTION_TIMEOUT_SECONDS: Duration = Duration.ofSeconds(30)
   const val VITESS_DOCKER_NETWORK_NAME = "vitess-network"
   const val VITESS_DOCKER_NETWORK_TYPE = "bridge"
-  const val VITESS_IMAGE = "vitess/vttestserver:v21.0.4-mysql80"
-  const val VITESS_VERSION = 21
-  const val VTCTLD_CLIENT_IMAGE = "vitess/vtctldclient:v21.0.4"
+  const val VITESS_IMAGE = "ghcr.io/block/vitess/vttestserver:23.0.3-block.1-mysql84"
+  const val VITESS_VERSION = 23
+  const val VTCTLD_CLIENT_IMAGE = "ghcr.io/block/vitess/vtctldclient:23.0.3-block.1"
   const val VTGATE_USER = "root"
   const val VTGATE_USER_PASSWORD = ""
 }
@@ -39,6 +40,12 @@ enum class TransactionIsolationLevel(val value: String) {
   READ_COMMITTED("READ-COMMITTED"),
   REPEATABLE_READ("REPEATABLE-READ"),
   SERIALIZABLE("SERIALIZABLE"),
+}
+
+enum class TransactionMode(val value: String) {
+  SINGLE("SINGLE"),
+  MULTI("MULTI"),
+  TWOPC("TWOPC"),
 }
 
 val hostname: String

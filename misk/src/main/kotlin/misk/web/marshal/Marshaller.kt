@@ -1,13 +1,14 @@
 package misk.web.marshal
 
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
+import java.lang.reflect.WildcardType
+import kotlin.reflect.KType
 import misk.inject.typeLiteral
 import misk.web.HttpCall
 import misk.web.Response
 import misk.web.ResponseBody
 import okhttp3.MediaType
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.Type
-import kotlin.reflect.KType
 
 /** Marshalls typed kotlin objects into a [ResponseBody] */
 interface Marshaller<in T> {
@@ -18,9 +19,8 @@ interface Marshaller<in T> {
   fun responseBody(o: T): ResponseBody
 
   /**
-   * This interface is used with Guice multibindings. Register instances by calling `multibind()`
-   * in a `KAbstractModule`:
-   *
+   * This interface is used with Guice multibindings. Register instances by calling `multibind()` in a
+   * `KAbstractModule`:
    * ```
    * multibind<Marshaller.Factory>().to<MyFactory>()
    * ```
@@ -30,8 +30,7 @@ interface Marshaller<in T> {
   }
 
   /**
-   * Alternate way to marshal the response body with access to the HttpCall.
-   * Invokes [responseBody] by default.
+   * Alternate way to marshal the response body with access to the HttpCall. Invokes [responseBody] by default.
    *
    * @return The object marshalled into a [ResponseBody]
    */
@@ -40,11 +39,21 @@ interface Marshaller<in T> {
   companion object {
     fun actualResponseType(type: KType): Type {
       val typeLiteral = type.typeLiteral()
-      return when {
-        typeLiteral.rawType == Response::class.java -> {
-          (typeLiteral.type as ParameterizedType).actualTypeArguments[0]
+      val javaType =
+        when {
+          typeLiteral.rawType == Response::class.java -> {
+            (typeLiteral.type as ParameterizedType).actualTypeArguments[0]
+          }
+          else -> typeLiteral.type
         }
-        else -> typeLiteral.type
+      // Unwrap wildcard types produced by Kotlin's declaration-site variance.
+      // Response<out T> can produce "? extends T" instead of "T" for suspend function return types,
+      // because KType.javaType reconstructs the type from Continuation metadata rather than from
+      // Method.getGenericReturnType().
+      return if (javaType is WildcardType) {
+        javaType.upperBounds.firstOrNull() ?: javaType
+      } else {
+        javaType
       }
     }
   }

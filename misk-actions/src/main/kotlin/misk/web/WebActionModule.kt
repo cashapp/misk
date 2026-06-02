@@ -1,15 +1,13 @@
 package misk.web
 
 import com.google.inject.Binder
+import kotlin.reflect.KClass
 import misk.inject.KAbstractModule
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
-import kotlin.reflect.KClass
 
-class WebActionModule<A : WebAction> private constructor(
-  val actionClass: KClass<A>,
-  val url_path_prefix: String
-) : KAbstractModule() {
+class WebActionModule<A : WebAction> private constructor(val actionClass: KClass<A>, val url_path_prefix: String) :
+  KAbstractModule() {
   override fun configure() {
     multibind<WebActionEntry>().toInstance(WebActionEntry(actionClass, url_path_prefix))
     // Ensures that the action has an @Inject annotation and that its dependencies are satisfied
@@ -28,35 +26,31 @@ class WebActionModule<A : WebAction> private constructor(
 
     /**
      * Registers a web action.
+     *
      * @param actionClass: The web action to register.
      */
     fun <A : WebAction> create(actionClass: KClass<A>): WebActionModule<A> {
       return WebActionModule(actionClass, "/")
     }
 
-    inline fun <reified A : WebAction> createWithPrefix(url_path_prefix: String):
-      WebActionModule<A> = createWithPrefix(A::class, url_path_prefix)
+    inline fun <reified A : WebAction> createWithPrefix(url_path_prefix: String): WebActionModule<A> =
+      createWithPrefix(A::class, url_path_prefix)
 
     @JvmStatic
-    fun <A : WebAction> createWithPrefix(
-      actionClass: Class<A>,
-      url_path_prefix: String
-    ): WebActionModule<A> {
+    fun <A : WebAction> createWithPrefix(actionClass: Class<A>, url_path_prefix: String): WebActionModule<A> {
       return createWithPrefix(actionClass.kotlin, url_path_prefix)
     }
 
     /**
      * Registers a web action with a path prefix.
+     *
      * @param actionClass: The web action to register.
      * @param url_path_prefix: Defaults to "/". If not empty, must match pattern requirements:
-     *   - must begin with "/"
-     *   - any number of non-whitespace characters (including additional path segments or "/")
-     *   - must terminate with a non-"/" because rest of path will start with "/"
+     *     - must begin with "/"
+     *     - any number of non-whitespace characters (including additional path segments or "/")
+     *     - must terminate with a non-"/" because rest of path will start with "/"
      */
-    fun <A : WebAction> createWithPrefix(
-      actionClass: KClass<A>,
-      url_path_prefix: String
-    ): WebActionModule<A> {
+    fun <A : WebAction> createWithPrefix(actionClass: KClass<A>, url_path_prefix: String): WebActionModule<A> {
       return WebActionModule(actionClass, url_path_prefix)
     }
   }

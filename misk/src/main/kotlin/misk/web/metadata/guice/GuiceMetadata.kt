@@ -26,24 +26,21 @@ import misk.web.metadata.toFormattedJson
 import wisp.moshi.defaultKotlinMoshi
 
 // TODO consider moving to misk-admin so it can be internal scoped
-data class GuiceMetadata(
-  val guice: GuiceMetadataProvider.Metadata
-) : Metadata(
-  metadata = guice,
-  prettyPrint = "Total Bindings: ${guice.bindingMetadata.size}\n\n" + defaultKotlinMoshi
-    .adapter<Set<GuiceMetadataProvider.BindingMetadata>>()
-    .toFormattedJson(guice.bindingMetadata),
-  descriptionString = "Direct injection bindings, powered by Guice. This metadata is work-in-progress."
-)
+data class GuiceMetadata(val guice: GuiceMetadataProvider.Metadata) :
+  Metadata(
+    metadata = guice,
+    prettyPrint =
+      "Total Bindings: ${guice.bindingMetadata.size}\n\n" +
+        defaultKotlinMoshi.adapter<Set<GuiceMetadataProvider.BindingMetadata>>().toFormattedJson(guice.bindingMetadata),
+    descriptionString = "Direct injection bindings, powered by Guice. This metadata is work-in-progress.",
+  )
 
 class GuiceMetadataProvider @Inject constructor() : MetadataProvider<GuiceMetadata> {
   @Inject lateinit var injector: Injector
 
   override val id = "guice"
 
-  data class Metadata(
-    val bindingMetadata: Set<BindingMetadata>,
-  )
+  data class Metadata(val bindingMetadata: Set<BindingMetadata>)
 
   data class BindingMetadata(
     val type: String,
@@ -60,29 +57,41 @@ class GuiceMetadataProvider @Inject constructor() : MetadataProvider<GuiceMetada
     }
   }
 
-  val allBindings by lazy {
-    injector.allBindings
-  }
+  val allBindings by lazy { injector.allBindings }
 
   // TODO should this cache the result?
   override fun get(): GuiceMetadata {
     val allBindingMetadataSet = allBindings.mapNotNull { it.value.toMetadata() }.toSet()
-    val multibindingTypes = allBindingMetadataSet.mapNotNull { it.subElementsType }.flatMap { type ->
-      listOf("List<? extends $type>", "List<$type>", "Set<? extends $type>", "Set<$type>", "Collection<Provider<$type>>")
-    }.toSet()
-    val bindingMetadataSet = allBindingMetadataSet.filter {bindingMetadata ->
-      bindingMetadata.subElementsType != null || !multibindingTypes.contains(bindingMetadata.type)
-    }.toSet()
+    val multibindingTypes =
+      allBindingMetadataSet
+        .mapNotNull { it.subElementsType }
+        .flatMap { type ->
+          listOf(
+            "List<? extends $type>",
+            "List<$type>",
+            "Set<? extends $type>",
+            "Set<$type>",
+            "Collection<Provider<$type>>",
+          )
+        }
+        .toSet()
+    val bindingMetadataSet =
+      allBindingMetadataSet
+        .filter { bindingMetadata ->
+          bindingMetadata.subElementsType != null || !multibindingTypes.contains(bindingMetadata.type)
+        }
+        .toSet()
 
     return GuiceMetadata(Metadata(bindingMetadata = bindingMetadataSet))
   }
 
-  private fun Binding<*>.toMetadata() : BindingMetadata? {
+  private fun Binding<*>.toMetadata(): BindingMetadata? {
     return acceptTargetVisitor(MetadataBuilderVisitor())
   }
 
-  private class MetadataBuilderVisitor : MultibindingsTargetVisitor<Any?,BindingMetadata?> {
+  private class MetadataBuilderVisitor : MultibindingsTargetVisitor<Any?, BindingMetadata?> {
     private val keyAnnotationRegex = """annotation=([^]]+)""".toRegex()
+
     override fun visit(multibinding: MultibinderBinding<out Any>?): BindingMetadata? {
       return if (multibinding?.elements?.isNotEmpty() == true) {
         val sample = multibinding.elements.first().toMetadata()
@@ -123,8 +132,8 @@ class GuiceMetadataProvider @Inject constructor() : MetadataProvider<GuiceMetada
     }
 
     override fun visit(optionalbinding: OptionalBinderBinding<out Any>?): BindingMetadata? {
-      return optionalbinding?.actualBinding?.let { singleBindingMetadataSkipSubElements(optionalbinding.actualBinding) } ?:
-        optionalbinding?.defaultBinding?.let { singleBindingMetadataSkipSubElements(optionalbinding.defaultBinding) }
+      return optionalbinding?.actualBinding?.let { singleBindingMetadataSkipSubElements(optionalbinding.actualBinding) }
+        ?: optionalbinding?.defaultBinding?.let { singleBindingMetadataSkipSubElements(optionalbinding.defaultBinding) }
     }
 
     override fun visit(binding: InstanceBinding<out Any>?): BindingMetadata? {
@@ -163,7 +172,7 @@ class GuiceMetadataProvider @Inject constructor() : MetadataProvider<GuiceMetada
       return binding?.let { singleBindingMetadataSkipSubElements(binding) }
     }
 
-    private fun singleBindingMetadataSkipSubElements(binding: Binding<*>) : BindingMetadata?{
+    private fun singleBindingMetadataSkipSubElements(binding: Binding<*>): BindingMetadata? {
       return if (isSubElement(binding)) {
         null
       } else {
@@ -171,7 +180,7 @@ class GuiceMetadataProvider @Inject constructor() : MetadataProvider<GuiceMetada
       }
     }
 
-    private fun isSubElement(binding: Binding<*>) : Boolean {
+    private fun isSubElement(binding: Binding<*>): Boolean {
       return binding.key.annotation?.annotationClass?.qualifiedName == "com.google.inject.internal.Element"
     }
 
@@ -198,9 +207,7 @@ class GuiceMetadataProvider @Inject constructor() : MetadataProvider<GuiceMetada
       var pretty = this
 
       val commonPackages = listOf("com.google.inject", "jakarta.inject", "javax.inject", "java.util", "java.lang")
-      commonPackages.forEach {
-        pretty = pretty.replace("$it.", "")
-      }
+      commonPackages.forEach { pretty = pretty.replace("$it.", "") }
 
       return pretty
     }
@@ -235,7 +242,6 @@ class GuiceMetadataProvider @Inject constructor() : MetadataProvider<GuiceMetada
         annotation
       }
     }
-
   }
 
   private class ScopeVisitor : BindingScopingVisitor<String?> {

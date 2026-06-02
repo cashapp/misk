@@ -2,6 +2,7 @@ package misk.web
 
 import com.google.inject.util.Modules
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.moshi.adapter
@@ -23,7 +24,6 @@ import org.assertj.core.data.Offset
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.util.thread.ThreadPool
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class JettyServiceMetricsTest {
@@ -34,13 +34,15 @@ internal class JettyServiceMetricsTest {
   @Inject lateinit var connectionMetricsCollector: JettyConnectionMetricsCollector
   @Inject lateinit var moshi: Moshi
 
-  @Test fun connectionMetrics() {
+  @Test
+  fun connectionMetrics() {
     val httpClient = OkHttpClient()
-    val request = Request.Builder()
-      .get()
-      .header("user-agent", "JettyServiceMetricsTest")
-      .url(serverUrlBuilder().encodedPath("/hello").build())
-      .build()
+    val request =
+      Request.Builder()
+        .get()
+        .header("user-agent", "JettyServiceMetricsTest")
+        .url(serverUrlBuilder().encodedPath("/hello").build())
+        .build()
 
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
@@ -63,9 +65,7 @@ internal class JettyServiceMetricsTest {
     // Wait for the active connections to go to zero. This is done by another thread (and we can't
     // control it) so we need to do a spin wait on time out
     val timeout = System.currentTimeMillis() + 5000
-    while (System.currentTimeMillis() < timeout &&
-      connectionMetrics.activeConnections.labels(*labels).get() != 0.0
-    ) {
+    while (System.currentTimeMillis() < timeout && connectionMetrics.activeConnections.labels(*labels).get() != 0.0) {
       Thread.sleep(500)
     }
 
@@ -91,12 +91,10 @@ internal class JettyServiceMetricsTest {
     assertThat(connectionMetrics.messagesSent.labels(*labels).get()).isEqualTo(1.0)
   }
 
-  @Test fun threadPoolMetrics() {
+  @Test
+  fun threadPoolMetrics() {
     val httpClient = OkHttpClient()
-    val request = Request.Builder()
-      .get()
-      .url(serverUrlBuilder().encodedPath("/current-pool-metrics").build())
-      .build()
+    val request = Request.Builder().get().url(serverUrlBuilder().encodedPath("/current-pool-metrics").build()).build()
 
     val adapter = moshi.adapter<PoolMetricsResponse>()
     val response = httpClient.newCall(request).execute()
@@ -121,7 +119,7 @@ internal class JettyServiceMetricsTest {
     val queuedJobs: Double,
     val size: Double,
     val utilization: Double,
-    val utilization_max: Double
+    val utilization_max: Double,
   )
 
   internal class CurrentPoolMetricsAction @Inject constructor() : WebAction {
@@ -136,7 +134,7 @@ internal class JettyServiceMetricsTest {
         queuedJobs = threadPoolMetrics.queuedJobs.get(),
         size = threadPoolMetrics.size.get(),
         utilization = threadPoolMetrics.utilization.get(),
-        utilization_max = threadPoolMetrics.utilizationMax.get()
+        utilization_max = threadPoolMetrics.utilizationMax.get(),
       )
     }
   }
@@ -144,17 +142,20 @@ internal class JettyServiceMetricsTest {
   internal class TestModule : KAbstractModule() {
     override fun configure() {
       install(
-        Modules.override(WebServerTestingModule()).with(
-          object : KAbstractModule() {
-            override fun configure() {
-              val pool = QueuedThreadPool(
-                10, 10 // Fixed # of threads
-              )
-              bind<ThreadPool>().toInstance(pool)
-              bind<MeasuredThreadPool>().toInstance(MeasuredQueuedThreadPool(pool))
+        Modules.override(WebServerTestingModule())
+          .with(
+            object : KAbstractModule() {
+              override fun configure() {
+                val pool =
+                  QueuedThreadPool(
+                    10,
+                    10, // Fixed # of threads
+                  )
+                bind<ThreadPool>().toInstance(pool)
+                bind<MeasuredThreadPool>().toInstance(MeasuredQueuedThreadPool(pool))
+              }
             }
-          }
-        )
+          )
       )
       install(MiskTestingServiceModule())
       install(WebActionModule.create<HelloAction>())

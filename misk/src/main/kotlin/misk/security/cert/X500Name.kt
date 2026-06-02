@@ -6,15 +6,17 @@ data class X500Name(
   val organization: String?,
   val locality: String?,
   val state: String?,
-  val country: String?
+  val country: String?,
 ) {
-  constructor(components: Map<String, String>) : this(
+  constructor(
+    components: Map<String, String>
+  ) : this(
     commonName = components.get("CN"),
     organizationalUnit = components.get("OU"),
     organization = components.get("O"),
     locality = components.get("L"),
     state = components.get("ST"),
-    country = components.get("C")
+    country = components.get("C"),
   )
 
   companion object {
@@ -52,9 +54,7 @@ data class X500Name(
           // Ends the attribute entirely. An error if we never encountered a value, otherwise
           // trim the current value and add to the component map
           c == ',' || c == ';' -> {
-            require(!inAttributeName) {
-              "invalid X.500 name '$dnString'; no attribute value for $openNameOrValue"
-            }
+            require(!inAttributeName) { "invalid X.500 name '$dnString'; no attribute value for $openNameOrValue" }
 
             components[attributeName!!] = openNameOrValue.toString().trim()
 
@@ -67,14 +67,11 @@ data class X500Name(
           // trim and save off the attribute name, and begin parsing the attribute value
           c == '=' -> {
             require(inAttributeName) {
-              "invalid X.500 name '$dnString'; " +
-                "illegal character '=' in attribute value $attributeName"
+              "invalid X.500 name '$dnString'; " + "illegal character '=' in attribute value $attributeName"
             }
             inAttributeName = false
             attributeName = openNameOrValue.toString().trim()
-            require(attributeName.isNotBlank()) {
-              "invalid X.500 name '$dnString'; attribute name is blank"
-            }
+            require(attributeName.isNotBlank()) { "invalid X.500 name '$dnString'; attribute name is blank" }
             openNameOrValue = StringBuilder()
           }
 

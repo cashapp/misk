@@ -110,6 +110,5 @@ public final class wisp/launchdarkly/LaunchDarklyFeatureFlags : wisp/feature/Fea
 }
 
 public final class wisp/launchdarkly/LaunchDarklyFeatureFlags$Companion {
-	public final fun getLogger ()Lmu/KLogger;
 }
 

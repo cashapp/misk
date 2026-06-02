@@ -7,7 +7,6 @@ import java.sql.Connection
 import java.sql.SQLException
 import java.sql.SQLIntegrityConstraintViolationException
 import java.sql.SQLRecoverableException
-import java.sql.SQLTransientException
 import java.time.Duration
 import java.util.EnumSet
 import java.util.UUID
@@ -15,9 +14,10 @@ import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
-import javax.persistence.OptimisticLockException
 import kotlin.reflect.KClass
 import misk.backoff.ExponentialBackoff
+import misk.backoff.RetryConfig
+import misk.backoff.retry
 import misk.concurrent.ExecutorServiceFactory
 import misk.hibernate.advisorylocks.tryAcquireLock
 import misk.hibernate.advisorylocks.tryReleaseLock
@@ -25,17 +25,15 @@ import misk.jdbc.CheckDisabler
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.map
+import misk.jdbc.retry.RetryDefaults
 import misk.logging.getLogger
 import misk.vitess.Destination
 import misk.vitess.Keyspace
 import misk.vitess.Shard
 import misk.vitess.Shard.Companion.SINGLE_SHARD_SET
-import misk.vitess.TabletType
 import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
-import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.ConstraintViolationException
-import org.hibernate.exception.LockAcquisitionException
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode
 
 private val logger = getLogger<RealTransacter>()
@@ -59,6 +57,10 @@ private constructor(
   private val shardListFetcher: ShardListFetcher,
   private val hibernateEntities: Set<HibernateEntity>,
 ) : Transacter {
+
+  private val qualifierName = qualifier.simpleName ?: "hibernate"
+  private val exceptionClassifier = HibernateExceptionClassifier(config.type)
+
   constructor(
     qualifier: KClass<out Annotation>,
     sessionFactoryService: SessionFactoryService,
@@ -154,9 +156,42 @@ private constructor(
     if (!options.readOnly) {
       return readOnly().replicaRead(block)
     }
+
+    if (!config.type.isVitess) {
+      return transactionWithRetriesInternal {
+        replicaReadWithoutTransactionInternalSession { session -> block(session) }
+      }
+    }
+
+    return vitessReplicaRead(block)
+  }
+
+  private fun <T> vitessReplicaRead(block: (session: Session) -> T): T {
+    // Use connection holding to prevent connection changes during nested target operations
     return transactionWithRetriesInternal {
-      replicaReadWithoutTransactionInternalSession { session ->
-        session.target(Destination(TabletType.REPLICA)) { block(session) }
+      val connectionHandlingMode = PhysicalConnectionHandlingMode.IMMEDIATE_ACQUISITION_AND_HOLD
+
+      withNewHibernateSession(reader(), connectionHandlingMode) { hibernateSession ->
+        val session =
+          RealSession(
+            hibernateSession = hibernateSession,
+            readOnly = true,
+            config = config,
+            disabledChecks = options.disabledChecks,
+            transacter = this,
+          )
+
+        session.use {
+          useSession(session) {
+            // target `@replica` if the datasource does not originate from a Reader config.
+            if (config.database != Destination.replica().toString()) {
+              session.target(Destination.replica(), block)
+            } else {
+              // otherwise just run the block, which avoids an unnecessary shard target.
+              block(session)
+            }
+          }
+        }
       }
     }
   }
@@ -167,13 +202,42 @@ private constructor(
     // which means any subsequent transaction that gets that connection will think it holds the lock, when it does not.
     val connectionHandlingMode = PhysicalConnectionHandlingMode.IMMEDIATE_ACQUISITION_AND_HOLD
     return withNewHibernateSession(sessionFactory, connectionHandlingMode) { hibernateSession ->
+      val primaryTarget = Destination.primary().toString()
+      var previousTarget: String? = null
+      if (config.type.isVitess) {
+        hibernateSession.doReturningWork { conn ->
+          previousTarget = conn.catalog
+          if (previousTarget != primaryTarget) {
+            conn.catalog = primaryTarget
+          }
+        }
+      }
+
       val didAcquireLock = hibernateSession.tryAcquireLock(lockKey)
       check(didAcquireLock) { "Unable to acquire lock $lockKey" }
+
+      if (config.type.isVitess && previousTarget != primaryTarget) {
+        // Restore previous destination if it is not primary already.
+        hibernateSession.doReturningWork { conn -> conn.catalog = previousTarget }
+      }
 
       val blockResult = runCatching { block() }
 
       try {
+        if (config.type.isVitess) {
+          // Restore to the same destination the lock was acquired on.
+          hibernateSession.doReturningWork { conn ->
+            previousTarget = conn.catalog
+            if (previousTarget != primaryTarget) {
+              conn.catalog = primaryTarget
+            }
+          }
+        }
         hibernateSession.tryReleaseLock(lockKey)
+        if (config.type.isVitess && previousTarget != primaryTarget) {
+          // Restore to the same destination the lock was acquired on.
+          hibernateSession.doReturningWork { conn -> conn.catalog = previousTarget }
+        }
       } catch (e: Throwable) {
         val originalFailure = blockResult.exceptionOrNull()?.apply { addSuppressed(e) }
         throw originalFailure ?: e
@@ -184,77 +248,47 @@ private constructor(
   }
 
   private fun <T> transactionWithRetriesInternal(block: () -> T): T {
-    require(options.maxAttempts > 0)
-
     val backoff =
       ExponentialBackoff(
-        Duration.ofMillis(options.minRetryDelayMillis),
-        Duration.ofMillis(options.maxRetryDelayMillis),
-        Duration.ofMillis(options.retryJitterMillis),
+        baseDelay = Duration.ofMillis(options.minRetryDelayMillis),
+        maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
+        jitter = Duration.ofMillis(options.retryJitterMillis),
       )
-    var attempt = 0
-
-    while (true) {
-      try {
-        attempt++
-        val result = block()
-
-        if (attempt > 1) {
-          logger.info { "retried ${qualifier.simpleName} transaction succeeded (attempt $attempt)" }
-        }
-
-        return result
-      } catch (e: Exception) {
-        if (!isRetryable(e)) throw e
-
-        if (attempt >= options.maxAttempts) {
-          logger.info {
-            "${qualifier.simpleName} recoverable transaction exception " + "(attempt $attempt), no more attempts"
-          }
-          throw e
-        }
-
-        val sleepDuration = backoff.nextRetry()
-        logger.info(e) {
-          "${qualifier.simpleName} recoverable transaction exception " +
-            "(attempt $attempt), will retry after a $sleepDuration delay"
-        }
-
-        if (!sleepDuration.isZero) {
-          Thread.sleep(sleepDuration.toMillis())
-        }
-      }
-    }
+    val retryConfig =
+      RetryConfig.Builder(options.maxAttempts, backoff)
+        .shouldRetry { exceptionClassifier.isRetryable(it) }
+        .onRetry { attempt, e -> logger.info(e) { "$qualifierName transaction failed, retrying (attempt $attempt)" } }
+        .build()
+    return retry(retryConfig) { block() }
   }
 
   private fun <T> transactionInternalSession(block: (session: RealSession) -> T): T {
     return withSession { session ->
-      session.target(Destination(TabletType.PRIMARY)) {
-        val transaction = session.hibernateSession.beginTransaction()!!
-        try {
-          val result = block(session)
+      val transaction = session.hibernateSession.beginTransaction()!!
+      try {
+        val result = block(session)
 
-          // Flush any changes to the database before commit
-          session.hibernateSession.flush()
-          session.preCommit()
-          transaction.commit()
-          session.postCommit()
-          result
-        } catch (e: Throwable) {
-          var rethrow = e
-          if (config.type == DataSourceType.TIDB) {
-            rethrow = mapTidbException(e)
-          }
-
-          if (transaction.isActive) {
-            try {
-              transaction.rollback()
-            } catch (suppressed: Exception) {
-              rethrow.addSuppressed(suppressed)
-            }
-          }
-          throw rethrow
+        // Flush any changes to the database before commit
+        session.hibernateSession.flush()
+        session.preCommit()
+        transaction.commit()
+        session.postCommit()
+        result
+      } catch (e: Throwable) {
+        var rethrow = e
+        if (config.type == DataSourceType.TIDB) {
+          rethrow = mapTidbException(e)
         }
+
+        if (transaction.isActive) {
+          try {
+            transaction.rollback()
+            session.onSessionClose { session.runRollbackHooks(e) }
+          } catch (suppressed: Exception) {
+            rethrow.addSuppressed(suppressed)
+          }
+        }
+        throw rethrow
       }
     }
   }
@@ -270,7 +304,9 @@ private constructor(
         return ConstraintViolationException(sqlException.message, sqlException, "")
       }
       // write-write conflicts fail at COMMIT rather than waiting on a lock.
-      e.cause is SQLException && isTidbWriteConflict(e.cause as SQLException) -> {
+      // Error 9007: "Transactions in TiKV encounter write conflicts"
+      // https://docs.pingcap.com/tidb/dev/tidb-faq#error-9007-hy000-write-conflict
+      e.cause is SQLException && (e.cause as SQLException).errorCode == 9007 -> {
         val sqlException = e.cause as SQLException
         return ConstraintViolationException(sqlException.message, sqlException, "")
       }
@@ -293,9 +329,7 @@ private constructor(
     if (readerSessionFactoryService != null) {
       return readerSessionFactoryService.sessionFactory
     }
-    if (config.type.isVitess) {
-      return sessionFactory
-    }
+
     if (config.type == DataSourceType.COCKROACHDB || config.type == DataSourceType.TIDB) {
       return sessionFactory
     }
@@ -391,76 +425,13 @@ private constructor(
     }
   }
 
-  private fun isRetryable(th: Throwable): Boolean {
-    return when (th) {
-      is RetryTransactionException,
-      is StaleObjectStateException,
-      is LockAcquisitionException,
-      is SQLRecoverableException,
-      is SQLTransientException,
-      is OptimisticLockException -> true
-      is SQLException -> if (isMessageRetryable(th)) true else isCauseRetryable(th)
-      else -> isCauseRetryable(th)
-    }
-  }
-
-  private fun isMessageRetryable(th: SQLException) =
-    isConnectionClosed(th) ||
-      isVitessTransactionNotFound(th) ||
-      isCockroachRestartTransaction(th) ||
-      isTidbWriteConflict(th)
-
-  /**
-   * This is thrown as a raw SQLException from Hikari even though it is most certainly a recoverable exception. See
-   * com/zaxxer/hikari/pool/ProxyConnection.java:493
-   */
-  private fun isConnectionClosed(th: SQLException) = th.message.equals("Connection is closed")
-
-  /**
-   * We get this error as a MySQLQueryInterruptedException when a tablet gracefully terminates, we just need to retry
-   * the transaction and the new primary should handle it.
-   *
-   * ```
-   * vttablet: rpc error: code = Aborted desc = transaction 1572922696317821557:
-   * not found (CallerID: )
-   * ```
-   */
-  private fun isVitessTransactionNotFound(th: SQLException): Boolean {
-    val message = th.message
-    return message != null &&
-      message.contains("vttablet: rpc error") &&
-      message.contains("code = Aborted") &&
-      message.contains("transaction") &&
-      message.contains("not found")
-  }
-
-  /**
-   * "Messages with the error code 40001 and the string restart transaction indicate that a transaction failed because
-   * it conflicted with another concurrent or recent transaction accessing the same data. The transaction needs to be
-   * retried by the client." https://www.cockroachlabs.com/docs/stable/common-errors.html#restart-transaction
-   */
-  private fun isCockroachRestartTransaction(th: SQLException): Boolean {
-    val message = th.message
-    return th.errorCode == 40001 && message != null && message.contains("restart transaction")
-  }
-
-  /**
-   * "Transactions in TiKV encounter write conflicts". This can happen when optimistic transaction mode is on. Conflicts
-   * are detected during transaction commit https://docs.pingcap.com/tidb/dev/tidb-faq#error-9007-hy000-write-conflict
-   */
-  private fun isTidbWriteConflict(th: SQLException): Boolean {
-    return th.errorCode == 9007
-  }
-
-  private fun isCauseRetryable(th: Throwable) = th.cause?.let { isRetryable(it) } ?: false
-
   // NB: all options should be immutable types as copy() is shallow.
   internal data class TransacterOptions(
-    val maxAttempts: Int = 3,
+    val maxAttempts: Int = RetryDefaults.MAX_ATTEMPTS,
     val disabledChecks: EnumSet<Check> = EnumSet.noneOf(Check::class.java),
-    val minRetryDelayMillis: Long = 100,
-    val maxRetryDelayMillis: Long = 500,
-    val retryJitterMillis: Long = 400,
+    val minRetryDelayMillis: Long = RetryDefaults.MIN_RETRY_DELAY_MILLIS,
+    val maxRetryDelayMillis: Long = RetryDefaults.MAX_RETRY_DELAY_MILLIS,
+    val retryJitterMillis: Long = RetryDefaults.RETRY_JITTER_MILLIS,
     val readOnly: Boolean = false,
   )
 
@@ -474,6 +445,8 @@ private constructor(
     private val preCommitHooks = mutableListOf<() -> Unit>()
     private val postCommitHooks = mutableListOf<() -> Unit>()
     private val sessionCloseHooks = mutableListOf<() -> Unit>()
+    private val rollbackHooks = mutableListOf<(error: Throwable) -> Unit>()
+
     internal var inTransaction = false
 
     init {
@@ -521,63 +494,57 @@ private constructor(
       }
     }
 
-    override fun <T> target(shard: Shard, function: () -> T): T {
-      return if (config.type.isVitess) {
-        target(Destination(shard), function)
-      } else {
-        function()
+    @Deprecated("Use target(Destination, block) which has more explicit targeting")
+    override fun <T> target(shard: Shard, function: () -> T): T = target(Destination(shard)) { _ -> function() }
+
+    override fun <T> target(destination: Destination, block: (session: Session) -> T): T {
+      return when (config.type.isVitess) {
+        false -> block(this)
+        true -> {
+          useConnection { connection ->
+            val previous = currentTarget(connection)
+            val targetHasChanged = previous != destination
+            try {
+              if (targetHasChanged) {
+                logger.debug {
+                  "The new destination was updated from previous target. Destination target: $destination, " +
+                    "previous target: $previous"
+                }
+                use(connection, destination)
+              }
+              block(this)
+            } catch (e: Exception) {
+              throw e
+            } finally {
+              if (targetHasChanged) {
+                try {
+                  use(connection, previous)
+                } catch (e: Exception) {
+                  logger.error(e) {
+                    "Exception restoring destination, previous = $previous, destination = $destination, " +
+                      "cause = ${e.message}"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
 
-    internal fun <T> target(destination: Destination, function: () -> T): T {
-      return if (config.type.isVitess) {
-        val previous = currentTarget()
-        if (previous != destination) {
-          logger.warn {
-            "The new destination was updated from previous target. Destination target: $destination, " +
-              "previous target: $previous"
-          }
-        }
-        try {
-          use(destination)
-          function()
-        } catch (e: Exception) {
-          throw e
-        } finally {
-          try {
-            use(previous)
-          } catch (exception: Exception) {
-            logger.error {
-              "Exception restoring destination, previous = $previous, destination = $destination, " +
-                "cause = ${exception.message}"
-            }
-            // Ignore the exception if the connection is already closed.
-            if (!isConnectionClosed(exception)) {
-              throw exception
-            }
-          }
-        }
-      } else {
-        function()
-      }
-    }
-
-    private fun isConnectionClosed(exception: Exception) =
-      exception.cause?.javaClass == SQLException::class.java && exception.cause?.message.equals("Connection is closed")
-
-    private fun use(destination: Destination) = useConnection { connection ->
+    private fun use(connection: Connection, destination: Destination) {
       check(config.type.isVitess)
-      connection.createStatement().use { statement ->
+      connection.createStatement().use { _ ->
         val catalog = if (destination.isBlank()) "${Destination.primary()}" else "$destination"
         connection.catalog = catalog
       }
     }
 
-    private fun currentTarget(): Destination = useConnection { connection ->
+    private fun currentTarget(connection: Connection): Destination {
       check(config.type.isVitess)
-      connection.createStatement().use { statement ->
+      connection.createStatement().use { _ ->
         val target = connection.catalog
-        Destination.parse(target)
+        return Destination.parse(target)
       }
     }
 
@@ -587,7 +554,7 @@ private constructor(
 
     internal fun preCommit() {
       preCommitHooks.forEach { preCommitHook ->
-        // Propagate hook exceptions up to the transacter so that the the transaction is rolled
+        // Propagate hook exceptions up to the transacter so that the transaction is rolled
         // back and the error gets returned to the application.
         preCommitHook()
       }
@@ -617,6 +584,14 @@ private constructor(
 
     override fun onSessionClose(work: () -> Unit) {
       sessionCloseHooks.add(work)
+    }
+
+    override fun onRollback(work: (error: Throwable) -> Unit) {
+      rollbackHooks.add(work)
+    }
+
+    internal fun runRollbackHooks(error: Throwable) {
+      rollbackHooks.forEach { rollbackHook -> rollbackHook(error) }
     }
 
     override fun <T> withoutChecks(vararg checks: Check, body: () -> T): T {

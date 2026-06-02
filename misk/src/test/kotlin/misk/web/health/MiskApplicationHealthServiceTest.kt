@@ -7,12 +7,24 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.util.Modules
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.lang.Thread.sleep
+import java.net.ConnectException
+import java.net.ServerSocket
+import java.net.SocketOptions
+import java.time.Duration
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
+import kotlin.reflect.KClass
+import kotlin.time.Duration.Companion.seconds
 import misk.MiskApplication
 import misk.MiskTestingServiceModule
 import misk.ReadyService
 import misk.RunningMiskApplication
 import misk.ServiceModule
 import misk.inject.KAbstractModule
+import misk.logging.getLogger
 import misk.time.ClockModule
 import misk.web.Get
 import misk.web.WebActionModule
@@ -29,18 +41,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 import org.slf4j.LoggerFactory
-import misk.logging.getLogger
-import java.lang.Thread.sleep
-import java.net.ConnectException
-import java.net.ServerSocket
-import java.net.SocketOptions
-import java.time.Duration
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
-import kotlin.reflect.KClass
-import kotlin.time.Duration.Companion.seconds
 
 // Must run isolated because it binds an available port to discover it and then releases it
 // for misk to use.
@@ -63,11 +63,7 @@ class MiskApplicationHealthServiceTest {
       install(Modules.override(MiskTestingServiceModule()).with(ClockModule()))
       install(
         WebServerTestingModule(
-          TESTING_WEB_CONFIG.copy(
-            port = webPort,
-            health_port = healthPort,
-            health_dedicated_jetty_instance = true
-          )
+          TESTING_WEB_CONFIG.copy(port = webPort, health_port = healthPort, health_dedicated_jetty_instance = true)
         )
       )
 
@@ -87,16 +83,17 @@ class MiskApplicationHealthServiceTest {
 
       // Counts down a latch when started to indicate health service has begun starting.
       // Waits for a latch to be counted down before shutting down.
-      install(ServiceModule<HealthCheckNotifyStartDelayStop>()
-        .enhancedBy<DelayJettyStartNotifyStop>())
+      install(ServiceModule<HealthCheckNotifyStartDelayStop>().enhancedBy<DelayJettyStartNotifyStop>())
     }
   }
 
-  private val client = OkHttpClient().newBuilder()
-    .readTimeout(Duration.ofSeconds(5))
-    .connectTimeout(Duration.ofSeconds(5))
-    .writeTimeout(Duration.ofSeconds(5))
-    .build()
+  private val client =
+    OkHttpClient()
+      .newBuilder()
+      .readTimeout(Duration.ofSeconds(5))
+      .connectTimeout(Duration.ofSeconds(5))
+      .writeTimeout(Duration.ofSeconds(5))
+      .build()
 
   @Test
   fun health() {
@@ -110,7 +107,7 @@ class MiskApplicationHealthServiceTest {
       try {
         logger.debug("Running Misk!")
         futureApp.complete(miskApplication.start())
-      } catch (e : Exception) {
+      } catch (e: Exception) {
         futureApp.completeExceptionally(e)
       }
     }
@@ -208,12 +205,7 @@ class MiskApplicationHealthServiceTest {
     get(healthStatusUrl, "health", expectThrowable = ConnectException::class)
   }
 
-  private fun get(
-    url: HttpUrl,
-    host: String,
-    expectCode: Int? = null,
-    expectThrowable: KClass<*>? = null
-  ): String {
+  private fun get(url: HttpUrl, host: String, expectCode: Int? = null, expectThrowable: KClass<*>? = null): String {
     val req = Request.Builder().url(url).build()
     var result = ""
     var response: Response? = null

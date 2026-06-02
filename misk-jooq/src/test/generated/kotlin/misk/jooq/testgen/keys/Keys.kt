@@ -3,21 +3,24 @@
  */
 package misk.jooq.testgen.keys
 
-
 import misk.jooq.testgen.tables.Movie
 import misk.jooq.testgen.tables.RecordSignatureTest
 import misk.jooq.testgen.tables.records.MovieRecord
 import misk.jooq.testgen.tables.records.RecordSignatureTestRecord
-
 import org.jooq.UniqueKey
 import org.jooq.impl.DSL
 import org.jooq.impl.Internal
-
-
 
 // -------------------------------------------------------------------------
 // UNIQUE and PRIMARY KEY definitions
 // -------------------------------------------------------------------------
 
-val KEY_MOVIE_PRIMARY: UniqueKey<MovieRecord> = Internal.createUniqueKey(Movie.MOVIE, DSL.name("KEY_movie_PRIMARY"), arrayOf(Movie.MOVIE.ID), true)
-val KEY_RECORD_SIGNATURE_TEST_PRIMARY: UniqueKey<RecordSignatureTestRecord> = Internal.createUniqueKey(RecordSignatureTest.RECORD_SIGNATURE_TEST, DSL.name("KEY_record_signature_test_PRIMARY"), arrayOf(RecordSignatureTest.RECORD_SIGNATURE_TEST.ID), true)
+val KEY_MOVIE_PRIMARY: UniqueKey<MovieRecord> =
+  Internal.createUniqueKey(Movie.MOVIE, DSL.name("KEY_movie_PRIMARY"), arrayOf(Movie.MOVIE.ID), true)
+val KEY_RECORD_SIGNATURE_TEST_PRIMARY: UniqueKey<RecordSignatureTestRecord> =
+  Internal.createUniqueKey(
+    RecordSignatureTest.RECORD_SIGNATURE_TEST,
+    DSL.name("KEY_record_signature_test_PRIMARY"),
+    arrayOf(RecordSignatureTest.RECORD_SIGNATURE_TEST.ID),
+    true,
+  )

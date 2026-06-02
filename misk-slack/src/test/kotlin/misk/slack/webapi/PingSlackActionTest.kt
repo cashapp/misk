@@ -2,6 +2,9 @@ package misk.slack.webapi
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.net.HttpURLConnection
 import misk.config.MiskConfig.RealSecret
 import misk.security.authz.Unauthenticated
 import misk.slack.webapi.helpers.Block
@@ -21,45 +24,38 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import java.net.HttpURLConnection
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 class PingSlackActionTest {
   private val server = MockWebServer()
 
-  private val moshi = Moshi.Builder()
-    .add(KotlinJsonAdapterFactory())
-    .build()
+  private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
 
-  private val slackConfig = SlackConfig(
-    // ⚠️ DO NOT CHECK IN PRODUCTION KEYS!
-    // The 'Bot User OAuth Token', here: https://api.slack.com/apps/A04NSLF2N11/oauth
-    bearer_token = RealSecret("xoxb-1234567890123-4567890abcdef-FakeSecretFakeSecretFake"),
+  private val slackConfig =
+    SlackConfig(
+      // ⚠️ DO NOT CHECK IN PRODUCTION KEYS!
+      // The 'Bot User OAuth Token', here: https://api.slack.com/apps/A04NSLF2N11/oauth
+      bearer_token = RealSecret("xoxb-1234567890123-4567890abcdef-FakeSecretFakeSecretFake"),
 
-    // ⚠️ DO NOT CHECK IN PRODUCTION KEYS!
-    // The 'Signing Secret', here: https://api.slack.com/apps/A04NSLF2N11/general
-    signing_secret = RealSecret("abcdef0123456789abcdef0123456789")
-  )
+      // ⚠️ DO NOT CHECK IN PRODUCTION KEYS!
+      // The 'Signing Secret', here: https://api.slack.com/apps/A04NSLF2N11/general
+      signing_secret = RealSecret("abcdef0123456789abcdef0123456789"),
+    )
 
-  private val pingSlackAction = PingSlackAction(
-    slackApi = Retrofit.Builder()
-      .client(
-        OkHttpClient.Builder()
-          .addInterceptor(SlackClientInterceptor(slackConfig))
+  private val pingSlackAction =
+    PingSlackAction(
+      slackApi =
+        Retrofit.Builder()
+          .client(OkHttpClient.Builder().addInterceptor(SlackClientInterceptor(slackConfig)).build())
+          .baseUrl(server.url("https://slack.com/"))
+          .addConverterFactory(MoshiConverterFactory.create(moshi))
           .build()
-      )
-      .baseUrl(server.url("https://slack.com/"))
-      .addConverterFactory(MoshiConverterFactory.create(moshi))
-      .build()
-      .create(SlackApi::class.java),
-    moshi = moshi,
-  )
+          .create(SlackApi::class.java),
+      moshi = moshi,
+    )
 
   /**
-   * This is a facet for manual testing.
-   * With the correct secrets, this can validate that messages
-   * are being delivered to the intended slack channel.
+   * This is a facet for manual testing. With the correct secrets, this can validate that messages are being delivered
+   * to the intended slack channel.
    */
   @Test
   @Disabled
@@ -69,29 +65,21 @@ class PingSlackActionTest {
   }
 
   @Singleton
-  internal class PingSlackAction @Inject constructor(
-    private val slackApi: SlackApi,
-    moshi: Moshi,
-  ) : WebAction {
+  internal class PingSlackAction @Inject constructor(private val slackApi: SlackApi, moshi: Moshi) : WebAction {
     @Get("/cash-app/misk/ping-slack")
     @Unauthenticated
-    fun pingSlack(
-    ): Response<ResponseBody> {
+    fun pingSlack(): Response<ResponseBody> {
 
-      //set the channel to the channel ID (ie. "C04PSNFH65Q")
-      val postMessageJson = PostMessageRequest(
-        channel = "test",
-        response_type = "in_channel",
-        blocks = listOf(
-          Block(
-            type = "section",
-            text = Text(
-              type = "mrkdwn",
-              text = buildMrkdwn { append("this is a test.") }
-            )
-          )
+      // set the channel to the channel ID (ie. "C04PSNFH65Q")
+      val postMessageJson =
+        PostMessageRequest(
+          channel = "test",
+          response_type = "in_channel",
+          blocks =
+            listOf(
+              Block(type = "section", text = Text(type = "mrkdwn", text = buildMrkdwn { append("this is a test.") }))
+            ),
         )
-      )
 
       val response = slackApi.postMessage(postMessageJson).execute()
 
@@ -100,7 +88,7 @@ class PingSlackActionTest {
       return Response(
         body = "hello slack".toResponseBody(),
         statusCode = HttpURLConnection.HTTP_OK,
-        headers = Headers.headersOf()
+        headers = Headers.headersOf(),
       )
     }
   }

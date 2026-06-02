@@ -5,24 +5,23 @@ import datadog.trace.api.internal.InternalTracer
 import io.opentracing.Tracer
 import misk.inject.KAbstractModule
 
-/**
- * Binds the datadog tracer to opentracing's [Tracer]
- */
-
+/** Binds the datadog tracer to opentracing's [Tracer] */
 class DatadogTracingBackendModule() : KAbstractModule() {
 
   private var useAutoMdcInjection: Boolean = false
 
   @Deprecated("useAutoMdcInjection is an experimental option that will be removed in a future version")
-  constructor(useAutoMdcInjection: Boolean): this() {
+  constructor(useAutoMdcInjection: Boolean) : this() {
     this.useAutoMdcInjection = useAutoMdcInjection
   }
 
   override fun configure() {
     // A DDTracer is installed by the dd-java-agent in TracerInstaller, which runs before the app's main() method.
-    // Otherwise, the GlobalTracer in both libraries would return a noop tracer and tracing would be effectively disabled.
+    // Otherwise, the GlobalTracer in both libraries would return a noop tracer and tracing would be effectively
+    // disabled.
     // See https://docs.datadoghq.com/tracing/custom_instrumentation/java/
-    // See https://github.com/DataDog/dd-trace-java/tree/v0.65.0/dd-smoke-tests/opentracing/src/main/java/datadog/smoketest/opentracing
+    // See
+    // https://github.com/DataDog/dd-trace-java/tree/v0.65.0/dd-smoke-tests/opentracing/src/main/java/datadog/smoketest/opentracing
     bind<Tracer>().toInstance(io.opentracing.util.GlobalTracer.get())
 
     if (!useAutoMdcInjection) {

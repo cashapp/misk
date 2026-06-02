@@ -8,6 +8,13 @@ import com.google.common.util.concurrent.Service.State.NEW
 import com.google.common.util.concurrent.ServiceManager
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.lang.Thread.sleep
+import java.net.ServerSocket
+import java.net.SocketOptions
+import java.time.Duration
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.milliseconds
 import misk.MiskApplication
 import misk.MiskTestingServiceModule
 import misk.RunningMiskApplication
@@ -16,6 +23,7 @@ import misk.client.HTTP_INTERNAL_SERVER_ERROR
 import misk.client.HTTP_SERVICE_UNAVAILABLE
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
+import misk.logging.getLogger
 import misk.time.FakeClock
 import misk.web.Get
 import misk.web.GracefulShutdownConfig
@@ -40,14 +48,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 import org.slf4j.LoggerFactory
-import misk.logging.getLogger
-import java.lang.Thread.sleep
-import java.net.ServerSocket
-import java.net.SocketOptions
-import java.time.Duration
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import kotlin.time.Duration.Companion.milliseconds
 
 // Must run isolated because it binds an available port to discover it and then releases it
 // for misk to use.
@@ -56,9 +56,7 @@ class GracefulShutdownInterceptorTest {
   private var healthPort: Int = -1
   private var webPort: Int = -1
 
-  private val defaultConfig = TESTING_WEB_CONFIG.copy(
-    health_dedicated_jetty_instance = true
-  )
+  private val defaultConfig = TESTING_WEB_CONFIG.copy(health_dedicated_jetty_instance = true)
 
   @BeforeEach
   fun setup() {
@@ -68,11 +66,10 @@ class GracefulShutdownInterceptorTest {
     JettyStartedService.startedLatch = CountDownLatch(1)
     InFlightAction.okToReturnLatch = CountDownLatch(1)
     InFlightAction.reachedActionLatch = CountDownLatch(1)
-
   }
 
   abstract inner class GracefulInterceptorModule : KAbstractModule() {
-    abstract val config : WebConfig
+    abstract val config: WebConfig
 
     override fun configure() {
       val healthSocket = ServerSocket(0, SocketOptions.SO_REUSEPORT)
@@ -84,17 +81,10 @@ class GracefulShutdownInterceptorTest {
       healthSocket.close()
       jettySocket.close()
 
-      val testConfig = config.copy(
-        port = webPort,
-        health_port = healthPort
-      )
+      val testConfig = config.copy(port = webPort, health_port = healthPort)
 
       install(MiskTestingServiceModule())
-      install(
-        WebServerTestingModule(
-          testConfig
-        )
-      )
+      install(WebServerTestingModule(testConfig))
       // An action that returns after awaiting a latch
       install(WebActionModule.create<InFlightAction>())
 
@@ -103,63 +93,56 @@ class GracefulShutdownInterceptorTest {
 
       install(GracefulShutdownModule(testConfig))
 
-      install(ServiceModule<JettyStartedService>()
-        .dependsOn<JettyService>())
+      install(ServiceModule<JettyStartedService>().dependsOn<JettyService>())
     }
   }
 
-  private val client = OkHttpClient().newBuilder()
-    .readTimeout(Duration.ofSeconds(5))
-    .connectTimeout(Duration.ofSeconds(5))
-    .writeTimeout(Duration.ofSeconds(5))
-    .build()
+  private val client =
+    OkHttpClient()
+      .newBuilder()
+      .readTimeout(Duration.ofSeconds(5))
+      .connectTimeout(Duration.ofSeconds(5))
+      .writeTimeout(Duration.ofSeconds(5))
+      .build()
 
-  /**
-   * When graceful interceptor config is null the service and injector are not installed.
-   */
+  /** When graceful interceptor config is null the service and injector are not installed. */
   @Test
   fun nullConfig() {
     object : GracefulInterceptorModule() {
-      override val config: WebConfig
-        get() = defaultConfig.copy(
-          graceful_shutdown_config = null
-        )
-    }.assertServiceAndInterceptorNotInstalled()
+        override val config: WebConfig
+          get() = defaultConfig.copy(graceful_shutdown_config = null)
+      }
+      .assertServiceAndInterceptorNotInstalled()
   }
 
-  /**
-   * When graceful interceptor config is disabled the service and injector are not installed.
-   */
+  /** When graceful interceptor config is disabled the service and injector are not installed. */
   @Test
   fun disabledConfig() {
     object : GracefulInterceptorModule() {
-      override val config: WebConfig
-        get() = defaultConfig.copy(
-          graceful_shutdown_config = GracefulShutdownConfig(
-            disabled = true
-          )
-        )
-    }.assertServiceAndInterceptorNotInstalled()
+        override val config: WebConfig
+          get() = defaultConfig.copy(graceful_shutdown_config = GracefulShutdownConfig(disabled = true))
+      }
+      .assertServiceAndInterceptorNotInstalled()
   }
 
-  /**
-   * When the dedicated health service is disabled the service and injector are not installed.
-   */
+  /** When the dedicated health service is disabled the service and injector are not installed. */
   @Test
   fun healthServiceNotEnabled() {
     object : GracefulInterceptorModule() {
-      override val config: WebConfig
-        get() = defaultConfig.copy(
-          health_dedicated_jetty_instance = false,
-          graceful_shutdown_config = GracefulShutdownConfig()
-        )
-    }.assertServiceAndInterceptorNotInstalled()
+        override val config: WebConfig
+          get() =
+            defaultConfig.copy(
+              health_dedicated_jetty_instance = false,
+              graceful_shutdown_config = GracefulShutdownConfig(),
+            )
+      }
+      .assertServiceAndInterceptorNotInstalled()
   }
 
   @Test
   fun `log delay bucketing scheme`() {
 
-    //inWholeMilliseconds <= 500 -> inWholeMilliseconds.toNearest(100)
+    // inWholeMilliseconds <= 500 -> inWholeMilliseconds.toNearest(100)
     assertThat(0.milliseconds.delayBucket()).isEqualTo(0L)
     assertThat(1.milliseconds.delayBucket()).isEqualTo(0L)
 
@@ -172,7 +155,7 @@ class GracefulShutdownInterceptorTest {
     assertThat(151.milliseconds.delayBucket()).isEqualTo(200L)
     assertThat(500.milliseconds.delayBucket()).isEqualTo(500L)
 
-    //inWholeMilliseconds <= 10_000 -> inWholeMilliseconds.toNearest(500)
+    // inWholeMilliseconds <= 10_000 -> inWholeMilliseconds.toNearest(500)
     assertThat(600.milliseconds.delayBucket()).isEqualTo(500L)
     assertThat(749.milliseconds.delayBucket()).isEqualTo(500L)
     assertThat(750.milliseconds.delayBucket()).isEqualTo(1000L)
@@ -180,7 +163,7 @@ class GracefulShutdownInterceptorTest {
     assertThat(1750.milliseconds.delayBucket()).isEqualTo(2000L)
     assertThat(8750.milliseconds.delayBucket()).isEqualTo(9000L)
 
-    //else -> inWholeMilliseconds.toNearest(1000)
+    // else -> inWholeMilliseconds.toNearest(1000)
     assertThat(10_499.milliseconds.delayBucket()).isEqualTo(10_000L)
     assertThat(10_500.milliseconds.delayBucket()).isEqualTo(11_000L)
     assertThat(21_700.milliseconds.delayBucket()).isEqualTo(22_000L)
@@ -234,22 +217,24 @@ class GracefulShutdownInterceptorTest {
     miskApplication.stop()
   }
 
-  /**
-   * Without idle timeout, tests that inflight requests are still waited on before proceeding.
-   */
+  /** Without idle timeout, tests that inflight requests are still waited on before proceeding. */
   @Test
   fun inflightRequest() {
-    val miskApplication = object : GracefulInterceptorModule() {
-      override val config: WebConfig
-        get() = defaultConfig.copy(
-          graceful_shutdown_config = GracefulShutdownConfig(
-            disabled = false,
-            idle_timeout = -1,
-            max_graceful_wait = -1,
-            rejection_status_code = HTTP_SERVICE_UNAVAILABLE
-          )
-        )
-    }.startUpMisk()
+    val miskApplication =
+      object : GracefulInterceptorModule() {
+          override val config: WebConfig
+            get() =
+              defaultConfig.copy(
+                graceful_shutdown_config =
+                  GracefulShutdownConfig(
+                    disabled = false,
+                    idle_timeout = -1,
+                    max_graceful_wait = -1,
+                    rejection_status_code = HTTP_SERVICE_UNAVAILABLE,
+                  )
+              )
+        }
+        .startUpMisk()
     val inflightAction = "http://127.0.0.1:$webPort/inflight".toHttpUrl()
     val notInflightAction = "http://127.0.0.1:$webPort/notinflight".toHttpUrl()
 
@@ -279,22 +264,24 @@ class GracefulShutdownInterceptorTest {
     assertThat(miskApplication.awaitTerminated(10, TimeUnit.SECONDS)).isTrue()
   }
 
-  /**
-   * Without max wait, ensures that incoming requests are idle before proceeding.
-   */
+  /** Without max wait, ensures that incoming requests are idle before proceeding. */
   @Test
   fun notIdle() {
-    val miskApplication = object : GracefulInterceptorModule() {
-      override val config: WebConfig
-        get() = defaultConfig.copy(
-          graceful_shutdown_config = GracefulShutdownConfig(
-            disabled = false,
-            idle_timeout = 2000,
-            max_graceful_wait = -1,
-            rejection_status_code = HTTP_SERVICE_UNAVAILABLE
-          )
-        )
-    }.startUpMisk()
+    val miskApplication =
+      object : GracefulInterceptorModule() {
+          override val config: WebConfig
+            get() =
+              defaultConfig.copy(
+                graceful_shutdown_config =
+                  GracefulShutdownConfig(
+                    disabled = false,
+                    idle_timeout = 2000,
+                    max_graceful_wait = -1,
+                    rejection_status_code = HTTP_SERVICE_UNAVAILABLE,
+                  )
+              )
+        }
+        .startUpMisk()
     val notInflightAction = "http://127.0.0.1:$webPort/notinflight".toHttpUrl()
 
     // Shutdown misk and wait for graceful shutdown service to be shutting down.
@@ -333,22 +320,24 @@ class GracefulShutdownInterceptorTest {
     assertThat(miskApplication.awaitTerminated(5, TimeUnit.SECONDS)).isTrue()
   }
 
-  /**
-   * Ensures custom status code is honored.
-   */
+  /** Ensures custom status code is honored. */
   @Test
   fun customStatusCode() {
-    val miskApplication = object : GracefulInterceptorModule() {
-      override val config: WebConfig
-        get() = defaultConfig.copy(
-          graceful_shutdown_config = GracefulShutdownConfig(
-            disabled = false,
-            idle_timeout = 2000,
-            max_graceful_wait = -1,
-            rejection_status_code = HTTP_INTERNAL_SERVER_ERROR
-          )
-        )
-    }.startUpMisk()
+    val miskApplication =
+      object : GracefulInterceptorModule() {
+          override val config: WebConfig
+            get() =
+              defaultConfig.copy(
+                graceful_shutdown_config =
+                  GracefulShutdownConfig(
+                    disabled = false,
+                    idle_timeout = 2000,
+                    max_graceful_wait = -1,
+                    rejection_status_code = HTTP_INTERNAL_SERVER_ERROR,
+                  )
+              )
+        }
+        .startUpMisk()
     val notInflightAction = "http://127.0.0.1:$webPort/notinflight".toHttpUrl()
 
     // Shutdown misk and wait for graceful shutdown service to be shutting down.
@@ -387,22 +376,24 @@ class GracefulShutdownInterceptorTest {
     assertThat(miskApplication.awaitTerminated(5, TimeUnit.SECONDS)).isTrue()
   }
 
-  /**
-   * Ensures combined in flight and idle timeout is enforced together.
-   */
+  /** Ensures combined in flight and idle timeout is enforced together. */
   @Test
   fun idleWithInFlight() {
-    val miskApplication = object : GracefulInterceptorModule() {
-      override val config: WebConfig
-        get() = defaultConfig.copy(
-          graceful_shutdown_config = GracefulShutdownConfig(
-            disabled = false,
-            idle_timeout = 2000,
-            max_graceful_wait = -1,
-            rejection_status_code = HTTP_SERVICE_UNAVAILABLE
-          )
-        )
-    }.startUpMisk()
+    val miskApplication =
+      object : GracefulInterceptorModule() {
+          override val config: WebConfig
+            get() =
+              defaultConfig.copy(
+                graceful_shutdown_config =
+                  GracefulShutdownConfig(
+                    disabled = false,
+                    idle_timeout = 2000,
+                    max_graceful_wait = -1,
+                    rejection_status_code = HTTP_SERVICE_UNAVAILABLE,
+                  )
+              )
+        }
+        .startUpMisk()
     val notInflightAction = "http://127.0.0.1:$webPort/notinflight".toHttpUrl()
     val inflightAction = "http://127.0.0.1:$webPort/inflight".toHttpUrl()
 
@@ -454,23 +445,24 @@ class GracefulShutdownInterceptorTest {
     assertThat(miskApplication.awaitTerminated(5, TimeUnit.SECONDS)).isTrue()
   }
 
-  /**
-   * Ensures waiting for idle and inflight is enforced even when rejection of incoming requests
-   * is off.
-   */
+  /** Ensures waiting for idle and inflight is enforced even when rejection of incoming requests is off. */
   @Test
   fun noRejects() {
-    val miskApplication = object : GracefulInterceptorModule() {
-      override val config: WebConfig
-        get() = defaultConfig.copy(
-          graceful_shutdown_config = GracefulShutdownConfig(
-            disabled = false,
-            idle_timeout = 2000,
-            max_graceful_wait = -1,
-            rejection_status_code = -1
-          )
-        )
-    }.startUpMisk()
+    val miskApplication =
+      object : GracefulInterceptorModule() {
+          override val config: WebConfig
+            get() =
+              defaultConfig.copy(
+                graceful_shutdown_config =
+                  GracefulShutdownConfig(
+                    disabled = false,
+                    idle_timeout = 2000,
+                    max_graceful_wait = -1,
+                    rejection_status_code = -1,
+                  )
+              )
+        }
+        .startUpMisk()
 
     val notInflightAction = "http://127.0.0.1:$webPort/notinflight".toHttpUrl()
     val inflightAction = "http://127.0.0.1:$webPort/inflight".toHttpUrl()
@@ -520,23 +512,24 @@ class GracefulShutdownInterceptorTest {
     assertThat(miskApplication.awaitTerminated(5, TimeUnit.SECONDS)).isTrue()
   }
 
-  /**
-   * Ensures that max graceful wait is enforced even when in flight requests and/or idle timeout
-   * are not met.
-   */
+  /** Ensures that max graceful wait is enforced even when in flight requests and/or idle timeout are not met. */
   @Test
   fun maxWait() {
-    val miskApplication = object : GracefulInterceptorModule() {
-      override val config: WebConfig
-        get() = defaultConfig.copy(
-          graceful_shutdown_config = GracefulShutdownConfig(
-            disabled = false,
-            idle_timeout = 2000,
-            max_graceful_wait = 3000,
-            rejection_status_code = HTTP_SERVICE_UNAVAILABLE
-          )
-        )
-    }.startUpMisk()
+    val miskApplication =
+      object : GracefulInterceptorModule() {
+          override val config: WebConfig
+            get() =
+              defaultConfig.copy(
+                graceful_shutdown_config =
+                  GracefulShutdownConfig(
+                    disabled = false,
+                    idle_timeout = 2000,
+                    max_graceful_wait = 3000,
+                    rejection_status_code = HTTP_SERVICE_UNAVAILABLE,
+                  )
+              )
+        }
+        .startUpMisk()
 
     val notInflightAction = "http://127.0.0.1:$webPort/notinflight".toHttpUrl()
 
@@ -576,15 +569,11 @@ class GracefulShutdownInterceptorTest {
     assertThat(miskApplication.awaitTerminated(5, TimeUnit.SECONDS)).isTrue()
   }
 
-  /**
-   * Starts up misk on a separate thread and awaits started for the current config.
-   */
-  private fun GracefulInterceptorModule.startUpMisk() : RunningMiskApplication {
+  /** Starts up misk on a separate thread and awaits started for the current config. */
+  private fun GracefulInterceptorModule.startUpMisk(): RunningMiskApplication {
     val miskApplication = MiskApplication(this)
     logger.debug("Running Misk!")
     val app = miskApplication.start()
-      
-    
 
     JettyStartedService.startedLatch.await(10, TimeUnit.SECONDS)
 
@@ -596,52 +585,46 @@ class GracefulShutdownInterceptorTest {
     return app
   }
 
-  /**
-   * The async result of an http request through getAsync.
-   */
+  /** The async result of an http request through getAsync. */
   private data class CallResult(
-    var response : String? = null,
-    var code : Int? = null,
+    var response: String? = null,
+    var code: Int? = null,
     var ex: IOException? = null,
-    var callCompleteLatch: CountDownLatch
+    var callCompleteLatch: CountDownLatch,
   )
 
-  /**
-   * Enqueues the request and populates the CallResult on response, setting the callCompleteLatch
-   * once completed.
-   */
-  private fun getAsync(
-    url: HttpUrl
-  ): CallResult {
+  /** Enqueues the request and populates the CallResult on response, setting the callCompleteLatch once completed. */
+  private fun getAsync(url: HttpUrl): CallResult {
     val req = Request.Builder().url(url).build()
-    val callResult = CallResult(
-      callCompleteLatch = CountDownLatch(1)
-    )
+    val callResult = CallResult(callCompleteLatch = CountDownLatch(1))
 
-    client.newCall(req).enqueue (object : Callback
-    {
-      override fun onFailure(call: Call, e: IOException) {
-        callResult.ex = e
-        logger.info { "call failed: $callResult" }
-        callResult.callCompleteLatch.countDown()
-      }
+    client
+      .newCall(req)
+      .enqueue(
+        object : Callback {
+          override fun onFailure(call: Call, e: IOException) {
+            callResult.ex = e
+            logger.info { "call failed: $callResult" }
+            callResult.callCompleteLatch.countDown()
+          }
 
-      override fun onResponse(call: Call, response: Response) {
-        callResult.response = response.body.toString()
-        callResult.code = response.code
-        response.close()
+          override fun onResponse(call: Call, response: Response) {
+            callResult.response = response.body.toString()
+            callResult.code = response.code
+            response.close()
 
-        logger.info { "call succeeded: $callResult" }
-        callResult.callCompleteLatch.countDown()
-      }
-    })
+            logger.info { "call succeeded: $callResult" }
+            callResult.callCompleteLatch.countDown()
+          }
+        }
+      )
 
     return callResult
   }
 
   /**
-   * Informs when the request reached the action through reachedActionLatch and waits for
-   * okToReturnLatch before completing.  Allows verifying the behaviors with in flight requests.
+   * Informs when the request reached the action through reachedActionLatch and waits for okToReturnLatch before
+   * completing. Allows verifying the behaviors with in flight requests.
    */
   @Singleton
   internal class InFlightAction @Inject constructor() : WebAction {
@@ -653,14 +636,12 @@ class GracefulShutdownInterceptorTest {
     }
 
     companion object {
-      lateinit var okToReturnLatch : CountDownLatch
-      lateinit var reachedActionLatch : CountDownLatch
+      lateinit var okToReturnLatch: CountDownLatch
+      lateinit var reachedActionLatch: CountDownLatch
     }
   }
 
-  /**
-   * Plain old action that just returns
-   */
+  /** Plain old action that just returns */
   @Singleton
   internal class NotInflightAction @Inject constructor() : WebAction {
     @Get("/notinflight")
@@ -669,19 +650,17 @@ class GracefulShutdownInterceptorTest {
     }
   }
 
-  /**
-   * Sets a latch when started after jetty to allow the test to move forward with misk started.
-   */
+  /** Sets a latch when started after jetty to allow the test to move forward with misk started. */
   @Singleton
   internal class JettyStartedService @Inject constructor() : AbstractIdleService() {
     override fun startUp() {
       startedLatch.countDown()
     }
 
-    override fun shutDown() { }
+    override fun shutDown() {}
 
     companion object {
-      lateinit var startedLatch : CountDownLatch
+      lateinit var startedLatch: CountDownLatch
     }
   }
 

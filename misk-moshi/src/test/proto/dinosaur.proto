@@ -1,0 +1,10 @@
+syntax = "proto2";
+
+option java_package = "helpers.protos";
+
+package helpers.protos;
+
+message Dinosaur {
+  optional string name = 1;
+  repeated string picture_urls = 2;
+}

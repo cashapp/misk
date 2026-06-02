@@ -1,17 +1,15 @@
 package misk.hibernate
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.time.Clock
 import org.hibernate.event.spi.PreInsertEvent
 import org.hibernate.event.spi.PreInsertEventListener
 import org.hibernate.event.spi.PreUpdateEvent
 import org.hibernate.event.spi.PreUpdateEventListener
-import java.time.Clock
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @Singleton
-internal class TimestampListener @Inject constructor() :
-  PreInsertEventListener,
-  PreUpdateEventListener {
+internal class TimestampListener @Inject constructor() : PreInsertEventListener, PreUpdateEventListener {
   @Inject lateinit var clock: Clock
 
   override fun onPreInsert(event: PreInsertEvent): Boolean {

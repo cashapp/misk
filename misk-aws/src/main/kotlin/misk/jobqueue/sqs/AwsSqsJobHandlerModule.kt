@@ -2,20 +2,26 @@ package misk.jobqueue.sqs
 
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
+import kotlin.reflect.KClass
 import misk.ReadyService
 import misk.ServiceModule
+import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
-import misk.inject.toKey
 import misk.jobqueue.BatchJobHandler
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
-import kotlin.reflect.KClass
 
 /**
- * Install this module to register a handler for an SQS queue,
- * and if specified, registers its corresponding retry queue.
+ * Install this module to register a handler for an SQS queue, and if specified, registers its corresponding retry
+ * queue.
  */
-class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
+@Deprecated(
+  message =
+    "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
+      "misk-aws2-sqs (misk.aws2.sqs.jobqueue.SqsJobHandlerModule) instead."
+)
+class AwsSqsJobHandlerModule<T : JobHandler>
+private constructor(
   private val queueName: QueueName,
   private val handler: KClass<T>,
   private val installRetryQueue: Boolean,
@@ -29,12 +35,8 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
       newMapBinder<QueueName, JobHandler>().addBinding(queueName.retryQueue).to(handler.java)
     }
 
-    install(
-      ServiceModule(
-        key = AwsSqsJobHandlerSubscriptionService::class.toKey(),
-        dependsOn = dependsOn
-      ).dependsOn<ReadyService>()
-    )
+    install(DefaultAsyncSwitchModule())
+    install(ServiceModule<AwsSqsJobHandlerSubscriptionService>().dependsOn(dependsOn).dependsOn<ReadyService>())
   }
 
   companion object {
@@ -45,7 +47,8 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
       dependsOn: List<Key<out Service>> = emptyList(),
     ): AwsSqsJobHandlerModule<T> = create(queueName, T::class, installRetryQueue, dependsOn)
 
-    @JvmStatic @JvmOverloads
+    @JvmStatic
+    @JvmOverloads
     fun <T : JobHandler> create(
       queueName: QueueName,
       handlerClass: Class<T>,
@@ -55,9 +58,7 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
       return create(queueName, handlerClass.kotlin, installRetryQueue, dependsOn)
     }
 
-    /**
-     * Returns a module that registers a handler for an SQS queue.
-     */
+    /** Returns a module that registers a handler for an SQS queue. */
     @JvmOverloads
     fun <T : JobHandler> create(
       queueName: QueueName,

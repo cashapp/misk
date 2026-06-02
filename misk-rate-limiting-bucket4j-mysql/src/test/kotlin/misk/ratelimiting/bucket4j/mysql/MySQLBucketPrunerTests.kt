@@ -4,6 +4,7 @@ import com.google.inject.Injector
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import jakarta.inject.Inject
+import java.time.Duration
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
@@ -23,33 +24,32 @@ import wisp.ratelimiting.RateLimitPruner
 import wisp.ratelimiting.RateLimitPrunerMetrics
 import wisp.ratelimiting.RateLimiter
 import wisp.ratelimiting.testing.TestRateLimitConfig
-import java.time.Duration
 
 @MiskTest(startService = true)
 class MySQLBucketPrunerTests {
   @Suppress("unused")
-  @MiskTestModule val module = object : KAbstractModule() {
-    override fun configure() {
-      install(MiskTestingServiceModule())
-      install(DeploymentModule(TESTING))
-      val config = MiskConfig.load<MySQLBucket4jRateLimiterTests.RootConfig>(
-        "mysql_rate_limiter_test", TESTING
-      )
-      install(JdbcTestingModule(RateLimits::class))
-      install(JdbcModule(RateLimits::class, config.mysql_data_source))
+  @MiskTestModule
+  val module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(MiskTestingServiceModule())
+        install(DeploymentModule(TESTING))
+        val config = MiskConfig.load<MySQLBucket4jRateLimiterTests.RootConfig>("mysql_rate_limiter_test", TESTING)
+        install(JdbcTestingModule(RateLimits::class))
+        install(JdbcModule(RateLimits::class, config.mysql_data_source))
 
-      install(
-        MySQLBucket4jRateLimiterModule(
-          qualifier = RateLimits::class,
-          tableName = MySQLBucket4jRateLimiterTests.TABLE_NAME,
-          idColumn = MySQLBucket4jRateLimiterTests.ID_COLUMN,
-          stateColumn = MySQLBucket4jRateLimiterTests.STATE_COLUMN,
-          prunerPageSize = 2L
+        install(
+          MySQLBucket4jRateLimiterModule(
+            qualifier = RateLimits::class,
+            tableName = MySQLBucket4jRateLimiterTests.TABLE_NAME,
+            idColumn = MySQLBucket4jRateLimiterTests.ID_COLUMN,
+            stateColumn = MySQLBucket4jRateLimiterTests.STATE_COLUMN,
+            prunerPageSize = 2L,
+          )
         )
-      )
-      bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
+        bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
+      }
     }
-  }
 
   @Inject private lateinit var fakeClock: FakeClock
 
@@ -61,32 +61,22 @@ class MySQLBucketPrunerTests {
 
   @Inject private lateinit var rateLimiter: RateLimiter
 
-  private val getAllKeysQuery = """
+  private val getAllKeysQuery =
+    """
       SELECT ${MySQLBucket4jRateLimiterTests.ID_COLUMN} 
       FROM ${MySQLBucket4jRateLimiterTests.TABLE_NAME}
-    """.trimIndent()
+    """
+      .trimIndent()
 
-  private val prunerMetrics by lazy {
-    RateLimitPrunerMetrics(meterRegistry)
-  }
+  private val prunerMetrics by lazy { RateLimitPrunerMetrics(meterRegistry) }
 
   @Test
   fun `pruning deletes only expired rows`() {
     // Create group of expired keys
-    val expiredBucketKeys = buildList {
-      repeat(10) {
-        add("expired-$it")
-      }
-    }
-    expiredBucketKeys.forEach { key ->
-      rateLimiter.consumeToken(key, TestRateLimitConfig)
-    }
+    val expiredBucketKeys = buildList { repeat(10) { add("expired-$it") } }
+    expiredBucketKeys.forEach { key -> rateLimiter.consumeToken(key, TestRateLimitConfig) }
 
-    val mixedBucketKeys = buildList {
-      repeat(10) {
-        add("maybeexpired-$it")
-      }
-    }
+    val mixedBucketKeys = buildList { repeat(10) { add("maybeexpired-$it") } }
 
     // Create group of interleaved short and long buckets
     mixedBucketKeys.forEachIndexed { idx, key ->
@@ -100,14 +90,8 @@ class MySQLBucketPrunerTests {
     fakeClock.add(TestRateLimitConfig.refillPeriod)
 
     // Create group of non-expired keys
-    val nonExpiredShortBucketKeys = buildList {
-      repeat(10) {
-        add("nonexpired-short-$it")
-      }
-    }
-    nonExpiredShortBucketKeys.forEach { key ->
-      rateLimiter.consumeToken(key, TestRateLimitConfig)
-    }
+    val nonExpiredShortBucketKeys = buildList { repeat(10) { add("nonexpired-short-$it") } }
+    nonExpiredShortBucketKeys.forEach { key -> rateLimiter.consumeToken(key, TestRateLimitConfig) }
 
     pruner.prune()
 
@@ -116,9 +100,7 @@ class MySQLBucketPrunerTests {
     //  sometimes in tests the time can be so fast it registers as 0, resulting in a flaky test
     assertThat(prunerMetrics.pruningDuration.count()).isGreaterThan(0L)
 
-    val partitionedBucketKeys = mixedBucketKeys.withIndex().partition {
-      it.index % 2 == 0
-    }
+    val partitionedBucketKeys = mixedBucketKeys.withIndex().partition { it.index % 2 == 0 }
     val nonExpiredLongKeys = partitionedBucketKeys.first.map { it.value }
 
     val dataSource = injector.getInstance(keyOf<DataSourceService>(RateLimits::class)).dataSource
@@ -133,9 +115,7 @@ class MySQLBucketPrunerTests {
 
     // We should have deleted only the short duration keys that were created before advancing time,
     // leaving the long duration keys and the short duration keys created after advancing time
-    assertThat(extantKeys).containsExactlyElementsOf(
-      nonExpiredLongKeys + nonExpiredShortBucketKeys
-    )
+    assertThat(extantKeys).containsExactlyElementsOf(nonExpiredLongKeys + nonExpiredShortBucketKeys)
   }
 
   private object LongTestRateLimitConfig : RateLimitConfiguration {

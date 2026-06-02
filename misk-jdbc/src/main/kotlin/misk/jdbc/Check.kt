@@ -4,7 +4,7 @@ import java.util.EnumSet
 
 enum class Check {
   TABLE_SCAN,
-  COWRITE
+  COWRITE,
 }
 
 object CheckDisabler {
@@ -16,11 +16,12 @@ object CheckDisabler {
 
   fun <T> withoutChecks(vararg checks: Check, body: () -> T): T {
     val previous = disabledChecks.get()
-    val actualChecks = if (checks.isEmpty()) {
-      EnumSet.allOf(Check::class.java)
-    } else {
-      EnumSet.of(checks[0], *checks)
-    }
+    val actualChecks =
+      if (checks.isEmpty()) {
+        EnumSet.allOf(Check::class.java)
+      } else {
+        EnumSet.of(checks[0], *checks)
+      }
     disabledChecks.set(actualChecks)
     return try {
       body()

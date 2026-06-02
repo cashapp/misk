@@ -2,6 +2,10 @@ package misk.client
 
 import com.google.inject.Guice
 import helpers.protos.Dinosaur
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.net.InetSocketAddress
+import java.net.Proxy
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
@@ -16,22 +20,15 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.net.InetSocketAddress
-import java.net.Proxy
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 internal class HttpClientEventListenerTest {
 
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
-  @Inject
-  private lateinit var jetty: JettyService
+  @Inject private lateinit var jetty: JettyService
 
-  @Inject
-  private lateinit var testListener: TestEventListener
+  @Inject private lateinit var testListener: TestEventListener
 
   private lateinit var client: ReturnADinosaur
 
@@ -50,8 +47,7 @@ internal class HttpClientEventListenerTest {
     assertThat(testListener.started()).isTrue()
   }
 
-  class ClientModule(val jetty: JettyService, val eventListener: TestEventListener) :
-    KAbstractModule() {
+  class ClientModule(val jetty: JettyService, val eventListener: TestEventListener) : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
       install(DinoClientModule(jetty))
@@ -60,8 +56,7 @@ internal class HttpClientEventListenerTest {
     }
   }
 
-  class TestEventListenerFactory @Inject constructor(private val listener: TestEventListener) :
-    EventListener.Factory {
+  class TestEventListenerFactory @Inject constructor(private val listener: TestEventListener) : EventListener.Factory {
     override fun create(call: Call): EventListener {
       return listener
     }
@@ -70,6 +65,7 @@ internal class HttpClientEventListenerTest {
   @Singleton
   class TestEventListener @Inject constructor() : EventListener() {
     private var started = false
+
     override fun connectStart(call: Call, inetSocketAddress: InetSocketAddress, proxy: Proxy) {
       started = true
     }

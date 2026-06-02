@@ -1,10 +1,18 @@
 public abstract class misk/sqldelight/RetryingTransacter : app/cash/sqldelight/Transacter {
 	public fun <init> (Lapp/cash/sqldelight/Transacter;)V
 	public fun <init> (Lapp/cash/sqldelight/Transacter;Lmisk/sqldelight/TransacterOptions;)V
-	public synthetic fun <init> (Lapp/cash/sqldelight/Transacter;Lmisk/sqldelight/TransacterOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lapp/cash/sqldelight/Transacter;Lmisk/sqldelight/TransacterOptions;Lmisk/jdbc/DataSourceType;)V
+	public synthetic fun <init> (Lapp/cash/sqldelight/Transacter;Lmisk/sqldelight/TransacterOptions;Lmisk/jdbc/DataSourceType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getOptions ()Lmisk/sqldelight/TransacterOptions;
 	public fun transaction (ZLkotlin/jvm/functions/Function1;)V
 	public fun transactionWithResult (ZLkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class misk/sqldelight/SqlDelightExceptionClassifier : misk/jdbc/retry/DefaultExceptionClassifier {
+	public fun <init> ()V
+	public fun <init> (Lmisk/jdbc/DataSourceType;)V
+	public synthetic fun <init> (Lmisk/jdbc/DataSourceType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun isRetryable (Ljava/lang/Throwable;)Z
 }
 
 public final class misk/sqldelight/TransacterOptions {

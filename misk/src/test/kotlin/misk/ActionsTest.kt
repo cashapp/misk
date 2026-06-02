@@ -1,14 +1,15 @@
 package misk
 
+import kotlin.reflect.full.createType
+import kotlin.test.assertFailsWith
 import misk.web.DispatchMechanism
 import misk.web.RequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import kotlin.reflect.full.createType
-import kotlin.test.assertFailsWith
 
 internal class ActionsTest {
-  @Test fun methodAsAction() {
+  @Test
+  fun methodAsAction() {
     val action = TestAction::myActionMethod.asAction(DispatchMechanism.GET)
     assertThat(action.name).isEqualTo("TestAction")
     assertThat(action.parameterTypes).hasSize(2)
@@ -18,7 +19,8 @@ internal class ActionsTest {
     assertThat(action.returnType).isEqualTo(String::class.createType())
   }
 
-  @Test fun noRequestBodyAction() {
+  @Test
+  fun noRequestBodyAction() {
     val action = NoRequestBodyAction::myActionMethod.asAction(DispatchMechanism.GET)
     assertThat(action.name).isEqualTo("NoRequestBodyAction")
     assertThat(action.parameterTypes).hasSize(1)
@@ -26,28 +28,30 @@ internal class ActionsTest {
     assertThat(action.requestType).isNull()
   }
 
-  @Test fun nestedAction() {
+  @Test
+  fun nestedAction() {
     val action = NestedAction.InnerAction::myActionMethod.asAction(DispatchMechanism.GET)
     assertThat(action.name).isEqualTo("NestedAction.InnerAction")
   }
 
-  @Test fun functionAsJavaMethod() {
+  @Test
+  fun functionAsJavaMethod() {
     val action = TestAction::myActionMethod.asAction(DispatchMechanism.GET)
     val functionAsJavaMethod = action.functionAsJavaMethod
     assertThat(functionAsJavaMethod?.declaringClass).isEqualTo(TestAction::class.java)
   }
 
-  @Test fun methodReferenceNotAllowedAsAction() {
+  @Test
+  fun methodReferenceNotAllowedAsAction() {
     assertFailsWith<IllegalArgumentException> {
       val t = TestAction()
       t::myActionMethod.asAction(DispatchMechanism.GET)
     }
   }
 
-  @Test fun freeStandingFunctionNotAllowedAsAction() {
-    assertFailsWith<IllegalArgumentException> {
-      ::myActionHandler.asAction(DispatchMechanism.GET)
-    }
+  @Test
+  fun freeStandingFunctionNotAllowedAsAction() {
+    assertFailsWith<IllegalArgumentException> { ::myActionHandler.asAction(DispatchMechanism.GET) }
   }
 }
 

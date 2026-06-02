@@ -1,4 +1,4 @@
-package misk.cloud.gcp.testing;
+package misk.cloud.gcp.testing
 
 import com.google.api.client.util.Key
 

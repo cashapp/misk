@@ -21,13 +21,18 @@ import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.Durations.ONE_HUNDRED_MILLISECONDS
+import org.awaitility.Durations.ONE_MILLISECOND
+import org.awaitility.kotlin.atMost
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.untilAsserted
+import org.awaitility.kotlin.withPollInterval
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
 class MetricsInterceptorTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
   val httpClient = OkHttpClient()
 
   @Inject private lateinit var metricsInterceptorFactory: MetricsInterceptor.Factory
@@ -57,42 +62,37 @@ class MetricsInterceptorTest {
     // Make sure all the right non-histo metrics were generated
     val requestDuration = metricsInterceptorFactory.requestDurationSummary!!
     requestDuration.labels(*labels(200)).observe(1.0)
-    assertThat(requestDuration.labels(*labels(200)).get().count.toInt()).isEqualTo(3)
     requestDuration.labels(*labels(202)).observe(1.0)
-    assertThat(requestDuration.labels(*labels(202)).get().count.toInt()).isEqualTo(2)
     requestDuration.labels(*labels(404)).observe(1.0)
-    assertThat(requestDuration.labels(*labels(404)).get().count.toInt()).isEqualTo(2)
     requestDuration.labels(*labels(403)).observe(1.0)
-    assertThat(requestDuration.labels(*labels(403)).get().count.toInt()).isEqualTo(3)
-
     requestDuration.labels(*labels(200, "my-peer")).observe(1.0)
-    assertThat(requestDuration.labels(*labels(200, "my-peer")).get().count.toInt()).isEqualTo(5)
-
     requestDuration.labels(*labels(200, "<user>")).observe(1.0)
-    assertThat(requestDuration.labels(*labels(200, "<user>")).get().count.toInt()).isEqualTo(2)
 
-    // Make sure all the right histo metrics were generated
-    val histoDuration = metricsInterceptorFactory.requestDurationHistogram
-    assertThat(histoDuration.labels(*labels(200)).get().count()).isEqualTo(2)
-    assertThat(histoDuration.labels(*labels(202)).get().count()).isEqualTo(1)
-    assertThat(histoDuration.labels(*labels(404)).get().count()).isEqualTo(1)
-    assertThat(histoDuration.labels(*labels(403)).get().count()).isEqualTo(2)
-    assertThat(histoDuration.labels(*labels(200, "my-peer")).get().count()).isEqualTo(4)
-    assertThat(histoDuration.labels(*labels(200, "<user>")).get().count()).isEqualTo(1)
+    // Promteheus processes events asynchronously, thus we might have to wait for a bit.
+    await.withPollInterval(ONE_MILLISECOND).atMost(ONE_HUNDRED_MILLISECONDS).untilAsserted {
+      // Summary metrics assertions
+      assertThat(requestDuration.labels(*labels(200)).get().count.toInt()).isEqualTo(3)
+      assertThat(requestDuration.labels(*labels(202)).get().count.toInt()).isEqualTo(2)
+      assertThat(requestDuration.labels(*labels(404)).get().count.toInt()).isEqualTo(2)
+      assertThat(requestDuration.labels(*labels(403)).get().count.toInt()).isEqualTo(3)
+      assertThat(requestDuration.labels(*labels(200, "my-peer")).get().count.toInt()).isEqualTo(5)
+      assertThat(requestDuration.labels(*labels(200, "<user>")).get().count.toInt()).isEqualTo(2)
+
+      // Histogram metrics assertions
+      val histoDuration = metricsInterceptorFactory.requestDurationHistogram
+      assertThat(histoDuration.labels(*labels(200)).get().count()).isEqualTo(2)
+      assertThat(histoDuration.labels(*labels(202)).get().count()).isEqualTo(1)
+      assertThat(histoDuration.labels(*labels(404)).get().count()).isEqualTo(1)
+      assertThat(histoDuration.labels(*labels(403)).get().count()).isEqualTo(2)
+      assertThat(histoDuration.labels(*labels(200, "my-peer")).get().count()).isEqualTo(4)
+      assertThat(histoDuration.labels(*labels(200, "<user>")).get().count()).isEqualTo(1)
+    }
   }
 
-  fun invoke(
-    desiredStatusCode: Int,
-    service: String? = null,
-    user: String? = null
-  ): okhttp3.Response {
-    val url = jettyService.httpServerUrl.newBuilder()
-      .encodedPath("/call/$desiredStatusCode")
-      .build()
+  fun invoke(desiredStatusCode: Int, service: String? = null, user: String? = null): okhttp3.Response {
+    val url = jettyService.httpServerUrl.newBuilder().encodedPath("/call/$desiredStatusCode").build()
 
-    val request = okhttp3.Request.Builder()
-      .url(url)
-      .get()
+    val request = okhttp3.Request.Builder().url(url).get()
     service?.let { request.addHeader(SERVICE_HEADER, it) }
     user?.let { request.addHeader(USER_HEADER, it) }
     return httpClient.newCall(request.build()).execute().also {

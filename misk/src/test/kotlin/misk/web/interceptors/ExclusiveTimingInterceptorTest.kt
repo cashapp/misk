@@ -2,6 +2,8 @@ package misk.web.interceptors
 
 import io.prometheus.client.Histogram
 import jakarta.inject.Inject
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.milliseconds
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessControlModule
@@ -22,13 +24,12 @@ import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Offset
+import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
-import kotlin.time.Duration.Companion.milliseconds
 
 @MiskTest(startService = true)
 class ExclusiveTimingInterceptorTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
   val httpClient = OkHttpClient()
 
   @Inject private lateinit var exclusiveTimingInterceptorFactory: ExclusiveTimingInterceptor.Factory
@@ -44,19 +45,22 @@ class ExclusiveTimingInterceptorTest {
     val response = invoke(200)
     assertThat(response.code).isEqualTo(200)
 
-    // Figure out how long each of the latency metrics was
-    val requestDuration = metricsInterceptorFactory.requestDurationSummary!!
-    val exclusiveRequestDuration = exclusiveTimingInterceptorFactory.requestDurationHistogram
-    val difference =
-      requestDuration.labels(*labels(200)).get().sum -
-        exclusiveRequestDuration.labels(*labels(200)).get().sum
+    // Wait for metrics to be recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      // Figure out how long each of the latency metrics was
+      val requestDuration = metricsInterceptorFactory.requestDurationSummary!!
+      val exclusiveRequestDuration = exclusiveTimingInterceptorFactory.requestDurationHistogram
+      val difference =
+        requestDuration.labels(*labels(200)).get().sum - exclusiveRequestDuration.labels(*labels(200)).get().sum
 
-    // Verify that the sleep time was excluded
-    // (but leave some room for small differences due to execution time.)
-    assertThat(difference).isCloseTo(
-      /* expected = */ ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble(),
-      /* offset = */ Offset.offset(ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble() / 2)
-    )
+      // Verify that the sleep time was excluded
+      // (but leave some room for small differences due to execution time.)
+      assertThat(difference)
+        .isCloseTo(
+          /* expected = */ ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble(),
+          /* offset = */ Offset.offset(ExclusiveTimingInterceptorTestAction.SLEEP_TIME.toDouble() / 2),
+        )
+    }
   }
 
   @Test
@@ -76,28 +80,23 @@ class ExclusiveTimingInterceptorTest {
 
     val metric = exclusiveTimingInterceptorFactory.requestDurationHistogram
 
-    // Make sure all the right metrics were generated
-    // Note: buckets.last() always contains the count of samples
-    assertThat(metric.labels(*labels(200)).get().count()).isEqualTo(2)
-    assertThat(metric.labels(*labels(202)).get().count()).isEqualTo(1)
-    assertThat(metric.labels(*labels(404)).get().count()).isEqualTo(1)
-    assertThat(metric.labels(*labels(403)).get().count()).isEqualTo(2)
-    assertThat(metric.labels(*labels(200, "my-peer")).get().count()).isEqualTo(4)
-    assertThat(metric.labels(*labels(200, "<user>")).get().count()).isEqualTo(1)
+    // Wait for metrics to be recorded asynchronously
+    await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+      // Make sure all the right metrics were generated
+      // Note: buckets.last() always contains the count of samples
+      assertThat(metric.labels(*labels(200)).get().count()).isEqualTo(2)
+      assertThat(metric.labels(*labels(202)).get().count()).isEqualTo(1)
+      assertThat(metric.labels(*labels(404)).get().count()).isEqualTo(1)
+      assertThat(metric.labels(*labels(403)).get().count()).isEqualTo(2)
+      assertThat(metric.labels(*labels(200, "my-peer")).get().count()).isEqualTo(4)
+      assertThat(metric.labels(*labels(200, "<user>")).get().count()).isEqualTo(1)
+    }
   }
 
-  fun invoke(
-    desiredStatusCode: Int,
-    service: String? = null,
-    user: String? = null,
-  ): okhttp3.Response {
-    val url = jettyService.httpServerUrl.newBuilder()
-      .encodedPath("/call/$desiredStatusCode")
-      .build()
+  fun invoke(desiredStatusCode: Int, service: String? = null, user: String? = null): okhttp3.Response {
+    val url = jettyService.httpServerUrl.newBuilder().encodedPath("/call/$desiredStatusCode").build()
 
-    val request = okhttp3.Request.Builder()
-      .url(url)
-      .get()
+    val request = okhttp3.Request.Builder().url(url).get()
     service?.let { request.addHeader(SERVICE_HEADER, it) }
     user?.let { request.addHeader(USER_HEADER, it) }
     return httpClient.newCall(request.build()).execute().also {
@@ -123,7 +122,8 @@ class ExclusiveTimingInterceptorTest {
 }
 
 internal class ExclusiveTimingInterceptorTestAction
-@Inject constructor(private val excludedTime: ThreadLocal<ExcludedTime>) : WebAction {
+@Inject
+constructor(private val excludedTime: ThreadLocal<ExcludedTime>) : WebAction {
   @Get("/call/{desiredStatusCode}")
   @Unauthenticated
   fun call(@PathParam desiredStatusCode: Int): Response<String> {

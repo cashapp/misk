@@ -1,5 +1,9 @@
 package misk.web.interceptors
 
+import jakarta.inject.Inject
+import java.time.Clock
+import java.time.Duration
+import java.time.Instant
 import misk.Action
 import misk.MiskTestingServiceModule
 import misk.asAction
@@ -7,17 +11,18 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.DispatchMechanism
-import misk.web.ServletHttpCall
 import misk.web.Get
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.RealNetworkChain
-import misk.web.RequestDeadlineTimeout
-import misk.web.WebConfig
 import misk.web.RequestDeadlineMode
+import misk.web.RequestDeadlineTimeout
 import misk.web.RequestDeadlinesConfig
+import misk.web.ServletHttpCall
+import misk.web.WebConfig
 import misk.web.actions.WebAction
 import misk.web.actions.WebSocketListener
+import misk.web.http.HttpVersion
 import misk.web.interceptors.RequestDeadlineInterceptor.Companion.MISK_REQUEST_DEADLINE_HEADER
 import misk.web.requestdeadlines.RequestDeadlineMetrics
 import okhttp3.Headers
@@ -26,16 +31,10 @@ import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.Clock
-import java.time.Duration
-import java.time.Instant
-import jakarta.inject.Inject
-import misk.web.http.HttpVersion
 
 @MiskTest(startService = false)
 class RequestDeadlineInterceptorTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var requestDeadlineInterceptorFactory: RequestDeadlineInterceptor.Factory
   @Inject private lateinit var clock: Clock
@@ -71,9 +70,7 @@ class RequestDeadlineInterceptorTest {
   fun `timeout from X-Request-Deadline header in seconds`() {
     val action = NoTimeoutAction::call.asAction(DispatchMechanism.GET)
     val interceptor = requestDeadlineInterceptorFactory.create(action)
-    val httpCall = createTestServletHttpCall(
-      requestHeaders = headersOf("x-request-deadline", "15")
-    )
+    val httpCall = createTestServletHttpCall(requestHeaders = headersOf("x-request-deadline", "15"))
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -86,9 +83,7 @@ class RequestDeadlineInterceptorTest {
   fun `timeout from x-envoy-expected-rq-timeout-ms header`() {
     val action = NoTimeoutAction::call.asAction(DispatchMechanism.GET)
     val interceptor = requestDeadlineInterceptorFactory.create(action)
-    val httpCall = createTestServletHttpCall(
-      requestHeaders = headersOf("x-envoy-expected-rq-timeout-ms", "3000")
-    )
+    val httpCall = createTestServletHttpCall(requestHeaders = headersOf("x-envoy-expected-rq-timeout-ms", "3000"))
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -101,12 +96,16 @@ class RequestDeadlineInterceptorTest {
   fun `headers take precedence over annotation - min timeout wins`() {
     val action = AnnotationTimeoutAction::call.asAction(DispatchMechanism.GET) // 5000ms
     val interceptor = requestDeadlineInterceptorFactory.create(action)
-    val httpCall = createTestServletHttpCall(
-      requestHeaders = headersOf(
-        "x-request-deadline", "8", // 8000ms
-        "x-envoy-expected-rq-timeout-ms", "4000" // 4000ms - lowest
+    val httpCall =
+      createTestServletHttpCall(
+        requestHeaders =
+          headersOf(
+            "x-request-deadline",
+            "8", // 8000ms
+            "x-envoy-expected-rq-timeout-ms",
+            "4000", // 4000ms - lowest
+          )
       )
-    )
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -119,12 +118,16 @@ class RequestDeadlineInterceptorTest {
   fun `annotation timeout is used when no valid headers present`() {
     val action = AnnotationTimeoutAction::call.asAction(DispatchMechanism.GET)
     val interceptor = requestDeadlineInterceptorFactory.create(action)
-    val httpCall = createTestServletHttpCall(
-      requestHeaders = headersOf(
-        "X-Request-Deadline", "invalid", // Invalid value
-        "x-envoy-expected-rq-timeout-ms", "not-a-number" // Invalid value
+    val httpCall =
+      createTestServletHttpCall(
+        requestHeaders =
+          headersOf(
+            "X-Request-Deadline",
+            "invalid", // Invalid value
+            "x-envoy-expected-rq-timeout-ms",
+            "not-a-number", // Invalid value
+          )
       )
-    )
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -137,12 +140,16 @@ class RequestDeadlineInterceptorTest {
   fun `mixed valid and invalid header values - only valid value wins`() {
     val action = NoTimeoutAction::call.asAction(DispatchMechanism.GET)
     val interceptor = requestDeadlineInterceptorFactory.create(action)
-    val httpCall = createTestServletHttpCall(
-      requestHeaders = headersOf(
-        "X-Request-Deadline", "invalid", // Invalid
-        "x-envoy-expected-rq-timeout-ms", "9000" // Valid
+    val httpCall =
+      createTestServletHttpCall(
+        requestHeaders =
+          headersOf(
+            "X-Request-Deadline",
+            "invalid", // Invalid
+            "x-envoy-expected-rq-timeout-ms",
+            "9000", // Valid
+          )
       )
-    )
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -155,12 +162,16 @@ class RequestDeadlineInterceptorTest {
   fun `multiple valid timeout values - minimum timeout wins`() {
     val action = NoTimeoutAction::call.asAction(DispatchMechanism.GET)
     val interceptor = requestDeadlineInterceptorFactory.create(action)
-    val httpCall = createTestServletHttpCall(
-      requestHeaders = headersOf(
-        "X-Request-Deadline", "12", // 12000ms
-        "x-envoy-expected-rq-timeout-ms", "7000" // 7000ms - minimum
+    val httpCall =
+      createTestServletHttpCall(
+        requestHeaders =
+          headersOf(
+            "X-Request-Deadline",
+            "12", // 12000ms
+            "x-envoy-expected-rq-timeout-ms",
+            "7000", // 7000ms - minimum
+          )
       )
-    )
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -173,12 +184,10 @@ class RequestDeadlineInterceptorTest {
   fun `zero timeout values are ignored`() {
     val action = AnnotationTimeoutAction::call.asAction(DispatchMechanism.GET)
     val interceptor = requestDeadlineInterceptorFactory.create(action)
-    val httpCall = createTestServletHttpCall(
-      requestHeaders = headersOf(
-        "X-Request-Deadline", "0",
-        "x-envoy-expected-rq-timeout-ms", "0"
+    val httpCall =
+      createTestServletHttpCall(
+        requestHeaders = headersOf("X-Request-Deadline", "0", "x-envoy-expected-rq-timeout-ms", "0")
       )
-    )
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -191,11 +200,7 @@ class RequestDeadlineInterceptorTest {
   fun `negative timeout values are ignored`() {
     val action = AnnotationTimeoutAction::call.asAction(DispatchMechanism.GET)
     val interceptor = requestDeadlineInterceptorFactory.create(action)
-    val httpCall = createTestServletHttpCall(
-      requestHeaders = headersOf(
-        "X-Request-Deadline", "-5"
-      )
-    )
+    val httpCall = createTestServletHttpCall(requestHeaders = headersOf("X-Request-Deadline", "-5"))
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -208,9 +213,10 @@ class RequestDeadlineInterceptorTest {
   fun `X-Request-Deadline header supports ISO8601 duration format`() {
     val action = NoTimeoutAction::call.asAction(DispatchMechanism.GET)
     val interceptor = requestDeadlineInterceptorFactory.create(action)
-    val httpCall = createTestServletHttpCall(
-      requestHeaders = headersOf("X-Request-Deadline", "PT30S") // 30 seconds in ISO8601
-    )
+    val httpCall =
+      createTestServletHttpCall(
+        requestHeaders = headersOf("X-Request-Deadline", "PT30S") // 30 seconds in ISO8601
+      )
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -223,9 +229,10 @@ class RequestDeadlineInterceptorTest {
   fun `X-Request-Deadline header supports various ISO8601 duration formats`() {
     val action = NoTimeoutAction::call.asAction(DispatchMechanism.GET)
     val interceptor = requestDeadlineInterceptorFactory.create(action)
-    val httpCall = createTestServletHttpCall(
-      requestHeaders = headersOf("X-Request-Deadline", "PT1M30S") // 1 minute 30 seconds = 90 seconds
-    )
+    val httpCall =
+      createTestServletHttpCall(
+        requestHeaders = headersOf("X-Request-Deadline", "PT1M30S") // 1 minute 30 seconds = 90 seconds
+      )
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -238,9 +245,10 @@ class RequestDeadlineInterceptorTest {
   fun `X-Request-Deadline header falls back to seconds format when ISO8601 fails`() {
     val action = NoTimeoutAction::call.asAction(DispatchMechanism.GET)
     val interceptor = requestDeadlineInterceptorFactory.create(action)
-    val httpCall = createTestServletHttpCall(
-      requestHeaders = headersOf("X-Request-Deadline", "25") // Plain seconds format
-    )
+    val httpCall =
+      createTestServletHttpCall(
+        requestHeaders = headersOf("X-Request-Deadline", "25") // Plain seconds format
+      )
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -253,9 +261,7 @@ class RequestDeadlineInterceptorTest {
   fun `X-Request-Deadline header ignores invalid format and falls back to default`() {
     val action = NoTimeoutAction::call.asAction(DispatchMechanism.GET)
     val interceptor = requestDeadlineInterceptorFactory.create(action)
-    val httpCall = createTestServletHttpCall(
-      requestHeaders = headersOf("X-Request-Deadline", "invalid-format")
-    )
+    val httpCall = createTestServletHttpCall(requestHeaders = headersOf("X-Request-Deadline", "invalid-format"))
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -268,10 +274,11 @@ class RequestDeadlineInterceptorTest {
   fun `gRPC dispatch uses grpc-timeout header`() {
     val action = NoTimeoutAction::call.asAction(DispatchMechanism.GRPC)
     val interceptor = requestDeadlineInterceptorFactory.create(action)
-    val httpCall = createTestServletHttpCall(
-      requestHeaders = headersOf("grpc-timeout", "3000m"), // 3 seconds in milliseconds
-      dispatchMechanism = DispatchMechanism.GRPC
-    )
+    val httpCall =
+      createTestServletHttpCall(
+        requestHeaders = headersOf("grpc-timeout", "3000m"), // 3 seconds in milliseconds
+        dispatchMechanism = DispatchMechanism.GRPC,
+      )
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -284,13 +291,17 @@ class RequestDeadlineInterceptorTest {
   fun `gRPC dispatch ignores HTTP timeout headers and uses grpc-timeout`() {
     val action = NoTimeoutAction::call.asAction(DispatchMechanism.GRPC)
     val interceptor = requestDeadlineInterceptorFactory.create(action)
-    val httpCall = createTestServletHttpCall(
-      requestHeaders = headersOf(
-        "X-Request-Deadline", "10", // This should be ignored for gRPC
-        "grpc-timeout", "2000m" // 2 seconds - this should be used
-      ),
-      dispatchMechanism = DispatchMechanism.GRPC
-    )
+    val httpCall =
+      createTestServletHttpCall(
+        requestHeaders =
+          headersOf(
+            "X-Request-Deadline",
+            "10", // This should be ignored for gRPC
+            "grpc-timeout",
+            "2000m", // 2 seconds - this should be used
+          ),
+        dispatchMechanism = DispatchMechanism.GRPC,
+      )
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -303,9 +314,7 @@ class RequestDeadlineInterceptorTest {
   fun `gRPC dispatch falls back to default when no grpc-timeout header`() {
     val action = NoTimeoutAction::call.asAction(DispatchMechanism.GRPC)
     val interceptor = requestDeadlineInterceptorFactory.create(action)
-    val httpCall = createTestServletHttpCall(
-      dispatchMechanism = DispatchMechanism.GRPC
-    )
+    val httpCall = createTestServletHttpCall(dispatchMechanism = DispatchMechanism.GRPC)
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -318,9 +327,7 @@ class RequestDeadlineInterceptorTest {
   fun `gRPC dispatch uses annotation timeout when no grpc-timeout header`() {
     val action = AnnotationTimeoutAction::call.asAction(DispatchMechanism.GRPC)
     val interceptor = requestDeadlineInterceptorFactory.create(action)
-    val httpCall = createTestServletHttpCall(
-      dispatchMechanism = DispatchMechanism.GRPC
-    )
+    val httpCall = createTestServletHttpCall(dispatchMechanism = DispatchMechanism.GRPC)
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -334,23 +341,23 @@ class RequestDeadlineInterceptorTest {
     val action = NoTimeoutAction::call.asAction(DispatchMechanism.GET)
 
     // Create interceptor with enforcement mode
-    val interceptorFactoryWithEnforceInbound = RequestDeadlineInterceptor.Factory(
-      clock = clock,
-      webConfig = WebConfig(
-        port = 0,
-        request_deadlines = RequestDeadlinesConfig(mode = RequestDeadlineMode.ENFORCE_INBOUND)
-      ),
-      metrics = requestDeadlineMetrics
-    )
+    val interceptorFactoryWithEnforceInbound =
+      RequestDeadlineInterceptor.Factory(
+        clock = clock,
+        webConfig =
+          WebConfig(port = 0, request_deadlines = RequestDeadlinesConfig(mode = RequestDeadlineMode.ENFORCE_INBOUND)),
+        metrics = requestDeadlineMetrics,
+      )
     val interceptor = interceptorFactoryWithEnforceInbound.create(action)
 
     // Create HttpCall with timestamp from 5 seconds ago, timeout of 1 second
     // So deadline = (now - 5000ms) + 1000ms = now - 4000ms (already passed)
     val pastTimestamp = clock.millis() - 5000
-    val httpCall = createTestServletHttpCall(
-      requestHeaders = headersOf("X-Request-Deadline", "1"), // 1 second timeout
-      requestReceivedTimestamp = pastTimestamp
-    )
+    val httpCall =
+      createTestServletHttpCall(
+        requestHeaders = headersOf("X-Request-Deadline", "1"), // 1 second timeout
+        requestReceivedTimestamp = pastTimestamp,
+      )
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -364,23 +371,23 @@ class RequestDeadlineInterceptorTest {
     val action = NoTimeoutAction::call.asAction(DispatchMechanism.GRPC)
 
     // Create interceptor with enforcement mode
-    val interceptorFactoryWithEnforceAll = RequestDeadlineInterceptor.Factory(
-      clock = clock,
-      webConfig = WebConfig(
-        port = 0,
-        request_deadlines = RequestDeadlinesConfig(mode = RequestDeadlineMode.ENFORCE_ALL)
-      ),
-      metrics = requestDeadlineMetrics
-    )
+    val interceptorFactoryWithEnforceAll =
+      RequestDeadlineInterceptor.Factory(
+        clock = clock,
+        webConfig =
+          WebConfig(port = 0, request_deadlines = RequestDeadlinesConfig(mode = RequestDeadlineMode.ENFORCE_ALL)),
+        metrics = requestDeadlineMetrics,
+      )
     val interceptor = interceptorFactoryWithEnforceAll.create(action)
 
     // Create HttpCall with timestamp from 3 seconds ago, gRPC timeout of 500ms
     val pastTimestamp = clock.millis() - 3000
-    val (httpCall, fakeUpstreamResponse) = createTestServletHttpCallWithTrailers(
-      requestHeaders = headersOf("grpc-timeout", "500m"), // 500ms timeout
-      requestReceivedTimestamp = pastTimestamp,
-      dispatchMechanism = DispatchMechanism.GRPC
-    )
+    val (httpCall, fakeUpstreamResponse) =
+      createTestServletHttpCallWithTrailers(
+        requestHeaders = headersOf("grpc-timeout", "500m"), // 500ms timeout
+        requestReceivedTimestamp = pastTimestamp,
+        dispatchMechanism = DispatchMechanism.GRPC,
+      )
     val chain = createChain(action, httpCall, listOf(interceptor, TerminalInterceptor()))
 
     chain.proceed(chain.httpCall)
@@ -394,7 +401,7 @@ class RequestDeadlineInterceptorTest {
     url: HttpUrl = "http://test.com".toHttpUrl(),
     requestHeaders: Headers = headersOf(),
     requestReceivedTimestamp: Long = clock.millis(),
-    dispatchMechanism: DispatchMechanism = DispatchMechanism.GET
+    dispatchMechanism: DispatchMechanism = DispatchMechanism.GET,
   ): ServletHttpCall {
     return ServletHttpCall(
       url = url,
@@ -406,7 +413,7 @@ class RequestDeadlineInterceptorTest {
       responseBody = null,
       webSocket = null,
       cookies = listOf(),
-      requestReceivedTimestamp = requestReceivedTimestamp
+      requestReceivedTimestamp = requestReceivedTimestamp,
     )
   }
 
@@ -414,37 +421,34 @@ class RequestDeadlineInterceptorTest {
     url: HttpUrl = "http://test.com".toHttpUrl(),
     requestHeaders: Headers = headersOf(),
     requestReceivedTimestamp: Long = clock.millis(),
-    dispatchMechanism: DispatchMechanism = DispatchMechanism.GET
+    dispatchMechanism: DispatchMechanism = DispatchMechanism.GET,
   ): Pair<ServletHttpCall, FakeUpstreamResponse> {
     val fakeUpstreamResponse = FakeUpstreamResponse()
-    val httpCall = ServletHttpCall(
-      url = url,
-      linkLayerLocalAddress = null,
-      dispatchMechanism = dispatchMechanism,
-      requestHeaders = requestHeaders,
-      requestBody = null,
-      upstreamResponse = fakeUpstreamResponse,
-      responseBody = null,
-      webSocket = null,
-      cookies = listOf(),
-      requestReceivedTimestamp = requestReceivedTimestamp
-    )
+    val httpCall =
+      ServletHttpCall(
+        url = url,
+        linkLayerLocalAddress = null,
+        dispatchMechanism = dispatchMechanism,
+        requestHeaders = requestHeaders,
+        requestBody = null,
+        upstreamResponse = fakeUpstreamResponse,
+        responseBody = null,
+        webSocket = null,
+        cookies = listOf(),
+        requestReceivedTimestamp = requestReceivedTimestamp,
+      )
     return httpCall to fakeUpstreamResponse
   }
 
   private fun createChain(
     action: Action,
     httpCall: ServletHttpCall,
-    interceptors: List<NetworkInterceptor>
+    interceptors: List<NetworkInterceptor>,
   ): NetworkChain {
     return RealNetworkChain(action, TestAction(), httpCall, interceptors)
   }
 
-  private fun assertDeadlineHeaderTimeout(
-    httpCall: ServletHttpCall,
-    expectedTimeoutMs: Long,
-    tolerance: Long = 10
-  ) {
+  private fun assertDeadlineHeaderTimeout(httpCall: ServletHttpCall, expectedTimeoutMs: Long, tolerance: Long = 10) {
     val deadlineHeader = httpCall.requestHeaders[MISK_REQUEST_DEADLINE_HEADER]
     assertThat(deadlineHeader).isNotNull()
     val deadline = Instant.parse(deadlineHeader!!)
@@ -455,14 +459,11 @@ class RequestDeadlineInterceptorTest {
   }
 
   internal class NoTimeoutAction @Inject constructor() : WebAction {
-    @Get("/no-timeout")
-    fun call(): String = "success"
+    @Get("/no-timeout") fun call(): String = "success"
   }
 
   internal class AnnotationTimeoutAction @Inject constructor() : WebAction {
-    @Get("/annotation-timeout")
-    @RequestDeadlineTimeout(timeoutMs = 5000)
-    fun call(): String = "success"
+    @Get("/annotation-timeout") @RequestDeadlineTimeout(timeoutMs = 5000) fun call(): String = "success"
   }
 
   internal class TestAction @Inject constructor() : WebAction
@@ -477,7 +478,7 @@ class RequestDeadlineInterceptorTest {
   internal class FakeUpstreamResponse(
     override var statusCode: Int = 200,
     override val headers: Headers = headersOf(),
-    override val httpVersion: HttpVersion = HttpVersion.HTTP_1_1
+    override val httpVersion: HttpVersion = HttpVersion.HTTP_1_1,
   ) : ServletHttpCall.UpstreamResponse {
     private val headersBuilder = Headers.Builder()
     private val trailersMap = mutableMapOf<String, String>()
@@ -508,11 +509,7 @@ class RequestDeadlineInterceptorTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
-      bind<WebConfig>().toInstance(
-        WebConfig(
-          port = 0,
-        )
-      )
+      bind<WebConfig>().toInstance(WebConfig(port = 0))
       bind<RequestDeadlineInterceptor.Factory>()
     }
   }

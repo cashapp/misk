@@ -1,15 +1,16 @@
 package misk.jooq
 
+import java.sql.Connection
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.ConcurrentMap
 import misk.jdbc.PostCommitHookFailedException
 import misk.jdbc.Session
 import org.jooq.DSLContext
-import java.lang.UnsupportedOperationException
-import java.sql.Connection
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentMap
 
-class JooqSession(val ctx: DSLContext) : Session {
+class JooqSession internal constructor(val ctx: DSLContext) : Session {
   private val hooks: ConcurrentMap<HookType, List<() -> Unit>> = ConcurrentHashMap()
+  private val rollbackHooks: ConcurrentLinkedQueue<(error: Throwable) -> Unit> = ConcurrentLinkedQueue()
 
   override fun <T> useConnection(work: (Connection) -> T): T {
     return ctx.connectionResult(work)
@@ -27,10 +28,12 @@ class JooqSession(val ctx: DSLContext) : Session {
     hooks.add(HookType.SESSION_CLOSE, work)
   }
 
+  override fun onRollback(work: (error: Throwable) -> Unit) {
+    rollbackHooks.add(work)
+  }
+
   fun executePreCommitHooks() {
-    hooks[HookType.PRE]?.forEach {
-      it()
-    }
+    hooks[HookType.PRE]?.forEach { it() }
   }
 
   fun executePostCommitHooks() {
@@ -47,24 +50,29 @@ class JooqSession(val ctx: DSLContext) : Session {
     hooks[HookType.SESSION_CLOSE]?.forEach { it() }
   }
 
+  fun executeRollbackHooks(error: Throwable) {
+    rollbackHooks.forEach { it(error) }
+  }
+
   fun ConcurrentMap<HookType, List<() -> Unit>>.add(hookType: HookType, work: () -> Unit) {
     merge(hookType, listOf(work)) { oldList, newList ->
-      mutableListOf<() -> Unit>().apply {
-        addAll(oldList)
-        addAll(newList)
-      }.toList()
+      mutableListOf<() -> Unit>()
+        .apply {
+          addAll(oldList)
+          addAll(newList)
+        }
+        .toList()
     }
   }
 
   enum class HookType {
     PRE,
     POST,
-    SESSION_CLOSE
+    SESSION_CLOSE,
   }
 
   /**
-   * Allows for destructuring the JooqSession and writing simpler code like this
-   * transacter.transaction { (ctx) -> ... }
+   * Allows for destructuring the JooqSession and writing simpler code like this transacter.transaction { (ctx) -> ... }
    */
   operator fun component1(): DSLContext = ctx
 }

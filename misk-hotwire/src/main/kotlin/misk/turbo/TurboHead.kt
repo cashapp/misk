@@ -4,9 +4,7 @@ import kotlinx.html.TagConsumer
 import kotlinx.html.meta
 import kotlinx.html.script
 
-/**
- * HTML tags to add to Head to configure Hotwire (Turbo, Stimulus) dependencies and default controllers
- */
+/** HTML tags to add to Head to configure Hotwire (Turbo, Stimulus) dependencies and default controllers */
 fun TagConsumer<*>.addHotwireHeadImports(appRoot: String) {
   // Install Dependencies
   script {
@@ -16,11 +14,7 @@ fun TagConsumer<*>.addHotwireHeadImports(appRoot: String) {
   }
 
   // Install all Stimulus Controllers
-  val controllers = listOf(
-    "hello_controller",
-    "toggle_click_outside_controller",
-    "toggle_controller",
-  )
+  val controllers = listOf("hello_controller", "toggle_click_outside_controller", "toggle_controller")
   controllers.forEach {
     script {
       type = "module"
@@ -36,11 +30,12 @@ fun TagConsumer<*>.addHotwireHeadImports(appRoot: String) {
   script {
     type = "text/javascript"
     """
-        |if (window["EventSource"] && window["Turbo"]) {
-        |   Turbo.connectStreamSource(new EventSource("/load"));
-        |} else {
-        |    console.warn("Turbo Streams over SSE not available");
-        |}
-      """.trimMargin()
+    |if (window["EventSource"] && window["Turbo"]) {
+    |   Turbo.connectStreamSource(new EventSource("/load"));
+    |} else {
+    |    console.warn("Turbo Streams over SSE not available");
+    |}
+    """
+      .trimMargin()
   }
 }

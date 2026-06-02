@@ -1,6 +1,11 @@
 package misk.web.marshal
 
 import jakarta.inject.Inject
+import java.util.Random
+import kotlin.math.absoluteValue
+import kotlin.reflect.KType
+import kotlin.reflect.full.isSubtypeOf
+import kotlin.reflect.full.starProjectedType
 import misk.Action
 import misk.ApplicationInterceptor
 import misk.Chain
@@ -21,16 +26,10 @@ import misk.web.toResponseBody
 import okhttp3.MediaType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.util.Random
-import kotlin.math.absoluteValue
-import kotlin.reflect.KType
-import kotlin.reflect.full.isSubtypeOf
-import kotlin.reflect.full.starProjectedType
 
 @MiskTest(startService = true)
 class ResponseBodyWithHeadersTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject lateinit var webTestClient: WebTestClient
 
@@ -52,16 +51,13 @@ class ResponseBodyWithHeadersTest {
 
   class CustomObject(val foo: String)
 
-  class CustomObjectMarshaller @Inject constructor(
-    private val mediaType: MediaType,
-  ) : Marshaller<Any> {
+  class CustomObjectMarshaller @Inject constructor(private val mediaType: MediaType) : Marshaller<Any> {
     override fun contentType() = mediaType
+
     override fun responseBody(o: Any) = error("not implemented")
+
     override fun responseBody(o: Any, httpCall: HttpCall): ResponseBody {
-      httpCall.setResponseHeader(
-        "tobemodified",
-        httpCall.responseHeaders["tobemodified"] + "-done"
-      )
+      httpCall.setResponseHeader("tobemodified", httpCall.responseHeaders["tobemodified"] + "-done")
       with(o as CustomObject) {
         httpCall.setResponseHeader("foo", foo)
         return "Foo: $foo".toResponseBody()
@@ -70,8 +66,7 @@ class ResponseBodyWithHeadersTest {
 
     class Factory @Inject constructor() : Marshaller.Factory {
       override fun create(mediaType: MediaType, type: KType): Marshaller<Any>? =
-        if (type.isSubtypeOf(CustomObject::class.starProjectedType))
-          CustomObjectMarshaller(mediaType) else null
+        if (type.isSubtypeOf(CustomObject::class.starProjectedType)) CustomObjectMarshaller(mediaType) else null
     }
   }
 
@@ -87,9 +82,7 @@ class ResponseBodyWithHeadersTest {
   }
 
   class TestRoutes @Inject constructor() : WebAction {
-    @Get("/custom-object")
-    @ResponseContentType(MediaTypes.TEXT_HTML)
-    fun call() = CustomObject(random())
+    @Get("/custom-object") @ResponseContentType(MediaTypes.TEXT_HTML) fun call() = CustomObject(random())
   }
 
   class TestModule : KAbstractModule() {

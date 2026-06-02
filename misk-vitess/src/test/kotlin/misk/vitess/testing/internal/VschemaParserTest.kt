@@ -1,9 +1,9 @@
 package misk.vitess.testing.internal
 
-import misk.vitess.testing.VitessTestDbSchemaParseException
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
+import misk.vitess.testing.VitessTestDbSchemaParseException
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -163,6 +163,26 @@ class VitessSchemaParserTest {
   }
 
   @Test
+  fun `test schemabot yaml in schema directory is skipped`() {
+    val schemaDirPath = Files.createTempDirectory("schema_dir")
+    val keyspaceDir = File(schemaDirPath.toFile(), "keyspace1")
+    keyspaceDir.mkdir()
+    val sqlFile = File(keyspaceDir, "v0001__add_table.sql")
+    sqlFile.writeText("CREATE TABLE `test_table` (id int primary key);")
+    val vschemaFile = File(keyspaceDir, "vschema.json")
+    vschemaFile.writeText("{\"tables\": {\"test_table\": {}}}")
+
+    // Add schemabot.yaml alongside keyspace directories
+    val schemabotYaml = File(schemaDirPath.toFile(), "schemabot.yaml")
+    schemabotYaml.writeText("database: testdb\ntype: vitess\n")
+
+    val parser = VitessSchemaParser(false, schemaName, schemaDirPath)
+    val keyspaces = parser.validateAndParse()
+    assertTrue(keyspaces.isNotEmpty())
+    assertEquals("keyspace1", keyspaces[0].name)
+  }
+
+  @Test
   fun `test multiple keyspace directories with one invalid directory`() {
     val schemaDirPath = Files.createTempDirectory("schema_dir")
 
@@ -269,10 +289,10 @@ class VitessSchemaParserTest {
     val sqlFile = File(keyspaceDir, "v0001__add_tables.sql")
     sqlFile.writeText(
       """
-        CREATE TABLE `test_table1` (id int primary key);
-        CREATE TABLE `test_table2` (id int primary key);
-        DROP TABLE `test_table1`;
-        """
+      CREATE TABLE `test_table1` (id int primary key);
+      CREATE TABLE `test_table2` (id int primary key);
+      DROP TABLE `test_table1`;
+      """
         .trimIndent()
     )
     val vschemaFile = File(keyspaceDir, "vschema.json")
@@ -296,7 +316,7 @@ class VitessSchemaParserTest {
       CREATE TABLE `test_table` (id int primary key);
       CREATE TABLE `test_table2` (id int primary key);
       DROP TABLE IF EXISTS `test_table`;
-    """
+      """
         .trimIndent()
     )
     val vschemaFile = File(keyspaceDir, "vschema.json")

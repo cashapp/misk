@@ -16,4 +16,3 @@ object VitessExceptionDetector {
     return false
   }
 }
-

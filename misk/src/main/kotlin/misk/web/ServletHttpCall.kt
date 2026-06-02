@@ -1,5 +1,7 @@
 package misk.web
 
+import javax.servlet.http.Cookie
+import javax.servlet.http.HttpServletRequest
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import misk.web.http.HttpVersion
@@ -10,15 +12,12 @@ import okhttp3.HttpUrl
 import okio.BufferedSink
 import okio.BufferedSource
 import org.eclipse.jetty.ee8.nested.Request
-import javax.servlet.http.Cookie
-import javax.servlet.http.HttpServletRequest
 
 internal data class ServletHttpCall(
   override val url: HttpUrl,
   /**
-   * The local address that received this inbound request. This is the network interface and port or
-   * unix socket that Misk was listening on when this request arrived. The host will be '0.0.0.0' if
-   * listening on all local interfaces.
+   * The local address that received this inbound request. This is the network interface and port or unix socket that
+   * Misk was listening on when this request arrived. The host will be '0.0.0.0' if listening on all local interfaces.
    */
   override val linkLayerLocalAddress: SocketAddress? = null,
   override val dispatchMechanism: DispatchMechanism,
@@ -111,10 +110,15 @@ internal data class ServletHttpCall(
     var statusCode: Int
     val headers: Headers
     val httpVersion: HttpVersion
+
     fun setHeader(name: String, value: String)
+
     fun addHeaders(headers: Headers)
+
     fun requireTrailers()
+
     fun setTrailer(name: String, value: String)
+
     fun initWebSocketListener(webSocketListener: WebSocketListener)
   }
 
@@ -126,7 +130,7 @@ internal data class ServletHttpCall(
       linkLayerLocalAddress: SocketAddress? = null,
       webSocket: WebSocket? = null,
       requestBody: BufferedSource? = null,
-      responseBody: BufferedSink? = null
+      responseBody: BufferedSink? = null,
     ): ServletHttpCall {
       if (dispatchMechanism == DispatchMechanism.WEBSOCKET) {
         check(webSocket != null)
@@ -134,11 +138,12 @@ internal data class ServletHttpCall(
       // Try to get the actual request timestamp from Jetty's Request object.
       // If the request is not a Jetty Request (e.g., WebSocket upgrade requests),
       // fall back to current system time.
-      val requestReceivedTimestamp = if (request is Request) {
-        request.timeStamp
-      } else {
-        System.currentTimeMillis()
-      }
+      val requestReceivedTimestamp =
+        if (request is Request) {
+          request.timeStamp
+        } else {
+          System.currentTimeMillis()
+        }
 
       return ServletHttpCall(
         url = request.httpUrl(),
@@ -150,7 +155,7 @@ internal data class ServletHttpCall(
         responseBody = responseBody,
         webSocket = webSocket,
         cookies = request.cookies?.toList() ?: listOf(),
-        requestReceivedTimestamp = requestReceivedTimestamp
+        requestReceivedTimestamp = requestReceivedTimestamp,
       )
     }
   }

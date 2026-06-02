@@ -14,6 +14,8 @@ dependencies {
     api(project(":wisp:wisp-resource-loader"))
     api(project(":wisp:wisp-ssl"))
 
+    implementation(libs.guava)
+
     testImplementation(libs.assertj)
     testImplementation(libs.junitApi)
     testImplementation(libs.mockitoCore)

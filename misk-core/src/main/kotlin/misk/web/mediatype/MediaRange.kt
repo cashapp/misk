@@ -1,21 +1,23 @@
 package misk.web.mediatype
 
-import okhttp3.MediaType
 import java.nio.charset.Charset
+import okhttp3.MediaType
 
 /**
  * An RFC-2616 media range.
  *
  * This does not yet support structured syntax suffixes (ie. +json, +xml, etc) from RFC-6838.
  */
-data class MediaRange @JvmOverloads constructor(
+data class MediaRange
+@JvmOverloads
+constructor(
   val type: String,
   val subtype: String,
   val charset: Charset? = null,
   val qualityFactor: Double = 1.0,
   val parameters: Map<String, String> = mapOf(),
   val extensions: Map<String, String> = mapOf(),
-  private val rawText: String
+  private val rawText: String,
 ) : Comparable<MediaRange> {
   override fun compareTo(other: MediaRange): Int {
     val wildcardDiff = wildcardCount - other.wildcardCount
@@ -32,16 +34,16 @@ data class MediaRange @JvmOverloads constructor(
 
   override fun toString() = rawText
 
-  private val wildcardCount = when {
-    type == WILDCARD -> 2
-    subtype == WILDCARD -> 1
-    else -> 0
-  }
+  private val wildcardCount =
+    when {
+      type == WILDCARD -> 2
+      subtype == WILDCARD -> 1
+      else -> 0
+    }
 
   fun matcher(mediaType: MediaType): Matcher? {
     val typeMatches = type == mediaType.type || type == WILDCARD || mediaType.type == WILDCARD
-    val subtypeMatches =
-      subtype == mediaType.subtype || subtype == WILDCARD || mediaType.subtype == WILDCARD
+    val subtypeMatches = subtype == mediaType.subtype || subtype == WILDCARD || mediaType.subtype == WILDCARD
     if (!typeMatches || !subtypeMatches) {
       return null
     }
@@ -60,10 +62,8 @@ data class MediaRange @JvmOverloads constructor(
     return Matcher(this, true)
   }
 
-  class Matcher @JvmOverloads constructor(
-    val mediaRange: MediaRange,
-    val matchesCharset: Boolean = false
-  ) : Comparable<Matcher> {
+  class Matcher @JvmOverloads constructor(val mediaRange: MediaRange, val matchesCharset: Boolean = false) :
+    Comparable<Matcher> {
     override fun compareTo(other: Matcher): Int {
       val mediaRangeComparison = mediaRange.compareTo(other.mediaRange)
       if (mediaRangeComparison != 0) return mediaRangeComparison
@@ -109,9 +109,7 @@ data class MediaRange @JvmOverloads constructor(
         return MediaRange(type, subtype, rawText = s)
       }
 
-      val parametersAndExtensions = typeParametersAndExtensions.drop(1).map {
-        parseNameValue(it)
-      }
+      val parametersAndExtensions = typeParametersAndExtensions.drop(1).map { parseNameValue(it) }
       val parameters = LinkedHashMap<String, String>()
       val extensions = LinkedHashMap<String, String>()
       var charset: Charset? = null
@@ -121,17 +119,13 @@ data class MediaRange @JvmOverloads constructor(
       for (p in parametersAndExtensions) {
         when {
           p.first == "q" -> {
-            require(inParameters) {
-              "$s is not a valid media range; quality factor specified multiple times"
-            }
+            require(inParameters) { "$s is not a valid media range; quality factor specified multiple times" }
 
             qualityFactor = p.second.toDouble()
             inParameters = false
           }
           p.first == "charset" -> {
-            require(inParameters) {
-              "$s is not a valid media range; encountered charset parameter in extensions"
-            }
+            require(inParameters) { "$s is not a valid media range; encountered charset parameter in extensions" }
 
             charset = Charset.forName(p.second.uppercase())
           }
@@ -140,15 +134,7 @@ data class MediaRange @JvmOverloads constructor(
         }
       }
 
-      return MediaRange(
-        type,
-        subtype,
-        charset,
-        qualityFactor,
-        parameters.toMap(),
-        extensions.toMap(),
-        s
-      )
+      return MediaRange(type, subtype, charset, qualityFactor, parameters.toMap(), extensions.toMap(), s)
     }
 
     private fun parseNameValue(s: String): Pair<String, String> {

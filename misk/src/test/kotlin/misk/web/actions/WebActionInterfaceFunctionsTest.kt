@@ -32,8 +32,7 @@ import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
 class WebActionInterfaceFunctionsTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var jetty: JettyService
 
@@ -47,33 +46,24 @@ class WebActionInterfaceFunctionsTest {
 
   @Test
   fun happyPath() {
-    val call = client.newCall(
-      Request.Builder()
-        .url(jetty.httpServerUrl.resolve("/hello")!!)
-        .build()
-    )
-    call.execute().use { response ->
-      assertThat(response.body.string()).isEqualTo("hello")
-    }
+    val call = client.newCall(Request.Builder().url(jetty.httpServerUrl.resolve("/hello")!!).build())
+    call.execute().use { response -> assertThat(response.body.string()).isEqualTo("hello") }
   }
 
   @Test
   fun actionAnnotationsOnInterfaceFunction() {
-    val call = client.newCall(
-      Request.Builder()
-        .url(jetty.httpServerUrl.resolve("/greet")!!)
-        .post("""{"robot_id": 5, "robot_token":"r2d2"}""".toRequestBody(MediaTypes.APPLICATION_JSON.toMediaType()))
-        .build()
-    )
-    call.execute().use { response ->
-      assertThat(response.body.string()).isEqualTo("greetings Robot 5:r2d2")
-    }
+    val call =
+      client.newCall(
+        Request.Builder()
+          .url(jetty.httpServerUrl.resolve("/greet")!!)
+          .post("""{"robot_id": 5, "robot_token":"r2d2"}""".toRequestBody(MediaTypes.APPLICATION_JSON.toMediaType()))
+          .build()
+      )
+    call.execute().use { response -> assertThat(response.body.string()).isEqualTo("greetings Robot 5:r2d2") }
   }
 
   class HelloAction @Inject constructor() : WebAction {
-    @Get("/hello")
-    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun sayHello() = "hello"
+    @Get("/hello") @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8) fun sayHello() = "hello"
   }
 
   interface GreetingAction : WebAction {
@@ -89,11 +79,7 @@ class WebActionInterfaceFunctionsTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(
-        WebServerTestingModule(
-          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG
-        )
-      )
+      install(WebServerTestingModule(webConfig = WebServerTestingModule.TESTING_WEB_CONFIG))
       install(MiskTestingServiceModule())
       install(WebActionModule.create<HelloAction>())
       install(WebActionModule.create<RealGreetingAction>())
@@ -111,13 +97,7 @@ class WebActionInterfaceFunctionsTest {
     @Provides
     @Singleton
     fun provideHttpClientsConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
-        endpoints = mapOf(
-          "default" to HttpClientEndpointConfig(
-            url = "http://example.com/",
-          )
-        )
-      )
+      return HttpClientsConfig(endpoints = mapOf("default" to HttpClientEndpointConfig(url = "http://example.com/")))
     }
   }
 }

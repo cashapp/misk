@@ -4,9 +4,9 @@ import okio.Buffer
 import okio.BufferedSource
 
 /**
- * A fake [ResourceLoader.Backend] loads resources from an in-memory map. This does not have the
- * same well-formed filepath guarantees that [FakeFilesystemLoaderBackend] provides, which assumes
- * resource paths are file-like and will throw exceptions for malformed resource paths
+ * A fake [ResourceLoader.Backend] loads resources from an in-memory map. This does not have the same well-formed
+ * filepath guarantees that [FakeFilesystemLoaderBackend] provides, which assumes resource paths are file-like and will
+ * throw exceptions for malformed resource paths
  */
 class FakeResourceLoaderBackend(private val fakeResources: Map<String, String>) : ResourceLoader.Backend() {
   override fun checkPath(path: String) {

@@ -43,13 +43,7 @@ internal class CustomExceptionMapperTest {
 
   fun get(path: String): okhttp3.Response {
     val httpClient = OkHttpClient()
-    val request = Request.Builder()
-      .get()
-      .url(jettyService.httpServerUrl.newBuilder()
-        .encodedPath(path)
-        .build()
-      )
-      .build()
+    val request = Request.Builder().get().url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build()).build()
     return httpClient.newCall(request).execute()
   }
 
@@ -69,20 +63,14 @@ internal class CustomExceptionMapperTest {
     }
   }
 
-  class CustomUnauthorizedMapper @Inject constructor(
-  ) : ExceptionMapper<UnauthorizedException> {
-    override fun toResponse(th: UnauthorizedException) = Response(
-      statusCode = 403,
-      body = "custom unauthorized response!".toResponseBody(),
-    )
+  class CustomUnauthorizedMapper @Inject constructor() : ExceptionMapper<UnauthorizedException> {
+    override fun toResponse(th: UnauthorizedException) =
+      Response(statusCode = 403, body = "custom unauthorized response!".toResponseBody())
   }
 
-  class CustomUnauthenticatedMapper @Inject constructor(
-  ) : ExceptionMapper<UnauthenticatedException> {
-    override fun toResponse(th: UnauthenticatedException) = Response(
-      statusCode = 401,
-      body = "custom unauthenticated response!".toResponseBody(),
-    )
+  class CustomUnauthenticatedMapper @Inject constructor() : ExceptionMapper<UnauthenticatedException> {
+    override fun toResponse(th: UnauthenticatedException) =
+      Response(statusCode = 401, body = "custom unauthenticated response!".toResponseBody())
   }
 
   class TestModule : KAbstractModule() {

@@ -11,6 +11,8 @@ dependencies {
   api(libs.dockerApi)
   api(libs.guava)
   api(project(":misk-jdbc"))
+  implementation(project(":misk-logging"))
+  implementation(libs.loggingApi)
   implementation(libs.okio)
 
   testFixturesApi(libs.docker)
@@ -20,6 +22,7 @@ dependencies {
   testFixturesApi(project(":misk-docker"))
   testFixturesApi(project(":misk-testing"))
 
+  testFixturesImplementation(project(":misk-spirit"))
   testFixturesImplementation(libs.mysql)
   testFixturesImplementation(libs.moshiKotlin)
   testFixturesImplementation(libs.dockerApi)

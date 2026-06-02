@@ -1,51 +1,43 @@
-// Endpoint polling and auto-refresh script. This is only used with live reload enabled.
-// When the liveness endpoint is not reachable, it will wait for the server to come back online and refresh the page.
+// Endpoint long polling and auto-refresh script. This is only used with live reload enabled.
+// When the check-reload endpoint returns an updated reload marker, it will refresh the page.
+// If the server is down, it will keep retrying until the server comes back up.
 (function() {
     // Configuration
-    const POLL_ENDPOINT = '/_liveness'; // Change this to your backend endpoint
-    const POLL_INTERVAL = 100;
+    const POLL_ENDPOINT = '/_dev/check-reload';
 
     let isServerDown = false;
-    let pollInterval;
+    let reloadMarker = null;
 
     // Function to check if the server is alive
     async function checkServerStatus() {
         try {
-            const response = await fetch(POLL_ENDPOINT, {
+            let response = await fetch(POLL_ENDPOINT, {
                 method: 'GET',
-                cache: 'no-cache',
-                // Short timeout to quickly detect connection issues
-                signal: AbortSignal.timeout(5000)
+                headers : {
+                    'If-None-Match': reloadMarker
+                }
             });
 
-            // If we get here, the server responded
-            if (isServerDown) {
-                // Server was down but is now back up
-                console.log('Server is back online! Refreshing page...');
-                clearInterval(pollInterval);
-                setTimeout(() => {
-                    window.location.reload();
-                }, 500); // Small delay before refresh
+            let nextReloadMarker = response.headers.get('Etag');
+            if (reloadMarker == null) {
+                reloadMarker = nextReloadMarker;
+            } else if (reloadMarker !== nextReloadMarker && nextReloadMarker != null) {
+                console.log('Server has restarted. Reloading page... ' + reloadMarker + ' -> ' + nextReloadMarker);
+                window.location.reload();
+            } else if (isServerDown) {
+                console.log('Server connection restored.');
+                isServerDown = false;
             }
-
-            // Reset retry count on successful connection
-            retryCount = 0;
-
+            checkServerStatus();
         } catch (error) {
-            // Check if it's a connection error (server is down)
-            if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                if (!isServerDown) {
-                    console.log('Server connection lost. Waiting for it to come back...');
-                    isServerDown = true;
-                }
+            if (!isServerDown) {
+                console.log('Server connection lost. Waiting for it to come back...');
+                isServerDown = true;
             }
+            setTimeout(checkServerStatus, 1000);
         }
     }
 
-    // Start polling
     console.log('Starting server status monitoring...');
-    pollInterval = setInterval(checkServerStatus, POLL_INTERVAL);
-
-    // Also check immediately
     checkServerStatus();
 })();

@@ -1,27 +1,20 @@
 package misk.hibernate
 
-import org.hibernate.event.spi.EventType
 import com.google.inject.Provider
+import org.hibernate.event.spi.EventType
 
-/**
- * Control how we register listeners.
- */
+/** Control how we register listeners. */
 enum class BindPolicy {
   PREPEND,
   REPLACE,
-  APPEND
+  APPEND,
 }
 
 /**
- * A registration of a listener for one of many Hibernate event types. This class uses providers to
- * get a new listener instance each time it is needed. This is intended to prevent circular
- * dependencies.
+ * A registration of a listener for one of many Hibernate event types. This class uses providers to get a new listener
+ * instance each time it is needed. This is intended to prevent circular dependencies.
  */
-internal class ListenerRegistration(
-  val type: EventType<*>,
-  val provider: Provider<*>,
-  val policy: BindPolicy
-) {
+internal class ListenerRegistration(val type: EventType<*>, val provider: Provider<*>, val policy: BindPolicy) {
   init {
     when (type) {
       EventType.PRE_LOAD -> Unit

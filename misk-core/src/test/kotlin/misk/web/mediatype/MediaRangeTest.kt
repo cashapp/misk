@@ -1,12 +1,12 @@
 package misk.web.mediatype
 
+import java.util.Collections.shuffle
+import kotlin.test.assertFailsWith
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.containsExactly
 import org.assertj.core.data.Offset
 import org.junit.jupiter.api.Test
-import java.util.Collections.shuffle
-import kotlin.test.assertFailsWith
 
 internal class MediaRangeTest {
   @Test
@@ -66,9 +66,7 @@ internal class MediaRangeTest {
 
   @Test
   fun parseWithQualityFactor() {
-    val mediaRange = MediaRange.parse(
-      "text/html;level = 1 ; strict = true;charset=us-ascii; q = 0.45"
-    )
+    val mediaRange = MediaRange.parse("text/html;level = 1 ; strict = true;charset=us-ascii; q = 0.45")
     assertThat(mediaRange.type).isEqualTo("text")
     assertThat(mediaRange.subtype).isEqualTo("html")
     assertThat(mediaRange.charset).isEqualTo(Charsets.US_ASCII)
@@ -79,9 +77,8 @@ internal class MediaRangeTest {
 
   @Test
   fun parseWithExtensions() {
-    val mediaRange = MediaRange.parse(
-      "text/html;level = 1 ; strict = true;charset=us-ascii; q = 0.45; ext1=79; ext2=blerp"
-    )
+    val mediaRange =
+      MediaRange.parse("text/html;level = 1 ; strict = true;charset=us-ascii; q = 0.45; ext1=79; ext2=blerp")
     assertThat(mediaRange.type).isEqualTo("text")
     assertThat(mediaRange.subtype).isEqualTo("html")
     assertThat(mediaRange.charset).isEqualTo(Charsets.US_ASCII)
@@ -92,58 +89,42 @@ internal class MediaRangeTest {
 
   @Test
   fun wildcardTypeWithSpecificSubType() {
-    assertFailsWith<IllegalArgumentException> {
-      MediaRange.parse("*/html")
-    }
+    assertFailsWith<IllegalArgumentException> { MediaRange.parse("*/html") }
   }
 
   @Test
   fun blankType() {
-    assertFailsWith<IllegalArgumentException> {
-      MediaRange.parse("/html")
-    }
+    assertFailsWith<IllegalArgumentException> { MediaRange.parse("/html") }
   }
 
   @Test
   fun blankSubType() {
-    assertFailsWith<IllegalArgumentException> {
-      MediaRange.parse("text/")
-    }
+    assertFailsWith<IllegalArgumentException> { MediaRange.parse("text/") }
   }
 
   @Test
   fun noTypeSubType() {
-    assertFailsWith<IllegalArgumentException> {
-      MediaRange.parse("*")
-    }
+    assertFailsWith<IllegalArgumentException> { MediaRange.parse("*") }
   }
 
   @Test
   fun blankNameToken() {
-    assertFailsWith<IllegalArgumentException> {
-      MediaRange.parse("text/html;=foo")
-    }
+    assertFailsWith<IllegalArgumentException> { MediaRange.parse("text/html;=foo") }
   }
 
   @Test
   fun blankValueToken() {
-    assertFailsWith<IllegalArgumentException> {
-      MediaRange.parse("text/html;bar=")
-    }
+    assertFailsWith<IllegalArgumentException> { MediaRange.parse("text/html;bar=") }
   }
 
   @Test
   fun multipleQualityFactors() {
-    assertFailsWith<IllegalArgumentException> {
-      MediaRange.parse("text/html;q=0.4;q=0.56")
-    }
+    assertFailsWith<IllegalArgumentException> { MediaRange.parse("text/html;q=0.4;q=0.56") }
   }
 
   @Test
   fun charsetInExtensions() {
-    assertFailsWith<IllegalArgumentException> {
-      MediaRange.parse("text/html;q=0.4;charset=utf-8")
-    }
+    assertFailsWith<IllegalArgumentException> { MediaRange.parse("text/html;q=0.4;charset=utf-8") }
   }
 
   @Test
@@ -240,8 +221,7 @@ internal class MediaRangeTest {
     MediaRange.parseRanges("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 
     MediaRange.parseRanges(
-      "application/xml,application/xhtml+xml,text/html;q=0.9, " +
-        "text/plain;q=0.8,image/png,*/*;q=0.5"
+      "application/xml,application/xhtml+xml,text/html;q=0.9, " + "text/plain;q=0.8,image/png,*/*;q=0.5"
     )
     MediaRange.parseRanges("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
     MediaRange.parseRanges(

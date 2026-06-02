@@ -1,6 +1,9 @@
 package misk.web.actions
 
 import com.squareup.protos.test.grpc.HelloReply
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.nio.charset.Charset
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -17,14 +20,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.nio.charset.Charset
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 class ResponseContentTypeTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var jettyService: JettyService
 
@@ -84,22 +83,15 @@ class ResponseContentTypeTest {
   @Singleton
   class HelloAction @Inject constructor() : WebAction {
     @Get("/hello/{name}")
-    @ResponseContentType(
-      MediaTypes.APPLICATION_JSON,
-      MediaTypes.APPLICATION_PROTOBUF,
-    )
+    @ResponseContentType(MediaTypes.APPLICATION_JSON, MediaTypes.APPLICATION_PROTOBUF)
     fun sayHello(@PathParam("name") name: String): HelloReply {
-      return HelloReply.Builder()
-        .message("howdy, $name")
-        .build()
+      return HelloReply.Builder().message("howdy, $name").build()
     }
 
     @Get("/hello-json/{name}")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun sayHelloJson(@PathParam("name") name: String): HelloReply {
-      return HelloReply.Builder()
-        .message("howdy, $name")
-        .build()
+      return HelloReply.Builder().message("howdy, $name").build()
     }
   }
 

@@ -1,14 +1,13 @@
 package misk.web
 
-import okhttp3.HttpUrl
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import okhttp3.HttpUrl
 
 /**
- * A path with placeholders for variables. Paths may be constant like `/app/home/` or dynamic like
- * `/user/{username}`. Variables are delimited by curly braces and may specify an optional regex
- * like this: `{username:[a-z]+}`. If no regex is specified the variable is a sequence of non-'/'
- * characters.
+ * A path with placeholders for variables. Paths may be constant like `/app/home/` or dynamic like `/user/{username}`.
+ * Variables are delimited by curly braces and may specify an optional regex like this: `{username:[a-z]+}`. If no regex
+ * is specified the variable is a sequence of non-'/' characters.
  */
 class PathPattern(
   val pattern: String,
@@ -16,7 +15,7 @@ class PathPattern(
   val variableNames: List<String>,
   val numRegexVariables: Int,
   val numSegments: Int,
-  val matchesWildcardPath: Boolean
+  val matchesWildcardPath: Boolean,
 ) : Comparable<PathPattern> {
 
   /** Returns a Matcher if requestUrl can be matched, else null */
@@ -83,9 +82,7 @@ class PathPattern(
                 regex = regex.substring(0, regex.length - 2) + "[^/]*"
               }
 
-              result.append("(")
-                .append(regex)
-                .append(")")
+              result.append("(").append(regex).append(")")
               numRegexVariables++
 
               lastVariableIsWildcardMatch = regex.endsWith(".*")
@@ -124,7 +121,7 @@ class PathPattern(
         variableNames,
         numRegexVariables,
         numSegments,
-        lastVariableIsWildcardMatch
+        lastVariableIsWildcardMatch,
       )
     }
   }

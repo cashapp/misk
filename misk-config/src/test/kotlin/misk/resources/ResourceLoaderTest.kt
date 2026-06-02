@@ -1,11 +1,11 @@
 package misk.resources
 
 import com.google.inject.util.Modules
+import jakarta.inject.Inject
 import java.io.File
 import java.net.URLClassLoader
-import jakarta.inject.Inject
-import kotlin.test.assertFailsWith
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -22,8 +22,7 @@ import org.junitpioneer.jupiter.SetEnvironmentVariable
 
 @MiskTest
 class ResourceLoaderTest {
-  @MiskTestModule
-  val module = Modules.combine(ResourceLoaderModule(), TemporaryFolderModule())
+  @MiskTestModule val module = Modules.combine(ResourceLoaderModule(), TemporaryFolderModule())
 
   @Inject lateinit var resourceLoader: ResourceLoader
   @Inject lateinit var tempFolder: TemporaryFolder
@@ -62,26 +61,20 @@ class ResourceLoaderTest {
 
   @Test
   fun listContainsResourcesFromJar() {
-    assertThat(resourceLoader.list("classpath:/META-INF/"))
-      .contains("classpath:/META-INF/MANIFEST.MF")
+    assertThat(resourceLoader.list("classpath:/META-INF/")).contains("classpath:/META-INF/MANIFEST.MF")
   }
 
   @Test
   fun walk() {
     val resourcesBaseDir = "classpath:/misk/resources"
-    assertThat(resourceLoader.walk("$resourcesBaseDir/nested/deeper")).isEqualTo(
-      listOf("$resourcesBaseDir/nested/deeper/nested2.txt")
-    )
+    assertThat(resourceLoader.walk("$resourcesBaseDir/nested/deeper"))
+      .isEqualTo(listOf("$resourcesBaseDir/nested/deeper/nested2.txt"))
 
-    assertThat(resourceLoader.walk("$resourcesBaseDir/nested")).containsExactlyInAnyOrder(
-      "$resourcesBaseDir/nested/nested.txt",
-      "$resourcesBaseDir/nested/deeper/nested2.txt"
-    )
+    assertThat(resourceLoader.walk("$resourcesBaseDir/nested"))
+      .containsExactlyInAnyOrder("$resourcesBaseDir/nested/nested.txt", "$resourcesBaseDir/nested/deeper/nested2.txt")
 
-    assertThat(resourceLoader.walk("$resourcesBaseDir/")).contains(
-      "$resourcesBaseDir/nested/nested.txt",
-      "$resourcesBaseDir/nested/deeper/nested2.txt"
-    )
+    assertThat(resourceLoader.walk("$resourcesBaseDir/"))
+      .contains("$resourcesBaseDir/nested/nested.txt", "$resourcesBaseDir/nested/deeper/nested2.txt")
   }
 
   @Test
@@ -108,17 +101,12 @@ class ResourceLoaderTest {
 
     assertThat(resourceLoader.list("memory:/misk/resources")).containsExactly(data1, data2)
     assertThat(resourceLoader.list("memory:/misk/resources/")).containsExactly(data1, data2)
-    assertThat(resourceLoader.list("memory:/misk")).containsExactlyInAnyOrder(
-      "memory:/misk/resources", "memory:/misk/tmp", data3
-    )
-    assertThat(resourceLoader.list("memory:/misk/")).containsExactlyInAnyOrder(
-      "memory:/misk/resources", "memory:/misk/tmp", data3
-    )
+    assertThat(resourceLoader.list("memory:/misk"))
+      .containsExactlyInAnyOrder("memory:/misk/resources", "memory:/misk/tmp", data3)
+    assertThat(resourceLoader.list("memory:/misk/"))
+      .containsExactlyInAnyOrder("memory:/misk/resources", "memory:/misk/tmp", data3)
 
-    assertThat(resourceLoader.walk("memory:/misk")).containsExactlyInAnyOrder(
-      data1, data2, data3,
-      data4
-    )
+    assertThat(resourceLoader.walk("memory:/misk")).containsExactlyInAnyOrder(data1, data2, data3, data4)
   }
 
   @Test
@@ -139,31 +127,23 @@ class ResourceLoaderTest {
   @Test
   fun filesystemResources() {
     val resource1 = "filesystem:$tempRoot/data1.txt"
-    File(tempRoot, "data1.txt").sink().buffer().use {
-      it.writeUtf8("foo")
-    }
+    File(tempRoot, "data1.txt").sink().buffer().use { it.writeUtf8("foo") }
 
     val resource2 = "filesystem:$tempRoot/data2.txt"
-    File(tempRoot, "data2.txt").sink().buffer().use {
-      it.writeUtf8("bar")
-    }
+    File(tempRoot, "data2.txt").sink().buffer().use { it.writeUtf8("bar") }
 
     val resource3 = "filesystem:$tempRoot/data3.txt"
 
     val resource4 = "filesystem:$tempRoot/data4/data4.txt"
     File(tempRoot, "data4/").mkdirs()
-    File(tempRoot, "data4/data4.txt").sink().buffer().use {
-      it.writeUtf8("baz")
-    }
+    File(tempRoot, "data4/data4.txt").sink().buffer().use { it.writeUtf8("baz") }
 
     assertThat(resourceLoader.exists(resource1)).isTrue()
     assertThat(resourceLoader.exists(resource2)).isTrue()
     assertThat(resourceLoader.exists(resource3)).isFalse()
     assertThat(resourceLoader.exists(resource4)).isTrue()
 
-    resourceLoader.open(resource1)!!.use {
-      assertThat(it.readUtf8()).isEqualTo("foo")
-    }
+    resourceLoader.open(resource1)!!.use { assertThat(it.readUtf8()).isEqualTo("foo") }
     assertThat(resourceLoader.utf8(resource2)).isEqualTo("bar")
 
     val topLevelResources = resourceLoader.list("filesystem:$tempRoot")
@@ -178,13 +158,9 @@ class ResourceLoaderTest {
     val data1 = "filesystem:$tempRoot/data1.txt"
 
     val data1File = File(tempRoot, "data1.txt")
-    data1File.sink().buffer().use {
-      it.writeUtf8("foo")
-    }
+    data1File.sink().buffer().use { it.writeUtf8("foo") }
 
-    resourceLoader.open(data1)!!.use {
-      assertThat(it.readUtf8()).isEqualTo("foo")
-    }
+    resourceLoader.open(data1)!!.use { assertThat(it.readUtf8()).isEqualTo("foo") }
 
     var wasCalled = false
     resourceLoader.watch(data1) { address ->
@@ -195,13 +171,9 @@ class ResourceLoaderTest {
     assertTrue(watchedDirectory.isAlive)
     assertTrue(watchedDirectory.isDaemon)
 
-    data1File.sink().buffer().use {
-      it.writeUtf8("bar")
-    }
+    data1File.sink().buffer().use { it.writeUtf8("bar") }
 
-    resourceLoader.open(data1)!!.use {
-      assertThat(it.readUtf8()).isEqualTo("bar")
-    }
+    resourceLoader.open(data1)!!.use { assertThat(it.readUtf8()).isEqualTo("bar") }
 
     // This will fail to join, but it does yield this thread and give the others a go
     watchedDirectory.join(5000)
@@ -219,48 +191,33 @@ class ResourceLoaderTest {
 
   @Test
   fun addressValidation() {
-    assertFailsWith<IllegalArgumentException> {
-      resourceLoader.open("filepath:")
-    }
-    assertFailsWith<IllegalArgumentException> {
-      resourceLoader.open("")
-    }
-    assertFailsWith<IllegalArgumentException> {
-      resourceLoader.open(":/")
-    }
+    assertFailsWith<IllegalArgumentException> { resourceLoader.open("filepath:") }
+    assertFailsWith<IllegalArgumentException> { resourceLoader.open("") }
+    assertFailsWith<IllegalArgumentException> { resourceLoader.open(":/") }
   }
 
   @ParameterizedTest
-  @ValueSource(strings = [ClasspathResourceLoaderBackend.SCHEME, FilesystemLoaderBackend.SCHEME, MemoryResourceLoaderBackend.SCHEME])
+  @ValueSource(
+    strings =
+      [ClasspathResourceLoaderBackend.SCHEME, FilesystemLoaderBackend.SCHEME, MemoryResourceLoaderBackend.SCHEME]
+  )
   fun pathBasedAddressValidation(resource: String) {
-    assertFailsWith<IllegalArgumentException> {
-      resourceLoader.open("$resource:/")
-    }
-    assertFailsWith<IllegalArgumentException> {
-      resourceLoader.open("$resource://")
-    }
+    assertFailsWith<IllegalArgumentException> { resourceLoader.open("$resource:/") }
+    assertFailsWith<IllegalArgumentException> { resourceLoader.open("$resource://") }
   }
 
   @ParameterizedTest
   @ValueSource(strings = ["", "/", "//", " "])
   fun pathValidationForPathBasedResources(path: String) {
-    assertFailsWith<IllegalArgumentException> {
-      ClasspathResourceLoaderBackend.checkPath(path)
-    }
-    assertFailsWith<IllegalArgumentException> {
-      MemoryResourceLoaderBackend().checkPath(path)
-    }
-    assertFailsWith<IllegalArgumentException> {
-      FilesystemLoaderBackend.checkPath(path)
-    }
+    assertFailsWith<IllegalArgumentException> { ClasspathResourceLoaderBackend.checkPath(path) }
+    assertFailsWith<IllegalArgumentException> { MemoryResourceLoaderBackend().checkPath(path) }
+    assertFailsWith<IllegalArgumentException> { FilesystemLoaderBackend.checkPath(path) }
   }
 
   @ParameterizedTest
   @ValueSource(strings = ["", " "])
   fun pathValidationForEnvironmentResource(path: String) {
-    assertFailsWith<IllegalArgumentException> {
-      EnvironmentResourceLoaderBackend.checkPath(path)
-    }
+    assertFailsWith<IllegalArgumentException> { EnvironmentResourceLoaderBackend.checkPath(path) }
   }
 
   @Test
@@ -274,10 +231,8 @@ class ResourceLoaderTest {
     val tempRoot = tempFolder.root.toAbsolutePath()
     resourceLoader.copyTo("classpath:/misk/resources", tempRoot)
     val prefix = "filesystem:$tempRoot"
-    assertThat(resourceLoader.utf8("$prefix/ResourceLoaderTest.txt")!!)
-      .isEqualTo("69e0753934d2838d1953602ca7722444\n")
-    assertThat(resourceLoader.utf8("$prefix/nested/nested.txt")!!)
-      .isEqualTo("I am nested\n")
+    assertThat(resourceLoader.utf8("$prefix/ResourceLoaderTest.txt")!!).isEqualTo("69e0753934d2838d1953602ca7722444\n")
+    assertThat(resourceLoader.utf8("$prefix/nested/nested.txt")!!).isEqualTo("I am nested\n")
   }
 
   @Test
@@ -288,8 +243,7 @@ class ResourceLoaderTest {
     val tempDirClassLoader = URLClassLoader(arrayOf(tempRoot.toURI().toURL()))
 
     // Confirm the resource isn't available in the app class loader.
-    assertThat(resourceLoader.utf8("classpath:/context_class_loader_resource.txt"))
-      .isNull()
+    assertThat(resourceLoader.utf8("classpath:/context_class_loader_resource.txt")).isNull()
 
     // But when the context class loader changes, the resource becomes visible.
     withContextClassLoader(tempDirClassLoader) {
@@ -298,27 +252,20 @@ class ResourceLoaderTest {
     }
 
     // The resource is not cached in the resource loader.
-    assertThat(resourceLoader.utf8("classpath:/context_class_loader_resource.txt"))
-      .isNull()
+    assertThat(resourceLoader.utf8("classpath:/context_class_loader_resource.txt")).isNull()
   }
 
   @Test
   fun contextClassLoaderForList() {
     val directory = File(tempRoot, "context_class_loader")
     directory.mkdirs()
-    File(directory, "a.txt").sink().buffer().use {
-      it.writeUtf8("A")
-    }
-    File(directory, "b.txt").sink().buffer().use {
-      it.writeUtf8("B")
-    }
+    File(directory, "a.txt").sink().buffer().use { it.writeUtf8("A") }
+    File(directory, "b.txt").sink().buffer().use { it.writeUtf8("B") }
     val tempDirClassLoader = URLClassLoader(arrayOf(tempRoot.toURI().toURL()))
 
     withContextClassLoader(tempDirClassLoader) {
-      assertThat(resourceLoader.list("classpath:/context_class_loader")).contains(
-        "classpath:/context_class_loader/a.txt",
-        "classpath:/context_class_loader/b.txt"
-      )
+      assertThat(resourceLoader.list("classpath:/context_class_loader"))
+        .contains("classpath:/context_class_loader/a.txt", "classpath:/context_class_loader/b.txt")
     }
 
     assertThat(resourceLoader.list("classpath:/context_class_loader")).isEmpty()
@@ -326,39 +273,27 @@ class ResourceLoaderTest {
 
   @Test
   fun contextClassLoaderForExists() {
-    File(tempRoot, "context_class_loader_exists_resource.txt").sink().buffer().use {
-      it.writeUtf8("hello, I exist")
-    }
+    File(tempRoot, "context_class_loader_exists_resource.txt").sink().buffer().use { it.writeUtf8("hello, I exist") }
     val tempDirClassLoader = URLClassLoader(arrayOf(tempRoot.toURI().toURL()))
 
     withContextClassLoader(tempDirClassLoader) {
-      assertThat(resourceLoader.exists("classpath:/context_class_loader_exists_resource.txt"))
-        .isTrue()
+      assertThat(resourceLoader.exists("classpath:/context_class_loader_exists_resource.txt")).isTrue()
     }
 
-    assertThat(resourceLoader.exists("classpath:/context_class_loader_exists_resource.txt"))
-      .isFalse()
+    assertThat(resourceLoader.exists("classpath:/context_class_loader_exists_resource.txt")).isFalse()
   }
 
   @Test
   @SetEnvironmentVariable(key = "SOME_ENV_VAR", value = "value")
   fun openEnvironmentVariables() {
-    resourceLoader.open("environment:SOME_ENV_VAR")!!.use {
-      assertThat(it.readUtf8()).isEqualTo("value")
-    }
+    resourceLoader.open("environment:SOME_ENV_VAR")!!.use { assertThat(it.readUtf8()).isEqualTo("value") }
 
-    resourceLoader.open("environment:  SOME_ENV_VAR  ")!!.use {
-      assertThat(it.readUtf8()).isEqualTo("value")
-    }
+    resourceLoader.open("environment:  SOME_ENV_VAR  ")!!.use { assertThat(it.readUtf8()).isEqualTo("value") }
 
     assertThat(resourceLoader.open("environment:NOT_THERE")).isNull()
 
-    assertFailsWith<IllegalArgumentException> {
-      resourceLoader.open("environment:")
-    }
-    assertFailsWith<IllegalArgumentException> {
-      resourceLoader.open("environment:  ")
-    }
+    assertFailsWith<IllegalArgumentException> { resourceLoader.open("environment:") }
+    assertFailsWith<IllegalArgumentException> { resourceLoader.open("environment:  ") }
   }
 
   @Test

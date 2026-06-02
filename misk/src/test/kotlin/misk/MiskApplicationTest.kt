@@ -1,16 +1,15 @@
 package misk
 
 import com.beust.jcommander.Parameter
+import jakarta.inject.Inject
+import kotlin.test.assertFailsWith
 import misk.inject.KAbstractModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
-import kotlin.test.assertFailsWith
 
 internal class MiskApplicationTest {
   class WithRequiredArguments : MiskCommand("with-required-args") {
-    @Parameter(names = ["-f", "--file"], required = true)
-    var filename: String? = null
+    @Parameter(names = ["-f", "--file"], required = true) var filename: String? = null
 
     var run: Boolean = false
 
@@ -20,20 +19,16 @@ internal class MiskApplicationTest {
   }
 
   class WithPreconditions : MiskCommand("with-preconditions") {
-    @Parameter(names = ["-f", "--file"])
-    var filename: String? = null
+    @Parameter(names = ["-f", "--file"]) var filename: String? = null
 
-    @Parameter(names = ["-d", "--dir"])
-    var directory: String? = null
+    @Parameter(names = ["-d", "--dir"]) var directory: String? = null
 
     var run: Boolean = false
     var preconditionsMet: Boolean = false
 
     override fun run() {
       run = true
-      requireCli(filename != null || directory != null) {
-        "one of -f or -d must be specified"
-      }
+      requireCli(filename != null || directory != null) { "one of -f or -d must be specified" }
       preconditionsMet = true
     }
   }
@@ -90,14 +85,16 @@ internal class MiskApplicationTest {
 
   @Test
   fun missingRequiredArgument() {
-    val exception = assertFailsWith<MiskApplication.CliException> {
-      val commands = Commands()
-      MiskApplication(*commands.all).doRun(arrayOf("with-required-args", "-f"))
-    }
+    val exception =
+      assertFailsWith<MiskApplication.CliException> {
+        val commands = Commands()
+        MiskApplication(*commands.all).doRun(arrayOf("with-required-args", "-f"))
+      }
 
     // Error message should be specific to the command
-    assertThat(exception.message).isEqualTo(
-      """
+    assertThat(exception.message)
+      .isEqualTo(
+        """
         |
         |Expected a value after parameter -f
         |
@@ -105,20 +102,23 @@ internal class MiskApplicationTest {
         |  Options:
         |  * -f, --file
         |
-        |""".trimMargin()
-    )
+        |"""
+          .trimMargin()
+      )
   }
 
   @Test
   fun unknownCommand() {
-    val exception = assertFailsWith<MiskApplication.CliException> {
-      val commands = Commands()
-      MiskApplication(*commands.all).doRun(arrayOf("unknown"))
-    }
+    val exception =
+      assertFailsWith<MiskApplication.CliException> {
+        val commands = Commands()
+        MiskApplication(*commands.all).doRun(arrayOf("unknown"))
+      }
 
     // Error message should include the entire usage
-    assertThat(exception.message).isEqualTo(
-      """
+    assertThat(exception.message)
+      .isEqualTo(
+        """
         |
         |Expected a command, got unknown
         |
@@ -141,20 +141,23 @@ internal class MiskApplicationTest {
         |    with-module      null
         |      Usage: with-module
         |
-        |""".trimMargin()
-    )
+        |"""
+          .trimMargin()
+      )
   }
 
   @Test
   fun commandPreconditionsNotMet() {
-    val exception = assertFailsWith<MiskApplication.CliException> {
-      val commands = Commands()
-      MiskApplication(*commands.all).doRun(arrayOf("with-preconditions"))
-    }
+    val exception =
+      assertFailsWith<MiskApplication.CliException> {
+        val commands = Commands()
+        MiskApplication(*commands.all).doRun(arrayOf("with-preconditions"))
+      }
 
     // Error message should be specific to the command
-    assertThat(exception.message).isEqualTo(
-      """
+    assertThat(exception.message)
+      .isEqualTo(
+        """
         |
         |one of -f or -d must be specified
         |
@@ -164,7 +167,8 @@ internal class MiskApplicationTest {
         |
         |    -f, --file
         |
-        |""".trimMargin()
-    )
+        |"""
+          .trimMargin()
+      )
   }
 }

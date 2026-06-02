@@ -18,17 +18,15 @@ import wisp.lease.LeaseManager
 @MiskTest
 internal class ClusterAwareLeaseTest {
   @Suppress("unused")
-  @MiskTestModule val module: Module = Modules.combine(
-    MiskTestingServiceModule(),
-    FakeClusterWeightModule(),
-    ClusterAwareLeaseModule()
-  )
+  @MiskTestModule
+  val module: Module = Modules.combine(MiskTestingServiceModule(), FakeClusterWeightModule(), ClusterAwareLeaseModule())
 
   @Inject private lateinit var leaseManager: LeaseManager
 
   @Inject private lateinit var clusterWeight: FakeClusterWeight
 
-  @Test fun testActiveCluster() {
+  @Test
+  fun testActiveCluster() {
     val lease1 = leaseManager.requestLease("lease1")
     val lease2 = leaseManager.requestLease("lease2")
 
@@ -36,15 +34,18 @@ internal class ClusterAwareLeaseTest {
 
     // This should work for other lease managers as well.
     assertTrue(lease1.acquire())
+    assertTrue(lease1.isHeld())
     assertTrue(lease1.checkHeld())
 
     // This will be false for any lease managers other than the ClusterAwareLeaseManager
     // because lease hasn't been acquired yet.
+    assertTrue(lease2.isHeld())
     assertTrue(lease2.checkHeld())
     assertTrue(lease2.acquire())
   }
 
-  @Test fun testPassiveClusterAwareIgnoreLeaseManager() {
+  @Test
+  fun testPassiveClusterAwareIgnoreLeaseManager() {
     clusterWeight.setClusterWeight(0)
     val lease = leaseManager.requestLease("lease3")
 
@@ -52,6 +53,7 @@ internal class ClusterAwareLeaseTest {
 
     // Both should be false for ClusterAwareLeaseManager
     assertFalse(lease.acquire())
+    assertFalse(lease.isHeld())
     assertFalse(lease.checkHeld())
   }
 }

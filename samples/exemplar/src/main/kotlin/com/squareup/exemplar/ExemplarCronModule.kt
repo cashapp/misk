@@ -3,9 +3,11 @@ package com.squareup.exemplar
 import com.google.common.util.concurrent.AbstractIdleService
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.lang.Thread.sleep
+import java.time.ZoneId
+import kotlin.time.Duration.Companion.seconds
 import misk.ReadyService
 import misk.ServiceModule
-import misk.clustering.fake.lease.FakeLeaseModule
 import misk.clustering.weights.FakeClusterWeightModule
 import misk.cron.CronEntryModule
 import misk.cron.CronPattern
@@ -13,8 +15,6 @@ import misk.cron.FakeCronModule
 import misk.inject.KAbstractModule
 import misk.inject.toKey
 import misk.logging.getLogger
-import java.lang.Thread.sleep
-import java.time.ZoneId
 
 class ExemplarCronModule : KAbstractModule() {
   override fun configure() {
@@ -22,8 +22,9 @@ class ExemplarCronModule : KAbstractModule() {
     install(FakeClusterWeightModule())
     install(
       FakeCronModule(
-        ZoneId.of("America/Toronto"),
-        dependencies = listOf(DependentService::class.toKey())
+        zoneId = ZoneId.of("America/Toronto"),
+        dependencies = listOf(DependentService::class.toKey()),
+        installDashboardTab = true,
       )
     )
     install(CronEntryModule.create<MinuteCron>())
@@ -39,24 +40,24 @@ class ExemplarCronModule : KAbstractModule() {
     override fun shutDown() {}
 
     companion object {
-      val logger = getLogger<DependentService>()
+      private val logger = getLogger<DependentService>()
     }
   }
 
   @Singleton
-  @CronPattern("* * * * *")
+  @CronPattern("1 * * * *")
   class MinuteCron @Inject constructor() : Runnable {
     var counter = 0
 
     override fun run() {
       counter++
-      log.info("Minute Cron $counter Start")
-      sleep(10_000)
-      log.info("Minute Cron $counter End")
+      logger.info("Minute Cron $counter Start")
+      sleep(60.seconds.inWholeMilliseconds)
+      logger.info("Minute Cron $counter End")
     }
 
     companion object {
-      val log = getLogger<MinuteCron>()
+      private val logger = getLogger<MinuteCron>()
     }
   }
 }

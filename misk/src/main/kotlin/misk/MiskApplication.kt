@@ -6,27 +6,28 @@ import com.google.common.annotations.VisibleForTesting
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Injector
+import com.google.inject.Key
 import com.google.inject.Module
-import misk.inject.KAbstractModule
-import misk.inject.getInstance
-import misk.web.jetty.JettyHealthService
-import misk.web.jetty.JettyService
-import misk.logging.getLogger
-import java.io.Closeable
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import kotlin.concurrent.thread
 import kotlin.system.measureTimeMillis
 import kotlin.time.Duration.Companion.milliseconds
+import misk.inject.KAbstractModule
+import misk.inject.getInstance
+import misk.logging.getLogger
+import misk.web.WebConfig
+import misk.web.jetty.JettyHealthService
+import misk.web.jetty.JettyService
 
 /** The entry point for misk applications */
-class MiskApplication private constructor(
-  private val injectorGenerator: () -> Injector,
-  commands: List<MiskCommand> = listOf(),
-) {
+class MiskApplication
+private constructor(private val injectorGenerator: () -> Injector, commands: List<MiskCommand> = listOf()) {
 
   constructor(vararg modules: Module) : this({ Guice.createInjector(modules.toList()) })
+
   constructor(vararg commands: MiskCommand) : this({ Guice.createInjector() }, commands.toList())
+
   constructor(
     modules: List<Module>,
     commands: List<MiskCommand> = listOf(),
@@ -45,8 +46,7 @@ class MiskApplication private constructor(
   }
 
   /**
-   * Runs the application, finding and executing the appropriate command based on the
-   * provided command line arguments
+   * Runs the application, finding and executing the appropriate command based on the provided command line arguments
    */
   fun run(args: Array<String>) {
     try {
@@ -57,9 +57,9 @@ class MiskApplication private constructor(
   }
 
   /**
-   * Runs the application, raising a [CliException] if an error occurs. used for testing,
-   * to ensure that properly friendly error message are printed when command line parsing
-   * fails or when command preconditions (required arguments etc) are not met.
+   * Runs the application, raising a [CliException] if an error occurs. used for testing, to ensure that properly
+   * friendly error message are printed when command line parsing fails or when command preconditions (required
+   * arguments etc) are not met.
    *
    * If no command line arguments are specified, the service starts and blocks until terminated.
    */
@@ -71,18 +71,18 @@ class MiskApplication private constructor(
 
     try {
       jc.parse(*args)
-      val command = commands[jc.parsedCommand]
-        ?: throw ParameterException("unknown command ${jc.parsedCommand}")
+      val command = commands[jc.parsedCommand] ?: throw ParameterException("unknown command ${jc.parsedCommand}")
 
-      val injector = Guice.createInjector(
-        object : KAbstractModule() {
-          override fun configure() {
-            bind<JCommander>().toInstance(jc)
-            binder().requireAtInjectOnConstructors()
-          }
-        },
-        *command.modules.toTypedArray(),
-      )
+      val injector =
+        Guice.createInjector(
+          object : KAbstractModule() {
+            override fun configure() {
+              bind<JCommander>().toInstance(jc)
+              binder().requireAtInjectOnConstructors()
+            }
+          },
+          *command.modules.toTypedArray(),
+        )
 
       injector.injectMembers(command)
       command.run()
@@ -98,90 +98,104 @@ class MiskApplication private constructor(
     }
   }
 
-  /**
-   * Provides internal testing the ability to mimic system exit without actually
-   * exiting the process.
-   */
-  @VisibleForTesting
-  internal lateinit var shutdownHook: Thread
+  /** Provides internal testing the ability to mimic system exit without actually exiting the process. */
+  @VisibleForTesting internal lateinit var shutdownHook: Thread
 
-  /**
-   * Provides internal testing the ability to get instances this used by the application.
-   */
-  @VisibleForTesting
-  internal lateinit var injector: Injector
+  /** Provides internal testing the ability to get instances this used by the application. */
+  @VisibleForTesting internal lateinit var injector: Injector
 
   fun start(): RunningMiskApplication {
     log.info { "creating application injector" }
     injector = injectorGenerator()
     val serviceManager = injector.getInstance<ServiceManager>()
 
-
     // We manage JettyHealthService outside ServiceManager because it must start and
     // shutdown last to keep the container alive via liveness checks.
-    val jettyHealthService: JettyHealthService
+    // Skip instantiation entirely when Jetty is disabled to avoid registering Jetty metrics.
+    val jettyEnabled =
+      injector.getExistingBinding(Key.get(WebConfig::class.java))?.let {
+        !injector.getInstance<WebConfig>().disable_jetty
+      } ?: true
+    val jettyHealthService: JettyHealthService?
     measureTimeMillis {
-      log.info { "starting services" }
-      serviceManager.startAsync()
-      serviceManager.awaitHealthy()
-
-      // Start Health Service Last to ensure any dependencies are started.
-      jettyHealthService = injector.getInstance<JettyHealthService>()
-      jettyHealthService.startAsync()
-      jettyHealthService.awaitRunning()
-    }.also {
-      log.info { "all services started successfully in ${it.milliseconds}" }
-    }
-
-    shutdownHook = thread(start = false) {
-      measureTimeMillis {
-        log.info { "received a shutdown hook! performing an orderly shutdown" }
-        serviceManager.stopAsync()
-        serviceManager.awaitStopped()
-
-        // Synchronously stops Jetty Service if it is still running, otherwise no-ops.
-        // Jetty will already be shut down when either:
-        // webConfig.sleep_in_ms is <= 0 OR
-        // (webConfig.health_port >= 0 AND webConfig.health_dedicated_jetty_instance == true)
-        val jettyService = injector.getInstance<JettyService>()
-        jettyService.stop()
-
-        // Synchronously stop Jetty Health Service if it is running, otherwise no-ops.
-        // Use Guava Service methods to ensure main thread awaitTerminated is handled correctly.
-        val jettyHealthService = injector.getInstance<JettyHealthService>()
-        jettyHealthService.stopAsync()
-        jettyHealthService.awaitTerminated()
-      }.also {
-        log.info { "orderly shutdown complete in ${it.milliseconds}" }
-      }
-    }
-    val shutdown: RunningMiskApplication = object : RunningMiskApplication {
-      override fun stop() {
-        shutdownHook.start()
-      }
-
-      override fun awaitTerminated() {
-        serviceManager.awaitStopped()
-        jettyHealthService.awaitTerminated()
-        log.info { "all services stopped" }
-      }
-
-      override fun awaitTerminated(time : Long, timeUnit: TimeUnit) : Boolean{
-        val deadline : Long = timeUnit.toMillis(time) + System.currentTimeMillis()
+        log.info { "starting services" }
+        serviceManager.startAsync()
         try {
-          serviceManager.awaitStopped(time, timeUnit)
-          jettyHealthService.awaitTerminated(deadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS)
-        } catch (_ : TimeoutException) {
-          return false
+          serviceManager.awaitHealthy()
+        } catch (e: Exception) {
+          try {
+            serviceManager.stopAsync()
+            serviceManager.awaitStopped()
+          } catch (ex: Exception) {
+            log.error(ex) { "Failed to stop service after failed start" }
+          }
+          throw e
         }
-        log.info { "all services stopped" }
-        return true
-      }
 
-      override fun app(): MiskApplication {
-        return this@MiskApplication
+        // Start Health Service Last to ensure any dependencies are started.
+        jettyHealthService =
+          if (jettyEnabled) {
+            injector.getInstance<JettyHealthService>().also {
+              it.startAsync()
+              it.awaitRunning()
+            }
+          } else {
+            null
+          }
       }
-    }
+      .also { log.info { "all services started successfully in ${it.milliseconds}" } }
+
+    shutdownHook =
+      thread(start = false) {
+        measureTimeMillis {
+            log.info { "received a shutdown hook! performing an orderly shutdown" }
+            serviceManager.stopAsync()
+            serviceManager.awaitStopped()
+
+            if (jettyEnabled) {
+              // Synchronously stops Jetty Service if it is still running, otherwise no-ops.
+              // Jetty will already be shut down when either:
+              // webConfig.sleep_in_ms is <= 0 OR
+              // (webConfig.health_port >= 0 AND webConfig.health_dedicated_jetty_instance == true)
+              val jettyService = injector.getInstance<JettyService>()
+              jettyService.stop()
+
+              // Synchronously stop Jetty Health Service if it is running, otherwise no-ops.
+              // Use Guava Service methods to ensure main thread awaitTerminated is handled correctly.
+              jettyHealthService?.stopAsync()
+              jettyHealthService?.awaitTerminated()
+            }
+          }
+          .also { log.info { "orderly shutdown complete in ${it.milliseconds}" } }
+      }
+    val shutdown: RunningMiskApplication =
+      object : RunningMiskApplication {
+        override fun stop() {
+          shutdownHook.start()
+        }
+
+        override fun awaitTerminated() {
+          serviceManager.awaitStopped()
+          jettyHealthService?.awaitTerminated()
+          log.info { "all services stopped" }
+        }
+
+        override fun awaitTerminated(time: Long, timeUnit: TimeUnit): Boolean {
+          val deadline: Long = timeUnit.toMillis(time) + System.currentTimeMillis()
+          try {
+            serviceManager.awaitStopped(time, timeUnit)
+            jettyHealthService?.awaitTerminated(deadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS)
+          } catch (_: TimeoutException) {
+            return false
+          }
+          log.info { "all services stopped" }
+          return true
+        }
+
+        override fun app(): MiskApplication {
+          return this@MiskApplication
+        }
+      }
     return shutdown
   }
 
@@ -198,12 +212,12 @@ class MiskApplication private constructor(
   internal class CliException(message: String) : RuntimeException(message)
 }
 
-
 interface RunningMiskApplication {
   fun stop()
 
   fun awaitTerminated()
 
-  fun app() : MiskApplication
+  fun app(): MiskApplication
+
   fun awaitTerminated(i: Long, seconds: TimeUnit): Boolean
 }

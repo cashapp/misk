@@ -1,38 +1,11 @@
-public final class misk/cloud/aws/AwsAccountId {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lmisk/cloud/aws/AwsAccountId;
-	public static synthetic fun copy$default (Lmisk/cloud/aws/AwsAccountId;Ljava/lang/String;ILjava/lang/Object;)Lmisk/cloud/aws/AwsAccountId;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getValue ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class misk/cloud/aws/AwsEnvironmentModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public final fun awsAccountId (Lmisk/environment/EnvVarLoader;)Lmisk/cloud/aws/AwsAccountId;
 	public final fun awsRegion (Lmisk/environment/EnvVarLoader;)Lmisk/cloud/aws/AwsRegion;
 }
 
-public final class misk/cloud/aws/AwsRegion {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lmisk/cloud/aws/AwsRegion;
-	public static synthetic fun copy$default (Lmisk/cloud/aws/AwsRegion;Ljava/lang/String;ILjava/lang/Object;)Lmisk/cloud/aws/AwsRegion;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class misk/cloud/aws/FakeAwsEnvironmentModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
-}
-
-public final class misk/cloud/aws/TypesKt {
-	public static final fun toMiskAwsAccountId (Lwisp/aws/environment/AwsAccountId;)Lmisk/cloud/aws/AwsAccountId;
-	public static final fun toMiskAwsRegion (Lwisp/aws/environment/AwsRegion;)Lmisk/cloud/aws/AwsRegion;
 }
 
 public final class misk/jobqueue/sqs/AwsSqsBatchJobHandlerModule : misk/inject/KAbstractModule {
@@ -77,7 +50,7 @@ public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion {
 	public static synthetic fun create$default (Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;ILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 }
 
-public final class misk/jobqueue/sqs/AwsSqsJobQueueConfig : wisp/config/Config {
+public final class misk/jobqueue/sqs/AwsSqsJobQueueConfig : misk/config/Config {
 	public fun <init> ()V
 	public fun <init> (Ljava/util/Map;)V
 	public fun <init> (Ljava/util/Map;I)V

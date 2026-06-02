@@ -6,10 +6,9 @@ import com.google.inject.Key
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import helpers.protos.Dinosaur
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
-import misk.clustering.Cluster
-import misk.clustering.ClusterWatch
-import misk.clustering.fake.ExplicitClusterResourceMapper
 import misk.config.AppName
 import misk.inject.KAbstractModule
 import misk.security.ssl.CertStoreConfig
@@ -34,16 +33,12 @@ import org.junit.jupiter.api.Test
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 internal class TypedPeerHttpClientTest {
   @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var jetty: JettyService
-
-  @Inject private lateinit var cluster: Cluster
 
   private lateinit var clientInjector: Injector
 
@@ -54,12 +49,14 @@ internal class TypedPeerHttpClientTest {
 
   @Test
   fun useTypedClient() {
-    val clientFactory = clientInjector.getInstance(
-      Key.get(object : TypeLiteral<TypedPeerClientFactory<ReturnADinosaur>>() {})
-    )
+    val clientFactory =
+      clientInjector.getInstance(Key.get(object : TypeLiteral<TypedPeerClientFactory<ReturnADinosaur>>() {}))
 
-    val snapshot = cluster.snapshot
-    val client: ReturnADinosaur = clientFactory.client(snapshot.self)
+    val clusterMember =
+      object : PeerIdentifier {
+        override val ipAddress = "127.0.0.1"
+      }
+    val client: ReturnADinosaur = clientFactory.client(clusterMember)
 
     val response = client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
     assertThat(response.code()).isEqualTo(200)
@@ -68,41 +65,15 @@ internal class TypedPeerHttpClientTest {
   }
 
   interface ReturnADinosaur {
-    @POST("/cooldinos")
-    fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
+    @POST("/cooldinos") fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
   }
 
   class ReturnADinosaurAction @Inject constructor() : WebAction {
     @Post("/cooldinos")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun getDinosaur(@RequestBody request: Dinosaur):
-      Dinosaur = request.newBuilder().name("super${request.name}").build()
-  }
-
-  class FakeCluster @Inject constructor(
-    memberIp: String = "127.0.0.1"
-  ) : Cluster {
-
-    override val snapshot: Cluster.Snapshot
-
-    init {
-      val self = Cluster.Member(name = "self-name", ipAddress = memberIp)
-      val resourceMapper = ExplicitClusterResourceMapper()
-
-      resourceMapper.setDefaultMapping(self)
-
-      snapshot = Cluster.Snapshot(
-        self = self,
-        readyMembers = setOf(),
-        selfReady = true,
-        resourceMapper = resourceMapper
-      )
-    }
-
-    override fun watch(watch: ClusterWatch) {
-      throw UnsupportedOperationException()
-    }
+    fun getDinosaur(@RequestBody request: Dinosaur): Dinosaur =
+      request.newBuilder().name("super${request.name}").build()
   }
 
   class TestModule : KAbstractModule() {
@@ -114,25 +85,24 @@ internal class TypedPeerHttpClientTest {
             port = 0,
             idle_timeout = 500000,
             host = "127.0.0.1",
-            ssl = WebSslConfig(
-              0,
-              cert_store = CertStoreConfig(
-                resource = "classpath:/ssl/server_cert_key_combo.pem",
-                passphrase = "serverpassword",
-                format = SslLoader.FORMAT_PEM
+            ssl =
+              WebSslConfig(
+                0,
+                cert_store =
+                  CertStoreConfig(
+                    resource = "classpath:/ssl/server_cert_key_combo.pem",
+                    passphrase = "serverpassword",
+                    format = SslLoader.FORMAT_PEM,
+                  ),
+                trust_store =
+                  TrustStoreConfig(resource = "classpath:/ssl/client_cert.pem", format = SslLoader.FORMAT_PEM),
+                mutual_auth = WebSslConfig.MutualAuth.REQUIRED,
               ),
-              trust_store = TrustStoreConfig(
-                resource = "classpath:/ssl/client_cert.pem",
-                format = SslLoader.FORMAT_PEM
-              ),
-              mutual_auth = WebSslConfig.MutualAuth.REQUIRED
-            )
           )
         )
       )
 
       install(MiskTestingServiceModule())
-      bind<Cluster>().toInstance(FakeCluster())
       install(WebActionModule.create<ReturnADinosaurAction>())
     }
   }
@@ -154,24 +124,27 @@ internal class TypedPeerHttpClientTest {
     @Singleton
     fun provideHttpClientConfig(): HttpClientsConfig {
       return HttpClientsConfig(
-        endpoints = mapOf(
-          "Server" to HttpClientEndpointConfig(
-            url = jetty.httpsServerUrl!!.toString(),
-            clientConfig = HttpClientConfig(
-              ssl = HttpClientSSLConfig(
-                cert_store = CertStoreConfig(
-                  resource = "classpath:/ssl/client_cert_key_combo.pem",
-                  passphrase = "clientpassword",
-                  format = SslLoader.FORMAT_PEM
-                ),
-                trust_store = TrustStoreConfig(
-                  resource = "classpath:/ssl/server_cert.pem",
-                  format = SslLoader.FORMAT_PEM
-                )
+        endpoints =
+          mapOf(
+            "Server" to
+              HttpClientEndpointConfig(
+                url = jetty.httpsServerUrl!!.toString(),
+                clientConfig =
+                  HttpClientConfig(
+                    ssl =
+                      HttpClientSSLConfig(
+                        cert_store =
+                          CertStoreConfig(
+                            resource = "classpath:/ssl/client_cert_key_combo.pem",
+                            passphrase = "clientpassword",
+                            format = SslLoader.FORMAT_PEM,
+                          ),
+                        trust_store =
+                          TrustStoreConfig(resource = "classpath:/ssl/server_cert.pem", format = SslLoader.FORMAT_PEM),
+                      )
+                  ),
               )
-            )
           )
-        )
       )
     }
   }

@@ -1,5 +1,6 @@
 package misk.web.jetty
 
+import java.util.function.Supplier
 import misk.web.ServletHttpCall
 import misk.web.actions.WebSocketListener
 import misk.web.http.HttpVersion
@@ -7,11 +8,8 @@ import okhttp3.Headers
 import okhttp3.Headers.Companion.headersOf
 import org.eclipse.jetty.ee8.nested.Response
 import org.eclipse.jetty.http.HttpFields
-import java.util.function.Supplier
 
-internal class JettyServletUpstreamResponse(
-  val response: Response
-) : ServletHttpCall.UpstreamResponse {
+internal class JettyServletUpstreamResponse(val response: Response) : ServletHttpCall.UpstreamResponse {
   var sendTrailers = false
   var trailers = headersOf()
 
@@ -52,9 +50,7 @@ internal class JettyServletUpstreamResponse(
 
   override fun setTrailer(name: String, value: String) {
     check(sendTrailers)
-    trailers = trailers.newBuilder()
-      .set(name, value)
-      .build()
+    trailers = trailers.newBuilder().set(name, value).build()
   }
 
   override fun initWebSocketListener(webSocketListener: WebSocketListener) =

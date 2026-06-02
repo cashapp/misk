@@ -4,9 +4,10 @@ import io.prometheus.client.Collector
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Predicate
 import io.prometheus.client.SimpleCollector
+import java.util.Enumeration
+import java.util.concurrent.ConcurrentHashMap
 import misk.inject.KAbstractModule
 import misk.testing.TestFixture
-import java.util.Enumeration
 
 internal class CollectorRegistryModule : KAbstractModule() {
 
@@ -19,7 +20,7 @@ internal class CollectorRegistryModule : KAbstractModule() {
 
 internal class CollectorRegistryFixture(val registry: CollectorRegistry) : CollectorRegistry(true), TestFixture {
 
-  private val registeredCollectors = mutableSetOf<Collector>()
+  private val registeredCollectors: MutableSet<Collector> = ConcurrentHashMap.newKeySet()
 
   override fun reset() {
     registeredCollectors.forEach {
@@ -47,7 +48,9 @@ internal class CollectorRegistryFixture(val registry: CollectorRegistry) : Colle
     return registry.filteredMetricFamilySamples(includedNames)
   }
 
-  override fun filteredMetricFamilySamples(sampleNameFilter: Predicate<String?>?): Enumeration<Collector.MetricFamilySamples> {
+  override fun filteredMetricFamilySamples(
+    sampleNameFilter: Predicate<String?>?
+  ): Enumeration<Collector.MetricFamilySamples> {
     return registry.filteredMetricFamilySamples(sampleNameFilter)
   }
 
@@ -55,11 +58,7 @@ internal class CollectorRegistryFixture(val registry: CollectorRegistry) : Colle
     return registry.getSampleValue(name)
   }
 
-  override fun getSampleValue(
-    name: String,
-    labelNames: Array<String?>?,
-    labelValues: Array<String?>?
-  ): Double? {
+  override fun getSampleValue(name: String, labelNames: Array<String?>?, labelValues: Array<String?>?): Double? {
     return registry.getSampleValue(name, labelNames, labelValues)
   }
 

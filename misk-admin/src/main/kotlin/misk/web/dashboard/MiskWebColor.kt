@@ -1,9 +1,7 @@
 package misk.web.dashboard
 
-/**
- * Matches the Misk-Web Color enum in @misk/core/src/utilities/css.ts
- */
-enum class MiskWebColor (val hexColor: String) {
+/** Matches the Misk-Web Color enum in @misk/core/src/utilities/css.ts */
+enum class MiskWebColor(val hexColor: String) {
   RED("#df3320"),
   ORANGE("#f86932"),
   YELLOW("#edb312"),

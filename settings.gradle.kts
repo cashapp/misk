@@ -8,7 +8,7 @@ pluginManagement {
 }
 
 plugins {
-  id("com.gradle.develocity") version "4.1"
+  id("com.gradle.develocity") version "4.1.1"
 }
 
 develocity {
@@ -86,9 +86,11 @@ include(":misk-actions")
 include(":misk-admin")
 include(":misk-api")
 include(":misk-audit-client")
+include(":misk-aws-api")
 include(":misk-aws")
 include(":misk-aws-dynamodb")
 include(":misk-aws2-dynamodb")
+include(":misk-aws2-s3")
 include(":misk-aws2-sqs")
 include(":misk-backoff")
 include(":misk-bom")
@@ -136,6 +138,7 @@ include(":misk-redis-lettuce")
 include(":misk-sampling")
 include(":misk-schema-migrator-gradle-plugin")
 include(":misk-service")
+include(":misk-spirit")
 include(":misk-slack")
 include(":misk-sqldelight")
 include(":misk-sqldelight-testing")
@@ -149,3 +152,10 @@ include(":misk-vitess")
 include(":misk-vitess-database-gradle-plugin")
 include(":samples:exemplar")
 include(":samples:exemplarchat")
+
+val localSettings = file("local.settings.gradle.kts")
+if (localSettings.exists()) {
+  logger.lifecycle("Applying local settings at ${localSettings.absolutePath}")
+  apply(from = localSettings)
+}
+

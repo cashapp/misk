@@ -1,25 +1,27 @@
 package misk.hibernate
 
 import com.google.inject.Guice
+import jakarta.inject.Qualifier
 import misk.inject.getSetOf
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Qualifier
 
 internal class HibernateEntityModuleTest {
-  @Test fun multipleDataSources() {
-    val injector = Guice.createInjector(
-      object : HibernateEntityModule(Dinosaurs::class) {
-        override fun configureHibernate() {
-          addEntities(Triceratops::class, Stegosaurus::class)
-        }
-      },
-      object : HibernateEntityModule(Shapes::class) {
-        override fun configureHibernate() {
-          addEntities(Square::class, Circle::class)
-        }
-      }
-    )
+  @Test
+  fun multipleDataSources() {
+    val injector =
+      Guice.createInjector(
+        object : HibernateEntityModule(Dinosaurs::class) {
+          override fun configureHibernate() {
+            addEntities(Triceratops::class, Stegosaurus::class)
+          }
+        },
+        object : HibernateEntityModule(Shapes::class) {
+          override fun configureHibernate() {
+            addEntities(Square::class, Circle::class)
+          }
+        },
+      )
 
     assertThat(injector.getSetOf(HibernateEntity::class, Dinosaurs::class).unwrap())
       .containsExactly(Triceratops::class, Stegosaurus::class)
@@ -27,19 +29,21 @@ internal class HibernateEntityModuleTest {
       .containsExactly(Square::class, Circle::class)
   }
 
-  @Test fun multipleDataSourcesSameEntities() {
-    val injector = Guice.createInjector(
-      object : HibernateEntityModule(Dinosaurs::class) {
-        override fun configureHibernate() {
-          addHibernateEntities(Triceratops::class, Stegosaurus::class)
-        }
-      },
-      object : HibernateEntityModule(Shapes::class) {
-        override fun configureHibernate() {
-          addHibernateEntities(Triceratops::class, Stegosaurus::class)
-        }
-      }
-    )
+  @Test
+  fun multipleDataSourcesSameEntities() {
+    val injector =
+      Guice.createInjector(
+        object : HibernateEntityModule(Dinosaurs::class) {
+          override fun configureHibernate() {
+            addHibernateEntities(Triceratops::class, Stegosaurus::class)
+          }
+        },
+        object : HibernateEntityModule(Shapes::class) {
+          override fun configureHibernate() {
+            addHibernateEntities(Triceratops::class, Stegosaurus::class)
+          }
+        },
+      )
 
     assertThat(injector.getSetOf(HibernateEntity::class, Dinosaurs::class).unwrap())
       .containsExactly(Triceratops::class, Stegosaurus::class)
@@ -47,29 +51,31 @@ internal class HibernateEntityModuleTest {
       .containsExactly(Triceratops::class, Stegosaurus::class)
   }
 
-  @Test fun multipleModulesSameDataSource() {
-    val injector = Guice.createInjector(
-      object : HibernateEntityModule(Dinosaurs::class) {
-        override fun configureHibernate() {
-          addEntities(Triceratops::class)
-        }
-      },
-      object : HibernateEntityModule(Dinosaurs::class) {
-        override fun configureHibernate() {
-          addEntities(Stegosaurus::class)
-        }
-      },
-      object : HibernateEntityModule(Shapes::class) {
-        override fun configureHibernate() {
-          addEntities(Square::class)
-        }
-      },
-      object : HibernateEntityModule(Shapes::class) {
-        override fun configureHibernate() {
-          addEntities(Circle::class)
-        }
-      }
-    )
+  @Test
+  fun multipleModulesSameDataSource() {
+    val injector =
+      Guice.createInjector(
+        object : HibernateEntityModule(Dinosaurs::class) {
+          override fun configureHibernate() {
+            addEntities(Triceratops::class)
+          }
+        },
+        object : HibernateEntityModule(Dinosaurs::class) {
+          override fun configureHibernate() {
+            addEntities(Stegosaurus::class)
+          }
+        },
+        object : HibernateEntityModule(Shapes::class) {
+          override fun configureHibernate() {
+            addEntities(Square::class)
+          }
+        },
+        object : HibernateEntityModule(Shapes::class) {
+          override fun configureHibernate() {
+            addEntities(Circle::class)
+          }
+        },
+      )
 
     assertThat(injector.getSetOf(HibernateEntity::class, Dinosaurs::class).unwrap())
       .containsExactly(Triceratops::class, Stegosaurus::class)
@@ -79,15 +85,15 @@ internal class HibernateEntityModuleTest {
 
   private fun Set<HibernateEntity>.unwrap() = map { it.entity }
 
-  @Qualifier
-annotation class Dinosaurs
+  @Qualifier annotation class Dinosaurs
 
-  @Qualifier
-annotation class Shapes
+  @Qualifier annotation class Shapes
 
   abstract class Square : DbUnsharded<Square>
+
   abstract class Circle : DbEntity<Circle>
 
   abstract class Triceratops : DbUnsharded<Triceratops>
+
   abstract class Stegosaurus : DbUnsharded<Stegosaurus>
 }

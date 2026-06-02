@@ -1,9 +1,5 @@
 package misk.time
 
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.data.Offset
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Test
 import java.io.InterruptedIOException
 import java.time.Duration
 import java.util.concurrent.ExecutionException
@@ -11,6 +7,10 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import kotlin.test.assertFailsWith
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.data.Offset
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Test
 
 internal class FakeResourcePoolTest {
   private var executorService: ExecutorService? = null
@@ -53,12 +53,10 @@ internal class FakeResourcePoolTest {
     assertElapsedTime(expected = Duration.ofMillis(1250)) {
       val futures = mutableListOf<Future<*>>()
       for (i in 0 until 15) {
-        futures += executorService!!.submit {
-          pool.useResource(
-            maxTimeToWait = Duration.ofMillis(1100),
-            timeToHold = Duration.ofMillis(250)
-          )
-        }
+        futures +=
+          executorService!!.submit {
+            pool.useResource(maxTimeToWait = Duration.ofMillis(1100), timeToHold = Duration.ofMillis(250))
+          }
       }
       for (future in futures) {
         future.get()
@@ -68,10 +66,9 @@ internal class FakeResourcePoolTest {
 
   /**
    * Run 9 tasks over 9 threads targeting 3 resources:
-   *
-   *  * 3 will complete immediately
-   *  * 3 will complete after waiting
-   *  * 3 will time out.
+   * * 3 will complete immediately
+   * * 3 will complete after waiting
+   * * 3 will time out.
    */
   @Test
   fun contentionTimeouts() {
@@ -83,12 +80,10 @@ internal class FakeResourcePoolTest {
     assertElapsedTime(expected = Duration.ofMillis(500)) {
       val futures = mutableListOf<Future<*>>()
       for (i in 0 until 9) {
-        futures += executorService!!.submit {
-          pool.useResource(
-            maxTimeToWait = Duration.ofMillis(400),
-            timeToHold = Duration.ofMillis(250)
-          )
-        }
+        futures +=
+          executorService!!.submit {
+            pool.useResource(maxTimeToWait = Duration.ofMillis(400), timeToHold = Duration.ofMillis(250))
+          }
       }
 
       var successCount = 0

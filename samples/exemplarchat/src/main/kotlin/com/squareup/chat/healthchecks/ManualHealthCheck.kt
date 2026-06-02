@@ -1,8 +1,8 @@
 package com.squareup.chat.healthchecks
 
+import jakarta.inject.Singleton
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
-import jakarta.inject.Singleton
 
 @Singleton
 class ManualHealthCheck : HealthCheck {

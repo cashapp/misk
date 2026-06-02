@@ -11,13 +11,13 @@ dependencies {
   api(project(":wisp:wisp-rate-limiting"))
   api(project(":wisp:wisp-rate-limiting:bucket4j"))
   api(libs.awsDynamodb)
+  api(libs.bucket4jCore)
   api(libs.guice)
   api(libs.jakartaInject)
   api(libs.micrometerCore)
 
   implementation(project(":misk-logging"))
-  implementation(libs.bucket4jCore)
-  implementation(libs.bucket4jDynamoDbV1)
+  implementation(libs.awsCore)
   implementation(libs.loggingApi)
 
   testImplementation(project(":misk"))
@@ -33,6 +33,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = JavadocJar.Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = JavadocJar.Dokka("dokkaGfm")),
   )
 }

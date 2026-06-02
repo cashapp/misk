@@ -5,11 +5,15 @@ import com.squareup.moshi.Moshi
 import com.squareup.wire.GrpcException
 import com.squareup.wire.GrpcStatus
 import jakarta.inject.Inject
+import java.net.HttpURLConnection.HTTP_FORBIDDEN
+import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
+import java.net.HttpURLConnection.HTTP_UNAVAILABLE
 import misk.MiskTestingServiceModule
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
 import misk.exceptions.WebActionException
 import misk.inject.KAbstractModule
+import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -26,25 +30,17 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import misk.logging.LogCollector
-import java.net.HttpURLConnection.HTTP_FORBIDDEN
-import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
-import java.net.HttpURLConnection.HTTP_UNAVAILABLE
 
 @MiskTest(startService = true)
 internal class ExceptionMapperTest {
 
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
-  @Inject
-  lateinit var moshi: Moshi
+  @Inject lateinit var moshi: Moshi
 
-  @Inject
-  lateinit var jettyService: JettyService
+  @Inject lateinit var jettyService: JettyService
 
-  @Inject
-  lateinit var logCollector: LogCollector
+  @Inject lateinit var logCollector: LogCollector
 
   private fun serverUrlBuilder(): HttpUrl.Builder {
     return jettyService.httpServerUrl.newBuilder()
@@ -76,10 +72,8 @@ internal class ExceptionMapperTest {
     val response = get("/throws/grpc-error")
     assertThat(response.code).isEqualTo(HTTP_INTERNAL_ERROR)
     assertThat(response.body?.string()).isEqualTo("internal server error")
-    val loggedError = logCollector.takeMessage(
-      loggerClass = ExceptionHandlingInterceptor::class,
-      minLevel = Level.ERROR
-    )
+    val loggedError =
+      logCollector.takeMessage(loggerClass = ExceptionHandlingInterceptor::class, minLevel = Level.ERROR)
     assertThat(loggedError).isEqualTo("exception dispatching to ExceptionMapperTest.ThrowsGrpcError")
   }
 
@@ -99,10 +93,7 @@ internal class ExceptionMapperTest {
 
   fun get(path: String): okhttp3.Response {
     val httpClient = OkHttpClient()
-    val request = Request.Builder()
-      .get()
-      .url(serverUrlBuilder().encodedPath(path).build())
-      .build()
+    val request = Request.Builder().get().url(serverUrlBuilder().encodedPath(path).build()).build()
     return httpClient.newCall(request).execute()
   }
 
@@ -142,10 +133,7 @@ internal class ExceptionMapperTest {
     @Get("/throws/grpc-error")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun throwsGrpcError(): String {
-      throw GrpcException(
-        grpcStatus = GrpcStatus.UNKNOWN,
-        grpcMessage = "this was bad",
-      )
+      throw GrpcException(grpcStatus = GrpcStatus.UNKNOWN, grpcMessage = "this was bad")
     }
   }
 

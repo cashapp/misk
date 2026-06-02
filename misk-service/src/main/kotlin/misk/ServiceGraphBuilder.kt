@@ -20,8 +20,7 @@ data class ServiceGraphBuilderMetadata(
 }
 
 /**
- * Builds a graph of [CoordinatedService]s which defer start up and shut down until their dependent
- * services are ready.
+ * Builds a graph of [CoordinatedService]s which defer start up and shut down until their dependent services are ready.
  */
 internal class ServiceGraphBuilder {
   private val serviceMap = mutableMapOf<Key<*>, CoordinatedService>()
@@ -33,34 +32,32 @@ internal class ServiceGraphBuilder {
   /**
    * Registers a [service] with this [ServiceGraphBuilder]
    *
-   * A service should be added before dependencies or enhancements are specified.
-   * Keys must be unique. If a key is reused, then the original key-service pair will be replaced.
+   * A service should be added before dependencies or enhancements are specified. Keys must be unique. If a key is
+   * reused, then the original key-service pair will be replaced.
    */
   fun addService(key: Key<*>, service: Service) {
     addService(key, service::class.qualifiedName) { service }
   }
 
   fun addService(key: Key<*>, serviceName: String?, serviceProvider: Provider<out Service>) {
-    check(serviceMap[key] == null) {
-      "Service $key cannot be registered more than once"
-    }
+    check(serviceMap[key] == null) { "Service $key cannot be registered more than once" }
     serviceMap[key] = CoordinatedService(key, serviceProvider)
     serviceNames[key] = serviceName ?: "Anonymous Service(${key.typeLiteral.type.typeName})"
   }
 
   /**
-   * Registers a dependency pair in the service graph. Specifies that the [dependent] must
-   * start after [dependsOn], and conversely that [dependent] must stop before [dependsOn].
+   * Registers a dependency pair in the service graph. Specifies that the [dependent] must start after [dependsOn], and
+   * conversely that [dependent] must stop before [dependsOn].
    */
   fun addDependency(dependent: Key<*>, dependsOn: Key<*>) {
     dependencyMap.put(dependsOn, dependent)
   }
 
   /**
-   * This is the opposite of addDependency in that we're specifying that [toBeEnhanced] is a
-   * dependency of [enhancement]. The purpose of this is to avoid having to intertwine
-   * dependencies. For example, misk-service has no dependencies on other misk services but
-   * in the service graph ReadyService depends on many things by using enhancements.
+   * This is the opposite of addDependency in that we're specifying that [toBeEnhanced] is a dependency of
+   * [enhancement]. The purpose of this is to avoid having to intertwine dependencies. For example, misk-service has no
+   * dependencies on other misk services but in the service graph ReadyService depends on many things by using
+   * enhancements.
    */
   fun enhanceService(toBeEnhanced: Key<*>, enhancement: Key<*>) {
     dependencyMap.put(toBeEnhanced, enhancement)
@@ -78,10 +75,7 @@ internal class ServiceGraphBuilder {
     return ServiceManager(serviceMap.values)
   }
 
-  /**
-   * Builds [CoordinatedService]s from the instructions provided in the dependency and enhancement
-   * maps.
-   */
+  /** Builds [CoordinatedService]s from the instructions provided in the dependency and enhancement maps. */
   private fun linkDependencies() {
     for ((key, service) in serviceMap) {
       val dependencies = dependencyMap[key].map { serviceMap[it]!! }
@@ -89,9 +83,7 @@ internal class ServiceGraphBuilder {
     }
   }
 
-  /**
-   * Checks that no service in this builder has specified a dependency cycle.
-   */
+  /** Checks that no service in this builder has specified a dependency cycle. */
   private fun checkCycles() {
     val validityMap = mutableMapOf<CoordinatedService, CycleValidity>()
 
@@ -102,8 +94,8 @@ internal class ServiceGraphBuilder {
   }
 
   /**
-   * Checks that each service registered with this builder has its dependencies registered.
-   * (i.e. no one service requires a dependency or enhancement that doesn't exist.)
+   * Checks that each service registered with this builder has its dependencies registered. (i.e. no one service
+   * requires a dependency or enhancement that doesn't exist.)
    */
   private fun validateDependencyMap() {
     for ((service, dependents) in dependencyMap.asMap()) {
@@ -125,12 +117,7 @@ internal class ServiceGraphBuilder {
     }
   }
 
-  private fun StringBuilder.depthFirst(
-    serviceKey: Key<*>,
-    prefix: String,
-    isLast: Boolean,
-    isRoot: Boolean
-  ) {
+  private fun StringBuilder.depthFirst(serviceKey: Key<*>, prefix: String, isLast: Boolean, isRoot: Boolean) {
     if (!isRoot) {
       append(prefix)
       append(if (isLast) "\\__ " else "|__ ")
@@ -138,15 +125,14 @@ internal class ServiceGraphBuilder {
     append(serviceNameOf(serviceKey))
     append("\n")
 
-    val downstreamServices =
-      dependencyMap.asMap().filter { it.value.contains(serviceKey) }.keys.toList()
+    val downstreamServices = dependencyMap.asMap().filter { it.value.contains(serviceKey) }.keys.toList()
     for ((index, downstreamService) in downstreamServices.withIndex()) {
       val newPrefix = prefix + if (isLast) "    " else "|   "
       depthFirst(
         serviceKey = downstreamService,
         prefix = newPrefix,
         isLast = (index == downstreamServices.size - 1),
-        isRoot = false
+        isRoot = false,
       )
     }
   }
@@ -158,10 +144,11 @@ internal class ServiceGraphBuilder {
     append(serviceNames[key])
   }
 
-  fun toMetadata() = ServiceGraphBuilderMetadata(
-    serviceMap = serviceMap.map { it.key.toString() to it.value.toMetadataProvider() }.toMap(),
-    serviceNames = serviceNames.mapKeys { it.key.toString() },
-    dependencyMap = dependencyMap.asMap().map { (k,v) -> k.toString() to v.toString() }.toMap(),
-    asciiVisual = toString()
-  )
+  fun toMetadata() =
+    ServiceGraphBuilderMetadata(
+      serviceMap = serviceMap.map { it.key.toString() to it.value.toMetadataProvider() }.toMap(),
+      serviceNames = serviceNames.mapKeys { it.key.toString() },
+      dependencyMap = dependencyMap.asMap().map { (k, v) -> k.toString() to v.toString() }.toMap(),
+      asciiVisual = toString(),
+    )
 }

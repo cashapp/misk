@@ -1,22 +1,20 @@
 package misk.inject
 
 import com.google.inject.TypeLiteral
+import jakarta.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest
 class MapBinderTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject @TestAnnotation private lateinit var intToName: Map<Int, String>
   @Inject @TestAnnotation private lateinit var nameToShape: Map<String, Shape>
   @Inject @TestAnnotation private lateinit var shapeToName: Map<Shape, String>
-  @Inject @TestAnnotation
-  private lateinit var shapeToColor: Map<Shape, Color>
+  @Inject @TestAnnotation private lateinit var shapeToColor: Map<Shape, Color>
   @Inject private lateinit var unqualifiedShapeToColor: Map<Shape, Color>
   @Inject private lateinit var shapeToGeneric: Map<Shape, ColorWrapper<*>>
 
@@ -47,7 +45,7 @@ class TestModule : KAbstractModule() {
 
     newMapBinder<Shape, Color>().addBinding(Square()).toInstance(Blue())
     newMapBinder<Shape, Color>().addBinding(Circle()).toInstance(Red())
-    
+
     val wrapperType = object : TypeLiteral<ColorWrapper<*>>() {}
     newMapBinder(Shape::class.typeLiteral(), wrapperType).addBinding(Square()).toInstance(ColorWrapper.Blue())
     newMapBinder(Shape::class.typeLiteral(), wrapperType).addBinding(Circle()).toInstance(ColorWrapper.Red())

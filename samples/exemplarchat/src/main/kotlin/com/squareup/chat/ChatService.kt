@@ -16,12 +16,13 @@ fun main(args: Array<String>) {
   val deployment = wisp.deployment.Deployment(name = "exemplarchat", isLocalDevelopment = true)
   val config = MiskConfig.load<ChatConfig>("chat", deployment)
   MiskApplication(
-    MiskRealServiceModule(),
-    MiskWebModule(config.web),
-    ChatModule(),
-    RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false),
-    ConfigModule.create("chat", config),
-    DeploymentModule(deployment),
-    PrometheusMetricsServiceModule(config.prometheus)
-  ).run(args)
+      MiskRealServiceModule(),
+      MiskWebModule(config.web),
+      ChatModule(),
+      RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false),
+      ConfigModule.create("chat", config),
+      DeploymentModule(deployment),
+      PrometheusMetricsServiceModule(config.prometheus),
+    )
+    .run(args)
 }

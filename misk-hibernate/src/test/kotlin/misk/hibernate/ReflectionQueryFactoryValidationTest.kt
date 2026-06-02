@@ -1,22 +1,20 @@
 package misk.hibernate
 
 import com.google.common.util.concurrent.UncheckedExecutionException
+import jakarta.inject.Inject
+import kotlin.test.assertFailsWith
+import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.vitess.testing.utilities.DockerVitess
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
-import misk.testing.MiskExternalDependency
-import misk.vitess.testing.utilities.DockerVitess
-import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 class ReflectionQueryFactoryValidationTest {
-  @MiskExternalDependency
-  private val dockerVitess = DockerVitess()
+  @MiskExternalDependency private val dockerVitess = DockerVitess()
 
-  @MiskTestModule
-  val module = MoviesTestModule()
+  @MiskTestModule val module = MoviesTestModule()
 
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
@@ -25,52 +23,47 @@ class ReflectionQueryFactoryValidationTest {
   fun returnTypeMustBeThis() {
     val name = String::class.java.name
     val returnName = ReturnTypeMustBeThis::class.java.name
-    assertThat(
-      assertFailsWith<UncheckedExecutionException> {
-        queryFactory.newQuery<ReturnTypeMustBeThis>()
-      }.cause
-    ).hasMessage(
-      """
+    assertThat(assertFailsWith<UncheckedExecutionException> { queryFactory.newQuery<ReturnTypeMustBeThis>() }.cause)
+      .hasMessage(
+        """
         |Query class ${ReturnTypeMustBeThis::class.java.name} has problems:
         |  name() returns $name but @Constraint methods must return this ($returnName)"""
-        .trimMargin()
-    )
+          .trimMargin()
+      )
   }
 
   interface ReturnTypeMustBeThis : Query<DbCharacter> {
-    @Constraint("name")
-    fun name(name: String): String
+    @Constraint("name") fun name(name: String): String
   }
 
   @Test
   fun parameterCountMustMatchOperator() {
     assertThat(
-      assertFailsWith<UncheckedExecutionException> {
-        queryFactory.newQuery<ParameterCountMustMatchOperator>()
-      }.cause
-    ).hasMessage(
-      """
+        assertFailsWith<UncheckedExecutionException> { queryFactory.newQuery<ParameterCountMustMatchOperator>() }.cause
+      )
+      .hasMessage(
+        """
         |Query class ${ParameterCountMustMatchOperator::class.java.name} has problems:
-        |  name() declares 0 parameters but must accept 1 parameters""".trimMargin()
-    )
+        |  name() declares 0 parameters but must accept 1 parameters"""
+          .trimMargin()
+      )
   }
 
   interface ParameterCountMustMatchOperator : Query<DbCharacter> {
-    @Constraint("name")
-    fun name(): ParameterCountMustMatchOperator
+    @Constraint("name") fun name(): ParameterCountMustMatchOperator
   }
 
   @Test
   fun annotationRequiredOnQuery() {
     assertThat(
-      assertFailsWith<UncheckedExecutionException> {
-        queryFactory.newQuery<AnnotationRequiredOnQuery>()
-      }.cause
-    ).hasMessage(
-      """
+        assertFailsWith<UncheckedExecutionException> { queryFactory.newQuery<AnnotationRequiredOnQuery>() }.cause
+      )
+      .hasMessage(
+        """
         |Query class ${AnnotationRequiredOnQuery::class.java.name} has problems:
-        |  name() must be annotated @Constraint, @Fetch, @Order, @Group, or @Select""".trimMargin()
-    )
+        |  name() must be annotated @Constraint, @Fetch, @Order, @Group, or @Select"""
+          .trimMargin()
+      )
   }
 
   interface AnnotationRequiredOnQuery : Query<DbCharacter> {
@@ -79,41 +72,38 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun malformedPathOnQuery() {
-    assertThat(
-      assertFailsWith<UncheckedExecutionException> {
-        queryFactory.newQuery<MalformedPathOnQuery>()
-      }.cause
-    ).hasMessage(
-      """
+    assertThat(assertFailsWith<UncheckedExecutionException> { queryFactory.newQuery<MalformedPathOnQuery>() }.cause)
+      .hasMessage(
+        """
         |Query class ${MalformedPathOnQuery::class.java.name} has problems:
-        |  name() path is not valid: '.name'""".trimMargin()
-    )
+        |  name() path is not valid: '.name'"""
+          .trimMargin()
+      )
   }
 
   interface MalformedPathOnQuery : Query<DbCharacter> {
-    @Constraint(".name")
-    fun name(name: String): AnnotationRequiredOnQuery
+    @Constraint(".name") fun name(name: String): AnnotationRequiredOnQuery
   }
 
   @Test
   fun parameterAnnotationRequiredOnProjection() {
     val name = ParameterAnnotationRequiredOnProjection::class.java.name
     assertThat(
-      assertFailsWith<UncheckedExecutionException> {
-        transacter.transaction {
-          queryFactory.newQuery<ParameterAnnotationRequiredOnProjectionQuery>()
-        }
-      }.cause
-    ).hasMessage(
-      """
+        assertFailsWith<UncheckedExecutionException> {
+            transacter.transaction { queryFactory.newQuery<ParameterAnnotationRequiredOnProjectionQuery>() }
+          }
+          .cause
+      )
+      .hasMessage(
+        """
         |Query class ${ParameterAnnotationRequiredOnProjectionQuery::class.java.name} has problems:
-        |  $name parameter 0 is missing a @Property annotation""".trimMargin()
-    )
+        |  $name parameter 0 is missing a @Property annotation"""
+          .trimMargin()
+      )
   }
 
   interface ParameterAnnotationRequiredOnProjectionQuery : Query<DbCharacter> {
-    @Select
-    fun listAsProjection(session: Session): List<ParameterAnnotationRequiredOnProjection>
+    @Select fun listAsProjection(session: Session): List<ParameterAnnotationRequiredOnProjection>
   }
 
   data class ParameterAnnotationRequiredOnProjection(var name: String) : Projection
@@ -121,21 +111,21 @@ class ReflectionQueryFactoryValidationTest {
   @Test
   fun missingPrimaryConstructor() {
     assertThat(
-      assertFailsWith<UncheckedExecutionException> {
-        transacter.transaction {
-          queryFactory.newQuery<MissingPrimaryConstructorQuery>()
-        }
-      }.cause
-    ).hasMessage(
-      """
+        assertFailsWith<UncheckedExecutionException> {
+            transacter.transaction { queryFactory.newQuery<MissingPrimaryConstructorQuery>() }
+          }
+          .cause
+      )
+      .hasMessage(
+        """
         |Query class ${MissingPrimaryConstructorQuery::class.java.name} has problems:
-        |  ${MissingPrimaryConstructor::class.java.name} has no primary constructor""".trimMargin()
-    )
+        |  ${MissingPrimaryConstructor::class.java.name} has no primary constructor"""
+          .trimMargin()
+      )
   }
 
   interface MissingPrimaryConstructorQuery : Query<DbCharacter> {
-    @Select
-    fun listAsProjection(session: Session): List<MissingPrimaryConstructor>
+    @Select fun listAsProjection(session: Session): List<MissingPrimaryConstructor>
   }
 
   interface MissingPrimaryConstructor : Projection
@@ -143,129 +133,124 @@ class ReflectionQueryFactoryValidationTest {
   @Test
   fun malformedPathOnParameter() {
     assertThat(
-      assertFailsWith<UncheckedExecutionException> {
-        transacter.transaction {
-          queryFactory.newQuery<MalformedPathOnParameterQuery>()
-        }
-      }.cause
-    ).hasMessage(
-      """
+        assertFailsWith<UncheckedExecutionException> {
+            transacter.transaction { queryFactory.newQuery<MalformedPathOnParameterQuery>() }
+          }
+          .cause
+      )
+      .hasMessage(
+        """
         |Query class ${MalformedPathOnParameterQuery::class.java.name} has problems:
         |  ${MalformedPathOnParameter::class.java.name} parameter 0 path is not valid: '.name'"""
-        .trimMargin()
-    )
+          .trimMargin()
+      )
   }
 
   interface MalformedPathOnParameterQuery : Query<DbCharacter> {
-    @Select
-    fun listAsProjection(session: Session): List<MalformedPathOnParameter>
+    @Select fun listAsProjection(session: Session): List<MalformedPathOnParameter>
   }
 
-  data class MalformedPathOnParameter(
-    @Property(path = ".name") var name: String
-  ) : Projection
+  data class MalformedPathOnParameter(@Property(path = ".name") var name: String) : Projection
 
   @Test
   fun inParameterIsNotVarargOrCollection() {
     assertThat(
-      assertFailsWith<UncheckedExecutionException> {
-        queryFactory.newQuery<InParameterIsNotVarargOrCollection>()
-      }.cause
-    ).hasMessage(
-      """
+        assertFailsWith<UncheckedExecutionException> { queryFactory.newQuery<InParameterIsNotVarargOrCollection>() }
+          .cause
+      )
+      .hasMessage(
+        """
         |Query class ${InParameterIsNotVarargOrCollection::class.java.name} has problems:
-        |  nameIn() parameter must be a vararg or a collection""".trimMargin()
-    )
+        |  nameIn() parameter must be a vararg or a collection"""
+          .trimMargin()
+      )
   }
 
   interface InParameterIsNotVarargOrCollection : Query<DbCharacter> {
-    @Constraint("name", Operator.IN)
-    fun nameIn(name: String): InParameterIsNotVarargOrCollection
+    @Constraint("name", Operator.IN) fun nameIn(name: String): InParameterIsNotVarargOrCollection
   }
 
   @Test
   fun selectDoesNotAcceptSession() {
     assertThat(
-      assertFailsWith<UncheckedExecutionException> {
-        transacter.transaction {
-          queryFactory.newQuery<SelectDoesNotAcceptSessionQuery>()
-        }
-      }.cause
-    ).hasMessage(
-      """
+        assertFailsWith<UncheckedExecutionException> {
+            transacter.transaction { queryFactory.newQuery<SelectDoesNotAcceptSessionQuery>() }
+          }
+          .cause
+      )
+      .hasMessage(
+        """
         |Query class ${SelectDoesNotAcceptSessionQuery::class.java.name} has problems:
-        |  listAsProjection() must accept a single Session parameter""".trimMargin()
-    )
+        |  listAsProjection() must accept a single Session parameter"""
+          .trimMargin()
+      )
   }
 
   interface SelectDoesNotAcceptSessionQuery : Query<DbCharacter> {
-    @Select
-    fun listAsProjection(): List<MalformedPathOnParameter>
+    @Select fun listAsProjection(): List<MalformedPathOnParameter>
   }
 
   @Test
   fun selectNonProjectionPathIsEmpty() {
     assertThat(
-      assertFailsWith<UncheckedExecutionException> {
-        transacter.transaction {
-          queryFactory.newQuery<SelectNonProjectionPathIsEmpty>()
-        }
-      }.cause
-    ).hasMessage(
-      """
+        assertFailsWith<UncheckedExecutionException> {
+            transacter.transaction { queryFactory.newQuery<SelectNonProjectionPathIsEmpty>() }
+          }
+          .cause
+      )
+      .hasMessage(
+        """
         |Query class ${SelectNonProjectionPathIsEmpty::class.java.name} has problems:
-        |  listAsProjection() path is not valid: ''""".trimMargin()
-    )
+        |  listAsProjection() path is not valid: ''"""
+          .trimMargin()
+      )
   }
 
   interface SelectNonProjectionPathIsEmpty : Query<DbCharacter> {
-    @Select
-    fun listAsProjection(session: Session): List<String>
+    @Select fun listAsProjection(session: Session): List<String>
   }
 
   @Test
   fun selectUniqueReturnTypeNullability() {
     assertThat(
-      assertFailsWith<UncheckedExecutionException> {
-        transacter.transaction {
-          queryFactory.newQuery<SelectUniqueReturnTypeNullability>()
-        }
-      }.cause
-    ).hasMessage(
-      """
+        assertFailsWith<UncheckedExecutionException> {
+            transacter.transaction { queryFactory.newQuery<SelectUniqueReturnTypeNullability>() }
+          }
+          .cause
+      )
+      .hasMessage(
+        """
         |Query class ${SelectUniqueReturnTypeNullability::class.java.name} has problems:
         |  listNames() return type must be a non-null List or a nullable value
-        |  uniqueName() return type must be a non-null List or a nullable value""".trimMargin()
-    )
+        |  uniqueName() return type must be a non-null List or a nullable value"""
+          .trimMargin()
+      )
   }
 
   interface SelectUniqueReturnTypeNullability : Query<DbCharacter> {
-    @Select("name")
-    fun uniqueName(session: Session): String
+    @Select("name") fun uniqueName(session: Session): String
 
-    @Select("name")
-    fun listNames(session: Session): List<String>?
+    @Select("name") fun listNames(session: Session): List<String>?
   }
 
   @Test
   fun tooManyAnnotations() {
     assertThat(
-      assertFailsWith<UncheckedExecutionException> {
-        transacter.transaction {
-          queryFactory.newQuery<TooManyAnnotations>()
-        }
-      }.cause
-    ).hasMessage(
-      """
+        assertFailsWith<UncheckedExecutionException> {
+            transacter.transaction { queryFactory.newQuery<TooManyAnnotations>() }
+          }
+          .cause
+      )
+      .hasMessage(
+        """
         |Query class ${TooManyAnnotations::class.java.name} has problems:
-        |  selectOrConstraint() has too many annotations""".trimMargin()
-    )
+        |  selectOrConstraint() has too many annotations"""
+          .trimMargin()
+      )
   }
 
   interface TooManyAnnotations : Query<DbCharacter> {
-    @Select("name")
-    @Constraint("name")
-    fun selectOrConstraint(session: Session): TooManyAnnotations
+    @Select("name") @Constraint("name") fun selectOrConstraint(session: Session): TooManyAnnotations
   }
 
   @Test

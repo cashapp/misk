@@ -1,8 +1,14 @@
 package misk.web
 
 import com.google.inject.Key
+import com.google.inject.Provider
+import java.util.regex.Matcher
+import javax.servlet.http.HttpServletRequest
+import kotlin.reflect.KType
+import kotlin.reflect.full.findAnnotation
 import misk.Action
 import misk.ApplicationInterceptor
+import misk.api.HttpRequest
 import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.scope.SeedDataTransformer
@@ -16,18 +22,9 @@ import misk.web.metadata.webaction.WebActionMetadata
 import okhttp3.HttpUrl
 import okhttp3.MediaType
 import org.slf4j.MDC
-import java.util.regex.Matcher
-import com.google.inject.Provider
-import misk.api.HttpRequest
-import javax.servlet.http.HttpServletRequest
-import kotlin.reflect.KType
-import kotlin.reflect.full.findAnnotation
 
-/**
- * Decodes an HTTP request into a call to a web action, then encodes its response into an HTTP
- * response.
- */
-internal class BoundAction<A : WebAction>(
+/** Decodes an HTTP request into a call to a web action, then encodes its response into an HTTP response. */
+class BoundAction<A : WebAction>(
   private val scope: ActionScope,
   private val webActionProvider: Provider<A>,
   private val networkInterceptors: List<NetworkInterceptor>,
@@ -43,7 +40,7 @@ internal class BoundAction<A : WebAction>(
     requestDispatchMechanism: DispatchMechanism?,
     requestContentType: MediaType?,
     requestAcceptedTypes: List<MediaRange>,
-    url: HttpUrl
+    url: HttpUrl,
   ): BoundActionMatch? {
     // Confirm the path and method matches
     val pathMatcher = pathPattern.matcher(url) ?: return null
@@ -51,14 +48,12 @@ internal class BoundAction<A : WebAction>(
 
     // Confirm the request content type matches the types we accept, and pick the most specific
     // content type match
-    val requestContentTypeMatch =
-      requestContentType?.closestMediaRangeMatch(action.acceptedMediaRanges)
+    val requestContentTypeMatch = requestContentType?.closestMediaRangeMatch(action.acceptedMediaRanges)
     if (requestContentType != null && requestContentTypeMatch == null) return null
 
     // Confirm we can generate a response content type matching the set accepted by the request,
     // and pick the most specific response content type match
-    val responseContentTypeMatch =
-      action.responseContentType?.closestMediaRangeMatch(requestAcceptedTypes)
+    val responseContentTypeMatch = action.responseContentType?.closestMediaRangeMatch(requestAcceptedTypes)
     if (action.responseContentType != null && responseContentTypeMatch == null) return null
 
     val acceptedMediaRange = requestContentTypeMatch?.mediaRange ?: MediaRange.ALL_MEDIA
@@ -69,25 +64,22 @@ internal class BoundAction<A : WebAction>(
       pathMatcher = pathMatcher,
       acceptedMediaRange = acceptedMediaRange,
       requestCharsetMatch = requestCharsetMatch,
-      responseContentType = action.responseContentType ?: MediaTypes.ALL_MEDIA_TYPE
+      responseContentType = action.responseContentType ?: MediaTypes.ALL_MEDIA_TYPE,
     )
   }
 
   fun matchByUrl(url: HttpUrl): BoundActionMatch? {
-    val patchMather = pathPattern.matcher(url) ?: return null
+    val pathMatcher = pathPattern.matcher(url) ?: return null
     return BoundActionMatch(
       action = this,
-      pathMatcher = patchMather,
+      pathMatcher = pathMatcher,
       acceptedMediaRange = MediaRange.ALL_MEDIA,
       requestCharsetMatch = false,
-      responseContentType = MediaTypes.ALL_MEDIA_TYPE
+      responseContentType = MediaTypes.ALL_MEDIA_TYPE,
     )
   }
 
-  /**
-   * Returns true if this [BoundAction] has identical routing annotations as the provided
-   * [BoundAction].
-   */
+  /** Returns true if this [BoundAction] has identical routing annotations as the provided [BoundAction]. */
   fun hasIdenticalRouting(other: BoundAction<*>): Boolean {
     if (pathPattern.pattern != other.pathPattern.pattern) {
       return false
@@ -104,28 +96,45 @@ internal class BoundAction<A : WebAction>(
     return true
   }
 
-  internal fun scopeAndHandle(
-    request: HttpServletRequest,
-    httpCall: HttpCall,
-    pathMatcher: Matcher
-  ) {
-    val initialSeedData = mapOf<Key<*>, Any?>(
-      keyOf<HttpServletRequest>() to request,
-      keyOf<HttpCall>() to httpCall,
-      keyOf<HttpRequest>() to httpCall,
-      keyOf<Action>() to action,
-    )
+  fun scopeAndHandle(request: HttpServletRequest, httpCall: HttpCall, pathMatcher: Matcher) {
+    val initialSeedData =
+      mapOf<Key<*>, Any?>(
+        keyOf<HttpServletRequest>() to request,
+        keyOf<HttpCall>() to httpCall,
+        keyOf<HttpRequest>() to httpCall,
+        keyOf<Action>() to action,
+      )
     val seedData =
-      seedDataTransformers.fold(initialSeedData) { seedData, interceptor ->
-        interceptor.transform(seedData)
-      }
-    
+      seedDataTransformers.fold(initialSeedData) { seedData, interceptor -> interceptor.transform(seedData) }
+
     MDC.clear() // MDC should already be empty, but clear it again just in case
-    
+
     try {
-      scope.enter(seedData).use {
-        handle(httpCall, pathMatcher)
-      }
+      scope.create(seedData).inScope { handle(httpCall, pathMatcher) }
+    } finally {
+      MDC.clear() // don't let any MDC tags leak to subsequent requests
+    }
+  }
+
+  /**
+   * Overload for non-Jetty environments (like Armeria) where HttpServletRequest is not available. Provides null for
+   * HttpServletRequest in seed data.
+   */
+  fun scopeAndHandle(httpCall: HttpCall, pathMatcher: Matcher) {
+    val initialSeedData =
+      mapOf<Key<*>, Any?>(
+        keyOf<HttpServletRequest>() to null,
+        keyOf<HttpCall>() to httpCall,
+        keyOf<HttpRequest>() to httpCall,
+        keyOf<Action>() to action,
+      )
+    val seedData =
+      seedDataTransformers.fold(initialSeedData) { seedData, interceptor -> interceptor.transform(seedData) }
+
+    MDC.clear() // MDC should already be empty, but clear it again just in case
+
+    try {
+      scope.create(seedData).inScope { handle(httpCall, pathMatcher) }
     } finally {
       MDC.clear() // don't let any MDC tags leak to subsequent requests
     }
@@ -137,11 +146,7 @@ internal class BoundAction<A : WebAction>(
 
     // RequestBridgeInterceptor necessarily needs to be the last NetworkInterceptor run.
     val interceptors = networkInterceptors.toMutableList()
-    interceptors.add(
-      RequestBridgeInterceptor(
-        webActionBinding, applicationInterceptors, pathMatcher, scope
-      )
-    )
+    interceptors.add(RequestBridgeInterceptor(webActionBinding, applicationInterceptors, pathMatcher, scope))
 
     val chain = RealNetworkChain(action, webAction, httpCall, interceptors.toList())
     chain.proceed(httpCall)
@@ -164,14 +169,9 @@ internal class BoundAction<A : WebAction>(
       applicationInterceptors = applicationInterceptors,
       networkInterceptors = networkInterceptors,
       dispatchMechanism = action.dispatchMechanism,
-      allowedServices = fetchAllowedCallers(
-        applicationInterceptors, AccessInterceptor::allowedServices
-      ),
-      allowedCapabilities = fetchAllowedCallers(
-        applicationInterceptors,
-        AccessInterceptor::allowedCapabilities
-      ),
-      documentationProvider = documentationProvider
+      allowedServices = fetchAllowedCallers(applicationInterceptors, AccessInterceptor::allowedServices),
+      allowedCapabilities = fetchAllowedCallers(applicationInterceptors, AccessInterceptor::allowedCapabilities),
+      documentationProvider = documentationProvider,
     )
   }
 
@@ -184,7 +184,7 @@ internal class BoundAction<A : WebAction>(
 
   private fun fetchAllowedCallers(
     applicationInterceptors: List<ApplicationInterceptor>,
-    allowedCallersFun: (AccessInterceptor) -> Set<String>
+    allowedCallersFun: (AccessInterceptor) -> Set<String>,
   ): Set<String> {
     for (interceptor in applicationInterceptors) {
       if (interceptor is AccessInterceptor) {
@@ -198,11 +198,11 @@ internal class BoundAction<A : WebAction>(
 }
 
 /** Matches a request. Can be sorted to pick the most specific match amongst a set of candidates. */
-internal open class RequestMatch(
+open class RequestMatch(
   private val pathPattern: PathPattern,
   private val acceptedMediaRange: MediaRange,
   private val requestCharsetMatch: Boolean,
-  private val responseContentType: MediaType
+  private val responseContentType: MediaType,
 ) : Comparable<RequestMatch> {
 
   override fun compareTo(other: RequestMatch): Int {
@@ -225,17 +225,16 @@ internal open class RequestMatch(
     return 0
   }
 
-  override fun toString(): String =
-    "path: $pathPattern, accepts: $acceptedMediaRange, emits: $responseContentType"
+  override fun toString(): String = "path: $pathPattern, accepts: $acceptedMediaRange, emits: $responseContentType"
 }
 
 /** A [RequestMatch] associated with the action that matched. */
-internal class BoundActionMatch(
+class BoundActionMatch(
   val action: BoundAction<*>,
   val pathMatcher: Matcher,
   acceptedMediaRange: MediaRange,
   requestCharsetMatch: Boolean,
-  responseContentType: MediaType
+  responseContentType: MediaType,
 ) : RequestMatch(action.pathPattern, acceptedMediaRange, requestCharsetMatch, responseContentType)
 
 private fun MediaType.closestMediaRangeMatch(ranges: List<MediaRange>) =
@@ -244,8 +243,8 @@ private fun MediaType.closestMediaRangeMatch(ranges: List<MediaRange>) =
 /**
  * Acts as the bridge between network interceptors and application interceptors.
  *
- * This expects the application chain to return a value or a Response wrapping a value.
- * If it does, this will be written to the HTTP call's response.
+ * This expects the application chain to return a value or a Response wrapping a value. If it does, this will be written
+ * to the HTTP call's response.
  */
 private class RequestBridgeInterceptor(
   val webActionBinding: WebActionBinding,
@@ -257,9 +256,8 @@ private class RequestBridgeInterceptor(
     val httpCall = chain.httpCall
     val arguments = webActionBinding.beforeCall(chain.webAction, httpCall, pathMatcher)
 
-    val applicationChain = chain.webAction.asChain(
-      chain.action.function, arguments, applicationInterceptors, httpCall, actionScope
-    )
+    val applicationChain =
+      chain.webAction.asChain(chain.action.function, arguments, applicationInterceptors, httpCall, actionScope)
 
     var returnValue = applicationChain.proceed(applicationChain.args)
 
@@ -271,9 +269,7 @@ private class RequestBridgeInterceptor(
       returnValue = returnValue.body!!
       if (trailers?.any() == true) {
         httpCall.requireTrailers()
-        trailers.map {
-          httpCall.setResponseTrailer(it.first, it.second)
-        }
+        trailers.map { httpCall.setResponseTrailer(it.first, it.second) }
       }
     }
 

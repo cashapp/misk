@@ -1,27 +1,28 @@
 package misk.vitess.gradle
 
-import org.assertj.core.api.Assertions.assertThat
-import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
 import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 import java.sql.Statement
+import org.assertj.core.api.Assertions.assertThat
+import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class VitessDatabasePluginTest {
   @Test
   fun `start VitessTestDb with custom parameters`() {
     val testProjectDir = File(this.javaClass.getResource("/vitess-database-plugin-test")!!.file)
 
-    val result = GradleRunner.create()
-      .withProjectDir(testProjectDir)
-      .withArguments("startVitessDatabase")
-      .withPluginClasspath()
-      .forwardOutput()
-      .build()
+    val result =
+      GradleRunner.create()
+        .withProjectDir(testProjectDir)
+        .withArguments("startVitessDatabase")
+        .withPluginClasspath()
+        .forwardOutput()
+        .build()
 
     assertThat(result.task(":startVitessDatabase")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
 

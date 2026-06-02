@@ -22,8 +22,8 @@ interface Job {
   val attributes: Map<String, String>
 
   /**
-   * Acknowledges the job and deletes it from the underlying queue. May perform an RPC, and thus
-   * should not be called while holding database transactions or other resources
+   * Acknowledges the job and deletes it from the underlying queue. May perform an RPC, and thus should not be called
+   * while holding database transactions or other resources
    */
   fun acknowledge()
 
@@ -31,8 +31,8 @@ interface Job {
   fun deadLetter()
 
   /**
-   * Assigns and applies a visibility timeout for the job by making it unreachable for some time duration.
-   * The timeout increases after each retry. May perform an RPC.
-   * */
+   * Assigns and applies a visibility timeout for the job by making it unreachable for some time duration. The timeout
+   * increases after each retry. May perform an RPC.
+   */
   fun delayWithBackoff()
 }

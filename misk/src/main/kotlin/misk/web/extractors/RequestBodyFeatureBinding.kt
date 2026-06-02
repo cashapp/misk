@@ -1,5 +1,9 @@
 package misk.web.extractors
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.io.IOException
+import kotlin.reflect.KParameter
 import misk.Action
 import misk.exceptions.BadRequestException
 import misk.web.FeatureBinding
@@ -10,22 +14,18 @@ import misk.web.RequestBody
 import misk.web.marshal.GenericUnmarshallers
 import misk.web.marshal.Unmarshaller
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import java.io.IOException
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-import kotlin.reflect.KParameter
 
 /** Binds parameters annotated [RequestBody] to the unmarshalled request body. */
 internal class RequestBodyFeatureBinding(
   private val parameter: KParameter,
-  private val unmarshallerFactories: List<Unmarshaller.Factory>
+  private val unmarshallerFactories: List<Unmarshaller.Factory>,
 ) : FeatureBinding {
   override fun beforeCall(subject: Subject) {
     val contentType = subject.httpCall.requestHeaders["Content-Type"]
     val mediaType = contentType?.toMediaTypeOrNull()
-    val unmarshaller = mediaType?.let { type ->
-      unmarshallerFactories.firstNotNullOfOrNull { it.create(type, parameter.type) }
-    } ?: GenericUnmarshallers.into(parameter)
+    val unmarshaller =
+      mediaType?.let { type -> unmarshallerFactories.firstNotNullOfOrNull { it.create(type, parameter.type) } }
+        ?: GenericUnmarshallers.into(parameter)
 
     if (unmarshaller == null) {
       if (contentType == null) {
@@ -38,23 +38,25 @@ internal class RequestBodyFeatureBinding(
     }
 
     val requestBody = subject.httpCall.takeRequestBody()!!
-    val value = try {
-      unmarshaller.unmarshal(subject.httpCall.requestHeaders, requestBody)
-    } catch (e: IOException) {
-      throw RequestBodyException(e)
-    }
+    val value =
+      try {
+        unmarshaller.unmarshal(subject.httpCall.requestHeaders, requestBody)
+      } catch (e: IOException) {
+        throw RequestBodyException(e)
+      }
     subject.setParameter(parameter, value)
   }
 
   @Singleton
-  class Factory @Inject internal constructor(
-    @JvmSuppressWildcards private val unmarshallerFactories: List<Unmarshaller.Factory>
-  ) : FeatureBinding.Factory {
+  class Factory
+  @Inject
+  internal constructor(@JvmSuppressWildcards private val unmarshallerFactories: List<Unmarshaller.Factory>) :
+    FeatureBinding.Factory {
     override fun create(
       action: Action,
       pathPattern: PathPattern,
       claimer: Claimer,
-      stringConverterFactories: List<StringConverter.Factory>
+      stringConverterFactories: List<StringConverter.Factory>,
     ): FeatureBinding? {
       val parameter = action.parameterAnnotatedOrNull<RequestBody>() ?: return null
       claimer.claimParameter(parameter)
@@ -64,6 +66,4 @@ internal class RequestBodyFeatureBinding(
   }
 }
 
-class RequestBodyException(
-  cause: Throwable
-) : IOException("unmarshalling the request body failed: $cause", cause)
+class RequestBodyException(cause: Throwable) : IOException("unmarshalling the request body failed: $cause", cause)

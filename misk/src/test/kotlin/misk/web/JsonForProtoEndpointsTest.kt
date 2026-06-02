@@ -9,6 +9,7 @@ import com.squareup.wire.GrpcClient
 import com.squareup.wire.GrpcMethod
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.grpc.Http2ClientTestingModule
 import misk.inject.KAbstractModule
@@ -27,22 +28,16 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
-/**
- * Test that we can send JSON to proto and gRPC endpoints.
- */
+/** Test that we can send JSON to proto and gRPC endpoints. */
 @Disabled("gRPC tests are flaky, see https://github.com/cashapp/misk/issues/1853")
 @MiskTest(startService = true)
 internal class JsonForProtoEndpointsTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
-  @Inject
-  lateinit var moshi: Moshi
+  @Inject lateinit var moshi: Moshi
 
-  @Inject
-  lateinit var jettyService: JettyService
+  @Inject lateinit var jettyService: JettyService
 
   private lateinit var httpClient: OkHttpClient
 
@@ -54,96 +49,71 @@ internal class JsonForProtoEndpointsTest {
 
   @Test
   fun `json to protobuf endpoint`() {
-    val requestBody = Shipment.Builder()
-      .shipment_token("abc")
-      .build()
-    val expectedResponseBody = Warehouse.Builder()
-      .warehouse_token("abc")
-      .build()
+    val requestBody = Shipment.Builder().shipment_token("abc").build()
+    val expectedResponseBody = Warehouse.Builder().warehouse_token("abc").build()
 
-    val request = Request.Builder()
-      .post(
-        moshi.adapter(Shipment::class.java).toJson(requestBody)
-          .toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
-      )
-      .url(serverUrlBuilder().encodedPath("/get_destination_warehouse").build())
-      .build()
+    val request =
+      Request.Builder()
+        .post(
+          moshi.adapter(Shipment::class.java).toJson(requestBody).toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
+        )
+        .url(serverUrlBuilder().encodedPath("/get_destination_warehouse").build())
+        .build()
 
     val response = httpClient.newCall(request).execute()
     response.use {
       val responseBody = moshi.adapter(Warehouse::class.java).fromJson(response.body!!.source())
       assertThat(responseBody).isEqualTo(expectedResponseBody)
-      assertThat(response.body!!.contentType().toString())
-        .isEqualTo("application/json;charset=utf-8")
+      assertThat(response.body!!.contentType().toString()).isEqualTo("application/json;charset=utf-8")
     }
   }
 
   @Test
   fun `json to grpc endpoint`() {
-    val requestBody = Shipment.Builder()
-      .shipment_token("abc")
-      .build()
-    val expectedResponseBody = Warehouse.Builder()
-      .warehouse_token("abc")
-      .build()
+    val requestBody = Shipment.Builder().shipment_token("abc").build()
+    val expectedResponseBody = Warehouse.Builder().warehouse_token("abc").build()
 
-    val request = Request.Builder()
-      .post(
-        moshi.adapter(Shipment::class.java).toJson(requestBody)
-          .toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
-      )
-      .url(serverUrlBuilder().encodedPath("/test/GetDestinationWarehouse").build())
-      .build()
+    val request =
+      Request.Builder()
+        .post(
+          moshi.adapter(Shipment::class.java).toJson(requestBody).toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
+        )
+        .url(serverUrlBuilder().encodedPath("/test/GetDestinationWarehouse").build())
+        .build()
 
     val response = httpClient.newCall(request).execute()
     response.use {
       val responseBody = moshi.adapter(Warehouse::class.java).fromJson(response.body!!.source())
       assertThat(responseBody).isEqualTo(expectedResponseBody)
-      assertThat(response.body!!.contentType().toString())
-        .isEqualTo("application/json;charset=utf-8")
+      assertThat(response.body!!.contentType().toString()).isEqualTo("application/json;charset=utf-8")
     }
   }
 
   @Test
   fun `protobuf to protobuf endpoint`() {
-    val requestBody = Shipment.Builder()
-      .shipment_token("abc")
-      .build()
-    val expectedResponseBody = Warehouse.Builder()
-      .warehouse_token("abc")
-      .build()
+    val requestBody = Shipment.Builder().shipment_token("abc").build()
+    val expectedResponseBody = Warehouse.Builder().warehouse_token("abc").build()
 
-    val request = Request.Builder()
-      .post(
-        ByteString.of(*requestBody.encode()).toRequestBody(
-          MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE
-        )
-      )
-      .url(serverUrlBuilder().encodedPath("/get_destination_warehouse").build())
-      .build()
+    val request =
+      Request.Builder()
+        .post(ByteString.of(*requestBody.encode()).toRequestBody(MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE))
+        .url(serverUrlBuilder().encodedPath("/get_destination_warehouse").build())
+        .build()
 
     val response = httpClient.newCall(request).execute()
     response.use {
       val responseBody = Warehouse.ADAPTER.decode(response.body!!.source())
       assertThat(responseBody).isEqualTo(expectedResponseBody)
-      assertThat(response.body!!.contentType())
-        .isEqualTo(MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE)
+      assertThat(response.body!!.contentType()).isEqualTo(MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE)
     }
   }
 
   @Test
   fun `grpc to grpc endpoint`() {
-    val requestBody = Shipment.Builder()
-      .shipment_token("abc")
-      .build()
-    val expectedResponseBody = Warehouse.Builder()
-      .warehouse_token("abc")
-      .build()
+    val requestBody = Shipment.Builder().shipment_token("abc").build()
+    val expectedResponseBody = Warehouse.Builder().warehouse_token("abc").build()
 
-    val grpcClient = GrpcClient.Builder()
-      .baseUrl(jettyService.httpsServerUrl!!)
-      .client(httpClient)
-      .build()
+    val grpcClient = GrpcClient.Builder().baseUrl(jettyService.httpsServerUrl!!).client(httpClient).build()
     val shippingClient = GrpcShippingClient(grpcClient)
 
     val responseBody = shippingClient.GetDestinationWarehouse().executeBlocking(requestBody)
@@ -152,11 +122,7 @@ internal class JsonForProtoEndpointsTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(
-        WebServerTestingModule(
-          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG
-        )
-      )
+      install(WebServerTestingModule(webConfig = WebServerTestingModule.TESTING_WEB_CONFIG))
       install(MiskTestingServiceModule())
       install(WebActionModule.create<ProtoEchoShipmentToken>())
       install(WebActionModule.create<GrpcEchoShipmentToken>())
@@ -168,18 +134,13 @@ internal class JsonForProtoEndpointsTest {
     @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
     @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
     fun getDestinationWarehouse(@RequestBody shipment: Shipment) =
-      Warehouse.Builder()
-        .warehouse_token(shipment.shipment_token)
-        .build()
+      Warehouse.Builder().warehouse_token(shipment.shipment_token).build()
   }
 
-  class GrpcEchoShipmentToken @Inject constructor() :
-    ShippingGetDestinationWarehouseBlockingServer, WebAction {
+  class GrpcEchoShipmentToken @Inject constructor() : ShippingGetDestinationWarehouseBlockingServer, WebAction {
     @Unauthenticated
     override fun GetDestinationWarehouse(shipment: Shipment): Warehouse {
-      return Warehouse.Builder()
-        .warehouse_token(shipment.shipment_token)
-        .build()
+      return Warehouse.Builder().warehouse_token(shipment.shipment_token).build()
     }
   }
 
@@ -188,7 +149,7 @@ internal class JsonForProtoEndpointsTest {
     @WireRpc(
       path = "/test/GetDestinationWarehouse",
       requestAdapter = "com.squareup.protos.test.parsing.Shipment#ADAPTER",
-      responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER"
+      responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER",
     )
     fun GetDestinationWarehouse(shipment: Shipment): Warehouse
   }
@@ -198,15 +159,16 @@ internal class JsonForProtoEndpointsTest {
     @WireRpc(
       path = "/test/GetDestinationWarehouse",
       requestAdapter = "com.squareup.protos.test.parsing.Shipment#ADAPTER",
-      responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER"
+      responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER",
     )
-    fun GetDestinationWarehouse(): GrpcCall<Shipment, Warehouse> = client.newCall(
-      GrpcMethod(
-        path = "/test/GetDestinationWarehouse",
-        requestAdapter = Shipment.ADAPTER,
-        responseAdapter = Warehouse.ADAPTER
+    fun GetDestinationWarehouse(): GrpcCall<Shipment, Warehouse> =
+      client.newCall(
+        GrpcMethod(
+          path = "/test/GetDestinationWarehouse",
+          requestAdapter = Shipment.ADAPTER,
+          responseAdapter = Warehouse.ADAPTER,
+        )
       )
-    )
   }
 
   private fun serverUrlBuilder(): HttpUrl.Builder {

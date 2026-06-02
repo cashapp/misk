@@ -2,9 +2,9 @@ package misk.ratelimiting.bucket4j.dynamodb.v2.proxymanager
 
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.BucketConfiguration
+import java.time.Duration
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.Duration
 
 abstract class BaseDynamoDBProxyManagerTest<K> {
   @Test
@@ -12,14 +12,10 @@ abstract class BaseDynamoDBProxyManagerTest<K> {
     val key = createRandomKey()
     val proxyManager = createProxyManager()
 
-    val configuration = BucketConfiguration.builder()
-      .addLimit(
-        Bandwidth.builder()
-          .capacity(4)
-          .refillIntervally(4, Duration.ofHours(1))
-          .build()
-      )
-      .build()
+    val configuration =
+      BucketConfiguration.builder()
+        .addLimit(Bandwidth.builder().capacity(4).refillIntervally(4, Duration.ofHours(1)).build())
+        .build()
     val bucket = proxyManager.builder().build(key) { configuration }
     // Populates the bucket in storage
     val tokens = bucket.availableTokens

@@ -34,11 +34,9 @@
  *
  * The format is greedy with respect to precision — e.g., 2 seconds is represented as `2000000u`.
  *
- * @see <a href="https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md#requests">
- *   gRPC HTTP/2 request header format
- * </a>
+ * @see <a href="https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md#requests"> gRPC HTTP/2 request header
+ *   format </a>
  */
-
 package misk.grpc
 
 import java.util.concurrent.TimeUnit

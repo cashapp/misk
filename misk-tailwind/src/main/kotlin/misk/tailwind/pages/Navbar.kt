@@ -20,10 +20,7 @@ import misk.tailwind.icons.Heroicons
 import misk.tailwind.icons.heroicon
 import wisp.deployment.Deployment
 
-data class MenuSection(
-  val title: String,
-  val links: List<Link>
-)
+data class MenuSection(val title: String, val links: List<Link>)
 
 // TODO fix scrolling of non-iframe tabs scrolling the sidebar color
 fun TagConsumer<*>.Navbar(
@@ -32,7 +29,7 @@ fun TagConsumer<*>.Navbar(
   homeHref: String,
   menuSections: List<MenuSection> = listOf(),
   sortedMenuLinks: Boolean = true,
-  content: TagConsumer<*>.() -> Unit = {}
+  content: TagConsumer<*>.() -> Unit = {},
 ) {
   div("bg-gray-900") {
     attributes["data-controller"] = "toggle"
@@ -43,40 +40,39 @@ fun TagConsumer<*>.Navbar(
       attributes["aria-modal"] = "true"
       attributes["data-toggle-target"] = "toggleable"
       attributes["data-css-class"] = "hidden"
-//      +"""<!--
-//      Off-canvas menu backdrop, show/hide based on off-canvas menu state.
-//
-//      Entering: "transition-opacity ease-linear duration-300"
-//        From: "opacity-0"
-//        To: "opacity-100"
-//      Leaving: "transition-opacity ease-linear duration-300"
-//        From: "opacity-100"
-//        To: "opacity-0"
-//    -->"""
-      div("fixed inset-0 bg-gray-900/80") {
-      }
+      //      +"""<!--
+      //      Off-canvas menu backdrop, show/hide based on off-canvas menu state.
+      //
+      //      Entering: "transition-opacity ease-linear duration-300"
+      //        From: "opacity-0"
+      //        To: "opacity-100"
+      //      Leaving: "transition-opacity ease-linear duration-300"
+      //        From: "opacity-100"
+      //        To: "opacity-0"
+      //    -->"""
+      div("fixed inset-0 bg-gray-900/80") {}
       div("fixed inset-0 flex") {
-//        +"""<!--
-//        Off-canvas menu, show/hide based on off-canvas menu state.
-//
-//        Entering: "transition ease-in-out duration-300 transform"
-//          From: "-translate-x-full"
-//          To: "translate-x-0"
-//        Leaving: "transition ease-in-out duration-300 transform"
-//          From: "translate-x-0"
-//          To: "-translate-x-full"
-//      -->"""
+        //        +"""<!--
+        //        Off-canvas menu, show/hide based on off-canvas menu state.
+        //
+        //        Entering: "transition ease-in-out duration-300 transform"
+        //          From: "-translate-x-full"
+        //          To: "translate-x-0"
+        //        Leaving: "transition ease-in-out duration-300 transform"
+        //          From: "translate-x-0"
+        //          To: "-translate-x-full"
+        //      -->"""
         div("relative mr-16 flex w-full max-w-xs flex-1") {
-//          +"""<!--
-//          Close button, show/hide based on off-canvas menu state.
-//
-//          Entering: "ease-in-out duration-300"
-//            From: "opacity-0"
-//            To: "opacity-100"
-//          Leaving: "ease-in-out duration-300"
-//            From: "opacity-100"
-//            To: "opacity-0"
-//        -->"""
+          //          +"""<!--
+          //          Close button, show/hide based on off-canvas menu state.
+          //
+          //          Entering: "ease-in-out duration-300"
+          //            From: "opacity-0"
+          //            To: "opacity-100"
+          //          Leaving: "ease-in-out duration-300"
+          //            From: "opacity-100"
+          //            To: "opacity-0"
+          //        -->"""
           // +"""<!-- Sidebar component, swap this element with another sidebar if you like -->"""
           div("hidden flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 ring-1 ring-white/10") {
             attributes["data-toggle-target"] = "toggleable"
@@ -92,26 +88,30 @@ fun TagConsumer<*>.Navbar(
                   unsafe {
                     raw(
                       """
-                  <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  """.trimIndent()
+                      <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      """
+                        .trimIndent()
                     )
                   }
                 }
               }
             }
-//            div("flex h-16 shrink-0 items-center") {
-//              unsafe {
-//                raw(
-//                  """
-//                    <svg class="h-6 w-6 text-white" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-//                      <path fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
-//                    </svg>
-//                    """.trimIndent()
-//                )
-//              }
-//            }
+            //            div("flex h-16 shrink-0 items-center") {
+            //              unsafe {
+            //                raw(
+            //                  """
+            //                    <svg class="h-6 w-6 text-white" viewBox="0 0 20 20" fill="currentColor"
+            // aria-hidden="true">
+            //                      <path fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010
+            // 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0
+            // 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+            //                    </svg>
+            //                    """.trimIndent()
+            //                )
+            //              }
+            //            }
             NavMenu(menuSections, sortedMenuLinks)
           }
         }
@@ -136,7 +136,9 @@ fun TagConsumer<*>.Navbar(
     }
     div("xl:pl-72") {
       // +"""<!-- Sticky search header -->"""
-      div("fixed w-full z-40 flex h-16 shrink-0 items-center gap-x-6 border-b-4 ${deployment.asBorderColor()} bg-gray-900 px-6 shadow-sm sm:px-6 lg:px-6") {
+      div(
+        "fixed w-full z-40 flex h-16 shrink-0 items-center gap-x-6 border-b-4 ${deployment.asBorderColor()} bg-gray-900 px-6 shadow-sm sm:px-6 lg:px-6"
+      ) {
         if (menuSections.isNotEmpty()) {
           button(classes = "-m-2.5 p-2.5 text-white xl:hidden") {
             attributes["data-action"] = "toggle#toggle"
@@ -149,44 +151,39 @@ fun TagConsumer<*>.Navbar(
                 <svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
                 </svg>
-                """.trimIndent()
+                """
+                  .trimIndent()
               )
             }
           }
         }
         div("flex flex-1 gap-x-4 self-stretch lg:gap-x-6 py-4") {
-          a(homeHref) {
-            h1("text-white text-lg") { +appName.uppercase() }
-          }
-          h1("${deployment.asTextColor()} text-lg") {
-            +deployment.mapToEnvironmentName().uppercase()
-          }
+          a(homeHref) { h1("text-white text-lg") { +appName.uppercase() } }
+          h1("${deployment.asTextColor()} text-lg") { +deployment.mapToEnvironmentName().uppercase() }
         }
       }
-      main("h-full bg-white") {
-        div("pt-16") {
-          content()
-        }
-      }
+      main("h-full bg-white") { div("pt-16") { content() } }
     }
   }
 }
 
 /** Classes must be complete or they are not included in the production CSS. */
-private fun Deployment.asTextColor() = when {
-  isProduction -> "text-red-500"
-  isStaging -> "text-green-500"
-  isTest -> "text-white"
-  else -> "text-blue-500"
-}
+private fun Deployment.asTextColor() =
+  when {
+    isProduction -> "text-red-500"
+    isStaging -> "text-green-500"
+    isTest -> "text-white"
+    else -> "text-blue-500"
+  }
 
 /** Classes must be complete or they are not included in the production CSS. */
-private fun Deployment.asBorderColor() = when {
-  isProduction -> "border-b-red-500"
-  isStaging -> "border-b-green-500"
-  isTest -> "border-b-white"
-  else -> "border-b-blue-500"
-}
+private fun Deployment.asBorderColor() =
+  when {
+    isProduction -> "border-b-red-500"
+    isStaging -> "border-b-green-500"
+    isTest -> "border-b-white"
+    else -> "border-b-blue-500"
+  }
 
 private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>, sortedMenuLinks: Boolean) {
   if (menuSections.isNotEmpty()) {
@@ -199,49 +196,58 @@ private fun TagConsumer<*>.NavMenu(menuSections: List<MenuSection>, sortedMenuLi
             role = "list"
 
             li {
-              val sectionLinks = if (sortedMenuLinks) {
-                section.links.sortedBy { it.label }
-              } else {
-                section.links
-              }
+              val sectionLinks =
+                if (sortedMenuLinks) {
+                  section.links.sortedBy { it.label }
+                } else {
+                  section.links
+                }
               sectionLinks.map { link ->
                 ul("-mx-2 py-1") {
                   role = "list"
                   li {
-                    // +"""<!-- Current: "bg-gray-800 text-white", Default: "text-gray-400 hover:text-white hover:bg-gray-800" -->"""
-                    val isSelectedStyles = if (link.isSelected) {
-                      "bg-gray-800 text-white"
-                    } else {
-                      "text-gray-400 hover:text-white hover:bg-gray-800"
-                    }
+                    // +"""<!-- Current: "bg-gray-800 text-white", Default: "text-gray-400 hover:text-white
+                    // hover:bg-gray-800" -->"""
+                    val isSelectedStyles =
+                      if (link.isSelected) {
+                        "bg-gray-800 text-white"
+                      } else {
+                        "text-gray-400 hover:text-white hover:bg-gray-800"
+                      }
                     link.rawHtml?.let {
-                      div("group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-400 hover:text-white hover:bg-gray-800") {
+                      div(
+                        "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-400 hover:text-white hover:bg-gray-800"
+                      ) {
                         unsafe { +it }
                       }
-                    } ?: let {
-                      a(classes = "$isSelectedStyles group flex justify-between gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold") {
-                        href = link.href
-                        link.hoverText?.let { title = it }
+                    }
+                      ?: let {
+                        a(
+                          classes =
+                            "$isSelectedStyles group flex justify-between gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                        ) {
+                          href = link.href
+                          link.hoverText?.let { title = it }
 
-                        if (link.dataTurbo == true) {
-                          attributes["data-turbo-preload"] = ""
-                        } else if (link.dataTurbo == false) {
-                          attributes["data-turbo"] = "false"
-                        }
+                          if (link.dataTurbo == true) {
+                            attributes["data-turbo-preload"] = ""
+                          } else if (link.dataTurbo == false) {
+                            attributes["data-turbo"] = "false"
+                          }
 
-                        if (link.isPageNavigation) {
-                          attributes["target"] = "_top"
-                        } else if (link.openInNewTab) {
-                          attributes["target"] = "_blank"
-                        }
+                          if (link.isPageNavigation) {
+                            attributes["target"] = "_top"
+                          } else if (link.openInNewTab) {
+                            attributes["target"] = "_blank"
+                          }
 
-                        +link.label
+                          +link.label
 
-                        if (link.openInNewTab) {
-                          heroicon(Heroicons.MINI_ARROW_TOP_RIGHT_ON_SQUARE)
+                          if (link.openInNewTab) {
+                            heroicon(Heroicons.MINI_ARROW_TOP_RIGHT_ON_SQUARE)
+                          }
                         }
                       }
-                    }
                   }
                 }
               }

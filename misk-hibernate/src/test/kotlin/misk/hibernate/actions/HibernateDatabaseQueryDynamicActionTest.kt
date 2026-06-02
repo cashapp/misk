@@ -1,5 +1,13 @@
 package misk.hibernate.actions
 
+import jakarta.inject.Inject
+import java.time.LocalDate
+import javax.persistence.Transient
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.jvm.javaField
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import misk.audit.FakeAuditClient
 import misk.exceptions.BadRequestException
 import misk.exceptions.UnauthorizedException
 import misk.hibernate.DbActor
@@ -14,34 +22,20 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import jakarta.inject.Inject
-import misk.audit.FakeAuditClient
-import javax.persistence.Transient
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.jvm.javaField
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 class HibernateDatabaseQueryDynamicActionTest {
-  @MiskTestModule
-  val module = HibernateDatabaseQueryTestingModule()
+  @MiskTestModule val module = HibernateDatabaseQueryTestingModule()
 
   @Inject
   private lateinit var realActionRequestExecuter:
-    RealActionRequestExecuter<
-      HibernateDatabaseQueryDynamicAction.Request,
-      HibernateDatabaseQueryDynamicAction.Response
-      >
+    RealActionRequestExecuter<HibernateDatabaseQueryDynamicAction.Request, HibernateDatabaseQueryDynamicAction.Response>
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var auditClient: FakeAuditClient
 
   @BeforeEach
   fun before() {
-    realActionRequestExecuter.requestPath(
-      HibernateDatabaseQueryDynamicAction.HIBERNATE_QUERY_DYNAMIC_WEBACTION_PATH
-    )
+    realActionRequestExecuter.requestPath(HibernateDatabaseQueryDynamicAction.HIBERNATE_QUERY_DYNAMIC_WEBACTION_PATH)
 
     // Insert some movies, characters and actors.
     transacter.allowCowrites().transaction { session ->
@@ -54,10 +48,7 @@ class HibernateDatabaseQueryDynamicActionTest {
   }
 
   private val AUTHORIZED_CAPABILITIES =
-    HibernateDatabaseQueryTestingModule
-      .DYNAMIC_MOVIE_QUERY_ACCESS_ENTRY
-      .capabilities
-      .joinToString() + ",admin_console"
+    HibernateDatabaseQueryTestingModule.DYNAMIC_MOVIE_QUERY_ACCESS_ENTRY.capabilities.joinToString() + ",admin_console"
 
   @Test
   fun `unauthorized request`() {
@@ -66,87 +57,92 @@ class HibernateDatabaseQueryDynamicActionTest {
         HibernateDatabaseQueryDynamicAction.Request(
           entityClass = DbMovie::class.simpleName!!,
           queryClass = "DbMovieDynamicQuery",
-          query = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(
-            select = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuerySelect(
-              paths = listOf("name", "created_at")
-            )
-          )
+          query =
+            HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(
+              select =
+                HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuerySelect(paths = listOf("name", "created_at"))
+            ),
         ),
         user = "joey",
         // Lacks DYNAMIC_MOVIE_QUERY_ACCESS_ENTRY
-        capabilities = "admin_console"
+        capabilities = "admin_console",
       )
     }
   }
 
   @Test
   fun `default request`() {
-    val results = realActionRequestExecuter.executeRequest(
-      HibernateDatabaseQueryDynamicAction.Request(
-        entityClass = DbMovie::class.simpleName!!,
-        queryClass = "DbMovieDynamicQuery",
-        query = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery()
-      ),
-      user = "joey",
-      capabilities = AUTHORIZED_CAPABILITIES
-    )
+    val results =
+      realActionRequestExecuter.executeRequest(
+        HibernateDatabaseQueryDynamicAction.Request(
+          entityClass = DbMovie::class.simpleName!!,
+          queryClass = "DbMovieDynamicQuery",
+          query = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(),
+        ),
+        user = "joey",
+        capabilities = AUTHORIZED_CAPABILITIES,
+      )
     assertEquals(3, results.results.size)
 
-    assertThat(results.results.map { (it as Map<String, Any>).keys }.first()).containsAll(
-      DbMovie::class.declaredMemberProperties.filter {
-        it.javaField?.getAnnotation(Transient::class.java) == null
-      }.map { it.name }
-    )
+    assertThat(results.results.map { (it as Map<String, Any>).keys }.first())
+      .containsAll(
+        DbMovie::class
+          .declaredMemberProperties
+          .filter { it.javaField?.getAnnotation(Transient::class.java) == null }
+          .map { it.name }
+      )
   }
 
   @Test
   fun `dynamic select`() {
-    val results = realActionRequestExecuter.executeRequest(
-      HibernateDatabaseQueryDynamicAction.Request(
-        entityClass = DbMovie::class.simpleName!!,
-        queryClass = "DbMovieDynamicQuery",
-        query = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(
-          select = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuerySelect(
-            paths = listOf("name", "created_at")
-          )
-        )
-      ),
-      user = "joey",
-      capabilities = AUTHORIZED_CAPABILITIES
-    )
-    assertThat(results.results).containsAll(
-      listOf(
-        mapOf("name" to "Jurassic Park", "created_at" to "2018-01-01T00:00:00.000Z"),
-        mapOf("name" to "Pulp Fiction", "created_at" to "2018-01-01T00:00:00.000Z"),
-        mapOf("name" to "Die Hard", "created_at" to "2018-01-01T00:00:00.000Z"),
+    val results =
+      realActionRequestExecuter.executeRequest(
+        HibernateDatabaseQueryDynamicAction.Request(
+          entityClass = DbMovie::class.simpleName!!,
+          queryClass = "DbMovieDynamicQuery",
+          query =
+            HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(
+              select =
+                HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuerySelect(paths = listOf("name", "created_at"))
+            ),
+        ),
+        user = "joey",
+        capabilities = AUTHORIZED_CAPABILITIES,
       )
-    )
+    assertThat(results.results)
+      .containsAll(
+        listOf(
+          mapOf("name" to "Jurassic Park", "created_at" to "2018-01-01T00:00:00.000Z"),
+          mapOf("name" to "Pulp Fiction", "created_at" to "2018-01-01T00:00:00.000Z"),
+          mapOf("name" to "Die Hard", "created_at" to "2018-01-01T00:00:00.000Z"),
+        )
+      )
   }
 
   @Test
   fun `dynamic select with maxRows`() {
-    val results = realActionRequestExecuter.executeRequest(
-      HibernateDatabaseQueryDynamicAction.Request(
-        entityClass = DbMovie::class.simpleName!!,
-        queryClass = "DbMovieDynamicQuery",
-        query = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(
-          queryConfig = HibernateDatabaseQueryMetadataFactory.Companion.QueryConfig(
-            maxRows = 2
-          ),
-          select = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuerySelect(
-            paths = listOf("name", "created_at")
-          )
-        )
-      ),
-      user = "joey",
-      capabilities = AUTHORIZED_CAPABILITIES
-    )
-    assertThat(results.results).containsAll(
-      listOf(
-        mapOf("name" to "Jurassic Park", "created_at" to "2018-01-01T00:00:00.000Z"),
-        mapOf("name" to "Pulp Fiction", "created_at" to "2018-01-01T00:00:00.000Z"),
+    val results =
+      realActionRequestExecuter.executeRequest(
+        HibernateDatabaseQueryDynamicAction.Request(
+          entityClass = DbMovie::class.simpleName!!,
+          queryClass = "DbMovieDynamicQuery",
+          query =
+            HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(
+              queryConfig = HibernateDatabaseQueryMetadataFactory.Companion.QueryConfig(maxRows = 2),
+              select =
+                HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuerySelect(paths = listOf("name", "created_at")),
+            ),
+        ),
+        user = "joey",
+        capabilities = AUTHORIZED_CAPABILITIES,
       )
-    )
+    assertThat(results.results)
+      .containsAll(
+        listOf(
+          mapOf("name" to "Jurassic Park", "created_at" to "2018-01-01T00:00:00.000Z"),
+          mapOf("name" to "Pulp Fiction", "created_at" to "2018-01-01T00:00:00.000Z"),
+        )
+      )
   }
 
   @Test
@@ -156,91 +152,87 @@ class HibernateDatabaseQueryDynamicActionTest {
         HibernateDatabaseQueryDynamicAction.Request(
           entityClass = DbMovie::class.simpleName!!,
           queryClass = "DbMovieDynamicQuery",
-          query = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(
-            select = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuerySelect(
-              paths = listOf("name", "created_at", "rootId")
-            )
-          )
+          query =
+            HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(
+              select =
+                HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuerySelect(
+                  paths = listOf("name", "created_at", "rootId")
+                )
+            ),
         ),
         user = "joey",
-        capabilities = AUTHORIZED_CAPABILITIES
+        capabilities = AUTHORIZED_CAPABILITIES,
       )
     }
   }
 
   @Test
   fun `dynamic constraints`() {
-    val results = realActionRequestExecuter.executeRequest(
-      HibernateDatabaseQueryDynamicAction.Request(
-        entityClass = DbMovie::class.simpleName!!,
-        queryClass = "DbMovieDynamicQuery",
-        query = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(
-          constraints = listOf(
-            HibernateDatabaseQueryMetadataFactory.Companion.DynamicQueryConstraint(
-              path = "name",
-              operator = Operator.EQ,
-              value = "Die Hard"
-            )
-          ),
-          select = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuerySelect(
-            paths = listOf("name", "created_at")
-          )
-        )
-      ),
-      user = "joey",
-      capabilities = AUTHORIZED_CAPABILITIES
-    )
-    assertEquals(
-      listOf(
-        mapOf("name" to "Die Hard", "created_at" to "2018-01-01T00:00:00.000Z"),
-      ),
-      results.results
-    )
+    val results =
+      realActionRequestExecuter.executeRequest(
+        HibernateDatabaseQueryDynamicAction.Request(
+          entityClass = DbMovie::class.simpleName!!,
+          queryClass = "DbMovieDynamicQuery",
+          query =
+            HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(
+              constraints =
+                listOf(
+                  HibernateDatabaseQueryMetadataFactory.Companion.DynamicQueryConstraint(
+                    path = "name",
+                    operator = Operator.EQ,
+                    value = "Die Hard",
+                  )
+                ),
+              select =
+                HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuerySelect(paths = listOf("name", "created_at")),
+            ),
+        ),
+        user = "joey",
+        capabilities = AUTHORIZED_CAPABILITIES,
+      )
+    assertEquals(listOf(mapOf("name" to "Die Hard", "created_at" to "2018-01-01T00:00:00.000Z")), results.results)
   }
 
   @Test
   fun `dynamic orders`() {
-    val results = realActionRequestExecuter.executeRequest(
-      HibernateDatabaseQueryDynamicAction.Request(
-        entityClass = DbMovie::class.simpleName!!,
-        queryClass = "DbMovieDynamicQuery",
-        query = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(
-          orders = listOf(
-            HibernateDatabaseQueryMetadataFactory.Companion.DynamicQueryOrder(
-              path = "id",
-              ascending = true
-            )
-          ),
-          select = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuerySelect(
-            paths = listOf("name")
-          )
-        )
-      ),
-      user = "joey",
-      capabilities = AUTHORIZED_CAPABILITIES
-    )
+    val results =
+      realActionRequestExecuter.executeRequest(
+        HibernateDatabaseQueryDynamicAction.Request(
+          entityClass = DbMovie::class.simpleName!!,
+          queryClass = "DbMovieDynamicQuery",
+          query =
+            HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(
+              orders =
+                listOf(
+                  HibernateDatabaseQueryMetadataFactory.Companion.DynamicQueryOrder(path = "id", ascending = true)
+                ),
+              select = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuerySelect(paths = listOf("name")),
+            ),
+        ),
+        user = "joey",
+        capabilities = AUTHORIZED_CAPABILITIES,
+      )
     assertEquals(
-      listOf(
-        mapOf("name" to "Jurassic Park"),
-        mapOf("name" to "Pulp Fiction"),
-        mapOf("name" to "Die Hard"),
-      ),
-      results.results
+      listOf(mapOf("name" to "Jurassic Park"), mapOf("name" to "Pulp Fiction"), mapOf("name" to "Die Hard")),
+      results.results,
     )
 
-    assertEquals(FakeAuditClient.FakeAuditEvent(
-      eventSource = "test-app",
-      eventTarget = "HibernateDatabaseQueryDynamicAction",
-      timestampSent = 2147483647,
-      applicationName = "test-app",
-      approverLDAP = null,
-      automatedChange = false,
-      description = "HibernateDatabaseQueryDynamicAction principal=joey",
-      richDescription = "HibernateDatabaseQueryDynamicAction principal=joey time=0.000 ns code=200",
-      environment = "testing",
-      detailURL = null,
-      region = "us-west-2",
-      requestorLDAP = "joey"
-    ), auditClient.sentEvents.take())
+    assertEquals(
+      FakeAuditClient.FakeAuditEvent(
+        eventSource = "test-app",
+        eventTarget = "HibernateDatabaseQueryDynamicAction",
+        timestampSent = 2147483647,
+        applicationName = "test-app",
+        approverLDAP = null,
+        automatedChange = false,
+        description = "HibernateDatabaseQueryDynamicAction principal=joey",
+        richDescription = "HibernateDatabaseQueryDynamicAction principal=joey time=0.000 ns code=200",
+        environment = "testing",
+        detailURL = null,
+        region = "us-west-2",
+        requestorLDAP = "joey",
+      ),
+      auditClient.sentEvents.take(),
+    )
   }
 }

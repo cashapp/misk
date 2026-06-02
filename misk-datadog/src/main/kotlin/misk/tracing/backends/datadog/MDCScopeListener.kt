@@ -1,12 +1,11 @@
 package com.squareup.cash.tracing.datadog
 
 import datadog.trace.api.CorrelationIdentifier
-import org.slf4j.MDC
 import misk.logging.getLogger
+import org.slf4j.MDC
 
 /**
- * A scope listener that updates the MDC with the trace and span reference anytime a new scope is
- * activated or closed.
+ * A scope listener that updates the MDC with the trace and span reference anytime a new scope is activated or closed.
  */
 class MDCScopeListener {
   companion object {

@@ -4,10 +4,13 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.spi.ILoggingEvent
 import com.google.common.base.Ticker
 import com.google.inject.Key
+import jakarta.inject.Inject
+import java.util.concurrent.TimeUnit
 import misk.MiskTestingServiceModule
 import misk.concurrent.FakeTicker
 import misk.concurrent.Sleeper
 import misk.inject.KAbstractModule
+import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -15,9 +18,6 @@ import misk.web.WebServerTestingModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import misk.logging.LogCollector
-import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
 
 @MiskTest(startService = true) // NB: only starting services here to get log collection to work.
 class PauseDetectorTest {
@@ -27,7 +27,8 @@ class PauseDetectorTest {
   @Inject internal lateinit var detector: PauseDetector
   @Inject lateinit var logCollector: LogCollector
 
-  @BeforeEach fun setup() {
+  @BeforeEach
+  fun setup() {
     // We'll drive the detector from the test thread rather than running a detector thread.
     assertThat(detector.isRunning).isFalse()
 
@@ -43,14 +44,16 @@ class PauseDetectorTest {
     assertThat(shortestObservedDeltaNsec).isEqualTo(TimeUnit.MILLISECONDS.toNanos(1))
   }
 
-  @Test fun `no logging`() {
+  @Test
+  fun `no logging`() {
     detector.sleep()
     fakeTicker.sleepMs(99)
     detector.check()
     takeLogs().isEmpty()
   }
 
-  @Test fun `log info on a pause`() {
+  @Test
+  fun `log info on a pause`() {
     detector.sleep()
     fakeTicker.sleepMs(101)
     val (pauseTimeMillis, shortestObservedDeltaNsec) = detector.check()
@@ -62,7 +65,8 @@ class PauseDetectorTest {
     assertThat(logs.first().level).isEqualTo(Level.INFO)
   }
 
-  @Test fun `log warn on a pause`() {
+  @Test
+  fun `log warn on a pause`() {
     detector.sleep()
     fakeTicker.sleepMs(2322)
     val (pauseTimeMillis, shortestObservedDeltaNsec) = detector.check()
@@ -74,7 +78,8 @@ class PauseDetectorTest {
     assertThat(logs.first().level).isEqualTo(Level.WARN)
   }
 
-  @Test fun `log error on a pause`() {
+  @Test
+  fun `log error on a pause`() {
     detector.sleep()
     fakeTicker.sleepMs(99999)
     val (pauseTimeMillis, shortestObservedDeltaNsec) = detector.check()
@@ -86,9 +91,10 @@ class PauseDetectorTest {
     assertThat(logs.first().level).isEqualTo(Level.ERROR)
   }
 
-  @Test fun `ticker goes backwards`() {
+  @Test
+  fun `ticker goes backwards`() {
     // Move forward 5s so that we can move _backwards_ to a positive value in the test.
-    fakeTicker.sleepMs(5000);
+    fakeTicker.sleepMs(5000)
 
     // 1ms of sleep
     detector.sleep()
@@ -99,8 +105,7 @@ class PauseDetectorTest {
     verifyShortestObservedDelta(shortestObservedDeltaNsec)
     val logs = takeLogs()
     assertThat(logs).hasSize(1)
-    assertThat(logs.first().message)
-      .isEqualTo("Observed a negative pause time of 2020ms. Non-monotonic ticker?")
+    assertThat(logs.first().message).isEqualTo("Observed a negative pause time of 2020ms. Non-monotonic ticker?")
     assertThat(logs.first().level).isEqualTo(Level.INFO)
   }
 
@@ -109,20 +114,16 @@ class PauseDetectorTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       // Wire up the detector
-      val config = PauseDetectorConfig(
-        resolutionMillis = 1,
-        logInfoMillis = 100,
-        logWarnMillis = 1000,
-        logErrorMillis = 10000
-      )
+      val config =
+        PauseDetectorConfig(resolutionMillis = 1, logInfoMillis = 100, logWarnMillis = 1000, logErrorMillis = 10000)
       // NB: We are intentionally _not_ installing the module
       // because we want to drive the detector check/sleep cycles from this test harness and
       // we want to configure a fake ticker.
       bind<PauseDetectorConfig>().toInstance(config)
       bind<FakeTicker>().annotatedWith<ForPauseDetector>().toInstance(FakeTicker())
-      bind<Ticker>().annotatedWith<ForPauseDetector>()
-        .to(Key.get(FakeTicker::class.java, ForPauseDetector::class.java))
-      bind<Sleeper>().annotatedWith<ForPauseDetector>()
+      bind<Ticker>().annotatedWith<ForPauseDetector>().to(Key.get(FakeTicker::class.java, ForPauseDetector::class.java))
+      bind<Sleeper>()
+        .annotatedWith<ForPauseDetector>()
         .to(Key.get(FakeTicker::class.java, ForPauseDetector::class.java))
 
       // And its dependencies with test fakes

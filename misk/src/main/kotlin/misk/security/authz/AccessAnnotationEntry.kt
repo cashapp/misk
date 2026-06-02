@@ -4,12 +4,10 @@ import com.google.inject.BindingAnnotation
 import kotlin.reflect.KClass
 
 /**
- * Use this to alias an annotation to a set of services and capabilities. This can be used to decouple code
- * that needs access control from the policy that defines it.
+ * Use this to alias an annotation to a set of services and capabilities. This can be used to decouple code that needs
+ * access control from the policy that defines it.
  *
- * To demonstrate, let's define an access annotation. By convention these annotations are suffixed
- * `Access`:
- *
+ * To demonstrate, let's define an access annotation. By convention these annotations are suffixed `Access`:
  * ```
  * @Retention(AnnotationRetention.RUNTIME)
  * @Target(AnnotationTarget.FUNCTION)
@@ -17,7 +15,6 @@ import kotlin.reflect.KClass
  * ```
  *
  * Next we define actions that apply our annotation:
- *
  * ```
  * class DiscoverDinosaurAction @Inject constructor() : WebAction {
  *   @Get("/discover")
@@ -33,13 +30,14 @@ import kotlin.reflect.KClass
  * ```
  *
  * Finally we use multibindings to specify which services and capabilities are permitted:
- *
  * ```
  * multibind<AccessAnnotationEntry>().toInstance(
  *  AccessAnnotationEntry<PaleontologistAccess>(capabilities = listOf("paleontologist", "intern")))
  * ```
  */
-data class AccessAnnotationEntry @JvmOverloads constructor(
+data class AccessAnnotationEntry
+@JvmOverloads
+constructor(
   val annotation: KClass<out Annotation>,
   val services: List<String> = listOf(),
   val capabilities: List<String> = listOf(),
@@ -51,7 +49,7 @@ inline fun <reified T : Annotation> AccessAnnotationEntry(
   services: List<String> = listOf(),
   capabilities: List<String> = listOf(),
   allowAnyService: Boolean = false,
-  allowAnyUser: Boolean = false
+  allowAnyUser: Boolean = false,
 ): AccessAnnotationEntry {
   return AccessAnnotationEntry(T::class, services, capabilities, allowAnyService, allowAnyUser)
 }
@@ -59,16 +57,15 @@ inline fun <reified T : Annotation> AccessAnnotationEntry(
 /**
  * Exclude a service from @AllowAnyService.
  *
- * Add any external proxies that do service-to-service authentication to prevent AllowAnyService
- * from also allowing external traffic to your service.
+ * Add any external proxies that do service-to-service authentication to prevent AllowAnyService from also allowing
+ * external traffic to your service.
  *
  * You can still explicitly include these services by including them in
- * @Authenticated(services=["my-proxy"]) or with an equivalent decorator that creates
- * an AccessAnnotationEntry.
  *
- * Usage:
- *  multibind<String, ExcludeFromAllowAnyService>().toInstance("web-proxy")
- *  multibind<String, ExcludeFromAllowAnyService>().toInstance("access-proxy")
+ * @Authenticated(services=["my-proxy"]) or with an equivalent decorator that creates an AccessAnnotationEntry.
+ *
+ * Usage: multibind<String, ExcludeFromAllowAnyService>().toInstance("web-proxy") multibind<String,
+ * ExcludeFromAllowAnyService>().toInstance("access-proxy")
  */
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)

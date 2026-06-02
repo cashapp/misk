@@ -18,6 +18,7 @@ dependencies {
     testImplementation(libs.assertj)
     testImplementation(libs.hopliteCore)
     testImplementation(libs.junitApi)
+    testImplementation(libs.kotestAssertions)
     testImplementation(libs.kotestAssertionsShared)
     testImplementation(libs.kotestCommon)
     testImplementation(project(":wisp:wisp-resource-loader"))

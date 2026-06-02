@@ -4,6 +4,10 @@ import com.google.inject.Provides
 import com.google.inject.name.Named
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.io.File
+import java.util.Arrays
 import misk.MiskTestingServiceModule
 import misk.ServiceModule
 import misk.inject.KAbstractModule
@@ -17,10 +21,6 @@ import org.junit.jupiter.api.Test
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
-import java.io.File
-import java.util.Arrays
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 /** Demonstrates ability to bind up an envoy-based http client and connect via unix sockets. */
 @MiskTest(startService = true)
@@ -38,7 +38,8 @@ internal class HttpClientEnvoyTest {
   //   at okhttp3.internal.http2.Http2Connection$Builder.socket(Http2Connection.java:559)
   //   at okhttp3.mockwebserver.MockWebServer$3.processConnection(MockWebServer.java:501)
   @Disabled("MockWebServer + HTTP/2 + Unix Sockets not playing together nicely")
-  @Test fun useEnvoyClient() {
+  @Test
+  fun useEnvoyClient() {
 
     val dinoRequest = Dinosaur.Builder().name("dinoRequest").build()
 
@@ -51,8 +52,7 @@ internal class HttpClientEnvoyTest {
 
     val recordedRequest = server.takeRequest()
     assertThat(recordedRequest.path).isEqualTo("/cooldinos")
-    assertThat(recordedRequest.getHeader("Host"))
-      .isEqualTo(String.format("%s:%s", server.hostName, server.port))
+    assertThat(recordedRequest.getHeader("Host")).isEqualTo(String.format("%s:%s", server.hostName, server.port))
   }
 
   interface DinosaurService {
@@ -83,11 +83,11 @@ internal class HttpClientEnvoyTest {
       install(TypedHttpClientModule.create<DinosaurService>("dinosaur", Names.named("dinosaur")))
     }
 
-    @Provides @Singleton fun provideHttpClientConfig(): HttpClientsConfig {
+    @Provides
+    @Singleton
+    fun provideHttpClientConfig(): HttpClientsConfig {
       return HttpClientsConfig(
-        endpoints = mapOf(
-          "dinosaur" to HttpClientEndpointConfig(envoy = HttpClientEnvoyConfig("dinosaur"))
-        )
+        endpoints = mapOf("dinosaur" to HttpClientEndpointConfig(envoy = HttpClientEnvoyConfig("dinosaur")))
       )
     }
   }

@@ -10,7 +10,7 @@ application {
 }
 
 dependencies {
-  implementation(libs.findbugsJsr305)
+  compileOnly(libs.findbugsJsr305)
   implementation(libs.guava)
   implementation(libs.guice)
   implementation(libs.jakartaInject)
@@ -21,7 +21,6 @@ dependencies {
   implementation(libs.slf4jApi)
   implementation(libs.okHttp)
   implementation(libs.okio)
-  implementation(project(":wisp:wisp-config"))
   implementation(project(":wisp:wisp-deployment"))
   implementation(project(":wisp:wisp-lease"))
   implementation(project(":misk-logging"))

@@ -1,4 +1,4 @@
-public final class misk/MiskTestingServiceModule : misk/inject/KAbstractModule {
+public final class misk/MiskTestingServiceModule : misk/inject/ReusableTestModule {
 	public fun <init> ()V
 	public fun <init> (Z)V
 	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -108,12 +108,20 @@ public final class misk/containers/ContainerUtil {
 public abstract interface class misk/logging/LogCollector : misk/testing/TestFixture {
 	public abstract fun takeEvent (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Lch/qos/logback/classic/spi/ILoggingEvent;
 	public abstract fun takeEvent (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Lch/qos/logback/classic/spi/ILoggingEvent;
+	public static synthetic fun takeEvent$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ILjava/lang/Object;)Lch/qos/logback/classic/spi/ILoggingEvent;
+	public static synthetic fun takeEvent$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ZILjava/lang/Object;)Lch/qos/logback/classic/spi/ILoggingEvent;
 	public abstract fun takeEvents (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Ljava/util/List;
 	public abstract fun takeEvents (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Ljava/util/List;
+	public static synthetic fun takeEvents$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ILjava/lang/Object;)Ljava/util/List;
+	public static synthetic fun takeEvents$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ZILjava/lang/Object;)Ljava/util/List;
 	public abstract fun takeMessage (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Ljava/lang/String;
 	public abstract fun takeMessage (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Ljava/lang/String;
+	public static synthetic fun takeMessage$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ILjava/lang/Object;)Ljava/lang/String;
+	public static synthetic fun takeMessage$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ZILjava/lang/Object;)Ljava/lang/String;
 	public abstract fun takeMessages (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;)Ljava/util/List;
 	public abstract fun takeMessages (Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;Z)Ljava/util/List;
+	public static synthetic fun takeMessages$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ILjava/lang/Object;)Ljava/util/List;
+	public static synthetic fun takeMessages$default (Lmisk/logging/LogCollector;Lkotlin/reflect/KClass;Lch/qos/logback/classic/Level;Lkotlin/text/Regex;ZILjava/lang/Object;)Ljava/util/List;
 }
 
 public final class misk/logging/LogCollector$DefaultImpls {
@@ -160,6 +168,15 @@ public class misk/mockk/MockkTestFixture : misk/testing/FakeFixture {
 	public synthetic fun <init> (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun initMock ()V
 	public fun reset ()V
+}
+
+public final class misk/mockwebserver/MockWebServerTestFixture : misk/testing/TestFixture {
+	public fun <init> (Lmockwebserver3/MockWebServer;)V
+	public final fun enqueue (Lmockwebserver3/MockResponse;)V
+	public final fun getRequestCount ()I
+	public fun reset ()V
+	public final fun takeRequest ()Lmockwebserver3/RecordedRequest;
+	public final fun url ()Lokhttp3/HttpUrl;
 }
 
 public final class misk/random/FakeRandom : misk/random/Random {
@@ -230,7 +247,7 @@ public final class misk/testing/ExtensionContextExtensionsKt {
 public abstract interface class misk/testing/ExternalDependency {
 	public abstract fun afterEach ()V
 	public abstract fun beforeEach ()V
-	public abstract fun getId ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/String;
 	public abstract fun shutdown ()V
 	public abstract fun startup ()V
 }
@@ -282,6 +299,7 @@ public final class misk/testing/MockTracingBackendModule : misk/inject/KAbstract
 }
 
 public final class misk/testing/ParallelTestsKt {
+	public static final fun parallelTestIndex ()Ljava/lang/Integer;
 	public static final fun updateForParallelTests (Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 }
 
@@ -303,6 +321,16 @@ public final class misk/testing/TemporaryFolderModule : misk/inject/KAbstractMod
 public final class misk/testing/TemporaryFolderModule$DeleteTempFolder : org/junit/jupiter/api/extension/AfterEachCallback {
 	public fun <init> (Lmisk/testing/TemporaryFolder;)V
 	public fun afterEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+}
+
+public final class misk/testing/TestFixtureBindingValidator {
+	public static final field Companion Lmisk/testing/TestFixtureBindingValidator$Companion;
+	public fun <init> (Lcom/google/inject/Injector;)V
+	public final fun validate ()Ljava/util/List;
+	public final fun validateAndLog ()V
+}
+
+public final class misk/testing/TestFixtureBindingValidator$Companion {
 }
 
 public class misk/time/FakeClock : java/time/Clock, misk/testing/TestFixture {
@@ -333,6 +361,14 @@ public final class misk/time/FakeClockModule : misk/inject/KInstallOnceModule {
 
 public final class misk/time/FakeTickerModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
+}
+
+public abstract class misk/web/AbstractWebActionRegistrationTest {
+	public fun <init> ()V
+	public final fun allWebActionsAreRegistered ()V
+	protected fun excludeWebAction (Lkotlin/reflect/KClass;)Z
+	protected fun registrationModuleHint ()Ljava/lang/String;
+	protected abstract fun webActionPackages ()Ljava/util/List;
 }
 
 public final class misk/web/FakeHttpCall : misk/web/HttpCall {
@@ -440,6 +476,29 @@ public final class misk/web/MiskCallerExtension : org/junit/jupiter/api/extensio
 	public fun beforeTestExecution (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
 }
 
+public final class misk/web/WebActionRegistrationTester {
+	public static final field INSTANCE Lmisk/web/WebActionRegistrationTester;
+	public final fun assertAllWebActionsRegistered (Lcom/google/inject/Injector;Lmisk/web/WebActionRegistrationTester$Options;)V
+}
+
+public final class misk/web/WebActionRegistrationTester$Options {
+	public fun <init> (Ljava/util/List;)V
+	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function1;)V
+	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function1;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function1;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Lkotlin/jvm/functions/Function1;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Lkotlin/jvm/functions/Function1;Ljava/lang/String;)Lmisk/web/WebActionRegistrationTester$Options;
+	public static synthetic fun copy$default (Lmisk/web/WebActionRegistrationTester$Options;Ljava/util/List;Lkotlin/jvm/functions/Function1;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/WebActionRegistrationTester$Options;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBasePackages ()Ljava/util/List;
+	public final fun getExcludePredicate ()Lkotlin/jvm/functions/Function1;
+	public final fun getRegistrationModuleHint ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/web/WebServerTestingModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/web/WebServerTestingModule$Companion;
 	public fun <init> ()V
@@ -455,6 +514,10 @@ public final class misk/web/WebServerTestingModule$Companion {
 public final class misk/web/WebTestClient {
 	public fun <init> (Lcom/squareup/moshi/Moshi;Lmisk/web/jetty/JettyService;)V
 	public final fun call (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lmisk/web/WebTestClient$WebTestResponse;
+	public final fun delete (Ljava/lang/String;Ljava/lang/Object;Lkotlin/reflect/KClass;)Lmisk/web/WebTestClient$WebTestResponse;
+	public final fun delete (Ljava/lang/String;Ljava/lang/String;)Lmisk/web/WebTestClient$WebTestResponse;
+	public final fun delete (Ljava/lang/String;Ljava/lang/String;Lokhttp3/MediaType;)Lmisk/web/WebTestClient$WebTestResponse;
+	public static synthetic fun delete$default (Lmisk/web/WebTestClient;Ljava/lang/String;Ljava/lang/String;Lokhttp3/MediaType;ILjava/lang/Object;)Lmisk/web/WebTestClient$WebTestResponse;
 	public final fun get (Ljava/lang/String;)Lmisk/web/WebTestClient$WebTestResponse;
 	public final fun post (Ljava/lang/String;Ljava/lang/Object;Lkotlin/reflect/KClass;)Lmisk/web/WebTestClient$WebTestResponse;
 	public final fun post (Ljava/lang/String;Ljava/lang/String;)Lmisk/web/WebTestClient$WebTestResponse;

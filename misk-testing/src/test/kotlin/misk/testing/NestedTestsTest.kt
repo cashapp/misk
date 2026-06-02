@@ -1,14 +1,14 @@
 package misk.testing
 
 import com.google.common.util.concurrent.AbstractIdleService
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.ServiceManagerModule
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 class NestedTestsTest {
@@ -16,12 +16,13 @@ class NestedTestsTest {
   @Inject lateinit var boringService: BoringService
 
   @MiskTestModule
-  val module = object : KAbstractModule() {
-    override fun configure() {
-      install(ServiceManagerModule())
-      install(ServiceModule<BoringService>())
+  val module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(ServiceManagerModule())
+        install(ServiceModule<BoringService>())
+      }
     }
-  }
 
   @Test
   fun `injected fields are stateless across tests 1`() {
@@ -44,6 +45,7 @@ class NestedTestsTest {
 
     // We can inject things here too.
     @Inject lateinit var store2: Bookstore
+
     @Test
     fun `nested can access to injected fields`() {
       assertThat(store.count()).isEqualTo("Bookstore 1")
@@ -56,6 +58,7 @@ class NestedTestsTest {
     @Nested
     inner class SecondNested {
       @Inject lateinit var store3: Bookstore
+
       @Test
       fun `multiple nested levels access injected fields`() {
         assertThat(store.count()).isEqualTo("Bookstore 1")

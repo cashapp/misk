@@ -9,6 +9,7 @@ plugins {
 dependencies {
   api(libs.guava)
   api(libs.jakartaInject)
+  api(libs.micrometerCore)
   implementation(libs.kotlinStdLibJdk8)
 
   testImplementation(libs.assertj)
@@ -25,7 +26,7 @@ dependencies {
   testImplementation(libs.kotestAssertions)
   testImplementation(libs.kotestAssertionsShared)
   testImplementation(libs.kotestCommon)
-  testImplementation(libs.kotestFrameworkApi)
+  testImplementation(libs.kotestFrameworkEngine)
   testRuntimeOnly(libs.junitEngine)
   testRuntimeOnly(libs.kotestJunitRunnerJvm)
 }

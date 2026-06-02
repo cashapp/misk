@@ -1,5 +1,6 @@
 package misk.web.marshal
 
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -16,12 +17,10 @@ import misk.web.mediatype.MediaTypes
 import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class PlainTextRequestTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var webTestClient: WebTestClient
 
@@ -46,8 +45,7 @@ internal class PlainTextRequestTest {
     @Post("/as-byte-string")
     @RequestContentType(MediaTypes.TEXT_PLAIN_UTF8)
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun call(@RequestBody messageBytes: ByteString): String =
-      "${messageBytes.utf8()} as-byte-string"
+    fun call(@RequestBody messageBytes: ByteString): String = "${messageBytes.utf8()} as-byte-string"
   }
 
   class TestModule : KAbstractModule() {
@@ -59,10 +57,14 @@ internal class PlainTextRequestTest {
     }
   }
 
-  private fun post(path: String, message: String): String = webTestClient
-    .post(path, message, MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE)
-    .apply {
-      assertThat(response.code).isEqualTo(200)
-      assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    }.response.body?.string()!!
+  private fun post(path: String, message: String): String =
+    webTestClient
+      .post(path, message, MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE)
+      .apply {
+        assertThat(response.code).isEqualTo(200)
+        assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
+      }
+      .response
+      .body
+      ?.string()!!
 }

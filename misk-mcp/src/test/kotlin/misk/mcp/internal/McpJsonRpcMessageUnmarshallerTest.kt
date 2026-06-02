@@ -1,33 +1,35 @@
 package misk.mcp.internal
 
-import io.modelcontextprotocol.kotlin.sdk.JSONRPCMessage
-import misk.web.mediatype.MediaTypes
-import okhttp3.Headers
-import okhttp3.MediaType.Companion.toMediaType
-import okio.Buffer
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import kotlin.reflect.full.createType
 import kotlin.reflect.typeOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import misk.web.mediatype.MediaTypes
+import okhttp3.Headers
+import okhttp3.MediaType.Companion.toMediaType
+import okio.Buffer
 
 class McpJsonRpcMessageUnmarshallerTest {
 
   @Test
   fun `test unmarshal JSON RPC message`() {
     // Create an instance of McpJsonRpcMessageUnmarshaller with McpJson
-    val unmarshaller = McpJsonRpcMessageUnmarshaller(McpJson)
+    val unmarshaller = McpJsonRpcMessageUnmarshaller()
 
     // Create a valid JSON RPC request message
-    val jsonRpcRequestJson = """
+    val jsonRpcRequestJson =
+      """
       {
         "jsonrpc": "2.0",
         "id": "test-123",
         "method": "tools/list",
         "params": {}
       }
-    """.trimIndent()
+      """
+        .trimIndent()
 
     // Create a BufferedSource from the JSON string
     val buffer = Buffer().writeUtf8(jsonRpcRequestJson)
@@ -43,10 +45,11 @@ class McpJsonRpcMessageUnmarshallerTest {
   @Test
   fun `test unmarshal JSON RPC notification message`() {
     // Create an instance of McpJsonRpcMessageUnmarshaller with McpJson
-    val unmarshaller = McpJsonRpcMessageUnmarshaller(McpJson)
+    val unmarshaller = McpJsonRpcMessageUnmarshaller()
 
     // Create a valid JSON RPC notification message (no id field)
-    val jsonRpcNotificationJson = """
+    val jsonRpcNotificationJson =
+      """
       {
         "jsonrpc": "2.0",
         "method": "notifications/resources/updated",
@@ -54,7 +57,8 @@ class McpJsonRpcMessageUnmarshallerTest {
           "uri": "schema://database/users"
         }
       }
-    """.trimIndent()
+      """
+        .trimIndent()
 
     // Create a BufferedSource from the JSON string
     val buffer = Buffer().writeUtf8(jsonRpcNotificationJson)
@@ -70,10 +74,11 @@ class McpJsonRpcMessageUnmarshallerTest {
   @Test
   fun `test unmarshal JSON RPC response message`() {
     // Create an instance of McpJsonRpcMessageUnmarshaller with McpJson
-    val unmarshaller = McpJsonRpcMessageUnmarshaller(McpJson)
+    val unmarshaller = McpJsonRpcMessageUnmarshaller()
 
     // Create a valid JSON RPC response message
-    val jsonRpcResponseJson = """
+    val jsonRpcResponseJson =
+      """
       {
         "jsonrpc": "2.0",
         "id": "test-456",
@@ -81,7 +86,8 @@ class McpJsonRpcMessageUnmarshallerTest {
           "tools": []
         }
       }
-    """.trimIndent()
+      """
+        .trimIndent()
 
     // Create a BufferedSource from the JSON string
     val buffer = Buffer().writeUtf8(jsonRpcResponseJson)
@@ -97,7 +103,7 @@ class McpJsonRpcMessageUnmarshallerTest {
   @Test
   fun `test create unmarshaller`() {
     // Create an instance of McpJsonRpcMessageUnmarshaller.Factory
-    val factory = McpJsonRpcMessageUnmarshaller.Factory(McpJson)
+    val factory = McpJsonRpcMessageUnmarshaller.Factory()
 
     // Test with correct media type and type
     val applicationJsonMediaType = MediaTypes.APPLICATION_JSON_MEDIA_TYPE
@@ -113,7 +119,7 @@ class McpJsonRpcMessageUnmarshallerTest {
   @Test
   fun `test unmarshaller with invalid media type`() {
     // Create an instance of McpJsonRpcMessageUnmarshaller.Factory
-    val factory = McpJsonRpcMessageUnmarshaller.Factory(McpJson)
+    val factory = McpJsonRpcMessageUnmarshaller.Factory()
 
     // Test with unsupported media types
     val textPlainMediaType = "text/plain".toMediaType()
@@ -128,7 +134,7 @@ class McpJsonRpcMessageUnmarshallerTest {
   @Test
   fun `test unmarshaller with invalid type`() {
     // Create an instance of McpJsonRpcMessageUnmarshaller.Factory
-    val factory = McpJsonRpcMessageUnmarshaller.Factory(McpJson)
+    val factory = McpJsonRpcMessageUnmarshaller.Factory()
 
     // Test with correct media type but wrong types
     val applicationJsonMediaType = MediaTypes.APPLICATION_JSON_MEDIA_TYPE
@@ -145,7 +151,7 @@ class McpJsonRpcMessageUnmarshallerTest {
   @Test
   fun `test unmarshaller with application json subtype variations`() {
     // Create an instance of McpJsonRpcMessageUnmarshaller.Factory
-    val factory = McpJsonRpcMessageUnmarshaller.Factory(McpJson)
+    val factory = McpJsonRpcMessageUnmarshaller.Factory()
 
     // Test with different JSON media type variations
     val jsonUtf8MediaType = "application/json; charset=utf-8".toMediaType()
@@ -156,5 +162,4 @@ class McpJsonRpcMessageUnmarshallerTest {
     assertNotNull(unmarshaller)
     assertEquals(unmarshaller::class, McpJsonRpcMessageUnmarshaller::class)
   }
-
 }

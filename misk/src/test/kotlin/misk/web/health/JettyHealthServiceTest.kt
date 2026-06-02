@@ -4,8 +4,12 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.util.Modules
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.net.ConnectException
+import java.time.Duration
+import kotlin.reflect.KClass
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
+import misk.logging.getLogger
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.ClockModule
@@ -24,26 +28,15 @@ import okhttp3.Request
 import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import misk.logging.getLogger
-import java.net.ConnectException
-import java.time.Duration
-import kotlin.reflect.KClass
 
 @MiskTest(startService = true)
 class JettyHealthServiceTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(Modules.override(MiskTestingServiceModule()).with(ClockModule()))
-      install(
-        WebServerTestingModule(
-          TESTING_WEB_CONFIG.copy(
-            health_dedicated_jetty_instance = true
-          )
-        )
-      )
+      install(WebServerTestingModule(TESTING_WEB_CONFIG.copy(health_dedicated_jetty_instance = true)))
       install(WebActionModule.create<LivenessCheckAction>())
       install(WebActionModule.create<ReadinessCheckAction>())
       install(WebActionModule.create<JettyTestHelloAction>())
@@ -54,11 +47,13 @@ class JettyHealthServiceTest {
   @Inject internal lateinit var jettyHealthService: JettyHealthService
   @Inject lateinit var serviceManager: ServiceManager
 
-  private val client = OkHttpClient().newBuilder()
-    .readTimeout(Duration.ofSeconds(5))
-    .connectTimeout(Duration.ofSeconds(5))
-    .writeTimeout(Duration.ofSeconds(5))
-    .build()
+  private val client =
+    OkHttpClient()
+      .newBuilder()
+      .readTimeout(Duration.ofSeconds(5))
+      .connectTimeout(Duration.ofSeconds(5))
+      .writeTimeout(Duration.ofSeconds(5))
+      .build()
 
   @Test
   fun health() {
@@ -121,12 +116,7 @@ class JettyHealthServiceTest {
     get(healthStatusUrl, "health", expectThrowable = ConnectException::class)
   }
 
-  private fun get(
-    url: HttpUrl,
-    host: String,
-    expectCode: Int? = null,
-    expectThrowable: KClass<*>? = null
-  ): String {
+  private fun get(url: HttpUrl, host: String, expectCode: Int? = null, expectThrowable: KClass<*>? = null): String {
     val req = Request.Builder().url(url).build()
     var result = ""
     var response: Response? = null
@@ -146,8 +136,7 @@ class JettyHealthServiceTest {
   }
 
   @Singleton
-  internal class JettyTestHelloAction @Inject constructor() :
-    WebAction {
+  internal class JettyTestHelloAction @Inject constructor() : WebAction {
     @Get("/hello")
     fun get(): String {
       return "success"

@@ -23,20 +23,20 @@ import wisp.ratelimiting.testing.TestRateLimitConfig
 @MiskTest(startService = true)
 class MySQLBucket4jRateLimiterTests {
   @Suppress("unused")
-  @MiskTestModule val module = object : KAbstractModule() {
-    override fun configure() {
-      install(MiskTestingServiceModule())
-      install(DeploymentModule(TESTING))
-      val config = MiskConfig.load<RootConfig>("mysql_rate_limiter_test", TESTING)
-      install(JdbcTestingModule(RateLimits::class))
-      install(JdbcModule(RateLimits::class, config.mysql_data_source))
+  @MiskTestModule
+  val module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(MiskTestingServiceModule())
+        install(DeploymentModule(TESTING))
+        val config = MiskConfig.load<RootConfig>("mysql_rate_limiter_test", TESTING)
+        install(JdbcTestingModule(RateLimits::class))
+        install(JdbcModule(RateLimits::class, config.mysql_data_source))
 
-      install(
-        MySQLBucket4jRateLimiterModule(RateLimits::class, TABLE_NAME, ID_COLUMN, STATE_COLUMN)
-      )
-      bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
+        install(MySQLBucket4jRateLimiterModule(RateLimits::class, TABLE_NAME, ID_COLUMN, STATE_COLUMN))
+        bind<MeterRegistry>().toInstance(SimpleMeterRegistry())
+      }
     }
-  }
 
   @Inject private lateinit var rateLimiter: RateLimiter
 
@@ -46,23 +46,17 @@ class MySQLBucket4jRateLimiterTests {
       val result = rateLimiter.consumeToken(KEY, TestRateLimitConfig)
       with(result) {
         assertThat(didConsume).isTrue()
-        assertThat(remaining)
-          .isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig))
-          .isEqualTo(4L - it)
+        assertThat(remaining).isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig)).isEqualTo(4L - it)
       }
     }
     val result = rateLimiter.consumeToken(KEY, TestRateLimitConfig)
     with(result) {
       assertThat(didConsume).isFalse()
-      assertThat(remaining)
-        .isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig))
-        .isZero()
+      assertThat(remaining).isEqualTo(rateLimiter.availableTokens(KEY, TestRateLimitConfig)).isZero()
     }
   }
 
-  internal data class RootConfig(
-    val mysql_data_source: DataSourceConfig
-  ) : Config
+  internal data class RootConfig(val mysql_data_source: DataSourceConfig) : Config
 
   companion object {
     internal const val KEY = "test_key"
@@ -72,6 +66,4 @@ class MySQLBucket4jRateLimiterTests {
   }
 }
 
-@Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-internal annotation class RateLimits
+@Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) internal annotation class RateLimits

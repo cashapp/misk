@@ -8,7 +8,7 @@ import misk.inject.asSingleton
  *
  * This is useful for testing or when you don't want to send audit events to a remote service.
  */
-class NoOpAuditClientModule: KAbstractModule() {
+class NoOpAuditClientModule : KAbstractModule() {
   override fun configure() {
     bind<AuditClient>().to<NoOpAuditClient>().asSingleton()
   }

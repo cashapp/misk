@@ -1,7 +1,9 @@
 package misk
 
 /** Information about the authenticated caller of a given action */
-data class MiskCaller @JvmOverloads constructor(
+data class MiskCaller
+@JvmOverloads
+constructor(
   /** Present if the caller is an authenticated peer service */
   val service: String? = null,
 
@@ -9,7 +11,15 @@ data class MiskCaller @JvmOverloads constructor(
   val user: String? = null,
 
   /** Set of capabilities given to a human user, typically provided by the SSO infrastructure */
-  val capabilities: Set<String> = setOf()
+  val capabilities: Set<String> = setOf(),
+
+  /**
+   * When true, this caller is authorized for all endpoints regardless of required capabilities, services, or users.
+   *
+   * This is intended for use in controlled environments (e.g., staging playpens) where a trusted caller needs blanket
+   * access for testing. It should never be set in production.
+   */
+  val allowAll: Boolean = false,
 ) {
   init {
     require(service != null || user != null) { "one of service or user is required" }
@@ -17,7 +27,8 @@ data class MiskCaller @JvmOverloads constructor(
   }
 
   /** The identity of the calling principal, regardless of whether they are a service or a user */
-  val principal: String get() = service ?: user!!
+  val principal: String
+    get() = service ?: user!!
 
   /** We don't like to log usernames. */
   override fun toString(): String {
@@ -28,20 +39,17 @@ data class MiskCaller @JvmOverloads constructor(
     }
   }
 
-  /**
-   * Check whether the caller has one of allowedCapabilities.
-   */
-  fun hasCapability(allowedCapabilities: Set<String>) =
-    capabilities.any { allowedCapabilities.contains(it) }
+  /** Check whether the caller has one of allowedCapabilities. */
+  fun hasCapability(allowedCapabilities: Set<String>) = capabilities.any { allowedCapabilities.contains(it) }
 
-  /**
-   * Check whether this is a service-to-service call from one of allowedServices.
-   */
+  /** Check whether this is a service-to-service call from one of allowedServices. */
   fun isService(allowedServices: Set<String>) = service != null && allowedServices.contains(service)
 
   /** Determine based on allowed capabilities/services if the caller is permitted */
-  @Deprecated("This has been inlined into AccessInterceptor.isAuthorized().",
-    replaceWith = ReplaceWith("caller.hasCapability(allowedCapabilities) || caller.isService(allowedServices)"))
+  @Deprecated(
+    "This has been inlined into AccessInterceptor.isAuthorized().",
+    replaceWith = ReplaceWith("caller.hasCapability(allowedCapabilities) || caller.isService(allowedServices)"),
+  )
   fun isAllowed(allowedCapabilities: Set<String>, allowedServices: Set<String>): Boolean {
     // Allow if we don't have any requirements on service or capability
     if (allowedServices.isEmpty() && allowedCapabilities.isEmpty()) return true

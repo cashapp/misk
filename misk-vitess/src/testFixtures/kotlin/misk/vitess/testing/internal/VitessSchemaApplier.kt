@@ -5,17 +5,6 @@ import com.github.dockerjava.api.exception.DockerClientException
 import com.github.dockerjava.api.model.Container
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Image
-import misk.vitess.testing.ApplySchemaResult
-import misk.vitess.testing.DdlUpdate
-import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_GRPC
-import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_NAME
-import misk.vitess.testing.DefaultSettings.VTCTLD_CLIENT_IMAGE
-import misk.vitess.testing.VSchemaUpdate
-import misk.vitess.testing.VitessTableType
-import misk.vitess.testing.VitessTestDbStartupException
-import misk.resources.ClasspathResourceLoaderBackend
-import misk.resources.FilesystemLoaderBackend
-import misk.resources.ResourceLoader
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -25,8 +14,21 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.stream.Collectors
 import kotlin.io.path.createDirectories
 import kotlin.io.path.pathString
+import misk.resources.ClasspathResourceLoaderBackend
+import misk.resources.FilesystemLoaderBackend
+import misk.resources.ResourceLoader
+import misk.spirit.SchemaDiff
+import misk.spirit.Spirit
+import misk.vitess.testing.ApplySchemaResult
+import misk.vitess.testing.DdlUpdate
+import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_GRPC
+import misk.vitess.testing.VSchemaUpdate
+import misk.vitess.testing.VitessTableType
+import misk.vitess.testing.VitessTestDbException
+import misk.vitess.testing.VitessTestDbStartupException
 
 /**
  * VitessSchemaApplier is responsible for applying the vschema and .sql DDL's for each keyspace in the schema directory.
@@ -38,26 +40,19 @@ internal class VitessSchemaApplier(
   private val dbaUserPassword: String,
   private val debugStartup: Boolean,
   private val dockerClient: DockerClient,
+  private val dockerNetworkName: String,
   private val enableDeclarativeSchemaChanges: Boolean,
   private val keyspaces: List<VitessKeyspace>,
   private val hostname: String,
   private val mysqlPort: Int,
   private val schemaDir: String,
+  private val vitessImage: String,
   private val vtgatePort: Int,
   private val vtgateUser: String,
-  private val vtgateUserPassword: String
+  private val vtgateUserPassword: String,
 ) {
-  private companion object {
-    const val VTCTLDCLIENT_CONTAINER_START_DELAY_MS = 10000L
-    const val VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS = "10000ms"
-  }
 
-  private val skeema = VitessSkeema(
-    hostname = hostname,
-    mysqlPort = mysqlPort,
-    dbaUser = dbaUser,
-    dbaUserPassword = dbaUserPassword)
-
+  private val spirit = Spirit()
 
   /**
    * Apply the schema defined in the schema directory, which will reinitialize the keyspace vschema's and apply all
@@ -70,12 +65,13 @@ internal class VitessSchemaApplier(
     // to handle starting a new container.
     var vitessQueryExecutor: VitessQueryExecutor
     try {
-      vitessQueryExecutor = VitessQueryExecutor(
-        hostname = hostname,
-        vtgatePort = vtgatePort,
-        vtgateUser = vtgateUser,
-        vtgateUserPassword = vtgateUserPassword)
-
+      vitessQueryExecutor =
+        VitessQueryExecutor(
+          hostname = hostname,
+          vtgatePort = vtgatePort,
+          vtgateUser = vtgateUser,
+          vtgateUserPassword = vtgateUserPassword,
+        )
     } catch (e: VitessQueryExecutorException) {
       return ApplySchemaResult(
         newContainerNeeded = true,
@@ -139,18 +135,12 @@ internal class VitessSchemaApplier(
     // Apply VSchemas in parallel but wait for all to complete before proceeding to DDL's.
     val vschemaExecutorService = Executors.newFixedThreadPool(keyspaces.size)
     val vschemaFutures = mutableListOf<Future<VSchemaUpdate>>()
-    
+
     keyspaces.forEach { keyspace ->
-      vschemaFutures.add(
-        vschemaExecutorService.submit<VSchemaUpdate> {
-          processVschema(keyspace)
-        }
-      )
+      vschemaFutures.add(vschemaExecutorService.submit<VSchemaUpdate> { processVschema(keyspace) })
     }
 
-    vschemaFutures.forEach { future ->
-      vschemaUpdates.add(future.get())
-    }
+    vschemaFutures.forEach { future -> vschemaUpdates.add(future.get()) }
     vschemaExecutorService.shutdown()
 
     val ddlExecutorService = Executors.newFixedThreadPool(keyspaces.size)
@@ -215,19 +205,28 @@ internal class VitessSchemaApplier(
     vitessQueryExecutor: VitessQueryExecutor,
     ddlUpdates: ConcurrentLinkedQueue<DdlUpdate>,
   ): Boolean {
-    val skeemaDiff = skeema.diff(keyspace)
-    if (skeemaDiff.hasDiff) {
+    val schemaDiff = runSpirit(keyspace)
+    if (schemaDiff.hasDiff) {
       printDebug("Schema changes detected for keyspace `${keyspace.name}`")
-      if (skeemaDiff.diff != null) {
-        applyDdlCommands(skeemaDiff.diff, keyspace, vitessQueryExecutor)
-        ddlUpdates.add(DdlUpdate(keyspace.name, skeemaDiff.diff))
-        return true
-      } else {
-        throw VitessSchemaManagerException("Skeema diff returned null diff for keyspace `${keyspace.name}`")
-      }
+      val ddl =
+        schemaDiff.diff
+          ?: throw VitessSchemaManagerException("Spirit diff returned null diff for keyspace `${keyspace.name}`")
+      applyDdlCommands(ddl, keyspace, vitessQueryExecutor)
+      ddlUpdates.add(DdlUpdate(keyspace.name, ddl))
+      return true
     } else {
       printDebug("SQL schema for keyspace `${keyspace.name}` is up-to-date.")
       return false
+    }
+  }
+
+  private fun runSpirit(keyspace: VitessKeyspace): SchemaDiff {
+    val dsn = "$vtgateUser:$vtgateUserPassword@tcp($hostname:$vtgatePort)/${keyspace.name}"
+    val sqlFiles = keyspace.ddlCommands.toMap()
+    try {
+      return spirit.diff(dsn, sqlFiles)
+    } catch (e: Exception) {
+      throw VitessTestDbException("Failed to run spirit diff for keyspace `${keyspace.name}`. Error: `${e.message}`", e)
     }
   }
 
@@ -311,15 +310,17 @@ internal class VitessSchemaApplier(
     }
 
     val networks = dockerClient.listNetworksCmd().exec()
-    networks.find { it.name == VITESS_DOCKER_NETWORK_NAME}
-      ?: throw VitessSchemaManagerException("VitessSchemaManager could not find the correct Docker Network named `$VITESS_DOCKER_NETWORK_NAME`. The network may have failed to initialize or VitessDockerContainer.createContainer may not have been run.")
+    networks.find { it.name == dockerNetworkName }
+      ?: throw VitessSchemaManagerException(
+        "VitessSchemaManager could not find the correct Docker Network named `$dockerNetworkName`. The network may have failed to initialize or VitessDockerContainer.createContainer may not have been run."
+      )
 
     printDebug("Creating new vtctldclient container.")
     val createContainerResponse =
       dockerClient
-        .createContainerCmd(VTCTLD_CLIENT_IMAGE)
+        .createContainerCmd(deriveVtctldClientImage(vitessImage))
         .withName(vtctldClientContainerName)
-        .withHostConfig(HostConfig.newHostConfig().withNetworkMode(VITESS_DOCKER_NETWORK_NAME))
+        .withHostConfig(HostConfig.newHostConfig().withNetworkMode(dockerNetworkName))
         .withCmd(command)
         .withAttachStdout(true)
         .withAttachStdin(true)
@@ -329,10 +330,11 @@ internal class VitessSchemaApplier(
     dockerClient.startContainerCmd(createContainerResponse.id).exec()
 
     try {
-      val statusCode = dockerClient
-        .waitContainerCmd(createContainerResponse.id)
-        .start()
-        .awaitStatusCode(VTCTLDCLIENT_CONTAINER_START_DELAY_MS, TimeUnit.MILLISECONDS)
+      val statusCode =
+        dockerClient
+          .waitContainerCmd(createContainerResponse.id)
+          .start()
+          .awaitStatusCode(VTCTLDCLIENT_CONTAINER_START_DELAY_MS, TimeUnit.MILLISECONDS)
       printDebug("vtctldclient container command wait status code: `$statusCode`")
 
       val containerLogs = getContainerLogs(createContainerResponse.id)
@@ -349,22 +351,24 @@ internal class VitessSchemaApplier(
       val containerLogs = getContainerLogs(createContainerResponse.id)
       println("Failed to await vtctld container command for `${command.joinToString(" ")}`. Logs: $containerLogs")
       throw VitessSchemaManagerException(
-        "Failed to await vtctld container command: `${command.joinToString(" ")}`, check logs for details.", e)
+        "Failed to await vtctld container command: `${command.joinToString(" ")}`, check logs for details.",
+        e,
+      )
     } finally {
       dockerClient.removeContainerCmd(createContainerResponse.id).withForce(true).exec()
     }
   }
 
-
   private fun createTempSchemaDirectory(): Path {
     val tempDir = Files.createTempDirectory("schema-")
 
-    val resourceLoader = ResourceLoader(
-      mapOf(
-        ClasspathResourceLoaderBackend.SCHEME to ClasspathResourceLoaderBackend,
-        FilesystemLoaderBackend.SCHEME to FilesystemLoaderBackend
+    val resourceLoader =
+      ResourceLoader(
+        mapOf(
+          ClasspathResourceLoaderBackend.SCHEME to ClasspathResourceLoaderBackend,
+          FilesystemLoaderBackend.SCHEME to FilesystemLoaderBackend,
+        )
       )
-    )
 
     tempDir.createDirectories()
 
@@ -388,7 +392,11 @@ internal class VitessSchemaApplier(
     }
 
     val keyspaces =
-      Files.list(lastSchemaDirPath).filter { Files.isDirectory(it) }.map { it.fileName.toString() }.sorted().toList()
+      Files.list(lastSchemaDirPath)
+        .filter { Files.isDirectory(it) }
+        .map { it.fileName.toString() }
+        .sorted()
+        .collect(Collectors.toList())
 
     val schemaDirectoryDiffs = mutableMapOf<String, List<String>>()
     var diffsPresent = false
@@ -457,15 +465,21 @@ internal class VitessSchemaApplier(
     Files.walk(Paths.get(currentSchemaDirPath, keyspace))
       .filter { Files.isRegularFile(it) }
       .map { it.fileName.toString() to it.toFile().readText() }
-      .toList()
+      .collect(Collectors.toList())
       .sortedBy { it.first }
 
   private fun prepareVtctldClientImage() {
-    val images: List<Image> = dockerClient.listImagesCmd().withReferenceFilter(VTCTLD_CLIENT_IMAGE).exec()
+    val vtctldClientImage = deriveVtctldClientImage(vitessImage)
+    val images: List<Image> = dockerClient.listImagesCmd().withReferenceFilter(vtctldClientImage).exec()
     if (images.isEmpty()) {
-      printDebug("vtctldclient image `$VTCTLD_CLIENT_IMAGE` does not exist, proceeding to pull.")
-      dockerClient.pullImageCmd(VTCTLD_CLIENT_IMAGE).start().awaitCompletion()
+      printDebug("vtctldclient image `$vtctldClientImage` does not exist, proceeding to pull.")
+      dockerClient.pullImageCmd(vtctldClientImage).start().awaitCompletion()
     }
+  }
+
+  private companion object {
+    const val VTCTLDCLIENT_CONTAINER_START_DELAY_MS = 10000L
+    const val VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS = "10000ms"
   }
 
   private fun findExistingContainer(containerName: String): Container? {
@@ -479,12 +493,7 @@ internal class VitessSchemaApplier(
 
   private fun getContainerLogs(containerId: String): String {
     val logCallback = LogContainerResultCallback()
-    dockerClient
-      .logContainerCmd(containerId)
-      .withStdOut(true)
-      .withStdErr(true)
-      .exec(logCallback)
-      .awaitCompletion()
+    dockerClient.logContainerCmd(containerId).withStdOut(true).withStdErr(true).exec(logCallback).awaitCompletion()
 
     return logCallback.getLogs()
   }

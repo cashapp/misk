@@ -8,13 +8,15 @@ import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
 
 @Singleton
-internal class AwsSqsJobHandlerSubscriptionService @Inject constructor(
+internal class AwsSqsJobHandlerSubscriptionService
+@Inject
+constructor(
   private val attributeImporter: AwsSqsQueueAttributeImporter,
   private val consumer: SqsJobConsumer,
   private val individualConsumerMapping: Map<QueueName, JobHandler>,
   private val batchConsumerMapping: Map<QueueName, BatchJobHandler>,
   private val externalQueues: Map<QueueName, AwsSqsQueueConfig>,
-  private val config: AwsSqsJobQueueConfig
+  private val config: AwsSqsJobQueueConfig,
 ) : AbstractIdleService() {
   override fun startUp() {
     check(individualConsumerMapping.isNotEmpty() || batchConsumerMapping.isNotEmpty()) {
@@ -26,6 +28,7 @@ internal class AwsSqsJobHandlerSubscriptionService @Inject constructor(
 
     individualConsumerMapping.forEach { consumer.subscribe(it.key, it.value) }
     batchConsumerMapping.forEach { consumer.subscribe(it.key, it.value) }
+
     externalQueues.forEach { attributeImporter.import(it.key) }
   }
 

@@ -1,5 +1,6 @@
 package misk.web.jetty
 
+import java.util.ArrayDeque
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
 import misk.web.ServletHttpCall
@@ -17,14 +18,11 @@ import org.eclipse.jetty.ee8.websocket.api.WriteCallback
 import org.eclipse.jetty.ee8.websocket.server.JettyServerUpgradeRequest
 import org.eclipse.jetty.ee8.websocket.server.JettyServerUpgradeResponse
 import org.eclipse.jetty.ee8.websocket.server.JettyWebSocketCreator
-import java.util.ArrayDeque
 
 private const val MAX_QUEUE_SIZE = 16 * 1024 * 1024
 
-internal class JettyWebSocket(
-  val request: JettyServerUpgradeRequest,
-  val response: JettyServerUpgradeResponse
-) : WebSocket {
+internal class JettyWebSocket(val request: JettyServerUpgradeRequest, val response: JettyServerUpgradeResponse) :
+  WebSocket {
 
   /** Total size of messages enqueued and not yet transmitted by Jetty. */
   private var outgoingQueueSize = 0L
@@ -35,62 +33,64 @@ internal class JettyWebSocket(
   /** Application's listener to notify of incoming messages from the client. */
   private var listener: WebSocketListener? = null
 
-  private val adapter = object : WebSocketAdapter() {
-    override fun onWebSocketConnect(sess: Session) {
-      super.onWebSocketConnect(sess)
-      sendQueue()
-    }
-
-    override fun onWebSocketClose(statusCode: Int, reason: String?) {
-      super.onWebSocketClose(statusCode, reason)
-      listener!!.onClosed(this@JettyWebSocket, statusCode, reason)
-    }
-
-    override fun onWebSocketError(cause: Throwable?) {
-      listener!!.onFailure(this@JettyWebSocket, cause!!)
-    }
-
-    override fun onWebSocketText(message: String?) {
-      listener!!.onMessage(this@JettyWebSocket, message!!)
-    }
-
-    override fun onWebSocketBinary(payload: ByteArray?, offset: Int, len: Int) {
-      listener!!.onMessage(this@JettyWebSocket, payload!!.toByteString(offset, len))
-    }
-  }
-
-  internal fun upstreamResponse() = object : ServletHttpCall.UpstreamResponse {
-    override var statusCode: Int
-      get() = response.statusCode
-      set(value) {
-        response.statusCode = value
+  private val adapter =
+    object : WebSocketAdapter() {
+      override fun onWebSocketConnect(sess: Session) {
+        super.onWebSocketConnect(sess)
+        sendQueue()
       }
 
-    override val httpVersion: HttpVersion
-      get() = error("No http version for websocket responses")
+      override fun onWebSocketClose(statusCode: Int, reason: String?) {
+        super.onWebSocketClose(statusCode, reason)
+        listener!!.onClosed(this@JettyWebSocket, statusCode, reason)
+      }
 
-    override val headers: Headers
-      get() = response.headers()
+      override fun onWebSocketError(cause: Throwable?) {
+        listener!!.onFailure(this@JettyWebSocket, cause!!)
+      }
 
-    override fun setHeader(name: String, value: String) {
-      response.setHeader(name, value)
-    }
+      override fun onWebSocketText(message: String?) {
+        listener!!.onMessage(this@JettyWebSocket, message!!)
+      }
 
-    override fun addHeaders(headers: Headers) {
-      for (i in 0 until headers.size) {
-        response.addHeader(headers.name(i), headers.value(i))
+      override fun onWebSocketBinary(payload: ByteArray?, offset: Int, len: Int) {
+        listener!!.onMessage(this@JettyWebSocket, payload!!.toByteString(offset, len))
       }
     }
 
-    override fun requireTrailers() = error("no trailers for web sockets")
+  internal fun upstreamResponse() =
+    object : ServletHttpCall.UpstreamResponse {
+      override var statusCode: Int
+        get() = response.statusCode
+        set(value) {
+          response.statusCode = value
+        }
 
-    override fun setTrailer(name: String, value: String) = error("no trailers for web sockets")
+      override val httpVersion: HttpVersion
+        get() = error("No http version for websocket responses")
 
-    override fun initWebSocketListener(webSocketListener: WebSocketListener) {
-      check(this@JettyWebSocket.listener == null) { "web socket listener already set" }
-      this@JettyWebSocket.listener = webSocketListener
+      override val headers: Headers
+        get() = response.headers()
+
+      override fun setHeader(name: String, value: String) {
+        response.setHeader(name, value)
+      }
+
+      override fun addHeaders(headers: Headers) {
+        for (i in 0 until headers.size) {
+          response.addHeader(headers.name(i), headers.value(i))
+        }
+      }
+
+      override fun requireTrailers() = error("no trailers for web sockets")
+
+      override fun setTrailer(name: String, value: String) = error("no trailers for web sockets")
+
+      override fun initWebSocketListener(webSocketListener: WebSocketListener) {
+        check(this@JettyWebSocket.listener == null) { "web socket listener already set" }
+        this@JettyWebSocket.listener = webSocketListener
+      }
     }
-  }
 
   override fun queueSize(): Long {
     return outgoingQueueSize
@@ -125,7 +125,7 @@ internal class JettyWebSocket(
           override fun writeFailed(x: Throwable?) {
             outgoingQueueSize -= byteCount
           }
-        }
+        },
       )
     }
   }
@@ -151,25 +151,23 @@ internal class JettyWebSocket(
     return "JettyWebSocket[${re.remoteAddr}:${re.remotePort} to ${re.requestURI}]"
   }
 
-  internal class Creator(
-    private val boundActions: Set<BoundAction<out WebAction>>
-  ) : JettyWebSocketCreator {
+  internal class Creator(private val boundActions: Set<BoundAction<out WebAction>>) : JettyWebSocketCreator {
     override fun createWebSocket(
       request: JettyServerUpgradeRequest,
-      response: JettyServerUpgradeResponse
+      response: JettyServerUpgradeResponse,
     ): WebSocketAdapter? {
       val realWebSocket = JettyWebSocket(request, response)
 
-      val httpCall = ServletHttpCall.create(
-        request = request.httpServletRequest,
-        dispatchMechanism = DispatchMechanism.WEBSOCKET,
-        upstreamResponse = realWebSocket.upstreamResponse(),
-        webSocket = realWebSocket
-      )
+      val httpCall =
+        ServletHttpCall.create(
+          request = request.httpServletRequest,
+          dispatchMechanism = DispatchMechanism.WEBSOCKET,
+          upstreamResponse = realWebSocket.upstreamResponse(),
+          webSocket = realWebSocket,
+        )
 
-      val candidateActions = boundActions.mapNotNull {
-        it.match(DispatchMechanism.WEBSOCKET, null, listOf(), httpCall.url)
-      }
+      val candidateActions =
+        boundActions.mapNotNull { it.match(DispatchMechanism.WEBSOCKET, null, listOf(), httpCall.url) }
 
       val bestAction = candidateActions.sorted().firstOrNull() ?: return null
       bestAction.action.scopeAndHandle(request.httpServletRequest, httpCall, bestAction.pathMatcher)

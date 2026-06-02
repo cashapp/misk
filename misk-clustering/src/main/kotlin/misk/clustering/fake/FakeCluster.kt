@@ -1,60 +1,49 @@
 package misk.clustering.fake
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import misk.clustering.Cluster
 import misk.clustering.ClusterService
 import misk.clustering.ClusterWatch
 import misk.clustering.DefaultCluster
 import misk.logging.getLogger
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 /**
- * A [FakeCluster] is a [Cluster] that is a fake. It delegates entirely to [DefaultCluster],
- * but allows us to keep [DefaultCluster] internal and make it clear that [FakeCluster]
- * is only intended to be used for fakes.
+ * A [FakeCluster] is a [Cluster] that is a fake. It delegates entirely to [DefaultCluster], but allows us to keep
+ * [DefaultCluster] internal and make it clear that [FakeCluster] is only intended to be used for fakes.
  *
- * NB(mmihic): I'd prefer for this to be in the misk-testing module, but it can't since it
- * relies on [DefaultCluster] and we want to leave [DefaultCluster] internal
+ * NB(mmihic): I'd prefer for this to be in the misk-testing module, but it can't since it relies on [DefaultCluster]
+ * and we want to leave [DefaultCluster] internal
  */
 @Singleton
-class FakeCluster internal constructor(
-  val resourceMapper: ExplicitClusterResourceMapper,
-  private val delegate: DefaultCluster
-) : ClusterService by delegate, Cluster by delegate {
-  constructor(resourceMapper: ExplicitClusterResourceMapper) :
-    this(resourceMapper, DefaultCluster(self) { resourceMapper })
+class FakeCluster
+internal constructor(val resourceMapper: ExplicitClusterResourceMapper, private val delegate: DefaultCluster) :
+  ClusterService by delegate, Cluster by delegate {
+  constructor(
+    resourceMapper: ExplicitClusterResourceMapper
+  ) : this(resourceMapper, DefaultCluster(self) { resourceMapper })
 
-  @Inject constructor() : this(
-    ExplicitClusterResourceMapper().apply {
-      setDefaultMapping(self)
-    }
-  )
+  @Inject constructor() : this(ExplicitClusterResourceMapper().apply { setDefaultMapping(self) })
 
   override fun watch(watch: ClusterWatch) {
-    waitFor {
-      delegate.watch(watch)
-    }
+    waitFor { delegate.watch(watch) }
   }
 
   @JvmOverloads
   fun clusterChanged(
     membersBecomingReady: Set<Cluster.Member> = setOf(),
-    membersBecomingNotReady: Set<Cluster.Member> = setOf()
+    membersBecomingNotReady: Set<Cluster.Member> = setOf(),
   ) {
-    waitFor {
-      delegate.clusterChanged(membersBecomingReady, membersBecomingNotReady)
-    }
+    waitFor { delegate.clusterChanged(membersBecomingReady, membersBecomingNotReady) }
   }
 
   private fun waitFor(f: () -> Unit) {
     // Single thread all changes to the cluster by waiting for each operation to complete
     val latch = CountDownLatch(1)
     f()
-    delegate.syncPoint {
-      latch.countDown()
-    }
+    delegate.syncPoint { latch.countDown() }
     check(latch.await(5, TimeUnit.SECONDS)) { "cluster change did not complete within 5 seconds " }
   }
 

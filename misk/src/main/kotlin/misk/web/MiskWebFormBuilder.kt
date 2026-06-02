@@ -5,7 +5,6 @@ import com.squareup.wire.Message
 import com.squareup.wire.ProtoAdapter
 import com.squareup.wire.WireEnum
 import com.squareup.wire.WireField
-import okio.ByteString
 import java.lang.reflect.ParameterizedType
 import java.time.Duration
 import java.time.Instant
@@ -17,18 +16,17 @@ import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.superclasses
 import kotlin.reflect.jvm.javaField
+import okio.ByteString
 
 /**
- * Provides a mapping from field name to Type definition given a KType.
- * Useful for processes that want to have a schema definition of a type.
- * For example: used by the WebActions admin dashboard tab to show a statically typed form
- * containing request fields for developers to fill out.
- * Currently only supports Wire request type messages;
- * non-Wire messages return an empty mapping.
+ * Provides a mapping from field name to Type definition given a KType. Useful for processes that want to have a schema
+ * definition of a type. For example: used by the WebActions admin dashboard tab to show a statically typed form
+ * containing request fields for developers to fill out. Currently only supports Wire request type messages; non-Wire
+ * messages return an empty mapping.
  */
-class MiskWebFormBuilder @JvmOverloads constructor(
-  private val documentationProvider: ProtoDocumentationProvider? = null
-) {
+class MiskWebFormBuilder
+@JvmOverloads
+constructor(private val documentationProvider: ProtoDocumentationProvider? = null) {
   fun calculateTypes(requestType: KType?): Map<String, Type> {
     // Type maps can only be calculated for wire messages
     if (requestType == null) {
@@ -64,7 +62,7 @@ class MiskWebFormBuilder @JvmOverloads constructor(
             fieldName = field.name,
             fields = fields,
             stack = stack,
-            annotations = property.annotations.filter { it !is WireField }
+            annotations = property.annotations.filter { it !is WireField },
           )
         }
       }
@@ -90,18 +88,14 @@ class MiskWebFormBuilder @JvmOverloads constructor(
       maybePrimitiveType != null -> fields.add(maybePrimitiveType)
       fieldClass == List::class.java -> {
         val fieldClassParameters = (fieldType.type as ParameterizedType).actualTypeArguments
-        check(fieldClassParameters.size == 1) {
-          "Encountered Wire-generated List without 1 type parameter: $fieldType"
-        }
+        check(fieldClassParameters.size == 1) { "Encountered Wire-generated List without 1 type parameter: $fieldType" }
         val listType = fieldClassParameters[0]
         handleField(TypeLiteral.get(listType), fieldName, fields, stack, true, annotations)
       }
 
       fieldClass == Map::class.java -> {
         val fieldClassArguments = (fieldType.type as ParameterizedType).actualTypeArguments
-        check(fieldClassArguments.size == 2) {
-          "Encountered Wire-generated Map without 2 type parameters: $fieldType"
-        }
+        check(fieldClassArguments.size == 2) { "Encountered Wire-generated Map without 2 type parameters: $fieldType" }
         // key type can never be a Message so we skip it
         val valueType = fieldClassArguments[1]
         handleField(TypeLiteral.get(valueType), fieldName, fields, stack, true, annotations)
@@ -122,10 +116,7 @@ class MiskWebFormBuilder @JvmOverloads constructor(
   }
 
   companion object {
-    /**
-     * Create misk-web [Field]s for primitives and enum types.
-     * Returns null if the type cannot be mapped.
-     */
+    /** Create misk-web [Field]s for primitives and enum types. Returns null if the type cannot be mapped. */
     fun maybeCreatePrimitiveField(
       fieldClass: Class<*>,
       fieldName: String,
@@ -139,82 +130,37 @@ class MiskWebFormBuilder @JvmOverloads constructor(
         fieldClass == ByteString::class.java ->
           Field(fieldName, ByteString::class.simpleName!!, repeated, annotations.toStrings())
 
-        fieldClass == Char::class.javaObjectType -> Field(
-          fieldName,
-          Char::class.simpleName!!,
-          repeated,
-          annotations.toStrings(),
-        )
+        fieldClass == Char::class.javaObjectType ->
+          Field(fieldName, Char::class.simpleName!!, repeated, annotations.toStrings())
 
-        fieldClass == Byte::class.javaObjectType -> Field(
-          fieldName,
-          Byte::class.simpleName!!,
-          repeated,
-          annotations.toStrings(),
-        )
+        fieldClass == Byte::class.javaObjectType ->
+          Field(fieldName, Byte::class.simpleName!!, repeated, annotations.toStrings())
 
-        fieldClass == Short::class.javaObjectType -> Field(
-          fieldName,
-          Short::class.simpleName!!,
-          repeated,
-          annotations.toStrings(),
-        )
+        fieldClass == Short::class.javaObjectType ->
+          Field(fieldName, Short::class.simpleName!!, repeated, annotations.toStrings())
 
-        fieldClass == Int::class.javaObjectType -> Field(
-          fieldName,
-          Int::class.simpleName!!,
-          repeated,
-          annotations.toStrings(),
-        )
+        fieldClass == Int::class.javaObjectType ->
+          Field(fieldName, Int::class.simpleName!!, repeated, annotations.toStrings())
 
-        fieldClass == Long::class.javaObjectType || fieldClass == Long::class.javaPrimitiveType -> Field(
-          fieldName,
-          Long::class.simpleName!!,
-          repeated,
-          annotations.toStrings(),
-        )
+        fieldClass == Long::class.javaObjectType || fieldClass == Long::class.javaPrimitiveType ->
+          Field(fieldName, Long::class.simpleName!!, repeated, annotations.toStrings())
 
-        fieldClass == Double::class.javaObjectType -> Field(
-          fieldName,
-          Double::class.simpleName!!,
-          repeated,
-          annotations.toStrings(),
-        )
+        fieldClass == Double::class.javaObjectType ->
+          Field(fieldName, Double::class.simpleName!!, repeated, annotations.toStrings())
 
-        fieldClass == Boolean::class.javaObjectType -> Field(
-          fieldName,
-          Boolean::class.simpleName!!,
-          repeated,
-          annotations.toStrings(),
-        )
+        fieldClass == Boolean::class.javaObjectType ->
+          Field(fieldName, Boolean::class.simpleName!!, repeated, annotations.toStrings())
 
-        fieldClass == Enum::class.java -> createEnumField(
-          fieldClass,
-          fieldName,
-          repeated,
-          annotations
-        )
+        fieldClass == Enum::class.java -> createEnumField(fieldClass, fieldName, repeated, annotations)
 
-        fieldClass == Instant::class.java -> Field(
-          fieldName,
-          Instant::class.simpleName!!,
-          repeated,
-          annotations.toStrings()
-        )
+        fieldClass == Instant::class.java ->
+          Field(fieldName, Instant::class.simpleName!!, repeated, annotations.toStrings())
 
-        fieldClass == Duration::class.java -> Field(
-          fieldName,
-          Duration::class.simpleName!!,
-          repeated,
-          annotations.toStrings(),
-        )
+        fieldClass == Duration::class.java ->
+          Field(fieldName, Duration::class.simpleName!!, repeated, annotations.toStrings())
 
-        fieldClass == LocalDate::class.java -> Field(
-          fieldName,
-          LocalDate::class.simpleName!!,
-          repeated,
-          annotations.toStrings(),
-        )
+        fieldClass == LocalDate::class.java ->
+          Field(fieldName, LocalDate::class.simpleName!!, repeated, annotations.toStrings())
 
         WireEnum::class.java.isAssignableFrom(fieldClass) -> {
           createEnumField(fieldClass, fieldName, repeated, annotations)
@@ -225,70 +171,64 @@ class MiskWebFormBuilder @JvmOverloads constructor(
     }
 
     /**
-     * Adds a field with a type that has the class name and enum values embedded
-     * Example: "Enum<app.cash.backfila.BackfillType,ISOLATED,PARALLEL>"
+     * Adds a field with a type that has the class name and enum values embedded Example:
+     * "Enum<app.cash.backfila.BackfillType,ISOLATED,PARALLEL>"
      */
     fun createEnumField(
       fieldClass: Class<*>,
       fieldName: String,
       repeated: Boolean,
       annotations: List<Annotation> = emptyList(),
-    ): Field = createSyntheticEnumField(
-      fieldClassName = fieldClass.canonicalName,
-      fieldName = fieldName,
-      enumValues = fieldClass.enumConstants.map { (it as Enum<*>).name },
-      repeated = repeated,
-      annotations = annotations,
-    )
+    ): Field =
+      createSyntheticEnumField(
+        fieldClassName = fieldClass.canonicalName,
+        fieldName = fieldName,
+        enumValues = fieldClass.enumConstants.map { (it as Enum<*>).name },
+        repeated = repeated,
+        annotations = annotations,
+      )
 
     /**
-     * Adds a field with a type that has the class name and enum values embedded
-     * Example: "Enum<app.cash.backfila.BackfillType,ISOLATED,PARALLEL>"
+     * Adds a field with a type that has the class name and enum values embedded Example:
+     * "Enum<app.cash.backfila.BackfillType,ISOLATED,PARALLEL>"
      */
     fun createSyntheticEnumField(
       fieldClassName: String,
       fieldName: String,
       enumValues: List<String>,
       repeated: Boolean,
-      annotations: List<Annotation> = listOf()
-    ) = Field(
-      fieldName,
-      "Enum<$fieldClassName,${enumValues.joinToString(",")}>",
-      repeated,
-      annotations.toStrings()
-    )
+      annotations: List<Annotation> = listOf(),
+    ) = Field(fieldName, "Enum<$fieldClassName,${enumValues.joinToString(",")}>", repeated, annotations.toStrings())
 
     private fun List<Annotation>.toStrings(): List<String> = this.map { it.toString() }
 
     private fun KClass<*>.getProtobufType(): String? {
       return when {
-        isSubclassOf(Message::class) -> ProtoAdapter.get(this.java)
-        else -> null
-      }?.typeUrl?.split("/")?.lastOrNull()
+          isSubclassOf(Message::class) -> ProtoAdapter.get(this.java)
+          else -> null
+        }
+        ?.typeUrl
+        ?.split("/")
+        ?.lastOrNull()
     }
   }
 
   /** Akin to a Proto Message, a Type has a list of fields */
-  data class Type @JvmOverloads constructor(
+  data class Type
+  @JvmOverloads
+  constructor(
     val fields: List<Field>,
 
-    /**
-     * Optional url to type documentation
-     */
+    /** Optional url to type documentation */
     val documentationUrl: String? = null,
   )
 
   /**
-   * Akin to a Proto field, a field can be of primitive or another Message type,
-   * and can be repeated to become a list.
+   * Akin to a Proto field, a field can be of primitive or another Message type, and can be repeated to become a list.
    *
-   * Enums are encoded to contain their values within their Type definition as
-   * opposed to a unique Type.
+   * Enums are encoded to contain their values within their Type definition as opposed to a unique Type.
    */
-  data class Field @JvmOverloads constructor(
-    val name: String,
-    val type: String,
-    val repeated: Boolean,
-    val annotations: List<String> = listOf(),
-  )
+  data class Field
+  @JvmOverloads
+  constructor(val name: String, val type: String, val repeated: Boolean, val annotations: List<String> = listOf())
 }

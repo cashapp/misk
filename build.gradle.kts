@@ -23,6 +23,7 @@ plugins {
   alias(libs.plugins.kotlinAllOpen) apply false
   alias(libs.plugins.kotlinJpa) apply false
   alias(libs.plugins.kotlinJvm) apply false
+  alias(libs.plugins.kotlinSerialization) apply false
   alias(libs.plugins.mavenPublishBase) apply false
   alias(libs.plugins.protobuf) apply false
   alias(libs.plugins.schemaMigrator) apply false
@@ -70,6 +71,7 @@ dependencyAnalysis {
     project(":misk-jooq") {
       onIncorrectConfiguration {
         exclude("org.jooq:jooq")
+        exclude("org.jooq:jooq-kotlin")
       }
     }
     project(":detektive") {
@@ -87,6 +89,12 @@ dependencyAnalysis {
       onUnusedDependencies {
         // Plugin does not recognize use of tests artifact from bucket4j's maven manifest
         exclude("com.bucket4j:bucket4j-core")
+      }
+    }
+    project(":misk-admin") {
+      onUnusedDependencies {
+        // `wire-runtime` is added automatically by the Wire plugin but not directly used.
+        exclude("com.squareup.wire:wire-runtime")
       }
     }
     project(":misk-action-scopes") {
@@ -245,11 +253,11 @@ subprojects {
     tasks.withType<KotlinCompile>().configureEach {
       compilerOptions {
         jvmTarget.set(JvmTarget.JVM_11)
+        freeCompilerArgs.add("-Xjdk-release=11")
       }
     }
     tasks.withType<JavaCompile>().configureEach {
-      sourceCompatibility = "11"
-      targetCompatibility = "11"
+      options.release.set(11)
     }
 
     dependencies {
@@ -257,8 +265,7 @@ subprojects {
       add("testRuntimeOnly", rootProject.libs.junitLauncher)
 
       // Platform/BOM dependencies constrain versions only.
-      // Enforce misk-bom -- it should take priority over external BOMs.
-      add("api", enforcedPlatform(project(":misk-bom")))
+      add("api", platform(project(":misk-bom")))
       add("api", platform(rootProject.libs.grpcBom))
       add("api", platform(rootProject.libs.guavaBom))
       add("api", platform(rootProject.libs.guiceBom))

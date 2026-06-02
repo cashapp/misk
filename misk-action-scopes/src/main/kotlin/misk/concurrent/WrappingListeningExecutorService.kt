@@ -20,7 +20,10 @@ abstract class WrappingListeningExecutorService : ForwardingListeningExecutorSer
   }
 
   override fun <T> submit(runnable: Runnable, result: T): ListenableFuture<T> {
-    return submit<T> { runnable.run(); result }
+    return submit<T> {
+      runnable.run()
+      result
+    }
   }
 
   override fun submit(runnable: Runnable): ListenableFuture<*> {
@@ -34,11 +37,7 @@ abstract class WrappingListeningExecutorService : ForwardingListeningExecutorSer
   }
 
   @Throws(InterruptedException::class)
-  override fun <T> invokeAll(
-    callables: Collection<Callable<T>>,
-    timeout: Long,
-    timeUnit: TimeUnit
-  ): List<Future<T>> {
+  override fun <T> invokeAll(callables: Collection<Callable<T>>, timeout: Long, timeUnit: TimeUnit): List<Future<T>> {
     return delegate().invokeAll(callables.map { wrap(it) }, timeout, timeUnit)
   }
 
@@ -48,11 +47,7 @@ abstract class WrappingListeningExecutorService : ForwardingListeningExecutorSer
   }
 
   @Throws(InterruptedException::class, ExecutionException::class, TimeoutException::class)
-  override fun <T> invokeAny(
-    callables: Collection<Callable<T>>,
-    timeout: Long,
-    timeUnit: TimeUnit
-  ): T & Any {
+  override fun <T> invokeAny(callables: Collection<Callable<T>>, timeout: Long, timeUnit: TimeUnit): T & Any {
     return delegate().invokeAny(callables.map { wrap(it) }, timeout, timeUnit)!!
   }
 

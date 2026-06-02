@@ -1,8 +1,8 @@
 package misk.config
 
 /**
- * Type for any secrets that need to be loaded as reference in their config file.
- * Secret addresses should use format specified in [misk.resources.ResourceLoader].
+ * Type for any secrets that need to be loaded as reference in their config file. Secret addresses should use format
+ * specified in [misk.resources.ResourceLoader].
  *
  * Usage example:
  * ```
@@ -13,6 +13,7 @@ package misk.config
  * ```
  *
  * With
+ *
  * ```
  * data class SecretInformationConfig(
  *  val answer_to_universe: String,
@@ -37,7 +38,6 @@ package misk.config
  * superSecretConfig.secret_information.value.answer_to_universe
  * ```
  */
-
 interface Secret<T> {
   val value: T
 }

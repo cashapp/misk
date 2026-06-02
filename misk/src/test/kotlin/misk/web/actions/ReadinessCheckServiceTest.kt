@@ -7,27 +7,24 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.ServiceModule
 import misk.healthchecks.FakeHealthCheckModule
+import misk.logging.getLogger
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import misk.logging.getLogger
 
 @MiskTest
 class ReadinessCheckServiceTest {
   @MiskTestModule
-  val module = Modules.combine(
-    TestWebActionModule(),
-    FakeHealthCheckModule(),
-    ServiceModule<ReadinessTestService>()
-  )
+  val module = Modules.combine(TestWebActionModule(), FakeHealthCheckModule(), ServiceModule<ReadinessTestService>())
 
   @Inject lateinit var clock: FakeClock
   @Inject internal lateinit var readinessCheckService: ReadinessCheckService
   @Inject lateinit var serviceManager: ServiceManager
 
-  @Test fun waitsForRunningServicesBeforeHealthChecks() {
+  @Test
+  fun waitsForRunningServicesBeforeHealthChecks() {
     assertThat(ReadinessTestService.instanceCreated).isFalse()
     assertThat(readinessCheckService.status).isNull()
 

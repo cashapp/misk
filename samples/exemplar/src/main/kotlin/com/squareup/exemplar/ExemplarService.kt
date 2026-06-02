@@ -25,22 +25,23 @@ fun main(args: Array<String>) {
 fun application(): MiskApplication {
   val deployment = Deployment(name = "exemplar", isLocalDevelopment = true)
   val config = MiskConfig.load<ExemplarConfig>("exemplar", deployment)
-  val modules = listOf(
-    ConfigModule.create("exemplar", config),
-    DeploymentModule(deployment),
-    ExemplarAccessModule(),
-    ExemplarAuditClientModule(config.audit),
-    ExemplarDashboardModule(deployment),
-    ExemplarMetadataModule(),
-    ExemplarWebActionsModule(),
-    ExemplarCronModule(),
-    ExemplarGuiceBindingsModule(),
-    MiskRealServiceModule(),
-    MiskWebModule(config.web),
-    PrometheusMetricsServiceModule(config.prometheus),
-    MonitoringModule(),
-    SqlLeaseModule(config.data_source_clusters),
-  )
+  val modules =
+    listOf(
+      ConfigModule.create("exemplar", config),
+      DeploymentModule(deployment),
+      ExemplarAccessModule(),
+      ExemplarAuditClientModule(config.audit),
+      ExemplarDashboardModule(deployment),
+      ExemplarMetadataModule(),
+      ExemplarWebActionsModule(),
+      ExemplarCronModule(),
+      ExemplarGuiceBindingsModule(),
+      MiskRealServiceModule(),
+      MiskWebModule(config.web),
+      PrometheusMetricsServiceModule(config.prometheus),
+      MonitoringModule(),
+      SqlLeaseModule(config.data_source_clusters),
+    )
 
   return MiskApplication(modules)
 }

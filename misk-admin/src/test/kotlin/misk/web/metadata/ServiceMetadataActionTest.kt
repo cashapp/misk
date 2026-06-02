@@ -1,6 +1,7 @@
 package misk.web.metadata
 
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientFactory
 import misk.moshi.adapter
@@ -12,18 +13,17 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class ServiceMetadataActionTest {
-  @MiskTestModule
-  val module = MetadataTestingModule()
+  @MiskTestModule val module = MetadataTestingModule()
 
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var httpClientFactory: HttpClientFactory
   @Inject private lateinit var moshi: Moshi
 
-  @Test fun `service metadata environment uses correct case mapping`() {
+  @Test
+  fun `service metadata environment uses correct case mapping`() {
     val response = executeRequest()
     assertThat(response.serviceMetadata.environment).isUpperCase
   }
@@ -32,22 +32,15 @@ class ServiceMetadataActionTest {
     path: String = "/api/service/metadata",
     service: String? = null,
     user: String? = null,
-    capabilities: String? = null
+    capabilities: String? = null,
   ): ServiceMetadataAction.Response {
     val client = createOkHttpClient()
 
     val baseUrl = jetty.httpServerUrl
-    val requestBuilder = Request.Builder()
-      .url(baseUrl.resolve(path)!!)
-    service?.let {
-      requestBuilder.header(FakeCallerAuthenticator.SERVICE_HEADER, service)
-    }
-    user?.let {
-      requestBuilder.header(FakeCallerAuthenticator.USER_HEADER, user)
-    }
-    capabilities?.let {
-      requestBuilder.header(FakeCallerAuthenticator.CAPABILITIES_HEADER, capabilities)
-    }
+    val requestBuilder = Request.Builder().url(baseUrl.resolve(path)!!)
+    service?.let { requestBuilder.header(FakeCallerAuthenticator.SERVICE_HEADER, service) }
+    user?.let { requestBuilder.header(FakeCallerAuthenticator.USER_HEADER, user) }
+    capabilities?.let { requestBuilder.header(FakeCallerAuthenticator.CAPABILITIES_HEADER, capabilities) }
     val call = client.newCall(requestBuilder.build())
     val response = call.execute()
 

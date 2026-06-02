@@ -1,164 +1,104 @@
 package misk.jooq
 
-import misk.backoff.ExponentialBackoff
-import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceService
-import misk.jdbc.DataSourceType
-import misk.jooq.listeners.AvoidUsingSelectStarListener
-import misk.jooq.listeners.JooqSQLLogger
-import misk.jooq.listeners.JooqTimestampRecordListener
-import misk.jooq.listeners.JooqTimestampRecordListenerOptions
-import org.jooq.Configuration
-import org.jooq.DSLContext
-import org.jooq.SQLDialect
-import org.jooq.conf.MappedSchema
-import org.jooq.conf.RenderMapping
-import org.jooq.conf.Settings
-import org.jooq.exception.DataAccessException
-import org.jooq.impl.DSL
-import org.jooq.impl.DataSourceConnectionProvider
-import org.jooq.impl.DefaultExecuteListenerProvider
-import org.jooq.impl.DefaultTransactionProvider
-import misk.logging.getLogger
-import java.time.Clock
 import java.time.Duration
+import misk.backoff.ExponentialBackoff
+import misk.backoff.RetryConfig
+import misk.backoff.retry
+import misk.jdbc.DataSourceType
+import misk.jdbc.retry.RetryDefaults
+import misk.logging.getLogger
+import org.jooq.Configuration
+import org.jooq.impl.DSL
 
-class JooqTransacter @JvmOverloads constructor(
-  private val dataSourceService: DataSourceService,
-  private val dataSourceConfig: DataSourceConfig,
-  private val jooqCodeGenSchemaName: String,
-  private val jooqTimestampRecordListenerOptions: JooqTimestampRecordListenerOptions =
-    JooqTimestampRecordListenerOptions(install = false),
-  private val clock: Clock,
-  private val jooqConfigExtension: Configuration.() -> Unit = {}
+class JooqTransacter
+internal constructor(
+  private val configurationFactory: (TransacterOptions) -> Configuration,
+  private val dataSourceType: DataSourceType? = null,
 ) {
+  private val exceptionClassifier = JooqExceptionClassifier(dataSourceType)
 
   @JvmOverloads
   fun <RETURN_TYPE> transaction(
     options: TransacterOptions = TransacterOptions(),
-    callback: (jooqSession: JooqSession) -> RETURN_TYPE
+    callback: (jooqSession: JooqSession) -> RETURN_TYPE,
   ): RETURN_TYPE {
-    val backoff = ExponentialBackoff(Duration.ofMillis(10L), Duration.ofMillis(options.maxRetryDelayMillis))
-    var attempt = 0
-
-    while (true) {
-      try {
-        return performInTransaction(options, callback, ++attempt)
-      } catch (e: Exception) {
-        if (e !is DataAccessException || attempt >= options.maxAttempts) throw e
-        val sleepDuration = backoff.nextRetry()
-        if (!sleepDuration.isZero) {
-          Thread.sleep(sleepDuration.toMillis())
-        }
-      }
-    }
+    val backoff =
+      ExponentialBackoff(
+        baseDelay = Duration.ofMillis(options.minRetryDelayMillis),
+        maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
+        jitter = Duration.ofMillis(options.retryJitterMillis),
+      )
+    val retryConfig =
+      RetryConfig.Builder(options.maxAttempts, backoff)
+        .shouldRetry { exceptionClassifier.isRetryable(it) }
+        .onRetry { attempt, e -> log.info(e) { "jOOQ transaction failed, retrying (attempt $attempt)" } }
+        .build()
+    return retry(retryConfig) { performInTransaction(options, callback) }
   }
+
+  /**
+   * Runs [block] inside [ambient] if supplied; otherwise opens a new transaction and passes its [JooqSession] to
+   * [block].
+   *
+   * Designed for repository methods that may run standalone or be called from within an outer transaction. Callers that
+   * already hold a session pass it as [ambient] so the work participates in the outer commit boundary instead of
+   * opening a nested transaction.
+   *
+   * ```
+   * fun create(name: String, ambient: JooqSession? = null) =
+   *   transacter.transactionOrAmbient(ambient) { session -> ... }
+   *
+   * transacter.transactionOrAmbient { outer -> repo.create("foo", ambient = outer) }
+   * ```
+   *
+   * When [ambient] is non-null no new transaction is opened and retry/backoff is skipped — the outer transaction owns
+   * those concerns. When [ambient] is null this delegates to [transaction] with default options.
+   *
+   * Coroutine-safe by construction: the active session is passed explicitly through the call chain rather than tracked
+   * in thread-local state, so suspension and dispatcher hops cannot desynchronize the lookup from the underlying JDBC
+   * connection.
+   */
+  @JvmOverloads
+  fun <RETURN_TYPE> transactionOrAmbient(
+    ambient: JooqSession? = null,
+    block: (JooqSession) -> RETURN_TYPE,
+  ): RETURN_TYPE = if (ambient != null) block(ambient) else transaction(callback = block)
 
   private fun <RETURN_TYPE> performInTransaction(
     options: TransacterOptions,
     callback: (jooqSession: JooqSession) -> RETURN_TYPE,
-    attempt: Int,
   ): RETURN_TYPE {
-    return try {
-      val result = createDSLContextAndCallback(options, callback)
-      if (attempt > 1) {
-        log.info {
-          "Retried jooq transaction succeeded after [attempts=$attempt]"
-        }
-      }
-      result
-    } catch (e: Exception) {
-      if (attempt >= options.maxAttempts) {
-        log.warn(e) {
-          "Recoverable transaction exception [attempts=$attempt], no more attempts"
-        }
-        throw e
-      }
-      log.info(e) { "Exception thrown while transacting with the db via jooq" }
-      throw e
-    }
+    return createDSLContextAndCallback(options, callback)
   }
 
   private fun <RETURN_TYPE> createDSLContextAndCallback(
     options: TransacterOptions,
-    callback: (jooqSession: JooqSession) -> RETURN_TYPE
+    callback: (jooqSession: JooqSession) -> RETURN_TYPE,
   ): RETURN_TYPE {
     var jooqSession: JooqSession? = null
     return try {
-      dslContext(dataSourceService, clock, dataSourceConfig, options).transactionResult { configuration ->
-        jooqSession = JooqSession(DSL.using(configuration))
-        callback(jooqSession!!).also { jooqSession!!.executePreCommitHooks() }
-      }.also {
-        jooqSession?.executePostCommitHooks()
-      }
+      DSL.using(configurationFactory(options))
+        .transactionResult { configuration ->
+          jooqSession = JooqSession(DSL.using(configuration))
+          runCatching { callback(jooqSession).also { jooqSession.executePreCommitHooks() } }
+            .onFailure { jooqSession.onSessionClose { jooqSession.executeRollbackHooks(it) } }
+            .getOrThrow()
+        }
+        .also { jooqSession?.executePostCommitHooks() }
     } finally {
       jooqSession?.executeSessionCloseHooks()
     }
   }
 
-  private fun dslContext(
-    dataSourceService: DataSourceService,
-    clock: Clock,
-    datasourceConfig: DataSourceConfig,
-    options: TransacterOptions,
-  ): DSLContext {
-    val settings = Settings()
-      .withExecuteWithOptimisticLocking(true)
-      .withRenderMapping(
-        RenderMapping().withSchemata(
-          MappedSchema()
-            .withInput(jooqCodeGenSchemaName)
-            .withOutput(datasourceConfig.database)
-        )
-      )
-
-    val connectionProvider = IsolationLevelAwareConnectionProvider(
-      dataSourceConnectionProvider = DataSourceConnectionProvider(dataSourceService.dataSource),
-      transacterOptions = options
-    )
-
-    return DSL.using(connectionProvider, datasourceConfig.type.toSqlDialect(), settings)
-      .apply {
-        configuration().set(
-          DefaultTransactionProvider(
-            configuration().connectionProvider(),
-            false
-          )
-        ).apply {
-          val executeListeners = mutableListOf(
-            DefaultExecuteListenerProvider(AvoidUsingSelectStarListener())
-          )
-          if ("true" == datasourceConfig.show_sql) {
-            executeListeners.add(DefaultExecuteListenerProvider(JooqSQLLogger()))
-          }
-          set(*executeListeners.toTypedArray())
-
-          if (jooqTimestampRecordListenerOptions.install) {
-            set(
-              JooqTimestampRecordListener(
-                clock = clock,
-                createdAtColumnName = jooqTimestampRecordListenerOptions.createdAtColumnName,
-                updatedAtColumnName = jooqTimestampRecordListenerOptions.updatedAtColumnName
-              )
-            )
-          }
-        }.apply(jooqConfigExtension)
-      }
-  }
-
-  private fun DataSourceType.toSqlDialect() = when (this) {
-    DataSourceType.MYSQL -> SQLDialect.MYSQL
-    DataSourceType.HSQLDB -> SQLDialect.HSQLDB
-    DataSourceType.VITESS_MYSQL -> SQLDialect.MYSQL
-    DataSourceType.POSTGRESQL -> SQLDialect.POSTGRES
-    DataSourceType.TIDB -> SQLDialect.MYSQL
-    else -> throw IllegalArgumentException("no SQLDialect for " + this.name)
-  }
-
-  data class TransacterOptions @JvmOverloads constructor(
-    val maxAttempts: Int = 3,
-    val maxRetryDelayMillis: Long = 500,
-    val isolationLevel: TransactionIsolationLevel = TransactionIsolationLevel.REPEATABLE_READ
+  data class TransacterOptions
+  @JvmOverloads
+  constructor(
+    val maxAttempts: Int = RetryDefaults.MAX_ATTEMPTS,
+    val minRetryDelayMillis: Long = RetryDefaults.MIN_RETRY_DELAY_MILLIS,
+    val maxRetryDelayMillis: Long = RetryDefaults.MAX_RETRY_DELAY_MILLIS,
+    val retryJitterMillis: Long = RetryDefaults.RETRY_JITTER_MILLIS,
+    val isolationLevel: TransactionIsolationLevel = TransactionIsolationLevel.REPEATABLE_READ,
+    val readOnly: Boolean = false,
   )
 
   companion object {

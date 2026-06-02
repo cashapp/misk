@@ -4,6 +4,8 @@ import com.google.inject.Guice
 import com.google.inject.Provides
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
@@ -21,16 +23,12 @@ import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 class ProtoMessageHttpClientTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
-  @Inject
-  private lateinit var jetty: JettyService
+  @Inject private lateinit var jetty: JettyService
 
   private lateinit var httpClient: ProtoMessageHttpClient
 
@@ -42,32 +40,23 @@ class ProtoMessageHttpClientTest {
 
   @Test
   fun protoMessageHttpCall() {
-    val dinoMessage = Dinosaur.Builder()
-      .name("stegosaurus")
-      .picture_urls(
-        listOf(
-          "https://cdn.dinopics.com/stego.jpg",
-          "https://cdn.dinopics.com/stego2.png"
-        )
-      )
-      .build()
+    val dinoMessage =
+      Dinosaur.Builder()
+        .name("stegosaurus")
+        .picture_urls(listOf("https://cdn.dinopics.com/stego.jpg", "https://cdn.dinopics.com/stego2.png"))
+        .build()
 
     val response = httpClient.post<Dinosaur>("/cooldinos", dinoMessage)
     assertThat(response.name).isEqualTo("supersaurus")
-    assertThat(response.picture_urls).isEqualTo(
-      listOf(
-        "https://cdn.dinopics.com/stego.jpg",
-        "https://cdn.dinopics.com/stego2.png"
-      )
-    )
+    assertThat(response.picture_urls)
+      .isEqualTo(listOf("https://cdn.dinopics.com/stego.jpg", "https://cdn.dinopics.com/stego2.png"))
   }
 
   class ReturnADinosaur @Inject constructor() : WebAction {
     @Post("/cooldinos")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun getDinosaur(@RequestBody requestBody: Dinosaur):
-      Dinosaur = requestBody.newBuilder().name("supersaurus").build()
+    fun getDinosaur(@RequestBody requestBody: Dinosaur): Dinosaur = requestBody.newBuilder().name("supersaurus").build()
   }
 
   class TestModule : KAbstractModule() {
@@ -90,9 +79,7 @@ class ProtoMessageHttpClientTest {
     @Singleton
     fun provideHttpClientConfig(): HttpClientsConfig {
       return HttpClientsConfig(
-        endpoints = mapOf(
-          "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-        )
+        endpoints = mapOf("dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString()))
       )
     }
   }

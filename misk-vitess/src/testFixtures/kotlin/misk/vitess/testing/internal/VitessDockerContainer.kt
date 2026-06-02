@@ -20,33 +20,34 @@ import com.github.dockerjava.api.model.Volume
 import com.github.dockerjava.core.DefaultDockerClientConfig
 import com.github.dockerjava.core.DockerClientBuilder
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
-import misk.docker.withMiskDefaults
-import misk.vitess.testing.ApplySchemaResult
-import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_BASE
-import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_MYSQL
-import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_VTGATE
-import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_NAME
-import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_TYPE
-import misk.vitess.testing.DefaultSettings.VTGATE_USER
-import misk.vitess.testing.DefaultSettings.VTGATE_USER_PASSWORD
-import misk.vitess.testing.RemoveContainerResult
-import misk.vitess.testing.StartContainerResult
-import misk.vitess.testing.TransactionIsolationLevel
-import misk.vitess.testing.VitessTestDbException
-import misk.vitess.testing.VitessTestDbStartupException
-import misk.vitess.testing.hostname
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.SocketException
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.pathString
+import misk.docker.withMiskDefaults
+import misk.vitess.testing.ApplySchemaResult
+import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_BASE
+import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_MYSQL
+import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_VTGATE
+import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_TYPE
+import misk.vitess.testing.DefaultSettings.VTGATE_USER
+import misk.vitess.testing.DefaultSettings.VTGATE_USER_PASSWORD
+import misk.vitess.testing.RemoveContainerResult
+import misk.vitess.testing.StartContainerResult
+import misk.vitess.testing.TransactionIsolationLevel
+import misk.vitess.testing.TransactionMode
+import misk.vitess.testing.VitessTestDbException
+import misk.vitess.testing.VitessTestDbStartupException
+import misk.vitess.testing.hostname
 
 /** VitessDockerContainer validates user arguments and starts a Docker container with a vttestserver image. */
 internal class VitessDockerContainer(
   private val autoApplySchemaChanges: Boolean,
   private val containerName: String,
   private val debugStartup: Boolean,
+  private val dockerNetworkName: String,
   private val enableDeclarativeSchemaChanges: Boolean,
   private val enableInMemoryStorage: Boolean,
   private val enableScatters: Boolean,
@@ -57,6 +58,7 @@ internal class VitessDockerContainer(
   private val schemaDir: String,
   private val sqlMode: String,
   private val transactionIsolationLevel: TransactionIsolationLevel,
+  private val transactionMode: TransactionMode,
   private val transactionTimeoutSeconds: Duration,
   private val userPort: Int,
   private val vitessImage: String,
@@ -73,6 +75,7 @@ internal class VitessDockerContainer(
     const val PORT_ENV = "PORT"
     const val SQL_MODE_ENV = "SQL_MODE"
     const val TRANSACTION_ISOLATION_LEVEL_ENV = "TRANSACTION_ISOLATION_LEVEL"
+    const val TRANSACTION_MODE_ENV = "TRANSACTION_MODE"
     const val TRANSACTION_TIMEOUT_SECONDS_ENV = "TRANSACTION_TIMEOUT_SECONDS"
     const val VITESS_IMAGE_ENV = "VITESS_IMAGE"
     const val VITESS_VERSION_ENV = "VITESS_VERSION"
@@ -148,7 +151,7 @@ internal class VitessDockerContainer(
   private fun startContainerWithRetries(vitessSchemaPreparer: VitessSchemaPreparer): StartContainerResult {
     var lastResult: StartDockerContainerResult? = null
     var containerId: String? = null
-    
+
     repeat(CONTAINER_STARTUP_MAX_RETRIES) { attemptNumber ->
       try {
         val vitessPortConfig = VitessPortConfig.create(userPort)
@@ -157,12 +160,12 @@ internal class VitessDockerContainer(
           stopExistingContainers(containerName, vitessPortConfig)
           containerId = createContainer(vitessPortConfig, vitessSchemaPreparer.keyspaces)
         }
-        
+
         val startResult = startContainer(containerId)
-        
+
         when {
           startResult.status == StartDockerContainerStatus.SUCCESS ||
-          startResult.status == StartDockerContainerStatus.ALREADY_STARTED -> {
+            startResult.status == StartDockerContainerStatus.ALREADY_STARTED -> {
             waitForContainerHealth(containerId)
             createDbaUserForSideCarDb(containerId)
 
@@ -176,42 +179,41 @@ internal class VitessDockerContainer(
 
             return StartVitessContainerResult(
               newContainerCreated = true,
-              newContainerReason = "Container started successfully" + if (attemptNumber > 0) " after ${attemptNumber + 1} attempts" else "",
+              newContainerReason =
+                "Container started successfully" +
+                  if (attemptNumber > 0) " after ${attemptNumber + 1} attempts" else "",
               containerId = containerId,
             )
           }
-          
+
           startResult.shouldRetry -> {
             lastResult = startResult
             println("Container start attempt ${attemptNumber + 1}: ${startResult.message}")
-            
+
             if (startResult.shouldUseNewPortConfig) {
               containerId = null // Force new container creation with new port config
             }
             // else keep same containerId for retry
-            
+
             if (attemptNumber < CONTAINER_STARTUP_MAX_RETRIES - 1) {
               Thread.sleep(CONTAINER_STARTUP_RETRY_DELAY_MS * (attemptNumber + 1))
             }
           }
-          
+
           else -> {
             // Non-retryable failure
-            throw VitessTestDbStartupException(
-              startResult.message ?: "Container startup failed",
-              startResult.cause
-            )
+            throw VitessTestDbStartupException(startResult.message ?: "Container startup failed", startResult.cause)
           }
         }
       } catch (e: Exception) {
         throw VitessTestDbStartupException("Unexpected error during container startup", e)
       }
     }
-    
+
     // All retries exhausted
     throw VitessTestDbStartupException(
       "Failed to start container after `$CONTAINER_STARTUP_MAX_RETRIES` attempts. Last error: `${lastResult?.message}`",
-      lastResult?.cause
+      lastResult?.cause,
     )
   }
 
@@ -222,17 +224,11 @@ internal class VitessDockerContainer(
       val removeResult = removeContainer(existingContainer)
       if (!removeResult) {
         println("Container `$containerName` is already shut down.")
-        return RemoveVitessContainerResult(
-          containerId = existingContainer.id,
-          containerRemoved = false
-        )
+        return RemoveVitessContainerResult(containerId = existingContainer.id, containerRemoved = false)
       }
 
       println("Container `$containerName` has been successfully shut down.")
-      return RemoveVitessContainerResult(
-        containerId = existingContainer.id,
-        containerRemoved = true
-      )
+      return RemoveVitessContainerResult(containerId = existingContainer.id, containerRemoved = true)
     }
 
     println("No container found with name `$containerName` to shut down.")
@@ -250,7 +246,8 @@ internal class VitessDockerContainer(
         hostname = hostname,
         vtgatePort = vtgatePort,
         vtgateUser = VTGATE_USER,
-        vtgateUserPassword = VTGATE_USER_PASSWORD
+        vtgateUserPassword = VTGATE_USER_PASSWORD,
+        transactionMode = transactionMode,
       )
     }
 
@@ -270,8 +267,9 @@ internal class VitessDockerContainer(
     }
 
   private val portMappings by lazy {
-    val existingContainer = findExistingContainer(containerName)
-      ?: throw VitessTestDbException("Container `$containerName` not found, unable to get host port mappings.")
+    val existingContainer =
+      findExistingContainer(containerName)
+        ?: throw VitessTestDbException("Container `$containerName` not found, unable to get host port mappings.")
 
     val inspect = dockerClient.inspectContainerCmd(existingContainer.id).exec()
     inspect.networkSettings.ports.bindings
@@ -280,8 +278,11 @@ internal class VitessDockerContainer(
   private fun getMappedHostPort(containerPort: Int): Int {
     val exposedPort = ExposedPort.tcp(containerPort)
     val bindings: Array<Ports.Binding>? = portMappings[exposedPort]
-    val hostPort = bindings?.firstOrNull()?.hostPortSpec
-      ?: throw VitessTestDbException("No host port mapped for container port `$containerPort` for container `$containerName`.")
+    val hostPort =
+      bindings?.firstOrNull()?.hostPortSpec
+        ?: throw VitessTestDbException(
+          "No host port mapped for container port `$containerPort` for container `$containerName`."
+        )
     return hostPort.toInt()
   }
 
@@ -315,7 +316,10 @@ internal class VitessDockerContainer(
    * This method checks if the container should be created based on the user arguments and the schema directory
    * contents.
    */
-  private fun shouldCreateContainer(containerName: String, keyspaces: List<VitessKeyspace>): ShouldCreateVitessContainerResult {
+  private fun shouldCreateContainer(
+    containerName: String,
+    keyspaces: List<VitessKeyspace>,
+  ): ShouldCreateVitessContainerResult {
     if (!keepAlive) {
       return ShouldCreateVitessContainerResult(newContainerNeeded = true, "the property `keepAlive` is `false`.")
     }
@@ -359,7 +363,8 @@ internal class VitessDockerContainer(
      */
     val argsToValidate: Map<String, Pair<String, String>> =
       mapOf(
-        ENABLE_DECLARATIVE_SCHEMA_CHANGES_ENV to ("$enableDeclarativeSchemaChanges" to "enableDeclarativeSchemaChanges"),
+        ENABLE_DECLARATIVE_SCHEMA_CHANGES_ENV to
+          ("$enableDeclarativeSchemaChanges" to "enableDeclarativeSchemaChanges"),
         ENABLE_IN_MEMORY_STORAGE_ENV to ("$enableInMemoryStorage" to "enableInMemoryStorage"),
         ENABLE_SCATTERS_ENV to ("$enableScatters" to "enableScatters"),
         IN_MEMORY_STORAGE_SIZE_ENV to (inMemoryStorageSize to "inMemoryStorageSize"),
@@ -368,6 +373,7 @@ internal class VitessDockerContainer(
         PORT_ENV to ("${userPort}" to "port"),
         SQL_MODE_ENV to (sqlMode to "sqlMode"),
         TRANSACTION_ISOLATION_LEVEL_ENV to (transactionIsolationLevel.value to "transactionIsolationLevel"),
+        TRANSACTION_MODE_ENV to (transactionMode.value to "transactionMode"),
         TRANSACTION_TIMEOUT_SECONDS_ENV to ("${transactionTimeoutSeconds.seconds}" to "transactionTimeoutSeconds"),
         VITESS_IMAGE_ENV to (vitessImage to "vitessImage"),
         VITESS_VERSION_ENV to ("$vitessVersion" to "vitessVersion"),
@@ -397,11 +403,13 @@ internal class VitessDockerContainer(
     // Also remove any containers that are using the same ports as the new container.
     vitessPortConfig.allHostPorts().forEach { port ->
       val containers = dockerClient.listContainersCmd().withShowAll(true).withFilter("publish", listOf("$port")).exec()
-      containers.forEach {
-        container -> stopContainer(container)
+      containers.forEach { container ->
+        stopContainer(container)
         if (isPortInUse(port)) {
           val containerName = container.names?.firstOrNull() ?: "unknown"
-          println("Port `$port` is still in use by container with id `${container.id}` and name `$containerName` after stopping container. Force removing container.")
+          println(
+            "Port `$port` is still in use by container with id `${container.id}` and name `$containerName` after stopping container. Force removing container."
+          )
           removeContainer(container)
         }
       }
@@ -415,10 +423,7 @@ internal class VitessDockerContainer(
     }
   }
 
-  /**
-   * This method stops the container. If the container is already stopped or removed, it returns
-   * `false`.
-   */
+  /** This method stops the container. If the container is already stopped or removed, it returns `false`. */
   private fun stopContainer(container: Container): Boolean {
     try {
       dockerClient.stopContainerCmd(container.id).withTimeout(CONTAINER_STOP_TIMEOUT_SECONDS).exec()
@@ -444,9 +449,7 @@ internal class VitessDockerContainer(
     }
   }
 
-  /**
-   * This method removes the container. If the container is already removed or being removed, it returns `false`.
-   */
+  /** This method removes the container. If the container is already removed or being removed, it returns `false`. */
   private fun removeContainer(container: Container): Boolean {
     synchronized(containerLock) {
       try {
@@ -475,36 +478,32 @@ internal class VitessDockerContainer(
         // Start the container
         dockerClient.startContainerCmd(containerId).exec()
         return StartDockerContainerResult.success("Container started successfully.")
-        
       } catch (notModifiedException: NotModifiedException) {
         // The container is already started, ignore the exception.
         println("Container `$containerId` is already started.")
         return StartDockerContainerResult.alreadyStarted()
-        
       } catch (notFoundException: NotFoundException) {
         return StartDockerContainerResult.retryableNewPortConfig(
           "Container for `$containerId` was not found during start up.",
-          notFoundException
+          notFoundException,
         )
-        
       } catch (internalServerException: InternalServerErrorException) {
         val message = internalServerException.message ?: ""
-        
+
         return when {
           message.contains("port is already allocated") -> {
             handlePortAlreadyAllocatedError(containerId, internalServerException)
           }
-          message.contains("OCI runtime create failed") ||
-          message.contains("device or resource busy") -> {
+          message.contains("OCI runtime create failed") || message.contains("device or resource busy") -> {
             StartDockerContainerResult.retryableSamePortConfig(
               "Failed to start Docker container for `$containerName`.",
-              internalServerException
+              internalServerException,
             )
           }
           else -> {
             StartDockerContainerResult.nonRetryableFailure(
               "Failed to start Docker container for `$containerName`.",
-              internalServerException
+              internalServerException,
             )
           }
         }
@@ -554,12 +553,7 @@ internal class VitessDockerContainer(
 
   private fun emitStartupLogs(containerId: String) {
     val logCallback = LogContainerResultCallback()
-    dockerClient
-      .logContainerCmd(containerId)
-      .withStdOut(true)
-      .withStdErr(true)
-      .exec(logCallback)
-      .awaitCompletion()
+    dockerClient.logContainerCmd(containerId).withStdOut(true).withStdErr(true).exec(logCallback).awaitCompletion()
     println("Container start up logs:\n${logCallback.getLogs()}")
   }
 
@@ -590,38 +584,49 @@ internal class VitessDockerContainer(
     val images: List<Image> = dockerClient.listImagesCmd().withReferenceFilter(vitessImage).exec()
     if (images.isEmpty()) {
       println("Vitess image `$vitessImage` does not exist, proceeding to pull.")
-      dockerClient.pullImageCmd(vitessImage).start().awaitCompletion()
+      try {
+        dockerClient.pullImageCmd(vitessImage).start().awaitCompletion()
+      } catch (e: NotFoundException) {
+        if ("no matching manifest" !in (e.message ?: "")) throw e
+        // No native image for this architecture; pull amd64 and let Docker emulate.
+        println("Native pull failed (no matching manifest), retrying with --platform linux/amd64")
+        dockerClient.pullImageCmd(vitessImage).withPlatform("linux/amd64").start().awaitCompletion()
+      }
     }
 
     val networkId = getOrCreateVitessNetwork()
     printDebug("Using Docker network `$networkId` for container `$containerName`.")
 
-    val portBindings = vitessPortConfig.allPortMappings().map { portMapping -> PortBinding.parse("${portMapping.hostPort}:${portMapping.containerPort}") }
-    val optionsFileDest = "$TEST_DB_DIR/my.cnf"
-    
-    val hostConfig = HostConfig().apply {
-      withPortBindings(portBindings)
-      withBinds(Bind(vitessMyCnf.optionsFilePath.pathString, Volume(optionsFileDest)))
-      withNetworkMode(VITESS_DOCKER_NETWORK_NAME)
-      withAutoRemove(
-        !debugStartup // If `debugStartup` is `true`, we keep the container running to inspect logs.
-      ) // Otherwise, remove container when it stops.
-      if (enableInMemoryStorage) {
-        /**
-         * Tmpfs options using `/vt/vtdataroot` as the source to mount:
-         * - "rw": Mount the filesystem as read-write.
-         * - "noexec": Disallow execution of binaries from this mount for security.
-         * - "nosuid": Ignore set-user-ID and set-group-ID bits on files for security.
-         * - "mode=0777": Set the permissions of the /vt/vtdataroot mount point to be world-writable to
-         *                ensure the vttestserver process can create directories and files within the tmpfs.
-         * - "size=$inMemoryStorageSize": Limit the total size of the tmpfs to the value specified by the user (e.g., "1G").
-         */
-        val tmpfsOptions = "rw,noexec,nosuid,mode=0777,size=${inMemoryStorageSize.uppercase()}"
-        withTmpFs(mapOf("/vt/vtdataroot" to tmpfsOptions))
-        printDebug("Enabled in-memory storage (tmpfs) for /vt/vtdataroot with options: $tmpfsOptions")
+    val portBindings =
+      vitessPortConfig.allPortMappings().map { portMapping ->
+        PortBinding.parse("${portMapping.hostPort}:${portMapping.containerPort}")
       }
-    }
+    val optionsFileDest = "$TEST_DB_DIR/my.cnf"
 
+    val hostConfig =
+      HostConfig().apply {
+        withPortBindings(portBindings)
+        withBinds(Bind(vitessMyCnf.optionsFilePath.pathString, Volume(optionsFileDest)))
+        withNetworkMode(dockerNetworkName)
+        withAutoRemove(
+          !debugStartup // If `debugStartup` is `true`, we keep the container running to inspect logs.
+        ) // Otherwise, remove container when it stops.
+        if (enableInMemoryStorage) {
+          /**
+           * Tmpfs options using `/vt/vtdataroot` as the source to mount:
+           * - "rw": Mount the filesystem as read-write.
+           * - "noexec": Disallow execution of binaries from this mount for security.
+           * - "nosuid": Ignore set-user-ID and set-group-ID bits on files for security.
+           * - "mode=0777": Set the permissions of the /vt/vtdataroot mount point to be world-writable to ensure the
+           *   vttestserver process can create directories and files within the tmpfs.
+           * - "size=$inMemoryStorageSize": Limit the total size of the tmpfs to the value specified by the user (e.g.,
+           *   "1G").
+           */
+          val tmpfsOptions = "rw,noexec,nosuid,mode=0777,size=${inMemoryStorageSize.uppercase()}"
+          withTmpFs(mapOf("/vt/vtdataroot" to tmpfsOptions))
+          printDebug("Enabled in-memory storage (tmpfs) for /vt/vtdataroot with options: $tmpfsOptions")
+        }
+      }
 
     // The health check is run from the Docker daemon, so it needs to target localhost.
     val healthCheck =
@@ -667,6 +672,9 @@ internal class VitessDockerContainer(
       cmd.add("--no_scatter")
     }
 
+    cmd.add("--transaction_mode")
+    cmd.add(transactionMode.value)
+
     try {
       return runCreateContainerCmd(hostConfig, healthCheck, cmd, vitessPortConfig, keyspaces)
     } catch (e: ConflictException) {
@@ -682,14 +690,13 @@ internal class VitessDockerContainer(
     healthCheck: HealthCheck?,
     cmd: MutableList<String>,
     vitessPortConfig: VitessPortConfig,
-    keyspaces: List<VitessKeyspace>
+    keyspaces: List<VitessKeyspace>,
   ): String {
     val container: CreateContainerResponse =
       dockerClient
         .createContainerCmd(vitessImage)
         .withName(containerName)
         .withHostConfig(hostConfig)
-        .withPlatform("linux/amd64")
         .withHealthcheck(healthCheck)
         .withExposedPorts(*vitessPortConfig.allPortMappings().map { ExposedPort(it.containerPort) }.toTypedArray())
         .withEnv(
@@ -703,6 +710,7 @@ internal class VitessDockerContainer(
           "$PORT_ENV=${vitessPortConfig.vtgatePort.hostPort}",
           "$SQL_MODE_ENV=$sqlMode",
           "$TRANSACTION_ISOLATION_LEVEL_ENV=${transactionIsolationLevel.value}",
+          "$TRANSACTION_MODE_ENV=${transactionMode.value}",
           "$TRANSACTION_TIMEOUT_SECONDS_ENV=${transactionTimeoutSeconds.seconds}",
           "$VITESS_IMAGE_ENV=$vitessImage",
           "$VITESS_VERSION_ENV=$vitessVersion",
@@ -762,7 +770,8 @@ internal class VitessDockerContainer(
     throw VitessTestDbStartupException("Failed to start Docker after $DOCKER_START_RETRIES attempts.")
   }
 
-  private fun getKeyspacesArgString(keyspaces: List<VitessKeyspace>): String = keyspaces.map { it.name }.sorted().joinToString(",")
+  private fun getKeyspacesArgString(keyspaces: List<VitessKeyspace>): String =
+    keyspaces.map { it.name }.sorted().joinToString(",")
 
   private fun getNumShardsArgString(keyspaces: List<VitessKeyspace>): String =
     keyspaces.sortedBy { it.name }.joinToString(",") { it.shards.toString() }
@@ -824,39 +833,38 @@ internal class VitessDockerContainer(
       dbaUserPassword = DBA_USER_PASSWORD,
       debugStartup = debugStartup,
       dockerClient = dockerClient,
+      dockerNetworkName = dockerNetworkName,
       enableDeclarativeSchemaChanges = enableDeclarativeSchemaChanges,
       hostname = hostname,
       keyspaces = vitessSchemaPreparer.keyspaces,
       mysqlPort = mysqlPort,
       schemaDir = schemaDir,
+      vitessImage = vitessImage,
       vtgatePort = vtgatePort,
       vtgateUser = VTGATE_USER,
       vtgateUserPassword = VTGATE_USER_PASSWORD,
     )
   }
 
-  /**
-   *   Create or get a network for Vitess docker containers to communicate with each other.
-   */
+  /** Create or get a network for Vitess docker containers to communicate with each other. */
   private fun getOrCreateVitessNetwork(): String {
     synchronized(vitessNetworkLock) {
       var existingNetwork = findExistingNetwork()
 
       if (existingNetwork == null) {
         try {
-          val newNetworkId = dockerClient.createNetworkCmd()
-            .withName(VITESS_DOCKER_NETWORK_NAME)
-            .withDriver(VITESS_DOCKER_NETWORK_TYPE)
-            .exec()
-            .id
+          val newNetworkId =
+            dockerClient.createNetworkCmd().withName(dockerNetworkName).withDriver(VITESS_DOCKER_NETWORK_TYPE).exec().id
           return newNetworkId
         } catch (conflictException: ConflictException) {
           // If we are in this state, the network was already created.
-          println("Network `$VITESS_DOCKER_NETWORK_NAME` was already created, attempting to find it.")
+          println("Network `$dockerNetworkName` was already created, attempting to find it.")
           existingNetwork = findExistingNetwork()
           if (existingNetwork == null) {
             throw VitessTestDbStartupException(
-              "Network `$VITESS_DOCKER_NETWORK_NAME` was created but not found.", conflictException)
+              "Network `$dockerNetworkName` was created but not found.",
+              conflictException,
+            )
           }
         }
       }
@@ -864,7 +872,7 @@ internal class VitessDockerContainer(
       // Validate the existing network we found has the expected network type.
       if (existingNetwork!!.driver != VITESS_DOCKER_NETWORK_TYPE) {
         throw VitessTestDbStartupException(
-          "Network `$VITESS_DOCKER_NETWORK_NAME` exists for network id `${existingNetwork.id}` but is not of type `$VITESS_DOCKER_NETWORK_TYPE`. " +
+          "Network `$dockerNetworkName` exists for network id `${existingNetwork.id}` but is not of type `$VITESS_DOCKER_NETWORK_TYPE`. " +
             "Found type: `${existingNetwork.driver}`. Tear down the existing network to use this version of VitessTestDb."
         )
       }
@@ -875,17 +883,17 @@ internal class VitessDockerContainer(
 
   private fun findExistingNetwork(): Network? {
     val networks = dockerClient.listNetworksCmd().exec()
-    val existingNetwork = networks.find { it.name == VITESS_DOCKER_NETWORK_NAME }
+    val existingNetwork = networks.find { it.name == dockerNetworkName }
     return existingNetwork
   }
 
   /**
-   * This method handles an error that happens in CI environments where the port is already allocated by another container or process,
-   * specifically errors of the form:
+   * This method handles an error that happens in CI environments where the port is already allocated by another
+   * container or process, specifically errors of the form:
    *
-   * com.github.dockerjava.api.exception.InternalServerErrorException: Status 500:
-   * {"message":"driver failed programming external connectivity on endpoint <container_name>
-   * (<container_id>): Bind for 0.0.0.0:<port> failed: port is already allocated"}
+   * com.github.dockerjava.api.exception.InternalServerErrorException: Status 500: {"message":"driver failed programming
+   * external connectivity on endpoint <container_name> (<container_id>): Bind for 0.0.0.0:<port> failed: port is
+   * already allocated"}
    *
    * Returns appropriate `StartDockerContainerResult` based on the port conflict scenario.
    */
@@ -896,27 +904,27 @@ internal class VitessDockerContainer(
     val message = internalServerException.message!!
     val allocatedPort = parseAllocatedPort(message)
     if (allocatedPort != null) {
-      val containers = dockerClient.listContainersCmd()
-        .withShowAll(true)
-        .withFilter("publish", listOf(allocatedPort))
-        .exec()
+      val containers =
+        dockerClient.listContainersCmd().withShowAll(true).withFilter("publish", listOf(allocatedPort)).exec()
       val conflictingContainer = containers.firstOrNull()
       when {
         conflictingContainer == null -> {
           return StartDockerContainerResult.retryableSamePortConfig(
             "Port `$allocatedPort` is already allocated, but no container found using it.",
-            internalServerException
+            internalServerException,
           )
         }
         conflictingContainer.id == containerId -> {
-          println("Port `$allocatedPort` is already allocated by the same container `$containerId`. Returning gracefully.")
+          println(
+            "Port `$allocatedPort` is already allocated by the same container `$containerId`. Returning gracefully."
+          )
           return StartDockerContainerResult.alreadyStarted()
         }
         else -> {
           val names = conflictingContainer.names?.joinToString() ?: "unknown"
           return StartDockerContainerResult.retryableNewPortConfig(
             "Port `$allocatedPort` is already allocated by container: `id=${conflictingContainer.id}`, `names=$names`.",
-            internalServerException
+            internalServerException,
           )
         }
       }
@@ -924,7 +932,7 @@ internal class VitessDockerContainer(
 
     return StartDockerContainerResult.nonRetryableFailure(
       "Failed to start Docker container for `$containerName` due to possible port conflict or race condition.",
-      internalServerException
+      internalServerException,
     )
   }
 
@@ -935,10 +943,9 @@ internal class VitessDockerContainer(
   }
 
   /**
-   *  Check if a port is in use via a socket connection. If there is a successful connection,
-   *  it means the port is already in use by another process; the socket is immediately closed after
-   *  the connection is made via the "use block", so it does not bind or occupy the port itself.
-   *  If an exception is thrown, it means the port is not in use.
+   * Check if a port is in use via a socket connection. If there is a successful connection, it means the port is
+   * already in use by another process; the socket is immediately closed after the connection is made via the "use
+   * block", so it does not bind or occupy the port itself. If an exception is thrown, it means the port is not in use.
    */
   private fun isPortInUse(port: Int): Boolean {
     return try {
@@ -957,56 +964,56 @@ internal class VitessDockerContainer(
     }
   }
 
-  /**
-   * Result type for the Docker `startContainer` API operation itself that encodes a retry strategy as needed.
-   */
+  /** Result type for the Docker `startContainer` API operation itself that encodes a retry strategy as needed. */
   private data class StartDockerContainerResult(
     val status: StartDockerContainerStatus,
     val shouldRetry: Boolean = false,
     val shouldUseNewPortConfig: Boolean = false,
     val message: String? = null,
-    val cause: Throwable? = null
+    val cause: Throwable? = null,
   ) {
     companion object {
-      fun success(message: String? = null) = StartDockerContainerResult(
-        status = StartDockerContainerStatus.SUCCESS,
-        message = message
-      )
-      
-      fun alreadyStarted() = StartDockerContainerResult(
-        status = StartDockerContainerStatus.ALREADY_STARTED,
-        message = "Container is already started"
-      )
-      
-      fun retryableSamePortConfig(message: String, cause: Throwable? = null) = StartDockerContainerResult(
-        status = StartDockerContainerStatus.FAILED,
-        shouldRetry = true,
-        shouldUseNewPortConfig = false,
-        message = message,
-        cause = cause
-      )
-      
-      fun retryableNewPortConfig(message: String, cause: Throwable? = null) = StartDockerContainerResult(
-        status = StartDockerContainerStatus.FAILED,
-        shouldRetry = true,
-        shouldUseNewPortConfig = true,
-        message = message,
-        cause = cause
-      )
-      
-      fun nonRetryableFailure(message: String, cause: Throwable? = null) = StartDockerContainerResult(
-        status = StartDockerContainerStatus.FAILED,
-        shouldRetry = false,
-        message = message,
-        cause = cause
-      )
+      fun success(message: String? = null) =
+        StartDockerContainerResult(status = StartDockerContainerStatus.SUCCESS, message = message)
+
+      fun alreadyStarted() =
+        StartDockerContainerResult(
+          status = StartDockerContainerStatus.ALREADY_STARTED,
+          message = "Container is already started",
+        )
+
+      fun retryableSamePortConfig(message: String, cause: Throwable? = null) =
+        StartDockerContainerResult(
+          status = StartDockerContainerStatus.FAILED,
+          shouldRetry = true,
+          shouldUseNewPortConfig = false,
+          message = message,
+          cause = cause,
+        )
+
+      fun retryableNewPortConfig(message: String, cause: Throwable? = null) =
+        StartDockerContainerResult(
+          status = StartDockerContainerStatus.FAILED,
+          shouldRetry = true,
+          shouldUseNewPortConfig = true,
+          message = message,
+          cause = cause,
+        )
+
+      fun nonRetryableFailure(message: String, cause: Throwable? = null) =
+        StartDockerContainerResult(
+          status = StartDockerContainerStatus.FAILED,
+          shouldRetry = false,
+          message = message,
+          cause = cause,
+        )
     }
   }
 
   private enum class StartDockerContainerStatus {
     SUCCESS,
     ALREADY_STARTED,
-    FAILED
+    FAILED,
   }
 }
 
@@ -1035,7 +1042,7 @@ data class ShouldCreateVitessContainerResult(
 data class StartVitessContainerResult(
   override val containerId: String,
   override val newContainerCreated: Boolean,
-  override val newContainerReason: String? = null
+  override val newContainerReason: String? = null,
 ) : StartContainerResult
 
 /**
@@ -1044,7 +1051,5 @@ data class StartVitessContainerResult(
  * @property containerId The ID of the Docker container that was removed.
  * @property containerRemoved Whether the container was removed.
  */
-data class RemoveVitessContainerResult(
-  override val containerId: String?,
-  override val containerRemoved: Boolean
-) : RemoveContainerResult
+data class RemoveVitessContainerResult(override val containerId: String?, override val containerRemoved: Boolean) :
+  RemoveContainerResult

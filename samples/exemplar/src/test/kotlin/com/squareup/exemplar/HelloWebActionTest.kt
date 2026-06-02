@@ -3,12 +3,12 @@ package com.squareup.exemplar
 import com.google.inject.Module
 import com.squareup.exemplar.actions.HelloResponse
 import com.squareup.exemplar.actions.HelloWebAction
+import jakarta.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okhttp3.Headers.Companion.headersOf
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest
 class HelloWebActionTest {

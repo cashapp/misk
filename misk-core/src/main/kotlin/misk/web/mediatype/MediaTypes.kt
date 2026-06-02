@@ -3,9 +3,7 @@ package misk.web.mediatype
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 
-/**
- * Note order alphabetically, but keep pairs together.
- */
+/** Note order alphabetically, but keep pairs together. */
 object MediaTypes {
 
   const val ALL = "*/*"
@@ -82,9 +80,11 @@ object MediaTypes {
       "css" -> TEXT_CSS_MEDIA_TYPE
       "form-data" -> FORM_DATA_MEDIA_TYPE
       "gif" -> IMAGE_GIF_MEDIA_TYPE
-      "html", "htm" -> TEXT_HTML_MEDIA_TYPE
+      "html",
+      "htm" -> TEXT_HTML_MEDIA_TYPE
       "ico" -> IMAGE_ICO_MEDIA_TYPE
-      "jpeg", "jpg" -> IMAGE_JPEG_MEDIA_TYPE
+      "jpeg",
+      "jpg" -> IMAGE_JPEG_MEDIA_TYPE
       "js" -> APPLICATION_JAVASCRIPT_MEDIA_TYPE
       "json" -> APPLICATION_JSON_MEDIA_TYPE
       "jwt" -> APPLICATION_JWT_MEDIA_TYPE
@@ -100,13 +100,15 @@ object MediaTypes {
 }
 
 fun String.asMediaType() = this.toMediaType()
+
 fun String.asMediaRange() = MediaRange.parse(this)
 
 internal val MediaType.wildcardCount
-  get() = when {
-    type == "*" -> 2
-    subtype == "*" -> 1
-    else -> 0
-  }
+  get() =
+    when {
+      type == "*" -> 2
+      subtype == "*" -> 1
+      else -> 0
+    }
 
 fun MediaType.compareTo(other: MediaType) = wildcardCount - other.wildcardCount

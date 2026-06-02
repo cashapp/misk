@@ -4,7 +4,13 @@
   "port": "3202",
   "rawGitginore": "",
   "rawIndex": false,
-  "rawPackageJson": {},
+  "rawPackageJson": {
+    "scripts": {
+      "lib": "cross-env NODE_ENV=production NODE_OPTIONS=\"--openssl-legacy-provider\" webpack",
+      "dev-lib": "cross-env NODE_ENV=development NODE_OPTIONS=\"--openssl-legacy-provider\" webpack",
+      "start": "npm run-script prebuild && cross-env NODE_ENV=development NODE_OPTIONS=\"--openssl-legacy-provider\" webpack-dev-server"
+    }
+  },
   "rawTsconfig": {
     "declaration": false
   },

@@ -41,7 +41,7 @@ wire {
 
   // Generate service interfaces also.
   kotlin {
-    includes = listOf("routeguide.RouteGuide")
+    includes = listOf("routeguide.RouteGuide", "transitive.MainService")
     exclusive = false
     rpcRole = "server"
     rpcCallStyle = "blocking"
@@ -63,9 +63,9 @@ dependencies {
   api(project(":misk-api"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
+  compileOnly(libs.javaxAnnotation)
   implementation(libs.grpcNetty)
   implementation(libs.grpcProtobuf)
-  implementation(libs.javaxAnnotation)
   implementation(libs.nettyHandler)
   implementation(libs.wireGrpcClient)
   implementation(libs.wireRuntime)

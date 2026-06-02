@@ -1,5 +1,6 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
+import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 
 plugins {
   id("org.jetbrains.kotlin.jvm")
@@ -15,6 +16,8 @@ dependencies {
   api(libs.jacksonDatabind)
   api(libs.jakartaInject)
   api(libs.jakartaInject)
+  api(libs.jettyHttp2Common)
+  api(libs.jettyIo)
   api(libs.jettyServer)
   api(libs.jettyServletApi)
   api(libs.jettyUtil)
@@ -30,7 +33,6 @@ dependencies {
   api(project(":misk-api"))
   api(project(":misk-audit-client"))
   api(project(":misk-backoff"))
-  api(project(":misk-clustering"))
   api(project(":misk-config"))
   api(project(":misk-core"))
   api(project(":misk-inject"))
@@ -38,15 +40,16 @@ dependencies {
   api(project(":misk-moshi"))
   api(project(":misk-sampling"))
   api(project(":misk-service"))
-  api(project(":wisp:wisp-client"))
-  api(project(":wisp:wisp-config"))
   api(project(":wisp:wisp-deployment"))
+  api(libs.logbackClassic)
+  api(libs.logbackCore)
+  api(libs.micrometerCore)
+  api(project(":misk-feature"))
   implementation(libs.jCommander)
   implementation(libs.jettyAlpnServer)
   implementation(libs.jettyEe8Nested)
   implementation(libs.jettyHttp)
   implementation(libs.jettyHttp2)
-  implementation(libs.jettyIo)
   implementation(libs.jettyServlet)
   implementation(libs.jettyServlets)
   implementation(libs.jettyUds)
@@ -74,10 +77,11 @@ dependencies {
   implementation(project(":misk-tokens"))
   implementation(project(":wisp:wisp-deployment-testing"))
   implementation(project(":wisp:wisp-moshi"))
-  implementation(project(":wisp:wisp-ssl"))
   runtimeOnly(libs.jettyAlpnServerJava)
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
   testImplementation(libs.assertj)
+  testImplementation(libs.awaitility)
+  testImplementation(libs.awaitilityKotlin)
   testImplementation(libs.guavaTestLib)
   testImplementation(libs.junitApi)
   testImplementation(libs.junitParams)
@@ -85,7 +89,7 @@ dependencies {
   testImplementation(libs.kotlinTest)
   testImplementation(libs.kotlinxCoroutinesCore)
   testImplementation(libs.kotlinxCoroutinesTest)
-  testImplementation(libs.logbackClassic)
+  testImplementation(libs.mockitoCore)
   testImplementation(libs.okHttpMockWebServer)
   testImplementation(libs.okHttpSse)
   testImplementation(libs.openTracingMock)
@@ -94,6 +98,8 @@ dependencies {
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":wisp:wisp-tracing"))
   testImplementation(testFixtures(project(":misk-audit-client")))
+  testImplementation(testFixtures(project(":misk-feature")))
+  testImplementation(testFixtures(project(":misk-metrics")))
 }
 
 val generatedSourceDir = layout.buildDirectory.dir("generated/source/wire-test").get().asFile.path
@@ -129,9 +135,9 @@ wire {
   }
 }
 
-// Make sure the Wire-generated sources are test-only.
+// We want the Wire-generated sources to be test-only, so we move them to test source sets here.
 afterEvaluate {
-  val generatedSourceGlob = "$generatedSourceDir/**"
+  val kotlinSourceSets = extensions.findByType(KotlinProjectExtension::class.java)?.sourceSets
 
   sourceSets {
     main {
@@ -142,14 +148,14 @@ afterEvaluate {
     }
   }
 
-  tasks {
-    compileJava {
-      exclude(generatedSourceGlob)
-    }
-    compileTestJava {
-      include(generatedSourceGlob)
-    }
-  }
+  kotlinSourceSets?.getByName("main")?.kotlin?.setSrcDirs(
+    kotlinSourceSets.getByName("main").kotlin.srcDirs.filter { !it.path.contains(generatedSourceDir) }
+  )
+  kotlinSourceSets?.getByName("test")?.kotlin?.srcDir(generatedSourceDir)
+
+  // Explicit dependency for test scoped protos to be generated if need be.
+  tasks.named("compileTestKotlin") { dependsOn("generateMainProtos") }
+  tasks.named("compileTestJava") { dependsOn("generateMainProtos") }
 }
 
 mavenPublishing {

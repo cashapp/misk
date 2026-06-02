@@ -1,5 +1,7 @@
 package misk.jobqueue.sqs
 
+import jakarta.inject.Inject
+import kotlin.test.assertEquals
 import misk.MiskTestingServiceModule
 import misk.clustering.fake.lease.FakeLeaseManager
 import misk.clustering.fake.lease.FakeLeaseModule
@@ -16,20 +18,19 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
-import kotlin.test.assertEquals
 
 @MiskTest(startService = false)
 class SqsConsumerAllocatorTest {
 
   @MiskTestModule
-  val module = object : KAbstractModule() {
-    override fun configure() {
-      install(MiskTestingServiceModule())
-      install(FakeLeaseModule())
-      install(FakeFeatureFlagsModule())
+  val module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(MiskTestingServiceModule())
+        install(FakeLeaseModule())
+        install(FakeFeatureFlagsModule())
+      }
     }
-  }
 
   @Inject private lateinit var featureFlags: FakeFeatureFlags
   @Inject private lateinit var leaseManager: FakeLeaseManager
@@ -49,9 +50,7 @@ class SqsConsumerAllocatorTest {
       assertEquals(15, sqsConsumerAllocator.computeSqsConsumersForPod(queueName, ONE_FLAG_ONLY))
 
       // Take some leases
-      (1..10).forEach {
-        leaseManager.markLeaseHeldElsewhere(SqsConsumerAllocator.leaseName(queueName, it))
-      }
+      (1..10).forEach { leaseManager.markLeaseHeldElsewhere(SqsConsumerAllocator.leaseName(queueName, it)) }
       assertEquals(5, sqsConsumerAllocator.computeSqsConsumersForPod(queueName, ONE_FLAG_ONLY))
     }
 
@@ -61,9 +60,7 @@ class SqsConsumerAllocatorTest {
       featureFlags.override(POD_CONSUMERS_PER_QUEUE, 5)
       featureFlags.override(POD_MAX_JOBQUEUE_CONSUMERS, 0)
       // Take some leases.
-      (1..10).forEach {
-        leaseManager.markLeaseHeldElsewhere(SqsConsumerAllocator.leaseName(queueName, it))
-      }
+      (1..10).forEach { leaseManager.markLeaseHeldElsewhere(SqsConsumerAllocator.leaseName(queueName, it)) }
       // Leases don't matter.. we take all available according to the flag.
       assertEquals(5, sqsConsumerAllocator.computeSqsConsumersForPod(queueName, ONE_FLAG_ONLY))
     }
@@ -77,9 +74,7 @@ class SqsConsumerAllocatorTest {
       featureFlags.override(CONSUMERS_PER_QUEUE, 15)
       featureFlags.override(POD_MAX_JOBQUEUE_CONSUMERS, 10)
       // Take some leases.
-      (1..10).forEach {
-        leaseManager.markLeaseHeldElsewhere(SqsConsumerAllocator.leaseName(queueName, it))
-      }
+      (1..10).forEach { leaseManager.markLeaseHeldElsewhere(SqsConsumerAllocator.leaseName(queueName, it)) }
       // Even though this pod can take up to 10 consumers, only 5 are available.
       assertEquals(5, sqsConsumerAllocator.computeSqsConsumersForPod(queueName, BALANCED_MAX))
     }
@@ -89,9 +84,7 @@ class SqsConsumerAllocatorTest {
       featureFlags.override(CONSUMERS_PER_QUEUE, 15)
       featureFlags.override(POD_MAX_JOBQUEUE_CONSUMERS, 5)
       // Take some leases.
-      (1..2).forEach {
-        leaseManager.markLeaseHeldElsewhere(SqsConsumerAllocator.leaseName(queueName, it))
-      }
+      (1..2).forEach { leaseManager.markLeaseHeldElsewhere(SqsConsumerAllocator.leaseName(queueName, it)) }
       // Even though there are 13 consumers available globally, this pod is capped at 5.
       assertEquals(5, sqsConsumerAllocator.computeSqsConsumersForPod(queueName, BALANCED_MAX))
     }

@@ -8,6 +8,7 @@ import misk.web.metadata.DashboardMetadataAction
 import misk.web.metadata.ServiceMetadataAction
 import misk.web.v2.DashboardIndexAccessBlock
 import misk.web.v2.DashboardIndexBlock
+import misk.web.v2.DashboardLayoutConfig
 import misk.web.v2.DashboardV2RedirectAction
 
 /**
@@ -16,10 +17,14 @@ import misk.web.v2.DashboardV2RedirectAction
  * - `admin-dashboard` tab which loads all other tabs and provides navbar, menu links, auth
  * - `@misk` packages used by Misk-Web tabs from window to provide faster tab loads
  */
-class BaseDashboardModule(
-  private val isDevelopment: Boolean
-): KAbstractModule() {
+class BaseDashboardModule
+@JvmOverloads
+constructor(
+  private val isDevelopment: Boolean,
+  private val layoutConfig: DashboardLayoutConfig = DashboardLayoutConfig(),
+) : KAbstractModule() {
   override fun configure() {
+    bind<DashboardLayoutConfig>().toInstance(layoutConfig)
     // Setup multibindings for dashboard related components
     newMultibinder<DashboardTab>()
     newMultibinder<DashboardHomeUrl>()
@@ -50,7 +55,7 @@ class BaseDashboardModule(
         web_proxy_url = "http://localhost:3201/",
         url_path_prefix = "/@misk/",
         // Serve the @misk dependencies from the Database tab lib directory
-        resourcePath = "classpath:/web/_tab/database/@misk/"
+        resourcePath = "classpath:/web/_tab/database/@misk/",
       )
     )
   }

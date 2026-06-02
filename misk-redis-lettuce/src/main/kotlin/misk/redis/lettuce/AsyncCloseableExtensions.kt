@@ -1,16 +1,16 @@
 package misk.redis.lettuce
 
 import io.lettuce.core.api.AsyncCloseable
-import kotlinx.coroutines.future.await
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
+import kotlinx.coroutines.future.await
 
 /**
- * Ensures that the [AsyncCloseable] is closed when the [CompletionStage] completes, regardless of whether
- * the completion is successful or exceptional.
+ * Ensures that the [AsyncCloseable] is closed when the [CompletionStage] completes, regardless of whether the
+ * completion is successful or exceptional.
  *
- * This is the asynchronous equivalent of using a resource within a try-finally block where the resource
- * is closed in the finally block.
+ * This is the asynchronous equivalent of using a resource within a try-finally block where the resource is closed in
+ * the finally block.
  *
  * Example:
  * ```kotlin
@@ -21,15 +21,16 @@ import java.util.concurrent.CompletionStage
  * @param c The [AsyncCloseable] resource to be closed when the [CompletionStage] completes
  * @return The original [CompletionStage] with the close operation attached
  */
-fun <T : AsyncCloseable, R> CompletionStage<R>.closeOnCompletion(c: T): CompletionStage<R> =
-  whenComplete { _, t -> c.closeFinallyAsync(t) }
+fun <T : AsyncCloseable, R> CompletionStage<R>.closeOnCompletion(c: T): CompletionStage<R> = whenComplete { _, t ->
+  c.closeFinallyAsync(t)
+}
 
 /**
- * Executes the given [block] function with the [AsyncCloseable] resource as its argument and ensures
- * the resource is closed when the resulting [CompletionStage] completes.
+ * Executes the given [block] function with the [AsyncCloseable] resource as its argument and ensures the resource is
+ * closed when the resulting [CompletionStage] completes.
  *
- * This is the asynchronous equivalent of the standard library's [use] function for [java.io.Closeable],
- * but adapted for [CompletionStage] composition with [AsyncCloseable] resources.
+ * This is the asynchronous equivalent of the standard library's [use] function for [java.io.Closeable], but adapted for
+ * [CompletionStage] composition with [AsyncCloseable] resources.
  *
  * Example:
  * ```kotlin
@@ -44,20 +45,17 @@ fun <T : AsyncCloseable, R> CompletionStage<R>.closeOnCompletion(c: T): Completi
  */
 inline fun <T : AsyncCloseable, R> CompletionStage<T>.thenComposeUsing(
   crossinline block: (T) -> CompletionStage<R>
-): CompletionStage<R> = thenCompose {
-  block(it)
-    .closeOnCompletion(it)
-}
+): CompletionStage<R> = thenCompose { block(it).closeOnCompletion(it) }
 
 /**
- * Executes the given [block] function with the [AsyncCloseable] resource as its argument and ensures
- * the resource is closed when the resulting [CompletionStage] completes.
+ * Executes the given [block] function with the [AsyncCloseable] resource as its argument and ensures the resource is
+ * closed when the resulting [CompletionStage] completes.
  *
- * Similar to [thenComposeUsing], but for synchronous operations that don't return a [CompletionStage].
- * The result of [block] is wrapped in a completed [CompletionStage].
+ * Similar to [thenComposeUsing], but for synchronous operations that don't return a [CompletionStage]. The result of
+ * [block] is wrapped in a completed [CompletionStage].
  *
- * This is analogous to the standard library's [use] function for [java.io.Closeable], but adapted for
- * [CompletionStage] composition with [AsyncCloseable] resources.
+ * This is analogous to the standard library's [use] function for [java.io.Closeable], but adapted for [CompletionStage]
+ * composition with [AsyncCloseable] resources.
  *
  * Example:
  * ```kotlin
@@ -70,21 +68,18 @@ inline fun <T : AsyncCloseable, R> CompletionStage<T>.thenComposeUsing(
  * @param block A function that takes the resource and returns a result of type [R]
  * @return A [CompletionStage] that will complete with the result of the [block] and ensure the resource is closed
  */
-inline fun <T : AsyncCloseable, R> CompletionStage<T>.thenApplyUsing(
-  crossinline block: (T) -> R
-): CompletionStage<R> = thenComposeUsing {
-  runCatching { (block(it)) }.fold(
-    onSuccess = { CompletableFuture.completedFuture(it) },
-    onFailure = { CompletableFuture.failedFuture(it) },
-  )
-}
+inline fun <T : AsyncCloseable, R> CompletionStage<T>.thenApplyUsing(crossinline block: (T) -> R): CompletionStage<R> =
+  thenComposeUsing {
+    runCatching { (block(it)) }
+      .fold(onSuccess = { CompletableFuture.completedFuture(it) }, onFailure = { CompletableFuture.failedFuture(it) })
+  }
 
 /**
- * Executes the given [block] function with the [AsyncCloseable] resource as its argument and ensures
- * the resource is properly closed when the block completes, whether successfully or with an exception.
+ * Executes the given [block] function with the [AsyncCloseable] resource as its argument and ensures the resource is
+ * properly closed when the block completes, whether successfully or with an exception.
  *
- * This is the direct coroutine equivalent of the standard library's [use] function for [java.io.Closeable],
- * but adapted for suspending functions with [AsyncCloseable] resources.
+ * This is the direct coroutine equivalent of the standard library's [use] function for [java.io.Closeable], but adapted
+ * for suspending functions with [AsyncCloseable] resources.
  *
  * Example:
  * ```kotlin
@@ -110,8 +105,8 @@ suspend inline fun <T : AsyncCloseable, R> T.suspendingUse(block: (T) -> R): R {
 }
 
 /**
- * Internal helper function to close an [AsyncCloseable] resource asynchronously, suppressing any exceptions
- * from the close operation if a primary exception is already present.
+ * Internal helper function to close an [AsyncCloseable] resource asynchronously, suppressing any exceptions from the
+ * close operation if a primary exception is already present.
  *
  * This is similar to how the standard library's [use] function handles suppressed exceptions when closing resources.
  *
@@ -127,4 +122,3 @@ internal fun AsyncCloseable.closeFinallyAsync(cause: Throwable? = null): Complet
     // Log the error
     null
   }
-

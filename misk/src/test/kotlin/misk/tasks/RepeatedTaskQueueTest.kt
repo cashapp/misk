@@ -3,32 +3,32 @@ package misk.tasks
 import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.util.Modules
-import misk.MiskTestingServiceModule
-import misk.ServiceModule
-import misk.backoff.ExponentialBackoff
-import misk.backoff.FlatBackoff
-import misk.backoff.retry
-import misk.concurrent.ExplicitReleaseDelayQueue
-import misk.inject.KAbstractModule
-import misk.testing.MiskTest
-import misk.testing.MiskTestModule
-import misk.time.FakeClockModule
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import misk.time.FakeClock
+import jakarta.inject.Inject
+import jakarta.inject.Named
+import jakarta.inject.Singleton
 import java.time.Duration
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
-import jakarta.inject.Inject
-import jakarta.inject.Named
-import jakarta.inject.Singleton
-import misk.backoff.RetryConfig
 import kotlin.concurrent.withLock
 import kotlin.test.assertEquals
+import misk.MiskTestingServiceModule
+import misk.ServiceModule
+import misk.backoff.ExponentialBackoff
+import misk.backoff.FlatBackoff
+import misk.backoff.RetryConfig
+import misk.backoff.retry
+import misk.concurrent.ExplicitReleaseDelayQueue
+import misk.inject.KAbstractModule
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
+import misk.time.FakeClock
+import misk.time.FakeClockModule
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
 internal class RepeatedTaskQueueTest {
@@ -42,14 +42,14 @@ internal class RepeatedTaskQueueTest {
   @Inject lateinit var pendingTasks: ExplicitReleaseDelayQueue<DelayedTask>
   @Inject lateinit var repeatedTaskQueueFactory: RepeatedTaskQueueFactory
 
-  @BeforeEach fun initClock() {
+  @BeforeEach
+  fun initClock() {
     clock.add(Duration.ofDays(365 * 12))
   }
 
-  @Test fun honorsInitialDelay() {
-    taskQueue.schedule(Duration.ofSeconds(10)) {
-      Result(Status.OK, Duration.ofSeconds(5))
-    }
+  @Test
+  fun honorsInitialDelay() {
+    taskQueue.schedule(Duration.ofSeconds(10)) { Result(Status.OK, Duration.ofSeconds(5)) }
 
     val scheduled = waitForNextPendingTask()
     assertThat(scheduled.executionTime).isEqualTo(clock.instant().plus(Duration.ofSeconds(10)))
@@ -59,15 +59,17 @@ internal class RepeatedTaskQueueTest {
     assertThat(scheduled.getDelay(TimeUnit.SECONDS)).isEqualTo(3)
   }
 
-  @Test fun scheduleMetrics() {
+  @Test
+  fun scheduleMetrics() {
     var counter = 0
     taskQueue.schedule(Duration.ofSeconds(10)) {
-      val status = when (counter) {
-        0 -> Status.OK
-        1 -> Status.FAILED
-        2 -> Status.NO_RESCHEDULE
-        else -> Status.NO_WORK
-      }
+      val status =
+        when (counter) {
+          0 -> Status.OK
+          1 -> Status.FAILED
+          2 -> Status.NO_RESCHEDULE
+          else -> Status.NO_WORK
+        }
       counter++
       Result(status, Duration.ofSeconds(5))
     }
@@ -81,15 +83,17 @@ internal class RepeatedTaskQueueTest {
     assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "no_work")).isEqualTo(1)
   }
 
-  @Test fun scheduleBackoffMetrics() {
+  @Test
+  fun scheduleBackoffMetrics() {
     var counter = 0
     taskQueue.scheduleWithBackoff(Duration.ofSeconds(10)) {
-      val status = when (counter) {
-        0 -> Status.OK
-        1 -> Status.FAILED
-        2 -> Status.NO_RESCHEDULE
-        else -> Status.NO_WORK
-      }
+      val status =
+        when (counter) {
+          0 -> Status.OK
+          1 -> Status.FAILED
+          2 -> Status.NO_RESCHEDULE
+          else -> Status.NO_WORK
+        }
       counter++
       status
     }
@@ -103,24 +107,20 @@ internal class RepeatedTaskQueueTest {
     assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "no_work")).isEqualTo(1)
   }
 
-  @Test fun ordersTasksByInitialDelay() {
-    taskQueue.schedule(Duration.ofSeconds(10)) {
-      Result(Status.OK, Duration.ofSeconds(5))
-    }
+  @Test
+  fun ordersTasksByInitialDelay() {
+    taskQueue.schedule(Duration.ofSeconds(10)) { Result(Status.OK, Duration.ofSeconds(5)) }
 
-    taskQueue.schedule(Duration.ofSeconds(9)) {
-      Result(Status.OK, Duration.ofSeconds(5))
-    }
+    taskQueue.schedule(Duration.ofSeconds(9)) { Result(Status.OK, Duration.ofSeconds(5)) }
 
-    taskQueue.schedule(Duration.ofSeconds(13)) {
-      Result(Status.OK, Duration.ofSeconds(5))
-    }
+    taskQueue.schedule(Duration.ofSeconds(13)) { Result(Status.OK, Duration.ofSeconds(5)) }
 
     val firstScheduled = waitForNextPendingTask()
     assertThat(firstScheduled.getDelay(TimeUnit.SECONDS)).isEqualTo(9)
   }
 
-  @Test fun honorsNextDelayReturnedByTask() {
+  @Test
+  fun honorsNextDelayReturnedByTask() {
     val latch = CountDownLatch(1)
     taskQueue.schedule(Duration.ofSeconds(3)) {
       // Re-run the task in 5 seconds
@@ -137,7 +137,8 @@ internal class RepeatedTaskQueueTest {
     assertThat(nextScheduled.getDelay(TimeUnit.SECONDS)).isEqualTo(5)
   }
 
-  @Test fun honorsNoReschedule() {
+  @Test
+  fun honorsNoReschedule() {
     val latch = CountDownLatch(1)
     taskQueue.schedule(Duration.ofSeconds(3)) {
       if (latch.count > 0) latch.countDown()
@@ -152,7 +153,8 @@ internal class RepeatedTaskQueueTest {
     assertThat(pendingTasks.peekPending()).isNull()
   }
 
-  @Test fun honorsBackoffTaskTimeBetweenRuns() {
+  @Test
+  fun honorsBackoffTaskTimeBetweenRuns() {
     // Schedule a simple task with a fixed time between runs, confirm that after one execution
     // we re-schedule that task with the fixed backoff
     val latch = CountDownLatch(1)
@@ -172,20 +174,17 @@ internal class RepeatedTaskQueueTest {
     assertThat(nextTask.getDelay(TimeUnit.SECONDS)).isEqualTo(5)
   }
 
-  @Test fun defaultsInitialDelayToTimeBetweenRuns() {
-    taskQueue.scheduleWithBackoff(Duration.ofSeconds(5)) {
-      Status.OK
-    }
+  @Test
+  fun defaultsInitialDelayToTimeBetweenRuns() {
+    taskQueue.scheduleWithBackoff(Duration.ofSeconds(5)) { Status.OK }
 
     val task = waitForNextPendingTask()
     assertThat(task.executionTime).isEqualTo(clock.instant().plusMillis(5000))
   }
 
-  @Test fun honorsCustomInitialDelay() {
-    taskQueue.scheduleWithBackoff(
-      timeBetweenRuns = Duration.ofSeconds(5),
-      initialDelay = Duration.ofSeconds(25)
-    ) {
+  @Test
+  fun honorsCustomInitialDelay() {
+    taskQueue.scheduleWithBackoff(timeBetweenRuns = Duration.ofSeconds(5), initialDelay = Duration.ofSeconds(25)) {
       Status.OK
     }
 
@@ -193,7 +192,8 @@ internal class RepeatedTaskQueueTest {
     assertThat(task.executionTime).isEqualTo(clock.instant().plusMillis(25000))
   }
 
-  @Test fun honorsFailureBackoffOnException() {
+  @Test
+  fun honorsFailureBackoffOnException() {
     val lock = ReentrantLock()
     val taskCompleted = lock.newCondition()
 
@@ -201,7 +201,7 @@ internal class RepeatedTaskQueueTest {
     taskQueue.scheduleWithBackoff(
       timeBetweenRuns = Duration.ofSeconds(2),
       failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100)),
     ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
@@ -226,7 +226,8 @@ internal class RepeatedTaskQueueTest {
     assertThat(nextTask.getDelay(TimeUnit.SECONDS)).isEqualTo(60L)
   }
 
-  @Test fun honorsFailureBackoffOnError() {
+  @Test
+  fun honorsFailureBackoffOnError() {
     val lock = ReentrantLock()
     val taskCompleted = lock.newCondition()
 
@@ -234,7 +235,7 @@ internal class RepeatedTaskQueueTest {
     taskQueue.scheduleWithBackoff(
       timeBetweenRuns = Duration.ofSeconds(2),
       failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100)),
     ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
@@ -259,7 +260,8 @@ internal class RepeatedTaskQueueTest {
     assertThat(nextTask.getDelay(TimeUnit.SECONDS)).isEqualTo(60L)
   }
 
-  @Test fun honorsNoWorkBackoff() {
+  @Test
+  fun honorsNoWorkBackoff() {
     val lock = ReentrantLock()
     val taskCompleted = lock.newCondition()
 
@@ -267,7 +269,7 @@ internal class RepeatedTaskQueueTest {
     taskQueue.scheduleWithBackoff(
       timeBetweenRuns = Duration.ofSeconds(2),
       failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100)),
     ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
@@ -292,7 +294,8 @@ internal class RepeatedTaskQueueTest {
     assertThat(nextTask.getDelay(TimeUnit.SECONDS)).isEqualTo(100L)
   }
 
-  @Test fun resetFailureBackoffOnSuccess() {
+  @Test
+  fun resetFailureBackoffOnSuccess() {
     val lock = ReentrantLock()
     val taskCompleted = lock.newCondition()
     val returnStatus = AtomicReference(Status.FAILED)
@@ -302,7 +305,7 @@ internal class RepeatedTaskQueueTest {
     taskQueue.scheduleWithBackoff(
       timeBetweenRuns = Duration.ofSeconds(2),
       failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100)),
     ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
@@ -342,7 +345,8 @@ internal class RepeatedTaskQueueTest {
     assertThat(nextTask.getDelay(TimeUnit.SECONDS)).isEqualTo(5L)
   }
 
-  @Test fun resetFailureBackoffWhenNoWork() {
+  @Test
+  fun resetFailureBackoffWhenNoWork() {
     val lock = ReentrantLock()
     val taskCompleted = lock.newCondition()
     val returnStatus = AtomicReference(Status.FAILED)
@@ -352,7 +356,7 @@ internal class RepeatedTaskQueueTest {
     taskQueue.scheduleWithBackoff(
       timeBetweenRuns = Duration.ofSeconds(2),
       failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100)),
     ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
@@ -392,7 +396,8 @@ internal class RepeatedTaskQueueTest {
     assertThat(nextTask.getDelay(TimeUnit.SECONDS)).isEqualTo(5L)
   }
 
-  @Test fun resetNoWorkBackoffOnSuccess() {
+  @Test
+  fun resetNoWorkBackoffOnSuccess() {
     val lock = ReentrantLock()
     val taskCompleted = lock.newCondition()
     val returnStatus = AtomicReference(Status.NO_WORK)
@@ -402,7 +407,7 @@ internal class RepeatedTaskQueueTest {
     taskQueue.scheduleWithBackoff(
       timeBetweenRuns = Duration.ofSeconds(2),
       failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100)),
     ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
@@ -442,7 +447,8 @@ internal class RepeatedTaskQueueTest {
     assertThat(nextTask.getDelay(TimeUnit.SECONDS)).isEqualTo(10L)
   }
 
-  @Test fun resetNoWorkBackoffOnFailure() {
+  @Test
+  fun resetNoWorkBackoffOnFailure() {
     val lock = ReentrantLock()
     val taskCompleted = lock.newCondition()
     val returnStatus = AtomicReference(Status.NO_WORK)
@@ -452,7 +458,7 @@ internal class RepeatedTaskQueueTest {
     taskQueue.scheduleWithBackoff(
       timeBetweenRuns = Duration.ofSeconds(2),
       failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100)),
     ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
@@ -492,24 +498,13 @@ internal class RepeatedTaskQueueTest {
     assertThat(nextTask.getDelay(TimeUnit.SECONDS)).isEqualTo(10L)
   }
 
-  @Test fun sortTaskByDelay() {
+  @Test
+  fun sortTaskByDelay() {
     // Schedule three tasks, each returning different status (so we can differentiate them)
     val queue = PriorityBlockingQueue<DelayedTask>()
-    queue.add(
-      DelayedTask(clock, clock.instant().plusMillis(100)) {
-        Result(Status.OK, Duration.ofMillis(100))
-      }
-    )
-    queue.add(
-      DelayedTask(clock, clock.instant().plusMillis(75)) {
-        Result(Status.FAILED, Duration.ofMillis(100))
-      }
-    )
-    queue.add(
-      DelayedTask(clock, clock.instant().plusMillis(125)) {
-        Result(Status.NO_WORK, Duration.ofMillis(100))
-      }
-    )
+    queue.add(DelayedTask(clock, clock.instant().plusMillis(100)) { Result(Status.OK, Duration.ofMillis(100)) })
+    queue.add(DelayedTask(clock, clock.instant().plusMillis(75)) { Result(Status.FAILED, Duration.ofMillis(100)) })
+    queue.add(DelayedTask(clock, clock.instant().plusMillis(125)) { Result(Status.NO_WORK, Duration.ofMillis(100)) })
 
     // Drain the tasks and make sure they were queued in the proper order
     assertThat(queue.poll().task().status).isEqualTo(Status.FAILED)
@@ -517,7 +512,8 @@ internal class RepeatedTaskQueueTest {
     assertThat(queue.poll().task().status).isEqualTo(Status.NO_WORK)
   }
 
-  @Test fun handlesUncaughtThrowableFromTask() {
+  @Test
+  fun handlesUncaughtThrowableFromTask() {
     val latch = CountDownLatch(1)
     taskQueue.schedule(Duration.ofSeconds(3)) {
       if (latch.count > 0) latch.countDown()
@@ -532,7 +528,8 @@ internal class RepeatedTaskQueueTest {
     assertThat(nextScheduled.getDelay(TimeUnit.SECONDS)).isEqualTo(3)
   }
 
-  @Test fun handlesUncaughtThrowableFromTaskWithRetryDelay() {
+  @Test
+  fun handlesUncaughtThrowableFromTaskWithRetryDelay() {
     val latch = CountDownLatch(1)
     taskQueue.schedule(Duration.ofSeconds(3), Duration.ofSeconds(5)) {
       if (latch.count > 0) latch.countDown()
@@ -547,7 +544,8 @@ internal class RepeatedTaskQueueTest {
     assertThat(nextScheduled.getDelay(TimeUnit.SECONDS)).isEqualTo(5)
   }
 
-  @Test fun `terminates when it is shut down`() {
+  @Test
+  fun `terminates when it is shut down`() {
     val queues = mutableListOf(taskQueue)
     // Each queue should have its own backingStorage, but it can't be guaranteed, so test with worst case
     // val queuesPendingTasks = mutableListOf(pendingTasks)
@@ -558,8 +556,8 @@ internal class RepeatedTaskQueueTest {
         i,
         repeatedTaskQueueFactory.forTesting(
           name = "queue-$i",
-          backingStorage = pendingTasks // queuesPendingTasks[i]
-        )
+          backingStorage = pendingTasks, // queuesPendingTasks[i]
+        ),
       )
     }
 
@@ -568,9 +566,7 @@ internal class RepeatedTaskQueueTest {
     }
 
     for (i in 0..queues.lastIndex) {
-      queues[i].schedule(Duration.ZERO, Duration.ofMillis(100L)) {
-        Result(Status.OK, Duration.ofMillis(100))
-      }
+      queues[i].schedule(Duration.ZERO, Duration.ofMillis(100L)) { Result(Status.OK, Duration.ofMillis(100)) }
     }
 
     for (i in 0..queues.lastIndex) {
@@ -591,10 +587,7 @@ internal class RepeatedTaskQueueTest {
     }
 
     for (i in 0..queues.lastIndex) {
-      assertEquals(
-        Service.State.TERMINATED, queues[i].state(),
-        "Failed to TERMINATE for queue $i: ${queues[i].name}"
-      )
+      assertEquals(Service.State.TERMINATED, queues[i].state(), "Failed to TERMINATE for queue $i: ${queues[i].name}")
     }
   }
 
@@ -604,23 +597,27 @@ internal class RepeatedTaskQueueTest {
       install(ServiceModule<RepeatedTaskQueue>())
     }
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun repeatedTaskQueueBackingStorage(): ExplicitReleaseDelayQueue<DelayedTask> {
       return ExplicitReleaseDelayQueue()
     }
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun repeatedTaskQueue(
       queueFactory: RepeatedTaskQueueFactory,
-      backingStorage: ExplicitReleaseDelayQueue<DelayedTask>
+      backingStorage: ExplicitReleaseDelayQueue<DelayedTask>,
     ): RepeatedTaskQueue {
       return queueFactory.forTesting("my-task-queue", backingStorage)
     }
 
-    @Provides @Singleton @Named("another")
+    @Provides
+    @Singleton
+    @Named("another")
     fun anotherRepeatedTaskQueue(
       queueFactory: RepeatedTaskQueueFactory,
-      backingStorage: ExplicitReleaseDelayQueue<DelayedTask>
+      backingStorage: ExplicitReleaseDelayQueue<DelayedTask>,
     ): RepeatedTaskQueue {
       return queueFactory.forTesting("another-task-queue", backingStorage)
     }
@@ -628,8 +625,6 @@ internal class RepeatedTaskQueueTest {
 
   private fun waitForNextPendingTask(): DelayedTask {
     val retryConfig = RetryConfig.Builder(5, FlatBackoff(Duration.ofMillis(200)))
-    return retry(retryConfig.build()) {
-      pendingTasks.peekPending()!!
-    }
+    return retry(retryConfig.build()) { pendingTasks.peekPending()!! }
   }
 }

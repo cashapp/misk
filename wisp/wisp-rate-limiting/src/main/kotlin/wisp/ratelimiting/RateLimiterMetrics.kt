@@ -5,14 +5,12 @@ import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.MeterRegistry
 
 class RateLimiterMetrics(private val meterRegistry: MeterRegistry) {
-  fun consumptionAttempts(
-    configuration: RateLimitConfiguration,
-    consumptionResult: ConsumptionResult
-  ): Counter = Counter.builder(ATTEMPT_COUNTER_NAME)
-    .description("count of successful rate limiter consumption attempts by config and status")
-    .tag(RATE_LIMIT_TAG, configuration.name)
-    .tag(RESULT_TAG, consumptionResult.name)
-    .register(meterRegistry)
+  fun consumptionAttempts(configuration: RateLimitConfiguration, consumptionResult: ConsumptionResult): Counter =
+    Counter.builder(ATTEMPT_COUNTER_NAME)
+      .description("count of successful rate limiter consumption attempts by config and status")
+      .tag(RATE_LIMIT_TAG, configuration.name)
+      .tag(RESULT_TAG, consumptionResult.name)
+      .register(meterRegistry)
 
   fun tokensConsumed(configuration: RateLimitConfiguration): Counter =
     Counter.builder(TOTAL_CONSUMED_COUNTER_NAME)
@@ -20,9 +18,7 @@ class RateLimiterMetrics(private val meterRegistry: MeterRegistry) {
       .tag(RATE_LIMIT_TAG, configuration.name)
       .register(meterRegistry)
 
-  fun limitConsumptionDuration(
-    configuration: RateLimitConfiguration,
-  ): DistributionSummary =
+  fun limitConsumptionDuration(configuration: RateLimitConfiguration): DistributionSummary =
     DistributionSummary.builder(LIMIT_CONSUMPTION_DURATION)
       .description("duration in ms of rate limit consumption")
       .tag(RATE_LIMIT_TAG, configuration.name)
@@ -30,9 +26,7 @@ class RateLimiterMetrics(private val meterRegistry: MeterRegistry) {
       .publishPercentiles(0.5, 0.75, 0.95, 0.99, 0.999)
       .register(meterRegistry)
 
-  fun limitTestDuration(
-    configuration: RateLimitConfiguration,
-  ): DistributionSummary =
+  fun limitTestDuration(configuration: RateLimitConfiguration): DistributionSummary =
     DistributionSummary.builder(LIMIT_TEST_DURATION)
       .description("duration in ms of rate limit consumption testing")
       .tag(RATE_LIMIT_TAG, configuration.name)
@@ -40,9 +34,7 @@ class RateLimiterMetrics(private val meterRegistry: MeterRegistry) {
       .publishPercentiles(0.5, 0.75, 0.95, 0.99, 0.999)
       .register(meterRegistry)
 
-  fun limitAvailabilityDuration(
-    configuration: RateLimitConfiguration,
-  ): DistributionSummary =
+  fun limitAvailabilityDuration(configuration: RateLimitConfiguration): DistributionSummary =
     DistributionSummary.builder(LIMIT_AVAILABILITY_DURATION)
       .description("duration in ms of rate limit token availability checking")
       .tag(RATE_LIMIT_TAG, configuration.name)
@@ -50,9 +42,7 @@ class RateLimiterMetrics(private val meterRegistry: MeterRegistry) {
       .publishPercentiles(0.5, 0.75, 0.95, 0.99, 0.999)
       .register(meterRegistry)
 
-  fun limitReleaseDuration(
-    configuration: RateLimitConfiguration,
-  ): DistributionSummary =
+  fun limitReleaseDuration(configuration: RateLimitConfiguration): DistributionSummary =
     DistributionSummary.builder(LIMIT_RELEASE_DURATION)
       .description("duration in ms of rate limit release")
       .tag(RATE_LIMIT_TAG, configuration.name)
@@ -60,9 +50,7 @@ class RateLimiterMetrics(private val meterRegistry: MeterRegistry) {
       .publishPercentiles(0.5, 0.75, 0.95, 0.99, 0.999)
       .register(meterRegistry)
 
-  fun limitResetDuration(
-    configuration: RateLimitConfiguration,
-  ): DistributionSummary =
+  fun limitResetDuration(configuration: RateLimitConfiguration): DistributionSummary =
     DistributionSummary.builder(LIMIT_RESET_DURATION)
       .description("duration in ms of rate limit bucket reset")
       .tag(RATE_LIMIT_TAG, configuration.name)
@@ -71,20 +59,14 @@ class RateLimiterMetrics(private val meterRegistry: MeterRegistry) {
       .register(meterRegistry)
 
   enum class ConsumptionResult {
-    /**
-     * A token was consumed successfully
-     */
+    /** A token was consumed successfully */
     SUCCESS,
 
-    /**
-     * There were insufficient tokens in the bucket
-     */
+    /** There were insufficient tokens in the bucket */
     REJECTED,
 
-    /**
-     * An exception was thrown while attempting to consume a token
-     */
-    EXCEPTION
+    /** An exception was thrown while attempting to consume a token */
+    EXCEPTION,
   }
 
   companion object {

@@ -4,12 +4,8 @@ import com.google.common.annotations.VisibleForTesting
 import com.google.common.util.concurrent.AbstractExecutionThreadService
 import com.google.common.util.concurrent.MoreExecutors.newDirectExecutorService
 import com.google.common.util.concurrent.Service
-import misk.backoff.Backoff
-import misk.concurrent.ExecutorServiceFactory
-import misk.concurrent.ExplicitReleaseDelayQueue
-import misk.metrics.Metrics
-import misk.time.timed
-import misk.logging.getLogger
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.time.Clock
 import java.time.Duration
 import java.util.concurrent.BlockingQueue
@@ -19,18 +15,24 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors.newSingleThreadExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
+import misk.backoff.Backoff
+import misk.concurrent.ExecutorServiceFactory
+import misk.concurrent.ExplicitReleaseDelayQueue
+import misk.logging.getLogger
+import misk.metrics.Metrics
+import misk.time.timed
 
 /**
- * A [RepeatedTaskQueue] runs repeated tasks at a user controlled rate. Internally it uses
- * a [DelayQueue] to hold the pending tasks; a background thread pulls the next task
- * from the [DelayQueue] and hands it off to an executor service for execution.
+ * A [RepeatedTaskQueue] runs repeated tasks at a user controlled rate. Internally it uses a [DelayQueue] to hold the
+ * pending tasks; a background thread pulls the next task from the [DelayQueue] and hands it off to an executor service
+ * for execution.
  *
- * [RepeatedTaskQueue] implements the [Service] interface, which requires proper startup and shutdown.
- * Alternatively, you can add new instances to the [Service] multibind.
+ * [RepeatedTaskQueue] implements the [Service] interface, which requires proper startup and shutdown. Alternatively,
+ * you can add new instances to the [Service] multibind.
  */
-class RepeatedTaskQueue @VisibleForTesting internal constructor(
+class RepeatedTaskQueue
+@VisibleForTesting
+internal constructor(
   val name: String,
   private val clock: Clock,
   private val taskExecutor: ExecutorService,
@@ -38,8 +40,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
   private val pendingTasks: BlockingQueue<DelayedTask>, // visible internally for testing only
   internal val metrics: RepeatedTaskQueueMetrics,
   private val config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig(),
-  private val pollingTimeout: Duration = Duration.ofMillis(250)
-
+  private val pollingTimeout: Duration = Duration.ofMillis(250),
 ) : AbstractExecutionThreadService() {
 
   private val running = AtomicBoolean(false)
@@ -67,7 +68,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
           log.error(failure) { "the background thread for repeated task queue $name failed" }
         }
       },
-      executor()
+      executor(),
     )
   }
 
@@ -83,16 +84,11 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
 
     // Remove all currently scheduled tasks, and schedule an empty task to kick the background thread
     pendingTasks.clear()
-    pendingTasks.add(
-      DelayedTask(clock, clock.instant()) {
-        Result(Status.NO_RESCHEDULE, Duration.ofMillis(0))
-      }
-    )
+    pendingTasks.add(DelayedTask(clock, clock.instant()) { Result(Status.NO_RESCHEDULE, Duration.ofMillis(0)) })
   }
 
   /**
-   * runs the main event loop, pulling the next task from the queue and handing it off to the
-   * executor for dispatching
+   * runs the main event loop, pulling the next task from the queue and handing it off to the executor for dispatching
    */
   override fun run() {
     // N.B - If any exception escapes this method the background thread driving the repeated
@@ -118,9 +114,9 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
   }
 
   /**
-   * Schedules a task to run repeatedly after an initial delay. The task itself determines the
-   * next execution time. Provide an optional retryDelayOnFailure parameter to determine when
-   * the job should be retried in the case of an unhandled exception by the client
+   * Schedules a task to run repeatedly after an initial delay. The task itself determines the next execution time.
+   * Provide an optional retryDelayOnFailure parameter to determine when the job should be retried in the case of an
+   * unhandled exception by the client
    */
   @JvmOverloads
   fun schedule(delay: Duration, retryDelayOnFailure: Duration? = null, task: () -> Result) {
@@ -134,8 +130,9 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
         }
       }
       metrics.taskDuration.record(
-        timedResult.first.toMillis().toDouble(), name,
-        timedResult.second.status.metricLabel()
+        timedResult.first.toMillis().toDouble(),
+        name,
+        timedResult.second.status.metricLabel(),
       )
       timedResult.second
     }
@@ -146,17 +143,14 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
     pendingTasks.add(DelayedTask(clock, clock.instant().plus(delay), task))
   }
 
-  /**
-   * Schedules a task to run repeatedly at a fixed delay, with back-off for errors and lack
-   * of available work
-   */
+  /** Schedules a task to run repeatedly at a fixed delay, with back-off for errors and lack of available work */
   @JvmOverloads
   fun scheduleWithBackoff(
     timeBetweenRuns: Duration,
     initialDelay: Duration = timeBetweenRuns,
     noWorkBackoff: Backoff = config.defaultBackoff(timeBetweenRuns),
     failureBackoff: Backoff = config.defaultBackoff(timeBetweenRuns),
-    task: () -> Status
+    task: () -> Status,
   ) {
     enqueue(delay = initialDelay) {
       val timedResult = timed {
@@ -186,8 +180,9 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
         }
       }
       metrics.taskDuration.record(
-        timedResult.first.toMillis().toDouble(), name,
-        timedResult.second.status.metricLabel()
+        timedResult.first.toMillis().toDouble(),
+        name,
+        timedResult.second.status.metricLabel(),
       )
       timedResult.second
     }
@@ -204,67 +199,57 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
 
 @Singleton
 class RepeatedTaskQueueMetrics @Inject constructor(metrics: Metrics) {
-  internal val taskDuration = metrics.histogram(
-    "task_queue_task_duration",
-    "count and duration in ms of periodic tasks",
-    listOf("name", "result")
-  )
+  internal val taskDuration =
+    metrics.histogram(
+      "task_queue_task_duration",
+      "count and duration in ms of periodic tasks",
+      listOf("name", "result"),
+    )
 }
 
 @Singleton
-class RepeatedTaskQueueFactory @Inject constructor(
+class RepeatedTaskQueueFactory
+@Inject
+constructor(
   private val clock: Clock,
   private val metrics: RepeatedTaskQueueMetrics,
-  private val executorServiceFactory: ExecutorServiceFactory
+  private val executorServiceFactory: ExecutorServiceFactory,
 ) {
 
-  /**
-   * Builds a new instance of a [RepeatedTaskQueue]
-   */
+  /** Builds a new instance of a [RepeatedTaskQueue] */
   @JvmOverloads
   fun new(
     name: String,
     config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig(),
-    pollingTimeout: Duration = Duration.ofMillis(250)
-  ):
-    RepeatedTaskQueue {
-    val executor = if (config.num_parallel_tasks == -1) {
-      executorServiceFactory.unbounded("$name-%d")
-    } else {
-      executorServiceFactory.fixed("$name-%d", config.num_parallel_tasks)
-    }
-    return RepeatedTaskQueue(
-      name,
-      clock,
-      executor,
-      null,
-      DelayQueue<DelayedTask>(),
-      metrics,
-      config,
-      pollingTimeout
-    )
+    pollingTimeout: Duration = Duration.ofMillis(250),
+  ): RepeatedTaskQueue {
+    val executor =
+      if (config.num_parallel_tasks == -1) {
+        executorServiceFactory.unbounded("$name-%d")
+      } else {
+        executorServiceFactory.fixed("$name-%d", config.num_parallel_tasks)
+      }
+    return RepeatedTaskQueue(name, clock, executor, null, DelayQueue<DelayedTask>(), metrics, config, pollingTimeout)
   }
 
-  /**
-   * Builds a new instance of a [RepeatedTaskQueue] for testing
-   */
+  /** Builds a new instance of a [RepeatedTaskQueue] for testing */
   @JvmOverloads
   fun forTesting(
     name: String,
     backingStorage: ExplicitReleaseDelayQueue<DelayedTask>,
-    pollingTimeout: Duration = Duration.ofMillis(50)
-  ):
-    RepeatedTaskQueue {
-    val queue = RepeatedTaskQueue(
-      name,
-      clock,
-      newDirectExecutorService(),
-      executorServiceFactory.single("$name-%d"),
-      backingStorage,
-      metrics,
-      RepeatedTaskQueueConfig(),
-      pollingTimeout
-    )
+    pollingTimeout: Duration = Duration.ofMillis(50),
+  ): RepeatedTaskQueue {
+    val queue =
+      RepeatedTaskQueue(
+        name,
+        clock,
+        newDirectExecutorService(),
+        executorServiceFactory.single("$name-%d"),
+        backingStorage,
+        metrics,
+        RepeatedTaskQueueConfig(),
+        pollingTimeout,
+      )
 
     // Install a status listener that will explicitly release all of the tasks from the
     // underlying delay queue backing storage at shutdown, ensuring that the termination
@@ -280,7 +265,7 @@ class RepeatedTaskQueueFactory @Inject constructor(
           }
         }
       },
-      newSingleThreadExecutor()
+      newSingleThreadExecutor(),
     )
 
     return queue
