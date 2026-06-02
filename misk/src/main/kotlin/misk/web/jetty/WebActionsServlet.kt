@@ -140,7 +140,7 @@ constructor(
             if (response is Response) {
               JettyServletUpstreamResponse(response)
             } else {
-              GenericServletUpstreamResponse(response)
+              GenericServletUpstreamResponse(request.protocol, response)
             },
           requestBody = request.inputStream.source().buffer(),
           responseBody = responseBody,
@@ -250,6 +250,16 @@ internal fun HttpServletRequest.headers(): Headers {
   return result.build()
 }
 
+internal fun HttpServletResponse.headers(): Headers {
+  val result = Headers.Builder()
+  for (name in headerNames) {
+    for (value in getHeaders(name)) {
+      result.addUnsafeNonAscii(name, value)
+    }
+  }
+  return result.build()
+}
+
 internal fun Response.headers(): Headers {
   val result = Headers.Builder()
   for (name in headerNames) {
@@ -297,10 +307,7 @@ private fun extractLinkLayerLocalAddress(request: HttpServletRequest): SocketAdd
   return when (connector) {
     is UnixDomainServerConnector -> SocketAddress.Unix(connector.unixDomainPath.toString())
 
-    is UnixSocketConnector -> SocketAddress.Unix(connector.unixSocket)
-
-    is ServerConnector ->
-      SocketAddress.Network(httpChannel.endPoint.remoteAddress.address.hostAddress, connector.localPort)
+    is ServerConnector -> SocketAddress.Network(httpChannel.remoteAddress.address.hostAddress, connector.localPort)
 
     else -> throw IllegalStateException("Unknown socket connector.")
   }

@@ -131,7 +131,7 @@ apiValidation {
     "exemplar",
     "exemplarchat",
     "detektive",
-    "misk-schema-migrator-gradle-plugin"
+    "misk-schema-migrator-gradle-plugin",
   )
   ignoredProjects.addAll(subprojects.map { it.name }.filter { it in ignorable })
   additionalSourceSets.add("testFixtures")
@@ -189,13 +189,13 @@ val hibernateProjects = listOf(
   "misk-jdbc-testing",
   "misk-hibernate-testing",
   "misk-rate-limiting-bucket4j-mysql",
-  "misk-sqldelight"
+  "misk-sqldelight",
 )
 
 val redisProjects = listOf(
   "misk-redis",
   "misk-redis-lettuce",
-  "misk-rate-limiting-bucket4j-redis"
+  "misk-rate-limiting-bucket4j-redis",
 )
 
 val detektConfig = file("detekt.yaml")
@@ -252,12 +252,12 @@ subprojects {
   plugins.withType<KotlinPluginWrapper> {
     tasks.withType<KotlinCompile>().configureEach {
       compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_11)
-        freeCompilerArgs.add("-Xjdk-release=11")
+        jvmTarget.set(JvmTarget.JVM_17)
+        freeCompilerArgs.add("-Xjdk-release=17")
       }
     }
     tasks.withType<JavaCompile>().configureEach {
-      options.release.set(11)
+      options.release.set(17)
     }
 
     dependencies {
@@ -312,7 +312,7 @@ subprojects {
           "dd.civisibility.git.upload.enabled" to false,
           "dd.integration.opentracing.enabled" to true,
           "dd.instrumentation.telemetry.enabled" to false,
-        )
+        ),
       )
       develocity.testRetry {
         maxRetries.set(1)
@@ -378,7 +378,7 @@ subprojects {
     if (name in configurationNames) {
       attributes.attribute(
         Usage.USAGE_ATTRIBUTE,
-        this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME)
+        this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME),
       )
     }
 
@@ -467,7 +467,7 @@ abstract class StartRedisTask @Inject constructor(
     val portIsOccupied = try {
       Socket("localhost", redisPort).close()
       true
-    } catch (e: IOException) {
+    } catch (_: IOException) {
       false
     }
     if (portIsOccupied) {
@@ -484,7 +484,7 @@ abstract class StartRedisTask @Inject constructor(
       "-p", "$redisPort:6379",
       redisImage,
       "redis-server",
-      "--loglevel debug"
+      "--loglevel debug",
     )
     execOperations.exec {
       workingDir(rootDir.get().asFile)
@@ -518,7 +518,7 @@ abstract class StartRedisClusterTask @Inject constructor(
     val portIsOccupied = try {
       Socket("localhost", redisSeedPort).close()
       true
-    } catch (e: IOException) {
+    } catch (_: IOException) {
       false
     }
     if (portIsOccupied) {
@@ -537,26 +537,28 @@ abstract class StartRedisClusterTask @Inject constructor(
       "-e", "MASTERS=3",
       "-e", "SLAVES_PER_MASTER=1",
       "-p", "7000-7005:7000-7005",
-      redisImage
+      redisImage,
     )
     execOperations.exec {
       workingDir(rootDir.get().asFile)
       commandLine(*dockerArguments)
     }
 
-    waitForRedisCluster(redisContainerName,redisSeedPort)
+    waitForRedisCluster(redisContainerName, redisSeedPort)
 
     logger.info("Started Redis Cluster docker image $redisImage on port $redisSeedPort")
   }
 
-  private fun waitForRedisCluster(containerName:String, port:Int){
+  private fun waitForRedisCluster(containerName: String, port: Int) {
     println("Waiting for Redis cluster to become available...")
     val deadline = System.currentTimeMillis() + 60.seconds.inWholeMilliseconds
 
     fun clusterReady(): Boolean {
       try {
-        val process = ProcessBuilder("docker", "exec", containerName,
-          "redis-cli", "-c", "-p", port.toString(), "cluster", "info")
+        val process = ProcessBuilder(
+          "docker", "exec", containerName,
+          "redis-cli", "-c", "-p", port.toString(), "cluster", "info",
+        )
           .redirectErrorStream(true)
           .start()
 
@@ -564,7 +566,7 @@ abstract class StartRedisClusterTask @Inject constructor(
         process.waitFor(5, TimeUnit.SECONDS)
 
         return "cluster_state:ok" in output && "slots_assigned:16384" in output
-      } catch (e: Exception) {
+      } catch (_: Exception) {
         return false
       }
     }

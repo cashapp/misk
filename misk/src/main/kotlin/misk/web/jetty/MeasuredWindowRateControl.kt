@@ -21,13 +21,13 @@ import java.util.concurrent.atomic.AtomicInteger
 import misk.metrics.v2.Metrics
 import misk.metrics.v2.PeakGauge
 import misk.web.WebConfig
-import org.eclipse.jetty.http2.parser.RateControl
+import org.eclipse.jetty.http2.RateControl
 import org.eclipse.jetty.io.EndPoint
 import org.eclipse.jetty.util.NanoTime
 
 /**
  * Misk's RateControl implementation with observability for monitoring HTTP/2 frame rate limiting. Almost the same
- * implementation as [org.eclipse.jetty.http2.parser.WindowRateControl].
+ * implementation as [org.eclipse.jetty.http2.WindowRateControl].
  */
 class MeasuredWindowRateControl
 private constructor(
