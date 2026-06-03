@@ -1043,7 +1043,7 @@ public final class misk/web/BoundAction {
 	public final fun hasIdenticalRouting (Lmisk/web/BoundAction;)Z
 	public final fun match (Lmisk/web/DispatchMechanism;Lokhttp3/MediaType;Ljava/util/List;Lokhttp3/HttpUrl;)Lmisk/web/BoundActionMatch;
 	public final fun matchByUrl (Lokhttp3/HttpUrl;)Lmisk/web/BoundActionMatch;
-	public final fun scopeAndHandle (Ljavax/servlet/http/HttpServletRequest;Lmisk/web/HttpCall;Ljava/util/regex/Matcher;)V
+	public final fun scopeAndHandle (Ljakarta/servlet/http/HttpServletRequest;Lmisk/web/HttpCall;Ljava/util/regex/Matcher;)V
 	public final fun scopeAndHandle (Lmisk/web/HttpCall;Ljava/util/regex/Matcher;)V
 	public fun toString ()Ljava/lang/String;
 }
@@ -2231,7 +2231,7 @@ public abstract interface class misk/web/marshal/Unmarshaller$Factory {
 }
 
 public abstract interface class misk/web/mdc/LogContextProvider {
-	public abstract fun get (Ljavax/servlet/http/HttpServletRequest;)Ljava/lang/String;
+	public abstract fun get (Ljakarta/servlet/http/HttpServletRequest;)Ljava/lang/String;
 }
 
 public final class misk/web/metadata/guice/GuiceMetadata : misk/web/metadata/Metadata {
