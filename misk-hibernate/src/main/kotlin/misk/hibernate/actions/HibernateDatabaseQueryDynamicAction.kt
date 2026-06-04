@@ -72,7 +72,17 @@ constructor(
     transacter.transaction { session ->
       val dbEntity =
         transacter.entities().find { it.simpleName == request.entityClass }
-          ?: throw BadRequestException("[dbEntity=${metadata.entityClass}] is not an installed HibernateEntity")
+          ?: throw BadRequestException("[dbEntity=${request.entityClass}] is not an installed HibernateEntity")
+      // Authorization is performed against `queryClass` (and its bound `metadata.entityClass`), but the
+      // entity actually queried is taken from the user-controlled `request.entityClass`. Without the
+      // binding check below, a caller authorized for one query class could read any registered entity
+      // by setting `entityClass` to a different entity name. Enforce that the entity executed matches
+      // the entity the query class is authorized for.
+      if (dbEntity.simpleName != metadata.entityClass) {
+        throw UnauthorizedException(
+          "Requested entity [dbEntity=${request.entityClass}] does not match authorized query [queryClass=${request.queryClass}]"
+        )
+      }
       val (selectPaths, rows) = runDynamicQuery(session, principal, dbEntity, request)
       rows.map { row ->
         // TODO (adrw) sort the map based on DbEntity order
