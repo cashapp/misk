@@ -138,8 +138,8 @@ fun clientOptionsFor(
     capabilities =
       ClientCapabilities(
         experimental = if (supportsExperimental) EmptyJsonObject else null,
-        sampling = if (supportsSampling) EmptyJsonObject else null,
-        elicitation = if (supportsElicitation) EmptyJsonObject else null,
+        sampling = if (supportsSampling) ClientCapabilities.Sampling() else null,
+        elicitation = if (supportsElicitation) ClientCapabilities.Elicitation() else null,
         roots = if (supportsRoots) ClientCapabilities.Roots(false) else null,
       ),
   )
