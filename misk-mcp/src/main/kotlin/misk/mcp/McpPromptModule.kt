@@ -82,42 +82,32 @@ private constructor(private val promptClass: KClass<P>, private val qualifier: B
 
   companion object {
     /**
-     * Creates an [McpPromptModule] with an optional group annotation class.
+     * Creates an [McpPromptModule] without any group annotation.
      *
-     * This is the base factory method that accepts a [KClass] for both the prompt and the group annotation. Use the
-     * reified generic versions for more convenient type-safe creation.
-     *
-     * @param P The type of [McpPrompt] implementation to register
-     * @param promptClass The [KClass] of the prompt implementation
-     * @param groupAnnotationClass Optional annotation class for grouping this prompt with a specific MCP server
-     * @return A configured McpPromptModule instance
-     */
-    fun <P : McpPrompt> create(promptClass: KClass<P>, groupAnnotationClass: KClass<out Annotation>?) =
-      McpPromptModule(promptClass = promptClass, qualifier = groupAnnotationClass?.qualifier)
-
-    /**
-     * Creates an [McpPromptModule] with reified type parameters for both group annotation and prompt.
-     *
-     * This is the recommended way to register prompts with a specific MCP server group. Both the group annotation and
-     * prompt type are specified using reified generics for compile-time type safety.
+     * Use this when registering a prompt with the default (ungrouped) MCP server.
+     * The prompt will be available to any MCP server that doesn't specify a group annotation.
      *
      * Example:
      * ```kotlin
-     * install(McpPromptModule.create<AdminMcp, CodeReviewPrompt>())
+     * install(McpPromptModule.create(DocumentationPrompt::class))
      * ```
      *
-     * @param GA The annotation type for the prompt's MCP group (e.g., @AdminMcp, @PaymentsMcp)
-     * @param P The type of [McpPrompt] implementation to register
-     * @return A configured McpPromptModule instance
+     * @param T The type of [McpPrompt] implementation to register
+     * @param promptClass The [KClass] of the prompt implementation
+     * @return A configured McpPromptModule instance with no group annotation
      */
-    inline fun <reified GA : Annotation, reified P : McpPrompt> create() =
-      create(promptClass = P::class, groupAnnotationClass = GA::class)
+    @JvmName("createWithNoGroup")
+    fun <T : McpPrompt> create(promptClass: KClass<T>) =
+      McpPromptModule(
+        promptClass = promptClass,
+        qualifier = null,
+      )
 
     /**
      * Creates an [McpPromptModule] without any group annotation.
      *
-     * Use this when registering a prompt with the default (ungrouped) MCP server. The prompt will be available to any
-     * MCP server that doesn't specify a group annotation.
+     * Use this when registering a prompt with the default (ungrouped) MCP server.
+     * The prompt will be available to any MCP server that doesn't specify a group annotation.
      *
      * Example:
      * ```kotlin
@@ -128,7 +118,48 @@ private constructor(private val promptClass: KClass<P>, private val qualifier: B
      * @return A configured McpPromptModule instance with no group annotation
      */
     @JvmName("createWithNoGroup")
-    inline fun <reified T : McpPrompt> create() = create(promptClass = T::class, groupAnnotationClass = null)
+    inline fun <reified T : McpPrompt> create() =
+      create(
+        promptClass = T::class,
+      )
+
+
+    /**
+     * Creates an [McpPromptModule] with an optional group annotation class.
+     *
+     * This is the base factory method that accepts a [KClass] for both the prompt and the group annotation. Use the
+     * reified generic versions for more convenient type-safe creation.
+     *
+     * @param P The type of [McpPrompt] implementation to register
+     * @param promptClass The [KClass] of the prompt implementation
+     * @param groupAnnotationClass Optional annotation class for grouping this prompt with a specific MCP server
+     * @return A configured McpPromptModule instance
+     */
+    fun <P : McpPrompt> create(
+      promptClass: KClass<P>,
+      groupAnnotationClass: KClass<out Annotation>?
+    ) = McpPromptModule(
+        promptClass = promptClass,
+        qualifier = groupAnnotationClass?.qualifier,
+      )
+
+
+    /**
+     * Creates an [McpPromptModule] with a reified prompt type and optional group annotation class.
+     *
+     * Convenience method that combines a reified prompt type with a group annotation class parameter.
+     *
+     * Example:
+     * ```kotlin
+     * install(McpPromptModule.create<CodeReviewPrompt>(AdminMcp::class))
+     * ```
+     *
+     * @param P The type of [McpPrompt] implementation to register
+     * @param groupAnnotationClass Optional annotation class for grouping this prompt with a specific MCP server
+     * @return A configured McpPromptModule instance
+     */
+    inline fun <reified P : McpPrompt> create(groupAnnotationClass: KClass<out Annotation>?) =
+      create(promptClass = P::class, groupAnnotationClass = groupAnnotationClass)
 
     /**
      * Creates an [McpPromptModule] with an annotation instance for dynamic grouping.
@@ -141,8 +172,13 @@ private constructor(private val promptClass: KClass<P>, private val qualifier: B
      * @param groupAnnotation Optional annotation instance for grouping this prompt with a specific MCP server
      * @return A configured McpPromptModule instance
      */
-    fun <R : McpPrompt> create(promptClass: KClass<R>, groupAnnotation: Annotation?) =
-      McpPromptModule(promptClass = promptClass, qualifier = groupAnnotation?.qualifier)
+    fun <R : McpPrompt> create(
+      promptClass: KClass<R>,
+      groupAnnotation: Annotation?
+    ) = McpPromptModule(
+        promptClass = promptClass,
+        qualifier = groupAnnotation?.qualifier,
+      )
 
     /**
      * Creates an [McpPromptModule] with a reified prompt type and annotation instance.
