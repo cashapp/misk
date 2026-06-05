@@ -28,6 +28,7 @@ dependencies {
   implementation(libs.kotlinxCoroutinesCore)
   implementation(libs.kotlinxSerializationCore)
 
+  implementation(libs.kotlinBitflags)
   implementation(libs.loggingApi)
   implementation(project(":misk-core"))
   implementation(project(":misk-logging"))

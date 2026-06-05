@@ -56,7 +56,7 @@ interface McpSessionHandler {
   suspend fun initialize(): String
 
   /**
-   * Validates whether the specified session is still active and valid.
+   * Validates whether the specified session is still active and valid
    *
    * This method is called automatically by the framework to verify session validity before processing requests.
    * Implementations should check if the session exists, hasn't expired, and is in a valid state.

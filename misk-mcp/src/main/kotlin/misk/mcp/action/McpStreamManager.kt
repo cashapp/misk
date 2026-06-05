@@ -17,9 +17,11 @@ import misk.mcp.internal.McpServerSession
 import misk.mcp.internal.MiskServerTransport
 import misk.mcp.internal.MiskStreamableHttpServerTransport
 import misk.mcp.internal.MiskWebSocketServerTransport
+import misk.mcp.internal.fromUuid
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import misk.web.sse.ServerSentEvent
+import java.util.UUID
 
 @Suppress("unused")
 
@@ -196,8 +198,10 @@ internal constructor(
         logger.debug { "New StreamableHTTP connection established with streamId: ${it.streamId}" }
       }
 
-    val session = mcpServer.createSession(transport).initialize()
+    val sessionId = transport.call.requestHeaders[SESSION_ID_HEADER]?.let { UUID.fromString(it) }
+    val clientCapabilities = sessionId?.let { ClientCapabilities.fromUuid(it) }
 
+    val session = mcpServer.createSession(transport, clientCapabilities = clientCapabilities).initialize()
     try {
       withContext(McpServerSession(session)) { block(session) }
     } finally {
