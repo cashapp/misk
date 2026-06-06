@@ -1,8 +1,25 @@
+public final class wisp/lease/AcquireOptions {
+	public fun <init> ()V
+	public fun <init> (Lwisp/lease/WaitMode;)V
+	public fun <init> (Lwisp/lease/WaitMode;Lwisp/lease/UnsupportedWaitBehavior;)V
+	public synthetic fun <init> (Lwisp/lease/WaitMode;Lwisp/lease/UnsupportedWaitBehavior;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lwisp/lease/WaitMode;
+	public final fun component2 ()Lwisp/lease/UnsupportedWaitBehavior;
+	public final fun copy (Lwisp/lease/WaitMode;Lwisp/lease/UnsupportedWaitBehavior;)Lwisp/lease/AcquireOptions;
+	public static synthetic fun copy$default (Lwisp/lease/AcquireOptions;Lwisp/lease/WaitMode;Lwisp/lease/UnsupportedWaitBehavior;ILjava/lang/Object;)Lwisp/lease/AcquireOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUnsupportedWaitBehavior ()Lwisp/lease/UnsupportedWaitBehavior;
+	public final fun getWait ()Lwisp/lease/WaitMode;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class wisp/lease/AutoCloseableLease : java/lang/AutoCloseable, wisp/lease/Lease {
 	public fun <init> (Lwisp/lease/Lease;)V
 	public fun <init> (Lwisp/lease/Lease;Z)V
 	public synthetic fun <init> (Lwisp/lease/Lease;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun acquire ()Z
+	public fun acquire (Lwisp/lease/AcquireOptions;)Z
 	public fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
 	public fun checkHeld ()Z
 	public fun checkHeldElsewhere ()Z
@@ -16,7 +33,10 @@ public final class wisp/lease/AutoCloseableLease : java/lang/AutoCloseable, wisp
 
 public final class wisp/lease/ExtensionsKt {
 	public static final fun acquireOrNull (Lwisp/lease/LeaseManager;Ljava/lang/String;)Lwisp/lease/AutoCloseableLease;
+	public static final fun acquireOrNull (Lwisp/lease/LeaseManager;Ljava/lang/String;Lwisp/lease/AcquireOptions;)Lwisp/lease/AutoCloseableLease;
+	public static final fun acquireOrNull (Lwisp/lease/LeaseManager;Ljava/lang/String;Lwisp/lease/AcquireOptions;Z)Lwisp/lease/AutoCloseableLease;
 	public static final fun acquireOrNull (Lwisp/lease/LeaseManager;Ljava/lang/String;Z)Lwisp/lease/AutoCloseableLease;
+	public static synthetic fun acquireOrNull$default (Lwisp/lease/LeaseManager;Ljava/lang/String;Lwisp/lease/AcquireOptions;ZILjava/lang/Object;)Lwisp/lease/AutoCloseableLease;
 	public static synthetic fun acquireOrNull$default (Lwisp/lease/LeaseManager;Ljava/lang/String;ZILjava/lang/Object;)Lwisp/lease/AutoCloseableLease;
 }
 
@@ -29,6 +49,7 @@ public final class wisp/lease/LeaderLeaseManager$DefaultImpls {
 
 public abstract interface class wisp/lease/Lease {
 	public abstract fun acquire ()Z
+	public fun acquire (Lwisp/lease/AcquireOptions;)Z
 	public abstract fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
 	public abstract fun checkHeld ()Z
 	public abstract fun checkHeldElsewhere ()Z
@@ -37,6 +58,10 @@ public abstract interface class wisp/lease/Lease {
 	public abstract fun release ()Z
 	public abstract fun release (Z)Z
 	public abstract fun shouldHold ()Z
+}
+
+public final class wisp/lease/Lease$DefaultImpls {
+	public static fun acquire (Lwisp/lease/Lease;Lwisp/lease/AcquireOptions;)Z
 }
 
 public abstract interface class wisp/lease/Lease$StateChangeListener {
@@ -65,5 +90,41 @@ public abstract interface class wisp/lease/PersistentLeaseManager : wisp/lease/L
 
 public final class wisp/lease/PersistentLeaseManager$DefaultImpls {
 	public static fun releaseAll (Lwisp/lease/PersistentLeaseManager;)V
+}
+
+public final class wisp/lease/UnsupportedWaitBehavior : java/lang/Enum {
+	public static final field Fail Lwisp/lease/UnsupportedWaitBehavior;
+	public static final field FallbackToNonBlocking Lwisp/lease/UnsupportedWaitBehavior;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lwisp/lease/UnsupportedWaitBehavior;
+	public static fun values ()[Lwisp/lease/UnsupportedWaitBehavior;
+}
+
+public abstract interface class wisp/lease/WaitMode {
+}
+
+public final class wisp/lease/WaitMode$DoNotWait : wisp/lease/WaitMode {
+	public static final field INSTANCE Lwisp/lease/WaitMode$DoNotWait;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class wisp/lease/WaitMode$WaitForLeaseDuration : wisp/lease/WaitMode {
+	public static final field INSTANCE Lwisp/lease/WaitMode$WaitForLeaseDuration;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class wisp/lease/WaitMode$WaitUpTo : wisp/lease/WaitMode {
+	public fun <init> (Ljava/time/Duration;)V
+	public final fun component1 ()Ljava/time/Duration;
+	public final fun copy (Ljava/time/Duration;)Lwisp/lease/WaitMode$WaitUpTo;
+	public static synthetic fun copy$default (Lwisp/lease/WaitMode$WaitUpTo;Ljava/time/Duration;ILjava/lang/Object;)Lwisp/lease/WaitMode$WaitUpTo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getTimeout ()Ljava/time/Duration;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 

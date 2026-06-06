@@ -7,8 +7,11 @@ import java.time.Duration
 import java.time.Instant
 import misk.annotation.ExperimentalMiskApi
 import misk.logging.getLogger
+import wisp.lease.AcquireOptions
 import wisp.lease.Lease
 import wisp.lease.PersistentLeaseManager
+import wisp.lease.UnsupportedWaitBehavior
+import wisp.lease.WaitMode
 
 /** A LeaseManager that uses a SQL database to manage distributed leases. */
 @ExperimentalMiskApi
@@ -84,12 +87,33 @@ internal class SqlLeaseManager @Inject constructor(private val clock: Clock, pri
 
     /** Attempts to acquire the lease. Notifies listeners if successful. */
     override fun acquire(): Boolean {
+      if (isHeld()) {
+        notifyAfterAcquire()
+        return true
+      }
+
       val lease = requestLease(name)
       if (lease.isHeld()) {
         notifyAfterAcquire()
         return true
       }
       return false
+    }
+
+    override fun acquire(options: AcquireOptions): Boolean {
+      return when (options.wait) {
+        WaitMode.DoNotWait -> acquire()
+        WaitMode.WaitForLeaseDuration,
+        is WaitMode.WaitUpTo ->
+          when (options.unsupportedWaitBehavior) {
+            UnsupportedWaitBehavior.Fail -> {
+              if (isHeld()) release()
+              throw UnsupportedOperationException("Lease $name does not support waiting to acquire")
+            }
+
+            UnsupportedWaitBehavior.FallbackToNonBlocking -> acquire()
+          }
+      }
     }
 
     /** Releases the lease if held. Notifies listeners before releasing. */
