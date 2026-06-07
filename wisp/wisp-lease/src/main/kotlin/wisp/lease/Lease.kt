@@ -1,5 +1,31 @@
 package wisp.lease
 
+import java.time.Duration
+
+data class AcquireOptions
+@JvmOverloads
+constructor(
+  val wait: WaitMode = WaitMode.DoNotWait,
+  val unsupportedWaitBehavior: UnsupportedWaitBehavior = UnsupportedWaitBehavior.Fail,
+)
+
+enum class UnsupportedWaitBehavior {
+  Fail,
+  FallbackToNonBlocking,
+}
+
+sealed interface WaitMode {
+  data object DoNotWait : WaitMode
+
+  data object WaitForLeaseDuration : WaitMode
+
+  data class WaitUpTo(val timeout: Duration) : WaitMode {
+    init {
+      require(!timeout.isNegative) { "timeout must be non-negative" }
+    }
+  }
+}
+
 /**
  * A [Lease] is a cluster-wide, time-based lock on a given resource. Leases are retrieved via
  * [LeaseManager.requestLease].
@@ -47,6 +73,27 @@ interface Lease {
    * @return true if this process acquires the lease.
    */
   fun acquire(): Boolean
+
+  /**
+   * Attempts to acquire the lock on the lease with [options]. Implementations that do not support the requested options
+   * should fail rather than silently falling back to weaker acquire semantics, unless
+   * [AcquireOptions.unsupportedWaitBehavior] allows fallback.
+   *
+   * @return true if this process acquires the lease.
+   */
+  fun acquire(options: AcquireOptions): Boolean {
+    return when (options.wait) {
+      WaitMode.DoNotWait -> acquire()
+      WaitMode.WaitForLeaseDuration,
+      is WaitMode.WaitUpTo ->
+        when (options.unsupportedWaitBehavior) {
+          UnsupportedWaitBehavior.Fail ->
+            throw UnsupportedOperationException("Lease $name does not support waiting to acquire")
+
+          UnsupportedWaitBehavior.FallbackToNonBlocking -> acquire()
+        }
+    }
+  }
 
   /**
    * Release the lock on the lease. This will return true if released. Note that it will return false if the lease was
