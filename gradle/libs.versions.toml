@@ -203,7 +203,7 @@ mockk = { module = "io.mockk:mockk", version = "1.14.5" }
 moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version = "1.15.2" }
 moshiCore = { module = "com.squareup.moshi:moshi", version = "1.15.2" }
 moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version = "1.15.2" }
-mysql = { module = "com.mysql:mysql-connector-j", version = "8.4.0" }
+mysql = { module = "com.mysql:mysql-connector-j", version = "9.7.0" }
 nettyBom = { module = "io.netty:netty-bom", version.ref = "netty" }
 nettyHandler = { module = "io.netty:netty-handler", version.ref = "netty" }
 okHttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okHttp" }
