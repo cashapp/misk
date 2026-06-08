@@ -23,7 +23,6 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.full.allSupertypes
-import kotlin.reflect.full.createType
 import kotlin.reflect.full.declaredMemberFunctions
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.primaryConstructor
@@ -504,9 +503,12 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
     companion object {
       // Primitives are special. We have to ensure we are using the boxed types.
-      private val doubleType = Double::class.createType(nullable = true).typeLiteral().rawType
-      private val longType = Long::class.createType(nullable = true).typeLiteral().rawType
-      private val numberType = Number::class.createType(nullable = true).typeLiteral().rawType
+      // Kotlin 2.3 kotlin-reflect resolves `Long::class.createType(nullable = true).javaType`
+      // back to the primitive `long.class` instead of `java.lang.Long`, so we reference the
+      // boxed wrappers directly.
+      private val doubleType: Class<*> = java.lang.Double::class.java
+      private val longType: Class<*> = java.lang.Long::class.java
+      private val numberType: Class<*> = java.lang.Number::class.java
 
       private fun typeToString(type: Class<*>): String = "${type.simpleName}?"
 
