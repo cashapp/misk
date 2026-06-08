@@ -14,6 +14,7 @@ import misk.inject.KAbstractModule
 import misk.inject.toKey
 import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
+import misk.logging.LogCollectorService
 import misk.logging.getLogger
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -30,7 +31,7 @@ class CronModuleTest {
         install(FakeLeaseModule())
         install(MiskTestingServiceModule())
         install(LogCollectorModule())
-        install(ServiceModule<DependentService>().enhancedBy<ReadyService>())
+        install(ServiceModule<DependentService>().dependsOn<LogCollectorService>().enhancedBy<ReadyService>())
         install(FakeClusterWeightModule())
         install(
           CronModule(
