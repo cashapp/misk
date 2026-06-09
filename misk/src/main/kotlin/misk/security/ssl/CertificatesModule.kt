@@ -2,8 +2,8 @@ package misk.security.ssl
 
 import com.google.inject.TypeLiteral
 import jakarta.inject.Inject
+import jakarta.servlet.http.HttpServletRequest
 import java.security.cert.X509Certificate
-import javax.servlet.http.HttpServletRequest
 import misk.scope.ActionScoped
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
@@ -34,7 +34,7 @@ internal class CertificatesModule : ActionScopedProviderModule() {
 
     override fun get(): Array<X509Certificate>? {
       @Suppress("UNCHECKED_CAST")
-      return request.get().getAttribute("javax.servlet.request.X509Certificate") as? Array<X509Certificate>
+      return request.get().getAttribute("jakarta.servlet.request.X509Certificate") as? Array<X509Certificate>
     }
   }
 

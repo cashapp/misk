@@ -1,7 +1,7 @@
 package misk.web.extractors
 
 import jakarta.inject.Inject
-import javax.servlet.http.Cookie
+import jakarta.servlet.http.Cookie
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
