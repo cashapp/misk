@@ -13,6 +13,7 @@ import java.util.concurrent.DelayQueue
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors.newSingleThreadExecutor
+import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import misk.backoff.Backoff
@@ -85,6 +86,14 @@ internal constructor(
     // Remove all currently scheduled tasks, and schedule an empty task to kick the background thread
     pendingTasks.clear()
     pendingTasks.add(DelayedTask(clock, clock.instant()) { Result(Status.NO_RESCHEDULE, Duration.ofMillis(0)) })
+
+    // Optionally interrupt any in-flight task lambdas. By default the executor is left alone and in-flight tasks are
+    // allowed to drain naturally; the underlying ExecutorServiceFactory will eventually call shutdown() on it. With
+    // interrupt_on_shutdown=true, callers opt into terminating long-blocking I/O (e.g. an SQS long-poll) immediately
+    // so awaitTerminated() actually waits for the lambda to finish unwinding rather than just for the dispatch loop.
+    if (config.interrupt_on_shutdown) {
+      taskExecutor.shutdownNow()
+    }
   }
 
   /**
@@ -104,11 +113,19 @@ internal constructor(
       val task = delayedTask?.task ?: continue
 
       // Hand the task off to the executor for parallel execution and repeat so long as the
-      // task requests rescheduling
-      taskExecutor.submit {
-        val result = task()
-        // Reschedule using enqueue so as to not repeatedly wrap the task in try-catch blocks
-        if (result.status != Status.NO_RESCHEDULE) enqueue(result.nextDelay, task)
+      // task requests rescheduling. If the executor has been shut down between the running.get() check above and now
+      // (only possible with config.interrupt_on_shutdown=true), submit() may throw RejectedExecutionException; that's
+      // benign at shutdown so we just return rather than letting it tear down the dispatch thread as a failure.
+      try {
+        taskExecutor.submit {
+          val result = task()
+          // Reschedule using enqueue so as to not repeatedly wrap the task in try-catch blocks
+          if (result.status != Status.NO_RESCHEDULE) enqueue(result.nextDelay, task)
+        }
+      } catch (e: RejectedExecutionException) {
+        if (running.get()) throw e
+        log.info { "task executor for $name rejected submit during shutdown; exiting dispatch loop" }
+        return
       }
     }
   }
@@ -125,8 +142,15 @@ internal constructor(
         try {
           task()
         } catch (th: Throwable) {
-          log.error(th) { "error running repeated task on queue $name" }
-          Result(Status.FAILED, retryDelayOnFailure ?: delay)
+          if (isShutdownInterrupt(th)) {
+            // Restore the interrupt flag so anything else on this thread can observe it, and stop rescheduling.
+            Thread.currentThread().interrupt()
+            log.info { "repeated task on queue $name interrupted during shutdown" }
+            Result(Status.NO_RESCHEDULE, Duration.ofMillis(0))
+          } else {
+            log.error(th) { "error running repeated task on queue $name" }
+            Result(Status.FAILED, retryDelayOnFailure ?: delay)
+          }
         }
       }
       metrics.taskDuration.record(
@@ -174,9 +198,16 @@ internal constructor(
               Result(status, Duration.ofMillis(0))
           }
         } catch (th: Throwable) {
-          log.error(th) { "error running repeated task on queue $name" }
-          noWorkBackoff.reset()
-          Result(Status.FAILED, failureBackoff.nextRetry())
+          if (isShutdownInterrupt(th)) {
+            // Restore the interrupt flag so anything else on this thread can observe it, and stop rescheduling.
+            Thread.currentThread().interrupt()
+            log.info { "repeated task on queue $name interrupted during shutdown" }
+            Result(Status.NO_RESCHEDULE, Duration.ofMillis(0))
+          } else {
+            log.error(th) { "error running repeated task on queue $name" }
+            noWorkBackoff.reset()
+            Result(Status.FAILED, failureBackoff.nextRetry())
+          }
         }
       }
       metrics.taskDuration.record(
@@ -191,6 +222,23 @@ internal constructor(
   override fun serviceName() = name
 
   override fun executor(): Executor = dispatchExecutor ?: super.executor()
+
+  /**
+   * Returns true if [th] indicates the task was aborted because the executor was shut down (i.e. our own
+   * [triggerShutdown] called [java.util.concurrent.ExecutorService.shutdownNow]). This covers a direct
+   * [InterruptedException], the case where an enclosing handler swallowed it but left the thread's interrupt flag set,
+   * and common SDK wrapper exceptions whose `cause` is an [InterruptedException].
+   */
+  private fun isShutdownInterrupt(th: Throwable): Boolean {
+    if (th is InterruptedException) return true
+    if (Thread.currentThread().isInterrupted) return true
+    var cause: Throwable? = th.cause
+    while (cause != null && cause !== th) {
+      if (cause is InterruptedException) return true
+      cause = cause.cause
+    }
+    return false
+  }
 
   companion object {
     private val log = getLogger<RepeatedTaskQueue>()
