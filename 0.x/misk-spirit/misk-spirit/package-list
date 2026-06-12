@@ -1,0 +1,12 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.spirit////PointingToDeclaration/misk-spirit/misk.spirit/index.md
+$dokka.location:misk.spirit/SchemaDiff///PointingToDeclaration/misk-spirit/misk.spirit/-schema-diff/index.md
+$dokka.location:misk.spirit/SchemaDiff/SchemaDiff/#kotlin.String?#kotlin.Boolean/PointingToDeclaration/misk-spirit/misk.spirit/-schema-diff/-schema-diff.md
+$dokka.location:misk.spirit/SchemaDiff/diff/#/PointingToDeclaration/misk-spirit/misk.spirit/-schema-diff/diff.md
+$dokka.location:misk.spirit/SchemaDiff/hasDiff/#/PointingToDeclaration/misk-spirit/misk.spirit/-schema-diff/has-diff.md
+$dokka.location:misk.spirit/Spirit.Companion///PointingToDeclaration/misk-spirit/misk.spirit/-spirit/-companion/index.md
+$dokka.location:misk.spirit/Spirit///PointingToDeclaration/misk-spirit/misk.spirit/-spirit/index.md
+$dokka.location:misk.spirit/Spirit/Spirit/#/PointingToDeclaration/misk-spirit/misk.spirit/-spirit/-spirit.md
+$dokka.location:misk.spirit/Spirit/diff/#kotlin.String#kotlin.collections.Map[kotlin.String,kotlin.String]/PointingToDeclaration/misk-spirit/misk.spirit/-spirit/diff.md
+misk.spirit

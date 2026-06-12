@@ -1,0 +1,24 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.cloud.aws////PointingToDeclaration/misk-aws/misk.cloud.aws/index.md
+$dokka.location:misk.cloud.aws/AwsEnvironmentModule///PointingToDeclaration/misk-aws/misk.cloud.aws/-aws-environment-module/index.md
+$dokka.location:misk.cloud.aws/AwsEnvironmentModule/AwsEnvironmentModule/#/PointingToDeclaration/misk-aws/misk.cloud.aws/-aws-environment-module/-aws-environment-module.md
+$dokka.location:misk.cloud.aws/AwsEnvironmentModule/awsAccountId/#misk.environment.EnvVarLoader/PointingToDeclaration/misk-aws/misk.cloud.aws/-aws-environment-module/aws-account-id.md
+$dokka.location:misk.cloud.aws/AwsEnvironmentModule/awsRegion/#misk.environment.EnvVarLoader/PointingToDeclaration/misk-aws/misk.cloud.aws/-aws-environment-module/aws-region.md
+$dokka.location:misk.cloud.aws/FakeAwsEnvironmentModule///PointingToDeclaration/misk-aws/misk.cloud.aws/-fake-aws-environment-module/index.md
+$dokka.location:misk.cloud.aws/FakeAwsEnvironmentModule/FakeAwsEnvironmentModule/#/PointingToDeclaration/misk-aws/misk.cloud.aws/-fake-aws-environment-module/-fake-aws-environment-module.md
+$dokka.location:misk.jobqueue.sqs////PointingToDeclaration/misk-aws/misk.jobqueue.sqs/index.md
+$dokka.location:misk.jobqueue.sqs//isRetryQueue/misk.jobqueue.QueueName#/PointingToDeclaration/misk-aws/misk.jobqueue.sqs/is-retry-queue.md
+$dokka.location:misk.jobqueue.sqs//parentQueue/misk.jobqueue.QueueName#/PointingToDeclaration/misk-aws/misk.jobqueue.sqs/parent-queue.md
+$dokka.location:misk.jobqueue.sqs//retryQueue/misk.jobqueue.QueueName#/PointingToDeclaration/misk-aws/misk.jobqueue.sqs/retry-queue.md
+$dokka.location:misk.jobqueue.sqs/FlaggedBufferedSqsClient.Companion///PointingToDeclaration/misk-aws/misk.jobqueue.sqs/-flagged-buffered-sqs-client/-companion/index.md
+$dokka.location:misk.jobqueue.sqs/FlaggedBufferedSqsClient.Companion/FEATURE/#/PointingToDeclaration/misk-aws/misk.jobqueue.sqs/-flagged-buffered-sqs-client/-companion/-f-e-a-t-u-r-e.md
+$dokka.location:misk.jobqueue.sqs/FlaggedBufferedSqsClient///PointingToDeclaration/misk-aws/misk.jobqueue.sqs/-flagged-buffered-sqs-client/index.md
+$dokka.location:misk.jobqueue.sqs/FlaggedBufferedSqsClient/FlaggedBufferedSqsClient/#com.amazonaws.services.sqs.AmazonSQS#com.amazonaws.services.sqs.AmazonSQS#kotlin.String#misk.feature.FeatureFlags/PointingToDeclaration/misk-aws/misk.jobqueue.sqs/-flagged-buffered-sqs-client/-flagged-buffered-sqs-client.md
+$dokka.location:misk.jobqueue.sqs/FlaggedBufferedSqsClient/deleteMessage/#com.amazonaws.services.sqs.model.DeleteMessageRequest/PointingToDeclaration/misk-aws/misk.jobqueue.sqs/-flagged-buffered-sqs-client/delete-message.md
+$dokka.location:misk.jobqueue.sqs/FlaggedBufferedSqsClient/deleteMessage/#kotlin.String#kotlin.String/PointingToDeclaration/misk-aws/misk.jobqueue.sqs/-flagged-buffered-sqs-client/delete-message.md
+$dokka.location:misk.jobqueue.sqs/FlaggedBufferedSqsClient/sendMessage/#com.amazonaws.services.sqs.model.SendMessageRequest/PointingToDeclaration/misk-aws/misk.jobqueue.sqs/-flagged-buffered-sqs-client/send-message.md
+$dokka.location:misk.jobqueue.sqs/FlaggedBufferedSqsClient/sendMessage/#kotlin.String#kotlin.String/PointingToDeclaration/misk-aws/misk.jobqueue.sqs/-flagged-buffered-sqs-client/send-message.md
+$dokka.location:misk.jobqueue.sqs/FlaggedBufferedSqsClient/shutdown/#/PointingToDeclaration/misk-aws/misk.jobqueue.sqs/-flagged-buffered-sqs-client/shutdown.md
+misk.cloud.aws
+misk.jobqueue.sqs
