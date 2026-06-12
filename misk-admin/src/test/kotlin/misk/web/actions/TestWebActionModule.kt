@@ -35,6 +35,7 @@ class TestWebActionModule : KAbstractModule() {
     install(WebActionModule.create<CustomCapabilityAccessAction>())
     install(WebActionModule.create<RequestTypeAction>())
     install(WebActionModule.create<GrpcAction>())
+    install(WebActionModule.create<DataClassRequestAction>())
 
     multibind<AccessAnnotationEntry>()
       .toInstance(AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments")))
@@ -89,4 +90,16 @@ class GrpcAction @Inject constructor() : TestWebActionModule.ShippingGetDestinat
   override fun GetDestinationWarehouse(requestType: Shipment): Warehouse {
     return Warehouse.Builder().warehouse_id(7777L).build()
   }
+}
+
+data class DataClassRequest(val token: String, val count: Int, val entries: List<DataClassEntry>)
+
+data class DataClassEntry(val id: Long, val note: String?)
+
+class DataClassRequestAction @Inject constructor() : WebAction {
+  @Post("/data_class_request")
+  @RequestContentType(MediaTypes.APPLICATION_JSON)
+  @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+  @Unauthenticated
+  fun handle(@RequestBody request: DataClassRequest) = "request: $request".toResponseBody()
 }

@@ -21,9 +21,151 @@ internal class MiskWebFormBuilderTest {
   }
 
   @Test
-  fun `handles non-wire messages`() {
-    assertThat(miskWebFormBuilder.calculateTypes(String::class.createType())).isEmpty()
+  fun `handles plain data class with primitive fields`() {
+    val types = miskWebFormBuilder.calculateTypes(SimpleRequest::class.createType())
+
+    assertThat(types).containsKey(SimpleRequest::class.java.canonicalName)
+    val type = types[SimpleRequest::class.java.canonicalName]!!
+    assertThat(type.fields)
+      .containsExactlyInAnyOrder(
+        Field("id", "Long", false, emptyList()),
+        Field("name", "String", false, emptyList()),
+        Field("active", "Boolean", false, emptyList()),
+      )
   }
+
+  @Test
+  fun `handles nullable fields on data class`() {
+    val types = miskWebFormBuilder.calculateTypes(NullableRequest::class.createType())
+    val type = types[NullableRequest::class.java.canonicalName]!!
+    assertThat(type.fields)
+      .containsExactlyInAnyOrder(
+        Field("optionalName", "String", false, emptyList()),
+        Field("optionalCount", "Int", false, emptyList()),
+      )
+  }
+
+  @Test
+  fun `handles list of primitive on data class`() {
+    val types = miskWebFormBuilder.calculateTypes(StringListRequest::class.createType())
+    val type = types[StringListRequest::class.java.canonicalName]!!
+    assertThat(type.fields).containsExactly(Field("tokens", "String", repeated = true, emptyList()))
+  }
+
+  @Test
+  fun `handles list of nested data class with recursion`() {
+    val types = miskWebFormBuilder.calculateTypes(NestedListRequest::class.createType())
+
+    assertThat(types).containsKey(NestedListRequest::class.java.canonicalName)
+    assertThat(types).containsKey(NestedItem::class.java.canonicalName)
+
+    val outer = types[NestedListRequest::class.java.canonicalName]!!
+    assertThat(outer.fields)
+      .containsExactly(Field("entries", NestedItem::class.java.canonicalName!!, repeated = true, emptyList()))
+
+    val nested = types[NestedItem::class.java.canonicalName]!!
+    assertThat(nested.fields)
+      .containsExactlyInAnyOrder(
+        Field("itemId", "Long", false, emptyList()),
+        Field("note", "String", false, emptyList()),
+      )
+  }
+
+  @Test
+  fun `handles map on data class`() {
+    val types = miskWebFormBuilder.calculateTypes(MapRequest::class.createType())
+    val type = types[MapRequest::class.java.canonicalName]!!
+    // Mirrors Wire-message behavior: map keys are skipped, values are emitted as a repeated field.
+    assertThat(type.fields).containsExactly(Field("counts", "Int", repeated = true, emptyList()))
+  }
+
+  @Test
+  fun `handles nested data classes`() {
+    val types = miskWebFormBuilder.calculateTypes(OuterRequest::class.createType())
+
+    assertThat(types).containsKey(OuterRequest::class.java.canonicalName)
+    assertThat(types).containsKey(InnerRequest::class.java.canonicalName)
+
+    val outer = types[OuterRequest::class.java.canonicalName]!!
+    assertThat(outer.fields)
+      .containsExactly(Field("inner", InnerRequest::class.java.canonicalName!!, repeated = false, emptyList()))
+
+    val inner = types[InnerRequest::class.java.canonicalName]!!
+    assertThat(inner.fields).containsExactly(Field("value", "String", false, emptyList()))
+  }
+
+  @Test
+  fun `does not re-walk a visited type`() {
+    // Self-referential structure: a data class with a list of itself. The visited-set guard
+    // prevents infinite recursion and ensures the type only appears once in the output map.
+    val types = miskWebFormBuilder.calculateTypes(RecursiveRequest::class.createType())
+
+    assertThat(types).hasSize(1)
+    assertThat(types).containsKey(RecursiveRequest::class.java.canonicalName)
+    val type = types[RecursiveRequest::class.java.canonicalName]!!
+    assertThat(type.fields)
+      .contains(Field("children", RecursiveRequest::class.java.canonicalName!!, repeated = true, emptyList()))
+  }
+
+  @Test
+  fun `handles enum fields on data class`() {
+    val types = miskWebFormBuilder.calculateTypes(EnumRequest::class.createType())
+    val type = types[EnumRequest::class.java.canonicalName]!!
+    assertThat(type.fields)
+      .containsExactly(
+        Field(
+          name = "color",
+          type = "Enum<${SimpleColor::class.java.canonicalName},RED,GREEN,BLUE>",
+          repeated = false,
+          annotations = emptyList(),
+        )
+      )
+  }
+
+  @Test
+  fun `handles data class containing wire message`() {
+    val types = miskWebFormBuilder.calculateTypes(MixedRequest::class.createType())
+
+    assertThat(types).containsKey(MixedRequest::class.java.canonicalName)
+    // Nested Wire message gets walked via the WireField path, populating its proto fields too.
+    assertThat(types).containsKey(KotlinProtoShipment::class.qualifiedName)
+    assertThat(types).containsKey(KotlinProtoWarehouse::class.qualifiedName)
+
+    val mixed = types[MixedRequest::class.java.canonicalName]!!
+    assertThat(mixed.fields)
+      .contains(
+        Field("name", "String", false, emptyList()),
+        Field("shipment", KotlinProtoShipment::class.qualifiedName!!, repeated = false, emptyList()),
+      )
+  }
+
+  private data class SimpleRequest(val id: Long, val name: String, val active: Boolean)
+
+  private data class NullableRequest(val optionalName: String?, val optionalCount: Int?)
+
+  private data class StringListRequest(val tokens: List<String>)
+
+  private data class NestedItem(val itemId: Long, val note: String?)
+
+  private data class NestedListRequest(val entries: List<NestedItem>)
+
+  private data class MapRequest(val counts: Map<String, Int>)
+
+  private data class InnerRequest(val value: String)
+
+  private data class OuterRequest(val inner: InnerRequest)
+
+  private data class RecursiveRequest(val name: String, val children: List<RecursiveRequest>)
+
+  private enum class SimpleColor {
+    RED,
+    GREEN,
+    BLUE,
+  }
+
+  private data class EnumRequest(val color: SimpleColor)
+
+  private data class MixedRequest(val name: String, val shipment: KotlinProtoShipment)
 
   @Test
   fun `handles java wire messages`() {
