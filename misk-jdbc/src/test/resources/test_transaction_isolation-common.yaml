@@ -1,0 +1,16 @@
+default_isolation_data_source:
+  type: MYSQL
+  database: movies_mysql
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/jdbc/test_transacter-mysql-migrations
+
+read_committed_data_source:
+  type: MYSQL
+  database: movies_mysql
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/jdbc/test_transacter-mysql-migrations
+  use_fixed_pool_size: true
+  fixed_pool_size: 1
+  transaction_isolation: READ_COMMITTED
