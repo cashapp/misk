@@ -20,7 +20,7 @@ kotlinBinaryCompatibilityPlugin = "0.18.1"
 ktor = "3.3.0"
 mavenPublish = "0.34.0"
 mcp = "0.13.0"
-micrometer = "1.12.13"
+micrometer = "1.17.0"
 netty = "4.2.14.Final"
 okHttp = "5.4.0"
 okio = "3.16.4"
@@ -196,7 +196,7 @@ mcpKotlinSdkClient = { module = "io.modelcontextprotocol:kotlin-sdk-client", ver
 mcpKotlinSdkCore = { module = "io.modelcontextprotocol:kotlin-sdk-core", version.ref = "mcp" }
 mcpKotlinSdkServer = { module = "io.modelcontextprotocol:kotlin-sdk-server", version.ref = "mcp" }
 micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
-micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
+micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus-simpleclient", version.ref = "micrometer" }
 mockitoCore = { module = "org.mockito:mockito-core", version = "5.21.0" }
 mockitoKotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "6.0.0" }
 mockk = { module = "io.mockk:mockk", version = "1.14.5" }
