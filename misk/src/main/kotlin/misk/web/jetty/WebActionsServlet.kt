@@ -2,10 +2,10 @@ package misk.web.jetty
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import java.net.HttpURLConnection
 import java.net.ProtocolException
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 import misk.logging.getLogger
 import misk.web.BoundAction
 import misk.web.DispatchMechanism

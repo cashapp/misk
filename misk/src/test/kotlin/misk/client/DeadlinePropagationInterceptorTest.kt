@@ -16,7 +16,7 @@ import misk.web.RequestDeadlinesConfig
 import misk.web.requestdeadlines.DeadlineExceededException
 import misk.web.requestdeadlines.RequestDeadline
 import misk.web.requestdeadlines.RequestDeadlineMetrics
-import okhttp3.Interceptor
+import okhttp3.EventListener
 import okhttp3.Request
 import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
@@ -353,7 +353,7 @@ class DeadlinePropagationInterceptorTest {
     private val readTimeoutMillis: Int = 10000,
     private val callTimeoutMillis: Int = 0,
     grpcRequest: Boolean = false,
-  ) : Interceptor.Chain {
+  ) : OkHttpInterceptorChain(null) {
     private val originalRequest =
       Request.Builder()
         .url("http://test.example.com")
@@ -387,21 +387,6 @@ class DeadlinePropagationInterceptorTest {
     }
 
     override fun call(): okhttp3.Call = TestCall(callTimeoutMillis)
-
-    override fun connectTimeoutMillis(): Int = throw NotImplementedError("Not needed for test")
-
-    override fun withConnectTimeout(timeout: Int, unit: java.util.concurrent.TimeUnit): Interceptor.Chain =
-      throw NotImplementedError("Not needed for test")
-
-    override fun withReadTimeout(timeout: Int, unit: java.util.concurrent.TimeUnit): Interceptor.Chain =
-      throw NotImplementedError("Not needed for test")
-
-    override fun withWriteTimeout(timeout: Int, unit: java.util.concurrent.TimeUnit): Interceptor.Chain =
-      throw NotImplementedError("Not needed for test")
-
-    override fun writeTimeoutMillis(): Int = throw NotImplementedError("Not needed for test")
-
-    override fun connection(): okhttp3.Connection? = null
   }
 
   private class TestCall(private val callTimeoutMillis: Int) : okhttp3.Call {
@@ -430,6 +415,8 @@ class DeadlinePropagationInterceptorTest {
 
     override fun <T : Any> tag(type: Class<T>, computeIfAbsent: () -> T): T =
       throw NotImplementedError("Not needed for test")
+
+    override fun addEventListener(listener: EventListener) = throw NotImplementedError("Not needed for test")
   }
 
   private class TestTimeout(private val callTimeoutMillis: Int) : okio.Timeout() {

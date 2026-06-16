@@ -1,6 +1,7 @@
 package misk.clustering.lease
 
 import misk.clustering.weights.ClusterWeightProvider
+import wisp.lease.AcquireOptions
 import wisp.lease.Lease
 
 /**
@@ -14,6 +15,8 @@ class ClusterAwareLease(override val name: String, private val clusterWeightProv
   override fun acquire(): Boolean {
     return (clusterWeightProvider.get() != 0)
   }
+
+  override fun acquire(options: AcquireOptions): Boolean = acquire()
 
   override fun addListener(listener: Lease.StateChangeListener) {}
 

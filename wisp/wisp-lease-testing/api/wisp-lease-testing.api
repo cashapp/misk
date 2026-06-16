@@ -1,6 +1,7 @@
 public final class wisp/lease/FakeLease : wisp/lease/Lease {
 	public fun <init> (Ljava/lang/String;Lwisp/lease/FakeLeaseManager;)V
 	public fun acquire ()Z
+	public fun acquire (Lwisp/lease/AcquireOptions;)Z
 	public fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
 	public fun checkHeld ()Z
 	public fun checkHeldElsewhere ()Z

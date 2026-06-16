@@ -2,7 +2,7 @@ package misk.web.interceptors
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
 import misk.Action
 import misk.MiskCaller
 import misk.scope.ActionScoped

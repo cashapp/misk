@@ -2,7 +2,7 @@ package misk.web
 
 import java.net.InetSocketAddress
 import java.net.UnixDomainSocketAddress
-import javax.servlet.http.Cookie
+import jakarta.servlet.http.Cookie
 import misk.api.HttpRequest
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener

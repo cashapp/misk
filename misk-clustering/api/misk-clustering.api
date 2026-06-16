@@ -158,6 +158,7 @@ public final class misk/clustering/fake/lease/FakeLeaderLeaseManager : misk/clus
 public final class misk/clustering/fake/lease/FakeLease : wisp/lease/Lease {
 	public fun <init> (Ljava/lang/String;Lmisk/clustering/fake/lease/FakeLeaseManager;)V
 	public fun acquire ()Z
+	public fun acquire (Lwisp/lease/AcquireOptions;)Z
 	public fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
 	public fun checkHeld ()Z
 	public fun checkHeldElsewhere ()Z
@@ -226,6 +227,7 @@ public final class misk/clustering/kubernetes/KubernetesConfig : misk/config/Con
 public final class misk/clustering/lease/ClusterAwareLease : wisp/lease/Lease {
 	public fun <init> (Ljava/lang/String;Lmisk/clustering/weights/ClusterWeightProvider;)V
 	public fun acquire ()Z
+	public fun acquire (Lwisp/lease/AcquireOptions;)Z
 	public fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
 	public fun checkHeld ()Z
 	public fun checkHeldElsewhere ()Z

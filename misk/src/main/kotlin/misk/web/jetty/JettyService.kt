@@ -7,6 +7,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.squareup.wire.internal.newMutableList
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import jakarta.servlet.DispatcherType
 import java.io.File
 import java.io.IOException
 import java.lang.Thread.sleep
@@ -19,7 +20,6 @@ import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
-import javax.servlet.DispatcherType
 import misk.logging.getLogger
 import misk.security.ssl.CipherSuites
 import misk.security.ssl.SslLoader

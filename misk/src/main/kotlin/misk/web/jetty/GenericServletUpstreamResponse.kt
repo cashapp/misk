@@ -1,6 +1,6 @@
 package misk.web.jetty
 
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpServletResponse
 import misk.web.ServletHttpCall
 import misk.web.actions.WebSocketListener
 import misk.web.http.HttpVersion

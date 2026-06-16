@@ -3,7 +3,7 @@ awaitility = "4.3.0"
 aws1 = "1.12.797"
 aws2 = "2.44.3"
 bucket4j = "8.16.1"
-datadog = "1.62.0"
+datadog = "1.63.0"
 dependencyAnalysisPlugin = "3.6.1"
 detekt = "1.23.8"
 docker = "3.7.1"
@@ -20,10 +20,10 @@ kotlin = "2.2.21"
 kotlinBinaryCompatibilityPlugin = "0.18.1"
 ktor = "3.3.0"
 mavenPublish = "0.34.0"
-mcp = "0.11.0"
-micrometer = "1.12.13"
+mcp = "0.13.0"
+micrometer = "1.17.0"
 netty = "4.2.14.Final"
-okHttp = "5.3.2"
+okHttp = "5.4.0"
 okio = "3.16.4"
 prometheus = "0.16.0"
 protobuf = "3.25.8"
@@ -145,7 +145,7 @@ jettyHttp2Common = { module = "org.eclipse.jetty.http2:jetty-http2-common" }
 jettyIo = { module = "org.eclipse.jetty:jetty-io" }
 jettyServer = { module = "org.eclipse.jetty:jetty-server" }
 jettyServlet = { module = "org.eclipse.jetty.ee8:jetty-ee8-servlet" }
-jettyServletApi = { module = "org.eclipse.jetty.toolchain:jetty-servlet-api", version = "4.0.6" }
+jettyServletApi = { module = "org.eclipse.jetty.toolchain:jetty-jakarta-servlet-api", version = "5.0.2" }
 jettyServlets = { module = "org.eclipse.jetty.ee8:jetty-ee8-servlets" }
 jettyUds = { module = "org.eclipse.jetty:jetty-unixdomain-server" }
 jettyUtil = { module = "org.eclipse.jetty:jetty-util" }
@@ -198,14 +198,14 @@ mcpKotlinSdkClient = { module = "io.modelcontextprotocol:kotlin-sdk-client", ver
 mcpKotlinSdkCore = { module = "io.modelcontextprotocol:kotlin-sdk-core", version.ref = "mcp" }
 mcpKotlinSdkServer = { module = "io.modelcontextprotocol:kotlin-sdk-server", version.ref = "mcp" }
 micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
-micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
+micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus-simpleclient", version.ref = "micrometer" }
 mockitoCore = { module = "org.mockito:mockito-core", version = "5.21.0" }
 mockitoKotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "6.0.0" }
 mockk = { module = "io.mockk:mockk", version = "1.14.5" }
 moshiAdapters = { module = "com.squareup.moshi:moshi-adapters", version = "1.15.2" }
 moshiCore = { module = "com.squareup.moshi:moshi", version = "1.15.2" }
 moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version = "1.15.2" }
-mysql = { module = "com.mysql:mysql-connector-j", version = "8.4.0" }
+mysql = { module = "com.mysql:mysql-connector-j", version = "9.7.0" }
 nettyBom = { module = "io.netty:netty-bom", version.ref = "netty" }
 nettyHandler = { module = "io.netty:netty-handler", version.ref = "netty" }
 okHttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okHttp" }
@@ -235,6 +235,7 @@ retrofitMoshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref
 retrofitProtobuf = { module = "com.squareup.retrofit2:converter-protobuf", version.ref = "retrofit" }
 retrofitScalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "retrofit" }
 retrofitWire = { module = "com.squareup.retrofit2:converter-wire", version.ref = "retrofit" }
+servletApi = { module = "jakarta.servlet:jakarta.servlet-api", version = "5.0.0" }
 slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.17" }
 sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version.ref = "sqldelight" }
 sqldelightMysqlDialect = { module = "app.cash.sqldelight:mysql-dialect", version.ref = "sqldelight" }
