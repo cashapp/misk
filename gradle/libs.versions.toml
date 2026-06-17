@@ -137,20 +137,20 @@ jetbrainsAnnotations = { module = "org.jetbrains:annotations", version = "26.0.2
 jettyAlpnServer = { module = "org.eclipse.jetty:jetty-alpn-server" }
 jettyAlpnServerJava = { module = "org.eclipse.jetty:jetty-alpn-java-server" }
 jettyBom = { module = "org.eclipse.jetty:jetty-bom", version.ref = "jetty" }
-jettyEe8Bom = { module = "org.eclipse.jetty.ee8:jetty-ee8-bom", version.ref = "jetty" }
-jettyEe8Nested = { module = "org.eclipse.jetty.ee8:jetty-ee8-nested" }
+jettyEe9Bom = { module = "org.eclipse.jetty.ee9:jetty-ee9-bom", version.ref = "jetty" }
+jettyEe9Nested = { module = "org.eclipse.jetty.ee9:jetty-ee9-nested" }
 jettyHttp = { module = "org.eclipse.jetty:jetty-http" }
 jettyHttp2 = { module = "org.eclipse.jetty.http2:jetty-http2-server" }
 jettyHttp2Common = { module = "org.eclipse.jetty.http2:jetty-http2-common" }
 jettyIo = { module = "org.eclipse.jetty:jetty-io" }
 jettyServer = { module = "org.eclipse.jetty:jetty-server" }
-jettyServlet = { module = "org.eclipse.jetty.ee8:jetty-ee8-servlet" }
+jettyServlet = { module = "org.eclipse.jetty.ee9:jetty-ee9-servlet" }
 jettyServletApi = { module = "org.eclipse.jetty.toolchain:jetty-jakarta-servlet-api", version = "5.0.2" }
-jettyServlets = { module = "org.eclipse.jetty.ee8:jetty-ee8-servlets" }
+jettyServlets = { module = "org.eclipse.jetty.ee9:jetty-ee9-servlets" }
 jettyUds = { module = "org.eclipse.jetty:jetty-unixdomain-server" }
 jettyUtil = { module = "org.eclipse.jetty:jetty-util" }
-jettyWebsocketApiEE8 = { module = "org.eclipse.jetty.ee8.websocket:jetty-ee8-websocket-jetty-api" }
-jettyWebsocketServerEE8 = { module = "org.eclipse.jetty.ee8.websocket:jetty-ee8-websocket-jetty-server" }
+jettyWebsocketApiEE9 = { module = "org.eclipse.jetty.ee9.websocket:jetty-ee9-websocket-jetty-api" }
+jettyWebsocketServerEE9 = { module = "org.eclipse.jetty.ee9.websocket:jetty-ee9-websocket-jetty-server" }
 jnrUnixsocket = { module = "com.github.jnr:jnr-unixsocket", version = "0.38.24" }
 jooq = { module = "org.jooq:jooq" }
 jooqBom = { module = "org.jooq:jooq-bom", version.ref = "jooq" }

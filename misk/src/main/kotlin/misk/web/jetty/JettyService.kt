@@ -31,11 +31,11 @@ import misk.web.jetty.JettyHealthService.Companion.jettyHealthServiceEnabled
 import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
-import org.eclipse.jetty.ee8.servlet.FilterHolder
-import org.eclipse.jetty.ee8.servlet.ServletContextHandler
-import org.eclipse.jetty.ee8.servlet.ServletHolder
-import org.eclipse.jetty.ee8.servlets.CrossOriginFilter
-import org.eclipse.jetty.ee8.websocket.server.config.JettyWebSocketServletContainerInitializer
+import org.eclipse.jetty.ee9.servlet.FilterHolder
+import org.eclipse.jetty.ee9.servlet.ServletContextHandler
+import org.eclipse.jetty.ee9.servlet.ServletHolder
+import org.eclipse.jetty.ee9.servlets.CrossOriginFilter
+import org.eclipse.jetty.ee9.websocket.server.config.JettyWebSocketServletContainerInitializer
 import org.eclipse.jetty.http.UriCompliance
 import org.eclipse.jetty.http2.server.AbstractHTTP2ServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
@@ -105,7 +105,7 @@ internal constructor(
           server,
           healthExecutor,
           null, /* scheduler */
-          null /* buffer pool */,
+          null, /* buffer pool */
           1,
           1,
           HttpConnectionFactory(),
@@ -149,9 +149,9 @@ internal constructor(
     val httpConnector =
       ServerConnector(
         server,
-        null /* executor */,
-        null /* scheduler */,
-        null /* buffer pool */,
+        null, /* executor */
+        null, /* scheduler */
+        null, /* buffer pool */
         webConfig.acceptors ?: -1,
         webConfig.selectors ?: -1,
         *httpConnectionFactories.toTypedArray(),
@@ -230,9 +230,9 @@ internal constructor(
       val httpsConnector =
         ServerConnector(
           server,
-          null /* executor */,
-          null /* scheduler */,
-          null /* buffer pool */,
+          null, /* executor */
+          null, /* scheduler */
+          null, /* buffer pool */
           webConfig.acceptors ?: -1,
           webConfig.selectors ?: -1,
           *httpsConnectionFactories.toTypedArray(),
@@ -269,9 +269,9 @@ internal constructor(
       val udsConnector =
         UnixDomainServerConnector(
           server,
-          null /* executor */,
-          null /* scheduler */,
-          null /* buffer pool */,
+          null, /* executor */
+          null, /* scheduler */
+          null, /* buffer pool */
           webConfig.acceptors ?: -1,
           webConfig.selectors ?: -1,
           *udsConnFactories.toTypedArray(),
@@ -402,17 +402,17 @@ internal constructor(
 
 private val Server.healthUrl: HttpUrl?
   get() {
-    return connectors.mapNotNull { it as? NetworkConnector }.firstOrNull { it.name == "health" }?.toHttpUrl()
+    return connectors.filterIsInstance<NetworkConnector>().firstOrNull { it.name == "health" }?.toHttpUrl()
   }
 
 private val Server.httpUrl: HttpUrl?
   get() {
-    return connectors.mapNotNull { it as? NetworkConnector }.firstOrNull { it.name == "http" }?.toHttpUrl()
+    return connectors.filterIsInstance<NetworkConnector>().firstOrNull { it.name == "http" }?.toHttpUrl()
   }
 
 private val Server.httpsUrl: HttpUrl?
   get() {
-    return connectors.mapNotNull { it as? NetworkConnector }.firstOrNull { it.name == "https" }?.toHttpUrl()
+    return connectors.filterIsInstance<NetworkConnector>().firstOrNull { it.name == "https" }?.toHttpUrl()
   }
 
 internal fun NetworkConnector.toHttpUrl(): HttpUrl {

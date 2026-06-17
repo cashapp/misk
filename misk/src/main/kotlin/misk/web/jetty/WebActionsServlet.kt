@@ -25,11 +25,11 @@ import okio.BufferedSink
 import okio.buffer
 import okio.sink
 import okio.source
-import org.eclipse.jetty.ee8.nested.Request
-import org.eclipse.jetty.ee8.nested.Response
-import org.eclipse.jetty.ee8.websocket.server.JettyServerUpgradeResponse
-import org.eclipse.jetty.ee8.websocket.server.JettyWebSocketServlet
-import org.eclipse.jetty.ee8.websocket.server.JettyWebSocketServletFactory
+import org.eclipse.jetty.ee9.nested.Request
+import org.eclipse.jetty.ee9.nested.Response
+import org.eclipse.jetty.ee9.websocket.server.JettyServerUpgradeResponse
+import org.eclipse.jetty.ee9.websocket.server.JettyWebSocketServlet
+import org.eclipse.jetty.ee9.websocket.server.JettyWebSocketServletFactory
 import org.eclipse.jetty.http.BadMessageException
 import org.eclipse.jetty.http.HttpMethod
 import org.eclipse.jetty.server.ServerConnector

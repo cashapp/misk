@@ -6,7 +6,7 @@ import misk.web.actions.WebSocketListener
 import misk.web.http.HttpVersion
 import okhttp3.Headers
 import okhttp3.Headers.Companion.headersOf
-import org.eclipse.jetty.ee8.nested.Response
+import org.eclipse.jetty.ee9.nested.Response
 import org.eclipse.jetty.http.HttpFields
 
 internal class JettyServletUpstreamResponse(val response: Response) : ServletHttpCall.UpstreamResponse {

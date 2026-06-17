@@ -14,9 +14,9 @@ import misk.logging.getLogger
 import misk.web.WebConfig
 import mu.KLogger
 import okhttp3.HttpUrl
-import org.eclipse.jetty.ee8.servlet.ServletContextHandler
-import org.eclipse.jetty.ee8.servlet.ServletHolder
-import org.eclipse.jetty.ee8.websocket.server.config.JettyWebSocketServletContainerInitializer
+import org.eclipse.jetty.ee9.servlet.ServletContextHandler
+import org.eclipse.jetty.ee9.servlet.ServletHolder
+import org.eclipse.jetty.ee9.websocket.server.config.JettyWebSocketServletContainerInitializer
 import org.eclipse.jetty.http.UriCompliance
 import org.eclipse.jetty.io.ConnectionStatistics
 import org.eclipse.jetty.server.Handler
