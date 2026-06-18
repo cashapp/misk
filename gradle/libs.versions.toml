@@ -140,8 +140,8 @@ jettyBom = { module = "org.eclipse.jetty:jetty-bom", version.ref = "jetty" }
 jettyEe9Bom = { module = "org.eclipse.jetty.ee9:jetty-ee9-bom", version.ref = "jetty" }
 jettyEe9Nested = { module = "org.eclipse.jetty.ee9:jetty-ee9-nested" }
 jettyHttp = { module = "org.eclipse.jetty:jetty-http" }
-jettyHttp2 = { module = "org.eclipse.jetty.http2:jetty-http2-server" }
-jettyHttp2Common = { module = "org.eclipse.jetty.http2:jetty-http2-common" }
+jettyHttp2 = { module = "org.eclipse.jetty.http2:jetty-http2-server", version.ref = "jetty" }
+jettyHttp2Common = { module = "org.eclipse.jetty.http2:jetty-http2-common", version.ref = "jetty" }
 jettyIo = { module = "org.eclipse.jetty:jetty-io" }
 jettyServer = { module = "org.eclipse.jetty:jetty-server" }
 jettyServlet = { module = "org.eclipse.jetty.ee9:jetty-ee9-servlet" }
