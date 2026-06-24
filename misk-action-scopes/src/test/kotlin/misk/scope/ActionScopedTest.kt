@@ -314,4 +314,65 @@ internal class ActionScopedTest {
     // Make sure that closing the scope when it isn't open doesn't call the listeners which would throw the exception
     scope.close()
   }
+
+  @Test
+  fun `withOverrides replaces seed data`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
+
+    scope.create(seedData)
+      .withOverrides(seedData = mapOf(keyOf<String>(Names.named("from-seed")) to "overridden-seed"))
+      .inScope { assertThat(foo.get()).isEqualTo("overridden-seed and bar and foo!") }
+  }
+
+  @Test
+  fun `withOverrides replaces a provider`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
+
+    val providerOverride =
+      object : ActionScopedProvider<String> {
+        override fun get(): String = "overridden-bar"
+      }
+
+    scope.create(seedData)
+      .withOverrides(providerOverrides = mapOf(keyOf<String>(Names.named("bar")) to providerOverride))
+      .inScope { assertThat(foo.get()).isEqualTo("overridden-bar and foo!") }
+  }
+
+  @Test
+  fun `withOverrides with no arguments preserves the original instance values`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
+
+    scope.create(seedData)
+      .withOverrides()
+      .inScope { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
+  }
+
+  @Test
+  fun `withOverrides seed data takes precedence over provider overrides`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "initial-seed")
+
+    val seedKeyProviderOverride =
+      object : ActionScopedProvider<String> {
+        override fun get(): String = "from-provider"
+      }
+
+    scope.create(seedData)
+      .withOverrides(
+        seedData = mapOf(keyOf<String>(Names.named("from-seed")) to "from-seed-direct"),
+        providerOverrides = mapOf(keyOf<String>(Names.named("from-seed")) to seedKeyProviderOverride),
+      )
+      .inScope { assertThat(foo.get()).isEqualTo("from-seed-direct and bar and foo!") }
+  }
 }

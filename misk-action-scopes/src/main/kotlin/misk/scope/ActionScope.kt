@@ -207,6 +207,22 @@ internal constructor(
     fun enter() {
       scope.enter(this)
     }
+
+    /**
+     * Returns a new [Instance] derived from this one with additional seed data and/or provider
+     * overrides layered on top. Already-initialized lazy values from this instance are preserved;
+     * entries in [seedData] and [providerOverrides] override matching keys. [seedData] takes
+     * precedence over [providerOverrides], matching the merge order of [ActionScope.create].
+     */
+    @JvmOverloads
+    fun withOverrides(
+      seedData: Map<Key<*>, Any?> = emptyMap(),
+      providerOverrides: Map<Key<*>, ActionScopedProvider<*>> = emptyMap(),
+    ): Instance {
+      val immediateValues = seedData.mapValues { (_, value) -> ImmediateLazy(value) }
+      val lazyOverrides = providerOverrides.mapValues { (_, provider) -> SynchronizedLazy(provider) }
+      return Instance(lazyValues + lazyOverrides + immediateValues, scope)
+    }
   }
 
   private class WrappedKFunction<T>(
