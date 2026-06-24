@@ -357,6 +357,35 @@ internal class ActionScopedTest {
   }
 
   @Test
+  fun `withOverrides does not write back into the receiver when child computes first`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    val parent = scope.create(mapOf(keyOf<String>(Names.named("from-seed")) to "parent"))
+    val child = parent.withOverrides(
+      seedData = mapOf(keyOf<String>(Names.named("from-seed")) to "child"),
+    )
+
+    child.inScope { assertThat(foo.get()).isEqualTo("child and bar and foo!") }
+    parent.inScope { assertThat(foo.get()).isEqualTo("parent and bar and foo!") }
+  }
+
+  @Test
+  fun `withOverrides propagates already-computed values from the receiver`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    val parent = scope.create(mapOf(keyOf<String>(Names.named("from-seed")) to "parent"))
+    parent.inScope { assertThat(foo.get()).isEqualTo("parent and bar and foo!") }
+
+    val child = parent.withOverrides(
+      seedData = mapOf(keyOf<String>(Names.named("from-seed")) to "child"),
+    )
+
+    child.inScope { assertThat(foo.get()).isEqualTo("parent and bar and foo!") }
+  }
+
+  @Test
   fun `withOverrides seed data takes precedence over provider overrides`() {
     val injector = Guice.createInjector(TestActionScopedProviderModule())
     injector.injectMembers(this)

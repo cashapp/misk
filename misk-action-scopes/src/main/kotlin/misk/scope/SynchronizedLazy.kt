@@ -30,4 +30,6 @@ internal class SynchronizedLazy(private val provider: ActionScopedProvider<*>) :
   override fun isInitialized(): Boolean {
     return _value != UNINITIALIZED_VALUE
   }
+
+  internal fun copy(): SynchronizedLazy = SynchronizedLazy(provider)
 }
