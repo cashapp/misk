@@ -2,13 +2,12 @@ package misk.moshi
 
 import com.google.inject.Provides
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
 import com.squareup.wire.WireJsonAdapterFactory as WireOnlyJsonAdapterFactory
 import jakarta.inject.Singleton
-import java.util.Date
 import misk.inject.KAbstractModule
 import misk.moshi.adapters.BigDecimalAdapter
 import misk.moshi.okio.ByteStringAdapter
+import misk.moshi.time.DateAdapter
 import misk.moshi.time.InstantAdapter
 import misk.moshi.time.LocalDateAdapter
 import misk.moshi.time.OffsetDateTimeAdapter
@@ -37,7 +36,6 @@ constructor(private val useWireToRead: Boolean = false, private val useWireToWri
       )
     )
 
-    install(MoshiAdapterModule<Date>(Rfc3339DateJsonAdapter()))
     defaultMoshiAdapters.forEach { install(MoshiAdapterModule(it)) }
   }
 
@@ -54,6 +52,7 @@ constructor(private val useWireToRead: Boolean = false, private val useWireToWri
     val defaultMoshiAdapters =
       listOf(
         ByteStringAdapter,
+        DateAdapter,
         InstantAdapter,
         BigDecimalAdapter,
         LocalDateAdapter,

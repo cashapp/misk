@@ -3,6 +3,7 @@ package misk.moshi
 import com.squareup.moshi.Moshi
 import jakarta.inject.Inject
 import java.time.Instant
+import java.util.Date
 import misk.MiskTestingServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -10,6 +11,7 @@ import okio.ByteString
 import okio.ByteString.Companion.decodeHex
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.moshi.buildMoshi
 
 @MiskTest(startService = false)
 internal class BuiltInAdaptersTest {
@@ -58,6 +60,21 @@ internal class BuiltInAdaptersTest {
     val value = Instant.ofEpochMilli(0L)
     assertThat(jsonAdapter.toJson(value)).isEqualTo(json)
     assertThat(jsonAdapter.fromJson(json)).isEqualTo(value)
+  }
+
+  @Test
+  fun defaultMoshiAdaptersIncludeDateAdapterRequiredByInstantAdapter() {
+    val moshi = buildMoshi(MoshiModule.defaultMoshiAdapters)
+
+    val dateAdapter = moshi.adapter<Date>()
+    assertThat(dateAdapter.toJson(Date.from(Instant.ofEpochMilli(0L))))
+      .isEqualTo("\"1970-01-01T00:00:00.000Z\"")
+
+    val instantAdapter = moshi.adapter<Instant>()
+    val json = "\"1970-01-01T00:00:00.000Z\""
+    val value = Instant.ofEpochMilli(0L)
+    assertThat(instantAdapter.toJson(value)).isEqualTo(json)
+    assertThat(instantAdapter.fromJson(json)).isEqualTo(value)
   }
 
   @Test
