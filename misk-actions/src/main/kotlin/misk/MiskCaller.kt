@@ -16,10 +16,17 @@ constructor(
   /**
    * When true, this caller is authorized for all endpoints regardless of required capabilities, services, or users.
    *
-   * This is intended for use in controlled environments (e.g., staging playpens) where a trusted caller needs
-   * blanket access for testing. It should never be set in production.
+   * This is intended for use in controlled environments (e.g., staging playpens) where a trusted caller needs blanket
+   * access for testing. It should never be set in production.
    */
   val allowAll: Boolean = false,
+
+  /**
+   * A numeric identifier for the caller
+   *
+   * This is intended to support systems where a user's account has a numeric id in addition to a username string.
+   */
+  val uid: Long? = null,
 ) {
   init {
     require(service != null || user != null) { "one of service or user is required" }
