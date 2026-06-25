@@ -558,6 +558,7 @@ public final class misk/jdbc/RealTransacter : misk/jdbc/Transacter {
 	public fun <init> (Lmisk/jdbc/DataSourceService;)V
 	public fun <init> (Lmisk/jdbc/DataSourceService;Lmisk/jdbc/DataSourceConfig;)V
 	public fun getInTransaction ()Z
+	public fun isolationLevel (Lmisk/jdbc/TransactionIsolationLevel;)Lmisk/jdbc/Transacter;
 	public fun noRetries ()Lmisk/jdbc/Transacter;
 	public fun retries (I)Lmisk/jdbc/Transacter;
 	public fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
@@ -695,10 +696,15 @@ public final class misk/jdbc/TracingDataSourceDecorator : misk/jdbc/DataSourceDe
 
 public abstract interface class misk/jdbc/Transacter {
 	public abstract fun getInTransaction ()Z
+	public fun isolationLevel (Lmisk/jdbc/TransactionIsolationLevel;)Lmisk/jdbc/Transacter;
 	public abstract fun noRetries ()Lmisk/jdbc/Transacter;
 	public abstract fun retries (I)Lmisk/jdbc/Transacter;
 	public abstract fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public abstract fun transactionWithSession (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class misk/jdbc/Transacter$DefaultImpls {
+	public static fun isolationLevel (Lmisk/jdbc/Transacter;Lmisk/jdbc/TransactionIsolationLevel;)Lmisk/jdbc/Transacter;
 }
 
 public final class misk/jdbc/TransactionIsolationLevel : java/lang/Enum {
@@ -708,6 +714,7 @@ public final class misk/jdbc/TransactionIsolationLevel : java/lang/Enum {
 	public static final field SERIALIZABLE Lmisk/jdbc/TransactionIsolationLevel;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getHikariValueName ()Ljava/lang/String;
+	public final fun getJdbcLevel ()I
 	public static fun valueOf (Ljava/lang/String;)Lmisk/jdbc/TransactionIsolationLevel;
 	public static fun values ()[Lmisk/jdbc/TransactionIsolationLevel;
 }

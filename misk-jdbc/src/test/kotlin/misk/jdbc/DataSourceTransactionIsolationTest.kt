@@ -22,6 +22,7 @@ class DataSourceTransactionIsolationTest {
 
   @Inject @Movies lateinit var readCommittedTransacter: Transacter
   @Inject @Movies2 lateinit var defaultTransacter: Transacter
+  @Inject @Movies3 lateinit var perTransactionTransacter: Transacter
 
   @Test
   fun `connections use the configured transaction isolation`() {
@@ -54,6 +55,45 @@ class DataSourceTransactionIsolationTest {
     }
   }
 
+  @Test
+  fun `isolationLevel is applied for the transaction on a pool with no configured isolation`() {
+    perTransactionTransacter.isolationLevel(TransactionIsolationLevel.READ_COMMITTED).transactionWithSession {
+      (connection) ->
+      assertThat(connection.transactionIsolation).isEqualTo(Connection.TRANSACTION_READ_COMMITTED)
+      assertThat(serverSessionIsolation(connection)).isEqualTo("READ-COMMITTED")
+    }
+  }
+
+  @Test
+  fun `isolationLevel is restored on return and does not leak to later transactions`() {
+    // No pool isolation (so Hikari can't reset it) and a single connection (reused by the next transaction): proves
+    // the transacter restores the level itself.
+    perTransactionTransacter.isolationLevel(TransactionIsolationLevel.READ_COMMITTED).transactionWithSession {
+      (connection) ->
+      assertThat(serverSessionIsolation(connection)).isEqualTo("READ-COMMITTED")
+    }
+
+    perTransactionTransacter.transactionWithSession { (connection) ->
+      assertThat(connection.transactionIsolation).isEqualTo(Connection.TRANSACTION_REPEATABLE_READ)
+      assertThat(serverSessionIsolation(connection)).isEqualTo("REPEATABLE-READ")
+    }
+  }
+
+  @Test
+  fun `isolationLevel overrides a pool-configured level and restores it afterwards`() {
+    // Opt a transacter into a stricter level than the pool default; the connection returns to the pool level after.
+    readCommittedTransacter.isolationLevel(TransactionIsolationLevel.SERIALIZABLE).transactionWithSession { (connection)
+      ->
+      assertThat(connection.transactionIsolation).isEqualTo(Connection.TRANSACTION_SERIALIZABLE)
+      assertThat(serverSessionIsolation(connection)).isEqualTo("SERIALIZABLE")
+    }
+
+    readCommittedTransacter.transactionWithSession { (connection) ->
+      assertThat(connection.transactionIsolation).isEqualTo(Connection.TRANSACTION_READ_COMMITTED)
+      assertThat(serverSessionIsolation(connection)).isEqualTo("READ-COMMITTED")
+    }
+  }
+
   private fun serverSessionIsolation(connection: Connection): String =
     connection.createStatement().use { statement ->
       statement.executeQuery("SELECT @@transaction_isolation").use { resultSet ->
@@ -65,6 +105,7 @@ class DataSourceTransactionIsolationTest {
   data class RootConfig(
     val default_isolation_data_source: DataSourceConfig,
     val read_committed_data_source: DataSourceConfig,
+    val per_transaction_data_source: DataSourceConfig,
   ) : Config
 
   class TransactionIsolationTestModule(private val appName: String) : KAbstractModule() {
@@ -78,6 +119,9 @@ class DataSourceTransactionIsolationTest {
 
       install(JdbcTestingModule(Movies2::class))
       install(JdbcModule(Movies2::class, config.default_isolation_data_source))
+
+      install(JdbcTestingModule(Movies3::class))
+      install(JdbcModule(Movies3::class, config.per_transaction_data_source))
     }
   }
 }
