@@ -224,7 +224,7 @@ internal constructor(
       providerOverrides: Map<Key<*>, ActionScopedProvider<*>> = emptyMap(),
     ): Instance {
       val isolatedLazyValues = lazyValues.mapValues { (_, lazy) ->
-        if (lazy is SynchronizedLazy && !lazy.isInitialized()) lazy.copy() else lazy
+        if (lazy is SynchronizedLazy && !lazy.isInitialized()) { lazy.copy() } else { lazy }
       }
       val immediateValues = seedData.mapValues { (_, value) -> ImmediateLazy(value) }
       val lazyOverrides = providerOverrides.mapValues { (_, provider) -> SynchronizedLazy(provider) }
