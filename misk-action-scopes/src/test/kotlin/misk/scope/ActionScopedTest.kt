@@ -404,4 +404,16 @@ internal class ActionScopedTest {
       )
       .inScope { assertThat(foo.get()).isEqualTo("from-seed-direct and bar and foo!") }
   }
+
+  @Test
+  fun `withOverrides gives uncomputed providers independent state from the receiver`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+
+    val parent = scope.create(emptyMap())
+    val child = parent.withOverrides()
+
+    child.inScope { assertThat(countingString.get()).isEqualTo("Called CountingProvider 1 time(s)") }
+    parent.inScope { assertThat(countingString.get()).isEqualTo("Called CountingProvider 1 time(s)") }
+  }
 }
