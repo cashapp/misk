@@ -14,3 +14,14 @@ read_committed_data_source:
   use_fixed_pool_size: true
   fixed_pool_size: 1
   transaction_isolation: READ_COMMITTED
+
+# A single-connection pool with no transaction_isolation configured, so Hikari's reset-on-return does not fire. Used to
+# prove the per-transaction isolation is applied and explicitly restored on the same reused connection.
+per_transaction_data_source:
+  type: MYSQL
+  database: movies_mysql
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/jdbc/test_transacter-mysql-migrations
+  use_fixed_pool_size: true
+  fixed_pool_size: 1

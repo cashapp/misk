@@ -36,18 +36,50 @@ interface Transacter {
   fun <T> transactionWithSession(work: (session: JDBCSession) -> T): T
 
   /**
+   * Like [transactionWithSession], but applies the per-transaction [options] to this single transaction only.
+   *
+   * The default implementation ignores [options] and behaves identically to [transactionWithSession]; implementations
+   * that support per-transaction options (such as [RealTransacter]) override it. See [TransactionOptions].
+   */
+  fun <T> transactionWithSession(options: TransactionOptions, work: (session: JDBCSession) -> T): T =
+    transactionWithSession(work)
+
+  /**
    * Returns a new transacter configured to retry transactions up to [maxAttempts] times on retryable exceptions.
    * Default is 3 attempts.
    */
   fun retries(maxAttempts: Int): Transacter
 
-  /**
-   * Returns a new transacter configured to not retry transactions.
-   */
+  /** Returns a new transacter configured to not retry transactions. */
   fun noRetries(): Transacter
 }
 
-class RealTransacter private constructor(
+/**
+ * Options that apply to a single [Transacter.transactionWithSession] call.
+ *
+ * Unlike [Transacter.retries]/[Transacter.noRetries], which return a reconfigured transacter, these options are scoped
+ * to the one transaction they are passed to and never affect other transactions sharing the pool.
+ */
+data class TransactionOptions
+@JvmOverloads
+constructor(
+  /**
+   * Isolation level to apply to this transaction only.
+   *
+   * It is set on the connection after it is acquired and before the transaction begins. Misk begins transactions lazily
+   * — the database transaction starts on the first statement — so the level takes effect before the transaction begins,
+   * which matters on MySQL where `setTransactionIsolation` issues `SET SESSION ...` and is a no-op for an
+   * already-started transaction. The connection's previous level is restored before it is returned to the pool, so the
+   * change never leaks to the next borrower, regardless of whether the pool configures
+   * [DataSourceConfig.transaction_isolation].
+   *
+   * When `null` (the default) the connection's isolation is left unchanged.
+   */
+  val isolationLevel: TransactionIsolationLevel? = null
+)
+
+class RealTransacter
+private constructor(
   private val dataSourceService: DataSourceService,
   private val config: DataSourceConfig?,
   private val options: TransacterOptions,
@@ -55,17 +87,14 @@ class RealTransacter private constructor(
   private val transacting = ThreadLocal.withInitial { false }
   private val exceptionClassifier = DefaultExceptionClassifier(config?.type)
 
-  constructor(dataSourceService: DataSourceService) : this(
-    dataSourceService = dataSourceService,
-    config = null,
-    options = TransacterOptions(),
-  )
+  constructor(
+    dataSourceService: DataSourceService
+  ) : this(dataSourceService = dataSourceService, config = null, options = TransacterOptions())
 
-  constructor(dataSourceService: DataSourceService, config: DataSourceConfig) : this(
-    dataSourceService = dataSourceService,
-    config = config,
-    options = TransacterOptions(),
-  )
+  constructor(
+    dataSourceService: DataSourceService,
+    config: DataSourceConfig,
+  ) : this(dataSourceService = dataSourceService, config = config, options = TransacterOptions())
 
   override val inTransaction: Boolean
     get() = transacting.get()
@@ -75,24 +104,29 @@ class RealTransacter private constructor(
     session.useConnection(work)
   }
 
-  override fun <T> transactionWithSession(work: (session: JDBCSession) -> T): T {
-    return transactionWithRetries { transactionInternal(work) }
+  override fun <T> transactionWithSession(work: (session: JDBCSession) -> T): T =
+    transactionWithSession(TransactionOptions(), work)
+
+  override fun <T> transactionWithSession(options: TransactionOptions, work: (session: JDBCSession) -> T): T {
+    return transactionWithRetries { transactionInternal(options, work) }
   }
 
   private fun <T> transactionWithRetries(block: () -> T): T {
-    val backoff = ExponentialBackoff(
-      baseDelay = Duration.ofMillis(options.minRetryDelayMillis),
-      maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
-      jitter = Duration.ofMillis(options.retryJitterMillis)
-    )
-    val retryConfig = RetryConfig.Builder(options.maxAttempts, backoff)
-      .shouldRetry { exceptionClassifier.isRetryable(it) }
-      .onRetry { attempt, e -> logger.info(e) { "JDBC transaction failed, retrying (attempt $attempt)" } }
-      .build()
+    val backoff =
+      ExponentialBackoff(
+        baseDelay = Duration.ofMillis(options.minRetryDelayMillis),
+        maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
+        jitter = Duration.ofMillis(options.retryJitterMillis),
+      )
+    val retryConfig =
+      RetryConfig.Builder(options.maxAttempts, backoff)
+        .shouldRetry { exceptionClassifier.isRetryable(it) }
+        .onRetry { attempt, e -> logger.info(e) { "JDBC transaction failed, retrying (attempt $attempt)" } }
+        .build()
     return retry(retryConfig) { block() }
   }
 
-  private fun <T> transactionInternal(work: (session: JDBCSession) -> T): T {
+  private fun <T> transactionInternal(options: TransactionOptions, work: (session: JDBCSession) -> T): T {
     check(!transacting.get()) { "The current thread is already in a transaction" }
     transacting.set(true)
 
@@ -105,23 +139,38 @@ class RealTransacter private constructor(
          * do rollback on exception
          */
 
-        // BEGIN
-        if (connection.autoCommit) {
-          connection.autoCommit = false
+        // Apply a caller-requested isolation level for this transaction only. Misk begins transactions lazily (the
+        // database transaction starts on the first statement), so setting it here — after acquiring the connection and
+        // before any work runs — takes effect before the transaction begins. We capture the connection's prior level
+        // and restore it once the transaction completes so the change never leaks to the next borrower of this pooled
+        // connection, independent of whether the pool configures transaction_isolation (Hikari's reset-on-return only
+        // fires when it is).
+        val isolationToRestore: Int? =
+          options.isolationLevel?.let { requested ->
+            connection.transactionIsolation.also { connection.transactionIsolation = requested.jdbcLevel }
+          }
+
+        try {
+          // BEGIN
+          if (connection.autoCommit) {
+            connection.autoCommit = false
+          }
+
+          // Do stuff
+          session = JDBCSession(connection)
+          val result =
+            runCatching { work(session) }
+              .onFailure { e -> session.onSessionClose { session.executeRollbackHooks(e) } }
+              .getOrThrow()
+
+          // COMMIT
+          session.executePreCommitHooks()
+          connection.commit()
+          session.executePostCommitHooks()
+          result
+        } finally {
+          isolationToRestore?.let { connection.transactionIsolation = it }
         }
-
-        // Do stuff
-        session = JDBCSession(connection)
-        val result =
-          runCatching { work(session) }
-            .onFailure { e -> session.onSessionClose { session.executeRollbackHooks(e) } }
-            .getOrThrow()
-
-        // COMMIT
-        session.executePreCommitHooks()
-        connection.commit()
-        session.executePostCommitHooks()
-        result
       }
     } finally {
       transacting.set(false)
@@ -129,11 +178,12 @@ class RealTransacter private constructor(
     }
   }
 
-  override fun retries(maxAttempts: Int): Transacter = RealTransacter(
-    dataSourceService = dataSourceService,
-    config = config,
-    options = options.copy(maxAttempts = maxAttempts),
-  )
+  override fun retries(maxAttempts: Int): Transacter =
+    RealTransacter(
+      dataSourceService = dataSourceService,
+      config = config,
+      options = options.copy(maxAttempts = maxAttempts),
+    )
 
   override fun noRetries(): Transacter = retries(1)
 
