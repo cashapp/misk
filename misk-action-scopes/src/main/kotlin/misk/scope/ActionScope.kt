@@ -89,7 +89,9 @@ internal constructor(
 
     val immediateValues = seedData.mapValues { (_, value) -> ImmediateLazy(value) }
 
-    val lazyValues = providers.mapValues { (key, _) -> SynchronizedLazy(providerFor(key)) }
+    val lazyValues = providers.mapValues { (key, _) ->
+      SynchronizedLazy(providerFor(key)) { providerFor(key) }
+    }
 
     val lazyOverrides = providerOverrides.mapValues { (_, provider) -> SynchronizedLazy(provider) }
 
