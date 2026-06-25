@@ -36,15 +36,6 @@ interface Transacter {
   fun <T> transactionWithSession(work: (session: JDBCSession) -> T): T
 
   /**
-   * Like [transactionWithSession], but applies the per-transaction [options] to this single transaction only.
-   *
-   * The default implementation ignores [options] and behaves identically to [transactionWithSession]; implementations
-   * that support per-transaction options (such as [RealTransacter]) override it. See [TransactionOptions].
-   */
-  fun <T> transactionWithSession(options: TransactionOptions, work: (session: JDBCSession) -> T): T =
-    transactionWithSession(work)
-
-  /**
    * Returns a new transacter configured to retry transactions up to [maxAttempts] times on retryable exceptions.
    * Default is 3 attempts.
    */
@@ -52,31 +43,17 @@ interface Transacter {
 
   /** Returns a new transacter configured to not retry transactions. */
   fun noRetries(): Transacter
-}
 
-/**
- * Options that apply to a single [Transacter.transactionWithSession] call.
- *
- * Unlike [Transacter.retries]/[Transacter.noRetries], which return a reconfigured transacter, these options are scoped
- * to the one transaction they are passed to and never affect other transactions sharing the pool.
- */
-data class TransactionOptions
-@JvmOverloads
-constructor(
   /**
-   * Isolation level to apply to this transaction only.
+   * Returns a transacter that runs its transactions at the given isolation [level], restoring the connection's prior
+   * level afterwards so it never leaks to others sharing the pool.
    *
-   * It is set on the connection after it is acquired and before the transaction begins. Misk begins transactions lazily
-   * — the database transaction starts on the first statement — so the level takes effect before the transaction begins,
-   * which matters on MySQL where `setTransactionIsolation` issues `SET SESSION ...` and is a no-op for an
-   * already-started transaction. The connection's previous level is restored before it is returned to the pool, so the
-   * change never leaks to the next borrower, regardless of whether the pool configures
-   * [DataSourceConfig.transaction_isolation].
-   *
-   * When `null` (the default) the connection's isolation is left unchanged.
+   * The default implementation throws; an implementation that doesn't support per-transaction isolation must override
+   * this to opt out explicitly.
    */
-  val isolationLevel: TransactionIsolationLevel? = null
-)
+  fun isolationLevel(level: TransactionIsolationLevel): Transacter =
+    throw UnsupportedOperationException("${this::class.simpleName} does not support isolationLevel($level)")
+}
 
 class RealTransacter
 private constructor(
@@ -104,11 +81,8 @@ private constructor(
     session.useConnection(work)
   }
 
-  override fun <T> transactionWithSession(work: (session: JDBCSession) -> T): T =
-    transactionWithSession(TransactionOptions(), work)
-
-  override fun <T> transactionWithSession(options: TransactionOptions, work: (session: JDBCSession) -> T): T {
-    return transactionWithRetries { transactionInternal(options, work) }
+  override fun <T> transactionWithSession(work: (session: JDBCSession) -> T): T {
+    return transactionWithRetries { transactionInternal(work) }
   }
 
   private fun <T> transactionWithRetries(block: () -> T): T {
@@ -126,7 +100,7 @@ private constructor(
     return retry(retryConfig) { block() }
   }
 
-  private fun <T> transactionInternal(options: TransactionOptions, work: (session: JDBCSession) -> T): T {
+  private fun <T> transactionInternal(work: (session: JDBCSession) -> T): T {
     check(!transacting.get()) { "The current thread is already in a transaction" }
     transacting.set(true)
 
@@ -139,12 +113,9 @@ private constructor(
          * do rollback on exception
          */
 
-        // Apply a caller-requested isolation level for this transaction only. Misk begins transactions lazily (the
-        // database transaction starts on the first statement), so setting it here — after acquiring the connection and
-        // before any work runs — takes effect before the transaction begins. We capture the connection's prior level
-        // and restore it once the transaction completes so the change never leaks to the next borrower of this pooled
-        // connection, independent of whether the pool configures transaction_isolation (Hikari's reset-on-return only
-        // fires when it is).
+        // Set isolation before the transaction begins; on MySQL it's a no-op once started, and misk begins lazily on
+        // the first statement. Restore the prior level afterwards so it doesn't leak to the next user of the
+        // connection.
         val isolationToRestore: Int? =
           options.isolationLevel?.let { requested ->
             connection.transactionIsolation.also { connection.transactionIsolation = requested.jdbcLevel }
@@ -187,11 +158,19 @@ private constructor(
 
   override fun noRetries(): Transacter = retries(1)
 
+  override fun isolationLevel(level: TransactionIsolationLevel): Transacter =
+    RealTransacter(
+      dataSourceService = dataSourceService,
+      config = config,
+      options = options.copy(isolationLevel = level),
+    )
+
   internal data class TransacterOptions(
     val maxAttempts: Int = RetryDefaults.MAX_ATTEMPTS,
     val minRetryDelayMillis: Long = RetryDefaults.MIN_RETRY_DELAY_MILLIS,
     val maxRetryDelayMillis: Long = RetryDefaults.MAX_RETRY_DELAY_MILLIS,
     val retryJitterMillis: Long = RetryDefaults.RETRY_JITTER_MILLIS,
+    val isolationLevel: TransactionIsolationLevel? = null,
   )
 
   companion object {

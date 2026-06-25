@@ -62,8 +62,8 @@ enum class MigrationsFormat {
  * isolation was changed at runtime back to this level when it is returned to the pool. When unset, connections use the
  * database server's default (for MySQL, `REPEATABLE READ` unless overridden server-side).
  *
- * The same levels are also reusable per-transaction via [TransactionOptions]; [jdbcLevel] is the corresponding
- * [java.sql.Connection] constant for [java.sql.Connection.setTransactionIsolation].
+ * [jdbcLevel] is the matching [java.sql.Connection] constant, used by [Transacter.isolationLevel] to set a level per
+ * transacter.
  */
 enum class TransactionIsolationLevel(val hikariValueName: String, val jdbcLevel: Int) {
   READ_UNCOMMITTED("TRANSACTION_READ_UNCOMMITTED", Connection.TRANSACTION_READ_UNCOMMITTED),

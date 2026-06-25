@@ -56,23 +56,20 @@ class DataSourceTransactionIsolationTest {
   }
 
   @Test
-  fun `per-transaction isolation is applied for the call on a pool with no configured isolation`() {
-    perTransactionTransacter.transactionWithSession(
-      TransactionOptions(isolationLevel = TransactionIsolationLevel.READ_COMMITTED)
-    ) { (connection) ->
+  fun `isolationLevel is applied for the transaction on a pool with no configured isolation`() {
+    perTransactionTransacter.isolationLevel(TransactionIsolationLevel.READ_COMMITTED).transactionWithSession {
+      (connection) ->
       assertThat(connection.transactionIsolation).isEqualTo(Connection.TRANSACTION_READ_COMMITTED)
       assertThat(serverSessionIsolation(connection)).isEqualTo("READ-COMMITTED")
     }
   }
 
   @Test
-  fun `per-transaction isolation is restored on return and does not leak to later transactions`() {
-    // This pool has no transaction_isolation configured, so Hikari's reset-on-return never fires. It is also a single
-    // connection, so the connection used below is deterministically reused by the following transaction. This proves
-    // the transacter itself captures and restores the prior level rather than relying on the pool.
-    perTransactionTransacter.transactionWithSession(
-      TransactionOptions(isolationLevel = TransactionIsolationLevel.READ_COMMITTED)
-    ) { (connection) ->
+  fun `isolationLevel is restored on return and does not leak to later transactions`() {
+    // No pool isolation (so Hikari can't reset it) and a single connection (reused by the next transaction): proves
+    // the transacter restores the level itself.
+    perTransactionTransacter.isolationLevel(TransactionIsolationLevel.READ_COMMITTED).transactionWithSession {
+      (connection) ->
       assertThat(serverSessionIsolation(connection)).isEqualTo("READ-COMMITTED")
     }
 
@@ -83,20 +80,10 @@ class DataSourceTransactionIsolationTest {
   }
 
   @Test
-  fun `transaction without options leaves the connection at the server default`() {
-    perTransactionTransacter.transactionWithSession(TransactionOptions()) { (connection) ->
-      assertThat(connection.transactionIsolation).isEqualTo(Connection.TRANSACTION_REPEATABLE_READ)
-      assertThat(serverSessionIsolation(connection)).isEqualTo("REPEATABLE-READ")
-    }
-  }
-
-  @Test
-  fun `per-transaction isolation overrides a pool-configured level and restores it afterwards`() {
-    // The read-committed pool defaults each connection to READ COMMITTED. A single transaction can opt into a stricter
-    // level, and the connection returns to the pool's configured level for the next borrower.
-    readCommittedTransacter.transactionWithSession(
-      TransactionOptions(isolationLevel = TransactionIsolationLevel.SERIALIZABLE)
-    ) { (connection) ->
+  fun `isolationLevel overrides a pool-configured level and restores it afterwards`() {
+    // Opt a transacter into a stricter level than the pool default; the connection returns to the pool level after.
+    readCommittedTransacter.isolationLevel(TransactionIsolationLevel.SERIALIZABLE).transactionWithSession { (connection)
+      ->
       assertThat(connection.transactionIsolation).isEqualTo(Connection.TRANSACTION_SERIALIZABLE)
       assertThat(serverSessionIsolation(connection)).isEqualTo("SERIALIZABLE")
     }
