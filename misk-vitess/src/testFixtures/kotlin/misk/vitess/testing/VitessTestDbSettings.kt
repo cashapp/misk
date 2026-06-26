@@ -3,6 +3,10 @@ package misk.vitess.testing
 import java.time.Duration
 import misk.containers.ContainerUtil
 
+private val DEFAULT_VTCTLD_CLIENT_TIMEOUT = Duration.ofSeconds(10)
+private const val VTCTLDCLIENT_CONTAINER_START_DELAY_MS_ENV = "VTCTLDCLIENT_CONTAINER_START_DELAY_MS"
+private const val VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS_ENV = "VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS"
+
 object DefaultSettings {
   const val AUTO_APPLY_SCHEMA_CHANGES = true
   const val CONTAINER_NAME = "vitess_test_db"
@@ -26,7 +30,7 @@ object DefaultSettings {
   @JvmField var TRANSACTION_ISOLATION_LEVEL: TransactionIsolationLevel = TransactionIsolationLevel.REPEATABLE_READ
   @JvmField val TRANSACTION_MODE: TransactionMode = TransactionMode.MULTI
   @JvmField var TRANSACTION_TIMEOUT_SECONDS: Duration = Duration.ofSeconds(30)
-  @JvmField var VTCTLD_CLIENT_TIMEOUT: Duration = Duration.ofSeconds(10)
+  @JvmField var VTCTLD_CLIENT_TIMEOUT: Duration = vtctldClientTimeoutFromEnvironment()
   const val VITESS_DOCKER_NETWORK_NAME = "vitess-network"
   const val VITESS_DOCKER_NETWORK_TYPE = "bridge"
   const val VITESS_IMAGE = "ghcr.io/block/vitess/vttestserver:23.0.3-block.1-mysql84"
@@ -34,6 +38,21 @@ object DefaultSettings {
   const val VTCTLD_CLIENT_IMAGE = "ghcr.io/block/vitess/vtctldclient:23.0.3-block.1"
   const val VTGATE_USER = "root"
   const val VTGATE_USER_PASSWORD = ""
+}
+
+internal fun vtctldClientTimeoutFromEnvironment(
+  environment: Map<String, String> = System.getenv(),
+): Duration {
+  return listOfNotNull(
+    environment[VTCTLDCLIENT_CONTAINER_START_DELAY_MS_ENV]?.toMillisecondsDuration(),
+    environment[VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS_ENV]?.toMillisecondsDuration(),
+  ).maxOrNull() ?: DEFAULT_VTCTLD_CLIENT_TIMEOUT
+}
+
+private fun String.toMillisecondsDuration(): Duration? {
+  return removeSuffix("ms")
+    .toLongOrNull()
+    ?.let(Duration::ofMillis)
 }
 
 enum class TransactionIsolationLevel(val value: String) {
