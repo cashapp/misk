@@ -201,6 +201,7 @@ public final class misk/vitess/testing/DefaultSettings {
 	public static final field VITESS_IMAGE Ljava/lang/String;
 	public static final field VITESS_VERSION I
 	public static final field VTCTLD_CLIENT_IMAGE Ljava/lang/String;
+	public static field VTCTLD_CLIENT_TIMEOUT Ljava/time/Duration;
 	public static final field VTGATE_USER Ljava/lang/String;
 	public static final field VTGATE_USER_PASSWORD Ljava/lang/String;
 }
@@ -319,6 +320,7 @@ public final class misk/vitess/testing/VitessTestDb$Builder {
 	public final fun transactionTimeoutSeconds (Ljava/time/Duration;)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun vitessImage (Ljava/lang/String;)Lmisk/vitess/testing/VitessTestDb$Builder;
 	public final fun vitessVersion (I)Lmisk/vitess/testing/VitessTestDb$Builder;
+	public final fun vtctldClientTimeout (Ljava/time/Duration;)Lmisk/vitess/testing/VitessTestDb$Builder;
 }
 
 public final class misk/vitess/testing/VitessTestDb$Companion {

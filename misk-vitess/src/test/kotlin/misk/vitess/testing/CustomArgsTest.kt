@@ -140,12 +140,13 @@ class CustomArgsTest {
     assertEquals(2, byShard.keys.size, "All IDs landed on the same shard: $ids")
     val idA = byShard[shard1]!!.first()
     val idB = byShard[shard2]!!.first()
-    val exception = assertThrows<VitessQueryExecutorException> {
-      testDb1.executeTransaction(
-        "UPDATE customers SET token = 'updated' WHERE id = $idA;" +
-          "UPDATE customers SET token = 'updated' WHERE id = $idB;"
-      )
-    }
+    val exception =
+      assertThrows<VitessQueryExecutorException> {
+        testDb1.executeTransaction(
+          "UPDATE customers SET token = 'updated' WHERE id = $idA;" +
+            "UPDATE customers SET token = 'updated' WHERE id = $idB;"
+        )
+      }
     assertTrue(
       exception.cause?.message!!.contains("multi-db transaction attempted"),
       "Expected 'multi-db transaction attempted' but got: ${exception.cause?.message}",
@@ -247,6 +248,19 @@ class CustomArgsTest {
       "Invalid `inMemoryStorageSize`: `100A`. Must match pattern '\\d+[KMG]', e.g., '1G', '512M', or '1024K'.",
       exception.message,
     )
+  }
+
+  @Test
+  fun `test invalid vtctldClientTimeout`() {
+    val exception =
+      assertThrows<IllegalArgumentException> {
+        VitessTestDb.Builder()
+          .containerName("invalid_vtctld_client_timeout_vitess_db")
+          .vtctldClientTimeout(Duration.ZERO)
+          .build()
+          .run()
+      }
+    assertEquals("Invalid `vtctldClientTimeout`: `PT0S`. Must be positive.", exception.message)
   }
 
   private fun assertTraditionalSchemaUpdatesApplied(applySchemaResult: ApplySchemaResult) {
