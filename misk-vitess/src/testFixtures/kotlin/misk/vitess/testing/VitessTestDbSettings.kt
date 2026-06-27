@@ -26,6 +26,7 @@ object DefaultSettings {
   @JvmField var TRANSACTION_ISOLATION_LEVEL: TransactionIsolationLevel = TransactionIsolationLevel.REPEATABLE_READ
   @JvmField val TRANSACTION_MODE: TransactionMode = TransactionMode.MULTI
   @JvmField var TRANSACTION_TIMEOUT_SECONDS: Duration = Duration.ofSeconds(30)
+  @JvmField var VTCTLD_CLIENT_TIMEOUT: Duration = Duration.ofSeconds(10)
   const val VITESS_DOCKER_NETWORK_NAME = "vitess-network"
   const val VITESS_DOCKER_NETWORK_TYPE = "bridge"
   const val VITESS_IMAGE = "ghcr.io/block/vitess/vttestserver:23.0.3-block.1-mysql84"

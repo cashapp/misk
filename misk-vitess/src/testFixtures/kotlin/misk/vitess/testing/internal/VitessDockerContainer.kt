@@ -60,6 +60,7 @@ internal class VitessDockerContainer(
   private val transactionIsolationLevel: TransactionIsolationLevel,
   private val transactionMode: TransactionMode,
   private val transactionTimeoutSeconds: Duration,
+  private val vtctldClientTimeout: Duration,
   private val userPort: Int,
   private val vitessImage: String,
   private val vitessVersion: Int,
@@ -113,6 +114,7 @@ internal class VitessDockerContainer(
   fun start(): StartContainerResult {
     validateVitessVersionArgs()
     validateInMemoryStorageSize()
+    validateVtctldClientTimeout()
 
     val vitessSchemaPreparer = VitessSchemaPreparer(lintSchema, schemaDir)
 
@@ -309,6 +311,12 @@ internal class VitessDockerContainer(
       require(pattern.matches(inMemoryStorageSize.uppercase())) {
         "Invalid `inMemoryStorageSize`: `$inMemoryStorageSize`. Must match pattern '\\d+[KMG]', e.g., '1G', '512M', or '1024K'."
       }
+    }
+  }
+
+  private fun validateVtctldClientTimeout() {
+    require(!vtctldClientTimeout.isZero && !vtctldClientTimeout.isNegative) {
+      "Invalid `vtctldClientTimeout`: `$vtctldClientTimeout`. Must be positive."
     }
   }
 
@@ -840,6 +848,7 @@ internal class VitessDockerContainer(
       mysqlPort = mysqlPort,
       schemaDir = schemaDir,
       vitessImage = vitessImage,
+      vtctldClientTimeout = vtctldClientTimeout,
       vtgatePort = vtgatePort,
       vtgateUser = VTGATE_USER,
       vtgateUserPassword = VTGATE_USER_PASSWORD,
@@ -854,12 +863,7 @@ internal class VitessDockerContainer(
       if (existingNetwork == null) {
         try {
           val newNetworkId =
-            dockerClient
-              .createNetworkCmd()
-              .withName(dockerNetworkName)
-              .withDriver(VITESS_DOCKER_NETWORK_TYPE)
-              .exec()
-              .id
+            dockerClient.createNetworkCmd().withName(dockerNetworkName).withDriver(VITESS_DOCKER_NETWORK_TYPE).exec().id
           return newNetworkId
         } catch (conflictException: ConflictException) {
           // If we are in this state, the network was already created.

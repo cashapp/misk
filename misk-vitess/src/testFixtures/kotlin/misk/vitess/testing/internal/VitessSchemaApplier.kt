@@ -9,6 +9,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import java.time.Duration
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
@@ -17,17 +18,17 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.stream.Collectors
 import kotlin.io.path.createDirectories
 import kotlin.io.path.pathString
-import misk.spirit.SchemaDiff
-import misk.spirit.Spirit
 import misk.resources.ClasspathResourceLoaderBackend
 import misk.resources.FilesystemLoaderBackend
 import misk.resources.ResourceLoader
+import misk.spirit.SchemaDiff
+import misk.spirit.Spirit
 import misk.vitess.testing.ApplySchemaResult
-import misk.vitess.testing.VitessTestDbException
 import misk.vitess.testing.DdlUpdate
 import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_GRPC
 import misk.vitess.testing.VSchemaUpdate
 import misk.vitess.testing.VitessTableType
+import misk.vitess.testing.VitessTestDbException
 import misk.vitess.testing.VitessTestDbStartupException
 
 /**
@@ -47,6 +48,7 @@ internal class VitessSchemaApplier(
   private val mysqlPort: Int,
   private val schemaDir: String,
   private val vitessImage: String,
+  private val vtctldClientTimeout: Duration,
   private val vtgatePort: Int,
   private val vtgateUser: String,
   private val vtgateUserPassword: String,
@@ -208,8 +210,9 @@ internal class VitessSchemaApplier(
     val schemaDiff = runSpirit(keyspace)
     if (schemaDiff.hasDiff) {
       printDebug("Schema changes detected for keyspace `${keyspace.name}`")
-      val ddl = schemaDiff.diff
-        ?: throw VitessSchemaManagerException("Spirit diff returned null diff for keyspace `${keyspace.name}`")
+      val ddl =
+        schemaDiff.diff
+          ?: throw VitessSchemaManagerException("Spirit diff returned null diff for keyspace `${keyspace.name}`")
       applyDdlCommands(ddl, keyspace, vitessQueryExecutor)
       ddlUpdates.add(DdlUpdate(keyspace.name, ddl))
       return true
@@ -225,10 +228,7 @@ internal class VitessSchemaApplier(
     try {
       return spirit.diff(dsn, sqlFiles)
     } catch (e: Exception) {
-      throw VitessTestDbException(
-        "Failed to run spirit diff for keyspace `${keyspace.name}`. Error: `${e.message}`",
-        e,
-      )
+      throw VitessTestDbException("Failed to run spirit diff for keyspace `${keyspace.name}`. Error: `${e.message}`", e)
     }
   }
 
@@ -288,19 +288,47 @@ internal class VitessSchemaApplier(
         "ApplyVSchema",
         keyspace.name,
         "--strict",
-        "--action_timeout=$VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS",
+        "--action_timeout=${vtctldClientTimeout.toMillis()}ms",
         "--server=$containerName:${CONTAINER_PORT_GRPC}",
         "--vschema=${keyspace.vschema}",
       )
 
     printDebug("Applying vschema for keyspace `${keyspace.name}` with command: `${command.joinToString(" ")}`")
-    executeDockerCommand(command, keyspace.name)
+    executeDockerCommandWithRetries(command, keyspace.name)
     return VSchemaUpdate(vschema = keyspace.vschema, keyspace = keyspace.name)
   }
 
   private fun applyDdlCommands(ddl: String, keyspace: VitessKeyspace, vitessQueryExecutor: VitessQueryExecutor) {
     printDebug("Applying schema changes:\n$ddl")
     vitessQueryExecutor.executeUpdateWithRetries(ddl, keyspace.name)
+  }
+
+  private fun executeDockerCommandWithRetries(command: List<String>, keyspace: String): String {
+    var lastException: VitessSchemaManagerException? = null
+    repeat(VTCTLDCLIENT_COMMAND_MAX_RETRIES) { attemptNumber ->
+      try {
+        return executeDockerCommand(command, keyspace)
+      } catch (e: VitessSchemaManagerException) {
+        if (e.cause !is DockerClientException) {
+          throw e
+        }
+
+        lastException = e
+        if (attemptNumber == VTCTLDCLIENT_COMMAND_MAX_RETRIES - 1) {
+          throw e
+        }
+
+        println(
+          "Retrying vtctldclient command for keyspace `$keyspace` after transient Docker error. " +
+            "Attempt `${attemptNumber + 1}` of `$VTCTLDCLIENT_COMMAND_MAX_RETRIES` failed."
+        )
+        Thread.sleep(VTCTLDCLIENT_COMMAND_RETRY_DELAY_MS * (attemptNumber + 1))
+      }
+    }
+
+    throw lastException ?: VitessSchemaManagerException(
+      "Failed to execute vtctldclient command: `${command.joinToString(" ")}`."
+    )
   }
 
   private fun executeDockerCommand(command: List<String>, keyspace: String): String {
@@ -317,29 +345,32 @@ internal class VitessSchemaApplier(
         "VitessSchemaManager could not find the correct Docker Network named `$dockerNetworkName`. The network may have failed to initialize or VitessDockerContainer.createContainer may not have been run."
       )
 
-    printDebug("Creating new vtctldclient container.")
-    val createContainerResponse =
-      dockerClient
-        .createContainerCmd(deriveVtctldClientImage(vitessImage))
-        .withName(vtctldClientContainerName)
-        .withHostConfig(HostConfig.newHostConfig().withNetworkMode(dockerNetworkName))
-        .withCmd(command)
-        .withAttachStdout(true)
-        .withAttachStdin(true)
-        .exec()
-    printDebug("Created vtctldclient container with id `${createContainerResponse.id}`")
-
-    dockerClient.startContainerCmd(createContainerResponse.id).exec()
-
+    var containerId: String? = null
     try {
+      printDebug("Creating new vtctldclient container.")
+      val createContainerResponse =
+        dockerClient
+          .createContainerCmd(deriveVtctldClientImage(vitessImage))
+          .withName(vtctldClientContainerName)
+          .withHostConfig(HostConfig.newHostConfig().withNetworkMode(dockerNetworkName))
+          .withCmd(command)
+          .withAttachStdout(true)
+          .withAttachStdin(true)
+          .exec()
+      val createdContainerId = createContainerResponse.id
+      containerId = createdContainerId
+      printDebug("Created vtctldclient container with id `$createdContainerId`")
+
+      dockerClient.startContainerCmd(createdContainerId).exec()
+
       val statusCode =
         dockerClient
-          .waitContainerCmd(createContainerResponse.id)
+          .waitContainerCmd(createdContainerId)
           .start()
-          .awaitStatusCode(VTCTLDCLIENT_CONTAINER_START_DELAY_MS, TimeUnit.MILLISECONDS)
+          .awaitStatusCode(vtctldClientTimeout.toMillis(), TimeUnit.MILLISECONDS)
       printDebug("vtctldclient container command wait status code: `$statusCode`")
 
-      val containerLogs = getContainerLogs(createContainerResponse.id)
+      val containerLogs = getContainerLogs(createdContainerId)
       printDebug("Vtctld response:\n$containerLogs")
 
       if (statusCode != 0) {
@@ -350,14 +381,16 @@ internal class VitessSchemaApplier(
 
       return containerLogs
     } catch (e: DockerClientException) {
-      val containerLogs = getContainerLogs(createContainerResponse.id)
+      val containerLogs = containerId?.let { getContainerLogs(it) }.orEmpty()
       println("Failed to await vtctld container command for `${command.joinToString(" ")}`. Logs: $containerLogs")
       throw VitessSchemaManagerException(
         "Failed to await vtctld container command: `${command.joinToString(" ")}`, check logs for details.",
         e,
       )
     } finally {
-      dockerClient.removeContainerCmd(createContainerResponse.id).withForce(true).exec()
+      if (containerId != null) {
+        dockerClient.removeContainerCmd(containerId).withForce(true).exec()
+      }
     }
   }
 
@@ -480,8 +513,8 @@ internal class VitessSchemaApplier(
   }
 
   private companion object {
-    const val VTCTLDCLIENT_CONTAINER_START_DELAY_MS = 10000L
-    const val VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS = "10000ms"
+    const val VTCTLDCLIENT_COMMAND_MAX_RETRIES = 3
+    const val VTCTLDCLIENT_COMMAND_RETRY_DELAY_MS = 2000L
   }
 
   private fun findExistingContainer(containerName: String): Container? {
