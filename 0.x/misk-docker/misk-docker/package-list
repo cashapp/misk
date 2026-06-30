@@ -1,0 +1,13 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.docker////PointingToDeclaration/misk-docker/misk.docker/index.md
+$dokka.location:misk.docker//withLocalDockerCredentials/com.github.dockerjava.core.DefaultDockerClientConfig.Builder#kotlin.String/PointingToDeclaration/misk-docker/misk.docker/with-local-docker-credentials.md
+$dokka.location:misk.docker//withMiskDefaults/com.github.dockerjava.core.DefaultDockerClientConfig.Builder#/PointingToDeclaration/misk-docker/misk.docker/with-misk-defaults.md
+$dokka.location:misk.docker/DockerCredential///PointingToDeclaration/misk-docker/misk.docker/-docker-credential/index.md
+$dokka.location:misk.docker/DockerCredential/DockerCredential/#kotlin.String?#kotlin.String?/PointingToDeclaration/misk-docker/misk.docker/-docker-credential/-docker-credential.md
+$dokka.location:misk.docker/DockerCredential/password/#/PointingToDeclaration/misk-docker/misk.docker/-docker-credential/password.md
+$dokka.location:misk.docker/DockerCredential/username/#/PointingToDeclaration/misk-docker/misk.docker/-docker-credential/username.md
+$dokka.location:misk.docker/DockerCredentials///PointingToDeclaration/misk-docker/misk.docker/-docker-credentials/index.md
+$dokka.location:misk.docker/DockerCredentials/DEFAULT_DOCKER_REGISTRY_URL/#/PointingToDeclaration/misk-docker/misk.docker/-docker-credentials/-d-e-f-a-u-l-t_-d-o-c-k-e-r_-r-e-g-i-s-t-r-y_-u-r-l.md
+$dokka.location:misk.docker/DockerCredentials/getDockerCredentials/#kotlin.String?#okio.FileSystem/PointingToDeclaration/misk-docker/misk.docker/-docker-credentials/get-docker-credentials.md
+misk.docker

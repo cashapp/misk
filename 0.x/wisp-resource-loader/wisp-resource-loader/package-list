@@ -1,0 +1,11 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.resources////PointingToDeclaration/wisp-resource-loader/wisp.resources/index.md
+$dokka.location:wisp.resources/OnePasswordResourcePath.Companion///PointingToDeclaration/wisp-resource-loader/wisp.resources/-one-password-resource-path/-companion/index.md
+$dokka.location:wisp.resources/OnePasswordResourcePath.Companion/fromPath/#kotlin.String/PointingToDeclaration/wisp-resource-loader/wisp.resources/-one-password-resource-path/-companion/from-path.md
+$dokka.location:wisp.resources/OnePasswordResourcePath///PointingToDeclaration/wisp-resource-loader/wisp.resources/-one-password-resource-path/index.md
+$dokka.location:wisp.resources/OnePasswordResourcePath/account/#/PointingToDeclaration/wisp-resource-loader/wisp.resources/-one-password-resource-path/account.md
+$dokka.location:wisp.resources/OnePasswordResourcePath/asCliArgs/#kotlin.String?/PointingToDeclaration/wisp-resource-loader/wisp.resources/-one-password-resource-path/as-cli-args.md
+$dokka.location:wisp.resources/OnePasswordResourcePath/secretReference/#/PointingToDeclaration/wisp-resource-loader/wisp.resources/-one-password-resource-path/secret-reference.md
+$dokka.location:wisp.resources/OnePasswordResourcePath/toString/#/PointingToDeclaration/wisp-resource-loader/wisp.resources/-one-password-resource-path/to-string.md
+wisp.resources
