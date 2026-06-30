@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
 import misk.MiskCaller
 import misk.audit.AuditRequestResponse
 import misk.exceptions.BadRequestException
-import misk.exceptions.UnauthorizedException
+import misk.exceptions.ForbiddenException
 import misk.hibernate.DbEntity
 import misk.hibernate.Operator
 import misk.hibernate.Query
@@ -62,7 +62,7 @@ constructor(
       if (caller.isAllowed(metadata.allowedCapabilities, metadata.allowedServices)) {
         runStaticQuery(transacter, caller.principal, request, metadata)
       } else {
-        throw UnauthorizedException("Unauthorized to query [dbEntity=${metadata.entityClass}]")
+        throw ForbiddenException("Unauthorized to query [dbEntity=${metadata.entityClass}]")
       }
 
     return Response(results)

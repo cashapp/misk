@@ -103,7 +103,7 @@ It's also possible to throw exceptions that are mapped to status codes.
 class HelloWebResponseAction @Inject constructor() : WebAction {
   @Get("/no_access/{name}")
   fun hello(@PathParam name: String): HelloResponse {
-      throw UnauthenticatedException()
+      throw UnauthorizedException()
   }
 }
 ```

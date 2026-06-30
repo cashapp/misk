@@ -9,8 +9,8 @@ import java.net.HttpURLConnection.HTTP_FORBIDDEN
 import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 import java.net.HttpURLConnection.HTTP_UNAVAILABLE
 import misk.MiskTestingServiceModule
-import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
+import misk.exceptions.ForbiddenException
 import misk.exceptions.WebActionException
 import misk.inject.KAbstractModule
 import misk.logging.LogCollector
@@ -109,7 +109,7 @@ internal class ExceptionMapperTest {
     @Get("/unauthenticated")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun throwsUnauthenticated(): String {
-      throw UnauthenticatedException()
+      throw UnauthorizedException()
     }
   }
 
@@ -117,7 +117,7 @@ internal class ExceptionMapperTest {
     @Get("/unauthorized")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun throwsUnauthorized(): String {
-      throw UnauthorizedException()
+      throw ForbiddenException()
     }
   }
 

@@ -7,7 +7,7 @@ import kotlin.reflect.KClass
 import misk.MiskCaller
 import misk.audit.AuditRequestResponse
 import misk.exceptions.BadRequestException
-import misk.exceptions.UnauthorizedException
+import misk.exceptions.ForbiddenException
 import misk.hibernate.DbEntity
 import misk.hibernate.Query
 import misk.hibernate.ReflectionQuery
@@ -57,7 +57,7 @@ constructor(
       if (caller.isAllowed(metadata.allowedCapabilities, metadata.allowedServices)) {
         runDynamicQuery(transacter, caller.principal, request, metadata)
       } else {
-        throw UnauthorizedException("Unauthorized to query [dbEntity=${metadata.entityClass}]")
+        throw ForbiddenException("Unauthorized to query [dbEntity=${metadata.entityClass}]")
       }
 
     return Response(results)
@@ -79,7 +79,7 @@ constructor(
       // by setting `entityClass` to a different entity name. Enforce that the entity executed matches
       // the entity the query class is authorized for.
       if (dbEntity.simpleName != metadata.entityClass) {
-        throw UnauthorizedException(
+        throw ForbiddenException(
           "Requested entity [dbEntity=${request.entityClass}] does not match authorized query [queryClass=${request.queryClass}]"
         )
       }

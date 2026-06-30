@@ -9,7 +9,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import misk.audit.FakeAuditClient
 import misk.exceptions.BadRequestException
-import misk.exceptions.UnauthorizedException
+import misk.exceptions.ForbiddenException
 import misk.hibernate.DbActor
 import misk.hibernate.DbCharacter
 import misk.hibernate.DbMovie
@@ -52,7 +52,7 @@ class HibernateDatabaseQueryDynamicActionTest {
 
   @Test
   fun `unauthorized request`() {
-    assertFailsWith<UnauthorizedException> {
+    assertFailsWith<ForbiddenException> {
       realActionRequestExecuter.executeRequest(
         HibernateDatabaseQueryDynamicAction.Request(
           entityClass = DbMovie::class.simpleName!!,
@@ -79,7 +79,7 @@ class HibernateDatabaseQueryDynamicActionTest {
    */
   @Test
   fun `entityClass not matching authorized queryClass throws unauthorized`() {
-    assertFailsWith<UnauthorizedException> {
+    assertFailsWith<ForbiddenException> {
       realActionRequestExecuter.executeRequest(
         HibernateDatabaseQueryDynamicAction.Request(
           entityClass = DbActor::class.simpleName!!,

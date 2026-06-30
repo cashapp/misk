@@ -6,7 +6,7 @@ import kotlin.reflect.KClass
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientFactory
 import misk.exceptions.BadRequestException
-import misk.exceptions.UnauthorizedException
+import misk.exceptions.ForbiddenException
 import misk.security.authz.FakeCallerAuthenticator
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -65,7 +65,7 @@ constructor(
         throw BadRequestException(response.message)
       }
       response.code == 403 -> {
-        throw UnauthorizedException(response.message)
+        throw ForbiddenException(response.message)
       }
       // TODO add other status code => Misk Action Exception mappings for related tests
       else -> {

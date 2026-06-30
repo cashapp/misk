@@ -7,7 +7,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertFailsWith
-import misk.exceptions.UnauthorizedException
+import misk.exceptions.ForbiddenException
 import misk.hibernate.VitessTestExtensions.save
 import misk.hibernate.VitessTestExtensions.shard
 import misk.jdbc.DataSourceType
@@ -232,13 +232,13 @@ abstract class TransacterTest {
 
   @Test
   fun exceptionCausesTransactionToRollback() {
-    assertFailsWith<UnauthorizedException> {
+    assertFailsWith<ForbiddenException> {
       transacter.transaction { session ->
         session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
 
         val query = queryFactory.newQuery<MovieQuery>().allowTableScan()
         assertThat(query.list(session)).isNotEmpty
-        throw UnauthorizedException("boom!")
+        throw ForbiddenException("boom!")
       }
     }
     transacter.transaction { session ->

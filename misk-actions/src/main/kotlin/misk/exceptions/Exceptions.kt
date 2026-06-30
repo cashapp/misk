@@ -63,11 +63,11 @@ open class NotFoundException @JvmOverloads constructor(message: String = "", cau
   WebActionException(HTTP_NOT_FOUND, message, cause)
 
 /** Base exception for when authentication fails */
-open class UnauthenticatedException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
+open class UnauthorizedException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
   WebActionException(HTTP_UNAUTHORIZED, message, cause)
 
 /** Base exception for when authenticated credentials lack access to a resource */
-open class UnauthorizedException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
+open class ForbiddenException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
   WebActionException(HTTP_FORBIDDEN, message, cause)
 
 /** Base exception for when a resource is unavailable. The message is not exposed to the caller. */

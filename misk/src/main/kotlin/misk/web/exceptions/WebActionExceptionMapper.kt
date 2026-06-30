@@ -2,8 +2,8 @@ package misk.web.exceptions
 
 import jakarta.inject.Inject
 import java.net.HttpURLConnection
-import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
+import misk.exceptions.ForbiddenException
 import misk.exceptions.WebActionException
 import misk.web.Response
 import misk.web.ResponseBody
@@ -19,8 +19,8 @@ internal class WebActionExceptionMapper @Inject internal constructor(val config:
   ExceptionMapper<WebActionException> {
   override fun toResponse(th: WebActionException): Response<ResponseBody> {
     return when (th) {
-      is UnauthenticatedException -> UNAUTHENTICATED_RESPONSE
-      is UnauthorizedException -> UNAUTHORIZED_RESPONSE
+      is UnauthorizedException -> UNAUTHENTICATED_RESPONSE
+      is ForbiddenException -> UNAUTHORIZED_RESPONSE
       else -> Response(th.responseBody.toResponseBody(), HEADERS, statusCode = th.code)
     }
   }

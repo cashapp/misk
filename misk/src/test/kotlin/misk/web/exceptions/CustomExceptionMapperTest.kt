@@ -2,8 +2,8 @@ package misk.web.exceptions
 
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
-import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
+import misk.exceptions.ForbiddenException
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -51,7 +51,7 @@ internal class CustomExceptionMapperTest {
     @Get("/unauthenticated")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun throwsUnauthenticated(): String {
-      throw UnauthenticatedException()
+      throw UnauthorizedException()
     }
   }
 
@@ -59,17 +59,17 @@ internal class CustomExceptionMapperTest {
     @Get("/unauthorized")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun throwsUnauthorized(): String {
-      throw UnauthorizedException()
+      throw ForbiddenException()
     }
   }
 
-  class CustomUnauthorizedMapper @Inject constructor() : ExceptionMapper<UnauthorizedException> {
-    override fun toResponse(th: UnauthorizedException) =
+  class CustomUnauthorizedMapper @Inject constructor() : ExceptionMapper<ForbiddenException> {
+    override fun toResponse(th: ForbiddenException) =
       Response(statusCode = 403, body = "custom unauthorized response!".toResponseBody())
   }
 
-  class CustomUnauthenticatedMapper @Inject constructor() : ExceptionMapper<UnauthenticatedException> {
-    override fun toResponse(th: UnauthenticatedException) =
+  class CustomUnauthenticatedMapper @Inject constructor() : ExceptionMapper<UnauthorizedException> {
+    override fun toResponse(th: UnauthorizedException) =
       Response(statusCode = 401, body = "custom unauthenticated response!".toResponseBody())
   }
 
@@ -79,8 +79,8 @@ internal class CustomExceptionMapperTest {
       install(MiskTestingServiceModule())
       install(WebActionModule.create<ThrowsUnauthenticated>())
       install(WebActionModule.create<ThrowsUnauthorized>())
-      install(ExceptionMapperModule.create<UnauthenticatedException, CustomUnauthenticatedMapper>())
-      install(ExceptionMapperModule.create<UnauthorizedException, CustomUnauthorizedMapper>())
+      install(ExceptionMapperModule.create<UnauthorizedException, CustomUnauthenticatedMapper>())
+      install(ExceptionMapperModule.create<ForbiddenException, CustomUnauthorizedMapper>())
     }
   }
 }

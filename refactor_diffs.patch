@@ -1,0 +1,429 @@
+diff --git a/docs/actions.md b/docs/actions.md
+index d8e0e4010..973e5d3a5 100644
+--- a/docs/actions.md
++++ b/docs/actions.md
+@@ -103,7 +103,7 @@ It's also possible to throw exceptions that are mapped to status codes.
+ class HelloWebResponseAction @Inject constructor() : WebAction {
+   @Get("/no_access/{name}")
+   fun hello(@PathParam name: String): HelloResponse {
+-      throw UnauthenticatedException()
++      throw UnauthorizedException()
+   }
+ }
+ ```
+diff --git a/misk-actions/api/misk-actions.api b/misk-actions/api/misk-actions.api
+index 942eb539a..881570d85 100644
+--- a/misk-actions/api/misk-actions.api
++++ b/misk-actions/api/misk-actions.api
+@@ -57,42 +57,42 @@ public final class misk/exceptions/ExceptionsKt {
+ 	public static final fun requireRequestNotNull (Ljava/lang/Object;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+ }
+ 
+-public class misk/exceptions/GatewayTimeoutException : misk/exceptions/WebActionException {
++public class misk/exceptions/ForbiddenException : misk/exceptions/WebActionException {
+ 	public fun <init> ()V
+ 	public fun <init> (Ljava/lang/String;)V
+ 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+ 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+ }
+ 
+-public class misk/exceptions/NotFoundException : misk/exceptions/WebActionException {
++public class misk/exceptions/GatewayTimeoutException : misk/exceptions/WebActionException {
+ 	public fun <init> ()V
+ 	public fun <init> (Ljava/lang/String;)V
+ 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+ 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+ }
+ 
+-public class misk/exceptions/PayloadTooLargeException : misk/exceptions/WebActionException {
++public class misk/exceptions/NotFoundException : misk/exceptions/WebActionException {
+ 	public fun <init> ()V
+ 	public fun <init> (Ljava/lang/String;)V
+ 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+ 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+ }
+ 
+-public class misk/exceptions/ResourceUnavailableException : misk/exceptions/WebActionException {
++public class misk/exceptions/PayloadTooLargeException : misk/exceptions/WebActionException {
+ 	public fun <init> ()V
+ 	public fun <init> (Ljava/lang/String;)V
+ 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+ 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+ }
+ 
+-public class misk/exceptions/TooManyRequestsException : misk/exceptions/WebActionException {
++public class misk/exceptions/ResourceUnavailableException : misk/exceptions/WebActionException {
+ 	public fun <init> ()V
+ 	public fun <init> (Ljava/lang/String;)V
+ 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+ 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+ }
+ 
+-public class misk/exceptions/UnauthenticatedException : misk/exceptions/WebActionException {
++public class misk/exceptions/TooManyRequestsException : misk/exceptions/WebActionException {
+ 	public fun <init> ()V
+ 	public fun <init> (Ljava/lang/String;)V
+ 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+diff --git a/misk-actions/src/main/kotlin/misk/exceptions/Exceptions.kt b/misk-actions/src/main/kotlin/misk/exceptions/Exceptions.kt
+index 44c2bf9e5..77d54af44 100644
+--- a/misk-actions/src/main/kotlin/misk/exceptions/Exceptions.kt
++++ b/misk-actions/src/main/kotlin/misk/exceptions/Exceptions.kt
+@@ -63,11 +63,11 @@ open class NotFoundException @JvmOverloads constructor(message: String = "", cau
+   WebActionException(HTTP_NOT_FOUND, message, cause)
+ 
+ /** Base exception for when authentication fails */
+-open class UnauthenticatedException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
++open class UnauthorizedException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
+   WebActionException(HTTP_UNAUTHORIZED, message, cause)
+ 
+ /** Base exception for when authenticated credentials lack access to a resource */
+-open class UnauthorizedException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
++open class ForbiddenException @JvmOverloads constructor(message: String = "", cause: Throwable? = null) :
+   WebActionException(HTTP_FORBIDDEN, message, cause)
+ 
+ /** Base exception for when a resource is unavailable. The message is not exposed to the caller. */
+diff --git a/misk-hibernate/src/main/kotlin/misk/hibernate/actions/HibernateDatabaseQueryDynamicAction.kt b/misk-hibernate/src/main/kotlin/misk/hibernate/actions/HibernateDatabaseQueryDynamicAction.kt
+index fc7559de6..179d2bdcd 100644
+--- a/misk-hibernate/src/main/kotlin/misk/hibernate/actions/HibernateDatabaseQueryDynamicAction.kt
++++ b/misk-hibernate/src/main/kotlin/misk/hibernate/actions/HibernateDatabaseQueryDynamicAction.kt
+@@ -7,7 +7,7 @@ import kotlin.reflect.KClass
+ import misk.MiskCaller
+ import misk.audit.AuditRequestResponse
+ import misk.exceptions.BadRequestException
+-import misk.exceptions.UnauthorizedException
++import misk.exceptions.ForbiddenException
+ import misk.hibernate.DbEntity
+ import misk.hibernate.Query
+ import misk.hibernate.ReflectionQuery
+@@ -57,7 +57,7 @@ constructor(
+       if (caller.isAllowed(metadata.allowedCapabilities, metadata.allowedServices)) {
+         runDynamicQuery(transacter, caller.principal, request, metadata)
+       } else {
+-        throw UnauthorizedException("Unauthorized to query [dbEntity=${metadata.entityClass}]")
++        throw ForbiddenException("Unauthorized to query [dbEntity=${metadata.entityClass}]")
+       }
+ 
+     return Response(results)
+@@ -79,7 +79,7 @@ constructor(
+       // by setting `entityClass` to a different entity name. Enforce that the entity executed matches
+       // the entity the query class is authorized for.
+       if (dbEntity.simpleName != metadata.entityClass) {
+-        throw UnauthorizedException(
++        throw ForbiddenException(
+           "Requested entity [dbEntity=${request.entityClass}] does not match authorized query [queryClass=${request.queryClass}]"
+         )
+       }
+diff --git a/misk-hibernate/src/main/kotlin/misk/hibernate/actions/HibernateDatabaseQueryStaticAction.kt b/misk-hibernate/src/main/kotlin/misk/hibernate/actions/HibernateDatabaseQueryStaticAction.kt
+index 9c0171196..1b021a03d 100644
+--- a/misk-hibernate/src/main/kotlin/misk/hibernate/actions/HibernateDatabaseQueryStaticAction.kt
++++ b/misk-hibernate/src/main/kotlin/misk/hibernate/actions/HibernateDatabaseQueryStaticAction.kt
+@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
+ import misk.MiskCaller
+ import misk.audit.AuditRequestResponse
+ import misk.exceptions.BadRequestException
+-import misk.exceptions.UnauthorizedException
++import misk.exceptions.ForbiddenException
+ import misk.hibernate.DbEntity
+ import misk.hibernate.Operator
+ import misk.hibernate.Query
+@@ -62,7 +62,7 @@ constructor(
+       if (caller.isAllowed(metadata.allowedCapabilities, metadata.allowedServices)) {
+         runStaticQuery(transacter, caller.principal, request, metadata)
+       } else {
+-        throw UnauthorizedException("Unauthorized to query [dbEntity=${metadata.entityClass}]")
++        throw ForbiddenException("Unauthorized to query [dbEntity=${metadata.entityClass}]")
+       }
+ 
+     return Response(results)
+diff --git a/misk-hibernate/src/test/kotlin/misk/hibernate/TransacterTest.kt b/misk-hibernate/src/test/kotlin/misk/hibernate/TransacterTest.kt
+index 81f907145..c92163966 100644
+--- a/misk-hibernate/src/test/kotlin/misk/hibernate/TransacterTest.kt
++++ b/misk-hibernate/src/test/kotlin/misk/hibernate/TransacterTest.kt
+@@ -7,7 +7,7 @@ import java.util.concurrent.CountDownLatch
+ import java.util.concurrent.Executors
+ import java.util.concurrent.atomic.AtomicInteger
+ import kotlin.test.assertFailsWith
+-import misk.exceptions.UnauthorizedException
++import misk.exceptions.ForbiddenException
+ import misk.hibernate.VitessTestExtensions.save
+ import misk.hibernate.VitessTestExtensions.shard
+ import misk.jdbc.DataSourceType
+@@ -232,13 +232,13 @@ abstract class TransacterTest {
+ 
+   @Test
+   fun exceptionCausesTransactionToRollback() {
+-    assertFailsWith<UnauthorizedException> {
++    assertFailsWith<ForbiddenException> {
+       transacter.transaction { session ->
+         session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+ 
+         val query = queryFactory.newQuery<MovieQuery>().allowTableScan()
+         assertThat(query.list(session)).isNotEmpty
+-        throw UnauthorizedException("boom!")
++        throw ForbiddenException("boom!")
+       }
+     }
+     transacter.transaction { session ->
+diff --git a/misk-hibernate/src/test/kotlin/misk/hibernate/actions/HibernateDatabaseQueryDynamicActionTest.kt b/misk-hibernate/src/test/kotlin/misk/hibernate/actions/HibernateDatabaseQueryDynamicActionTest.kt
+index 861f042c9..d32ec5053 100644
+--- a/misk-hibernate/src/test/kotlin/misk/hibernate/actions/HibernateDatabaseQueryDynamicActionTest.kt
++++ b/misk-hibernate/src/test/kotlin/misk/hibernate/actions/HibernateDatabaseQueryDynamicActionTest.kt
+@@ -9,7 +9,7 @@ import kotlin.test.assertEquals
+ import kotlin.test.assertFailsWith
+ import misk.audit.FakeAuditClient
+ import misk.exceptions.BadRequestException
+-import misk.exceptions.UnauthorizedException
++import misk.exceptions.ForbiddenException
+ import misk.hibernate.DbActor
+ import misk.hibernate.DbCharacter
+ import misk.hibernate.DbMovie
+@@ -52,7 +52,7 @@ class HibernateDatabaseQueryDynamicActionTest {
+ 
+   @Test
+   fun `unauthorized request`() {
+-    assertFailsWith<UnauthorizedException> {
++    assertFailsWith<ForbiddenException> {
+       realActionRequestExecuter.executeRequest(
+         HibernateDatabaseQueryDynamicAction.Request(
+           entityClass = DbMovie::class.simpleName!!,
+@@ -79,7 +79,7 @@ class HibernateDatabaseQueryDynamicActionTest {
+    */
+   @Test
+   fun `entityClass not matching authorized queryClass throws unauthorized`() {
+-    assertFailsWith<UnauthorizedException> {
++    assertFailsWith<ForbiddenException> {
+       realActionRequestExecuter.executeRequest(
+         HibernateDatabaseQueryDynamicAction.Request(
+           entityClass = DbActor::class.simpleName!!,
+diff --git a/misk-hibernate/src/test/kotlin/misk/hibernate/actions/HibernateDatabaseQueryStaticActionTest.kt b/misk-hibernate/src/test/kotlin/misk/hibernate/actions/HibernateDatabaseQueryStaticActionTest.kt
+index 0a0c6e13d..9e7164762 100644
+--- a/misk-hibernate/src/test/kotlin/misk/hibernate/actions/HibernateDatabaseQueryStaticActionTest.kt
++++ b/misk-hibernate/src/test/kotlin/misk/hibernate/actions/HibernateDatabaseQueryStaticActionTest.kt
+@@ -8,7 +8,7 @@ import kotlin.reflect.jvm.javaField
+ import kotlin.test.assertEquals
+ import kotlin.test.assertFailsWith
+ import misk.audit.FakeAuditClient
+-import misk.exceptions.UnauthorizedException
++import misk.exceptions.ForbiddenException
+ import misk.hibernate.DbActor
+ import misk.hibernate.DbCharacter
+ import misk.hibernate.DbMovie
+@@ -52,7 +52,7 @@ class HibernateDatabaseQueryStaticActionTest {
+ 
+   @Test
+   fun `unauthorized request`() {
+-    assertFailsWith<UnauthorizedException> {
++    assertFailsWith<ForbiddenException> {
+       realActionRequestExecuter.executeRequest(
+         HibernateDatabaseQueryStaticAction.Request(
+           entityClass = DbMovie::class.simpleName!!,
+diff --git a/misk-hibernate/src/test/kotlin/misk/hibernate/actions/RealActionRequestExecuter.kt b/misk-hibernate/src/test/kotlin/misk/hibernate/actions/RealActionRequestExecuter.kt
+index bf3fe6b45..feef5f145 100644
+--- a/misk-hibernate/src/test/kotlin/misk/hibernate/actions/RealActionRequestExecuter.kt
++++ b/misk-hibernate/src/test/kotlin/misk/hibernate/actions/RealActionRequestExecuter.kt
+@@ -6,7 +6,7 @@ import kotlin.reflect.KClass
+ import misk.client.HttpClientEndpointConfig
+ import misk.client.HttpClientFactory
+ import misk.exceptions.BadRequestException
+-import misk.exceptions.UnauthorizedException
++import misk.exceptions.ForbiddenException
+ import misk.security.authz.FakeCallerAuthenticator
+ import misk.web.jetty.JettyService
+ import misk.web.mediatype.MediaTypes
+@@ -65,7 +65,7 @@ constructor(
+         throw BadRequestException(response.message)
+       }
+       response.code == 403 -> {
+-        throw UnauthorizedException(response.message)
++        throw ForbiddenException(response.message)
+       }
+       // TODO add other status code => Misk Action Exception mappings for related tests
+       else -> {
+diff --git a/misk-slack/src/main/kotlin/misk/slack/webapi/interceptors/SlackSignedRequestsInterceptor.kt b/misk-slack/src/main/kotlin/misk/slack/webapi/interceptors/SlackSignedRequestsInterceptor.kt
+index 74be387f3..d3e063e39 100644
+--- a/misk-slack/src/main/kotlin/misk/slack/webapi/interceptors/SlackSignedRequestsInterceptor.kt
++++ b/misk-slack/src/main/kotlin/misk/slack/webapi/interceptors/SlackSignedRequestsInterceptor.kt
+@@ -7,7 +7,7 @@ import kotlin.math.abs
+ import kotlin.reflect.full.findAnnotation
+ import misk.Action
+ import misk.exceptions.BadRequestException
+-import misk.exceptions.UnauthorizedException
++import misk.exceptions.ForbiddenException
+ import misk.slack.webapi.SlackConfig
+ import misk.web.NetworkChain
+ import misk.web.NetworkInterceptor
+@@ -62,7 +62,7 @@ class SlackSignedRequestsInterceptor @Inject constructor(private val clock: Cloc
+ 
+     val expectedSignature = chain.httpCall.requestHeaders["X-Slack-Signature"]
+     if (actualSignature != expectedSignature) {
+-      throw UnauthorizedException("Slack headers could not be authenticated!")
++      throw ForbiddenException("Slack headers could not be authenticated!")
+     }
+ 
+     chain.proceed(chain.httpCall)
+diff --git a/misk/src/main/kotlin/misk/security/authz/AccessInterceptor.kt b/misk/src/main/kotlin/misk/security/authz/AccessInterceptor.kt
+index e02dda804..358db71df 100644
+--- a/misk/src/main/kotlin/misk/security/authz/AccessInterceptor.kt
++++ b/misk/src/main/kotlin/misk/security/authz/AccessInterceptor.kt
+@@ -6,8 +6,8 @@ import misk.Action
+ import misk.ApplicationInterceptor
+ import misk.Chain
+ import misk.MiskCaller
+-import misk.exceptions.UnauthenticatedException
+ import misk.exceptions.UnauthorizedException
++import misk.exceptions.ForbiddenException
+ import misk.logging.getLogger
+ import misk.scope.ActionScoped
+ 
+@@ -21,10 +21,10 @@ private constructor(
+   private val allowAnyUser: Boolean,
+ ) : ApplicationInterceptor {
+   override fun intercept(chain: Chain): Any {
+-    val caller = caller.get() ?: throw UnauthenticatedException()
++    val caller = caller.get() ?: throw UnauthorizedException()
+     if (!isAuthorized(caller)) {
+       logger.warn { "$caller is not allowed to access ${chain.action}" }
+-      throw UnauthorizedException()
++      throw ForbiddenException()
+     }
+ 
+     return chain.proceed(chain.args)
+diff --git a/misk/src/main/kotlin/misk/web/exceptions/ExceptionHandlingInterceptor.kt b/misk/src/main/kotlin/misk/web/exceptions/ExceptionHandlingInterceptor.kt
+index d10a2f8d7..8523ce546 100644
+--- a/misk/src/main/kotlin/misk/web/exceptions/ExceptionHandlingInterceptor.kt
++++ b/misk/src/main/kotlin/misk/web/exceptions/ExceptionHandlingInterceptor.kt
+@@ -10,8 +10,8 @@ import java.net.HttpURLConnection
+ import java.util.Base64
+ import misk.Action
+ import misk.annotation.ExperimentalMiskApi
+-import misk.exceptions.UnauthenticatedException
+ import misk.exceptions.UnauthorizedException
++import misk.exceptions.ForbiddenException
+ import misk.grpc.GrpcMessageSink
+ import misk.logging.SmartTagsThreadLocalHandler
+ import misk.logging.Tag
+@@ -136,8 +136,8 @@ private constructor(
+ 
+   private fun unwrappedToGrpcResponse(th: Throwable, mdcTags: Set<Tag>): GrpcErrorResponse =
+     when (th) {
+-      is UnauthenticatedException -> GrpcErrorResponse(GrpcStatus.UNAUTHENTICATED, th.message)
+-      is UnauthorizedException -> GrpcErrorResponse(GrpcStatus.PERMISSION_DENIED, th.message)
++      is UnauthorizedException -> GrpcErrorResponse(GrpcStatus.UNAUTHENTICATED, th.message)
++      is ForbiddenException -> GrpcErrorResponse(GrpcStatus.PERMISSION_DENIED, th.message)
+       else ->
+         mapperResolver.mapperFor(th)?.let {
+           if (!requestResponseLoggedCapture.isLogged()) {
+diff --git a/misk/src/main/kotlin/misk/web/exceptions/WebActionExceptionMapper.kt b/misk/src/main/kotlin/misk/web/exceptions/WebActionExceptionMapper.kt
+index 726f7b6f1..5f28ec97d 100644
+--- a/misk/src/main/kotlin/misk/web/exceptions/WebActionExceptionMapper.kt
++++ b/misk/src/main/kotlin/misk/web/exceptions/WebActionExceptionMapper.kt
+@@ -2,8 +2,8 @@ package misk.web.exceptions
+ 
+ import jakarta.inject.Inject
+ import java.net.HttpURLConnection
+-import misk.exceptions.UnauthenticatedException
+ import misk.exceptions.UnauthorizedException
++import misk.exceptions.ForbiddenException
+ import misk.exceptions.WebActionException
+ import misk.web.Response
+ import misk.web.ResponseBody
+@@ -19,8 +19,8 @@ internal class WebActionExceptionMapper @Inject internal constructor(val config:
+   ExceptionMapper<WebActionException> {
+   override fun toResponse(th: WebActionException): Response<ResponseBody> {
+     return when (th) {
+-      is UnauthenticatedException -> UNAUTHENTICATED_RESPONSE
+-      is UnauthorizedException -> UNAUTHORIZED_RESPONSE
++      is UnauthorizedException -> UNAUTHENTICATED_RESPONSE
++      is ForbiddenException -> UNAUTHORIZED_RESPONSE
+       else -> Response(th.responseBody.toResponseBody(), HEADERS, statusCode = th.code)
+     }
+   }
+diff --git a/misk/src/test/kotlin/misk/web/exceptions/CustomExceptionMapperTest.kt b/misk/src/test/kotlin/misk/web/exceptions/CustomExceptionMapperTest.kt
+index 92c9ec60b..ab96e4d12 100644
+--- a/misk/src/test/kotlin/misk/web/exceptions/CustomExceptionMapperTest.kt
++++ b/misk/src/test/kotlin/misk/web/exceptions/CustomExceptionMapperTest.kt
+@@ -2,8 +2,8 @@ package misk.web.exceptions
+ 
+ import jakarta.inject.Inject
+ import misk.MiskTestingServiceModule
+-import misk.exceptions.UnauthenticatedException
+ import misk.exceptions.UnauthorizedException
++import misk.exceptions.ForbiddenException
+ import misk.inject.KAbstractModule
+ import misk.testing.MiskTest
+ import misk.testing.MiskTestModule
+@@ -51,7 +51,7 @@ internal class CustomExceptionMapperTest {
+     @Get("/unauthenticated")
+     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+     fun throwsUnauthenticated(): String {
+-      throw UnauthenticatedException()
++      throw UnauthorizedException()
+     }
+   }
+ 
+@@ -59,17 +59,17 @@ internal class CustomExceptionMapperTest {
+     @Get("/unauthorized")
+     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+     fun throwsUnauthorized(): String {
+-      throw UnauthorizedException()
++      throw ForbiddenException()
+     }
+   }
+ 
+-  class CustomUnauthorizedMapper @Inject constructor() : ExceptionMapper<UnauthorizedException> {
+-    override fun toResponse(th: UnauthorizedException) =
++  class CustomUnauthorizedMapper @Inject constructor() : ExceptionMapper<ForbiddenException> {
++    override fun toResponse(th: ForbiddenException) =
+       Response(statusCode = 403, body = "custom unauthorized response!".toResponseBody())
+   }
+ 
+-  class CustomUnauthenticatedMapper @Inject constructor() : ExceptionMapper<UnauthenticatedException> {
+-    override fun toResponse(th: UnauthenticatedException) =
++  class CustomUnauthenticatedMapper @Inject constructor() : ExceptionMapper<UnauthorizedException> {
++    override fun toResponse(th: UnauthorizedException) =
+       Response(statusCode = 401, body = "custom unauthenticated response!".toResponseBody())
+   }
+ 
+@@ -79,8 +79,8 @@ internal class CustomExceptionMapperTest {
+       install(MiskTestingServiceModule())
+       install(WebActionModule.create<ThrowsUnauthenticated>())
+       install(WebActionModule.create<ThrowsUnauthorized>())
+-      install(ExceptionMapperModule.create<UnauthenticatedException, CustomUnauthenticatedMapper>())
+-      install(ExceptionMapperModule.create<UnauthorizedException, CustomUnauthorizedMapper>())
++      install(ExceptionMapperModule.create<UnauthorizedException, CustomUnauthenticatedMapper>())
++      install(ExceptionMapperModule.create<ForbiddenException, CustomUnauthorizedMapper>())
+     }
+   }
+ }
+diff --git a/misk/src/test/kotlin/misk/web/exceptions/ExceptionMapperTest.kt b/misk/src/test/kotlin/misk/web/exceptions/ExceptionMapperTest.kt
+index 9d060e4ff..f59c1c052 100644
+--- a/misk/src/test/kotlin/misk/web/exceptions/ExceptionMapperTest.kt
++++ b/misk/src/test/kotlin/misk/web/exceptions/ExceptionMapperTest.kt
+@@ -9,8 +9,8 @@ import java.net.HttpURLConnection.HTTP_FORBIDDEN
+ import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
+ import java.net.HttpURLConnection.HTTP_UNAVAILABLE
+ import misk.MiskTestingServiceModule
+-import misk.exceptions.UnauthenticatedException
+ import misk.exceptions.UnauthorizedException
++import misk.exceptions.ForbiddenException
+ import misk.exceptions.WebActionException
+ import misk.inject.KAbstractModule
+ import misk.logging.LogCollector
+@@ -109,7 +109,7 @@ internal class ExceptionMapperTest {
+     @Get("/unauthenticated")
+     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+     fun throwsUnauthenticated(): String {
+-      throw UnauthenticatedException()
++      throw UnauthorizedException()
+     }
+   }
+ 
+@@ -117,7 +117,7 @@ internal class ExceptionMapperTest {
+     @Get("/unauthorized")
+     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+     fun throwsUnauthorized(): String {
+-      throw UnauthorizedException()
++      throw ForbiddenException()
+     }
+   }
+ 

@@ -10,8 +10,8 @@ import java.net.HttpURLConnection
 import java.util.Base64
 import misk.Action
 import misk.annotation.ExperimentalMiskApi
-import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
+import misk.exceptions.ForbiddenException
 import misk.grpc.GrpcMessageSink
 import misk.logging.SmartTagsThreadLocalHandler
 import misk.logging.Tag
@@ -136,8 +136,8 @@ private constructor(
 
   private fun unwrappedToGrpcResponse(th: Throwable, mdcTags: Set<Tag>): GrpcErrorResponse =
     when (th) {
-      is UnauthenticatedException -> GrpcErrorResponse(GrpcStatus.UNAUTHENTICATED, th.message)
-      is UnauthorizedException -> GrpcErrorResponse(GrpcStatus.PERMISSION_DENIED, th.message)
+      is UnauthorizedException -> GrpcErrorResponse(GrpcStatus.UNAUTHENTICATED, th.message)
+      is ForbiddenException -> GrpcErrorResponse(GrpcStatus.PERMISSION_DENIED, th.message)
       else ->
         mapperResolver.mapperFor(th)?.let {
           if (!requestResponseLoggedCapture.isLogged()) {

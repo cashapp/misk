@@ -6,8 +6,8 @@ import misk.Action
 import misk.ApplicationInterceptor
 import misk.Chain
 import misk.MiskCaller
-import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
+import misk.exceptions.ForbiddenException
 import misk.logging.getLogger
 import misk.scope.ActionScoped
 
@@ -21,10 +21,10 @@ private constructor(
   private val allowAnyUser: Boolean,
 ) : ApplicationInterceptor {
   override fun intercept(chain: Chain): Any {
-    val caller = caller.get() ?: throw UnauthenticatedException()
+    val caller = caller.get() ?: throw UnauthorizedException()
     if (!isAuthorized(caller)) {
       logger.warn { "$caller is not allowed to access ${chain.action}" }
-      throw UnauthorizedException()
+      throw ForbiddenException()
     }
 
     return chain.proceed(chain.args)

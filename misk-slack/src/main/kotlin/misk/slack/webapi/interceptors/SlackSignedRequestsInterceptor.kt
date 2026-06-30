@@ -7,7 +7,7 @@ import kotlin.math.abs
 import kotlin.reflect.full.findAnnotation
 import misk.Action
 import misk.exceptions.BadRequestException
-import misk.exceptions.UnauthorizedException
+import misk.exceptions.ForbiddenException
 import misk.slack.webapi.SlackConfig
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
@@ -62,7 +62,7 @@ class SlackSignedRequestsInterceptor @Inject constructor(private val clock: Cloc
 
     val expectedSignature = chain.httpCall.requestHeaders["X-Slack-Signature"]
     if (actualSignature != expectedSignature) {
-      throw UnauthorizedException("Slack headers could not be authenticated!")
+      throw ForbiddenException("Slack headers could not be authenticated!")
     }
 
     chain.proceed(chain.httpCall)
