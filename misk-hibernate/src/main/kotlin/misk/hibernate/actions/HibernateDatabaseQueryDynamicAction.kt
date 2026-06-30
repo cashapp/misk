@@ -28,11 +28,8 @@ import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.database.DatabaseQueryMetadata
 
-/** Runs query from Database Query dashboard tab against DB and returns results */
 @Singleton
-internal class HibernateDatabaseQueryDynamicAction
-@Inject
-constructor(
+internal class HibernateDatabaseQueryDynamicAction @Inject constructor(
   @JvmSuppressWildcards private val callerProvider: ActionScoped<MiskCaller?>,
   private val databaseQueryMetadata: List<DatabaseQueryMetadata>,
   private val injector: Injector,
@@ -45,83 +42,98 @@ constructor(
   @AdminDashboardAccess
   @AuditRequestResponse
   fun query(@RequestBody request: Request): Response {
-    val caller = callerProvider.get()!!
-    val queryClass = request.queryClass
+    val caller = callerProvider.get()
+      ?: throw ForbiddenException("Authentication required")
 
-    checkQueryMatchesAction(queryClass, true)
-
-    val metadata = findDatabaseQueryMetadata(databaseQueryMetadata, queryClass)
+    checkQueryMatchesAction(request.queryClass, isDynamicAction = true)
+    val metadata = findDatabaseQueryMetadata(databaseQueryMetadata, request.queryClass)
     val transacter = getTransacterForDatabaseQueryAction(injector, metadata)
 
-    val results =
-      if (caller.isAllowed(metadata.allowedCapabilities, metadata.allowedServices)) {
-        runDynamicQuery(transacter, caller.principal, request, metadata)
-      } else {
-        throw ForbiddenException("Unauthorized to query [dbEntity=${metadata.entityClass}]")
-      }
-
+    authorizeCaller(caller, metadata)
+    val dbEntity = resolveAndValidateEntity(transacter, request, metadata)
+    val results = executeQueryInTransaction(transacter, caller.principal, dbEntity, request)
     return Response(results)
   }
 
-  private fun runDynamicQuery(
+  private fun authorizeCaller(caller: MiskCaller, metadata: DatabaseQueryMetadata) {
+    if (!caller.isAllowed(metadata.allowedCapabilities, metadata.allowedServices)) {
+      throw ForbiddenException("Unauthorized to query [dbEntity=${metadata.entityClass}]")
+    }
+  }
+
+  private fun resolveAndValidateEntity(
     transacter: Transacter,
-    principal: String,
     request: Request,
     metadata: DatabaseQueryMetadata,
-  ) =
+  ): KClass<out DbEntity<*>> {
+    val dbEntity = transacter.entities().find { it.simpleName == request.entityClass }
+      ?: throw BadRequestException("Unknown entity class")
+    
+    if (dbEntity.simpleName != metadata.entityClass) {
+      throw ForbiddenException("Requested entity does not match authorized query class")
+    }
+    return dbEntity
+  }
+
+  private fun executeQueryInTransaction(
+    transacter: Transacter,
+    principal: String,
+    dbEntity: KClass<out DbEntity<*>>,
+    request: Request,
+  ): List<Map<String, Any?>> =
     transacter.transaction { session ->
-      val dbEntity =
-        transacter.entities().find { it.simpleName == request.entityClass }
-          ?: throw BadRequestException("[dbEntity=${request.entityClass}] is not an installed HibernateEntity")
-      // Authorization is performed against `queryClass` (and its bound `metadata.entityClass`), but the
-      // entity actually queried is taken from the user-controlled `request.entityClass`. Without the
-      // binding check below, a caller authorized for one query class could read any registered entity
-      // by setting `entityClass` to a different entity name. Enforce that the entity executed matches
-      // the entity the query class is authorized for.
-      if (dbEntity.simpleName != metadata.entityClass) {
-        throw ForbiddenException(
-          "Requested entity [dbEntity=${request.entityClass}] does not match authorized query [queryClass=${request.queryClass}]"
-        )
-      }
-      val (selectPaths, rows) = runDynamicQuery(session, principal, dbEntity, request)
-      rows.map { row ->
-        // TODO (adrw) sort the map based on DbEntity order
-        // TODO (adrw) Mirror this over to the static path
-        row.mapIndexed { index, cell -> selectPaths[index] to cell }.toMap()
-      }
+      val (selectPaths, rawRows) = buildAndExecuteQuery(session, principal, dbEntity, request)
+      mapRowsToResults(selectPaths, rawRows)
     }
 
-  private fun runDynamicQuery(
+  private fun buildAndExecuteQuery(
     session: Session,
     principal: String,
     dbEntity: KClass<out DbEntity<*>>,
     request: Request,
-  ): Pair<List<String>, List<List<Any?>>> {
-    val maxRows = request.query.queryConfig?.maxRows ?: queryLimitsConfig.maxMaxRows
-    val configuredQuery =
-      ReflectionQuery.Factory(queryLimitsConfig).dynamicQuery(dbEntity).configureDynamic(request, maxRows)
+  ): QueryResult {
+    // FIX: Enforce ceiling for maxRows to prevent DoS
+    val requestedMaxRows = request.query.queryConfig?.maxRows ?: queryLimitsConfig.maxMaxRows
+    val effectiveMaxRows = minOf(requestedMaxRows, queryLimitsConfig.maxMaxRows)
+
+    val query = ReflectionQuery.Factory(queryLimitsConfig)
+      .dynamicQuery(dbEntity)
+      .applyDynamicConfiguration(request, effectiveMaxRows)
+
     val selectPaths = validateSelectPathsOrDefault(dbEntity, request.query.select?.paths)
-    logger.info(
-      "Query sent from dashboard [principal=$principal]" +
-        "[dbEntity=${request.entityClass}][selectPaths=$selectPaths] ${request.query}"
-    )
-    val rows = configuredQuery.dynamicList(session, selectPaths)
-    return Pair(selectPaths, rows)
+    logger.info { "Dynamic query executed [principal=$principal][dbEntity=${dbEntity.simpleName}]" }
+    
+    val rows = query.dynamicList(session, selectPaths)
+    return QueryResult(selectPaths, rows)
   }
 
-  private fun Query<out DbEntity<*>>.configureDynamic(request: Request, rowLimit: Int) = apply {
+  private fun Query<out DbEntity<*>>.applyDynamicConfiguration(
+    request: Request,
+    rowLimit: Int,
+  ) = apply {
     maxRows = rowLimit
-    request.query.constraints?.forEach { (path, operator, value) ->
-      if (path == null) throw BadRequestException("Constraint path must be non-null")
-      if (operator == null) throw BadRequestException("Constraint operator must be non-null")
-      dynamicAddConstraint(path = path, operator = operator, value = value)
+    request.query.constraints?.forEach { constraint ->
+      dynamicAddConstraint(
+        path = constraint.path ?: throw BadRequestException("Constraint path required"),
+        operator = constraint.operator ?: throw BadRequestException("Constraint operator required"),
+        value = constraint.value,
+      )
     }
-    request.query.orders?.forEach { (path, ascending) ->
-      if (path == null) throw BadRequestException("Order path must be non-null")
-      if (ascending == null) throw BadRequestException("Order ascending must be non-null")
-      dynamicAddOrder(path = path, asc = ascending)
+    request.query.orders?.forEach { order ->
+      dynamicAddOrder(
+        path = order.path ?: throw BadRequestException("Order path required"),
+        asc = order.ascending ?: throw BadRequestException("Order direction required")
+      )
     }
   }
+
+  private fun mapRowsToResults(
+    selectPaths: List<String>,
+    rawRows: List<List<Any?>>,
+  ): List<Map<String, Any?>> =
+    rawRows.map { row ->
+      row.mapIndexed { index, cell -> selectPaths[index] to cell }.toMap()
+    }
 
   data class Request(
     val entityClass: String,
@@ -129,11 +141,12 @@ constructor(
     val query: HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery,
   )
 
-  data class Response(val results: List<Any>)
+  data class Response(val results: List<Map<String, Any?>>)
+
+  private data class QueryResult(val selectPaths: List<String>, val rows: List<List<Any?>>)
 
   companion object {
     private val logger = getLogger<HibernateDatabaseQueryDynamicAction>()
-
     const val HIBERNATE_QUERY_DYNAMIC_WEBACTION_PATH = "/api/database/query/hibernate/dynamic"
   }
 }
