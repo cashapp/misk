@@ -68,9 +68,7 @@ class HibernateExceptionClassifierTest {
   @Test
   fun `inherits database-specific behavior from base classifier`() {
     val classifier = HibernateExceptionClassifier(DataSourceType.VITESS_MYSQL)
-    val exception = SQLException(
-      "vttablet: rpc error: code = Aborted desc = transaction 123: not found"
-    )
+    val exception = SQLException("vttablet: rpc error: code = Aborted desc = transaction 123: not found")
     assertThat(classifier.isRetryable(exception)).isTrue()
   }
 }

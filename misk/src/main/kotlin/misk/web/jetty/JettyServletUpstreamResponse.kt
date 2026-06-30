@@ -3,10 +3,11 @@ package misk.web.jetty
 import java.util.function.Supplier
 import misk.web.ServletHttpCall
 import misk.web.actions.WebSocketListener
+import misk.web.http.HttpVersion
 import okhttp3.Headers
 import okhttp3.Headers.Companion.headersOf
+import org.eclipse.jetty.ee9.nested.Response
 import org.eclipse.jetty.http.HttpFields
-import org.eclipse.jetty.server.Response
 
 internal class JettyServletUpstreamResponse(val response: Response) : ServletHttpCall.UpstreamResponse {
   var sendTrailers = false
@@ -20,6 +21,9 @@ internal class JettyServletUpstreamResponse(val response: Response) : ServletHtt
 
   override val headers: Headers
     get() = response.headers()
+
+  override val httpVersion: HttpVersion
+    get() = HttpVersion.fromJetty(response.httpChannel.request.httpVersion)
 
   override fun setHeader(name: String, value: String) {
     response.setHeader(name, value)
@@ -35,14 +39,13 @@ internal class JettyServletUpstreamResponse(val response: Response) : ServletHtt
     sendTrailers = true
 
     // Set the callback that'll return trailers at the end of the response body.
-    response.trailers =
-      Supplier<HttpFields> {
-        val httpFields = HttpFields.build()
-        for (i in 0 until trailers.size) {
-          httpFields.add(trailers.name(i), trailers.value(i))
-        }
-        httpFields
+    response.trailers = Supplier {
+      val httpFields = HttpFields.build()
+      for (i in 0 until trailers.size) {
+        httpFields.add(trailers.name(i), trailers.value(i))
       }
+      httpFields
+    }
   }
 
   override fun setTrailer(name: String, value: String) {

@@ -67,23 +67,24 @@ private val logger = getLogger<Session>()
  * database will throw a [java.sql.SQLException] (`Unknown system variable 'transaction_mode'`).
  */
 fun Session.allowCrossShardTransactions() {
-  hibernateSession.doWork { connection ->
-    connection.createStatement().execute("SET transaction_mode = 'multi'")
-  }
+  hibernateSession.doWork { connection -> connection.createStatement().execute("SET transaction_mode = 'multi'") }
 
   // Reset to UNSPECIFIED after the transaction completes (commit or rollback) so it doesn't leak
   // to subsequent transactions via connection pool reuse. UNSPECIFIED falls back to whatever the
   // vtgate-level default is, so this is safe regardless of the vtgate's configured transaction mode.
-  hibernateSession.transaction.registerSynchronization(object : Synchronization {
-    override fun beforeCompletion() {}
-    override fun afterCompletion(status: Int) {
-      try {
-        hibernateSession.doWork { connection ->
-          connection.createStatement().execute("SET transaction_mode = 'unspecified'")
+  hibernateSession.transaction.registerSynchronization(
+    object : Synchronization {
+      override fun beforeCompletion() {}
+
+      override fun afterCompletion(status: Int) {
+        try {
+          hibernateSession.doWork { connection ->
+            connection.createStatement().execute("SET transaction_mode = 'unspecified'")
+          }
+        } catch (e: Exception) {
+          logger.error(e) { "Failed to reset transaction_mode after transaction completion" }
         }
-      } catch (e: Exception) {
-        logger.error(e) { "Failed to reset transaction_mode after transaction completion" }
       }
     }
-  })
+  )
 }

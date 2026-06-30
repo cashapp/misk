@@ -51,9 +51,8 @@ constructor(
 }
 
 // Module that allows testing/development environments to bind up the admin dashboard
-class AdminDashboardTestingModule @JvmOverloads constructor(
-  private val enableTurbo: Boolean = true,
-) : KAbstractModule() {
+class AdminDashboardTestingModule @JvmOverloads constructor(private val enableTurbo: Boolean = true) :
+  KAbstractModule() {
   override fun configure() {
     // Set dummy values for access, these shouldn't matter,
     // as test environments should prefer to use the FakeCallerAuthenticator.

@@ -47,14 +47,14 @@ dependencies {
   api(project(":misk-feature"))
   implementation(libs.jCommander)
   implementation(libs.jettyAlpnServer)
+  implementation(libs.jettyEe9Nested)
   implementation(libs.jettyHttp)
   implementation(libs.jettyHttp2)
   implementation(libs.jettyServlet)
   implementation(libs.jettyServlets)
   implementation(libs.jettyUds)
-  implementation(libs.jettyUnixSocket)
-  implementation(libs.jettyWebsocketApi)
-  implementation(libs.jettyWebsocketServer)
+  implementation(libs.jettyWebsocketApiEE9)
+  implementation(libs.jettyWebsocketServerEE9)
   implementation(libs.jnrUnixsocket)
   implementation(libs.kotlinReflect)
   implementation(libs.kotlinStdLibJdk8)
@@ -119,7 +119,7 @@ wire {
     rpcCallStyle = "blocking"
     exclusive = false
     includes = listOf(
-      "helloworld.Greeter"
+      "helloworld.Greeter",
     )
   }
 
@@ -130,7 +130,7 @@ wire {
     exclusive = false
     singleMethodServices = true
     includes = listOf(
-      "helloworld.Greeter"
+      "helloworld.Greeter",
     )
   }
 }
@@ -149,7 +149,7 @@ afterEvaluate {
   }
 
   kotlinSourceSets?.getByName("main")?.kotlin?.setSrcDirs(
-    kotlinSourceSets.getByName("main").kotlin.srcDirs.filter { !it.path.contains(generatedSourceDir) }
+    kotlinSourceSets.getByName("main").kotlin.srcDirs.filter { !it.path.contains(generatedSourceDir) },
   )
   kotlinSourceSets?.getByName("test")?.kotlin?.srcDir(generatedSourceDir)
 
@@ -160,6 +160,6 @@ afterEvaluate {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGfm")),
   )
 }

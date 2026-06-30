@@ -1,20 +1,17 @@
 package misk.web
 
 import com.google.inject.Injector
-import com.google.inject.Module
-import misk.testing.MiskTest
-import misk.testing.MiskTestModule
-import misk.web.actions.WebAction
-import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
 import kotlin.reflect.KClass
+import misk.testing.MiskTest
+import misk.web.actions.WebAction
+import org.junit.jupiter.api.Test
 
 /**
  * Abstract base class for testing that all WebAction implementations are properly registered.
  *
- * Extend this class and implement the abstract methods to get automatic verification that
- * all WebAction implementations in your service's packages are registered via
- * `WebActionModule.create<YourAction>()`.
+ * Extend this class and implement the abstract methods to get automatic verification that all WebAction implementations
+ * in your service's packages are registered via `WebActionModule.create<YourAction>()`.
  *
  * ## Usage
  *
@@ -37,9 +34,8 @@ import kotlin.reflect.KClass
  *
  * ## What This Test Catches
  *
- * This test catches a common mistake: implementing a WebAction but forgetting to register it.
- * Without registration via `WebActionModule.create<YourAction>()`, the action won't be exposed
- * as an HTTP endpoint.
+ * This test catches a common mistake: implementing a WebAction but forgetting to register it. Without registration via
+ * `WebActionModule.create<YourAction>()`, the action won't be exposed as an HTTP endpoint.
  *
  * ## Built-in Exclusions
  *
@@ -52,22 +48,21 @@ import kotlin.reflect.KClass
 @MiskTest
 abstract class AbstractWebActionRegistrationTest {
 
-  @Inject
-  private lateinit var injector: Injector
+  @Inject private lateinit var injector: Injector
 
   /**
    * Returns the packages to scan for WebAction implementations.
    *
-   * This should be your service's root package(s), e.g. `listOf("com.example.myservice")`.
-   * Avoid overly broad packages like `listOf("com.example")` which might scan unrelated code.
+   * This should be your service's root package(s), e.g. `listOf("com.example.myservice")`. Avoid overly broad packages
+   * like `listOf("com.example")` which might scan unrelated code.
    */
   protected abstract fun webActionPackages(): List<String>
 
   /**
    * Returns true if the given action class should be excluded from registration verification.
    *
-   * Override this to exclude specific actions that are intentionally not registered,
-   * such as test-only actions or actions registered via different mechanisms.
+   * Override this to exclude specific actions that are intentionally not registered, such as test-only actions or
+   * actions registered via different mechanisms.
    *
    * Example:
    * ```kotlin
@@ -81,8 +76,7 @@ abstract class AbstractWebActionRegistrationTest {
   /**
    * Returns a hint for error messages about where to register missing actions.
    *
-   * Override this to provide a clearer error message, e.g. `"WebModule"` or
-   * `"config/modules/WebActionsModule"`.
+   * Override this to provide a clearer error message, e.g. `"WebModule"` or `"config/modules/WebActionsModule"`.
    */
   protected open fun registrationModuleHint(): String? = null
 

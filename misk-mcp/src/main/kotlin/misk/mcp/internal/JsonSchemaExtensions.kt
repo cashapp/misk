@@ -18,7 +18,6 @@ import kotlinx.serialization.json.buildJsonObject
 import misk.mcp.Description
 import misk.mcp.serializer
 
-
 /**
  * Generates a JSON schema for a serializable Kotlin type, including properties, types, and required fields.
  * Processes @Description annotations and handles nested objects with configurable recursion depth.
@@ -113,17 +112,20 @@ private fun SerialDescriptor.generateJsonSchemaInternal(
       SerialKind.ENUM -> {
         label?.let { put("properties", buildLabelProperty(it)) }
 
-        put("oneOf",
+        put(
+          "oneOf",
           buildJsonArray {
             (0 until elementsCount).forEach { index ->
               val enumValue = getElementName(index)
               val description = getElementAnnotations(index).description()
-              add(buildJsonObject {
-                put("const", JsonPrimitive(enumValue))
-                description?.let { put("description", JsonPrimitive(description)) }
-              })
+              add(
+                buildJsonObject {
+                  put("const", JsonPrimitive(enumValue))
+                  description?.let { put("description", JsonPrimitive(description)) }
+                }
+              )
             }
-          }
+          },
         )
       }
 

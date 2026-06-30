@@ -8,8 +8,9 @@ import misk.tasks.RepeatedTaskQueueConfig
 
 /** [AwsSqsJobQueueConfig] is the configuration for job queueing backed by Amazon's Simple Queuing Service */
 @Deprecated(
-  message = "AWS SDK v1 SQS jobqueue is deprecated. Use misk.aws2.sqs.jobqueue.config.SqsConfig " +
-    "with misk.aws2.sqs.jobqueue.SqsJobQueueModule instead."
+  message =
+    "AWS SDK v1 SQS jobqueue is deprecated. Use misk.aws2.sqs.jobqueue.config.SqsConfig " +
+      "with misk.aws2.sqs.jobqueue.SqsJobQueueModule instead."
 )
 class AwsSqsJobQueueConfig
 @JvmOverloads
@@ -73,8 +74,9 @@ constructor(
  * The [AwsSqsJobReceiverPolicy] gives two options for how consumers are created based on the flags.
  */
 @Deprecated(
-  message = "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
-    "misk-aws2-sqs (misk.aws2.sqs.jobqueue) instead."
+  message =
+    "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
+      "misk-aws2-sqs (misk.aws2.sqs.jobqueue) instead."
 )
 enum class AwsSqsJobReceiverPolicy {
   /**

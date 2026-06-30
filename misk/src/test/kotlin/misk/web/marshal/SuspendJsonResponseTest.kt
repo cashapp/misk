@@ -21,12 +21,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 /**
- * Mirrors [JsonResponseTest] but all actions use `suspend fun`.
- * Verifies suspend WebActions work identically to non-suspend for all return type variants.
+ * Mirrors [JsonResponseTest] but all actions use `suspend fun`. Verifies suspend WebActions work identically to
+ * non-suspend for all return type variants.
  *
- * Also adds [ReturnAsWrappedResponseBody] and [ReturnAsWrappedResponseBodyNoContentType]
- * which test `suspend fun(): Response<ResponseBody>` — the specific case that was previously
- * broken due to WildcardType leaking through KType.javaType for suspend function return types.
+ * Also adds [ReturnAsWrappedResponseBody] and [ReturnAsWrappedResponseBodyNoContentType] which test `suspend fun():
+ * Response<ResponseBody>` — the specific case that was previously broken due to WildcardType leaking through
+ * KType.javaType for suspend function return types.
  */
 @MiskTest(startService = true)
 internal class SuspendJsonResponseTest {
@@ -158,8 +158,7 @@ internal class SuspendJsonResponseTest {
   class ReturnAsWrappedResponseBody @Inject constructor() : WebAction {
     @Get("/suspend-response/as-wrapped-response-body")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    suspend fun call(): Response<ResponseBody> =
-      Response("{\"message\":\"as-wrapped-response-body\"}".toResponseBody())
+    suspend fun call(): Response<ResponseBody> = Response("{\"message\":\"as-wrapped-response-body\"}".toResponseBody())
   }
 
   class ReturnAsWrappedResponseBodyWith201 @Inject constructor() : WebAction {
@@ -172,8 +171,7 @@ internal class SuspendJsonResponseTest {
   // Response<ResponseBody> without @ResponseContentType — the original error case
   class ReturnAsWrappedResponseBodyNoContentType @Inject constructor() : WebAction {
     @Get("/suspend-response/as-wrapped-response-body-no-ct")
-    suspend fun call(): Response<ResponseBody> =
-      Response("{\"message\":\"no-content-type\"}".toResponseBody())
+    suspend fun call(): Response<ResponseBody> = Response("{\"message\":\"no-content-type\"}".toResponseBody())
   }
 
   class TestModule : KAbstractModule() {

@@ -4,10 +4,7 @@ import kotlin.reflect.KClass
 import misk.resources.ResourceLoader
 import misk.spirit.Spirit
 
-/**
- * Creates a [SchemaMigrator] without Guice. Useful for standalone tools like the
- * schema-migrator Gradle plugin.
- */
+/** Creates a [SchemaMigrator] without Guice. Useful for standalone tools like the schema-migrator Gradle plugin. */
 fun createSchemaMigrator(
   qualifier: KClass<out Annotation>,
   config: DataSourceConfig,

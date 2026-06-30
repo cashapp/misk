@@ -36,9 +36,7 @@ internal class ActionScopedExecutorServiceTest {
 
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "my seed data")
 
-    val future = scope.create(seedData).inScope {
-      executor.submit(Callable { tester.fooValue() })
-    }
+    val future = scope.create(seedData).inScope { executor.submit(Callable { tester.fooValue() }) }
 
     assertThat(future.get()).isEqualTo("my seed data and bar and foo!")
   }

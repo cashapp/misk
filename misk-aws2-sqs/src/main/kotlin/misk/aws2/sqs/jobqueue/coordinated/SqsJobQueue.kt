@@ -48,15 +48,14 @@ internal constructor(
           .messageAttributes(
             attributes
               .mapValues { it.value.toMessageAttributeValue() }
-              .plus(SqsJob.JOBQUEUE_METADATA_ATTR to createMetadataMessageAttributeValue(span, queueName, idempotenceKey))
+              .plus(
+                SqsJob.JOBQUEUE_METADATA_ATTR to createMetadataMessageAttributeValue(span, queueName, idempotenceKey)
+              )
           )
           .build()
       val (sendDuration) =
         timed {
-          queue.callSend(
-            unbufferedLambda = { it.sendMessage(request) },
-            bufferedLambda = { it.sendMessage(request) },
-          )
+          queue.callSend(unbufferedLambda = { it.sendMessage(request) }, bufferedLambda = { it.sendMessage(request) })
         }
       return@executeWithTracingAndErrorHandling sendDuration
     }
@@ -88,7 +87,9 @@ internal constructor(
             }
 
           timed {
-            client.sendMessageBatch(SendMessageBatchRequest.builder().queueUrl(queue.url).entries(messageEntries).build())
+            client.sendMessageBatch(
+              SendMessageBatchRequest.builder().queueUrl(queue.url).entries(messageEntries).build()
+            )
           }
         }
 

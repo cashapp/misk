@@ -24,15 +24,16 @@ import software.amazon.awssdk.services.sqs.model.QueueAttributeName
  *
  * @param dockerSqs The Docker SQS instance
  * @param yamlConfig The YAML-based SqsConfig (always required as fallback)
- * @param installFakeFeatureFlags Whether to install FakeFeatureFlagsModule (default true).
- *        Set to false to test behavior when DynamicConfig is not bound.
+ * @param installFakeFeatureFlags Whether to install FakeFeatureFlagsModule (default true). Set to false to test
+ *   behavior when DynamicConfig is not bound.
  */
 class SubscriptionServiceTestModule(
   private val dockerSqs: DockerSqs,
-  private val yamlConfig: SqsConfig = SqsConfig(
-    all_queues = SqsQueueConfig(concurrency = 5, parallelism = 2, region = "us-east-1"),
-    config_feature_flag = "test-sqs-config",
-  ),
+  private val yamlConfig: SqsConfig =
+    SqsConfig(
+      all_queues = SqsQueueConfig(concurrency = 5, parallelism = 2, region = "us-east-1"),
+      config_feature_flag = "test-sqs-config",
+    ),
   private val installFakeFeatureFlags: Boolean = true,
 ) : KAbstractModule() {
   override fun configure() {
@@ -61,6 +62,7 @@ class SubscriptionServiceTestQueueCreator(private val dockerSqs: DockerSqs) : Ex
   private val queues = listOf("test-queue", "test-queue_retryq", "test-queue_dlq")
 
   override fun startup() {}
+
   override fun shutdown() {}
 
   override fun beforeEach() {

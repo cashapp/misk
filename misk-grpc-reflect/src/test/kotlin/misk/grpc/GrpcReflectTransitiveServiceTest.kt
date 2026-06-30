@@ -41,17 +41,14 @@ class GrpcReflectTransitiveServiceTest {
 
         val response = responses.read()
         val serviceNames = response!!.list_services_response!!.service.map { it.name }
-        assertThat(serviceNames).containsExactlyInAnyOrder(
-          "grpc.reflection.v1alpha.ServerReflection",
-          "transitive.MainService",
-        )
+        assertThat(serviceNames)
+          .containsExactlyInAnyOrder("grpc.reflection.v1alpha.ServerReflection", "transitive.MainService")
       }
     }
   }
 
   @Singleton
-  private class FakeMainServiceAction @Inject constructor() :
-    MainServiceEchoBlockingServer, WebAction {
+  private class FakeMainServiceAction @Inject constructor() : MainServiceEchoBlockingServer, WebAction {
     override fun Echo(request: EchoRequest): EchoResponse = error("unsupported")
   }
 }

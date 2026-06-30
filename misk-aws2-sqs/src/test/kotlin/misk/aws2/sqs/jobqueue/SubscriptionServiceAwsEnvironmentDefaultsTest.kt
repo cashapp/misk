@@ -12,22 +12,19 @@ import misk.testing.MiskTestModule
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 
-/**
- * Tests that AWS environment defaults are applied to YAML config when region is not specified.
- */
+/** Tests that AWS environment defaults are applied to YAML config when region is not specified. */
 @MiskTest(startService = false)
 class SubscriptionServiceAwsEnvironmentDefaultsTest {
   @MiskExternalDependency private val dockerSqs = DockerSqs
   @MiskExternalDependency private val queueCreator = SubscriptionServiceTestQueueCreator(dockerSqs)
 
   @MiskTestModule
-  private val module = SubscriptionServiceTestModule(
-    dockerSqs = dockerSqs,
-    // YAML config without region - should be populated from AWS environment
-    yamlConfig = SqsConfig(
-      all_queues = SqsQueueConfig(concurrency = 3, parallelism = 2),
-    ),
-  )
+  private val module =
+    SubscriptionServiceTestModule(
+      dockerSqs = dockerSqs,
+      // YAML config without region - should be populated from AWS environment
+      yamlConfig = SqsConfig(all_queues = SqsQueueConfig(concurrency = 3, parallelism = 2)),
+    )
 
   @Inject private lateinit var subscriptionService: SubscriptionService
   @Inject private lateinit var serviceManager: ServiceManager

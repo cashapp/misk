@@ -1,6 +1,7 @@
 package cash.detektive.javacompat
 
 import cash.detektive.javacompat.AnnotatePublicApisWithJvmOverloads.ElementType
+import io.github.detekt.parser.DetektPomModel
 import io.github.detekt.test.utils.compileForTest
 import io.gitlab.arturbosch.detekt.api.Config
 import io.gitlab.arturbosch.detekt.api.Severity
@@ -12,12 +13,11 @@ import io.gitlab.arturbosch.detekt.test.getContextForPaths
 import java.io.File
 import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
-import org.jetbrains.kotlin.com.intellij.mock.MockProject
 import org.jetbrains.kotlin.com.intellij.mock.MockApplication
+import org.jetbrains.kotlin.com.intellij.mock.MockProject
 import org.jetbrains.kotlin.com.intellij.openapi.diagnostic.Logger
 import org.jetbrains.kotlin.com.intellij.openapi.util.Disposer
 import org.jetbrains.kotlin.com.intellij.pom.PomModel
-import io.github.detekt.parser.DetektPomModel
 import org.jetbrains.kotlin.config.CompilerConfigurationKey
 import org.jetbrains.kotlin.config.languageVersionSettings
 import org.jetbrains.kotlin.resolve.calls.smartcasts.DataFlowValueFactoryImpl

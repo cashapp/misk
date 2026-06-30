@@ -8,12 +8,12 @@ import misk.jdbc.CheckException
  * mix of both within the same transaction.
  *
  * This exception is thrown when the vtgate is configured with `--transaction_mode=SINGLE`, which rejects any
- * transaction that touches more than one shard. Sessions can opt in to cross-shard transactions via
- * `SET transaction_mode = 'multi'`.
+ * transaction that touches more than one shard. Sessions can opt in to cross-shard transactions via `SET
+ * transaction_mode = 'multi'`.
  *
  * Without two-phase commit (TWOPC), cross-shard transactions use best-effort commit semantics — there is no guarantee
- * of atomicity across shards. Note that even TWOPC only provides atomic commits for writes; it does not provide
- * full ACID cross-shard read isolation.
+ * of atomicity across shards. Note that even TWOPC only provides atomic commits for writes; it does not provide full
+ * ACID cross-shard read isolation.
  *
  * See https://vitess.io/docs/reference/features/distributed-transaction/
  */

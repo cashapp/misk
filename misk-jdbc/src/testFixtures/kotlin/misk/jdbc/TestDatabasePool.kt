@@ -49,9 +49,7 @@ class SharedLeaseDatabasePool(private val delegate: DatabasePool) : DatabasePool
   override fun releaseDatabase(config: DataSourceConfig): Unit =
     synchronized(this) {
       val key =
-        leasesByKey.entries
-          .firstOrNull { (_, lease) -> lease.config.database == config.database }
-          ?.key ?: return
+        leasesByKey.entries.firstOrNull { (_, lease) -> lease.config.database == config.database }?.key ?: return
 
       val lease = leasesByKey.getValue(key)
       lease.referenceCount -= 1
@@ -63,17 +61,9 @@ class SharedLeaseDatabasePool(private val delegate: DatabasePool) : DatabasePool
 
   private fun DataSourceConfig.leaseKey() = LeaseKey(type = type, host = host, port = port, database = database)
 
-  private data class Lease(
-    val config: DataSourceConfig,
-    var referenceCount: Int,
-  )
+  private data class Lease(val config: DataSourceConfig, var referenceCount: Int)
 
-  private data class LeaseKey(
-    val type: DataSourceType,
-    val host: String?,
-    val port: Int?,
-    val database: String?,
-  )
+  private data class LeaseKey(val type: DataSourceType, val host: String?, val port: Int?, val database: String?)
 }
 
 /**
