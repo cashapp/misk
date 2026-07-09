@@ -9,7 +9,6 @@ plugins {
 
 dependencies {
   api(libs.aws2Auth)
-  api(libs.aws2Kms)
   api(libs.aws2S3)
   api(libs.guice)
   api(libs.jakartaInject)
@@ -20,6 +19,7 @@ dependencies {
   implementation(libs.aws2Core)
   implementation(libs.aws2Regions)
   implementation(libs.awsSdkCore)
+  implementation(libs.tinkAwskms)
   implementation(libs.bouncyCastleProvider)
   implementation(libs.bouncyCastlePgp)
   implementation(libs.guava)

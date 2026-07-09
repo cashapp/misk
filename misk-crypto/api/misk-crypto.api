@@ -1,24 +1,6 @@
 public final class misk/crypto/AeadKeyManager : misk/crypto/MappedKeyManager {
 }
 
-public final class misk/crypto/Aws2KmsClient : com/google/crypto/tink/KmsClient {
-	public static final field Companion Lmisk/crypto/Aws2KmsClient$Companion;
-	public static final field PREFIX Ljava/lang/String;
-	public fun <init> (Lsoftware/amazon/awssdk/services/kms/KmsClient;)V
-	public fun doesSupport (Ljava/lang/String;)Z
-	public fun getAead (Ljava/lang/String;)Lcom/google/crypto/tink/Aead;
-	public fun withCredentials (Ljava/lang/String;)Lcom/google/crypto/tink/KmsClient;
-	public fun withDefaultCredentials ()Lcom/google/crypto/tink/KmsClient;
-}
-
-public final class misk/crypto/Aws2KmsClient$Companion {
-}
-
-public final class misk/crypto/Aws2KmsClientModule : misk/inject/KAbstractModule {
-	public fun <init> ()V
-	public final fun tinkKmsClient (Lsoftware/amazon/awssdk/services/kms/KmsClient;)Lcom/google/crypto/tink/KmsClient;
-}
-
 public final class misk/crypto/AwsKmsClientModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;)V
