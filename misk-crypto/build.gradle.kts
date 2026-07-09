@@ -19,7 +19,12 @@ dependencies {
   implementation(libs.aws2Core)
   implementation(libs.aws2Regions)
   implementation(libs.awsSdkCore)
-  implementation(libs.tinkAwskms)
+  implementation(libs.tinkAwskms) {
+    // tink-awskms 2.0.0 declares tink 1.21.0, but only uses the KmsClient/KmsClients/Aead
+    // interfaces, which are stable across tink versions. Excluding the transitive tink lets
+    // consumers that strictly pin an older tink (and misk itself, on 1.12.0) resolve cleanly.
+    exclude(group = "com.google.crypto.tink", module = "tink")
+  }
   implementation(libs.bouncyCastleProvider)
   implementation(libs.bouncyCastlePgp)
   implementation(libs.guava)
