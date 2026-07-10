@@ -8,21 +8,29 @@ plugins {
 }
 
 dependencies {
-  api(libs.awsCore)
-  api(libs.awsS3)
+  api(libs.aws2Auth)
+  api(libs.aws2S3)
   api(libs.guice)
   api(libs.jakartaInject)
   api(libs.tink)
   api(project(":wisp:wisp-deployment"))
   api(project(":misk-config"))
   api(project(":misk-inject"))
+  implementation(libs.aws2Core)
+  implementation(libs.aws2Regions)
+  implementation(libs.awsSdkCore)
+  implementation(libs.tinkAwskms) {
+    // tink-awskms 2.0.0 declares tink 1.21.0, but only uses the KmsClient/KmsClients/Aead
+    // interfaces, which are stable across tink versions. Excluding the transitive tink lets
+    // consumers that strictly pin an older tink (and misk itself, on 1.12.0) resolve cleanly.
+    exclude(group = "com.google.crypto.tink", module = "tink")
+  }
   implementation(libs.bouncyCastleProvider)
   implementation(libs.bouncyCastlePgp)
   implementation(libs.guava)
   implementation(libs.loggingApi)
   implementation(libs.moshiCore)
   implementation(libs.okio)
-  implementation(libs.tinkAwskms)
   implementation(libs.tinkGcpkms)
   implementation(project(":misk-logging"))
   implementation(project(":misk-moshi"))
@@ -34,7 +42,6 @@ dependencies {
   testFixturesImplementation(libs.bouncyCastleProvider)
   testFixturesImplementation(libs.guice)
   testFixturesImplementation(libs.tink)
-  testFixturesImplementation(libs.tinkAwskms)
   testFixturesImplementation(libs.tinkGcpkms)
   testFixturesImplementation(project(":wisp:wisp-deployment"))
   testFixturesImplementation(project(":misk-config"))
@@ -51,7 +58,6 @@ dependencies {
   testImplementation(libs.bouncyCastleProvider)
   testImplementation(libs.guice)
   testImplementation(libs.tink)
-  testImplementation(libs.tinkAwskms)
   testImplementation(libs.tinkGcpkms)
   testImplementation(project(":wisp:wisp-deployment"))
   testImplementation(project(":misk-config"))
@@ -62,7 +68,6 @@ dependencies {
   testFixturesImplementation(libs.loggingApi)
   testFixturesImplementation(libs.moshiCore)
   testFixturesImplementation(libs.okio)
-  testFixturesImplementation(libs.tinkAwskms)
   testFixturesImplementation(libs.tinkGcpkms)
   testFixturesImplementation(project(":misk-logging"))
   testFixturesImplementation(project(":misk"))
