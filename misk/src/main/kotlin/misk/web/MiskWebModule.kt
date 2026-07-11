@@ -176,6 +176,7 @@ constructor(private val config: WebConfig, private val jettyDependsOn: List<Key<
     newMultibinder<ApplicationInterceptor.Factory>()
     newMultibinder<StaticResourceEntry>()
     newMultibinder<WebProxyEntry>()
+    newMultibinder<jakarta.servlet.Filter>()
     val logContextProviderBinder = MapBinder.newMapBinder(binder(), String::class.java, LogContextProvider::class.java)
     logContextProviderBinder
       .addBinding(RequestLogContextInterceptor.MDC_HTTP_METHOD)

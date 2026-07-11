@@ -72,6 +72,7 @@ internal constructor(
   private val statisticsHandler: StatisticsHandler,
   private val gzipHandler: GzipHandler,
   private val http2RateControlFactory: MeasuredWindowRateControl.Factory,
+  private val servletFilters: Set<jakarta.servlet.Filter>,
 ) : AbstractIdleService() {
   private val server = Server(threadPool)
   val healthServerUrl: HttpUrl?
@@ -352,6 +353,12 @@ internal constructor(
       holder.setInitParameter(CrossOriginFilter.CHAIN_PREFLIGHT_PARAM, corsConfig.chainPreflight.toString())
       holder.setInitParameter(CrossOriginFilter.EXPOSED_HEADERS_PARAM, corsConfig.exposedHeaders.joinToString(","))
       servletContextHandler.addFilter(holder, path, EnumSet.of(DispatcherType.REQUEST))
+    }
+
+    // Register application-provided servlet filters. These run before WebActionsServlet
+    // dispatches the request, allowing pre-routing request modification (e.g. URL normalization).
+    servletFilters.forEach { filter ->
+      servletContextHandler.addFilter(FilterHolder(filter), "/*", EnumSet.of(DispatcherType.REQUEST))
     }
 
     server.start()

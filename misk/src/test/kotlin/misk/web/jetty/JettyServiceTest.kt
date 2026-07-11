@@ -68,6 +68,7 @@ class JettyServiceTest {
         statisticsHandler = mock(StatisticsHandler::class.java),
         gzipHandler = mock(GzipHandler::class.java),
         http2RateControlFactory = mock(MeasuredWindowRateControl.Factory::class.java),
+        servletFilters = emptySet(),
       )
 
     JettyService::class.java.getDeclaredField("server").apply {
