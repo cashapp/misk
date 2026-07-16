@@ -3,6 +3,7 @@ import com.vanniktech.maven.publish.KotlinJvm
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 import kotlin.jvm.java
+import org.gradle.api.file.SourceDirectorySet
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 
 plugins {
@@ -120,6 +121,17 @@ afterEvaluate {
   kotlinSourceSets?.getByName("main")?.kotlin?.setSrcDirs(
     kotlinSourceSets.getByName("main").kotlin.srcDirs.filter { !it.path.contains(generatedSourceDir) }
   )
+  // Wire 7+ registers Kotlin sources on the main source set's `generatedKotlin` source directory
+  // set when the Kotlin Gradle plugin provides one. It isn't part of KGP's public API yet, so
+  // access it reflectively, the same way Wire does.
+  kotlinSourceSets?.getByName("main")?.let { main ->
+    val generatedKotlin = runCatching {
+      main.javaClass.getMethod("getGeneratedKotlin").invoke(main) as SourceDirectorySet
+    }.getOrNull()
+    generatedKotlin?.setSrcDirs(
+      generatedKotlin.srcDirs.filter { !it.path.contains(generatedSourceDir) }
+    )
+  }
   kotlinSourceSets?.getByName("test")?.kotlin?.srcDir(generatedSourceDir)
 
   // Explicit dependency for test scoped protos to be generated if need be.
