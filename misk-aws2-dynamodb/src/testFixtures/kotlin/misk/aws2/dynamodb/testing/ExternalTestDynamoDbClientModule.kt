@@ -9,6 +9,7 @@ import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.util.concurrent.ConcurrentHashMap
 import misk.ServiceModule
 import misk.aws2.dynamodb.DynamoDbService
 import misk.aws2.dynamodb.RequiredDynamoDbTable
@@ -17,8 +18,11 @@ import misk.inject.KAbstractModule
 import misk.testing.TestFixture
 import misk.testing.updateForParallelTests
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+import software.amazon.awssdk.services.dynamodb.model.DeleteRequest
 import software.amazon.awssdk.services.dynamodb.model.DeleteTableRequest
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException
+import software.amazon.awssdk.services.dynamodb.model.WriteRequest
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
 
 /**
@@ -74,6 +78,9 @@ private class TestDynamoDbFixture
 constructor(private val client: TestDynamoDbClient, private val tables: List<DynamoDbTable>) :
   AbstractIdleService(), TestFixture {
 
+  private var tablesCreated = false
+  private val keyAttributeNames = ConcurrentHashMap<String, List<String>>()
+
   override fun startUp() {
     reset()
   }
@@ -81,19 +88,76 @@ constructor(private val client: TestDynamoDbClient, private val tables: List<Dyn
   override fun shutDown() {}
 
   override fun reset() {
+    if (tablesCreated) {
+      client.tables.forEach(::truncate)
+      return
+    }
+
+    recreateTables()
+    tablesCreated = true
+  }
+
+  /**
+   * The first reset recreates tables to remove any state left by a previous process. Later resets only delete rows,
+   * avoiding slow DynamoDB DDL calls before every test.
+   */
+  private fun recreateTables() {
     for (tableName in tables.map { it.tableName }) {
       try {
         client.dynamoDb.deleteTable(DeleteTableRequest.builder().tableName(tableName).build())
-      } catch (e: ResourceNotFoundException) {
-        // Ignore if the table doesn't exist
+      } catch (_: ResourceNotFoundException) {}
+    }
+
+    client.tables.forEach { client.dynamoDb.createTable(it) }
+  }
+
+  private fun truncate(table: TestTable) {
+    val tableName = table.tableName
+    val keyNames =
+      keyAttributeNames.getOrPut(tableName) {
+        client.dynamoDb.describeTable { it.tableName(tableName) }.table().keySchema().map { it.attributeName() }
+      }
+    val keyAliases = keyNames.withIndex().associate { (index, name) -> "#k$index" to name }
+    var exclusiveStartKey: Map<String, AttributeValue>? = null
+
+    do {
+      val startKey = exclusiveStartKey
+      val scan =
+        client.dynamoDb.scan {
+          it
+            .tableName(tableName)
+            .projectionExpression(keyAliases.keys.joinToString(", "))
+            .expressionAttributeNames(keyAliases)
+            .consistentRead(true)
+          if (startKey != null) it.exclusiveStartKey(startKey)
+        }
+      deleteItems(tableName, scan.items())
+      exclusiveStartKey = if (scan.hasLastEvaluatedKey()) scan.lastEvaluatedKey() else null
+    } while (exclusiveStartKey != null)
+  }
+
+  private fun deleteItems(tableName: String, keys: List<Map<String, AttributeValue>>) {
+    for (chunk in keys.chunked(MAX_BATCH_WRITE_ITEMS)) {
+      var writes =
+        chunk.map { key -> WriteRequest.builder().deleteRequest(DeleteRequest.builder().key(key).build()).build() }
+      var attempts = 0
+      while (writes.isNotEmpty()) {
+        if (attempts > 0) Thread.sleep(UNPROCESSED_RETRY_DELAY_MS)
+        check(attempts < MAX_BATCH_WRITE_ATTEMPTS) {
+          "BatchWriteItem left ${writes.size} unprocessed delete(s) for table $tableName after " +
+            "$MAX_BATCH_WRITE_ATTEMPTS attempts"
+        }
+        val response = client.dynamoDb.batchWriteItem { it.requestItems(mapOf(tableName to writes)) }
+        writes = response.unprocessedItems()[tableName].orEmpty()
+        attempts++
       }
     }
-    for (table in
-      tables.map { table ->
-        TestTable.create(table.tableName, table.tableClass) { table.configureTable(it.toBuilder()).build() }
-      }) {
-      client.dynamoDb.createTable(table)
-    }
+  }
+
+  private companion object {
+    const val MAX_BATCH_WRITE_ITEMS = 25
+    const val MAX_BATCH_WRITE_ATTEMPTS = 5
+    const val UNPROCESSED_RETRY_DELAY_MS = 50L
   }
 }
 
