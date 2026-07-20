@@ -25,21 +25,44 @@ import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException
 import software.amazon.awssdk.services.dynamodb.model.WriteRequest
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
 
+enum class ResetStrategy {
+  TRUNCATE,
+  DROP_RECREATE,
+}
+
 /**
  * Unlike the InProcessDynamoDbModule and DockerDynamoDbModule classes, this module does not internally start DynamoDB,
  * and instead relies on an external DynamoDB server already running on the given port, e.g. using a Gradle task as a
  * dependency of the test task, which starts DynamoDB in a Docker container.
+ *
+ * By default, tables are created once per injector and rows are truncated on later resets to avoid slow DynamoDB DDL
+ * calls before every test. Use [ResetStrategy.DROP_RECREATE] if tests use DynamoDB Streams or modify table definitions:
+ * truncation preserves streams (including delete records from the reset) and does not undo changes to TTL, billing
+ * mode, or indexes.
  */
-class ExternalTestDynamoDbClientModule(private val port: Int, originalTables: List<DynamoDbTable>) : KAbstractModule() {
+class ExternalTestDynamoDbClientModule
+@JvmOverloads
+constructor(
+  private val port: Int,
+  originalTables: List<DynamoDbTable>,
+  private val resetStrategy: ResetStrategy = ResetStrategy.TRUNCATE,
+) : KAbstractModule() {
 
   private val tables = originalTables.map { it.copy(tableName = ParallelTestsTableNameMapper.mapName(it.tableName)) }
 
   constructor(port: Int, vararg tables: DynamoDbTable) : this(port, tables.toList())
 
+  constructor(
+    port: Int,
+    resetStrategy: ResetStrategy,
+    vararg tables: DynamoDbTable,
+  ) : this(port, tables.toList(), resetStrategy)
+
   override fun configure() {
     for (table in tables) {
       multibind<DynamoDbTable>().toInstance(table)
     }
+    bind<ResetStrategy>().toInstance(resetStrategy)
     bind<DynamoDbService>().to<TestDynamoDbService>()
     install(ServiceModule<DynamoDbService>().dependsOn<TestDynamoDbFixture>())
     install(ServiceModule<TestDynamoDbFixture>())
@@ -75,8 +98,11 @@ class ExternalTestDynamoDbClientModule(private val port: Int, originalTables: Li
 @Singleton
 private class TestDynamoDbFixture
 @Inject
-constructor(private val client: TestDynamoDbClient, private val tables: List<DynamoDbTable>) :
-  AbstractIdleService(), TestFixture {
+constructor(
+  private val client: TestDynamoDbClient,
+  private val tables: List<DynamoDbTable>,
+  private val resetStrategy: ResetStrategy,
+) : AbstractIdleService(), TestFixture {
 
   private var tablesCreated = false
   private val keyAttributeNames = ConcurrentHashMap<String, List<String>>()
@@ -88,18 +114,18 @@ constructor(private val client: TestDynamoDbClient, private val tables: List<Dyn
   override fun shutDown() {}
 
   override fun reset() {
-    if (tablesCreated) {
-      client.tables.forEach(::truncate)
+    if (!tablesCreated || resetStrategy == ResetStrategy.DROP_RECREATE) {
+      recreateTables()
+      tablesCreated = true
       return
     }
 
-    recreateTables()
-    tablesCreated = true
+    client.tables.forEach(::truncate)
   }
 
   /**
-   * The first reset recreates tables to remove any state left by a previous process. Later resets only delete rows,
-   * avoiding slow DynamoDB DDL calls before every test.
+   * The first reset recreates tables to remove any state left by a previous process. Under [ResetStrategy.TRUNCATE],
+   * later resets only delete rows, avoiding slow DynamoDB DDL calls before every test.
    */
   private fun recreateTables() {
     for (tableName in tables.map { it.tableName }) {

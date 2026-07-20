@@ -25,7 +25,7 @@ class ExternalTestDynamoDbClientModuleTest {
   private val server =
     JvmDynamoDbServer.Factory.create(ServerSocket(0).use { it.localPort }).also { it.startAsync().awaitRunning() }
 
-  @MiskTestModule val module = TestModule(server.port)
+  @MiskTestModule val module = ExternalDynamoTestModule(server.port)
 
   @Inject lateinit var client: TestDynamoDbClient
   @Inject lateinit var testFixtures: Set<TestFixture>
@@ -80,13 +80,60 @@ class ExternalTestDynamoDbClientModuleTest {
       )
       .isEmpty()
   }
+}
 
-  class TestModule(private val port: Int) : KAbstractModule() {
-    override fun configure() {
-      install(MiskTestingServiceModule())
-      install(
-        ExternalTestDynamoDbClientModule(
-          port,
+@MiskTest(startService = true)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class DropRecreateExternalTestDynamoDbClientModuleTest {
+  private val server =
+    JvmDynamoDbServer.Factory.create(ServerSocket(0).use { it.localPort }).also { it.startAsync().awaitRunning() }
+
+  @MiskTestModule val module = ExternalDynamoTestModule(server.port, ResetStrategy.DROP_RECREATE)
+
+  @Inject lateinit var client: TestDynamoDbClient
+  @Inject lateinit var testFixtures: Set<TestFixture>
+
+  @AfterAll
+  fun stopServer() {
+    server.stopAsync().awaitTerminated()
+  }
+
+  @Test
+  fun `reset drops and recreates tables`() {
+    val tableName = client.tables.single().tableName
+    val movieTable =
+      DynamoDbEnhancedClient.builder()
+        .dynamoDbClient(client.dynamoDb)
+        .build()
+        .table(tableName, AbstractDynamoDbTest.MOVIE_TABLE_SCHEMA)
+    val tableCreatedAt = client.dynamoDb.describeTable { it.tableName(tableName) }.table().creationDateTime()
+
+    movieTable.putItem(
+      DyMovie().apply {
+        name = "Movie"
+        release_date = LocalDate.of(2000, 1, 1)
+        directed_by = "Director"
+      }
+    )
+
+    testFixtures.single { it.javaClass.simpleName == "TestDynamoDbFixture" }.reset()
+
+    assertThat(client.dynamoDb.describeTable { it.tableName(tableName) }.table().creationDateTime())
+      .isNotEqualTo(tableCreatedAt)
+    assertThat(movieTable.scan().items()).isEmpty()
+  }
+}
+
+class ExternalDynamoTestModule(
+  private val port: Int,
+  private val resetStrategy: ResetStrategy = ResetStrategy.TRUNCATE,
+) : KAbstractModule() {
+  override fun configure() {
+    install(MiskTestingServiceModule())
+    install(
+      ExternalTestDynamoDbClientModule(
+        port,
+        listOf(
           DynamoDbTable("movies", DyMovie::class) { createTableEnhancedRequest ->
             createTableEnhancedRequest.globalSecondaryIndices(
               EnhancedGlobalSecondaryIndex.builder()
@@ -95,9 +142,10 @@ class ExternalTestDynamoDbClientModuleTest {
                 .provisionedThroughput { it.readCapacityUnits(40_000L).writeCapacityUnits(40_000L) }
                 .build()
             )
-          },
-        )
+          }
+        ),
+        resetStrategy,
       )
-    }
+    )
   }
 }
