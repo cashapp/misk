@@ -5,6 +5,7 @@ import io.opentracing.Tracer
 import io.opentracing.tag.Tags
 import java.time.Clock
 import java.util.concurrent.CompletableFuture
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
@@ -69,21 +70,29 @@ class Subscriber(
               }
             sqsMetrics.handlerDispatchTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
             result
+          } catch (e: CancellationException) {
+            throw e
           } catch (e: Exception) {
             logger.warn(e) { "Handler failed for job ${job.id} from queue ${job.queueName.value}" }
             sqsMetrics.handlerFailures.labels(queueName.value).inc()
             return@withSpan
           }
-        when (result) {
-          JobStatus.OK -> deleteMessage(job)
-          JobStatus.DEAD_LETTER -> {
-            deadLetterMessage(job)
-            deleteMessage(job)
+        try {
+          when (result) {
+            JobStatus.OK -> deleteMessage(job)
+            JobStatus.DEAD_LETTER -> {
+              deadLetterMessage(job)
+              deleteMessage(job)
+            }
+            JobStatus.RETRY_WITH_BACKOFF -> retryWithBackoff(job)
+            JobStatus.RETRY_LATER -> {
+              /* no-op, will be retried after visibility timeout passes */
+            }
           }
-          JobStatus.RETRY_WITH_BACKOFF -> retryWithBackoff(job)
-          JobStatus.RETRY_LATER -> {
-            /* no-op, will be retried after visibility timeout passes */
-          }
+        } catch (e: CancellationException) {
+          throw e
+        } catch (e: Exception) {
+          logger.warn(e) { "Failed to apply status $result to job ${job.id} from queue ${job.queueName.value}" }
         }
       }
     }
@@ -138,6 +147,8 @@ class Subscriber(
           DeleteMessageRequest.builder().queueUrl(job.queueUrl).receiptHandle(job.message.receiptHandle()).build()
         )
         .await()
+    } catch (e: CancellationException) {
+      throw e
     } catch (e: Exception) {
       logger.warn(e) { "Failed to acknowledge job ${job.idempotenceKey} from queue ${job.queueName.value}" }
       sqsMetrics.jobsFailedToAcknowledge.labels(queueName.value).inc()
@@ -191,7 +202,15 @@ class Subscriber(
         wasDisabled = false
       }
       val startTime = clock.millis()
-      val response = fetchMessages(queueUrl).await()
+      val response =
+        try {
+          fetchMessages(queueUrl).await()
+        } catch (e: CancellationException) {
+          throw e
+        } catch (e: Exception) {
+          logger.warn(e) { "Failed to fetch messages from queue ${queueName.value}; retrying" }
+          continue
+        }
       sqsMetrics.sqsReceiveTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
 
       sqsMetrics.jobsReceived.labels(queueName.value).inc(response.messages().size.toDouble())
