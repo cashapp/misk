@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
@@ -22,6 +23,7 @@ import misk.metrics.v2.Metrics
 import misk.testing.ConcurrentMockTracer
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -34,6 +36,8 @@ import software.amazon.awssdk.services.sqs.model.Message
 import software.amazon.awssdk.services.sqs.model.MessageSystemAttributeName
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest
+import software.amazon.awssdk.services.sqs.model.SendMessageResponse
 import software.amazon.awssdk.services.sqs.model.SqsException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -52,7 +56,7 @@ class SubscriberTest {
     )
 
   @Test
-  fun `status application failure does not stop subscriber`() = runTest {
+  fun `retry with backoff failure does not stop subscriber`() = runTest {
     val handledJobs = mutableListOf<String>()
     val statuses = ArrayDeque(listOf(JobStatus.RETRY_WITH_BACKOFF, JobStatus.OK))
     val handler =
@@ -79,15 +83,52 @@ class SubscriberTest {
     assertEquals(listOf("job-1", "job-2"), handledJobs)
     verify(client).changeMessageVisibility(any<ChangeMessageVisibilityRequest>())
     verify(client).deleteMessage(any<DeleteMessageRequest>())
+    assertEquals(1.0, sqsMetrics.jobsFailedToRetryWithBackoff.labels(queueName.value).get())
     assertTrue(subscriberJob.isActive)
   }
 
   @Test
-  fun `fetch failure does not stop polling`() = runTest {
+  fun `dead letter failure does not acknowledge job or stop subscriber`() = runTest {
+    whenever(sqsQueueResolver.getQueueUrl(queueName.deadLetterQueue)).thenReturn("$queueUrl-dlq")
+    val handledJobs = mutableListOf<String>()
+    val statuses = ArrayDeque(listOf(JobStatus.DEAD_LETTER, JobStatus.OK))
+    val handler =
+      object : SuspendingJobHandler {
+        override suspend fun handleJob(job: Job): JobStatus {
+          handledJobs += job.id
+          return statuses.removeFirst()
+        }
+      }
+    whenever(client.sendMessage(any<SendMessageRequest>()))
+      .thenReturn(
+        CompletableFuture.failedFuture<SendMessageResponse>(
+          SqsException.builder().message("send failed").statusCode(500).build()
+        )
+      )
+    whenever(client.deleteMessage(any<DeleteMessageRequest>()))
+      .thenReturn(CompletableFuture.completedFuture(DeleteMessageResponse.builder().build()))
+
+    val subscriberJob = backgroundScope.launch { subscriber(handler).run() }
+    channel.send(job("job-1"))
+    channel.send(job("job-2"))
+    runCurrent()
+
+    assertEquals(listOf("job-1", "job-2"), handledJobs)
+    verify(client).sendMessage(any<SendMessageRequest>())
+    val deleteRequest = argumentCaptor<DeleteMessageRequest>()
+    verify(client).deleteMessage(deleteRequest.capture())
+    assertEquals("receipt-job-2", deleteRequest.firstValue.receiptHandle())
+    assertEquals(1.0, sqsMetrics.jobsFailedToDeadLetter.labels(queueName.value).get())
+    assertTrue(subscriberJob.isActive)
+  }
+
+  @Test
+  fun `canceled fetch does not stop polling unless subscriber is canceled`() = runTest {
     whenever(sqsQueueResolver.getQueueUrl(queueName)).thenReturn(queueUrl)
+    val canceledResponse = CompletableFuture<ReceiveMessageResponse>().apply { cancel(false) }
     val pendingResponse = CompletableFuture<ReceiveMessageResponse>()
     whenever(client.receiveMessage(any<ReceiveMessageRequest>()))
-      .thenReturn(CompletableFuture.failedFuture(IllegalStateException("fetch failed")))
+      .thenReturn(canceledResponse)
       .thenReturn(
         CompletableFuture.completedFuture(ReceiveMessageResponse.builder().messages(message("job-1")).build())
       )
@@ -98,6 +139,10 @@ class SubscriberTest {
 
     assertEquals("job-1", channel.receive().id)
     assertTrue(pollingJob.isActive)
+    assertEquals(1.0, sqsMetrics.sqsReceiveFailures.labels(queueName.value).get())
+
+    pollingJob.cancelAndJoin()
+    assertTrue(pollingJob.isCancelled)
   }
 
   private fun subscriber(
