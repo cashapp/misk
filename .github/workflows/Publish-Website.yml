@@ -27,7 +27,7 @@ jobs:
           python-version: 3.8
 
       - name: Generate API docs
-        run: gradle dokkaGfm
+        run: gradle dokkaGeneratePublicationMarkdown
 
       - name: Prep mkdocs
         run: .github/workflows/prepare_mkdocs.sh
