@@ -121,6 +121,8 @@ interface DeferredRedis {
     limit: Redis.ZRangeLimit? = null,
   ): Supplier<List<Pair<ByteString?, Double>>>
 
+  fun zrem(key: String, vararg members: String): Supplier<Long>
+
   fun zremRangeByRank(key: String, start: Redis.ZRangeRankMarker, stop: Redis.ZRangeRankMarker): Supplier<Long>
 
   fun llen(key: String): Supplier<Long>

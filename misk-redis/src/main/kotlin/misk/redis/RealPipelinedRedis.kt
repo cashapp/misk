@@ -432,6 +432,13 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     }
   }
 
+  override fun zrem(key: String, vararg members: String): Supplier<Long> {
+    val keyBytes = key.toByteArray(charset)
+    val memberBytes = Array(members.size) { members[it].toByteArray(charset) }
+    val response = pipeline.zrem(keyBytes, *memberBytes)
+    return Supplier { response.get() }
+  }
+
   override fun zremRangeByRank(
     key: String,
     start: Redis.ZRangeRankMarker,

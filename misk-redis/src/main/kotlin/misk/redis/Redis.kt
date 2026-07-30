@@ -581,6 +581,16 @@ interface Redis {
   ): List<Pair<ByteString?, Double>>
 
   /**
+   * Removes the specified [members] from the sorted set stored at [key]. Members that are not present in the sorted set
+   * are ignored.
+   *
+   * If [key] does not exist, 0 is returned. If the [key] exists but does not hold a sorted set, an error is returned.
+   *
+   * @return the number of members actually removed, not counting members that were not present.
+   */
+  fun zrem(key: String, vararg members: String): Long
+
+  /**
    * Removes all elements in the sorted set stored at [key] with rank between [start] and [stop]. Both start and stop
    * are 0 -based indexes with 0 being the element with the lowest score. These indexes can be negative numbers, where
    * they indicate offsets starting at the element with the highest score. For example: -1 is the element with the
