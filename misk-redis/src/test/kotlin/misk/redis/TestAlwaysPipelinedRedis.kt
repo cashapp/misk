@@ -208,6 +208,8 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(private val unifiedJ
     limit: Redis.ZRangeLimit?,
   ): List<Pair<ByteString?, Double>> = runPipeline { zrangeWithScores(key, type, start, stop, reverse, limit) }
 
+  override fun zrem(key: String, vararg members: String): Long = runPipeline { zrem(key, *members) }
+
   override fun zremRangeByRank(key: String, start: Redis.ZRangeRankMarker, stop: Redis.ZRangeRankMarker): Long =
     runPipeline {
       zremRangeByRank(key, start, stop)

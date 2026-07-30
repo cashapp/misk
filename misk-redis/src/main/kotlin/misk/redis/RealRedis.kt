@@ -480,6 +480,11 @@ class RealRedis(private val unifiedJedis: UnifiedJedis, private val clientMetric
     } ?: listOf()
   }
 
+  override fun zrem(key: String, vararg members: String): Long {
+    val memberBytes = Array(members.size) { members[it].toByteArray(charset) }
+    return unifiedJedis.zrem(key.toByteArray(charset), *memberBytes)
+  }
+
   override fun zremRangeByRank(key: String, start: ZRangeRankMarker, stop: ZRangeRankMarker): Long {
     return unifiedJedis.zremrangeByRank(key, start.longValue, stop.longValue)
   }
