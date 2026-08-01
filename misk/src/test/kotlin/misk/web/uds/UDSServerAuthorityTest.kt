@@ -33,8 +33,6 @@ import org.junit.jupiter.api.Test
 class UDSServerAuthorityTest {
   @MiskTestModule val module = TestModule()
 
-  @Inject private lateinit var jetty: JettyService
-
   /** An HTTP/1.0 request is valid without a Host header, so Jetty must fall back to the authority. */
   @Test
   fun `request without a Host header is served`() {
