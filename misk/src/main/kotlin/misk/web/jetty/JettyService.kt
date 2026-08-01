@@ -55,6 +55,7 @@ import org.eclipse.jetty.server.handler.ContextHandler
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.unixdomain.server.UnixDomainServerConnector
+import org.eclipse.jetty.util.HostPort
 import org.eclipse.jetty.util.JavaVersion
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
@@ -257,10 +258,19 @@ internal constructor(
       socketConfigs.addAll(webConfig.unix_domain_sockets)
     }
     socketConfigs.stream().forEach() { socketConfig ->
+      // Provide a fallback server authority for the Unix-domain connector. Jetty 12 derives the
+      // server authority from the connection's local address when a request carries no Host/
+      // :authority (e.g. the bare "PRI * HTTP/2.0" HTTP/2 prior-knowledge preface). For a Unix
+      // domain socket that local address is the socket file path, which HostPort rejects as an
+      // invalid authority ("Bad Authority"). Requests that do carry a Host/:authority still use
+      // their own value; this is only a fallback.
+      val udsHttpConfig = HttpConfiguration(httpConfig)
+      udsHttpConfig.serverAuthority = HostPort("localhost")
+
       val udsConnFactories = mutableListOf<ConnectionFactory>()
-      udsConnFactories.add(HttpConnectionFactory(httpConfig))
+      udsConnFactories.add(HttpConnectionFactory(udsHttpConfig))
       if (socketConfig.h2c == true) {
-        val http2 = HTTP2CServerConnectionFactory(httpConfig)
+        val http2 = HTTP2CServerConnectionFactory(udsHttpConfig)
         http2.rateControlFactory = http2RateControlFactory
         udsConnFactories.add(http2)
       }
