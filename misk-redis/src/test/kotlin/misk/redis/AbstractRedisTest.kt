@@ -1187,6 +1187,32 @@ abstract class AbstractRedisTest {
   }
 
   @Test
+  fun `zrange by score test - the infinity markers reach scores at and below zero`() {
+    val negative = "negative" to -1.0
+    val zero = "zero" to 0.0
+    val positive = "positive" to 5.0
+    redis.zadd(key, mapOf(negative, zero, positive))
+
+    // Double.MIN_VALUE is the -inf marker, not the tiny positive number it literally is, so nothing here is out of
+    // range.
+    checkZRangeScoreResponse(
+      mapOf(negative, zero, positive),
+      mapOf(positive, zero, negative),
+      Double.MIN_VALUE,
+      Double.MAX_VALUE,
+    )
+  }
+
+  @Test
+  fun `zrange by score test - negative infinity up to a negative bound`() {
+    val low = "low" to -9.0
+    val mid = "mid" to -5.0
+    redis.zadd(key, mapOf(low, mid, "high" to 2.0))
+
+    checkZRangeScoreResponse(mapOf(low, mid), mapOf(mid, low), Double.MIN_VALUE, -5.0)
+  }
+
+  @Test
   fun `zrange by score test - start score exceeds stop`() {
     redis.zadd(key, mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
 
@@ -1437,6 +1463,50 @@ abstract class AbstractRedisTest {
   }
 
   @Test
+  fun `zadd - re-adding a member at the score it already has keeps it`() {
+    redis.zadd(key, 100.0, "m")
+
+    // Nothing new is added, and the member has to survive the write.
+    assertEquals(0, redis.zadd(key, 100.0, "m"))
+    assertEquals(100.0, redis.zscore(key, "m"))
+    assertEquals(1, redis.zcard(key))
+  }
+
+  @Test
+  fun `zadd - moving a member down onto an occupied score`() {
+    redis.zadd(key, mapOf("low" to 1.0, "m" to 9.0))
+
+    assertEquals(0, redis.zadd(key, 1.0, "m"))
+    assertEquals(1.0, redis.zscore(key, "m"))
+    assertEquals(2, redis.zcard(key))
+  }
+
+  @Test
+  fun `zadd - moving a member up onto an occupied score`() {
+    redis.zadd(key, mapOf("high" to 9.0, "m" to 1.0))
+
+    assertEquals(0, redis.zadd(key, 9.0, "m"))
+    assertEquals(9.0, redis.zscore(key, "m"))
+    assertEquals(2, redis.zcard(key))
+  }
+
+  @Test
+  fun `zremRangeByRank - a start past the end removes nothing`() {
+    redis.zadd(key, mapOf(ba_2_3Pair, bb_4_5Pair, b_5Pair))
+
+    assertEquals(0, redis.zremRangeByRank(key, ZRangeRankMarker(3), ZRangeRankMarker(-1)))
+    assertEquals(3, redis.zcard(key))
+  }
+
+  @Test
+  fun `zremRangeByRank - a stop before the first member removes nothing`() {
+    redis.zadd(key, mapOf(ba_2_3Pair, bb_4_5Pair, b_5Pair))
+
+    assertEquals(0, redis.zremRangeByRank(key, ZRangeRankMarker(0), ZRangeRankMarker(-4)))
+    assertEquals(3, redis.zcard(key))
+  }
+
+  @Test
   fun `zcard`() {
     assertEquals(0, redis.zcard(key))
     redis.zadd(key, mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
@@ -1624,8 +1694,7 @@ abstract class AbstractRedisTest {
         )
       )
     }
-    assertThat(suppliers.map { it.get() })
-      .containsExactly(1L, 1.0, listOf("a".encodeUtf8() to 1.0), 1L, 1L, 1L, 0L)
+    assertThat(suppliers.map { it.get() }).containsExactly(1L, 1.0, listOf("a".encodeUtf8() to 1.0), 1L, 1L, 1L, 0L)
   }
 
   @Test
@@ -1641,6 +1710,22 @@ abstract class AbstractRedisTest {
     }
     assertThat(suppliers.first().get()).isEqualTo(Unit)
     assertThrows<RuntimeException> { suppliers.last().get() }
+  }
+
+  @Test
+  fun `pipelined commands run even when their replies are never read`() {
+    redis.pipelining { zadd("zkey", 1.0, "a") }
+
+    assertEquals(1L, redis.zcard("zkey"))
+  }
+
+  @Test
+  fun `reading a pipelined reply more than once does not run the command again`() {
+    lateinit var incremented: Supplier<Long>
+    redis.pipelining { incremented = incr("counter") }
+
+    assertThat(listOf(incremented.get(), incremented.get(), incremented.get())).containsExactly(1L, 1L, 1L)
+    assertEquals("1", redis["counter"]?.utf8())
   }
 
   private fun checkZRemRangeByRankResponse(
