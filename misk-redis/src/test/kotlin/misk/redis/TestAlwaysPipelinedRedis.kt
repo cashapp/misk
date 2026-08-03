@@ -215,6 +215,11 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(private val unifiedJ
       zremRangeByRank(key, start, stop)
     }
 
+  override fun zremRangeByScore(key: String, start: Redis.ZRangeScoreMarker, stop: Redis.ZRangeScoreMarker): Long =
+    runPipeline {
+      zremRangeByScore(key, start, stop)
+    }
+
   override fun zcard(key: String): Long = runPipeline { zcard(key) }
 
   companion object {

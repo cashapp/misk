@@ -11,6 +11,7 @@ import kotlin.random.Random
 import misk.redis.Redis.ZRangeLimit
 import misk.redis.Redis.ZRangeMarker
 import misk.redis.Redis.ZRangeRankMarker
+import misk.redis.Redis.ZRangeScoreMarker
 import misk.redis.Redis.ZRangeType
 import okio.ByteString
 import okio.ByteString.Companion.encode
@@ -534,6 +535,10 @@ class FakeRedis : Redis {
   }
 
   override fun zremRangeByRank(key: String, start: ZRangeRankMarker, stop: ZRangeRankMarker): Long {
+    throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun zremRangeByScore(key: String, start: ZRangeScoreMarker, stop: ZRangeScoreMarker): Long {
     throw NotImplementedError("Fake client not implemented for this operation")
   }
 

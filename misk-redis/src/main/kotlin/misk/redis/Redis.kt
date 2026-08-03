@@ -599,6 +599,19 @@ interface Redis {
   fun zremRangeByRank(key: String, start: ZRangeRankMarker, stop: ZRangeRankMarker): Long
 
   /**
+   * Removes all elements in the sorted set stored at [key] whose score falls between [start] and [stop].
+   *
+   * The interval is closed at both ends by default; set [ZRangeScoreMarker.isIncluded] to false on either marker to
+   * make that end exclusive. The markers follow the same convention as [zrange] with [ZRangeType.SCORE], so
+   * [Double.MAX_VALUE] and [Double.MIN_VALUE] stand for +inf and -inf.
+   *
+   * If [key] does not exist, 0 is returned. If the [key] exists but does not hold a sorted set, an error is returned.
+   *
+   * @return the number of members removed.
+   */
+  fun zremRangeByScore(key: String, start: ZRangeScoreMarker, stop: ZRangeScoreMarker): Long
+
+  /**
    * Returns the length of the list stored at [key].
    *
    * @param key the key of the list

@@ -708,6 +708,11 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
       this@FakeRedis.zremRangeByRank(key, start, stop)
     }
 
+    override fun zremRangeByScore(key: String, start: ZRangeScoreMarker, stop: ZRangeScoreMarker): Supplier<Long> =
+      eager {
+        this@FakeRedis.zremRangeByScore(key, start, stop)
+      }
+
     override fun zcard(key: String): Supplier<Long> = eager { this@FakeRedis.zcard(key) }
 
     override fun close() {
@@ -931,6 +936,32 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
       if (members.isEmpty()) sortedSet.remove(score)
     }
     // Redis keeps neither an empty score nor an empty sorted set: the key goes away with its last member.
+    if (sortedSet.isEmpty()) keyValueStore.remove(key)
+
+    return removed
+  }
+
+  override fun zremRangeByScore(key: String, start: ZRangeScoreMarker, stop: ZRangeScoreMarker): Long {
+    val sortedSet = keyValueStore.getTyped<Value.SortedSet>(key)?.data ?: return 0
+
+    val minDouble = start.bound()
+    val maxDouble = stop.bound()
+    if (minDouble > maxDouble) return 0
+
+    // Matches how zrangeByScore reads the same markers, so a range that selects members there removes exactly those.
+    fun Double.inRange(): Boolean {
+      val aboveStart = if (start.included) this >= minDouble else this > minDouble
+      val belowStop = if (stop.included) this <= maxDouble else this < maxDouble
+      return aboveStart && belowStop
+    }
+
+    var removed = 0L
+    // Every member under one score shares that score, so a bucket is wholly in the range or wholly out of it.
+    for (score in sortedSet.keys.toList()) {
+      if (!score.inRange()) continue
+      removed += sortedSet.getValue(score).size
+      sortedSet.remove(score)
+    }
     if (sortedSet.isEmpty()) keyValueStore.remove(key)
 
     return removed
