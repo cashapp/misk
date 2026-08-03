@@ -489,6 +489,16 @@ class RealRedis(private val unifiedJedis: UnifiedJedis, private val clientMetric
     return unifiedJedis.zremrangeByRank(key, start.longValue, stop.longValue)
   }
 
+  override fun zremRangeByScore(key: String, start: ZRangeScoreMarker, stop: ZRangeScoreMarker): Long {
+    // The string form of a marker is what carries the exclusive "(" prefix and the infinities, so this goes through
+    // the byte[] overload rather than the double one.
+    return unifiedJedis.zremrangeByScore(
+      key.toByteArray(charset),
+      start.toString().toByteArray(charset),
+      stop.toString().toByteArray(charset),
+    )
+  }
+
   override fun zcard(key: String): Long {
     return unifiedJedis.zcard(key)
   }

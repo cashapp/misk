@@ -125,6 +125,8 @@ interface DeferredRedis {
 
   fun zremRangeByRank(key: String, start: Redis.ZRangeRankMarker, stop: Redis.ZRangeRankMarker): Supplier<Long>
 
+  fun zremRangeByScore(key: String, start: Redis.ZRangeScoreMarker, stop: Redis.ZRangeScoreMarker): Supplier<Long>
+
   fun llen(key: String): Supplier<Long>
 
   fun zcard(key: String): Supplier<Long>
