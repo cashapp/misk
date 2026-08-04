@@ -128,3 +128,5 @@ internal abstract class SchemaMigratorServiceTest(val type: DataSourceType) {
 @Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) internal annotation class Movies
 
 @Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) internal annotation class Movies2
+
+@Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) internal annotation class Movies3

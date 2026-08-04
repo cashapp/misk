@@ -89,7 +89,9 @@ internal constructor(
 
     val immediateValues = seedData.mapValues { (_, value) -> ImmediateLazy(value) }
 
-    val lazyValues = providers.mapValues { (key, _) -> SynchronizedLazy(providerFor(key)) }
+    val lazyValues = providers.mapValues { (key, _) ->
+      SynchronizedLazy(providerFor(key)) { providerFor(key) }
+    }
 
     val lazyOverrides = providerOverrides.mapValues { (_, provider) -> SynchronizedLazy(provider) }
 
@@ -206,6 +208,27 @@ internal constructor(
 
     fun enter() {
       scope.enter(this)
+    }
+
+    /**
+     * Returns a new [Instance] derived from this one with additional seed data and/or provider
+     * overrides layered on top. Already-initialized lazy values from this instance are preserved
+     * and propagate to the returned instance; uncomputed lazy cells are copied so that computing
+     * them in the returned instance does not write back into this one. Entries in [seedData] and
+     * [providerOverrides] override matching keys, with [seedData] taking precedence over
+     * [providerOverrides], matching the merge order of [ActionScope.create].
+     */
+    @JvmOverloads
+    fun withOverrides(
+      seedData: Map<Key<*>, Any?> = emptyMap(),
+      providerOverrides: Map<Key<*>, ActionScopedProvider<*>> = emptyMap(),
+    ): Instance {
+      val isolatedLazyValues = lazyValues.mapValues { (_, lazy) ->
+        if (lazy is SynchronizedLazy && !lazy.isInitialized()) { lazy.copy() } else { lazy }
+      }
+      val immediateValues = seedData.mapValues { (_, value) -> ImmediateLazy(value) }
+      val lazyOverrides = providerOverrides.mapValues { (_, provider) -> SynchronizedLazy(provider) }
+      return Instance(isolatedLazyValues + lazyOverrides + immediateValues, scope)
     }
   }
 

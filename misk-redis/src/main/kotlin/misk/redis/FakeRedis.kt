@@ -529,6 +529,10 @@ class FakeRedis : Redis {
     throw NotImplementedError("Fake client not implemented for this operation")
   }
 
+  override fun zrem(key: String, vararg members: String): Long {
+    throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
   override fun zremRangeByRank(key: String, start: ZRangeRankMarker, stop: ZRangeRankMarker): Long {
     throw NotImplementedError("Fake client not implemented for this operation")
   }

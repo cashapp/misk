@@ -6,7 +6,9 @@ import io.opentracing.tag.Tags
 import java.time.Clock
 import java.util.concurrent.CompletableFuture
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.future.await
@@ -70,16 +72,15 @@ class Subscriber(
             sqsMetrics.handlerDispatchTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
             result
           } catch (e: Exception) {
+            // Propagate cancellation of this subscriber, but recover if only the failed operation was canceled.
+            currentCoroutineContext().ensureActive()
             logger.warn(e) { "Handler failed for job ${job.id} from queue ${job.queueName.value}" }
             sqsMetrics.handlerFailures.labels(queueName.value).inc()
             return@withSpan
           }
         when (result) {
           JobStatus.OK -> deleteMessage(job)
-          JobStatus.DEAD_LETTER -> {
-            deadLetterMessage(job)
-            deleteMessage(job)
-          }
+          JobStatus.DEAD_LETTER -> deadLetterMessage(job)
           JobStatus.RETRY_WITH_BACKOFF -> retryWithBackoff(job)
           JobStatus.RETRY_LATER -> {
             /* no-op, will be retried after visibility timeout passes */
@@ -104,24 +105,31 @@ class Subscriber(
   }
 
   private suspend fun retryWithBackoff(job: SqsJob) {
-    val visibilityTime =
-      visibilityTimeoutCalculator.calculateVisibilityTimeout(
-        currentReceiveCount =
-          job.message.attributes()[MessageSystemAttributeName.APPROXIMATE_RECEIVE_COUNT]?.toInt() ?: 1,
-        queueVisibilityTimeout = queueConfig.visibility_timeout ?: 1,
-      )
+    try {
+      val visibilityTime =
+        visibilityTimeoutCalculator.calculateVisibilityTimeout(
+          currentReceiveCount =
+            job.message.attributes()[MessageSystemAttributeName.APPROXIMATE_RECEIVE_COUNT]?.toInt() ?: 1,
+          queueVisibilityTimeout = queueConfig.visibility_timeout ?: 1,
+        )
 
-    client
-      .changeMessageVisibility(
-        ChangeMessageVisibilityRequest.builder()
-          .queueUrl(job.queueUrl)
-          .receiptHandle(job.message.receiptHandle())
-          .visibilityTimeout(visibilityTime)
-          .build()
-      )
-      .await()
+      client
+        .changeMessageVisibility(
+          ChangeMessageVisibilityRequest.builder()
+            .queueUrl(job.queueUrl)
+            .receiptHandle(job.message.receiptHandle())
+            .visibilityTimeout(visibilityTime)
+            .build()
+        )
+        .await()
 
-    sqsMetrics.visibilityTime.labels(queueName.value).observe(visibilityTime.toDouble())
+      sqsMetrics.visibilityTime.labels(queueName.value).observe(visibilityTime.toDouble())
+    } catch (e: Exception) {
+      // Propagate cancellation of this subscriber, but recover if only the failed operation was canceled.
+      currentCoroutineContext().ensureActive()
+      logger.warn(e) { "Failed to retry job ${job.id} with backoff from queue ${job.queueName.value}" }
+      sqsMetrics.jobsFailedToRetryWithBackoff.labels(queueName.value).inc()
+    }
   }
 
   /**
@@ -139,6 +147,8 @@ class Subscriber(
         )
         .await()
     } catch (e: Exception) {
+      // Propagate cancellation of this subscriber, but recover if only the failed operation was canceled.
+      currentCoroutineContext().ensureActive()
       logger.warn(e) { "Failed to acknowledge job ${job.idempotenceKey} from queue ${job.queueName.value}" }
       sqsMetrics.jobsFailedToAcknowledge.labels(queueName.value).inc()
       return
@@ -148,10 +158,10 @@ class Subscriber(
   }
 
   private suspend fun deadLetterMessage(job: SqsJob) {
-    val deadLetterQueueUrl = sqsQueueResolver.getQueueUrl(deadLetterQueueName)
-    val startTime = clock.millis()
+    try {
+      val deadLetterQueueUrl = sqsQueueResolver.getQueueUrl(deadLetterQueueName)
+      val startTime = clock.millis()
 
-    val response =
       client
         .sendMessage(
           SendMessageRequest.builder()
@@ -161,8 +171,18 @@ class Subscriber(
             .build()
         )
         .await()
-    sqsMetrics.sqsSendTime.labels(deadLetterQueueName.value).observe((clock.millis() - startTime).toDouble())
-    sqsMetrics.jobsDeadLettered.labels(queueName.value).inc()
+      sqsMetrics.sqsSendTime.labels(deadLetterQueueName.value).observe((clock.millis() - startTime).toDouble())
+      sqsMetrics.jobsDeadLettered.labels(queueName.value).inc()
+    } catch (e: Exception) {
+      // Propagate cancellation of this subscriber, but recover if only the failed operation was canceled.
+      currentCoroutineContext().ensureActive()
+      logger.warn(e) { "Failed to dead-letter job ${job.id} from queue ${job.queueName.value}" }
+      sqsMetrics.jobsFailedToDeadLetter.labels(queueName.value).inc()
+      return
+    }
+
+    // Follow by removing the message from the queue
+    deleteMessage(job)
   }
 
   /** Polls the messages from both the regular and the retry queue. */
@@ -191,7 +211,16 @@ class Subscriber(
         wasDisabled = false
       }
       val startTime = clock.millis()
-      val response = fetchMessages(queueUrl).await()
+      val response =
+        try {
+          fetchMessages(queueUrl).await()
+        } catch (e: Exception) {
+          // Propagate cancellation of this subscriber, but recover if only the failed operation was canceled.
+          currentCoroutineContext().ensureActive()
+          logger.warn(e) { "Failed to fetch messages from queue ${queueName.value}; retrying" }
+          sqsMetrics.sqsReceiveFailures.labels(queueName.value).inc()
+          continue
+        }
       sqsMetrics.sqsReceiveTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
 
       sqsMetrics.jobsReceived.labels(queueName.value).inc(response.messages().size.toDouble())

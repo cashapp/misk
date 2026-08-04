@@ -697,6 +697,10 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
       this@FakeRedis.zrangeWithScores(key, type, start, stop, reverse, limit)
     }
 
+    override fun zrem(key: String, vararg members: String): Supplier<Long> = Supplier {
+      this@FakeRedis.zrem(key, *members)
+    }
+
     override fun zremRangeByRank(key: String, start: ZRangeRankMarker, stop: ZRangeRankMarker): Supplier<Long> =
       Supplier {
         this@FakeRedis.zremRangeByRank(key, start, stop)
@@ -875,6 +879,31 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
       }
 
     return ansWithScore
+  }
+
+  override fun zrem(key: String, vararg members: String): Long {
+    val sortedSet = keyValueStore.getTyped<Value.SortedSet>(key)?.data ?: return 0
+
+    var removed = 0L
+    for (member in members) {
+      // A member sits under exactly one score, so the first bucket holding it is the only one to touch. A member named
+      // twice is removed once, which is what Redis counts too.
+      for (entry in sortedSet.entries) {
+        if (entry.value.remove(member)) {
+          removed++
+          break
+        }
+      }
+    }
+
+    // Redis keeps neither an empty score nor an empty sorted set: the key goes away with its last member. The stored
+    // value is mutated rather than replaced so this does not disturb the key's expiry.
+    for (score in sortedSet.keys.toList()) {
+      if (sortedSet.getValue(score).isEmpty()) sortedSet.remove(score)
+    }
+    if (sortedSet.isEmpty()) keyValueStore.remove(key)
+
+    return removed
   }
 
   override fun zremRangeByRank(key: String, start: ZRangeRankMarker, stop: ZRangeRankMarker): Long {

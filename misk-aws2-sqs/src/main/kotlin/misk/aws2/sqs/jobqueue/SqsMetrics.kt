@@ -62,6 +62,20 @@ class SqsMetrics @Inject internal constructor(metrics: Metrics) {
       listOf("QueueName"),
     )
 
+  val jobsFailedToDeadLetter =
+    metrics.counter(
+      "jobs_failed_dead_letter_v2_total",
+      "total # of jobs that we failed to move to the dead letter queueName",
+      listOf("QueueName"),
+    )
+
+  val jobsFailedToRetryWithBackoff =
+    metrics.counter(
+      "jobs_failed_retry_with_backoff_v2_total",
+      "total # of jobs that we failed to retry with backoff",
+      listOf("QueueName"),
+    )
+
   val visibilityTime =
     metrics.histogram(
       "jobs_visibility_time_v2",
@@ -90,6 +104,13 @@ class SqsMetrics @Inject internal constructor(metrics: Metrics) {
     metrics.histogram(
       "jobs_sqs_receive_latency_v2",
       "the round trip time to receive messages from SQS",
+      listOf("QueueName"),
+    )
+
+  val sqsReceiveFailures =
+    metrics.counter(
+      "jobs_sqs_receive_failures_v2_total",
+      "total # of failed requests to receive messages from SQS",
       listOf("QueueName"),
     )
 

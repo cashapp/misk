@@ -93,6 +93,12 @@ constructor(
       hikariConfig.isAutoCommit = false
     }
 
+    config.transaction_isolation?.let {
+      // Hikari applies this level as each connection is created, and resets any connection whose isolation was
+      // changed at runtime back to this level when it is returned to the pool.
+      hikariConfig.transactionIsolation = it.hikariValueName
+    }
+
     if (
       config.type == DataSourceType.MYSQL ||
         config.type == DataSourceType.VITESS_MYSQL ||

@@ -1,5 +1,6 @@
 package misk.jdbc
 
+import java.sql.Connection
 import java.time.Duration
 import java.util.Properties
 import misk.config.Config
@@ -52,6 +53,23 @@ enum class MigrationsFormat {
    * used, SchemaMigratorService will not be installed.
    */
   EXTERNALLY_MANAGED,
+}
+
+/**
+ * Session transaction isolation level applied to every connection in a datasource's pool.
+ *
+ * When configured, HikariCP applies the level as each connection is created and converges any connection whose
+ * isolation was changed at runtime back to this level when it is returned to the pool. When unset, connections use the
+ * database server's default (for MySQL, `REPEATABLE READ` unless overridden server-side).
+ *
+ * [jdbcLevel] is the matching [java.sql.Connection] constant, used by [Transacter.isolationLevel] to set a level per
+ * transacter.
+ */
+enum class TransactionIsolationLevel(val hikariValueName: String, val jdbcLevel: Int) {
+  READ_UNCOMMITTED("TRANSACTION_READ_UNCOMMITTED", Connection.TRANSACTION_READ_UNCOMMITTED),
+  READ_COMMITTED("TRANSACTION_READ_COMMITTED", Connection.TRANSACTION_READ_COMMITTED),
+  REPEATABLE_READ("TRANSACTION_REPEATABLE_READ", Connection.TRANSACTION_REPEATABLE_READ),
+  SERIALIZABLE("TRANSACTION_SERIALIZABLE", Connection.TRANSACTION_SERIALIZABLE),
 }
 
 /** Configuration element for an individual datasource */
@@ -127,6 +145,11 @@ constructor(
   val declarative_schema_config: DeclarativeSchemaConfig? = null,
   val mysql_use_aws_secret_for_credentials: Boolean = false,
   val mysql_aws_secret_name: String? = null,
+  /**
+   * Session transaction isolation level for every connection in the pool. When unset, connections use the database
+   * server's default. See [TransactionIsolationLevel].
+   */
+  val transaction_isolation: TransactionIsolationLevel? = null,
 ) {
   init {
     if (migrations_format == MigrationsFormat.DECLARATIVE) {
@@ -370,6 +393,7 @@ constructor(
       this.show_sql,
       this.generate_hibernate_stats,
       migrations_format = this.migrations_format,
+      transaction_isolation = this.transaction_isolation,
     )
   }
 

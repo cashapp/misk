@@ -43,6 +43,16 @@ interface Transacter {
 
   /** Returns a new transacter configured to not retry transactions. */
   fun noRetries(): Transacter
+
+  /**
+   * Returns a transacter that runs its transactions at the given isolation [level], restoring the connection's prior
+   * level afterwards so it never leaks to others sharing the pool.
+   *
+   * The default implementation throws; an implementation that doesn't support per-transaction isolation must override
+   * this to opt out explicitly.
+   */
+  fun isolationLevel(level: TransactionIsolationLevel): Transacter =
+    throw UnsupportedOperationException("${this::class.simpleName} does not support isolationLevel($level)")
 }
 
 class RealTransacter
@@ -103,23 +113,35 @@ private constructor(
          * do rollback on exception
          */
 
-        // BEGIN
-        if (connection.autoCommit) {
-          connection.autoCommit = false
+        // Set isolation before the transaction begins; on MySQL it's a no-op once started, and misk begins lazily on
+        // the first statement. Restore the prior level afterwards so it doesn't leak to the next user of the
+        // connection.
+        val isolationToRestore: Int? =
+          options.isolationLevel?.let { requested ->
+            connection.transactionIsolation.also { connection.transactionIsolation = requested.jdbcLevel }
+          }
+
+        try {
+          // BEGIN
+          if (connection.autoCommit) {
+            connection.autoCommit = false
+          }
+
+          // Do stuff
+          session = JDBCSession(connection)
+          val result =
+            runCatching { work(session) }
+              .onFailure { e -> session.onSessionClose { session.executeRollbackHooks(e) } }
+              .getOrThrow()
+
+          // COMMIT
+          session.executePreCommitHooks()
+          connection.commit()
+          session.executePostCommitHooks()
+          result
+        } finally {
+          isolationToRestore?.let { connection.transactionIsolation = it }
         }
-
-        // Do stuff
-        session = JDBCSession(connection)
-        val result =
-          runCatching { work(session) }
-            .onFailure { e -> session.onSessionClose { session.executeRollbackHooks(e) } }
-            .getOrThrow()
-
-        // COMMIT
-        session.executePreCommitHooks()
-        connection.commit()
-        session.executePostCommitHooks()
-        result
       }
     } finally {
       transacting.set(false)
@@ -136,11 +158,19 @@ private constructor(
 
   override fun noRetries(): Transacter = retries(1)
 
+  override fun isolationLevel(level: TransactionIsolationLevel): Transacter =
+    RealTransacter(
+      dataSourceService = dataSourceService,
+      config = config,
+      options = options.copy(isolationLevel = level),
+    )
+
   internal data class TransacterOptions(
     val maxAttempts: Int = RetryDefaults.MAX_ATTEMPTS,
     val minRetryDelayMillis: Long = RetryDefaults.MIN_RETRY_DELAY_MILLIS,
     val maxRetryDelayMillis: Long = RetryDefaults.MAX_RETRY_DELAY_MILLIS,
     val retryJitterMillis: Long = RetryDefaults.RETRY_JITTER_MILLIS,
+    val isolationLevel: TransactionIsolationLevel? = null,
   )
 
   companion object {

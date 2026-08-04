@@ -33,6 +33,11 @@ public final class misk/moshi/okio/ByteStringAdapter {
 	public final fun toJson (Lokio/ByteString;)Ljava/lang/String;
 }
 
+public final class misk/moshi/time/DateAdapter : com/squareup/moshi/JsonAdapter$Factory {
+	public static final field INSTANCE Lmisk/moshi/time/DateAdapter;
+	public fun create (Ljava/lang/reflect/Type;Ljava/util/Set;Lcom/squareup/moshi/Moshi;)Lcom/squareup/moshi/JsonAdapter;
+}
+
 public final class misk/moshi/time/DurationAdapter {
 	public static final field INSTANCE Lmisk/moshi/time/DurationAdapter;
 	public final fun fromJson (Ljava/lang/String;)Ljava/time/Duration;

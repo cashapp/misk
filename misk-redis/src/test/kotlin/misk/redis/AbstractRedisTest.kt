@@ -1344,6 +1344,99 @@ abstract class AbstractRedisTest {
   }
 
   @Test
+  fun `zrem - removes a single member`() {
+    // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
+    redis.zadd(key, mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    assertEquals(1, redis.zrem(key, "bb"))
+
+    assertEquals(
+      mapOf(ba_2_3Pair, bz_2_3Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair).toEncodedListOfPairs(),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(-1)),
+    )
+  }
+
+  @Test
+  fun `zrem - removes several members at once`() {
+    // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
+    redis.zadd(key, mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    assertEquals(3, redis.zrem(key, "ba", "c", "ad"))
+
+    assertEquals(
+      mapOf(bz_2_3Pair, bb_4_5Pair, b_5Pair, yy_6_7Pair).toEncodedListOfPairs(),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(-1)),
+    )
+  }
+
+  @Test
+  fun `zrem - leaves the other member of a shared score alone`() {
+    // ba and bz both score 2.3. Removing one must not take the score's other member with it.
+    redis.zadd(key, mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair))
+
+    assertEquals(1, redis.zrem(key, "ba"))
+
+    assertNull(redis.zscore(key, "ba"))
+    assertEquals(2.3, redis.zscore(key, "bz"))
+    assertEquals(2, redis.zcard(key))
+  }
+
+  @Test
+  fun `zrem - members that are not present are ignored`() {
+    redis.zadd(key, mapOf(b_5Pair, bb_4_5Pair))
+
+    assertEquals(0, redis.zrem(key, "not a member"))
+    // Only the member that was actually there counts towards the total.
+    assertEquals(1, redis.zrem(key, "not a member", "b", "also not a member"))
+    assertEquals(1, redis.zcard(key))
+  }
+
+  @Test
+  fun `zrem - naming a member twice removes it once`() {
+    redis.zadd(key, mapOf(b_5Pair, bb_4_5Pair))
+
+    assertEquals(1, redis.zrem(key, "b", "b"))
+    assertEquals(1, redis.zcard(key))
+  }
+
+  @Test
+  fun `zrem - missing key returns zero`() {
+    assertEquals(0, redis.zrem("no such key", "b"))
+    assertFalse(redis.exists("no such key"))
+  }
+
+  @Test
+  fun `zrem - removing every member deletes the key`() {
+    redis.zadd(key, mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair))
+
+    assertEquals(3, redis.zrem(key, "ba", "bz", "bb"))
+
+    assertEquals(0, redis.zcard(key))
+    assertFalse(redis.exists(key))
+  }
+
+  @Test
+  fun `zrem - only touches the key it is given`() {
+    redis.zadd(key, mapOf(b_5Pair, bb_4_5Pair))
+    redis.zadd("another key", mapOf(b_5Pair, bb_4_5Pair))
+
+    assertEquals(2, redis.zrem(key, "b", "bb"))
+
+    assertEquals(2, redis.zcard("another key"))
+  }
+
+  @Test
+  fun `zrem - a removed member can be added back`() {
+    redis.zadd(key, mapOf(ba_2_3Pair, bb_4_5Pair))
+    assertEquals(1, redis.zrem(key, "ba"))
+
+    // A re-add is a fresh insert rather than a score update, so it counts as a new member.
+    assertEquals(1, redis.zadd(key, 7.0, "ba"))
+    assertEquals(7.0, redis.zscore(key, "ba"))
+    assertEquals(2, redis.zcard(key))
+  }
+
+  @Test
   fun `zcard`() {
     assertEquals(0, redis.zcard(key))
     redis.zadd(key, mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
@@ -1524,12 +1617,15 @@ abstract class AbstractRedisTest {
           zadd("zkey", 1.0, "a"),
           zscore("zkey", "a"),
           zrangeWithScores("zkey", start = ZRangeIndexMarker(0), stop = ZRangeIndexMarker(-1)),
+          zadd("zkey", 2.0, "b"),
+          zrem("zkey", "b"),
           zremRangeByRank("zkey", start = ZRangeRankMarker(0), stop = ZRangeRankMarker(-1)),
           zcard("zkey"),
         )
       )
     }
-    assertThat(suppliers.map { it.get() }).containsExactly(1L, 1.0, listOf("a".encodeUtf8() to 1.0), 1L, 0L)
+    assertThat(suppliers.map { it.get() })
+      .containsExactly(1L, 1.0, listOf("a".encodeUtf8() to 1.0), 1L, 1L, 1L, 0L)
   }
 
   @Test

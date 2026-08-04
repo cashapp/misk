@@ -77,6 +77,7 @@ class VitessTestDb(
   private var vitessVersion: Int = DefaultSettings.VITESS_VERSION,
 ) {
   private var isInitialized = false
+  private var vtctldClientTimeout: Duration = DefaultSettings.VTCTLD_CLIENT_TIMEOUT
 
   // Builder added for Java interoperability. This simulates how Kotlin constructors work, which use named parameters
   // with default arguments.
@@ -98,6 +99,7 @@ class VitessTestDb(
     private var transactionIsolationLevel: TransactionIsolationLevel = DefaultSettings.TRANSACTION_ISOLATION_LEVEL
     private var transactionMode: TransactionMode = DefaultSettings.TRANSACTION_MODE
     private var transactionTimeoutSeconds: Duration = DefaultSettings.TRANSACTION_TIMEOUT_SECONDS
+    private var vtctldClientTimeout: Duration = DefaultSettings.VTCTLD_CLIENT_TIMEOUT
     private var vitessImage: String = DefaultSettings.VITESS_IMAGE
     private var vitessVersion: Int = DefaultSettings.VITESS_VERSION
 
@@ -145,32 +147,35 @@ class VitessTestDb(
       this.transactionTimeoutSeconds = transactionTimeoutSeconds
     }
 
+    fun vtctldClientTimeout(vtctldClientTimeout: Duration) = apply { this.vtctldClientTimeout = vtctldClientTimeout }
+
     fun vitessImage(vitessImage: String) = apply { this.vitessImage = vitessImage }
 
     fun vitessVersion(vitessVersion: Int) = apply { this.vitessVersion = vitessVersion }
 
     fun build(): VitessTestDb =
       VitessTestDb(
-        autoApplySchemaChanges,
-        containerName,
-        debugStartup,
-        dockerNetworkName,
-        enableDeclarativeSchemaChanges,
-        enableInMemoryStorage,
-        enableScatters,
-        inMemoryStorageSize,
-        keepAlive,
-        lintSchema,
-        mysqlVersion,
-        port,
-        schemaDir,
-        sqlMode,
-        transactionIsolationLevel,
-        transactionMode,
-        transactionTimeoutSeconds,
-        vitessImage,
-        vitessVersion,
-      )
+          autoApplySchemaChanges,
+          containerName,
+          debugStartup,
+          dockerNetworkName,
+          enableDeclarativeSchemaChanges,
+          enableInMemoryStorage,
+          enableScatters,
+          inMemoryStorageSize,
+          keepAlive,
+          lintSchema,
+          mysqlVersion,
+          port,
+          schemaDir,
+          sqlMode,
+          transactionIsolationLevel,
+          transactionMode,
+          transactionTimeoutSeconds,
+          vitessImage,
+          vitessVersion,
+        )
+        .also { it.vtctldClientTimeout = vtctldClientTimeout }
   }
 
   companion object {
@@ -379,6 +384,7 @@ class VitessTestDb(
         transactionIsolationLevel = transactionIsolationLevel,
         transactionMode = transactionMode,
         transactionTimeoutSeconds = transactionTimeoutSeconds,
+        vtctldClientTimeout = vtctldClientTimeout,
         userPort = port,
         vitessImage = vitessImage,
         vitessVersion = vitessVersion,

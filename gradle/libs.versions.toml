@@ -19,10 +19,10 @@ kotest = "6.0.7"
 kotlin = "2.2.21"
 kotlinBinaryCompatibilityPlugin = "0.18.1"
 ktor = "3.3.0"
-mavenPublish = "0.34.0"
+mavenPublish = "0.37.0"
 mcp = "0.13.0"
 micrometer = "1.17.0"
-netty = "4.2.14.Final"
+netty = "4.2.16.Final"
 okHttp = "5.4.0"
 okio = "3.16.4"
 prometheus = "0.16.0"
@@ -47,6 +47,7 @@ aws2Core = { module = "software.amazon.awssdk:aws-core", version.ref = "aws2" }
 aws2Dynamodb = { module = "software.amazon.awssdk:dynamodb", version.ref = "aws2" }
 aws2DynamodbEnhanced = { module = "software.amazon.awssdk:dynamodb-enhanced", version.ref = "aws2" }
 aws2HttpClientSpi = { module = "software.amazon.awssdk:http-client-spi", version.ref = "aws2" }
+aws2Kms = { module = "software.amazon.awssdk:kms", version.ref = "aws2" }
 aws2Regions = { module = "software.amazon.awssdk:regions", version.ref = "aws2" }
 aws2S3 = { module = "software.amazon.awssdk:s3", version.ref = "aws2" }
 aws2Sqs = { module = "software.amazon.awssdk:sqs", version.ref = "aws2" }
@@ -191,8 +192,8 @@ kubernetesClient = { module = "io.kubernetes:client-java", version = "24.0.0" }
 kubernetesClientApi = { module = "io.kubernetes:client-java-api", version = "24.0.0" }
 launchDarkly = { module = "com.launchdarkly:launchdarkly-java-server-sdk", version = "7.10.2" }
 lettuceCore = { module = "io.lettuce:lettuce-core", version = "6.8.1.RELEASE" }
-logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.32" }
-logbackCore = { module = "ch.qos.logback:logback-core", version = "1.5.32" }
+logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.33" }
+logbackCore = { module = "ch.qos.logback:logback-core", version = "1.5.33" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
 mcpKotlinSdkClient = { module = "io.modelcontextprotocol:kotlin-sdk-client", version.ref = "mcp" }
 mcpKotlinSdkCore = { module = "io.modelcontextprotocol:kotlin-sdk-core", version.ref = "mcp" }
@@ -252,7 +253,7 @@ tempestTestingInternal = { module = "app.cash.tempest:tempest-testing-internal",
 tempestTestingJvm = { module = "app.cash.tempest:tempest-testing-jvm", version.ref = "tempest" }
 threeTenBp = { module = "org.threeten:threetenbp", version = "1.7.2" }
 tink = { module = "com.google.crypto.tink:tink", version = "1.12.0" }
-tinkAwskms = { module = "com.google.crypto.tink:tink-awskms", version = "1.9.1" }
+tinkAwskms = { module = "com.google.crypto.tink:tink-awskms", version = "2.0.0" }
 tinkGcpkms = { module = "com.google.crypto.tink:tink-gcpkms", version = "1.10.0" }
 tracingDatadog = { module = "com.datadoghq:dd-trace-api", version.ref = "datadog" }
 wireBom = { module = "com.squareup.wire:wire-bom", version.ref = "wire" }

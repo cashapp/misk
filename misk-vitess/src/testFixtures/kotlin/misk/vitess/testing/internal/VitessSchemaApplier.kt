@@ -2,6 +2,7 @@ package misk.vitess.testing.internal
 
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.exception.DockerClientException
+import com.github.dockerjava.api.exception.DockerException
 import com.github.dockerjava.api.model.Container
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Image
@@ -9,6 +10,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import java.time.Duration
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
@@ -47,6 +49,7 @@ internal class VitessSchemaApplier(
   private val mysqlPort: Int,
   private val schemaDir: String,
   private val vitessImage: String,
+  private val vtctldClientTimeout: Duration,
   private val vtgatePort: Int,
   private val vtgateUser: String,
   private val vtgateUserPassword: String,
@@ -286,13 +289,13 @@ internal class VitessSchemaApplier(
         "ApplyVSchema",
         keyspace.name,
         "--strict",
-        "--action_timeout=$VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS",
+        "--action_timeout=${vtctldClientTimeout.toMillis()}ms",
         "--server=$containerName:${CONTAINER_PORT_GRPC}",
         "--vschema=${keyspace.vschema}",
       )
 
     printDebug("Applying vschema for keyspace `${keyspace.name}` with command: `${command.joinToString(" ")}`")
-    executeDockerCommand(command, keyspace.name)
+    executeDockerCommandWithRetries(command, keyspace.name)
     return VSchemaUpdate(vschema = keyspace.vschema, keyspace = keyspace.name)
   }
 
@@ -301,43 +304,73 @@ internal class VitessSchemaApplier(
     vitessQueryExecutor.executeUpdateWithRetries(ddl, keyspace.name)
   }
 
-  private fun executeDockerCommand(command: List<String>, keyspace: String): String {
-    val vtctldClientContainerName = "${containerName}_${keyspace}_vtctldclient"
-    val existingContainer = findExistingContainer(vtctldClientContainerName)
-    if (existingContainer != null) {
-      printDebug("Found existing vtctldclient container, proceeding to remove.")
-      dockerClient.removeContainerCmd(existingContainer.id).withForce(true).exec()
+  private fun executeDockerCommandWithRetries(command: List<String>, keyspace: String): String {
+    var lastException: VitessSchemaManagerException? = null
+    repeat(VTCTLDCLIENT_COMMAND_MAX_RETRIES) { attemptNumber ->
+      try {
+        return executeDockerCommand(command, keyspace)
+      } catch (e: VitessSchemaManagerException) {
+        if (!isRetryableDockerException(e.cause)) {
+          throw e
+        }
+
+        lastException = e
+        if (attemptNumber == VTCTLDCLIENT_COMMAND_MAX_RETRIES - 1) {
+          throw e
+        }
+
+        println(
+          "Retrying vtctldclient command for keyspace `$keyspace` after transient Docker error. " +
+            "Attempt `${attemptNumber + 1}` of `$VTCTLDCLIENT_COMMAND_MAX_RETRIES` failed."
+        )
+        Thread.sleep(VTCTLDCLIENT_COMMAND_RETRY_DELAY_MS * (attemptNumber + 1))
+      }
     }
 
-    val networks = dockerClient.listNetworksCmd().exec()
-    networks.find { it.name == dockerNetworkName }
-      ?: throw VitessSchemaManagerException(
-        "VitessSchemaManager could not find the correct Docker Network named `$dockerNetworkName`. The network may have failed to initialize or VitessDockerContainer.createContainer may not have been run."
-      )
+    throw lastException
+      ?: VitessSchemaManagerException("Failed to execute vtctldclient command: `${command.joinToString(" ")}`.")
+  }
 
-    printDebug("Creating new vtctldclient container.")
-    val createContainerResponse =
-      dockerClient
-        .createContainerCmd(deriveVtctldClientImage(vitessImage))
-        .withName(vtctldClientContainerName)
-        .withHostConfig(HostConfig.newHostConfig().withNetworkMode(dockerNetworkName))
-        .withCmd(command)
-        .withAttachStdout(true)
-        .withAttachStdin(true)
-        .exec()
-    printDebug("Created vtctldclient container with id `${createContainerResponse.id}`")
-
-    dockerClient.startContainerCmd(createContainerResponse.id).exec()
-
+  private fun executeDockerCommand(command: List<String>, keyspace: String): String {
+    val vtctldClientContainerName = "${containerName}_${keyspace}_vtctldclient"
+    var containerId: String? = null
     try {
+      val existingContainer = findExistingContainer(vtctldClientContainerName)
+      if (existingContainer != null) {
+        printDebug("Found existing vtctldclient container, proceeding to remove.")
+        removeContainerStrict(existingContainer.id, "existing")
+      }
+
+      val networks = dockerClient.listNetworksCmd().exec()
+      networks.find { it.name == dockerNetworkName }
+        ?: throw VitessSchemaManagerException(
+          "VitessSchemaManager could not find the correct Docker Network named `$dockerNetworkName`. The network may have failed to initialize or VitessDockerContainer.createContainer may not have been run."
+        )
+
+      printDebug("Creating new vtctldclient container.")
+      val createContainerResponse =
+        dockerClient
+          .createContainerCmd(deriveVtctldClientImage(vitessImage))
+          .withName(vtctldClientContainerName)
+          .withHostConfig(HostConfig.newHostConfig().withNetworkMode(dockerNetworkName))
+          .withCmd(command)
+          .withAttachStdout(true)
+          .withAttachStdin(true)
+          .exec()
+      val createdContainerId = createContainerResponse.id
+      containerId = createdContainerId
+      printDebug("Created vtctldclient container with id `$createdContainerId`")
+
+      dockerClient.startContainerCmd(createdContainerId).exec()
+
       val statusCode =
         dockerClient
-          .waitContainerCmd(createContainerResponse.id)
+          .waitContainerCmd(createdContainerId)
           .start()
-          .awaitStatusCode(VTCTLDCLIENT_CONTAINER_START_DELAY_MS, TimeUnit.MILLISECONDS)
+          .awaitStatusCode(vtctldClientTimeout.toMillis(), TimeUnit.MILLISECONDS)
       printDebug("vtctldclient container command wait status code: `$statusCode`")
 
-      val containerLogs = getContainerLogs(createContainerResponse.id)
+      val containerLogs = getContainerLogsBestEffort(createdContainerId)
       printDebug("Vtctld response:\n$containerLogs")
 
       if (statusCode != 0) {
@@ -347,15 +380,46 @@ internal class VitessSchemaApplier(
       }
 
       return containerLogs
-    } catch (e: DockerClientException) {
-      val containerLogs = getContainerLogs(createContainerResponse.id)
-      println("Failed to await vtctld container command for `${command.joinToString(" ")}`. Logs: $containerLogs")
+    } catch (e: VitessSchemaManagerException) {
+      throw e
+    } catch (e: RuntimeException) {
+      if (!isRetryableDockerException(e)) {
+        throw e
+      }
+
+      val containerLogs = containerId?.let { getContainerLogsBestEffort(it) }.orEmpty()
+      println("Failed to execute or await vtctld container command for `${command.joinToString(" ")}`. Logs: $containerLogs")
       throw VitessSchemaManagerException(
-        "Failed to await vtctld container command: `${command.joinToString(" ")}`, check logs for details.",
+        "Failed to execute or await vtctld container command: `${command.joinToString(" ")}`, check logs for details.",
         e,
       )
     } finally {
-      dockerClient.removeContainerCmd(createContainerResponse.id).withForce(true).exec()
+      if (containerId != null) {
+        removeContainerBestEffort(containerId, "completed")
+      }
+    }
+  }
+
+  private fun removeContainerStrict(containerId: String, description: String) {
+    try {
+      dockerClient.removeContainerCmd(containerId).withForce(true).exec()
+    } catch (e: RuntimeException) {
+      if (!isRetryableDockerException(e)) {
+        throw e
+      }
+
+      throw VitessSchemaManagerException(
+        "Failed to remove $description vtctldclient Docker container `$containerId`.",
+        e,
+      )
+    }
+  }
+
+  private fun removeContainerBestEffort(containerId: String, description: String) {
+    try {
+      dockerClient.removeContainerCmd(containerId).withForce(true).exec()
+    } catch (e: RuntimeException) {
+      println("Failed to remove $description vtctldclient Docker container `$containerId`; continuing. Error: ${e.message}")
     }
   }
 
@@ -478,8 +542,12 @@ internal class VitessSchemaApplier(
   }
 
   private companion object {
-    const val VTCTLDCLIENT_CONTAINER_START_DELAY_MS = 10000L
-    const val VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS = "10000ms"
+    const val VTCTLDCLIENT_COMMAND_MAX_RETRIES = 3
+    const val VTCTLDCLIENT_COMMAND_RETRY_DELAY_MS = 2000L
+  }
+
+  private fun isRetryableDockerException(exception: Throwable?): Boolean {
+    return exception is DockerClientException || exception is DockerException
   }
 
   private fun findExistingContainer(containerName: String): Container? {
@@ -496,6 +564,14 @@ internal class VitessSchemaApplier(
     dockerClient.logContainerCmd(containerId).withStdOut(true).withStdErr(true).exec(logCallback).awaitCompletion()
 
     return logCallback.getLogs()
+  }
+
+  private fun getContainerLogsBestEffort(containerId: String): String {
+    return try {
+      getContainerLogs(containerId)
+    } catch (e: RuntimeException) {
+      "<failed to fetch vtctldclient logs for `$containerId`: ${e.message}>"
+    }
   }
 
   private fun printDebug(message: String) {

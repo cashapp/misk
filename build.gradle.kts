@@ -6,7 +6,9 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.STARTED
-import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.dokka.gradle.DokkaExtension
+import org.jetbrains.dokka.gradle.formats.DokkaFormatPlugin
+import org.jetbrains.dokka.gradle.internal.InternalDokkaGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -226,6 +228,7 @@ if (hasPublishUrl) {
 
 subprojects {
   apply(plugin = "org.jetbrains.dokka")
+  apply<DokkaMarkdownPlugin>()
   apply(plugin = "io.gitlab.arturbosch.detekt")
   apply(plugin = "com.autonomousapps.dependency-analysis")
 
@@ -285,8 +288,8 @@ subprojects {
     }
   }
 
-  tasks.withType<DokkaTask>().configureEach {
-    if (name == "dokkaGfm") {
+  extensions.configure<DokkaExtension> {
+    dokkaPublications.named("markdown") {
       outputDirectory.set(project.file("$rootDir/docs/0.x/${project.name}"))
     }
 
@@ -447,6 +450,22 @@ subprojects {
   tasks.withType<AbstractArchiveTask>().configureEach {
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
+  }
+}
+
+/**
+ * Generates GitHub Flavored Markdown docs with Dokka Gradle Plugin v2, replacing the v1 dokkaGfm
+ * task. See https://github.com/Kotlin/dokka/blob/master/dokka-subprojects/plugin-gfm/README.md
+ */
+@OptIn(InternalDokkaGradlePluginApi::class)
+abstract class DokkaMarkdownPlugin : DokkaFormatPlugin(formatName = "markdown") {
+  override fun DokkaFormatPlugin.DokkaFormatPluginContext.configure() {
+    project.dependencies {
+      dokkaPlugin(dokka("gfm-plugin"))
+      formatDependencies.dokkaPublicationPluginClasspathApiOnly.dependencies.addLater(
+        dokka("gfm-template-processing-plugin")
+      )
+    }
   }
 }
 

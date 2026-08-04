@@ -250,6 +250,19 @@ class CustomArgsTest {
     )
   }
 
+  @Test
+  fun `test invalid vtctldClientTimeout`() {
+    val exception =
+      assertThrows<IllegalArgumentException> {
+        VitessTestDb.Builder()
+          .containerName("invalid_vtctld_client_timeout_vitess_db")
+          .vtctldClientTimeout(Duration.ZERO)
+          .build()
+          .run()
+      }
+    assertEquals("Invalid `vtctldClientTimeout`: `PT0S`. Must be positive.", exception.message)
+  }
+
   private fun assertTraditionalSchemaUpdatesApplied(applySchemaResult: ApplySchemaResult) {
     // The vschema is always applied for each keyspace.
     assertEquals(2, applySchemaResult.vschemaUpdates.size)
