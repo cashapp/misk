@@ -12,6 +12,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
+import misk.redis.Redis.ZRangeRankMarker
 import misk.redis.testing.RedisTestModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -94,6 +95,41 @@ class FakeRedisTest : AbstractRedisTest() {
     assertEquals("baz".encodeUtf8(), redis["foo"])
     clock.add(Duration.ofMillis(1))
     assertNull(redis["foo"])
+  }
+
+  @Test
+  fun `zremRangeByRank keeps the sorted set's expiry`() {
+    val key = "zkey"
+    redis.zadd(key, mapOf("a" to 1.0, "b" to 2.0, "c" to 3.0))
+    redis.expire(key, 10)
+
+    // Trimming rebuilt the sorted set, and the rebuilt value carried expiryInstant = Instant.MAX. The key outlived the
+    // deadline its writer had set, which no real server does.
+    assertEquals(1, redis.zremRangeByRank(key, ZRangeRankMarker(0), ZRangeRankMarker(0)))
+    assertEquals(2, redis.zcard(key))
+
+    // Asserting both sides of the deadline pins the expiry as unchanged rather than merely still set: a trim that
+    // shortened it would fail here, and one that cleared or extended it would fail below.
+    clock.add(Duration.ofSeconds(9))
+    assertTrue(redis.exists(key))
+
+    clock.add(Duration.ofSeconds(1))
+    assertFalse(redis.exists(key))
+    assertEquals(0, redis.zcard(key))
+  }
+
+  @Test
+  fun `zremRangeByRank keeps the expiry even when it removes nothing`() {
+    val key = "zkey"
+    redis.zadd(key, mapOf("a" to 1.0, "b" to 2.0))
+    redis.expire(key, 10)
+
+    // An empty range used to be clamped into a one-member range, so this removed a member it should not have touched.
+    assertEquals(0, redis.zremRangeByRank(key, ZRangeRankMarker(5), ZRangeRankMarker(9)))
+    assertEquals(2, redis.zcard(key))
+
+    clock.add(Duration.ofSeconds(10))
+    assertFalse(redis.exists(key))
   }
 
   @Test
