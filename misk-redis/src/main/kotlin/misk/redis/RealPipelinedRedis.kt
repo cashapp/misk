@@ -448,6 +448,20 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     return Supplier { response.get() }
   }
 
+  override fun zremRangeByScore(
+    key: String,
+    start: Redis.ZRangeScoreMarker,
+    stop: Redis.ZRangeScoreMarker,
+  ): Supplier<Long> {
+    val response =
+      pipeline.zremrangeByScore(
+        key.toByteArray(charset),
+        start.toString().toByteArray(charset),
+        stop.toString().toByteArray(charset),
+      )
+    return Supplier { response.get() }
+  }
+
   override fun zcard(key: String): Supplier<Long> {
     val response = pipeline.zcard(key)
     return Supplier { response.get() }
