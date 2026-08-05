@@ -143,6 +143,46 @@ class MiskConfigTest {
   }
 
   @Test
+  fun unparseableIntFailsLoudly() {
+    val exception =
+      assertFailsWith<IllegalStateException> { MiskConfig.load<CoercionTestConfig>("coercion_bad_int", TESTING) }
+
+    // Must name the property and the offending value, and must not claim the property is missing.
+    assertThat(exception).hasMessageContaining("int_value")
+    assertThat(exception).hasMessageContaining("not_a_number")
+    assertThat(exception).hasMessageNotContaining("could not find")
+  }
+
+  @Test
+  fun unparseableLongFailsLoudly() {
+    val exception =
+      assertFailsWith<IllegalStateException> { MiskConfig.load<CoercionTestConfig>("coercion_bad_long", TESTING) }
+
+    assertThat(exception).hasMessageContaining("long_value")
+    assertThat(exception).hasMessageContaining("5_000")
+  }
+
+  @Test
+  fun yamlOneDotOneBooleanFailsLoudly() {
+    val exception =
+      assertFailsWith<IllegalStateException> { MiskConfig.load<CoercionTestConfig>("coercion_bad_boolean", TESTING) }
+
+    assertThat(exception).hasMessageContaining("boolean_value")
+    assertThat(exception).hasMessageContaining("yes")
+    // The likely cause is worth spelling out, since "yes" was a boolean under YAML 1.1.
+    assertThat(exception).hasMessageContaining("use true or false")
+  }
+
+  @Test
+  fun numbersAndBooleansWrittenAsStringsStillParse() {
+    val actual = MiskConfig.load<CoercionTestConfig>("coercion_good", TESTING)
+
+    assertEquals(42, actual.int_value)
+    assertEquals(9000L, actual.long_value)
+    assertEquals(true, actual.boolean_value)
+  }
+
+  @Test
   fun configLoadsValuesFromEnvironmentVariables() {
     // Set environment variables before loading config
     assertEquals("abc123", System.getenv("STRING_VALUE"))
