@@ -269,6 +269,7 @@ subprojects {
 
       // Platform/BOM dependencies constrain versions only.
       add("api", platform(project(":misk-bom")))
+      add("api", platform(rootProject.libs.bouncyCastleBom))
       add("api", platform(rootProject.libs.grpcBom))
       add("api", platform(rootProject.libs.guavaBom))
       add("api", platform(rootProject.libs.guiceBom))
