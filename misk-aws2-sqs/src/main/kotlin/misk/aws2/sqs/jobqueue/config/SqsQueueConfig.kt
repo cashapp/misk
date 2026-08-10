@@ -11,6 +11,10 @@ package misk.aws2.sqs.jobqueue.config
  * will be invisible for subsequent requests. If configured to null, the queue settings will be used. `region` AWS
  * Region of the consumed queue, defaults to the current region. `account_id` AWS Account ID of the consumed queue,
  * defaults to the current account. `queue_name` AWS Queue Name, defaults to the application provided name of the queue.
+ * `drain_timeout_ms` defines how long consumer shutdown waits for in-flight jobs to finish handling and acknowledge
+ * before cancelling them. If null, zero, or negative, shutdown cancels polling and handling immediately (the legacy
+ * behavior). The configured value should be lower than the remaining pod termination grace period at the time the
+ * process receives SIGTERM (after any preStop hook) and lower than the queue visibility timeout.
  */
 data class SqsQueueConfig
 @JvmOverloads
@@ -24,4 +28,5 @@ constructor(
   val visibility_timeout: Int? = null,
   val region: String? = null,
   val account_id: String? = null,
+  val drain_timeout_ms: Long? = null,
 )

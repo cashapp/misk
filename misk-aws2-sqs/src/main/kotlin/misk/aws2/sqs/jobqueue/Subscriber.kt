@@ -5,7 +5,11 @@ import io.opentracing.Tracer
 import io.opentracing.tag.Tags
 import java.time.Clock
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -50,43 +54,88 @@ class Subscriber(
   val asyncSwitch: AsyncSwitch,
 ) {
   private var wasDisabled = false
+  private val draining = AtomicBoolean(false)
+  private val inFlightReceives = ConcurrentHashMap.newKeySet<CompletableFuture<ReceiveMessageResponse>>()
+  private val activeJobs = AtomicInteger(0)
+  private val queuedHandoffs = AtomicInteger(0)
+
+  /**
+   * Puts the subscriber into draining mode: no new SQS receive requests are issued and any in-flight receive is
+   * cancelled. Jobs already handed off stay owned - they remain in the channel and are handled normally until the
+   * channel is closed and empty. Returns the number of in-flight jobs at drain start.
+   *
+   * Best effort: cancelling an in-flight receive is a race against SQS assigning messages to that request server-side.
+   * Messages inside a cancelled receive were never seen by this consumer but have started their visibility timeout;
+   * they become receivable again only after it expires. The alternative - waiting out the long poll - would delay
+   * shutdown by up to the configured wait timeout, so prompt exit is preferred and the window is accepted and
+   * documented rather than eliminated.
+   */
+  internal fun startDraining(): Int {
+    draining.set(true)
+    inFlightReceives.forEach { it.cancel(true) }
+    return inFlightCount()
+  }
+
+  /** Number of jobs that have been handed off from polling but have not finished handling. */
+  internal fun inFlightCount(): Int = activeJobs.get() + queuedHandoffs.get()
 
   suspend fun run() {
     while (true) {
-      val job = tracer.withSpan("channel-receive-queue-${queueName.value}") { channel.receive() }
-      tracer.withSpan("process-queue-${queueName.value}") {
-        val receiveFromChannelTimestamp = clock.millis()
-        sqsMetrics.channelReceiveLag
-          .labels(queueName.value)
-          .observe((receiveFromChannelTimestamp - job.publishToChannelTimestamp).toDouble())
-        val result =
-          try {
-            val startTime = clock.millis()
-            val result =
-              tracer.withSpan("handle-queue-${queueName.value}") {
-                when (handler) {
-                  is SuspendingJobHandler -> handler.handleJob(job)
-                  is BlockingJobHandler -> runInterruptible { handler.handleJob(job) }
-                }
+      val job =
+        try {
+          tracer.withSpan("channel-receive-queue-${queueName.value}") { channel.receive() }
+        } catch (e: ClosedReceiveChannelException) {
+          return
+        }
+      queuedHandoffs.decrementAndGet()
+      activeJobs.incrementAndGet()
+      try {
+        val result = process(job)
+        if (draining.get()) {
+          val label = result?.name?.lowercase() ?: "handler_failed"
+          sqsMetrics.drainJobsCompleted.labels(queueName.value, label).inc()
+        }
+      } finally {
+        activeJobs.decrementAndGet()
+      }
+    }
+  }
+
+  /** Handles a single job. Returns the handler's status, or null if the handler threw. */
+  private suspend fun process(job: SqsJob): JobStatus? {
+    return tracer.withSpan("process-queue-${queueName.value}") {
+      val receiveFromChannelTimestamp = clock.millis()
+      sqsMetrics.channelReceiveLag
+        .labels(queueName.value)
+        .observe((receiveFromChannelTimestamp - job.publishToChannelTimestamp).toDouble())
+      val result =
+        try {
+          val startTime = clock.millis()
+          val result =
+            tracer.withSpan("handle-queue-${queueName.value}") {
+              when (handler) {
+                is SuspendingJobHandler -> handler.handleJob(job)
+                is BlockingJobHandler -> runInterruptible { handler.handleJob(job) }
               }
-            sqsMetrics.handlerDispatchTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
-            result
-          } catch (e: Exception) {
-            // Propagate cancellation of this subscriber, but recover if only the failed operation was canceled.
-            currentCoroutineContext().ensureActive()
-            logger.warn(e) { "Handler failed for job ${job.id} from queue ${job.queueName.value}" }
-            sqsMetrics.handlerFailures.labels(queueName.value).inc()
-            return@withSpan
-          }
-        when (result) {
-          JobStatus.OK -> deleteMessage(job)
-          JobStatus.DEAD_LETTER -> deadLetterMessage(job)
-          JobStatus.RETRY_WITH_BACKOFF -> retryWithBackoff(job)
-          JobStatus.RETRY_LATER -> {
-            /* no-op, will be retried after visibility timeout passes */
-          }
+            }
+          sqsMetrics.handlerDispatchTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
+          result
+        } catch (e: Exception) {
+          // Propagate cancellation of this subscriber, but recover if only the failed operation was canceled.
+          currentCoroutineContext().ensureActive()
+          logger.warn(e) { "Handler failed for job ${job.id} from queue ${job.queueName.value}" }
+          sqsMetrics.handlerFailures.labels(queueName.value).inc()
+          return@withSpan null
+        }
+      when (result) {
+        JobStatus.OK -> deleteMessage(job)
+        JobStatus.DEAD_LETTER -> deadLetterMessage(job)
+        JobStatus.RETRY_WITH_BACKOFF -> retryWithBackoff(job)
+        JobStatus.RETRY_LATER -> {
+          /* no-op, will be retried after visibility timeout passes */
         }
       }
+      result
     }
   }
 
@@ -151,10 +200,16 @@ class Subscriber(
       currentCoroutineContext().ensureActive()
       logger.warn(e) { "Failed to acknowledge job ${job.idempotenceKey} from queue ${job.queueName.value}" }
       sqsMetrics.jobsFailedToAcknowledge.labels(queueName.value).inc()
+      if (draining.get()) {
+        sqsMetrics.drainAckFailures.labels(queueName.value).inc()
+      }
       return
     }
     sqsMetrics.sqsDeleteTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
     sqsMetrics.jobsAcknowledged.labels(queueName.value).inc()
+    if (draining.get()) {
+      sqsMetrics.drainAcksSucceeded.labels(queueName.value).inc()
+    }
   }
 
   private suspend fun deadLetterMessage(job: SqsJob) {
@@ -197,7 +252,7 @@ class Subscriber(
 
   private fun messageFlow(queueName: QueueName) = flow {
     val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
-    while (true) {
+    while (!draining.get()) {
       if (!asyncSwitch.isEnabled("sqs")) {
         if (!wasDisabled) {
           logger.info { "Async SQS tasks disabled. Polling paused for queue ${queueName.value}." }
@@ -211,15 +266,29 @@ class Subscriber(
         wasDisabled = false
       }
       val startTime = clock.millis()
+      val future = fetchMessages(queueUrl)
+      inFlightReceives.add(future)
+      if (draining.get()) {
+        // The drain flag was set between the loop check and issuing the receive. startDraining may have missed
+        // this future when cancelling, so cancel it here and record that a receive raced with the drain.
+        sqsMetrics.receiveAttemptsAfterDrain.labels(queueName.value).inc()
+        future.cancel(true)
+      }
       val response =
         try {
-          fetchMessages(queueUrl).await()
+          future.await()
         } catch (e: Exception) {
           // Propagate cancellation of this subscriber, but recover if only the failed operation was canceled.
           currentCoroutineContext().ensureActive()
+          if (draining.get()) {
+            logger.info { "Polling stopped for queue ${queueName.value}: consumer is draining" }
+            break
+          }
           logger.warn(e) { "Failed to fetch messages from queue ${queueName.value}; retrying" }
           sqsMetrics.sqsReceiveFailures.labels(queueName.value).inc()
           continue
+        } finally {
+          inFlightReceives.remove(future)
         }
       sqsMetrics.sqsReceiveTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
 
@@ -235,6 +304,7 @@ class Subscriber(
           sqsMetrics.queueProcessingLag.labels(queueName.value).observe(processingLag)
         }
         val publishToChannelTimestamp = clock.millis()
+        queuedHandoffs.incrementAndGet()
         emit(
           SqsJob(
             queueName = queueName,

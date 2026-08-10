@@ -141,4 +141,61 @@ class SqsMetrics @Inject internal constructor(metrics: Metrics) {
       "time a job spent it the channel between receiver and handler",
       listOf("QueueName"),
     )
+
+  val drainsStarted =
+    metrics.counter(
+      "jobs_sqs_drains_started_v2_total",
+      "total # of consumer shutdown drains started",
+      listOf("QueueName"),
+    )
+
+  val drainInFlightAtStart =
+    metrics.histogram(
+      "jobs_sqs_drain_in_flight_at_start_v2",
+      "# of active and queued-handoff jobs when a shutdown drain started",
+      listOf("QueueName"),
+    )
+
+  val drainJobsCompleted =
+    metrics.counter(
+      "jobs_sqs_drain_jobs_completed_v2_total",
+      "total # of jobs that finished handling during a shutdown drain, by handler result " +
+        "(ok, retry_later, retry_with_backoff, dead_letter, handler_failed)",
+      listOf("QueueName", "result"),
+    )
+
+  val drainJobsCancelled =
+    metrics.counter(
+      "jobs_sqs_drain_jobs_cancelled_v2_total",
+      "total # of in-flight jobs cancelled because the shutdown drain deadline passed",
+      listOf("QueueName"),
+    )
+
+  val drainDuration =
+    metrics.histogram(
+      "jobs_sqs_drain_duration_ms_v2",
+      "duration of consumer shutdown drains by terminal result",
+      listOf("QueueName", "result"),
+    )
+
+  val receiveAttemptsAfterDrain =
+    metrics.counter(
+      "jobs_sqs_receive_attempts_after_drain_v2_total",
+      "total # of SQS receive attempts made after a shutdown drain started",
+      listOf("QueueName"),
+    )
+
+  val drainAcksSucceeded =
+    metrics.counter(
+      "jobs_sqs_drain_acknowledged_v2_total",
+      "total # of jobs acknowledged during a shutdown drain",
+      listOf("QueueName"),
+    )
+
+  val drainAckFailures =
+    metrics.counter(
+      "jobs_sqs_drain_ack_failures_v2_total",
+      "total # of jobs that failed to acknowledge during a shutdown drain",
+      listOf("QueueName"),
+    )
 }

@@ -271,6 +271,24 @@ Refer to the "threading model" section below for in-depth description.
     the caller's account. This setting is only needed for queues defined outside of your AWS account 
     (external queues)
 
+### Shutdown settings
+
+* `drain_timeout_ms`
+  * default value: null
+  * when set to a positive value, consumer shutdown drains the queue's in-flight work gracefully:
+    polling stops issuing new receive requests (cancelling any receive already in flight), jobs that
+    were already handed off keep their handlers and may finish and acknowledge within this deadline,
+    and only after the drain completes or times out does the service report stopped
+  * when null, zero, or negative, shutdown cancels polling and handling immediately (the legacy
+    behavior); in-flight messages stay invisible until their visibility timeout expires and are then
+    redelivered (or dead-lettered once the queue's maximum receive count is exhausted)
+  * choose a value lower than the termination grace your process actually has when it receives
+    SIGTERM (account for any Kubernetes `preStop` hook that runs first) and lower than the queue's
+    `visibility_timeout`; visibility is not extended while draining
+  * stopping new receives is best effort: SQS may have assigned messages to a receive request that
+    was cancelled at the drain instant; those messages become receivable again after their
+    visibility timeout
+
 **Note:** The `region` is automatically populated from the AWS environment if not explicitly specified 
 in either YAML or dynamic config. This means you typically don't need to specify the region unless 
 you're accessing queues in a different region than your service is deployed in.
