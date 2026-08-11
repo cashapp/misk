@@ -2,7 +2,6 @@ package misk.redis
 
 import jakarta.inject.Inject
 import java.time.Duration
-import java.util.function.Supplier
 import kotlin.random.Random
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -23,7 +22,7 @@ import org.junit.jupiter.api.Test
 import redis.clients.jedis.args.ListDirection
 
 @MiskTest
-class FakeRedisTest : AbstractRedisTest() {
+class FakeRedisTest : AbstractRedisTransactionTest() {
   @Suppress("unused")
   @MiskTestModule
   private val module =
@@ -37,37 +36,6 @@ class FakeRedisTest : AbstractRedisTest() {
 
   @Inject lateinit var clock: FakeClock
   @Inject override lateinit var redis: Redis
-
-  @Test
-  fun `transaction queues commands and resolves responses after commit`() {
-    redis["transaction-key"] = "before".encodeUtf8()
-    lateinit var removed: Supplier<Boolean>
-
-    redis.transaction {
-      removed = del("transaction-key")
-      set("transaction-key", "after".encodeUtf8())
-
-      assertFails { removed.get() }
-      assertEquals("before".encodeUtf8(), redis["transaction-key"])
-    }
-
-    assertTrue(removed.get())
-    assertEquals("after".encodeUtf8(), redis["transaction-key"])
-  }
-
-  @Test
-  fun `transaction discards queued commands when the block fails`() {
-    redis["transaction-key"] = "before".encodeUtf8()
-
-    assertFails {
-      redis.transaction {
-        set("transaction-key", "after".encodeUtf8())
-        error("boom")
-      }
-    }
-
-    assertEquals("before".encodeUtf8(), redis["transaction-key"])
-  }
 
   @Test
   fun expireInOneSecond() {
