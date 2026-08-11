@@ -149,6 +149,10 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(private val unifiedJ
     error("multi is not supported in TestAlwaysPipelinedRedis")
   }
 
+  override fun transaction(block: DeferredRedis.() -> Unit) {
+    error("transaction is not supported in TestAlwaysPipelinedRedis")
+  }
+
   @Deprecated("Use pipelining instead.")
   override fun pipelined(): Pipeline {
     error("pipelined is not supported in TestAlwaysPipelinedRedis")

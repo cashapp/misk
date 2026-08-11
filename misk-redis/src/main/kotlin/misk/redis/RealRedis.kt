@@ -400,6 +400,21 @@ class RealRedis(private val unifiedJedis: UnifiedJedis, private val clientMetric
       ?: error("Transactions aren't supported in misk-redis with ${unifiedJedis.javaClass} at this time.")
   }
 
+  override fun transaction(block: DeferredRedis.() -> Unit) {
+    when (unifiedJedis) {
+      is JedisPooled ->
+        unifiedJedis.pool.resource.use { connection ->
+          Transaction(connection, false).use { transaction ->
+            transaction.multi()
+            block(RealPipelinedRedis(transaction))
+            transaction.exec()
+          }
+        }
+
+      else -> error("Transactions aren't supported in misk-redis with ${unifiedJedis.javaClass} at this time.")
+    }
+  }
+
   // Pipelined requests do not get client histogram metrics right now.
   // pipelined() returns the jedis to the pool, despite returning a Pipeline that holds a reference
   // to the borrowed jedis connection.

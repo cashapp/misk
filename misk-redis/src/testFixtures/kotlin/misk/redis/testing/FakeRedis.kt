@@ -44,7 +44,7 @@ import redis.clients.jedis.args.ListDirection
  * - You need fine-grained control over key-expiry in tests
  *
  * Caveats:
- * - FakeRedis does not currently support [Redis.multi] transactions
+ * - FakeRedis does not support the Jedis-specific [Redis.multi] API. Use [Redis.transaction] instead.
  */
 class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis private val random: Random) :
   Redis, TestFixture {
@@ -99,6 +99,7 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
   /** Acts as the Redis key-value store. */
   private val keyValueStore = KeyValueStore(ConcurrentHashMap<String, Value>())
 
+  @Synchronized
   override fun reset() {
     keyValueStore.clear()
   }
@@ -380,7 +381,7 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
     return keyValueStore.getTyped<Value.List>(key)?.data?.size?.toLong() ?: 0L
   }
 
-  override fun rpop(key: String): ByteString? = rpop(key, count = 1).firstOrNull()
+  @Synchronized override fun rpop(key: String): ByteString? = rpop(key, count = 1).firstOrNull()
 
   @Synchronized
   override fun lrange(key: String, start: Long, stop: Long): List<ByteString?> {
@@ -411,6 +412,7 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
     keyValueStore[key] = Value.List(data = trimmedList, expiryInstant = expiry)
   }
 
+  @Synchronized
   override fun lrem(key: String, count: Long, element: ByteString): Long {
     val value = keyValueStore.getTyped<Value.List>(key) ?: return 0L
     val expiry = value.expiryInstant
@@ -439,14 +441,17 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
   override fun rpoplpush(sourceKey: String, destinationKey: String) =
     lmove(sourceKey = sourceKey, destinationKey = destinationKey, from = ListDirection.RIGHT, to = ListDirection.LEFT)
 
+  @Synchronized
   override fun exists(key: String): Boolean {
     return keyValueStore.containsKey(key)
   }
 
+  @Synchronized
   override fun exists(vararg key: String): Long {
     return key.sumOf { if (exists(it)) 1L else 0L }
   }
 
+  @Synchronized
   override fun persist(key: String): Boolean {
     val value = keyValueStore[key]
 
@@ -497,6 +502,12 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
     throw NotImplementedError("Fake client not implemented for this operation")
   }
 
+  override fun transaction(block: DeferredRedis.() -> Unit) {
+    val commands = TransactionCommands()
+    FakeDeferredRedis(commands).block()
+    commands.execute()
+  }
+
   @Deprecated("Use pipelining instead.")
   override fun pipelined(): Pipeline {
     throw NotImplementedError("Use pipelining instead.")
@@ -511,16 +522,55 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
    * each one runs as it is called rather than when the block closes. What a caller observes after the block are a real
    * pipeline's semantics — every command ran exactly once, in order.
    */
-  inner class FakePipelinedRedis : DeferredRedis {
-    /**
-     * Runs [block] now and replays its outcome to every read of the returned supplier. A real pipeline sends each
-     * queued command exactly once when the block closes, so by the time anyone reads a reply it is already fixed: a
-     * supplier that re-ran the command would execute it again on every read, and one never read at all would skip it
-     * entirely. A failure is held rather than thrown here, because a real pipeline reports it from the reply too.
-     */
-    private fun <T> eager(block: () -> T): Supplier<T> {
+  inner class FakePipelinedRedis : DeferredRedis by FakeDeferredRedis(EagerCommandDefer)
+
+  private interface CommandDefer {
+    fun <T> defer(block: () -> T): Supplier<T>
+  }
+
+  private object EagerCommandDefer : CommandDefer {
+    override fun <T> defer(block: () -> T): Supplier<T> {
       val outcome = runCatching(block)
       return Supplier { outcome.getOrThrow() }
+    }
+  }
+
+  private class QueuedResponse<T> : Supplier<T> {
+    private var outcome: Result<T>? = null
+
+    override fun get(): T {
+      return checkNotNull(outcome) { "Transaction response is not available until the transaction completes" }
+        .getOrThrow()
+    }
+
+    fun execute(block: () -> T) {
+      outcome = runCatching(block)
+    }
+  }
+
+  private inner class TransactionCommands : CommandDefer {
+    private val commands = mutableListOf<() -> Unit>()
+
+    override fun <T> defer(block: () -> T): Supplier<T> {
+      val response = QueuedResponse<T>()
+      commands += { response.execute(block) }
+      return response
+    }
+
+    fun execute() {
+      synchronized(this@FakeRedis) { commands.forEach { it() } }
+    }
+  }
+
+  private inner class FakeDeferredRedis(private val commandDefer: CommandDefer) : DeferredRedis {
+    /**
+     * Defers [block] according to the enclosing pipeline or transaction and replays its outcome to every read of the
+     * returned supplier. A supplier that re-ran the command would execute it again on every read, and one never read at
+     * all would skip it entirely. A failure is held rather than thrown here, because Redis reports command failures
+     * from replies too.
+     */
+    private fun <T> eager(block: () -> T): Supplier<T> {
+      return commandDefer.defer(block)
     }
 
     override fun del(key: String): Supplier<Boolean> = eager { this@FakeRedis.del(key) }
@@ -732,10 +782,12 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
     throw NotImplementedError("Fake client not implemented for this operation")
   }
 
+  @Synchronized
   override fun flushAll() {
     keyValueStore.clear()
   }
 
+  @Synchronized
   override fun flushDB() {
     flushAll()
   }
@@ -823,14 +875,17 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
     return false
   }
 
+  @Synchronized
   override fun zadd(key: String, score: Double, member: String, vararg options: Redis.ZAddOptions): Long {
     return zaddInternal(key, score, member, options)
   }
 
+  @Synchronized
   override fun zadd(key: String, scoreMembers: Map<String, Double>, vararg options: Redis.ZAddOptions): Long {
     return scoreMembers.entries.sumOf { (member, score) -> zaddInternal(key, score, member, options) }
   }
 
+  @Synchronized
   override fun zscore(key: String, member: String): Double? {
     val sortedSet = keyValueStore.getTyped<Value.SortedSet>(key) ?: return null
 
@@ -845,6 +900,7 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
     return currentScore
   }
 
+  @Synchronized
   override fun zrange(
     key: String,
     type: ZRangeType,
@@ -856,6 +912,7 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
     return zrangeWithScores(key, type, start, stop, reverse, limit).map { (member, _) -> member }.toList()
   }
 
+  @Synchronized
   override fun zrangeWithScores(
     key: String,
     type: ZRangeType,
@@ -889,6 +946,7 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
     return ansWithScore
   }
 
+  @Synchronized
   override fun zrem(key: String, vararg members: String): Long {
     val sortedSet = keyValueStore.getTyped<Value.SortedSet>(key)?.data ?: return 0
 
@@ -914,6 +972,7 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
     return removed
   }
 
+  @Synchronized
   override fun zremRangeByRank(key: String, start: ZRangeRankMarker, stop: ZRangeRankMarker): Long {
     val sortedSet = keyValueStore.getTyped<Value.SortedSet>(key)?.data ?: return 0
 
@@ -941,6 +1000,7 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
     return removed
   }
 
+  @Synchronized
   override fun zremRangeByScore(key: String, start: ZRangeScoreMarker, stop: ZRangeScoreMarker): Long {
     val sortedSet = keyValueStore.getTyped<Value.SortedSet>(key)?.data ?: return 0
 
@@ -967,6 +1027,7 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
     return removed
   }
 
+  @Synchronized
   override fun zcard(key: String): Long {
     val sortedSet = keyValueStore.getTyped<Value.SortedSet>(key)?.data ?: return 0
     var length = 0L
