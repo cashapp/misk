@@ -14,6 +14,8 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
 import misk.inject.AlwaysEnabledSwitch
+import misk.inject.AsyncSwitch
+import misk.inject.FakeSwitch
 import misk.jobqueue.QueueName
 import misk.jobqueue.v2.Job
 import misk.jobqueue.v2.JobHandler
@@ -215,6 +217,31 @@ class SubscriberTest {
   }
 
   @Test
+  fun `messages delivered after the switch is disabled are released back to the queue, not handled`() = runTest {
+    whenever(sqsQueueResolver.getQueueUrl(queueName)).thenReturn(queueUrl)
+    val fakeSwitch = FakeSwitch().apply { enabledKeys.add("sqs") }
+    // Simulate the switch flipping while a receive is in flight: the receive call itself disables the
+    // switch, then delivers a message.
+    whenever(client.receiveMessage(any<ReceiveMessageRequest>())).thenAnswer {
+      fakeSwitch.enabledKeys.remove("sqs")
+      CompletableFuture.completedFuture(ReceiveMessageResponse.builder().messages(message("job-1")).build())
+    }
+    whenever(client.changeMessageVisibility(any<ChangeMessageVisibilityRequest>()))
+      .thenReturn(CompletableFuture.completedFuture(ChangeMessageVisibilityResponse.builder().build()))
+
+    val pollingJob = backgroundScope.launch { subscriber(handler = { JobStatus.OK }, asyncSwitch = fakeSwitch).poll() }
+    runCurrent()
+
+    assertTrue(channel.isEmpty)
+    assertTrue(pollingJob.isActive)
+    val visibilityRequest = argumentCaptor<ChangeMessageVisibilityRequest>()
+    verify(client).changeMessageVisibility(visibilityRequest.capture())
+    assertEquals("receipt-job-1", visibilityRequest.firstValue.receiptHandle())
+    assertEquals(0, visibilityRequest.firstValue.visibilityTimeout())
+    assertEquals(0.0, sqsMetrics.jobsReceived.labels(queueName.value).get())
+  }
+
+  @Test
   fun `a receive issued concurrently with drain start is cancelled and recorded`() = runTest {
     whenever(sqsQueueResolver.getQueueUrl(queueName)).thenReturn(queueUrl)
     val subscriber = subscriber(handler = { JobStatus.OK })
@@ -237,6 +264,7 @@ class SubscriberTest {
   private fun subscriber(
     handler: JobHandler,
     queueConfig: SqsQueueConfig = SqsQueueConfig(install_retry_queue = false),
+    asyncSwitch: AsyncSwitch = AlwaysEnabledSwitch(),
   ) =
     Subscriber(
       queueName = queueName,
@@ -251,14 +279,18 @@ class SubscriberTest {
       clock = Clock.systemUTC(),
       tracer = ConcurrentMockTracer(),
       visibilityTimeoutCalculator = VisibilityTimeoutCalculator(),
-      asyncSwitch = AlwaysEnabledSwitch(),
+      asyncSwitch = asyncSwitch,
     )
 
-  private fun subscriber(handler: suspend (Job) -> JobStatus): Subscriber =
+  private fun subscriber(
+    handler: suspend (Job) -> JobStatus,
+    asyncSwitch: AsyncSwitch = AlwaysEnabledSwitch(),
+  ): Subscriber =
     subscriber(
       object : SuspendingJobHandler {
         override suspend fun handleJob(job: Job) = handler(job)
-      }
+      },
+      asyncSwitch = asyncSwitch,
     )
 
   private fun job(id: String) =

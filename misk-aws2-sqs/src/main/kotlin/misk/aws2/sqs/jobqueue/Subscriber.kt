@@ -28,6 +28,7 @@ import misk.logging.getLogger
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.ChangeMessageVisibilityRequest
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest
+import software.amazon.awssdk.services.sqs.model.Message
 import software.amazon.awssdk.services.sqs.model.MessageSystemAttributeName
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse
@@ -292,6 +293,14 @@ class Subscriber(
         }
       sqsMetrics.sqsReceiveTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
 
+      if (!asyncSwitch.isEnabled("sqs")) {
+        // The switch was disabled while this receive was in flight: a long poll issued while enabled can deliver
+        // messages after the switch flips. Handling them would violate the switch contract, so release them back to
+        // the queue immediately instead of letting them sit out their visibility timeout.
+        releaseMessages(queueName, queueUrl, response.messages())
+        continue
+      }
+
       sqsMetrics.jobsReceived.labels(queueName.value).inc(response.messages().size.toDouble())
       response.messages().forEach { message ->
         message.attributes()[MessageSystemAttributeName.SENT_TIMESTAMP]?.let {
@@ -314,6 +323,33 @@ class Subscriber(
             publishToChannelTimestamp = publishToChannelTimestamp,
           )
         )
+      }
+    }
+  }
+
+  /** Makes messages immediately receivable again by zeroing their visibility timeout. */
+  private suspend fun releaseMessages(queueName: QueueName, queueUrl: String, messages: List<Message>) {
+    if (messages.isEmpty()) return
+    logger.info {
+      "Async SQS tasks disabled while a receive was in flight; releasing ${messages.size} message(s) back to queue ${queueName.value}"
+    }
+    messages.forEach { message ->
+      try {
+        client
+          .changeMessageVisibility(
+            ChangeMessageVisibilityRequest.builder()
+              .queueUrl(queueUrl)
+              .receiptHandle(message.receiptHandle())
+              .visibilityTimeout(0)
+              .build()
+          )
+          .await()
+      } catch (e: Exception) {
+        // Propagate cancellation of this subscriber, but recover if only the failed operation was canceled.
+        currentCoroutineContext().ensureActive()
+        logger.warn(e) {
+          "Failed to release message back to queue ${queueName.value}; it will reappear after the visibility timeout"
+        }
       }
     }
   }
