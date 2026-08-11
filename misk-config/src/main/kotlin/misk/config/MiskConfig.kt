@@ -3,6 +3,7 @@ package misk.config
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.BeanProperty
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.DeserializationFeature
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer
+import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import com.fasterxml.jackson.databind.module.SimpleModule
@@ -172,6 +174,15 @@ object MiskConfig {
       return readFlattenedYaml(mapper, jsonNode, configClass, configFile, appName, configEnvironmentName, false)
     } catch (e: KotlinInvalidNullException) {
       throwMissingPropertyException(e, configClass, configFile, jsonNode)
+    } catch (e: InvalidFormatException) {
+      // The property is present, it just cannot be represented as the declared type. Reporting it as missing (which
+      // the MismatchedInputException branch below would do) sends readers looking for the wrong problem.
+      val path = Joiner.on('.').join(e.path.map { it.fieldName ?: it.index })
+      throw IllegalStateException(
+        "failed to load configuration for $appName $configEnvironmentName:" +
+          " could not parse '$path' in $configFile: ${e.originalMessage}",
+        e,
+      )
     } catch (e: MismatchedInputException) {
       throwMissingPropertyException(e, configClass, configFile, jsonNode)
     } catch (e: Exception) {
@@ -369,7 +380,6 @@ object MiskConfig {
         throw JsonMappingException.from(jsonParser, "Attempting to deserialize an object with no type")
       }
 
-      val valueAsType = jsonParser.valueAsTypeOrNull(type)
       val maybeReferenceWithMarkers = jsonParser.valueAsString
 
       // If the string starts with a known scheme, treat it as a resource reference.
@@ -416,7 +426,11 @@ object MiskConfig {
           val maybeReference = "$scheme:$path"
 
           resourceLoader.loadResource(maybeReference, type, mapper, default) as? T?
-        } ?: valueAsType as? T? // Not a resource reference, return the type as is.
+        }
+        // Not a resource reference, so convert the scalar itself. This is deliberately evaluated here rather than up
+        // front: a reference like "${environment:PORT}" is not a valid Int, so converting eagerly would reject
+        // references on every non-String field.
+        ?: jsonParser.valueAsTypeOrNull(type) as? T?
     }
 
     override fun createContextual(ctxt: DeserializationContext?, property: BeanProperty?): JsonDeserializer<*>? {
@@ -483,23 +497,90 @@ object MiskConfig {
     override fun toString(): String = "RealSecret(value=████████, reference=$reference)"
   }
 
-  private fun JsonParser.valueAsTypeOrNull(type: JavaType): Any? =
-    when (type.rawClass) {
-      String::class.java -> valueAsString
-      Int::class.java,
-      java.lang.Integer::class.java -> valueAsInt
-      Double::class.java,
-      java.lang.Double::class.java -> valueAsDouble
-      Float::class.java,
-      java.lang.Float::class.java -> valueAsDouble.toFloat()
-      Long::class.java,
-      java.lang.Long::class.java -> valueAsLong
-      Byte::class.java,
-      java.lang.Byte::class.java -> valueAsInt.toByte()
-      Boolean::class.java,
-      java.lang.Boolean::class.java -> valueAsBoolean
+  /**
+   * Converts the parser's current scalar to [type], failing loudly if it cannot be represented.
+   *
+   * Tokens that already carry the right kind of value (a number for a numeric field, a boolean for a boolean field) are
+   * read with Jackson's own accessors and behave as they always have. Text is the case that needs care: the
+   * `getValueAsX()` family is documented to answer `0`/`false` for anything it cannot parse and to never throw, so
+   * routing text through it turns a malformed config value into a plausible-looking one. `slow_call_timeout_ms: "not a
+   * number"` becomes `0`, and `enabled: "yes"` becomes `false`, with nothing logged.
+   *
+   * This matters more since YAML 1.2, which resolves `5_000` and `yes`/`no`/`on`/`off` as strings rather than as a
+   * number and booleans, so scalars that used to arrive already typed now arrive as text.
+   */
+  private fun JsonParser.valueAsTypeOrNull(type: JavaType): Any? {
+    val rawClass = type.rawClass
+    if (rawClass == String::class.java) return valueAsString
+
+    if (currentToken() != JsonToken.VALUE_STRING) {
+      return when (rawClass) {
+        Int::class.java,
+        java.lang.Integer::class.java -> valueAsInt
+        Double::class.java,
+        java.lang.Double::class.java -> valueAsDouble
+        Float::class.java,
+        java.lang.Float::class.java -> valueAsDouble.toFloat()
+        Long::class.java,
+        java.lang.Long::class.java -> valueAsLong
+        Byte::class.java,
+        java.lang.Byte::class.java -> valueAsInt.toByte()
+        Boolean::class.java,
+        java.lang.Boolean::class.java -> valueAsBoolean
+        else -> null
+      }
+    }
+
+    val text = valueAsString
+    val converted =
+      when (rawClass) {
+        Int::class.java,
+        java.lang.Integer::class.java -> text.trim().toIntOrNull()
+        Double::class.java,
+        java.lang.Double::class.java -> text.trim().toDoubleOrNull()
+        Float::class.java,
+        java.lang.Float::class.java -> text.trim().toFloatOrNull()
+        Long::class.java,
+        java.lang.Long::class.java -> text.trim().toLongOrNull()
+        Byte::class.java,
+        java.lang.Byte::class.java -> text.trim().toByteOrNull()
+        Boolean::class.java,
+        java.lang.Boolean::class.java -> text.toBooleanOrNull()
+        else -> return null
+      }
+
+    return converted
+      ?: throw InvalidFormatException.from(
+        this,
+        "Cannot convert \"$text\" to ${rawClass.simpleName}" + booleanHint(rawClass, text),
+        text,
+        rawClass,
+      )
+  }
+
+  /**
+   * Parses "true"/"false" case-insensitively, matching what Jackson accepts for text. Anything else is rejected rather
+   * than quietly treated as false, which is what both `getValueAsBoolean()` and [String.toBoolean] do.
+   */
+  private fun String.toBooleanOrNull(): Boolean? =
+    when (trim().lowercase(Locale.ROOT)) {
+      "true" -> true
+      "false" -> false
       else -> null
     }
+
+  /** YAML 1.1 spelled booleans several ways; YAML 1.2 does not, so point at the likely cause. */
+  private fun booleanHint(rawClass: Class<*>, text: String): String {
+    val isBoolean = rawClass == Boolean::class.java || rawClass == java.lang.Boolean::class.java
+    if (!isBoolean) return ""
+    return if (text.trim().lowercase(Locale.ROOT) in YAML_1_1_BOOLEANS) {
+      ". YAML 1.2 reads $text as a string, not a boolean; use true or false"
+    } else {
+      ". Expected true or false"
+    }
+  }
+
+  private val YAML_1_1_BOOLEANS = setOf("yes", "no", "on", "off", "y", "n")
 
   private fun String.toTypeOrNull(type: JavaType): Any? =
     when (type.rawClass) {
@@ -515,10 +596,16 @@ object MiskConfig {
       Byte::class.java -> this.toByte()
       java.lang.Byte::class.java -> this.toByte()
       ByteArray::class.java -> this.toByteArray()
-      Boolean::class.java -> this.toBoolean()
-      java.lang.Boolean::class.java -> this.toBoolean()
+      // The numeric conversions above throw on bad input; String.toBoolean() instead answers false for anything that
+      // is not "true", so an env var of "yes" or "1" would silently disable a flag. Reject it the same way.
+      Boolean::class.java -> this.toBooleanOrThrow()
+      java.lang.Boolean::class.java -> this.toBooleanOrThrow()
       else -> null
     }
+
+  private fun String.toBooleanOrThrow(): Boolean =
+    toBooleanOrNull()
+      ?: throw IllegalArgumentException("Cannot convert \"$this\" to Boolean" + booleanHint(Boolean::class.java, this))
 
   @OptIn(ExperimentalTime::class)
   private fun ResourceLoader.loadResource(

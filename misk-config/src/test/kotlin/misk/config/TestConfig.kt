@@ -24,6 +24,10 @@ data class NestedConfig(val child_nested: ChildNestedConfig) : Config
 
 data class ChildNestedConfig(val nested_value: String) : Config
 
+/** Defaults are deliberately non-zero so a silent coercion to 0/false is distinguishable from "not set". */
+data class CoercionTestConfig(val int_value: Int = 1, val long_value: Long = 1, val boolean_value: Boolean = true) :
+  Config
+
 data class EnvironmentTestConfig(
   val string_value: String,
   val ignored_classpath_value: String,
