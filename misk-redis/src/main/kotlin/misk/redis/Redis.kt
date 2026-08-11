@@ -483,6 +483,14 @@ interface Redis {
   /** Marks the start of a transaction block. Subsequent commands will be queued for atomic execution using EXEC. */
   fun multi(): Transaction
 
+  /**
+   * Runs [block]'s commands atomically using MULTI/EXEC. Command responses are not available until the transaction
+   * completes. Save their [Supplier]s and read them after this method returns.
+   *
+   * Transactions are not supported in Redis Cluster mode.
+   */
+  fun transaction(block: DeferredRedis.() -> Unit)
+
   /** Begin a pipeline operation to batch together several updates for optimal performance */
   @Deprecated("Use pipelining instead.") fun pipelined(): Pipeline
 

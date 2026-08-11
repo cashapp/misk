@@ -5,8 +5,9 @@ import java.util.function.Supplier
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import redis.clients.jedis.AbstractPipeline
+import redis.clients.jedis.AbstractTransaction
 import redis.clients.jedis.ClusterPipeline
-import redis.clients.jedis.Pipeline
+import redis.clients.jedis.PipeliningBase
 import redis.clients.jedis.Response
 import redis.clients.jedis.args.ListDirection
 import redis.clients.jedis.params.SetParams
@@ -14,7 +15,7 @@ import redis.clients.jedis.params.ZRangeParams
 import redis.clients.jedis.resps.Tuple
 import redis.clients.jedis.util.JedisClusterCRC16
 
-internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : DeferredRedis {
+internal class RealPipelinedRedis(private val pipeline: PipeliningBase) : DeferredRedis {
   private fun checkSlot(op: String, keys: List<ByteArray>): Throwable? {
     if (pipeline !is ClusterPipeline) {
       return null
@@ -32,13 +33,12 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     val keysBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
     val responses =
       when (pipeline) {
-        is Pipeline -> listOf(pipeline.del(*keysBytes))
         is ClusterPipeline -> {
           keysBytes
             .groupBy { JedisClusterCRC16.getSlot(it) }
             .map { (_, slottedKeys) -> pipeline.del(*slottedKeys.toTypedArray()) }
         }
-        else -> error("Unknown pipeline type: $pipeline")
+        else -> listOf(pipeline.del(*keysBytes))
       }
     return Supplier { responses.fold(0) { acc, response -> acc + response.get().toInt() } }
   }
@@ -47,10 +47,6 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
     val keysBytes = keys.map { it.toByteArray(charset) }.toTypedArray()
 
     return when (pipeline) {
-      is Pipeline -> {
-        val response = pipeline.mget(*keysBytes)
-        Supplier { response.get().map { it?.toByteString() } }
-      }
       is ClusterPipeline -> {
         val responses =
           keysBytes
@@ -70,7 +66,10 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
           keys.map { keyToValueMap[it] }
         }
       }
-      else -> error("Unknown pipeline type: $pipeline")
+      else -> {
+        val response = pipeline.mget(*keysBytes)
+        Supplier { response.get().map { it?.toByteString() } }
+      }
     }
   }
 
@@ -83,14 +82,13 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
 
     val responses =
       when (pipeline) {
-        is Pipeline -> listOf(pipeline.mset(*keyValuePairs.toTypedArray()))
         is ClusterPipeline -> {
           keyValuePairs
             .chunked(2)
             .groupBy { JedisClusterCRC16.getSlot(it.first()) }
             .map { (_, slottedKeyValues) -> pipeline.mset(*slottedKeyValues.flatten().toTypedArray()) }
         }
-        else -> error("Unknown pipeline type: $pipeline")
+        else -> listOf(pipeline.mset(*keyValuePairs.toTypedArray()))
       }
     return Supplier { responses.map { it.get() } }
   }
@@ -557,7 +555,11 @@ internal class RealPipelinedRedis(private val pipeline: AbstractPipeline) : Defe
   }
 
   override fun close() {
-    pipeline.close()
+    when (pipeline) {
+      is AbstractPipeline -> pipeline.close()
+      is AbstractTransaction -> pipeline.close()
+      else -> error("Unknown deferred Redis type: $pipeline")
+    }
   }
 
   companion object {

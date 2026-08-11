@@ -3,6 +3,7 @@ package misk.redis
 import com.google.inject.Module
 import jakarta.inject.Inject
 import java.time.Duration
+import java.util.function.Supplier
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
@@ -12,6 +13,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import redis.clients.jedis.ConnectionPoolConfig
 import wisp.deployment.TESTING
@@ -85,6 +87,38 @@ class RealRedisTest : AbstractRedisTest() {
 
     assertThat(redis["key5"]).isEqualTo("value5".encodeUtf8())
     assertThat(redis["key6"]).isNull()
+  }
+
+  @Test
+  fun `transaction block executes queued commands and resolves responses`() {
+    redis.zadd("book", 100.0, "old")
+    lateinit var removed: Supplier<Long>
+    lateinit var added: Supplier<Long>
+
+    redis.transaction {
+      removed = zremRangeByScore("book", Redis.ZRangeScoreMarker(100.0), Redis.ZRangeScoreMarker(100.0))
+      added = zadd("book", 100.0, "new")
+    }
+
+    assertThat(removed.get()).isEqualTo(1L)
+    assertThat(added.get()).isEqualTo(1L)
+    assertThat(redis.zscore("book", "old")).isNull()
+    assertThat(redis.zscore("book", "new")).isEqualTo(100.0)
+  }
+
+  @Test
+  fun `transaction block discards queued commands when the block fails`() {
+    redis["transaction-key"] = "before".encodeUtf8()
+
+    assertThatThrownBy {
+        redis.transaction {
+          set("transaction-key", "after".encodeUtf8())
+          error("boom")
+        }
+      }
+      .isInstanceOf(IllegalStateException::class.java)
+
+    assertThat(redis["transaction-key"]).isEqualTo("before".encodeUtf8())
   }
 
   @Test

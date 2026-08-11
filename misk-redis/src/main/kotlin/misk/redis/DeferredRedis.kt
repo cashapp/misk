@@ -5,7 +5,7 @@ import java.util.function.Supplier
 import okio.ByteString
 import redis.clients.jedis.args.ListDirection
 
-/** Like [Redis], but returns [Supplier]s to defer value retrieval. **Does not support transactions or pubsub.** */
+/** Like [Redis], but returns [Supplier]s to defer value retrieval in a pipeline or transaction. */
 interface DeferredRedis {
   fun del(key: String): Supplier<Boolean>
 
