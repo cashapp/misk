@@ -15,7 +15,9 @@ import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import redis.clients.jedis.Connection
 import redis.clients.jedis.ConnectionPoolConfig
+import redis.clients.jedis.ReliableTransaction
 import wisp.deployment.TESTING
 
 @MiskTest
@@ -119,6 +121,15 @@ class RealRedisTest : AbstractRedisTest() {
       .isInstanceOf(IllegalStateException::class.java)
 
     assertThat(redis["transaction-key"]).isEqualTo("before".encodeUtf8())
+  }
+
+  @Test
+  fun `deferred Redis rejects unknown Jedis implementations`() {
+    val unsupported = ReliableTransaction(Connection(), false)
+
+    assertThatThrownBy { RealPipelinedRedis(unsupported) }
+      .isInstanceOf(IllegalStateException::class.java)
+      .hasMessageContaining("Unknown deferred Redis type")
   }
 
   @Test
