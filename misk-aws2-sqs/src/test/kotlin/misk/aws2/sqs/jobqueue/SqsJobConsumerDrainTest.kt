@@ -9,6 +9,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.delay
@@ -140,19 +141,23 @@ class SqsJobConsumerDrainTest {
     )
     repeat(3) { sendMessage(queue.queueUrl, "message-$it") }
     assertTrue(handler.started.await(10, SECONDS), "handler did not start")
-    // Give the poller a moment to receive the next message so the drain interrupts a real in-flight handoff.
-    Thread.sleep(500)
+    // Wait until the poller has received message 2 into the handoff (both received messages invisible),
+    // so the drain deterministically interrupts a real in-flight handoff. Message 3 must not have been
+    // received: the poller is suspended handing off message 2 and only receives one message at a time.
+    awaitQueueDepths(queue.queueUrl, expectedVisible = 1, expectedNotVisible = 2)
 
     consumer.stopAsync()
     handler.release()
     consumer.awaitTerminated(10, SECONDS)
 
-    // Every message is either handled-and-deleted or still visible for the replacement pod. A message in the
-    // not-visible window would be exactly the orphaned in-flight delivery this feature exists to prevent.
+    // The two received messages were handled-and-deleted; message 3 was never received after the drain
+    // started and remains visible for the replacement pod. A message in the not-visible window would be
+    // exactly the orphaned in-flight delivery this feature exists to prevent, and a third handled message
+    // would mean polling kept receiving after shutdown.
+    assertEquals(2, handler.handled.get(), "exactly the two received jobs should have been handled")
     val (visible, notVisible) = queueDepths(queue.queueUrl)
     assertEquals(0, notVisible, "no message may be left stranded in the visibility window")
-    assertEquals(3 - handler.handled.get(), visible, "unhandled messages must remain visible")
-    assertTrue(handler.handled.get() >= 1, "the held job should have completed during the drain")
+    assertEquals(1, visible, "the never-received message must remain visible")
   }
 
   @Test
@@ -271,6 +276,16 @@ class SqsJobConsumerDrainTest {
     )
   }
 
+  @Test
+  fun `subscribing after shutdown began is rejected instead of creating an undrainable subscription`() {
+    val consumer = newConsumer()
+    consumer.stopAsync().awaitTerminated(10, SECONDS)
+
+    assertFailsWith<IllegalStateException> {
+      consumer.subscribe(QueueName("drain-test-late"), HoldingHandler(), drainingConfig(drain_timeout_ms = null))
+    }
+  }
+
   /** Holds the first job until [release] is called; any further jobs complete immediately. */
   private class HoldingHandler : SuspendingJobHandler {
     val started = CountDownLatch(1)
@@ -336,6 +351,17 @@ class SqsJobConsumerDrainTest {
     consumer.startAsync().awaitRunning()
     consumers += consumer
     return consumer
+  }
+
+  private fun awaitQueueDepths(queueUrl: String, expectedVisible: Int, expectedNotVisible: Int) {
+    val deadline = System.nanoTime() + SECONDS.toNanos(10)
+    while (queueDepths(queueUrl) != Pair(expectedVisible, expectedNotVisible)) {
+      if (System.nanoTime() > deadline) {
+        assertEquals(Pair(expectedVisible, expectedNotVisible), queueDepths(queueUrl), "queue depths never settled")
+        return
+      }
+      Thread.sleep(25)
+    }
   }
 
   /** Returns (visible, notVisible) message counts. ElasticMQ reports these attributes exactly. */

@@ -1,6 +1,7 @@
 package misk.aws2.sqs.jobqueue
 
 import com.google.common.util.concurrent.AbstractService
+import com.google.common.util.concurrent.Service
 import com.google.inject.Singleton
 import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
@@ -72,6 +73,12 @@ constructor(
   }
 
   fun subscribe(queueName: QueueName, handler: JobHandler, queueConfig: SqsQueueConfig) {
+    // A subscription created after shutdown began would be invisible to doStop() and outlive the service.
+    val state = state()
+    check(state != Service.State.STOPPING && state != Service.State.TERMINATED && state != Service.State.FAILED) {
+      "Cannot subscribe to queue ${queueName.value}: SqsJobConsumer is $state"
+    }
+
     // We won't resolve dead letter queue yet to skip it for local development and testing
     val deadLetterQueueName = dlqProvider.deadLetterQueueFor(queueName)
 
