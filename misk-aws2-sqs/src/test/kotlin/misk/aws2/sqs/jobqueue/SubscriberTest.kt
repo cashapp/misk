@@ -5,6 +5,7 @@ import io.prometheus.client.CollectorRegistry
 import java.time.Clock
 import java.util.concurrent.CompletableFuture
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelAndJoin
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
@@ -143,6 +145,57 @@ class SubscriberTest {
 
     pollingJob.cancelAndJoin()
     assertTrue(pollingJob.isCancelled)
+  }
+
+  @Test
+  fun `stopPolling lets the in-flight receive finish, hands off its messages, then closes the channel`() = runTest {
+    whenever(sqsQueueResolver.getQueueUrl(queueName)).thenReturn(queueUrl)
+    val pendingResponse = CompletableFuture<ReceiveMessageResponse>()
+    whenever(client.receiveMessage(any<ReceiveMessageRequest>())).thenReturn(pendingResponse)
+
+    val subscriber = subscriber(handler = { JobStatus.OK })
+    val pollingJob = backgroundScope.launch { subscriber.poll() }
+    runCurrent()
+
+    subscriber.stopPolling()
+    runCurrent()
+    // The in-flight receive is not cancelled, polling is still waiting on it.
+    assertFalse(pollingJob.isCompleted)
+
+    pendingResponse.complete(ReceiveMessageResponse.builder().messages(message("job-1")).build())
+    runCurrent()
+
+    // The in-flight receive's message is handed off rather than stranded, then polling stops for good.
+    assertEquals("job-1", channel.receive().id)
+    runCurrent()
+    assertTrue(pollingJob.isCompleted)
+    assertFalse(pollingJob.isCancelled)
+    assertTrue(channel.isClosedForReceive)
+    verify(client, times(1)).receiveMessage(any<ReceiveMessageRequest>())
+  }
+
+  @Test
+  fun `run handles the jobs already in the channel and completes when the channel closes`() = runTest {
+    whenever(client.deleteMessage(any<DeleteMessageRequest>()))
+      .thenReturn(CompletableFuture.completedFuture(DeleteMessageResponse.builder().build()))
+    val handledJobs = mutableListOf<String>()
+
+    val subscriber =
+      subscriber(
+        handler = {
+          handledJobs += it.id
+          JobStatus.OK
+        }
+      )
+    val subscriberJob = backgroundScope.launch { subscriber.run() }
+    channel.send(job("job-1"))
+    channel.send(job("job-2"))
+    channel.close()
+    runCurrent()
+
+    assertEquals(listOf("job-1", "job-2"), handledJobs)
+    assertTrue(subscriberJob.isCompleted)
+    assertFalse(subscriberJob.isCancelled)
   }
 
   private fun subscriber(

@@ -50,10 +50,21 @@ class Subscriber(
   val asyncSwitch: AsyncSwitch,
 ) {
   private var wasDisabled = false
+  @Volatile private var stopPollingRequested = false
+
+  /**
+   * Signals the polling loops to stop instead of issuing another receive. A receive already in flight completes
+   * normally and its messages are still handed to the handlers. Once the loops exit, [poll] closes the channel, so
+   * [run] handles whatever is already buffered and then returns.
+   */
+  fun stopPolling() {
+    stopPollingRequested = true
+  }
 
   suspend fun run() {
     while (true) {
-      val job = tracer.withSpan("channel-receive-queue-${queueName.value}") { channel.receive() }
+      val job =
+        tracer.withSpan("channel-receive-queue-${queueName.value}") { channel.receiveCatching() }.getOrNull() ?: return
       tracer.withSpan("process-queue-${queueName.value}") {
         val receiveFromChannelTimestamp = clock.millis()
         sqsMetrics.channelReceiveLag
@@ -187,17 +198,21 @@ class Subscriber(
 
   /** Polls the messages from both the regular and the retry queue. */
   suspend fun poll() {
-    if (queueConfig.install_retry_queue) {
-        merge(messageFlow(queueName), messageFlow(queueName.retryQueue))
-      } else {
-        messageFlow(queueName)
-      }
-      .collect { received -> channel.send(received) }
+    try {
+      if (queueConfig.install_retry_queue) {
+          merge(messageFlow(queueName), messageFlow(queueName.retryQueue))
+        } else {
+          messageFlow(queueName)
+        }
+        .collect { received -> channel.send(received) }
+    } finally {
+      channel.close()
+    }
   }
 
   private fun messageFlow(queueName: QueueName) = flow {
     val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
-    while (true) {
+    while (!stopPollingRequested) {
       if (!asyncSwitch.isEnabled("sqs")) {
         if (!wasDisabled) {
           logger.info { "Async SQS tasks disabled. Polling paused for queue ${queueName.value}." }

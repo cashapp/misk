@@ -11,6 +11,8 @@ package misk.aws2.sqs.jobqueue.config
  * will be invisible for subsequent requests. If configured to null, the queue settings will be used. `region` AWS
  * Region of the consumed queue, defaults to the current region. `account_id` AWS Account ID of the consumed queue,
  * defaults to the current account. `queue_name` AWS Queue Name, defaults to the application provided name of the queue.
+ * `drain_timeout_ms` defines how long consumer shutdown will wait for polling to stop and already-received jobs to be
+ * handled before cancelling them. Defaults to null, which cancels all work immediately on shutdown.
  */
 data class SqsQueueConfig
 @JvmOverloads
@@ -24,4 +26,5 @@ constructor(
   val visibility_timeout: Int? = null,
   val region: String? = null,
   val account_id: String? = null,
+  val drain_timeout_ms: Long? = null,
 )

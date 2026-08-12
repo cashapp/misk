@@ -9,10 +9,14 @@ import java.time.Clock
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
 import misk.inject.AsyncSwitch
 import misk.jobqueue.QueueName
@@ -39,6 +43,11 @@ import misk.testing.TestFixture
  * polling coroutine will wait until all the jobs from the last roundtrip are picked by the handlers before sending
  * another request to SQS. Use channel with a larger buffer size to prefetch messages. This can reduce the latency, but
  * increase the risk of hitting visibility timeout.
+ *
+ * On shutdown, queues configured with a positive `drain_timeout_ms` are drained instead of cancelled: their polling
+ * loops stop issuing new receives, the jobs already handed to the handlers get up to the deadline to finish, and only
+ * work still unfinished at the deadline is cancelled. Queues without the setting keep the legacy immediate
+ * cancellation.
  */
 @Singleton
 class SqsJobConsumer
@@ -56,7 +65,7 @@ constructor(
 ) : JobConsumer, AbstractService(), TestFixture {
   private val scope = CoroutineScope(Dispatchers.IO.limitedParallelism(1) + SupervisorJob())
 
-  private val handlingScopes = ConcurrentHashMap<QueueName, CoroutineScope>()
+  private val subscriptions = ConcurrentHashMap<QueueName, Subscription>()
 
   override fun subscribe(queueName: QueueName, handler: JobHandler) {
     subscribe(queueName = queueName, handler = handler, queueConfig = SqsQueueConfig())
@@ -83,19 +92,19 @@ constructor(
         asyncSwitch = asyncSwitch,
       )
 
-    scope.launch { subscriber.poll() }
-    handlingScopes[queueName] =
-      CoroutineScope(Dispatchers.IO.limitedParallelism(queueConfig.parallelism) + SupervisorJob())
-    repeat(queueConfig.concurrency) { handlingScopes[queueName]?.launch { subscriber.run() } }
+    val pollingJob = scope.launch { subscriber.poll() }
+    val handlingScope = CoroutineScope(Dispatchers.IO.limitedParallelism(queueConfig.parallelism) + SupervisorJob())
+    val handlingJobs = List(queueConfig.concurrency) { handlingScope.launch { subscriber.run() } }
+    subscriptions[queueName] = Subscription(subscriber, pollingJob, handlingScope, handlingJobs)
   }
 
   override fun unsubscribe(queueName: QueueName) {
-    handlingScopes[queueName]?.cancel()
+    subscriptions[queueName]?.handlingScope?.cancel()
   }
 
   /** Called automatically between every test to prevent long-running scopes or test timeouts. */
   override fun reset() {
-    handlingScopes.forEach { _, scope -> scope.cancel() }
+    subscriptions.forEach { _, subscription -> subscription.handlingScope.cancel() }
   }
 
   override fun doStart() {
@@ -103,9 +112,57 @@ constructor(
   }
 
   override fun doStop() {
-    scope.cancel()
-    handlingScopes.values.forEach { it.cancel() }
-    notifyStopped()
+    val (draining, immediate) = subscriptions.values.partition { it.isDrainable }
+    immediate.forEach {
+      it.pollingJob.cancel()
+      it.handlingScope.cancel()
+    }
+    if (draining.isEmpty()) {
+      scope.cancel()
+      notifyStopped()
+      return
+    }
+
+    draining.forEach { it.subscriber.stopPolling() }
+    // The drain waits on the polling scope's own children, so it runs on a scope of its own.
+    CoroutineScope(Dispatchers.IO).launch {
+      try {
+        draining
+          .map { subscription ->
+            launch {
+              val timeoutMs = subscription.subscriber.queueConfig.drain_timeout_ms!!
+              val drained =
+                withTimeoutOrNull(timeoutMs) {
+                  subscription.pollingJob.join()
+                  subscription.handlingJobs.joinAll()
+                }
+              if (drained == null) {
+                logger.warn {
+                  "Queue ${subscription.subscriber.queueName.value} did not drain within ${timeoutMs}ms, " +
+                    "cancelling its remaining work"
+                }
+              }
+              subscription.pollingJob.cancel()
+              subscription.handlingScope.cancel()
+            }
+          }
+          .joinAll()
+      } finally {
+        scope.cancel()
+        notifyStopped()
+      }
+    }
+  }
+
+  private class Subscription(
+    val subscriber: Subscriber,
+    val pollingJob: Job,
+    val handlingScope: CoroutineScope,
+    val handlingJobs: List<Job>,
+  ) {
+    /** An unsubscribed queue's handlers are already cancelled, there is nothing left to drain. */
+    val isDrainable: Boolean
+      get() = (subscriber.queueConfig.drain_timeout_ms ?: 0) > 0 && handlingScope.isActive
   }
 
   companion object {

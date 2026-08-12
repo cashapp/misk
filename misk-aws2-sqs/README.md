@@ -254,6 +254,14 @@ Refer to the "threading model" section below for in-depth description.
     If no value is provided, queue settings will be used
   * note: if the value is smaller than typical processing time, it may result in the job being processed
     multiple times
+* `drain_timeout_ms`
+  * default value: null
+  * when set to a positive value, consumer shutdown drains the queue's in-flight work instead of cancelling
+    it: polling stops issuing new receives, jobs already received get up to this deadline to finish and
+    acknowledge, and only work still unfinished at the deadline is cancelled
+  * when null (the default), zero or negative, shutdown cancels all in-flight work immediately (legacy behavior),
+    leaving the messages invisible until their visibility timeout expires
+  * see "Graceful shutdown draining" below for sizing guidance
 
 ### Connection settings
 
@@ -349,6 +357,36 @@ How the configuration impacts the processing:
 It's advised to start with the default settings and adjust based on specific workloads.
 
 ![image](concurrency.jpg)
+
+## Graceful shutdown draining
+
+By default, stopping the consumer (deploy, pod eviction, node drain) cancels the polling and handling
+coroutines immediately. Jobs that are mid-handler are cancelled: their messages stay invisible until the
+visibility timeout expires, and on queues with a low `maxReceiveCount` they can land in the DLQ.
+
+Setting `drain_timeout_ms` to a positive value turns shutdown into a drain for that queue:
+
+```yaml
+aws_sqs:
+  per_queue_overrides:
+    my_queue:
+      drain_timeout_ms: 15000
+```
+
+1. The polling loops stop issuing new receive requests. A receive already in flight is allowed to complete,
+   and its messages are still handed to the handlers rather than left stranded in the visibility window.
+2. The channel between polling and handling is closed; handlers finish the jobs already received and
+   acknowledge them as usual.
+3. Work still unfinished at the deadline is cancelled, matching the legacy behavior.
+
+Sizing guidance:
+- The drain waits for the in-flight receive to finish, so an idle queue can take up to `wait_timeout`
+  (or the queue's *ReceiveMessageWaitTimeSeconds*) to drain. Services that deploy often may want a lower
+  `wait_timeout` alongside the drain.
+- Size `drain_timeout_ms` below the pod's remaining termination grace after SIGTERM (accounting for any
+  preStop hook) and below the queue's visibility timeout.
+- Draining only helps on orderly shutdown. If the process crashes, in-flight messages still wait out
+  their visibility timeout.
 
 ## Differences to the previous misk-aws implementation
 
