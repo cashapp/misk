@@ -119,12 +119,12 @@ public final class misk/client/BackwardsCompatibleClientsConfig {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/client/BackwardsCompatibleClientsConfigConverter : com/fasterxml/jackson/databind/util/Converter {
+public final class misk/client/BackwardsCompatibleClientsConfigConverter : tools/jackson/databind/util/StdConverter {
 	public fun <init> ()V
 	public synthetic fun convert (Ljava/lang/Object;)Ljava/lang/Object;
 	public fun convert (Lmisk/client/BackwardsCompatibleClientsConfig;)Lmisk/client/HttpClientsConfig;
-	public fun getInputType (Lcom/fasterxml/jackson/databind/type/TypeFactory;)Lcom/fasterxml/jackson/databind/JavaType;
-	public fun getOutputType (Lcom/fasterxml/jackson/databind/type/TypeFactory;)Lcom/fasterxml/jackson/databind/JavaType;
+	public fun getInputType (Ltools/jackson/databind/type/TypeFactory;)Ltools/jackson/databind/JavaType;
+	public fun getOutputType (Ltools/jackson/databind/type/TypeFactory;)Ltools/jackson/databind/JavaType;
 }
 
 public final class misk/client/BackwardsCompatibleEndpointConfig {

@@ -1,6 +1,5 @@
 package misk.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.inject.util.Modules
 import jakarta.inject.Inject
 import java.io.File
@@ -24,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.event.Level
+import tools.jackson.databind.ObjectMapper
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 import uk.org.webcompere.systemstubs.jupiter.SystemStub
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension
@@ -183,6 +183,15 @@ class MiskConfigTest {
   }
 
   @Test
+  fun enumKeyedMapKeepsYamlOrder() {
+    val actual = MiskConfig.load<EnumKeyedMapConfig>("enum_keyed_map", TESTING)
+
+    // An EnumMap would answer CHECKING, SAVINGS, BROKERAGE regardless of how the file is written.
+    assertThat(actual.tiers.keys).containsExactly(AccountTier.BROKERAGE, AccountTier.CHECKING, AccountTier.SAVINGS)
+    assertThat(actual.tiers).isNotInstanceOf(java.util.EnumMap::class.java)
+  }
+
+  @Test
   fun configLoadsValuesFromEnvironmentVariables() {
     // Set environment variables before loading config
     assertEquals("abc123", System.getenv("STRING_VALUE"))
@@ -269,7 +278,7 @@ class MiskConfigTest {
       assertFailsWith<IllegalStateException> {
         MiskConfig.load<TestConfig>(TestConfig::class.java, "unknownproperty", TESTING, failOnUnknownProperties = true)
       }
-    assertThat(exception).hasMessageContaining("Unrecognized field \"blue_items\"")
+    assertThat(exception).hasMessageContaining("Unrecognized property \"blue_items\"")
   }
 
   @Test
