@@ -28,6 +28,7 @@ import software.amazon.awssdk.services.sqs.model.MessageSystemAttributeName
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
+import kotlin.math.log
 
 /**
  * Subscriber reads jobs from the channel and passes them to handler.
@@ -50,10 +51,21 @@ class Subscriber(
   val asyncSwitch: AsyncSwitch,
 ) {
   private var wasDisabled = false
+  private var isRunning = true
+
+  fun stop() {
+    isRunning = false
+  }
 
   suspend fun run() {
     while (true) {
-      val job = tracer.withSpan("channel-receive-queue-${queueName.value}") { channel.receive() }
+      val job = tracer.withSpan("channel-receive-queue-${queueName.value}") {
+        val result = channel.receiveCatching()
+        result.getOrNull()
+      }
+      if (job == null) {
+        break
+      }
       tracer.withSpan("process-queue-${queueName.value}") {
         val receiveFromChannelTimestamp = clock.millis()
         sqsMetrics.channelReceiveLag
@@ -192,12 +204,15 @@ class Subscriber(
       } else {
         messageFlow(queueName)
       }
-      .collect { received -> channel.send(received) }
+      .collect { received ->
+        channel.send(received)
+      }
+    channel.close()
   }
 
   private fun messageFlow(queueName: QueueName) = flow {
     val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
-    while (true) {
+    while (isRunning) {
       if (!asyncSwitch.isEnabled("sqs")) {
         if (!wasDisabled) {
           logger.info { "Async SQS tasks disabled. Polling paused for queue ${queueName.value}." }

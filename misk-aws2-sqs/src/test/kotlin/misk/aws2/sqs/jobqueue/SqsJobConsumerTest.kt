@@ -19,6 +19,7 @@ import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest
+import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest
 import software.amazon.awssdk.services.sqs.model.MessageAttributeValue
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
@@ -277,6 +278,60 @@ class SqsJobConsumerTest {
 
     latch.await(30, SECONDS)
     assertEquals(0, latch.count, "Not all messages were consumed")
+  }
+
+  @Test
+  fun `queues are drained drain`() {
+    // Run the test on a relatively large amount of jobs
+    val numberOfMessages = 1000
+    val queueName = QueueName("test-queue-1")
+    val result = createQueue(queueName)
+
+    val latch = CountDownLatch(numberOfMessages)
+    jobConsumer.subscribe(
+      queueName,
+      object : SuspendingJobHandler {
+        override suspend fun handleJob(job: Job): JobStatus {
+          logger.info { "Handling job: body=${job.body} queue=${job.queueName.value}" }
+          // Randomize the delay
+          delay(Random.nextLong(1, 50))
+          latch.countDown()
+          return JobStatus.OK
+        }
+      },
+      // Use non-standard settings to ensure some randomness of the test
+      SqsQueueConfig(parallelism = 2, concurrency = 5, channel_capacity = 7, region = "us-west-2"),
+    )
+
+    repeat(numberOfMessages) { sendMessage(result.queueUrl, "message $it") }
+    jobConsumer.stop()
+
+    val (visible, invisible) = queueDepths(result.queueUrl)
+
+    // Because we shut down consumption early, but gracefully, we expect all received jobs to be processed
+    // Some may still be on the queue
+    assertEquals(numberOfMessages, ((visible + invisible + (numberOfMessages - latch.count)).toInt()), "Visible: $visible, invisible: $invisible, latch: ${latch.count} ")
+    assertEquals(0, invisible)
+  }
+
+  private fun queueDepths(queueUrl: String): Pair<Int, Int> {
+    val attributes =
+      DockerSqs.client
+        .getQueueAttributes(
+          GetQueueAttributesRequest.builder()
+            .queueUrl(queueUrl)
+            .attributeNames(
+              QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES,
+              QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE,
+            )
+            .build()
+        )
+        .join()
+        .attributes()
+    return Pair(
+      attributes[QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES]!!.toInt(),
+      attributes[QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE]!!.toInt(),
+    )
   }
 
   private fun getDelayingHandler(latch: CountDownLatch): SuspendingJobHandler {

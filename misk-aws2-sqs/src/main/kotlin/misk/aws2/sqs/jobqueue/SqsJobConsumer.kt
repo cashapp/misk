@@ -9,10 +9,13 @@ import java.time.Clock
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
 import misk.inject.AsyncSwitch
 import misk.jobqueue.QueueName
@@ -56,7 +59,7 @@ constructor(
 ) : JobConsumer, AbstractService(), TestFixture {
   private val scope = CoroutineScope(Dispatchers.IO.limitedParallelism(1) + SupervisorJob())
 
-  private val handlingScopes = ConcurrentHashMap<QueueName, CoroutineScope>()
+  private val subscriptions = ConcurrentHashMap<QueueName, Subscription>()
 
   override fun subscribe(queueName: QueueName, handler: JobHandler) {
     subscribe(queueName = queueName, handler = handler, queueConfig = SqsQueueConfig())
@@ -83,19 +86,19 @@ constructor(
         asyncSwitch = asyncSwitch,
       )
 
-    scope.launch { subscriber.poll() }
-    handlingScopes[queueName] =
-      CoroutineScope(Dispatchers.IO.limitedParallelism(queueConfig.parallelism) + SupervisorJob())
-    repeat(queueConfig.concurrency) { handlingScopes[queueName]?.launch { subscriber.run() } }
+    val pollingJob = scope.launch { subscriber.poll() }
+    val handlingScope = CoroutineScope(Dispatchers.IO.limitedParallelism(queueConfig.parallelism) + SupervisorJob())
+    val handlingJobs = List(queueConfig.concurrency) { handlingScope.launch { subscriber.run() } }
+    subscriptions[queueName] = Subscription(subscriber, pollingJob, handlingScope, handlingJobs)
   }
 
   override fun unsubscribe(queueName: QueueName) {
-    handlingScopes[queueName]?.cancel()
+    subscriptions[queueName]?.handlingScope?.cancel()
   }
 
   /** Called automatically between every test to prevent long-running scopes or test timeouts. */
   override fun reset() {
-    handlingScopes.forEach { _, scope -> scope.cancel() }
+    subscriptions.forEach { _, subscription -> subscription.handlingScope.cancel() }
   }
 
   override fun doStart() {
@@ -103,10 +106,29 @@ constructor(
   }
 
   override fun doStop() {
-    scope.cancel()
-    handlingScopes.values.forEach { it.cancel() }
+    logger.info("Stopping job consumer")
+    runBlocking(scope.coroutineContext) {
+      subscriptions.values.forEach {
+        it.subscriber.stop()
+        it.pollingJob.join()
+        it.handlingJobs.joinAll()
+      }
+    }
+    logger.info("Stopped job consumer")
     notifyStopped()
   }
+
+  fun stop() {
+    doStop()
+  }
+
+  private data class Subscription(
+    val subscriber: Subscriber,
+    val pollingJob: Job,
+    val handlingScope: CoroutineScope,
+    val handlingJobs: List<Job>,
+  )
+
 
   companion object {
     private val logger = getLogger<SqsJobConsumer>()
