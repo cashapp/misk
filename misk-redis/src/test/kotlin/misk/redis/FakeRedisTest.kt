@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test
 import redis.clients.jedis.args.ListDirection
 
 @MiskTest
-class FakeRedisTest : AbstractRedisTest() {
+class FakeRedisTest : AbstractRedisTransactionTest() {
   @Suppress("unused")
   @MiskTestModule
   private val module =

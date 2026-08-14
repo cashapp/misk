@@ -465,6 +465,10 @@ class FakeRedis : Redis {
     throw NotImplementedError("Fake client not implemented for this operation")
   }
 
+  override fun transaction(block: DeferredRedis.() -> Unit) {
+    throw NotImplementedError("Use the fake from misk.redis.testing instead.")
+  }
+
   @Deprecated("Use pipelining instead.")
   override fun pipelined(): Pipeline {
     throw NotImplementedError("Fake client not implemented for this operation")
