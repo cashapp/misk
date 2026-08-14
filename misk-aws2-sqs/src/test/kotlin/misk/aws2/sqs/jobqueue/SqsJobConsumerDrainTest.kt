@@ -12,6 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import kotlin.test.fail
 import kotlinx.coroutines.delay
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
 import misk.inject.AsyncSwitch
@@ -125,8 +126,11 @@ class SqsJobConsumerDrainTest {
     val consumer = newConsumer()
     val handler = HoldingHandler()
 
-    // One message at a time, rendezvous channel, single handler: the handler holds job 1 while the poller
-    // waits to hand off job 2. Any message received before the drain must be handled, not stranded.
+    // One message at a time, rendezvous channel, single handler: the handler holds job 1 while the rest of the
+    // pipeline backs up behind it. The exact split is scheduling-dependent: the merge over (queue, retryQueue)
+    // decouples the receive loop from the rendezvous handoff, and the drain deliberately lets an in-flight
+    // receive complete, so the poller may legitimately prefetch the third message before or during the drain.
+    // The assertions below therefore check the drain invariants that hold under every legal scheduling.
     consumer.subscribe(
       queueName,
       handler,
@@ -141,23 +145,28 @@ class SqsJobConsumerDrainTest {
     )
     repeat(3) { sendMessage(queue.queueUrl, "message-$it") }
     assertTrue(handler.started.await(10, SECONDS), "handler did not start")
-    // Wait until the poller has received message 2 into the handoff (both received messages invisible),
-    // so the drain deterministically interrupts a real in-flight handoff. Message 3 must not have been
-    // received: the poller is suspended handing off message 2 and only receives one message at a time.
-    awaitQueueDepths(queue.queueUrl, expectedVisible = 1, expectedNotVisible = 2)
+    // Stage a genuinely backed-up pipeline before draining: at least messages 1 and 2 received (not visible)
+    // and the depths stable, i.e. the poller is parked in a handoff or an empty long poll.
+    awaitStableQueueDepths(queue.queueUrl, minNotVisible = 2)
 
     consumer.stopAsync()
     handler.release()
     consumer.awaitTerminated(10, SECONDS)
 
-    // The two received messages were handled-and-deleted; message 3 was never received after the drain
-    // started and remains visible for the replacement pod. A message in the not-visible window would be
-    // exactly the orphaned in-flight delivery this feature exists to prevent, and a third handled message
-    // would mean polling kept receiving after shutdown.
-    assertEquals(2, handler.handled.get(), "exactly the two received jobs should have been handled")
+    val handled = handler.handled.get()
     val (visible, notVisible) = queueDepths(queue.queueUrl)
+    // THE invariant this feature exists for: a message in the not-visible window would be exactly the orphaned
+    // in-flight delivery a drain must prevent.
     assertEquals(0, notVisible, "no message may be left stranded in the visibility window")
-    assertEquals(1, visible, "the never-received message must remain visible")
+    // Conservation: every message was either fully handled-and-deleted, or never consumed and still visible
+    // for the replacement pod.
+    assertEquals(3, handled + visible, "every message must be handled or still visible, got handled=$handled")
+    assertTrue(handled >= 2, "the messages received before the drain must have been handled, got $handled")
+
+    // Polling provably stopped: a message still visible stays visible. 3s is well past the 1s receive
+    // wait_timeout, so a poller that survived shutdown would have consumed it by now.
+    Thread.sleep(3_000)
+    assertEquals(Pair(visible, 0), queueDepths(queue.queueUrl), "polling must not continue after the drain")
   }
 
   @Test
@@ -353,14 +362,21 @@ class SqsJobConsumerDrainTest {
     return consumer
   }
 
-  private fun awaitQueueDepths(queueUrl: String, expectedVisible: Int, expectedNotVisible: Int) {
+  /**
+   * Waits until the poll pipeline has saturated: at least [minNotVisible] messages received (in the not-visible window)
+   * and the depths unchanged across several consecutive samples. The exact visible/not-visible split is
+   * scheduling-dependent (the poller may prefetch beyond the rendezvous handoff), so callers must not assume one.
+   */
+  private fun awaitStableQueueDepths(queueUrl: String, minNotVisible: Int) {
     val deadline = System.nanoTime() + SECONDS.toNanos(10)
-    while (queueDepths(queueUrl) != Pair(expectedVisible, expectedNotVisible)) {
-      if (System.nanoTime() > deadline) {
-        assertEquals(Pair(expectedVisible, expectedNotVisible), queueDepths(queueUrl), "queue depths never settled")
-        return
-      }
-      Thread.sleep(25)
+    var stableSamples = 0
+    var last = queueDepths(queueUrl)
+    while (stableSamples < 5) {
+      if (System.nanoTime() > deadline) fail("queue depths never saturated and settled, last=$last")
+      Thread.sleep(100)
+      val current = queueDepths(queueUrl)
+      stableSamples = if (current == last && current.second >= minNotVisible) stableSamples + 1 else 0
+      last = current
     }
   }
 
