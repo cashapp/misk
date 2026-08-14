@@ -45,7 +45,7 @@ class SqsAsyncSwitchTest {
             per_queue_overrides =
               mapOf(
                 "external-test-queue" to
-                  SqsQueueConfig(region = "us-west-2", account_id = "1234567890", install_retry_queue = false)
+                  SqsQueueConfig(region = "us-west-2", account_id = "1234567890", install_retry_queue = false, wait_timeout = 0)
               )
           ),
         )

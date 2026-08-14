@@ -58,14 +58,7 @@ class Subscriber(
   }
 
   suspend fun run() {
-    while (true) {
-      val job = tracer.withSpan("channel-receive-queue-${queueName.value}") {
-        val result = channel.receiveCatching()
-        result.getOrNull()
-      }
-      if (job == null) {
-        break
-      }
+    for (job in channel) {
       tracer.withSpan("process-queue-${queueName.value}") {
         val receiveFromChannelTimestamp = clock.millis()
         sqsMetrics.channelReceiveLag
@@ -226,6 +219,7 @@ class Subscriber(
         wasDisabled = false
       }
       val startTime = clock.millis()
+      logger.info("receiving")
       val response =
         try {
           fetchMessages(queueUrl).await()
@@ -270,7 +264,7 @@ class Subscriber(
         .messageAttributeNames(MessageSystemAttributeName.ALL.toString())
         .messageSystemAttributeNames(MessageSystemAttributeName.ALL)
         .maxNumberOfMessages(queueConfig.max_number_of_messages)
-        .waitTimeSeconds(queueConfig.wait_timeout)
+        .waitTimeSeconds(if (isRunning) queueConfig.wait_timeout else 0)
         .visibilityTimeout(queueConfig.visibility_timeout)
         .build()
     return client.receiveMessage(request)

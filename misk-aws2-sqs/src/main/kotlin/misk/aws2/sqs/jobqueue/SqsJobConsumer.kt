@@ -110,8 +110,8 @@ constructor(
     runBlocking(scope.coroutineContext) {
       subscriptions.values.forEach {
         it.subscriber.stop()
-        it.pollingJob.join()
         it.handlingJobs.joinAll()
+        it.pollingJob.join()
       }
     }
     logger.info("Stopped job consumer")
