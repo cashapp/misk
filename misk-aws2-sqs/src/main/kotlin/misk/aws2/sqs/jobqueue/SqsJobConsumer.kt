@@ -8,6 +8,7 @@ import io.opentracing.Tracer
 import jakarta.inject.Inject
 import java.time.Clock
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.concurrent.thread
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -17,6 +18,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
 import misk.inject.AsyncSwitch
@@ -131,11 +133,13 @@ constructor(
     }
 
     draining.forEach { it.subscriber.stopPolling() }
-    // The drain waits on the polling scope's own children, so it runs on a scope of its own.
-    CoroutineScope(Dispatchers.IO).launch {
+    // A dedicated thread keeps doStop() non-blocking (per AbstractService guidance, so ServiceManager can keep
+    // stopping other services) while runBlocking waits for the per-queue drain coroutines it launches.
+    // ServiceManager itself waits on the drain through notifyStopped().
+    thread(name = "sqs-consumer-drain") {
       try {
-        draining
-          .map { subscription ->
+        runBlocking {
+          draining.forEach { subscription ->
             launch {
               val timeoutMs = subscription.subscriber.queueConfig.drain_timeout_ms!!
               val drained =
@@ -153,7 +157,7 @@ constructor(
               subscription.handlingScope.cancel()
             }
           }
-          .joinAll()
+        }
       } finally {
         scope.cancel()
         notifyStopped()
