@@ -14,7 +14,7 @@ import misk.hibernate.ReflectionQuery
 import misk.hibernate.Session
 import misk.hibernate.Transacter
 import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.checkQueryMatchesAction
-import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.findDatabaseQueryMetadata
+import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.findDatabaseQueryRegistration
 import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.getTransacterForDatabaseQueryAction
 import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.validateSelectPathsOrDefault
 import misk.logging.getLogger
@@ -26,7 +26,6 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
-import misk.web.metadata.database.DatabaseQueryMetadata
 
 /** Runs query from Database Query dashboard tab against DB and returns results */
 @Singleton
@@ -34,7 +33,7 @@ internal class HibernateDatabaseQueryDynamicAction
 @Inject
 constructor(
   @JvmSuppressWildcards private val callerProvider: ActionScoped<MiskCaller?>,
-  private val databaseQueryMetadata: List<DatabaseQueryMetadata>,
+  private val databaseQueryRegistrations: List<HibernateDatabaseQueryRegistration>,
   private val injector: Injector,
   private val queryLimitsConfig: ReflectionQuery.QueryLimitsConfig,
 ) : WebAction {
@@ -50,12 +49,13 @@ constructor(
 
     checkQueryMatchesAction(queryClass, true)
 
-    val metadata = findDatabaseQueryMetadata(databaseQueryMetadata, queryClass)
-    val transacter = getTransacterForDatabaseQueryAction(injector, metadata)
+    val registration = findDatabaseQueryRegistration(databaseQueryRegistrations, queryClass)
+    val metadata = registration.metadata
+    val transacter = getTransacterForDatabaseQueryAction(injector, registration.entityClass)
 
     val results =
       if (caller.isAllowed(metadata.allowedCapabilities, metadata.allowedServices)) {
-        runDynamicQuery(transacter, caller.principal, request, metadata)
+        runDynamicQuery(transacter, caller.principal, request, registration)
       } else {
         throw UnauthorizedException("Unauthorized to query [dbEntity=${metadata.entityClass}]")
       }
@@ -67,22 +67,17 @@ constructor(
     transacter: Transacter,
     principal: String,
     request: Request,
-    metadata: DatabaseQueryMetadata,
+    registration: HibernateDatabaseQueryRegistration,
   ) =
     transacter.transaction { session ->
-      val dbEntity =
-        transacter.entities().find { it.simpleName == request.entityClass }
-          ?: throw BadRequestException("[dbEntity=${request.entityClass}] is not an installed HibernateEntity")
-      // Authorization is performed against `queryClass` (and its bound `metadata.entityClass`), but the
-      // entity actually queried is taken from the user-controlled `request.entityClass`. Without the
-      // binding check below, a caller authorized for one query class could read any registered entity
-      // by setting `entityClass` to a different entity name. Enforce that the entity executed matches
-      // the entity the query class is authorized for.
-      if (dbEntity.simpleName != metadata.entityClass) {
+      // Query the entity the authorized registration was built from. Reject a request naming a different
+      // entity than the authorized query class so the caller gets a clear error.
+      if (request.entityClass != registration.metadata.entityClass) {
         throw UnauthorizedException(
           "Requested entity [dbEntity=${request.entityClass}] does not match authorized query [queryClass=${request.queryClass}]"
         )
       }
+      val dbEntity = registration.entityClass
       val (selectPaths, rows) = runDynamicQuery(session, principal, dbEntity, request)
       rows.map { row ->
         // TODO (adrw) sort the map based on DbEntity order
