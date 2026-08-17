@@ -306,14 +306,58 @@ class SqsJobConsumerTest {
     )
 
     repeat(numberOfMessages) { sendMessage(result.queueUrl, "message $it") }
-    jobConsumer.stop()
+    jobConsumer.stopAsync().awaitTerminated()
 
-    val (visible, invisible) = queueDepths(result.queueUrl)
+    // The Approximate* depth attributes are exact in ElasticMQ but eventually consistent on real SQS, so poll
+    // until they settle instead of asserting on a single read taken right after the stop.
+    val (visible, invisible) =
+      awaitSettledQueueDepths(result.queueUrl) { (visible, invisible) ->
+        visible + invisible + (numberOfMessages - latch.count).toInt() == numberOfMessages && invisible == 0
+      }
 
     // Because we shut down consumption early, but gracefully, we expect all received jobs to be processed
     // Some may still be on the queue
-    assertEquals(numberOfMessages, ((visible + invisible + (numberOfMessages - latch.count)).toInt()), "Visible: $visible, invisible: $invisible, latch: ${latch.count} ")
+    assertEquals(
+      numberOfMessages,
+      ((visible + invisible + (numberOfMessages - latch.count)).toInt()),
+      "Visible: $visible, invisible: $invisible, latch: ${latch.count} ",
+    )
     assertEquals(0, invisible)
+  }
+
+  @Test
+  fun `handler exceeding the shutdown timeout is cancelled and shutdown terminates predictably`() {
+    val queueName = QueueName("test-queue-1")
+    val result = createQueue(queueName)
+
+    val started = CountDownLatch(1)
+    jobConsumer.subscribe(
+      queueName,
+      object : SuspendingJobHandler {
+        override suspend fun handleJob(job: Job): JobStatus {
+          started.countDown()
+          delay(60_000)
+          return JobStatus.OK
+        }
+      },
+      // Visibility of 30s: the cancelled job's message stays in the not-visible window for the whole test.
+      SqsQueueConfig(region = "us-west-2", visibility_timeout = 30, shutdown_timeout_ms = 1_000),
+    )
+    sendMessage(result.queueUrl, "message")
+    assertTrue(started.await(10, SECONDS), "handler did not start")
+
+    val stopStart = System.nanoTime()
+    jobConsumer.stopAsync()
+    jobConsumer.awaitTerminated(10, SECONDS)
+    val stopMillis = (System.nanoTime() - stopStart) / 1_000_000
+
+    assertTrue(stopMillis >= 1_000, "shutdown returned before the shutdown timeout: ${stopMillis}ms")
+    assertTrue(stopMillis < 8_000, "shutdown did not terminate promptly after the shutdown timeout: ${stopMillis}ms")
+
+    // The handler was cancelled, so its message was never acknowledged and remains in the visibility window.
+    val (visible, invisible) = queueDepths(result.queueUrl)
+    assertEquals(0, visible)
+    assertEquals(1, invisible, "cancelled job's message should remain in the visibility window")
   }
 
   @Test
@@ -330,9 +374,23 @@ class SqsJobConsumerTest {
 
     // Give the poller time to issue its receive before stopping.
     Thread.sleep(1_000)
-    val elapsed = measureTimeMillis { jobConsumer.stop() }
+    val elapsed = measureTimeMillis { jobConsumer.stopAsync().awaitTerminated() }
 
     assertTrue(elapsed < 5_000, "stop() took ${elapsed}ms; the in-flight receive was not canceled")
+  }
+
+  /**
+   * Polls the queue depths until [settled] returns true or a ~20s deadline expires, then returns the last read. The
+   * Approximate* depth attributes are exact in ElasticMQ but eventually consistent on real SQS.
+   */
+  private fun awaitSettledQueueDepths(queueUrl: String, settled: (Pair<Int, Int>) -> Boolean): Pair<Int, Int> {
+    val deadline = System.nanoTime() + SECONDS.toNanos(20)
+    var depths = queueDepths(queueUrl)
+    while (!settled(depths) && System.nanoTime() < deadline) {
+      Thread.sleep(100)
+      depths = queueDepths(queueUrl)
+    }
+    return depths
   }
 
   private fun queueDepths(queueUrl: String): Pair<Int, Int> {
