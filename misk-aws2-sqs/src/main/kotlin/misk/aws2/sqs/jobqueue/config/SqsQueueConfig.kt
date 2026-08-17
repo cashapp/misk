@@ -11,6 +11,9 @@ package misk.aws2.sqs.jobqueue.config
  * will be invisible for subsequent requests. If configured to null, the queue settings will be used. `region` AWS
  * Region of the consumed queue, defaults to the current region. `account_id` AWS Account ID of the consumed queue,
  * defaults to the current account. `queue_name` AWS Queue Name, defaults to the application provided name of the queue.
+ * `shutdown_grace_period_ms` defines how long shutdown waits for an in-flight receive to complete before aborting it.
+ * Set it to 0 to abort in-flight receives immediately. Defaults to null, which uses
+ * [SqsQueueConfig.DEFAULT_SHUTDOWN_GRACE_PERIOD_MS].
  */
 data class SqsQueueConfig
 @JvmOverloads
@@ -24,4 +27,15 @@ constructor(
   val visibility_timeout: Int? = null,
   val region: String? = null,
   val account_id: String? = null,
-)
+  val shutdown_grace_period_ms: Long? = null,
+) {
+  companion object {
+    /**
+     * How long shutdown waits for an in-flight receive to complete before aborting it.
+     *
+     * A long poll that has messages returns immediately, so this only needs to cover a receive that is about to
+     * deliver. One that is still waiting out its `wait_timeout` has nothing to lose by being canceled.
+     */
+    const val DEFAULT_SHUTDOWN_GRACE_PERIOD_MS = 1000L
+  }
+}

@@ -24,7 +24,7 @@ import misk.jobqueue.v2.JobConsumer
 import misk.jobqueue.v2.JobHandler
 import misk.logging.getLogger
 import misk.testing.TestFixture
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Instruments queue consumption.
@@ -114,8 +114,12 @@ constructor(
         // Stop issuing new receives, and give the in-flight one a chance to finish its long poll. Messages it already
         // fetched are handled normally; abandoning it would leave them invisible until their visibility timeout expires.
         subscription.subscriber.stop()
-        if (withTimeoutOrNull(POLLING_GRACE_PERIOD) { subscription.pollingJob.join() } == null) {
-          logger.info { "Polling for queue ${queueName.value} did not stop within $POLLING_GRACE_PERIOD; canceling it" }
+        val gracePeriod =
+          (subscription.subscriber.queueConfig.shutdown_grace_period_ms
+              ?: SqsQueueConfig.DEFAULT_SHUTDOWN_GRACE_PERIOD_MS)
+            .milliseconds
+        if (withTimeoutOrNull(gracePeriod) { subscription.pollingJob.join() } == null) {
+          logger.info { "Polling for queue ${queueName.value} did not stop within $gracePeriod; canceling it" }
           subscription.subscriber.cancelInFlightReceives()
           subscription.pollingJob.join()
         }
@@ -141,13 +145,5 @@ constructor(
 
   companion object {
     private val logger = getLogger<SqsJobConsumer>()
-
-    /**
-     * How long shutdown waits for an in-flight receive to complete before aborting it.
-     *
-     * A long poll that has messages returns immediately, so this only needs to cover a receive that is about to deliver.
-     * One that is still waiting out its `wait_timeout` has nothing to lose by being canceled.
-     */
-    private val POLLING_GRACE_PERIOD = 1.seconds
   }
 }

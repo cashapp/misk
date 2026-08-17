@@ -4,7 +4,9 @@ import jakarta.inject.Inject
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit.SECONDS
 import kotlin.random.Random
+import kotlin.system.measureTimeMillis
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlinx.coroutines.delay
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
 import misk.jobqueue.QueueName
@@ -312,6 +314,25 @@ class SqsJobConsumerTest {
     // Some may still be on the queue
     assertEquals(numberOfMessages, ((visible + invisible + (numberOfMessages - latch.count)).toInt()), "Visible: $visible, invisible: $invisible, latch: ${latch.count} ")
     assertEquals(0, invisible)
+  }
+
+  @Test
+  fun `shutdown grace period of zero cancels the in-flight receive`() {
+    val queueName = QueueName("test-queue-1")
+    // The queue is created with a 20s receive wait time, so an idle poller sits in a long poll.
+    createQueue(queueName)
+
+    jobConsumer.subscribe(
+      queueName,
+      getHandler(CountDownLatch(1)),
+      SqsQueueConfig(region = "us-west-2", shutdown_grace_period_ms = 0),
+    )
+
+    // Give the poller time to issue its receive before stopping.
+    Thread.sleep(1_000)
+    val elapsed = measureTimeMillis { jobConsumer.stop() }
+
+    assertTrue(elapsed < 5_000, "stop() took ${elapsed}ms; the in-flight receive was not canceled")
   }
 
   private fun queueDepths(queueUrl: String): Pair<Int, Int> {

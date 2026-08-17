@@ -235,7 +235,6 @@ class Subscriber(
         wasDisabled = false
       }
       val startTime = clock.millis()
-      logger.info("receiving")
       val response =
         try {
           val future = fetchMessages(queueUrl)
@@ -299,7 +298,7 @@ class Subscriber(
         .messageAttributeNames(MessageSystemAttributeName.ALL.toString())
         .messageSystemAttributeNames(MessageSystemAttributeName.ALL)
         .maxNumberOfMessages(queueConfig.max_number_of_messages)
-        .waitTimeSeconds(if (isRunning) queueConfig.wait_timeout else 0)
+        .waitTimeSeconds(queueConfig.wait_timeout)
         .visibilityTimeout(queueConfig.visibility_timeout)
         .build()
     return client.receiveMessage(request)
