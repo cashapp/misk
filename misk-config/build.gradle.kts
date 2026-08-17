@@ -20,7 +20,6 @@ dependencies {
   implementation(libs.guava)
   implementation(libs.jacksonCore)
   implementation(libs.jacksonDataformatYaml)
-  implementation(libs.jacksonJsr310)
   implementation(libs.jacksonKotlin)
   implementation(libs.loggingApi)
   implementation(libs.okio)

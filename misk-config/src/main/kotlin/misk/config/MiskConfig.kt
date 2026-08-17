@@ -1,32 +1,6 @@
 package misk.config
 
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.core.JsonToken
-import com.fasterxml.jackson.databind.BeanProperty
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.JavaType
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.JsonSerializer
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier
-import com.fasterxml.jackson.databind.deser.ContextualDeserializer
-import com.fasterxml.jackson.databind.exc.InvalidFormatException
-import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.databind.ser.ContextualSerializer
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinInvalidNullException
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.google.common.base.Joiner
 import java.io.File
 import java.io.FilenameFilter
@@ -36,6 +10,32 @@ import kotlin.time.ExperimentalTime
 import misk.logging.getLogger
 import misk.resources.ResourceLoader
 import org.apache.commons.lang3.StringUtils
+import tools.jackson.core.JsonGenerator
+import tools.jackson.core.JsonParser
+import tools.jackson.core.JsonToken
+import tools.jackson.databind.BeanProperty
+import tools.jackson.databind.DatabindException
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.JavaType
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.MapperFeature
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.SerializationContext
+import tools.jackson.databind.ValueDeserializer
+import tools.jackson.databind.ValueSerializer
+import tools.jackson.databind.annotation.JsonSerialize
+import tools.jackson.databind.cfg.EnumFeature
+import tools.jackson.databind.deser.ValueDeserializerModifier
+import tools.jackson.databind.exc.InvalidFormatException
+import tools.jackson.databind.exc.MismatchedInputException
+import tools.jackson.databind.exc.UnrecognizedPropertyException
+import tools.jackson.databind.module.SimpleModule
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.dataformat.yaml.YAMLMapper
+import tools.jackson.module.kotlin.KotlinFeature
+import tools.jackson.module.kotlin.KotlinInvalidNullException
+import tools.jackson.module.kotlin.KotlinModule
 import wisp.deployment.Deployment
 
 object MiskConfig {
@@ -125,11 +125,9 @@ object MiskConfig {
     overrideValues: JsonNode? = null,
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM,
     failOnUnknownProperties: Boolean,
-    deserializerModifier: BeanDeserializerModifier? = null,
+    deserializerModifier: ValueDeserializerModifier? = null,
   ): T {
     check(!Secret::class.java.isAssignableFrom(configClass)) { "Top level service config cannot be a Secret<*>" }
-
-    val mapper = newObjectMapper(resourceLoader, false, deserializerModifier)
 
     val configYamls = loadConfigYamlMap(appName, deployment, overrideResources, resourceLoader)
     check(configYamls.values.any { it != null }) { "could not find configuration files - checked ${configYamls.keys}" }
@@ -139,7 +137,7 @@ object MiskConfig {
 
     val configFile = "$appName-${configEnvironmentName.lowercase(Locale.US)}.yaml"
     return readFlattenedYaml(
-      mapper,
+      { failOnUnknown -> newObjectMapper(resourceLoader, false, deserializerModifier, failOnUnknown) },
       jsonNode,
       configClass,
       configFile,
@@ -150,7 +148,7 @@ object MiskConfig {
   }
 
   private fun <T : Config> readFlattenedYaml(
-    mapper: ObjectMapper,
+    newMapper: (failOnUnknownProperties: Boolean) -> ObjectMapper,
     jsonNode: JsonNode,
     configClass: Class<out Config>,
     configFile: String,
@@ -160,24 +158,32 @@ object MiskConfig {
   ): T {
     try {
       @Suppress("UNCHECKED_CAST")
-      return mapper.readValue(jsonNode.toString(), configClass) as T
+      return newMapper(true).readValue(jsonNode.toString(), configClass) as T
     } catch (e: UnrecognizedPropertyException) {
       if (failOnUnknownProperties) {
         throw IllegalStateException("failed to load configuration for $appName $configEnvironmentName: ${e.message}", e)
       }
 
-      val path = Joiner.on('.').join(e.path.map { it.fieldName ?: it.index })
+      val path = Joiner.on('.').join(e.path.map { it.propertyName ?: it.index })
       logger.warn(e) { "$configFile: '$path' not found in '${configClass.simpleName}', ignoring " + suggestSpelling(e) }
 
-      // Try again, this time ignoring unknown properties.
-      mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-      return readFlattenedYaml(mapper, jsonNode, configClass, configFile, appName, configEnvironmentName, false)
+      // Try again, this time ignoring unknown properties. Mappers are immutable, so build a new one
+      // rather than reconfiguring this one.
+      return readFlattenedYaml(
+        { newMapper(false) },
+        jsonNode,
+        configClass,
+        configFile,
+        appName,
+        configEnvironmentName,
+        false,
+      )
     } catch (e: KotlinInvalidNullException) {
       throwMissingPropertyException(e, configClass, configFile, jsonNode)
     } catch (e: InvalidFormatException) {
       // The property is present, it just cannot be represented as the declared type. Reporting it as missing (which
       // the MismatchedInputException branch below would do) sends readers looking for the wrong problem.
-      val path = Joiner.on('.').join(e.path.map { it.fieldName ?: it.index })
+      val path = Joiner.on('.').join(e.path.map { it.propertyName ?: it.index })
       throw IllegalStateException(
         "failed to load configuration for $appName $configEnvironmentName:" +
           " could not parse '$path' in $configFile: ${e.originalMessage}",
@@ -191,12 +197,12 @@ object MiskConfig {
   }
 
   private fun throwMissingPropertyException(
-    e: JsonMappingException,
+    e: DatabindException,
     configClass: Class<out Config>,
     configFile: String,
     jsonNode: JsonNode,
   ): Nothing {
-    val path = Joiner.on('.').join(e.path.map { it.fieldName ?: it.index })
+    val path = Joiner.on('.').join(e.path.map { it.propertyName ?: it.index })
     throw IllegalStateException(
       "could not find '${path}' of '${configClass.simpleName}'" +
         " in $configFile or in any of the combined logical config " +
@@ -209,11 +215,11 @@ object MiskConfig {
     if (jsonNode.isObject) {
       val objectNode = jsonNode as ObjectNode
 
-      var seq = objectNode.fieldNames().asSequence().map { Joiner.on('.').join(pathPrefix, it) }
+      var seq = objectNode.propertyNames().asSequence().map { Joiner.on('.').join(pathPrefix, it) }
 
       // Recursively add the field names of any object fields.
       seq +=
-        objectNode.fields().asSequence().flatMap {
+        objectNode.properties().asSequence().flatMap {
           val nextPrefix = Joiner.on('.').join(pathPrefix, it.key)
           allFieldNames(it.value, nextPrefix)
         }
@@ -240,37 +246,61 @@ object MiskConfig {
     }
 
   fun <T : Config> toRedactedYaml(config: T, resourceLoader: ResourceLoader): String {
-    val serializingMapper = newObjectMapper(resourceLoader, true, null)
+    val serializingMapper = newObjectMapper(resourceLoader, true, null, failOnUnknownProperties = true)
     return serializingMapper.writeValueAsString(config)
   }
 
   private fun newObjectMapper(
     resourceLoader: ResourceLoader,
     redactSecrets: Boolean,
-    deserializerModifier: BeanDeserializerModifier?,
+    deserializerModifier: ValueDeserializerModifier?,
+    failOnUnknownProperties: Boolean,
   ): ObjectMapper {
-    val mapper = ObjectMapper(YAMLFactory()).registerModules(KotlinModule.Builder().build(), JavaTimeModule())
+    // The secret and resource deserializers parse nested documents with the very mapper they are
+    // registered on. Mappers are immutable and built in one shot, so hand the modules a supplier
+    // that resolves once the build below completes.
+    lateinit var mapper: ObjectMapper
+    val mapperProvider = { mapper }
 
-    // Fail on null ints/doubles.
-    mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
+    val builder =
+      YAMLMapper.builder()
+        // StrictNullChecks defaults off in Jackson 2 and on in Jackson 3. Leaving it on rejects a null element of a
+        // collection nested inside a map even when that element type is declared nullable -- Map<String, Set<String?>>
+        // fails while a top-level Set<String?> is accepted -- so existing config stops loading. Keep it off to match
+        // Jackson 2.
+        .addModule(KotlinModule.Builder().disable(KotlinFeature.StrictNullChecks).build())
+        // Fail on null ints/doubles.
+        .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+        // Jackson 3 defaults this off. Config files are hand-written and a typo'd property should
+        // still surface as the "did you mean" warning below, so keep the Jackson 2 behaviour.
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties)
+        // Jackson 3 defaults this on. Redacted config is rendered in the dashboard in declaration
+        // order today; sorting would silently reshuffle every service's config page.
+        .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+        // Jackson 3 defaults these on. Config enums are matched by name, and toString() is
+        // frequently overridden for display, so switching would break existing config files.
+        .disable(EnumFeature.READ_ENUMS_USING_TO_STRING, EnumFeature.WRITE_ENUMS_USING_TO_STRING)
 
     // The SecretDeserializer supports deserializing json, so bind last so it can use previous
     // mappings.
     if (redactSecrets) {
-      mapper.registerModule(RedactSecretJacksonModule())
+      builder.addModule(RedactSecretJacksonModule())
     } else {
-      mapper.registerModule(SecretJacksonModule(resourceLoader, mapper))
+      builder.addModule(SecretJacksonModule(resourceLoader, mapperProvider))
     }
 
     // The ResourceAwareDeserializer lets string and other primitive types be loaded by reference using resource loader
     //   paths (classpath, filesystem, environment...) without using the Secret type.
     // This is useful for non-sensitive data or using environment variables to pass data into non-Secret types in
     //   existing config or framework provided config classes.
-    mapper.registerModule(ResourceAwareJacksonModule(resourceLoader, mapper))
+    builder.addModule(ResourceAwareJacksonModule(resourceLoader, mapperProvider))
+
+    builder.addModule(LinkedHashMapJacksonModule())
 
     // The deserializerModifier can be null if this mapper is serializing only.
-    deserializerModifier?.let { mapper.registerModule(DeserializerModifierModule(it)) }
+    deserializerModifier?.let { builder.addModule(DeserializerModifierModule(it)) }
 
+    mapper = builder.build()
     return mapper
   }
 
@@ -289,7 +319,7 @@ object MiskConfig {
    * Returns a JsonNode that combines the YAMLs in `configYamls`. If two nodes define the same value the last one wins.
    */
   private fun flattenYamlMap(configYamls: Map<String, String?>, overrideValues: JsonNode?): JsonNode {
-    val mapper = ObjectMapper(YAMLFactory()).registerModules(KotlinModule.Builder().build(), JavaTimeModule())
+    val mapper = YAMLMapper.builder().addModule(KotlinModule.Builder().build()).build()
     var result = mapper.createObjectNode()
 
     for ((key, value) in configYamls) {
@@ -328,35 +358,74 @@ object MiskConfig {
   private fun embeddedConfigFileNames(appName: String, deployment: Deployment) =
     listOf("common", deployment.mapToEnvironmentName().lowercase(Locale.US)).map { "$appName-$it.yaml" }
 
-  class SecretJacksonModule(val resourceLoader: ResourceLoader, val mapper: ObjectMapper) : SimpleModule() {
+  class SecretJacksonModule(val resourceLoader: ResourceLoader, private val mapperProvider: () -> ObjectMapper) :
+    SimpleModule() {
+    constructor(resourceLoader: ResourceLoader, mapper: ObjectMapper) : this(resourceLoader, { mapper })
+
+    /**
+     * The mapper nested secret documents are parsed with. Resolved lazily because a module has to be registered before
+     * the mapper it belongs to exists.
+     */
+    val mapper: ObjectMapper
+      get() = mapperProvider()
+
     override fun setupModule(context: SetupContext?) {
-      addDeserializer(Secret::class.java, SecretDeserializer(resourceLoader, mapper))
+      addDeserializer(Secret::class.java, SecretDeserializer(resourceLoader, mapperProvider))
 
       super.setupModule(context)
     }
   }
 
-  class DeserializerModifierModule(val deserializerModifier: BeanDeserializerModifier) : SimpleModule() {
+  class DeserializerModifierModule(val deserializerModifier: ValueDeserializerModifier) : SimpleModule() {
     override fun setupModule(context: SetupContext?) {
       setDeserializerModifier(deserializerModifier)
       super.setupModule(context)
     }
   }
 
-  private class ResourceAwareJacksonModule(val resourceLoader: ResourceLoader, val mapper: ObjectMapper) :
+  private class ResourceAwareJacksonModule(val resourceLoader: ResourceLoader, val mapperProvider: () -> ObjectMapper) :
     SimpleModule() {
     override fun setupModule(context: SetupContext?) {
-      addDeserializer(String::class.java, ResourceAwareDeserializer<String>(resourceLoader, mapper))
-      addDeserializer(Int::class.java, ResourceAwareDeserializer<Int>(resourceLoader, mapper))
-      addDeserializer(Integer::class.java, ResourceAwareDeserializer<Integer>(resourceLoader, mapper))
-      addDeserializer(Long::class.java, ResourceAwareDeserializer<Long>(resourceLoader, mapper))
-      addDeserializer(java.lang.Long::class.java, ResourceAwareDeserializer<java.lang.Long>(resourceLoader, mapper))
-      addDeserializer(Float::class.java, ResourceAwareDeserializer<Float>(resourceLoader, mapper))
-      addDeserializer(java.lang.Float::class.java, ResourceAwareDeserializer<java.lang.Float>(resourceLoader, mapper))
-      addDeserializer(Boolean::class.java, ResourceAwareDeserializer<Boolean>(resourceLoader, mapper))
+      addDeserializer(String::class.java, ResourceAwareDeserializer<String>(resourceLoader, mapperProvider))
+      addDeserializer(Int::class.java, ResourceAwareDeserializer<Int>(resourceLoader, mapperProvider))
+      addDeserializer(Integer::class.java, ResourceAwareDeserializer<Integer>(resourceLoader, mapperProvider))
+      addDeserializer(Long::class.java, ResourceAwareDeserializer<Long>(resourceLoader, mapperProvider))
+      addDeserializer(
+        java.lang.Long::class.java,
+        ResourceAwareDeserializer<java.lang.Long>(resourceLoader, mapperProvider),
+      )
+      addDeserializer(Float::class.java, ResourceAwareDeserializer<Float>(resourceLoader, mapperProvider))
+      addDeserializer(
+        java.lang.Float::class.java,
+        ResourceAwareDeserializer<java.lang.Float>(resourceLoader, mapperProvider),
+      )
+      addDeserializer(Boolean::class.java, ResourceAwareDeserializer<Boolean>(resourceLoader, mapperProvider))
       addDeserializer(
         java.lang.Boolean::class.java,
-        ResourceAwareDeserializer<java.lang.Boolean>(resourceLoader, mapper),
+        ResourceAwareDeserializer<java.lang.Boolean>(resourceLoader, mapperProvider),
+      )
+
+      super.setupModule(context)
+    }
+  }
+
+  /**
+   * Keeps a `Map` field declared with an enum key backed by a [LinkedHashMap], as it was under Jackson 2.
+   *
+   * Jackson 3 rewrites `Map<SomeEnum, V>` to an [EnumMap] (databind#1853), which iterates in enum declaration order
+   * rather than in the order the keys appear in the YAML. That is invisible at load time and only shows up wherever
+   * config iteration order is observable -- a service whose behaviour depends on which region or tier it processes
+   * first would quietly change, and nothing would fail. `BasicDeserializerFactory.createMapDeserializer` applies the
+   * rewrite unconditionally with no feature flag, but it only does so when the declared raw type is exactly `Map`, and
+   * abstract type resolution runs first (`DeserializerCache._createDeserializer`), so naming the implementation here
+   * settles it before that branch is reached. A field declared as an `EnumMap` still gets one.
+   */
+  private class LinkedHashMapJacksonModule : SimpleModule() {
+    override fun setupModule(context: SetupContext?) {
+      @Suppress("UNCHECKED_CAST")
+      addAbstractTypeMapping(
+        Map::class.java as Class<Map<Any, Any>>,
+        LinkedHashMap::class.java as Class<out Map<Any, Any>>,
       )
 
       super.setupModule(context)
@@ -365,19 +434,19 @@ object MiskConfig {
 
   private inline fun <reified T : Any> ResourceAwareDeserializer(
     resourceLoader: ResourceLoader,
-    mapper: ObjectMapper,
-  ): ResourceAwareDeserializer<T> = ResourceAwareDeserializer(T::class, resourceLoader, mapper)
+    noinline mapperProvider: () -> ObjectMapper,
+  ): ResourceAwareDeserializer<T> = ResourceAwareDeserializer(T::class, resourceLoader, mapperProvider)
 
   private class ResourceAwareDeserializer<T : Any>(
     val typeClass: KClass<out T>,
     val resourceLoader: ResourceLoader,
-    val mapper: ObjectMapper,
+    val mapperProvider: () -> ObjectMapper,
     val type: JavaType? = null,
-  ) : JsonDeserializer<T>(), ContextualDeserializer {
+  ) : ValueDeserializer<T>() {
     override fun deserialize(jsonParser: JsonParser, deserializationContext: DeserializationContext): T? {
       if (type == null) {
         // This only happens if ObjectMapper does not call createContextual for this property.
-        throw JsonMappingException.from(jsonParser, "Attempting to deserialize an object with no type")
+        throw DatabindException.from(jsonParser, "Attempting to deserialize an object with no type")
       }
 
       val maybeReferenceWithMarkers = jsonParser.valueAsString
@@ -425,7 +494,7 @@ object MiskConfig {
 
           val maybeReference = "$scheme:$path"
 
-          resourceLoader.loadResource(maybeReference, type, mapper, default) as? T?
+          resourceLoader.loadResource(maybeReference, type, mapperProvider(), default) as? T?
         }
         // Not a resource reference, so convert the scalar itself. This is deliberately evaluated here rather than up
         // front: a reference like "${environment:PORT}" is not a valid Int, so converting eagerly would reject
@@ -433,40 +502,41 @@ object MiskConfig {
         ?: jsonParser.valueAsTypeOrNull(type) as? T?
     }
 
-    override fun createContextual(ctxt: DeserializationContext?, property: BeanProperty?): JsonDeserializer<*>? {
-      return ResourceAwareDeserializer(typeClass, resourceLoader, mapper, mapper.constructType(typeClass.java))
+    override fun createContextual(ctxt: DeserializationContext, property: BeanProperty?): ValueDeserializer<*> {
+      val resolved = ctxt.constructType(typeClass.java)
+      return ResourceAwareDeserializer(typeClass, resourceLoader, mapperProvider, resolved)
     }
   }
 
   private class SecretDeserializer(
     val resourceLoader: ResourceLoader,
-    val mapper: ObjectMapper,
+    val mapperProvider: () -> ObjectMapper,
     val type: JavaType? = null,
-  ) : JsonDeserializer<Secret<*>>(), ContextualDeserializer {
+  ) : ValueDeserializer<Secret<*>>() {
 
     override fun createContextual(
-      deserializationContext: DeserializationContext?,
+      deserializationContext: DeserializationContext,
       property: BeanProperty,
-    ): JsonDeserializer<*> {
-      return SecretDeserializer(resourceLoader, mapper, property.type.bindings.getBoundType(0))
+    ): ValueDeserializer<*> {
+      return SecretDeserializer(resourceLoader, mapperProvider, property.type.bindings.getBoundType(0))
     }
 
     override fun deserialize(jsonParser: JsonParser, deserializationContext: DeserializationContext): Secret<*>? {
       if (type == null) {
         // This only happens if ObjectMapper does not call createContextual for this property.
-        throw JsonMappingException.from(jsonParser, "Attempting to deserialize an object with no type")
+        throw DatabindException.from(jsonParser, "Attempting to deserialize an object with no type")
       }
       val reference = jsonParser.valueAsString
-      return RealSecret(resourceLoader.loadResource(reference, type, mapper), reference)
+      return RealSecret(resourceLoader.loadResource(reference, type, mapperProvider()), reference)
     }
   }
 
-  internal class RedactSecretJsonSerializer : JsonSerializer<Any>(), ContextualSerializer {
-    override fun serialize(value: Any, gen: JsonGenerator, serializers: SerializerProvider) {
+  internal class RedactSecretJsonSerializer : ValueSerializer<Any>() {
+    override fun serialize(value: Any, gen: JsonGenerator, ctxt: SerializationContext) {
       gen.writeString("████████")
     }
 
-    override fun createContextual(prov: SerializerProvider, property: BeanProperty): JsonSerializer<*> {
+    override fun createContextual(ctxt: SerializationContext, property: BeanProperty): ValueSerializer<*> {
       return RedactSecretJsonSerializer()
     }
   }
@@ -478,8 +548,8 @@ object MiskConfig {
     }
   }
 
-  private class RedactSecretSerializer : JsonSerializer<Secret<*>>(), ContextualSerializer {
-    override fun serialize(value: Secret<*>, gen: JsonGenerator, serializers: SerializerProvider?) {
+  private class RedactSecretSerializer : ValueSerializer<Secret<*>>() {
+    override fun serialize(value: Secret<*>, gen: JsonGenerator, ctxt: SerializationContext) {
       if ((value as? RealSecret<*>)?.reference?.isNotBlank() == true) {
         gen.writeString("${value.reference} -> ████████")
       } else {
@@ -487,7 +557,7 @@ object MiskConfig {
       }
     }
 
-    override fun createContextual(prov: SerializerProvider?, property: BeanProperty): JsonSerializer<*> {
+    override fun createContextual(ctxt: SerializationContext, property: BeanProperty): ValueSerializer<*> {
       return RedactSecretSerializer()
     }
   }

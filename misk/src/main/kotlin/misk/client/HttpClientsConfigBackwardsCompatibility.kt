@@ -1,9 +1,9 @@
 package misk.client
 
 import com.fasterxml.jackson.annotation.JsonAlias
-import com.fasterxml.jackson.databind.type.TypeFactory
-import com.fasterxml.jackson.databind.util.Converter
 import java.time.Duration
+import tools.jackson.databind.type.TypeFactory
+import tools.jackson.databind.util.StdConverter
 
 data class BackwardsCompatibleEndpointConfig
 @JvmOverloads
@@ -47,7 +47,7 @@ constructor(
   val logRequests: Boolean = false,
 )
 
-class BackwardsCompatibleClientsConfigConverter : Converter<BackwardsCompatibleClientsConfig, HttpClientsConfig> {
+class BackwardsCompatibleClientsConfigConverter : StdConverter<BackwardsCompatibleClientsConfig, HttpClientsConfig>() {
   override fun getInputType(typeFactory: TypeFactory) =
     typeFactory.constructType(BackwardsCompatibleClientsConfig::class.java)
 

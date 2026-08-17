@@ -47,3 +47,12 @@ data class EnvironmentTestConfig(
   val jdbc_url_default: String,
   val https_url_with_port_default: String,
 ) : Config
+
+/** [tiers] is deliberately a plain `Map`: that is the declaration Jackson 3 rewrites to an `EnumMap`. */
+data class EnumKeyedMapConfig(val tiers: Map<AccountTier, Int>) : Config
+
+enum class AccountTier {
+  CHECKING,
+  SAVINGS,
+  BROKERAGE,
+}
