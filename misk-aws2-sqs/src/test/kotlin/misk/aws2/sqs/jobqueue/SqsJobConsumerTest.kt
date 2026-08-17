@@ -40,7 +40,7 @@ class SqsJobConsumerTest {
     val result = createQueue(queueName)
 
     val latch = CountDownLatch(10)
-    jobConsumer.subscribe(queueName, getHandler(latch), SqsQueueConfig(region = "us-west-2", wait_timeout = 0))
+    jobConsumer.subscribe(queueName, getHandler(latch), SqsQueueConfig(region = "us-west-2"))
     repeat(10) { sendMessage(result.queueUrl, "message") }
 
     latch.await(10, SECONDS)
@@ -59,7 +59,7 @@ class SqsJobConsumerTest {
     jobConsumer.subscribe(
       queueName,
       getHandler(latch),
-      SqsQueueConfig(parallelism = 1, concurrency = 1, channel_capacity = 0, region = "us-west-2", wait_timeout = 0),
+      SqsQueueConfig(parallelism = 1, concurrency = 1, channel_capacity = 0, region = "us-west-2"),
     )
 
     latch.await(10, SECONDS)
@@ -80,8 +80,8 @@ class SqsJobConsumerTest {
       repeat(10) { sendMessage(r.queueUrl, "message") }
     }
 
-    jobConsumer.subscribe(queueName1, getHandler(latch1), SqsQueueConfig(region = "us-west-2", wait_timeout = 0))
-    jobConsumer.subscribe(queueName2, getHandler(latch2), SqsQueueConfig(region = "us-west-2", wait_timeout = 0))
+    jobConsumer.subscribe(queueName1, getHandler(latch1), SqsQueueConfig(region = "us-west-2"))
+    jobConsumer.subscribe(queueName2, getHandler(latch2), SqsQueueConfig(region = "us-west-2"))
 
     latch1.await(10, SECONDS)
     assertEquals(0, latch1.count)
@@ -106,12 +106,12 @@ class SqsJobConsumerTest {
     jobConsumer.subscribe(
       queueName1,
       getHandler(latch1),
-      SqsQueueConfig(parallelism = 1, concurrency = 3, channel_capacity = 0, region = "us-west-2", wait_timeout = 0),
+      SqsQueueConfig(parallelism = 1, concurrency = 3, channel_capacity = 0, region = "us-west-2"),
     )
     jobConsumer.subscribe(
       queueName2,
       getHandler(latch2),
-      SqsQueueConfig(parallelism = 1, concurrency = 5, channel_capacity = 0, region = "us-west-2", wait_timeout = 0),
+      SqsQueueConfig(parallelism = 1, concurrency = 5, channel_capacity = 0, region = "us-west-2"),
     )
 
     latch1.await(10, SECONDS)
@@ -132,7 +132,7 @@ class SqsJobConsumerTest {
     jobConsumer.subscribe(
       queueName,
       getIntermittentIssuesHandler(latch),
-      SqsQueueConfig(visibility_timeout = 2, region = "us-west-2", wait_timeout = 0),
+      SqsQueueConfig(visibility_timeout = 2, region = "us-west-2"),
     )
 
     latch.await(10, SECONDS)
@@ -151,7 +151,7 @@ class SqsJobConsumerTest {
     jobConsumer.subscribe(
       queueName,
       getRetryWithBackoffHandler(latch),
-      SqsQueueConfig(visibility_timeout = 1, region = "us-west-2", wait_timeout = 0),
+      SqsQueueConfig(visibility_timeout = 1, region = "us-west-2"),
     )
 
     latch.await(8, SECONDS)
@@ -165,7 +165,7 @@ class SqsJobConsumerTest {
     val latch = CountDownLatch(1)
     sendMessage(result.queueUrl, "message")
 
-    jobConsumer.subscribe(queueName, getHandler(latch), SqsQueueConfig(region = "us-west-2", wait_timeout = 0))
+    jobConsumer.subscribe(queueName, getHandler(latch), SqsQueueConfig(region = "us-west-2"))
 
     latch.await(5, SECONDS)
     assertEquals(0, latch.count)
@@ -180,7 +180,7 @@ class SqsJobConsumerTest {
     sendMessage(result.queueUrl, "message")
 
     val latch = CountDownLatch(1)
-    jobConsumer.subscribe(queueName, getFailingHandler(), SqsQueueConfig(region = "us-west-2", wait_timeout = 0))
+    jobConsumer.subscribe(queueName, getFailingHandler(), SqsQueueConfig(region = "us-west-2"))
 
     latch.await(1, SECONDS)
 
@@ -199,7 +199,7 @@ class SqsJobConsumerTest {
     val result = createQueue(queueName)
 
     val latch = CountDownLatch(2)
-    jobConsumer.subscribe(queueName, getHandler(latch), SqsQueueConfig(region = "us-west-2", wait_timeout = 0))
+    jobConsumer.subscribe(queueName, getHandler(latch), SqsQueueConfig(region = "us-west-2"))
 
     sendMessage(result.queueUrl, "message")
     sendMessage(result.retryQueueUrl, "message")
@@ -220,7 +220,7 @@ class SqsJobConsumerTest {
     jobConsumer.subscribe(
       queueName,
       getHandler(latch),
-      SqsQueueConfig(install_retry_queue = false, region = "us-west-2", wait_timeout = 0),
+      SqsQueueConfig(install_retry_queue = false, region = "us-west-2"),
     )
 
     sendMessage(result.queueUrl, "message")
@@ -246,7 +246,7 @@ class SqsJobConsumerTest {
     jobConsumer.subscribe(
       queueName,
       getDelayingHandler(latch),
-      SqsQueueConfig(parallelism = 10, concurrency = 50, channel_capacity = 5, region = "us-west-2", wait_timeout = 0),
+      SqsQueueConfig(parallelism = 10, concurrency = 50, channel_capacity = 5, region = "us-west-2"),
     )
 
     // and push the subscriber a little bit more
@@ -271,7 +271,7 @@ class SqsJobConsumerTest {
           return JobStatus.OK
         }
       },
-      SqsQueueConfig(region = "us-west-2", wait_timeout = 0),
+      SqsQueueConfig(region = "us-west-2"),
     )
 
     repeat(10) { sendMessage(result.queueUrl, "message $it") }
@@ -300,7 +300,7 @@ class SqsJobConsumerTest {
         }
       },
       // Use non-standard settings to ensure some randomness of the test
-      SqsQueueConfig(parallelism = 2, concurrency = 5, channel_capacity = 7, region = "us-west-2", wait_timeout = 0),
+      SqsQueueConfig(parallelism = 2, concurrency = 5, channel_capacity = 7, region = "us-west-2"),
     )
 
     repeat(numberOfMessages) { sendMessage(result.queueUrl, "message $it") }

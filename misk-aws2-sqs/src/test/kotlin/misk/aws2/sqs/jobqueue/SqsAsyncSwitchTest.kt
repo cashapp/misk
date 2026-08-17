@@ -45,7 +45,7 @@ class SqsAsyncSwitchTest {
             per_queue_overrides =
               mapOf(
                 "external-test-queue" to
-                  SqsQueueConfig(region = "us-west-2", account_id = "1234567890", install_retry_queue = false, wait_timeout = 1)
+                  SqsQueueConfig(region = "us-west-2", account_id = "1234567890", install_retry_queue = false)
               )
           ),
         )
@@ -142,7 +142,7 @@ private class AsyncSwitchFakeQueueCreator(private val dockerSqs: DockerSqs) : Ex
             .queueName(it)
             .attributes(
               mapOf(
-                QueueAttributeName.RECEIVE_MESSAGE_WAIT_TIME_SECONDS to "1",
+                QueueAttributeName.RECEIVE_MESSAGE_WAIT_TIME_SECONDS to "20",
                 QueueAttributeName.VISIBILITY_TIMEOUT to "20",
               )
             )

@@ -16,6 +16,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
 import misk.inject.AsyncSwitch
 import misk.jobqueue.QueueName
@@ -23,6 +24,7 @@ import misk.jobqueue.v2.JobConsumer
 import misk.jobqueue.v2.JobHandler
 import misk.logging.getLogger
 import misk.testing.TestFixture
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Instruments queue consumption.
@@ -108,10 +110,17 @@ constructor(
   override fun doStop() {
     logger.info("Stopping job consumer")
     runBlocking(scope.coroutineContext) {
-      subscriptions.values.forEach {
-        it.subscriber.stop()
-        it.handlingJobs.joinAll()
-        it.pollingJob.join()
+      subscriptions.forEach { (queueName, subscription) ->
+        // Stop issuing new receives, and give the in-flight one a chance to finish its long poll. Messages it already
+        // fetched are handled normally; abandoning it would leave them invisible until their visibility timeout expires.
+        subscription.subscriber.stop()
+        if (withTimeoutOrNull(POLLING_GRACE_PERIOD) { subscription.pollingJob.join() } == null) {
+          logger.info { "Polling for queue ${queueName.value} did not stop within $POLLING_GRACE_PERIOD; canceling it" }
+          subscription.subscriber.cancelInFlightReceives()
+          subscription.pollingJob.join()
+        }
+        // The polling job closes the channel when it completes, which is what lets the handlers finish.
+        subscription.handlingJobs.joinAll()
       }
     }
     logger.info("Stopped job consumer")
@@ -132,5 +141,13 @@ constructor(
 
   companion object {
     private val logger = getLogger<SqsJobConsumer>()
+
+    /**
+     * How long shutdown waits for an in-flight receive to complete before aborting it.
+     *
+     * A long poll that has messages returns immediately, so this only needs to cover a receive that is about to deliver.
+     * One that is still waiting out its `wait_timeout` has nothing to lose by being canceled.
+     */
+    private val POLLING_GRACE_PERIOD = 1.seconds
   }
 }

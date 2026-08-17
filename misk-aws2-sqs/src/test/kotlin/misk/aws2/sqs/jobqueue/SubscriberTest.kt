@@ -5,6 +5,7 @@ import io.prometheus.client.CollectorRegistry
 import java.time.Clock
 import java.util.concurrent.CompletableFuture
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelAndJoin
@@ -143,6 +144,73 @@ class SubscriberTest {
 
     pollingJob.cancelAndJoin()
     assertTrue(pollingJob.isCancelled)
+  }
+
+  @Test
+  fun `stop lets an in-flight fetch finish`() = runTest {
+    whenever(sqsQueueResolver.getQueueUrl(queueName)).thenReturn(queueUrl)
+    val pendingResponse = CompletableFuture<ReceiveMessageResponse>()
+    whenever(client.receiveMessage(any<ReceiveMessageRequest>())).thenReturn(pendingResponse)
+
+    val subscriber = subscriber(handler = { JobStatus.OK })
+    val pollingJob = backgroundScope.launch { subscriber.poll() }
+    runCurrent()
+
+    subscriber.stop()
+    runCurrent()
+    assertTrue(pollingJob.isActive)
+
+    // The fetch that was already in flight still delivers its messages.
+    pendingResponse.complete(ReceiveMessageResponse.builder().messages(message("job-1")).build())
+    runCurrent()
+
+    assertEquals("job-1", channel.receive().id)
+    assertTrue(pollingJob.isCompleted)
+    assertTrue(channel.receiveCatching().isClosed)
+    assertEquals(0.0, sqsMetrics.sqsReceiveFailures.labels(queueName.value).get())
+  }
+
+  @Test
+  fun `canceling in-flight fetches ends polling and closes the channel`() = runTest {
+    whenever(sqsQueueResolver.getQueueUrl(queueName)).thenReturn(queueUrl)
+    val pendingResponse = CompletableFuture<ReceiveMessageResponse>()
+    whenever(client.receiveMessage(any<ReceiveMessageRequest>())).thenReturn(pendingResponse)
+
+    val subscriber = subscriber(handler = { JobStatus.OK })
+    val pollingJob = backgroundScope.launch { subscriber.poll() }
+    runCurrent()
+    assertTrue(pollingJob.isActive)
+
+    subscriber.stop()
+    subscriber.cancelInFlightReceives()
+    runCurrent()
+
+    assertTrue(pendingResponse.isCancelled)
+    assertTrue(pollingJob.isCompleted)
+    assertFalse(pollingJob.isCancelled)
+    assertTrue(channel.receiveCatching().isClosed)
+    // Canceling as part of a stop is expected, so it isn't counted as a receive failure.
+    assertEquals(0.0, sqsMetrics.sqsReceiveFailures.labels(queueName.value).get())
+  }
+
+  @Test
+  fun `a fetch started after cancellation is canceled immediately`() = runTest {
+    whenever(sqsQueueResolver.getQueueUrl(queueName)).thenReturn(queueUrl)
+    val subscriber = subscriber(handler = { JobStatus.OK })
+    val pendingResponse = CompletableFuture<ReceiveMessageResponse>()
+    // Stop the subscriber while it is issuing the request, so the set is swept before the future is registered.
+    whenever(client.receiveMessage(any<ReceiveMessageRequest>())).thenAnswer {
+      subscriber.stop()
+      subscriber.cancelInFlightReceives()
+      pendingResponse
+    }
+
+    val pollingJob = backgroundScope.launch { subscriber.poll() }
+    runCurrent()
+
+    assertTrue(pendingResponse.isCancelled)
+    assertTrue(pollingJob.isCompleted)
+    assertFalse(pollingJob.isCancelled)
   }
 
   private fun subscriber(
