@@ -3,12 +3,10 @@ import com.vanniktech.maven.publish.KotlinJvm
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 import kotlin.jvm.java
-import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 
 plugins {
   id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
-  id("com.squareup.wire")
 }
 
 dependencies {
@@ -42,6 +40,7 @@ dependencies {
   testImplementation(libs.kotlinTest)
   testImplementation(project(":misk-api"))
   testImplementation(project(":misk-action-scopes"))
+  testImplementation(project(":misk-admin-test-protos"))
   testImplementation(project(":misk-service"))
   testImplementation(project(":misk-testing"))
 }
@@ -85,46 +84,6 @@ sourceSets {
     resources.srcDir(buildMiskWeb)
     resources.srcDir(buildWebActions)
   }
-}
-
-val generatedSourceDir = layout.buildDirectory.dir("generated/source/wire-test").get().asFile.path
-
-wire {
-  sourcePath {
-    srcDir("src/test/proto/")
-  }
-  kotlin {
-    out = generatedSourceDir
-    includes = listOf(
-      "test.kt.*",
-    )
-  }
-  java {
-    out = generatedSourceDir
-  }
-}
-
-// We want the Wire-generated sources to be test-only, so we move them to test source sets here.
-afterEvaluate {
-  val kotlinSourceSets = extensions.findByType(KotlinProjectExtension::class.java)?.sourceSets
-
-  sourceSets {
-    main {
-      java.setSrcDirs(java.srcDirs.filter { !it.path.contains(generatedSourceDir) })
-    }
-    test {
-      java.srcDir(generatedSourceDir)
-    }
-  }
-
-  kotlinSourceSets?.getByName("main")?.kotlin?.setSrcDirs(
-    kotlinSourceSets.getByName("main").kotlin.srcDirs.filter { !it.path.contains(generatedSourceDir) }
-  )
-  kotlinSourceSets?.getByName("test")?.kotlin?.srcDir(generatedSourceDir)
-
-  // Explicit dependency for test scoped protos to be generated if need be.
-  tasks.named("compileTestKotlin") { dependsOn("generateMainProtos") }
-  tasks.named("compileTestJava") { dependsOn("generateMainProtos") }
 }
 
 mavenPublishing {
