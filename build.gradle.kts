@@ -93,12 +93,6 @@ dependencyAnalysis {
         exclude("com.bucket4j:bucket4j-core")
       }
     }
-    project(":misk-admin") {
-      onUnusedDependencies {
-        // `wire-runtime` is added automatically by the Wire plugin but not directly used.
-        exclude("com.squareup.wire:wire-runtime")
-      }
-    }
     project(":misk-action-scopes") {
       onIncorrectConfiguration {
         // For backwards compatibility, we want Action Scoped classes moved to misk-api to still be
@@ -133,7 +127,10 @@ apiValidation {
     "exemplar",
     "exemplarchat",
     "detektive",
-    "misk-schema-migrator-gradle-plugin"
+    "misk-admin-test-protos",
+    "misk-moshi-test-protos",
+    "misk-schema-migrator-gradle-plugin",
+    "misk-test-protos"
   )
   ignoredProjects.addAll(subprojects.map { it.name }.filter { it in ignorable })
   additionalSourceSets.add("testFixtures")

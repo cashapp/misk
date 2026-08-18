@@ -1,11 +1,9 @@
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
-import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 
 plugins {
   id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
-  id("com.squareup.wire")
 }
 
 dependencies {
@@ -94,68 +92,13 @@ dependencies {
   testImplementation(libs.okHttpSse)
   testImplementation(libs.openTracingMock)
   testImplementation(project(":misk"))
+  testImplementation(project(":misk-test-protos"))
   testImplementation(project(":misk-testing"))
   testImplementation(project(":wisp:wisp-logging-testing"))
   testImplementation(project(":wisp:wisp-tracing"))
   testImplementation(testFixtures(project(":misk-audit-client")))
   testImplementation(testFixtures(project(":misk-feature")))
   testImplementation(testFixtures(project(":misk-metrics")))
-}
-
-val generatedSourceDir = layout.buildDirectory.dir("generated/source/wire-test").get().asFile.path
-
-wire {
-  sourcePath {
-    srcDir("src/test/proto/")
-  }
-  java {
-    out = generatedSourceDir
-    exclusive = false
-  }
-
-  kotlin {
-    out = generatedSourceDir
-    rpcRole = "client"
-    rpcCallStyle = "blocking"
-    exclusive = false
-    includes = listOf(
-      "helloworld.Greeter"
-    )
-  }
-
-  kotlin {
-    out = generatedSourceDir
-    rpcRole = "server"
-    rpcCallStyle = "blocking"
-    exclusive = false
-    singleMethodServices = true
-    includes = listOf(
-      "helloworld.Greeter"
-    )
-  }
-}
-
-// We want the Wire-generated sources to be test-only, so we move them to test source sets here.
-afterEvaluate {
-  val kotlinSourceSets = extensions.findByType(KotlinProjectExtension::class.java)?.sourceSets
-
-  sourceSets {
-    main {
-      java.setSrcDirs(java.srcDirs.filter { !it.path.contains(generatedSourceDir) })
-    }
-    test {
-      java.srcDir(generatedSourceDir)
-    }
-  }
-
-  kotlinSourceSets?.getByName("main")?.kotlin?.setSrcDirs(
-    kotlinSourceSets.getByName("main").kotlin.srcDirs.filter { !it.path.contains(generatedSourceDir) }
-  )
-  kotlinSourceSets?.getByName("test")?.kotlin?.srcDir(generatedSourceDir)
-
-  // Explicit dependency for test scoped protos to be generated if need be.
-  tasks.named("compileTestKotlin") { dependsOn("generateMainProtos") }
-  tasks.named("compileTestJava") { dependsOn("generateMainProtos") }
 }
 
 mavenPublishing {
