@@ -483,6 +483,14 @@ interface Redis {
   /** Marks the start of a transaction block. Subsequent commands will be queued for atomic execution using EXEC. */
   fun multi(): Transaction
 
+  /**
+   * Runs [block]'s commands atomically using MULTI/EXEC. Command responses are not available until the transaction
+   * completes. Save their [Supplier]s and read them after this method returns.
+   *
+   * Transactions are not supported in Redis Cluster mode.
+   */
+  fun transaction(block: DeferredRedis.() -> Unit)
+
   /** Begin a pipeline operation to batch together several updates for optimal performance */
   @Deprecated("Use pipelining instead.") fun pipelined(): Pipeline
 
@@ -597,6 +605,19 @@ interface Redis {
    * highest score, -2 the element with the second-highest score and so forth.
    */
   fun zremRangeByRank(key: String, start: ZRangeRankMarker, stop: ZRangeRankMarker): Long
+
+  /**
+   * Removes all elements in the sorted set stored at [key] whose score falls between [start] and [stop].
+   *
+   * The interval is closed at both ends by default; set [ZRangeScoreMarker.isIncluded] to false on either marker to
+   * make that end exclusive. The markers follow the same convention as [zrange] with [ZRangeType.SCORE], so
+   * [Double.MAX_VALUE] and [Double.MIN_VALUE] stand for +inf and -inf.
+   *
+   * If [key] does not exist, 0 is returned. If the [key] exists but does not hold a sorted set, an error is returned.
+   *
+   * @return the number of members removed.
+   */
+  fun zremRangeByScore(key: String, start: ZRangeScoreMarker, stop: ZRangeScoreMarker): Long
 
   /**
    * Returns the length of the list stored at [key].

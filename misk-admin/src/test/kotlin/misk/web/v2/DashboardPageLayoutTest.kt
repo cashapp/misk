@@ -14,6 +14,7 @@ import misk.web.FakeHttpCall
 import misk.web.HttpCall
 import misk.web.metadata.MetadataTestingModule
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 @MiskTest

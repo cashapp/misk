@@ -24,7 +24,11 @@ class DynamoClusterModule @JvmOverloads constructor(private val config: DynamoCl
     bind<ClusterService>().toInstance(defaultCluster)
     install(ServiceModule<ClusterService>())
     install(DefaultAsyncSwitchModule())
-    install(ServiceModule<DynamoClusterWatcherTask>().dependsOn<ClusterService>().enhancedBy<ReadyService>())
+    install(
+      ServiceModule<DynamoClusterWatcherTask>()
+        .dependsOn<ClusterService>()
+        .enhancedBy<ReadyService>()
+    )
     install(ServiceModule<RepeatedTaskQueue>(ForDynamoDbClusterWatching::class))
   }
 

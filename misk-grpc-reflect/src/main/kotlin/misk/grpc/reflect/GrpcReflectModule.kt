@@ -61,11 +61,16 @@ class GrpcReflectModule : KAbstractModule() {
     }
 
     val schemaLoader = SchemaLoader(fileSystem)
-    schemaLoader.initRoots(sourcePath = sourceLocations.toList(), protoPath = listOf(Location.get(".")))
+    schemaLoader.initRoots(
+      sourcePath = sourceLocations.toList(),
+      protoPath = listOf(Location.get(".")),
+    )
     schemaLoader.loadExhaustively = true
     val schema = schemaLoader.loadSchema()
 
-    val pruningRules = PruningRules.Builder().addRoot(implementedServices).build()
+    val pruningRules = PruningRules.Builder()
+      .addRoot(implementedServices)
+      .build()
     return schema.prune(pruningRules)
   }
 

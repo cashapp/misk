@@ -1,6 +1,8 @@
 package misk.jdbc.retry
 
-/** Default retry configuration values shared across transacter implementations. */
+/**
+ * Default retry configuration values shared across transacter implementations.
+ */
 object RetryDefaults {
   const val MAX_ATTEMPTS: Int = 3
   const val MIN_RETRY_DELAY_MILLIS: Long = 100

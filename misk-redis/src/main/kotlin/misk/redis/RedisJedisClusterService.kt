@@ -2,7 +2,6 @@ package misk.redis
 
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Provider
-import java.time.Duration
 import misk.logging.getLogger
 import redis.clients.jedis.ClientSetInfoConfig
 import redis.clients.jedis.ConnectionPoolConfig
@@ -10,6 +9,7 @@ import redis.clients.jedis.DefaultJedisClientConfig
 import redis.clients.jedis.HostAndPort
 import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.UnifiedJedis
+import java.time.Duration
 
 /**
  * Controls the connection lifecycle for Redis in cluster mode.
@@ -61,16 +61,15 @@ internal class RedisJedisClusterService(
       "topology_refresh_period_ms must be positive, got $topologyRefreshPeriodMs"
     }
 
-    jedisCluster =
-      JedisCluster(
-        nodes,
-        jedisClientConfig,
-        connectionPoolConfig,
-        topologyRefreshPeriodMs?.let { Duration.ofMillis(it) },
-        replicationGroup.max_attempts,
-        // Cap total retry wall-clock time: each attempt can take at most one socket timeout.
-        Duration.ofMillis(replicationGroup.timeout_ms.toLong() * replicationGroup.max_attempts),
-      )
+    jedisCluster = JedisCluster(
+      nodes,
+      jedisClientConfig,
+      connectionPoolConfig,
+      topologyRefreshPeriodMs?.let { Duration.ofMillis(it) },
+      replicationGroup.max_attempts,
+      // Cap total retry wall-clock time: each attempt can take at most one socket timeout.
+      Duration.ofMillis(replicationGroup.timeout_ms.toLong() * replicationGroup.max_attempts),
+    )
   }
 
   override fun shutDown() {

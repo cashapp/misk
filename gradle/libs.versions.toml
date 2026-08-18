@@ -2,6 +2,7 @@
 awaitility = "4.3.0"
 aws1 = "1.12.797"
 aws2 = "2.44.3"
+bouncyCastle = "1.85"
 bucket4j = "8.16.1"
 datadog = "1.63.0"
 dependencyAnalysisPlugin = "3.6.1"
@@ -11,7 +12,7 @@ googleAuth = "1.39.1"
 googleHttp = "2.0.0"
 guava = "33.5.0-jre"
 hoplite = "2.7.5"
-jackson = "2.21.2"
+jackson = "3.2.1"
 jetty = "12.0.23"
 jooq = "3.19.29"
 junit = "5.14.2"
@@ -57,9 +58,10 @@ awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version.ref = "a
 awsS3 = { module = "com.amazonaws:aws-java-sdk-s3", version.ref = "aws1" }
 awsSdkCore = { module = "software.amazon.awssdk:sdk-core", version.ref = "aws2" }
 awsSqs = { module = "com.amazonaws:aws-java-sdk-sqs", version.ref = "aws1" }
-bouncyCastlePgp = { module = "org.bouncycastle:bcpg-jdk18on", version = "1.82" }
-bouncyCastlePkix = { module = "org.bouncycastle:bcpkix-jdk18on", version = "1.82" }
-bouncyCastleProvider = { module = "org.bouncycastle:bcprov-jdk18on", version = "1.82" }
+bouncyCastleBom = { module = "org.bouncycastle:bc-jdk18on-bom", version.ref = "bouncyCastle" }
+bouncyCastlePgp = { module = "org.bouncycastle:bcpg-jdk18on", version.ref = "bouncyCastle" }
+bouncyCastlePkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncyCastle" }
+bouncyCastleProvider = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncyCastle" }
 bucket4jCore = { module = "com.bucket4j:bucket4j_jdk17-core", version.ref = "bucket4j" }
 bucket4jMySQL = { module = "com.bucket4j:bucket4j_jdk17-mysql", version.ref = "bucket4j" }
 bucket4jRedis = { module = "com.bucket4j:bucket4j_jdk17-jedis", version.ref = "bucket4j" }
@@ -122,12 +124,11 @@ hopliteYaml = { module = "com.sksamuel.hoplite:hoplite-yaml", version.ref = "hop
 hsqldb = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
 jCommander = { module = "com.beust:jcommander", version = "1.82" }
 jacksonAnnotations = { module = "com.fasterxml.jackson.core:jackson-annotations" }
-jacksonBom = { module = "com.fasterxml.jackson:jackson-bom", version.ref = "jackson" }
-jacksonCore = { module = "com.fasterxml.jackson.core:jackson-core" }
-jacksonDatabind = { module = "com.fasterxml.jackson.core:jackson-databind" }
-jacksonDataformatYaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml" }
-jacksonJsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" }
-jacksonKotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin" }
+jacksonBom = { module = "tools.jackson:jackson-bom", version.ref = "jackson" }
+jacksonCore = { module = "tools.jackson.core:jackson-core" }
+jacksonDatabind = { module = "tools.jackson.core:jackson-databind" }
+jacksonDataformatYaml = { module = "tools.jackson.dataformat:jackson-dataformat-yaml" }
+jacksonKotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
 jakartaInject = { module = "jakarta.inject:jakarta.inject-api", version = "2.0.1" }
 javaxAnnotation = { module = "javax.annotation:javax.annotation-api", version = "1.3.2" }
 javaxInject = { module = "javax.inject:javax.inject", version = "1" }
@@ -188,12 +189,12 @@ ktorClientContentNegotiation = { module = "io.ktor:ktor-client-content-negotiati
 ktorClientEncoding = { module = "io.ktor:ktor-client-encoding", version.ref = "ktor" }
 ktorClientLogging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 ktorSerializationKotlinxJson = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
-kubernetesClient = { module = "io.kubernetes:client-java", version = "24.0.0" }
-kubernetesClientApi = { module = "io.kubernetes:client-java-api", version = "24.0.0" }
+kubernetesClient = { module = "io.kubernetes:client-java", version = "27.0.0" }
+kubernetesClientApi = { module = "io.kubernetes:client-java-api", version = "27.0.0" }
 launchDarkly = { module = "com.launchdarkly:launchdarkly-java-server-sdk", version = "7.10.2" }
 lettuceCore = { module = "io.lettuce:lettuce-core", version = "6.8.1.RELEASE" }
-logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.33" }
-logbackCore = { module = "ch.qos.logback:logback-core", version = "1.5.33" }
+logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.36" }
+logbackCore = { module = "ch.qos.logback:logback-core", version = "1.5.36" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
 mcpKotlinSdkClient = { module = "io.modelcontextprotocol:kotlin-sdk-client", version.ref = "mcp" }
 mcpKotlinSdkCore = { module = "io.modelcontextprotocol:kotlin-sdk-core", version.ref = "mcp" }

@@ -5,6 +5,8 @@ import io.opentracing.Tracer
 import io.opentracing.tag.Tags
 import java.time.Clock
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -28,6 +30,7 @@ import software.amazon.awssdk.services.sqs.model.MessageSystemAttributeName
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
+import kotlin.math.log
 
 /**
  * Subscriber reads jobs from the channel and passes them to handler.
@@ -50,10 +53,28 @@ class Subscriber(
   val asyncSwitch: AsyncSwitch,
 ) {
   private var wasDisabled = false
+  @Volatile private var isRunning = true
+
+  /** In-flight `ReceiveMessage` requests, so they can be aborted when the subscriber is stopped. */
+  private val inFlightReceives = ConcurrentHashMap.newKeySet<CompletableFuture<*>>()
+
+  /** Stops issuing new receives. In-flight ones are left to complete on their own. */
+  fun stop() {
+    isRunning = false
+  }
+
+  /**
+   * Aborts the in-flight receives, so shutdown doesn't have to wait out the long poll.
+   *
+   * Messages that SQS already handed to a canceled request are not lost, but they stay invisible until their visibility
+   * timeout expires, so prefer giving [stop] a chance to wind down on its own first.
+   */
+  fun cancelInFlightReceives() {
+    inFlightReceives.forEach { it.cancel(false) }
+  }
 
   suspend fun run() {
-    while (true) {
-      val job = tracer.withSpan("channel-receive-queue-${queueName.value}") { channel.receive() }
+    for (job in channel) {
       tracer.withSpan("process-queue-${queueName.value}") {
         val receiveFromChannelTimestamp = clock.millis()
         sqsMetrics.channelReceiveLag
@@ -192,12 +213,15 @@ class Subscriber(
       } else {
         messageFlow(queueName)
       }
-      .collect { received -> channel.send(received) }
+      .collect { received ->
+        channel.send(received)
+      }
+    channel.close()
   }
 
   private fun messageFlow(queueName: QueueName) = flow {
     val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
-    while (true) {
+    while (isRunning) {
       if (!asyncSwitch.isEnabled("sqs")) {
         if (!wasDisabled) {
           logger.info { "Async SQS tasks disabled. Polling paused for queue ${queueName.value}." }
@@ -213,7 +237,26 @@ class Subscriber(
       val startTime = clock.millis()
       val response =
         try {
-          fetchMessages(queueUrl).await()
+          val future = fetchMessages(queueUrl)
+          inFlightReceives.add(future)
+          // Closes the race with a cancelInFlightReceives() that already swept the set.
+          if (!isRunning) {
+            future.cancel(false)
+          }
+          try {
+            future.await()
+          } finally {
+            inFlightReceives.remove(future)
+          }
+        } catch (e: CancellationException) {
+          // Propagate cancellation of this subscriber, but recover if only the receive was canceled.
+          currentCoroutineContext().ensureActive()
+          if (isRunning) {
+            logger.warn(e) { "Receive was canceled for queue ${queueName.value}; retrying" }
+            sqsMetrics.sqsReceiveFailures.labels(queueName.value).inc()
+            continue
+          }
+          break
         } catch (e: Exception) {
           // Propagate cancellation of this subscriber, but recover if only the failed operation was canceled.
           currentCoroutineContext().ensureActive()

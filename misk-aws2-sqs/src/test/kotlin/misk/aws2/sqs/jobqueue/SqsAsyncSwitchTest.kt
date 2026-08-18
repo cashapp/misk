@@ -3,8 +3,6 @@ package misk.aws2.sqs.jobqueue
 import jakarta.inject.Inject
 import java.time.Duration
 import java.util.concurrent.TimeUnit
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
@@ -24,6 +22,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @MiskTest(startService = true)
 class SqsAsyncSwitchTest {

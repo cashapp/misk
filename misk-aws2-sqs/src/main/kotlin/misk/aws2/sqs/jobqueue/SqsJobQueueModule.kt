@@ -1,6 +1,7 @@
 package misk.aws2.sqs.jobqueue
 
 import com.google.inject.Provides
+import com.google.inject.multibindings.OptionalBinder
 import jakarta.inject.Singleton
 import misk.ReadyService
 import misk.ServiceModule

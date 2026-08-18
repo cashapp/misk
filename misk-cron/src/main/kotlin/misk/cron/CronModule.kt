@@ -46,8 +46,12 @@ constructor(
       )
     )
 
-    install(ServiceModule<RepeatedTaskQueue, ForMiskCron>().dependsOn<ReadyService>())
-    install(ServiceModule<CronTask>().dependsOn(dependencies).dependsOn<ReadyService>())
+    install(
+      ServiceModule<RepeatedTaskQueue, ForMiskCron>().dependsOn<ReadyService>()
+    )
+    install(
+      ServiceModule<CronTask>().dependsOn(dependencies).dependsOn<ReadyService>()
+    )
   }
 
   @Provides

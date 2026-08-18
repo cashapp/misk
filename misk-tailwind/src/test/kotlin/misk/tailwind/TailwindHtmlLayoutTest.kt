@@ -1,16 +1,20 @@
 package misk.tailwind
 
-import kotlin.test.assertContains
-import kotlin.test.assertFalse
 import kotlinx.html.stream.appendHTML
 import org.junit.jupiter.api.Test
+import kotlin.test.assertContains
+import kotlin.test.assertFalse
 
 class TailwindHtmlLayoutTest {
 
   private fun renderLayout(enableTurbo: Boolean): String =
-    StringBuilder()
-      .apply { appendHTML().TailwindHtmlLayout(appRoot = "/app", title = "Test", enableTurbo = enableTurbo) {} }
-      .toString()
+    StringBuilder().apply {
+      appendHTML().TailwindHtmlLayout(
+        appRoot = "/app",
+        title = "Test",
+        enableTurbo = enableTurbo,
+      ) {}
+    }.toString()
 
   @Test
   fun `turbo scripts included by default`() {

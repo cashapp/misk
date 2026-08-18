@@ -273,6 +273,31 @@ internal class DeclarativeSchemaMigratorTest {
   }
 
   @Test
+  fun passRequireAllWithInvisibleIndexes() {
+    val mainSource = config.migrations_resources!![0]
+
+    resourceLoader.put(
+      "$mainSource/t1.sql",
+      """
+      |CREATE TABLE `table_1` (
+      |  `id` bigint NOT NULL AUTO_INCREMENT,
+      |  `status` varchar(32) NOT NULL,
+      |  `quote_id` varchar(191) NOT NULL,
+      |  PRIMARY KEY (`id`),
+      |  KEY `idx_status` (`status`) INVISIBLE,
+      |  KEY `idx_quote_id` (`quote_id`) /*!80000 INVISIBLE */
+      |) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+      |"""
+        .trimMargin(),
+    )
+
+    assertThat(declarativeSchemaMigrator.applyAll("test")).isEqualTo(MigrationStatus.Success)
+
+    // Boot-time validation must tolerate both spellings of an invisible index.
+    assertThat(declarativeSchemaMigrator.requireAll()).isEqualTo(MigrationStatus.Success)
+  }
+
+  @Test
   fun testSqlParsing() {
     val mainSource = config.migrations_resources!![0]
     val librarySource = config.migrations_resources!![1]

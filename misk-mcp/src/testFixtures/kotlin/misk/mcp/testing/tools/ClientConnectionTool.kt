@@ -9,13 +9,16 @@ import misk.annotation.ExperimentalMiskApi
 import misk.mcp.StructuredMcpToolEmptyInput
 import misk.mcp.action.currentClientConnection
 
-@Serializable data class ClientConnectionToolOutput(val sessionId: String)
+@Serializable
+data class ClientConnectionToolOutput(
+  val sessionId: String,
+)
 
 /**
  * Test tool that verifies [currentClientConnection] is accessible from within a tool handler.
  *
- * Calls [currentClientConnection] to obtain the [ClientConnection] and returns its session ID to prove the connection
- * is available in the handler context.
+ * Calls [currentClientConnection] to obtain the [ClientConnection] and returns its session ID
+ * to prove the connection is available in the handler context.
  */
 class ClientConnectionTool @Inject constructor() : StructuredMcpToolEmptyInput<ClientConnectionToolOutput>() {
   override val name = "client_connection"
@@ -23,8 +26,16 @@ class ClientConnectionTool @Inject constructor() : StructuredMcpToolEmptyInput<C
 
   override suspend fun handle(): ToolResult {
     val connection = currentClientConnection()
-    return ToolResult(result = ClientConnectionToolOutput(sessionId = connection.sessionId))
+    return ToolResult(
+      result = ClientConnectionToolOutput(
+        sessionId = connection.sessionId,
+      )
+    )
   }
 }
 
-suspend fun Client.callClientConnectionTool() = callTool(name = "client_connection", arguments = mapOf())
+suspend fun Client.callClientConnectionTool() =
+  callTool(
+    name = "client_connection",
+    arguments = mapOf(),
+  )

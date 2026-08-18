@@ -71,9 +71,7 @@ internal class ActualResponseTypeTest {
   @Suppress("unused")
   class SuspendActions {
     suspend fun responseBody(): Response<ResponseBody> = TODO()
-
     suspend fun responseString(): Response<String> = TODO()
-
     suspend fun responseByteString(): Response<ByteString> = TODO()
   }
 

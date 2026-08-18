@@ -175,7 +175,9 @@ internal class ActionScopedTest {
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
 
     scope.create(seedData).inScope {
-      runBlocking(scope.asContextElement()) { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
+      runBlocking(scope.asContextElement()) {
+        assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
+      }
     }
   }
 
@@ -216,12 +218,14 @@ internal class ActionScopedTest {
 
       val instance = scope.snapshotActionScopeInstance()
       thread {
-          try {
-            instance.inScope { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
-          } catch (t: Throwable) {
-            thrown = t
+        try {
+          instance.inScope {
+            assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
           }
+        } catch (t: Throwable) {
+          thrown = t
         }
+      }
         .join()
       assertThat(thrown).isNull()
     }
@@ -256,12 +260,14 @@ internal class ActionScopedTest {
 
       val instance = scope.snapshotActionScopeInstance()
       thread {
-          try {
-            instance.inScope { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
-          } catch (t: Throwable) {
-            thrown = t
+        try {
+          instance.inScope {
+            assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
           }
+        } catch (t: Throwable) {
+          thrown = t
         }
+      }
         .join()
       assertThat(thrown).isNull()
     }

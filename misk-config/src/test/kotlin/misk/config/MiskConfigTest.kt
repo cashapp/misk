@@ -1,6 +1,5 @@
 package misk.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.inject.util.Modules
 import jakarta.inject.Inject
 import java.io.File
@@ -24,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.event.Level
+import tools.jackson.databind.ObjectMapper
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 import uk.org.webcompere.systemstubs.jupiter.SystemStub
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension
@@ -143,6 +143,55 @@ class MiskConfigTest {
   }
 
   @Test
+  fun unparseableIntFailsLoudly() {
+    val exception =
+      assertFailsWith<IllegalStateException> { MiskConfig.load<CoercionTestConfig>("coercion_bad_int", TESTING) }
+
+    // Must name the property and the offending value, and must not claim the property is missing.
+    assertThat(exception).hasMessageContaining("int_value")
+    assertThat(exception).hasMessageContaining("not_a_number")
+    assertThat(exception).hasMessageNotContaining("could not find")
+  }
+
+  @Test
+  fun unparseableLongFailsLoudly() {
+    val exception =
+      assertFailsWith<IllegalStateException> { MiskConfig.load<CoercionTestConfig>("coercion_bad_long", TESTING) }
+
+    assertThat(exception).hasMessageContaining("long_value")
+    assertThat(exception).hasMessageContaining("5_000")
+  }
+
+  @Test
+  fun yamlOneDotOneBooleanFailsLoudly() {
+    val exception =
+      assertFailsWith<IllegalStateException> { MiskConfig.load<CoercionTestConfig>("coercion_bad_boolean", TESTING) }
+
+    assertThat(exception).hasMessageContaining("boolean_value")
+    assertThat(exception).hasMessageContaining("yes")
+    // The likely cause is worth spelling out, since "yes" was a boolean under YAML 1.1.
+    assertThat(exception).hasMessageContaining("use true or false")
+  }
+
+  @Test
+  fun numbersAndBooleansWrittenAsStringsStillParse() {
+    val actual = MiskConfig.load<CoercionTestConfig>("coercion_good", TESTING)
+
+    assertEquals(42, actual.int_value)
+    assertEquals(9000L, actual.long_value)
+    assertEquals(true, actual.boolean_value)
+  }
+
+  @Test
+  fun enumKeyedMapKeepsYamlOrder() {
+    val actual = MiskConfig.load<EnumKeyedMapConfig>("enum_keyed_map", TESTING)
+
+    // An EnumMap would answer CHECKING, SAVINGS, BROKERAGE regardless of how the file is written.
+    assertThat(actual.tiers.keys).containsExactly(AccountTier.BROKERAGE, AccountTier.CHECKING, AccountTier.SAVINGS)
+    assertThat(actual.tiers).isNotInstanceOf(java.util.EnumMap::class.java)
+  }
+
+  @Test
   fun configLoadsValuesFromEnvironmentVariables() {
     // Set environment variables before loading config
     assertEquals("abc123", System.getenv("STRING_VALUE"))
@@ -229,7 +278,7 @@ class MiskConfigTest {
       assertFailsWith<IllegalStateException> {
         MiskConfig.load<TestConfig>(TestConfig::class.java, "unknownproperty", TESTING, failOnUnknownProperties = true)
       }
-    assertThat(exception).hasMessageContaining("Unrecognized field \"blue_items\"")
+    assertThat(exception).hasMessageContaining("Unrecognized property \"blue_items\"")
   }
 
   @Test

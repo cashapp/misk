@@ -15,7 +15,10 @@ class VitessImageUtilsTest {
 
   @Test
   fun `derives vtctldclient from upstream vitess image`() {
-    assertEquals("vitess/vtctldclient:v21.0.4", deriveVtctldClientImage("vitess/vttestserver:v21.0.4-mysql80"))
+    assertEquals(
+      "vitess/vtctldclient:v21.0.4",
+      deriveVtctldClientImage("vitess/vttestserver:v21.0.4-mysql80"),
+    )
   }
 
   @Test
@@ -28,12 +31,18 @@ class VitessImageUtilsTest {
 
   @Test
   fun `derives vtctldclient with mysql80 suffix`() {
-    assertEquals("vitess/vtctldclient:v22.0.2", deriveVtctldClientImage("vitess/vttestserver:v22.0.2-mysql80"))
+    assertEquals(
+      "vitess/vtctldclient:v22.0.2",
+      deriveVtctldClientImage("vitess/vttestserver:v22.0.2-mysql80"),
+    )
   }
 
   @Test
   fun `derives vtctldclient without mysql suffix is unchanged`() {
-    assertEquals("vitess/vtctldclient:v23.0.3", deriveVtctldClientImage("vitess/vttestserver:v23.0.3"))
+    assertEquals(
+      "vitess/vtctldclient:v23.0.3",
+      deriveVtctldClientImage("vitess/vttestserver:v23.0.3"),
+    )
   }
 
   @Test

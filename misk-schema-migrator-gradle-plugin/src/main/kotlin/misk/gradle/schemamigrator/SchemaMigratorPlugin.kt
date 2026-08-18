@@ -26,15 +26,14 @@ class SchemaMigratorPlugin : Plugin<Project> {
   override fun apply(project: Project) {
     val extension = create(project)
 
-    val schemaMigratorClasspath =
-      project.configurations.create("schemaMigratorClasspath") {
-        it.isCanBeConsumed = false
-        it.isCanBeResolved = true
-        it.defaultDependencies { deps ->
-          val version = loadDefaultVersion()
-          deps.add(project.dependencies.create("com.squareup.misk:misk-jdbc:$version"))
-        }
+    val schemaMigratorClasspath = project.configurations.create("schemaMigratorClasspath") {
+      it.isCanBeConsumed = false
+      it.isCanBeResolved = true
+      it.defaultDependencies { deps ->
+        val version = loadDefaultVersion()
+        deps.add(project.dependencies.create("com.squareup.misk:misk-jdbc:$version"))
       }
+    }
 
     // Allow overriding the worker classpath via a Gradle property, e.g. for testing:
     //   -PschemaMigratorClasspath=/path/to/jar1:/path/to/jar2
@@ -64,17 +63,20 @@ class SchemaMigratorPlugin : Plugin<Project> {
 
     fun loadDefaultVersion(): String {
       val props = Properties()
-      val stream =
-        SchemaMigratorPlugin::class.java.classLoader.getResourceAsStream("misk-schema-migrator.properties")
-          ?: error("misk-schema-migrator.properties not found in plugin classpath")
+      val stream = SchemaMigratorPlugin::class.java.classLoader
+        .getResourceAsStream("misk-schema-migrator.properties")
+        ?: error("misk-schema-migrator.properties not found in plugin classpath")
       props.load(stream)
-      return props.getProperty("version") ?: error("version property not found in misk-schema-migrator.properties")
+      return props.getProperty("version")
+        ?: error("version property not found in misk-schema-migrator.properties")
     }
   }
 }
 
-abstract class SchemaMigratorTask @Inject constructor(@get:Internal val execOperations: ExecOperations) :
-  DefaultTask() {
+abstract class SchemaMigratorTask @Inject constructor(
+  @get:Internal
+  val execOperations: ExecOperations
+) : DefaultTask() {
 
   companion object {
     const val NAME = "migrateSchema"
@@ -111,12 +113,10 @@ abstract class SchemaMigratorTask @Inject constructor(@get:Internal val execOper
       appendLine("migrationsFormat=${migrationsFormat.get()}")
     }
 
-    execOperations
-      .javaexec {
-        it.classpath = workerClasspath
-        it.mainClass.set("misk.jdbc.SchemaMigratorRunner")
-        it.standardInput = ByteArrayInputStream(props.toByteArray())
-      }
-      .assertNormalExitValue()
+    execOperations.javaexec {
+      it.classpath = workerClasspath
+      it.mainClass.set("misk.jdbc.SchemaMigratorRunner")
+      it.standardInput = ByteArrayInputStream(props.toByteArray())
+    }.assertNormalExitValue()
   }
 }

@@ -5,7 +5,7 @@ import java.util.function.Supplier
 import okio.ByteString
 import redis.clients.jedis.args.ListDirection
 
-/** Like [Redis], but returns [Supplier]s to defer value retrieval. **Does not support transactions or pubsub.** */
+/** Like [Redis], but returns [Supplier]s to defer value retrieval in a pipeline or transaction. */
 interface DeferredRedis {
   fun del(key: String): Supplier<Boolean>
 
@@ -124,6 +124,8 @@ interface DeferredRedis {
   fun zrem(key: String, vararg members: String): Supplier<Long>
 
   fun zremRangeByRank(key: String, start: Redis.ZRangeRankMarker, stop: Redis.ZRangeRankMarker): Supplier<Long>
+
+  fun zremRangeByScore(key: String, start: Redis.ZRangeScoreMarker, stop: Redis.ZRangeScoreMarker): Supplier<Long>
 
   fun llen(key: String): Supplier<Long>
 
