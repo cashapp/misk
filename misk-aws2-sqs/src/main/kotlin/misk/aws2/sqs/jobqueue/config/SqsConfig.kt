@@ -37,6 +37,7 @@ constructor(
         visibility_timeout = override.visibility_timeout ?: all_queues.visibility_timeout,
         region = override.region ?: all_queues.region,
         account_id = override.account_id ?: all_queues.account_id,
+        shutdown_grace_period_ms = override.shutdown_grace_period_ms ?: all_queues.shutdown_grace_period_ms,
       )
     } else {
       all_queues

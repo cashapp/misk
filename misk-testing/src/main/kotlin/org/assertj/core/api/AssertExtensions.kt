@@ -1,10 +1,10 @@
 package org.assertj.core.api
 
-import com.fasterxml.jackson.core.JacksonException
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.AssertionsForClassTypes.fail
+import tools.jackson.core.JacksonException
+import tools.jackson.core.StreamReadFeature
+import tools.jackson.databind.json.JsonMapper
 
 inline fun <reified KEY, VALUE> MapAssert<KEY, VALUE>.containsExactly(
   vararg p: Pair<KEY, VALUE>
@@ -12,7 +12,7 @@ inline fun <reified KEY, VALUE> MapAssert<KEY, VALUE>.containsExactly(
   return isEqualTo(mapOf(*p))
 }
 
-private val objectMapper = ObjectMapper().configure(JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION, true)
+private val objectMapper = JsonMapper.builder().enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION).build()
 
 fun <ACTUAL : CharSequence> AbstractCharSequenceAssert<*, ACTUAL>.isEqualToAsJson(
   expected: CharSequence

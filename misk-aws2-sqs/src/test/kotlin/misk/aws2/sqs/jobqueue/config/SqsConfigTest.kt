@@ -80,4 +80,19 @@ class SqsConfigTest {
     assertEquals("us-west-2", queueConfig.region) // inherited from all_queues
     assertEquals(20, queueConfig.wait_timeout) // inherited from all_queues
   }
+
+  @Test
+  fun `getQueueConfig resolves shutdown_grace_period_ms`() {
+    val config = SqsConfig(
+      all_queues = SqsQueueConfig(shutdown_grace_period_ms = 5_000),
+      per_queue_overrides = mapOf(
+        "inheriting-queue" to SqsQueueConfig(concurrency = 10),
+        "overriding-queue" to SqsQueueConfig(shutdown_grace_period_ms = 0),
+      ),
+    )
+
+    assertEquals(5_000, config.getQueueConfig(misk.jobqueue.QueueName("inheriting-queue")).shutdown_grace_period_ms)
+    assertEquals(0, config.getQueueConfig(misk.jobqueue.QueueName("overriding-queue")).shutdown_grace_period_ms)
+    assertEquals(5_000, config.getQueueConfig(misk.jobqueue.QueueName("unconfigured-queue")).shutdown_grace_period_ms)
+  }
 }

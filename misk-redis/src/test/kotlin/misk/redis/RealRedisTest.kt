@@ -12,12 +12,15 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import redis.clients.jedis.Connection
 import redis.clients.jedis.ConnectionPoolConfig
+import redis.clients.jedis.ReliableTransaction
 import wisp.deployment.TESTING
 
 @MiskTest
-class RealRedisTest : AbstractRedisTest() {
+class RealRedisTest : AbstractRedisTransactionTest() {
   @Suppress("unused")
   @MiskTestModule
   private val module: Module =
@@ -85,6 +88,15 @@ class RealRedisTest : AbstractRedisTest() {
 
     assertThat(redis["key5"]).isEqualTo("value5".encodeUtf8())
     assertThat(redis["key6"]).isNull()
+  }
+
+  @Test
+  fun `deferred Redis rejects unknown Jedis implementations`() {
+    val unsupported = ReliableTransaction(Connection(), false)
+
+    assertThatThrownBy { RealPipelinedRedis(unsupported) }
+      .isInstanceOf(IllegalStateException::class.java)
+      .hasMessageContaining("Unknown deferred Redis type")
   }
 
   @Test
