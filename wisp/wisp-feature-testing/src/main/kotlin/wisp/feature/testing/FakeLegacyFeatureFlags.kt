@@ -65,12 +65,15 @@ class FakeLegacyFeatureFlags @Deprecated("Needed for Misk Provider usage...") co
   override fun getJsonString(feature: Feature): String = getJsonString(feature, KEY)
 
   private fun <T> get(feature: Feature, key: String, attributes: Attributes, clazz: Class<T>): T {
-    val result = get(feature, key, attributes)
-      ?: throw IllegalArgumentException("Flag $feature must be overridden with override() before use")
+    val result =
+      get(feature, key, attributes)
+        ?: throw IllegalArgumentException("Flag $feature must be overridden with override() before use")
     try {
       return clazz.cast(result)
     } catch (_: ClassCastException) {
-      throw IllegalArgumentException("Flag $feature: expecting $clazz but override() was called with ${result.javaClass}")
+      throw IllegalArgumentException(
+        "Flag $feature: expecting $clazz but override() was called with ${result.javaClass}"
+      )
     }
   }
 

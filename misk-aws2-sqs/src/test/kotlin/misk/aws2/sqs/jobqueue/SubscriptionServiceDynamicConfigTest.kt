@@ -17,8 +17,7 @@ import org.junit.jupiter.api.Test
 /**
  * Tests for [SubscriptionService] dynamic config override behavior.
  *
- * Uses `startService = false` to allow per-test configuration of dynamic config
- * values before the service starts up.
+ * Uses `startService = false` to allow per-test configuration of dynamic config values before the service starts up.
  */
 @MiskTest(startService = false)
 class SubscriptionServiceDynamicConfigTest {
@@ -26,13 +25,15 @@ class SubscriptionServiceDynamicConfigTest {
   @MiskExternalDependency private val queueCreator = SubscriptionServiceTestQueueCreator(dockerSqs)
 
   @MiskTestModule
-  private val module = SubscriptionServiceTestModule(
-    dockerSqs = dockerSqs,
-    yamlConfig = SqsConfig(
-      all_queues = SqsQueueConfig(concurrency = 5, parallelism = 2, region = "us-east-1"),
-      config_feature_flag = "test-sqs-config",
-    ),
-  )
+  private val module =
+    SubscriptionServiceTestModule(
+      dockerSqs = dockerSqs,
+      yamlConfig =
+        SqsConfig(
+          all_queues = SqsQueueConfig(concurrency = 5, parallelism = 2, region = "us-east-1"),
+          config_feature_flag = "test-sqs-config",
+        ),
+    )
 
   @Inject private lateinit var subscriptionService: SubscriptionService
   @Inject private lateinit var serviceManager: ServiceManager

@@ -21,9 +21,7 @@ import misk.web.metadata.all.AllMetadataAccess
 import misk.web.metadata.all.AllMetadataModule
 
 // Common test module used to be able to test admin dashboard WebActions
-class MetadataTestingModule(
-  private val enableTurbo: Boolean = true,
-) : KAbstractModule() {
+class MetadataTestingModule(private val enableTurbo: Boolean = true) : KAbstractModule() {
   override fun configure() {
     install(TestWebActionModule())
     install(AdminDashboardTestingModule(enableTurbo = enableTurbo))

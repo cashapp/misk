@@ -26,8 +26,8 @@ import misk.inject.qualifier
  *
  * ## Resource Template Grouping with BindingQualifiers
  *
- * Resource templates can be organized into groups using [BindingQualifier] annotations. This allows multiple MCP servers
- * to expose different sets of resource templates:
+ * Resource templates can be organized into groups using [BindingQualifier] annotations. This allows multiple MCP
+ * servers to expose different sets of resource templates:
  * ```kotlin
  * install(McpResourceTemplateModule.create<AdminMcp, AdminSchemaResource>())
  * install(McpResourceTemplateModule.create<PublicMcp, PublicSchemaResource>())
@@ -43,10 +43,8 @@ import misk.inject.qualifier
  */
 @ExperimentalMiskApi
 class McpResourceTemplateModule<RT : McpResourceTemplate>
-private constructor(
-  private val resourceTemplateClass: KClass<RT>,
-  private val qualifier: BindingQualifier?,
-) : KAbstractModule() {
+private constructor(private val resourceTemplateClass: KClass<RT>, private val qualifier: BindingQualifier?) :
+  KAbstractModule() {
 
   override fun configure() {
     multibind<McpResourceTemplate>(qualifier).to(resourceTemplateClass.java)
@@ -61,13 +59,18 @@ private constructor(
      *
      * @param RT The type of [McpResourceTemplate] implementation to register
      * @param resourceTemplateClass The [KClass] of the resource template implementation
-     * @param groupAnnotationClass Optional annotation class for grouping this resource template with a specific MCP server
+     * @param groupAnnotationClass Optional annotation class for grouping this resource template with a specific MCP
+     *   server
      * @return A configured McpResourceTemplateModule instance
      */
     fun <RT : McpResourceTemplate> create(
       resourceTemplateClass: KClass<RT>,
       groupAnnotationClass: KClass<out Annotation>?,
-    ) = McpResourceTemplateModule(resourceTemplateClass = resourceTemplateClass, qualifier = groupAnnotationClass?.qualifier)
+    ) =
+      McpResourceTemplateModule(
+        resourceTemplateClass = resourceTemplateClass,
+        qualifier = groupAnnotationClass?.qualifier,
+      )
 
     /**
      * Creates an [McpResourceTemplateModule] with reified type parameters for both group annotation and resource
@@ -112,13 +115,12 @@ private constructor(
      *
      * @param RT The type of [McpResourceTemplate] implementation to register
      * @param resourceTemplateClass The [KClass] of the resource template implementation
-     * @param groupAnnotation Optional annotation instance for grouping this resource template with a specific MCP server
+     * @param groupAnnotation Optional annotation instance for grouping this resource template with a specific MCP
+     *   server
      * @return A configured McpResourceTemplateModule instance
      */
-    fun <RT : McpResourceTemplate> create(
-      resourceTemplateClass: KClass<RT>,
-      groupAnnotation: Annotation?,
-    ) = McpResourceTemplateModule(resourceTemplateClass = resourceTemplateClass, qualifier = groupAnnotation?.qualifier)
+    fun <RT : McpResourceTemplate> create(resourceTemplateClass: KClass<RT>, groupAnnotation: Annotation?) =
+      McpResourceTemplateModule(resourceTemplateClass = resourceTemplateClass, qualifier = groupAnnotation?.qualifier)
 
     /**
      * Creates an [McpResourceTemplateModule] with a reified resource template type and annotation instance.
@@ -126,7 +128,8 @@ private constructor(
      * Convenience method that combines reified resource template type with runtime annotation instance.
      *
      * @param RT The type of [McpResourceTemplate] implementation to register
-     * @param groupAnnotation Optional annotation instance for grouping this resource template with a specific MCP server
+     * @param groupAnnotation Optional annotation instance for grouping this resource template with a specific MCP
+     *   server
      * @return A configured McpResourceTemplateModule instance
      */
     inline fun <reified RT : McpResourceTemplate> create(groupAnnotation: Annotation?) =

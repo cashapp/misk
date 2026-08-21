@@ -48,15 +48,16 @@ constructor(
     logger.info { "Starting AWS SQS SubscriptionService with config=$effectiveConfig" }
     handlers.forEach { (queueName, handler) ->
       val queueConfig = effectiveConfig.getQueueConfig(queueName)
-      logger.info { "Subscribing to queue ${queueName.value} with config: concurrency=${queueConfig.concurrency}, parallelism=${queueConfig.parallelism}" }
+      logger.info {
+        "Subscribing to queue ${queueName.value} with config: concurrency=${queueConfig.concurrency}, parallelism=${queueConfig.parallelism}"
+      }
       consumer.subscribe(queueName, handler, queueConfig)
     }
   }
 
   /**
-   * Resolves the effective configuration.
-   * If a dynamic config flag is configured and returns a valid config, it completely replaces the YAML config.
-   * Otherwise, the YAML config is used.
+   * Resolves the effective configuration. If a dynamic config flag is configured and returns a valid config, it
+   * completely replaces the YAML config. Otherwise, the YAML config is used.
    *
    * In both cases, if region is not specified in the config, it is populated from the AWS environment.
    */
@@ -89,8 +90,8 @@ constructor(
   }
 
   /**
-   * Applies the AWS region default to the config if not already specified.
-   * This ensures dynamic config behaves the same as YAML config with respect to region auto-population.
+   * Applies the AWS region default to the config if not already specified. This ensures dynamic config behaves the same
+   * as YAML config with respect to region auto-population.
    */
   private fun applyRegionDefault(sqsConfig: SqsConfig): SqsConfig {
     return if (sqsConfig.all_queues.region == null) {

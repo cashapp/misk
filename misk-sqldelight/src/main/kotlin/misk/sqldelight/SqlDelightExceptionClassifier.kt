@@ -10,11 +10,8 @@ import misk.jdbc.retry.DefaultExceptionClassifier
  * Extends [DefaultExceptionClassifier] to add SQLDelight-specific retryable exceptions:
  * - [OptimisticLockException]: SQLDelight's optimistic locking exception
  */
-class SqlDelightExceptionClassifier
-@JvmOverloads
-constructor(
-  dataSourceType: DataSourceType? = null,
-) : DefaultExceptionClassifier(dataSourceType) {
+class SqlDelightExceptionClassifier @JvmOverloads constructor(dataSourceType: DataSourceType? = null) :
+  DefaultExceptionClassifier(dataSourceType) {
 
   override fun isRetryable(th: Throwable): Boolean {
     return when (th) {

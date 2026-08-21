@@ -100,27 +100,21 @@ class JooqExceptionClassifierTest {
   @Test
   fun `inherits database-specific behavior from base classifier`() {
     val classifier = JooqExceptionClassifier(DataSourceType.VITESS_MYSQL)
-    val exception = SQLException(
-      "vttablet: rpc error: code = Aborted desc = transaction 123: not found"
-    )
+    val exception = SQLException("vttablet: rpc error: code = Aborted desc = transaction 123: not found")
     assertThat(classifier.isRetryable(exception)).isTrue()
   }
 
   @Test
   fun `Vitess exception not retryable without correct DataSourceType`() {
     val classifier = JooqExceptionClassifier(DataSourceType.MYSQL)
-    val exception = SQLException(
-      "vttablet: rpc error: code = Aborted desc = transaction 123: not found"
-    )
+    val exception = SQLException("vttablet: rpc error: code = Aborted desc = transaction 123: not found")
     assertThat(classifier.isRetryable(exception)).isFalse()
   }
 
   @Test
   fun `DataAccessException wrapping a Vitess SQL cause is retryable for VITESS_MYSQL`() {
     val classifier = JooqExceptionClassifier(DataSourceType.VITESS_MYSQL)
-    val cause = SQLException(
-      "vttablet: rpc error: code = Aborted desc = transaction 123: not found"
-    )
+    val cause = SQLException("vttablet: rpc error: code = Aborted desc = transaction 123: not found")
     assertThat(classifier.isRetryable(DataAccessException("error", cause))).isTrue()
   }
 }

@@ -4,8 +4,8 @@ import io.github.bucket4j.distributed.serialization.Mapper
 import misk.testing.updateForParallelTests
 
 /**
- * A [KeyMapper] that appends a unique identifier for each test process ID to the Redis key. This is used to
- * ensure that multiple tests can run in parallel without clobbering each other's keys.
+ * A [KeyMapper] that appends a unique identifier for each test process ID to the Redis key. This is used to ensure that
+ * multiple tests can run in parallel without clobbering each other's keys.
  */
 internal object ParallelTestsKeyMapper : Mapper<String> {
   private val delegate = Mapper.STRING
@@ -14,6 +14,5 @@ internal object ParallelTestsKeyMapper : Mapper<String> {
 
   override fun toString(value: String): String = delegate.toString(mapValue(value))
 
-  private fun mapValue(value: String): String =
-    value.updateForParallelTests { v, index -> v + "_$index" }
+  private fun mapValue(value: String): String = value.updateForParallelTests { v, index -> v + "_$index" }
 }

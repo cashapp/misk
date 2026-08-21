@@ -3,6 +3,7 @@ package misk.web.jetty
 import jakarta.servlet.http.HttpServletResponse
 import misk.web.ServletHttpCall
 import misk.web.actions.WebSocketListener
+import misk.web.http.HttpVersion
 import okhttp3.Headers
 import okhttp3.Headers.Companion.headersOf
 
@@ -10,7 +11,7 @@ import okhttp3.Headers.Companion.headersOf
  * A generic implementation of ServletHttpCall.UpstreamResponse that works with standard HttpServletResponse instead of
  * requiring Jetty's specific Response class.
  */
-internal class GenericServletUpstreamResponse(private val response: HttpServletResponse) :
+internal class GenericServletUpstreamResponse(private val protocol: String, private val response: HttpServletResponse) :
   ServletHttpCall.UpstreamResponse {
   private var sendTrailers = false
   private var trailers = headersOf()
@@ -23,6 +24,9 @@ internal class GenericServletUpstreamResponse(private val response: HttpServletR
 
   override val headers: Headers
     get() = response.headers()
+
+  override val httpVersion: HttpVersion
+    get() = HttpVersion.fromServletRequestProtocol(protocol)
 
   override fun setHeader(name: String, value: String) {
     response.setHeader(name, value)

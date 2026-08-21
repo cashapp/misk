@@ -32,11 +32,7 @@ private constructor(
     }
 
     install(DefaultAsyncSwitchModule())
-    install(
-      ServiceModule<AwsSqsJobHandlerSubscriptionService>()
-        .dependsOn(dependsOn)
-        .dependsOn<ReadyService>()
-    )
+    install(ServiceModule<AwsSqsJobHandlerSubscriptionService>().dependsOn(dependsOn).dependsOn<ReadyService>())
   }
 
   companion object {

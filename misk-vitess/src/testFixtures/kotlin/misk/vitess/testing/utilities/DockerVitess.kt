@@ -31,13 +31,14 @@ class DockerVitess(
   dockerNetworkName: String = DefaultSettings.VITESS_DOCKER_NETWORK_NAME,
 ) : ExternalDependency {
 
-  private val vitessTestDb = VitessTestDb(
-    containerName = containerName,
-    dockerNetworkName = dockerNetworkName,
-    enableScatters = enableScatters,
-    transactionMode = transactionMode,
-    port = port,
-  )
+  private val vitessTestDb =
+    VitessTestDb(
+      containerName = containerName,
+      dockerNetworkName = dockerNetworkName,
+      enableScatters = enableScatters,
+      transactionMode = transactionMode,
+      port = port,
+    )
 
   override fun startup() {
     vitessTestDb.run()

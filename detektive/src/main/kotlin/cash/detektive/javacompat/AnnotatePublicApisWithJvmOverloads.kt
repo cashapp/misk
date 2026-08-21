@@ -76,7 +76,10 @@ class AnnotatePublicApisWithJvmOverloads(config: Config) : Rule(config) {
                 )
                 element.addAfter(KtPsiFactory.contextual(element.parent, markGenerated = true).createWhiteSpace(), null)
               } else if (elementType == ElementType.FUNCTION) {
-                annotation.addBefore(KtPsiFactory.contextual(element.parent, markGenerated = true).createNewLine(), null)
+                annotation.addBefore(
+                  KtPsiFactory.contextual(element.parent, markGenerated = true).createNewLine(),
+                  null,
+                )
               }
             }
           }
