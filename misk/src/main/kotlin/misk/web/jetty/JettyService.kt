@@ -160,9 +160,7 @@ internal constructor(
       )
     httpConnector.port = webConfig.port
     httpConnector.idleTimeout = webConfig.idle_timeout
-    if (webConfig.override_shutdown_idle_timeout != null) {
-      httpConnector.shutdownIdleTimeout = webConfig.override_shutdown_idle_timeout
-    }
+    httpConnector.applyShutdownIdleTimeout(webConfig.override_shutdown_idle_timeout)
     httpConnector.reuseAddress = true
     httpConnector.name = "http"
     if (webConfig.queue_size != null) {
@@ -241,6 +239,7 @@ internal constructor(
         )
       httpsConnector.port = webConfig.ssl.port
       httpsConnector.idleTimeout = webConfig.idle_timeout
+      httpsConnector.applyShutdownIdleTimeout()
       httpsConnector.reuseAddress = true
       if (webConfig.queue_size != null) {
         httpsConnector.acceptQueueSize = webConfig.queue_size
@@ -445,6 +444,26 @@ internal fun NetworkConnector.toHttpUrl(): HttpUrl {
     .host(explicitHost ?: InetAddress.getLocalHost().hostAddress)
     .port(localPort)
     .build()
+}
+
+/**
+ * Sets the connector's shutdown idle timeout, which bounds how long graceful shutdown waits for an idle connection to
+ * close.
+ *
+ * Through Jetty 12.0, `setIdleTimeout()` also clamped the shutdown idle timeout: it became zero for a zero idle
+ * timeout, and otherwise `min(1000, idleTimeout)` whenever the idle timeout was the smaller of the two. Jetty 12.1 made
+ * `setIdleTimeout()` a plain setter, so the shutdown idle timeout now stays at Jetty's 1000 ms default no matter how
+ * low the idle timeout is. That would silently slow shutdown for services configured with a sub-second `idle_timeout`,
+ * so derive it here instead of depending on Jetty to do it.
+ */
+private fun ServerConnector.applyShutdownIdleTimeout(override: Long? = null) {
+  shutdownIdleTimeout =
+    when {
+      override != null -> override
+      idleTimeout == 0L -> 0L
+      idleTimeout < shutdownIdleTimeout -> minOf(shutdownIdleTimeout, idleTimeout)
+      else -> shutdownIdleTimeout
+    }
 }
 
 /**

@@ -42,7 +42,10 @@ internal class ZeroIdleTimeoutPositiveShutdownIdleTimeoutTest : AbstractJettyShu
 
 @MiskTest
 internal class PositiveIdleTimeoutTest : AbstractJettyShutdownTest() {
-  @MiskTestModule val module = TestModule(idleTimeout = 10)
+  // idleTimeout is set well above the time it takes to open a connection and read a response, so that the connection
+  // isn't closed out from under `callHello()`. It still has to stay under `shutdownTest`'s timeout below, since a
+  // positive idleTimeout also caps how long graceful shutdown waits.
+  @MiskTestModule val module = TestModule(idleTimeout = 500)
 
   @Test
   fun `positive idleTimeout won't timeout`() {

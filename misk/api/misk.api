@@ -2084,6 +2084,7 @@ public final class misk/web/jetty/MeasuredWindowRateControl : org/eclipse/jetty/
 public final class misk/web/jetty/MeasuredWindowRateControl$Factory : org/eclipse/jetty/http2/RateControl$Factory {
 	public fun <init> (Lmisk/metrics/v2/Metrics;Lmisk/web/WebConfig;)V
 	public fun newRateControl (Lorg/eclipse/jetty/io/EndPoint;)Lorg/eclipse/jetty/http2/RateControl;
+	public synthetic fun newRateControl (Lorg/eclipse/jetty/io/EndPoint;)Lorg/eclipse/jetty/io/RateControl;
 }
 
 public final class misk/web/jetty/ThreadPoolQueueMetrics {
