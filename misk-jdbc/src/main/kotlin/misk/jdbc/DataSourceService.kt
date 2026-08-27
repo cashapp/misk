@@ -64,7 +64,7 @@ constructor(
   }
 
   private fun createDataSource(baseConfig: DataSourceConfig) {
-    // Rewrite the caller's config to get a database name like "movies__20190730__5" in tests.
+    // Rewrite the caller's config to get a database name like "movies__20190730140530__5" in tests.
     config = databasePool.takeDatabase(baseConfig)
 
     val hikariConfig = HikariConfig()
