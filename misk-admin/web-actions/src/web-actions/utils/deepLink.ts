@@ -81,6 +81,18 @@ function addressBarWindow(): Window {
   }
 }
 
+/**
+ * Invokes the listener when the URL hash changes, e.g. when the user edits
+ * the address bar in place. Returns a cleanup function. Note that
+ * `history.replaceState` does not fire this event, so writes from
+ * `writeSlugToUrl` never trigger it.
+ */
+export function onSlugChange(listener: () => void): () => void {
+  const target = addressBarWindow();
+  target.addEventListener('hashchange', listener);
+  return () => target.removeEventListener('hashchange', listener);
+}
+
 export function readSlugFromUrl(): string | null {
   const hash = addressBarWindow().location.hash;
   if (!hash || hash === '#') {

@@ -10,6 +10,7 @@ import RealMetadataClient from '@web-actions/api/RealMetadataClient';
 import { appEvents, APP_EVENTS } from '@web-actions/events/appEvents';
 import {
   buildSlugIndex,
+  onSlugChange,
   readSlugFromUrl,
   writeSlugToUrl,
   SlugIndex,
@@ -36,6 +37,7 @@ export default class EndpointSelection extends React.Component<Props, State> {
   private metadataClient = new RealMetadataClient();
   private options: EndpointOption[] = [];
   private slugIndex: SlugIndex | null = null;
+  private stopSlugListener: (() => void) | null = null;
 
   constructor(props: Props) {
     super(props);
@@ -113,7 +115,27 @@ export default class EndpointSelection extends React.Component<Props, State> {
         this.focusSelect();
       }
     });
+
+    this.stopSlugListener = onSlugChange(this.applyDeepLink);
   }
+
+  componentWillUnmount() {
+    this.stopSlugListener?.();
+  }
+
+  private applyDeepLink = () => {
+    const option = this.findDeepLinkedOption();
+    if (option === null) {
+      return;
+    }
+    // Re-selecting the current action would reset the request editor and
+    // discard the user's draft, so only act on an actual change.
+    const selected = this.selectRef.current?.getValue()?.[0];
+    if (selected?.value === option.value) {
+      return;
+    }
+    this.selectRef.current?.setValue(option, 'select-option');
+  };
 
   private findDeepLinkedOption(): EndpointOption | null {
     const slug = readSlugFromUrl();
