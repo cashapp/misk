@@ -1,5 +1,5 @@
 import { MiskRoute } from '@web-actions/api/responseTypes';
-import { buildSlugIndex } from '@web-actions/utils/deepLink';
+import { buildSlugIndex, writeSlugToUrl } from '@web-actions/utils/deepLink';
 
 function route(
   actionName: string,
@@ -64,5 +64,43 @@ describe('buildSlugIndex', () => {
 
     expect(slugByRoute.get(uniqueAction)).toBe('UniqueAction');
     expect(slugByRoute.get(getAction)).toBe('MyAction:GET');
+  });
+
+  it('assigns no slug when routes are ambiguous even with the path', () => {
+    const jsonAction = route('com.squareup.MyAction', 'POST', '/my-action');
+    const protoAction = route('com.other.MyAction', 'POST', '/my-action');
+    const { routeBySlug, slugByRoute } = buildSlugIndex([
+      jsonAction,
+      protoAction,
+    ]);
+
+    expect(routeBySlug.size).toBe(0);
+    expect(slugByRoute.get(jsonAction)).toBeUndefined();
+    expect(slugByRoute.get(protoAction)).toBeUndefined();
+  });
+});
+
+describe('writeSlugToUrl', () => {
+  afterEach(() => {
+    delete (globalThis as Record<string, unknown>).window;
+  });
+
+  it('preserves the existing history state', () => {
+    const replaceState = jest.fn();
+    const existingState = { turbo: 'restoration-identifier' };
+    const win: any = {
+      history: { state: existingState, replaceState },
+      location: { href: 'http://localhost/_admin/web-actions/', hash: '' },
+    };
+    win.top = win;
+    (globalThis as Record<string, unknown>).window = win;
+
+    writeSlugToUrl('MyAction:GET');
+
+    expect(replaceState).toHaveBeenCalledWith(
+      existingState,
+      '',
+      '#MyAction:GET',
+    );
   });
 });

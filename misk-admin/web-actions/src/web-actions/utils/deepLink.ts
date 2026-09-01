@@ -44,9 +44,19 @@ export function buildSlugIndex(routes: MiskRoute[]): SlugIndex {
     for (const [methodSlug, methodGroup] of byMethod) {
       if (methodGroup.length === 1) {
         assign(methodSlug, methodGroup[0]);
-      } else {
-        for (const route of methodGroup) {
-          assign(`${methodSlug}:${route.path}`, route);
+        continue;
+      }
+      const byPath = new Map<string, MiskRoute[]>();
+      for (const route of methodGroup) {
+        const key = `${methodSlug}:${route.path}`;
+        byPath.set(key, [...(byPath.get(key) ?? []), route]);
+      }
+      for (const [pathSlug, pathGroup] of byPath) {
+        // Routes that are still ambiguous (e.g. same action bound twice with
+        // different media types) get no slug: a link that could select the
+        // wrong action is worse than no link.
+        if (pathGroup.length === 1) {
+          assign(pathSlug, pathGroup[0]);
         }
       }
     }
@@ -90,7 +100,9 @@ export function writeSlugToUrl(slug: string): void {
     .replace(/%3A/gi, ':')
     .replace(/%2F/gi, '/');
   try {
-    target.history.replaceState(null, '', `#${encoded}`);
+    // Preserve the existing history state: the dashboard uses Turbo, which
+    // stores a restoration identifier there. Dropping it breaks Back/Forward.
+    target.history.replaceState(target.history.state, '', `#${encoded}`);
   } catch {
     // Deep linking is best-effort; never break selection over it.
   }
