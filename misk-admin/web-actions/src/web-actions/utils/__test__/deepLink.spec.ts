@@ -1,6 +1,7 @@
 import { MiskRoute } from '@web-actions/api/responseTypes';
 import {
   buildSlugIndex,
+  clearSlugFromUrl,
   onSlugChange,
   writeSlugToUrl,
 } from '@web-actions/utils/deepLink';
@@ -105,6 +106,36 @@ describe('writeSlugToUrl', () => {
       existingState,
       '',
       '#MyAction:GET',
+    );
+  });
+});
+
+describe('clearSlugFromUrl', () => {
+  afterEach(() => {
+    delete (globalThis as Record<string, unknown>).window;
+  });
+
+  it('removes the hash while preserving the query and history state', () => {
+    const replaceState = jest.fn();
+    const existingState = { turbo: 'restoration-identifier' };
+    const win: any = {
+      history: { state: existingState, replaceState },
+      location: {
+        href: 'http://localhost/_admin/web-actions/?tab=all#OldAction',
+        hash: '#OldAction',
+        pathname: '/_admin/web-actions/',
+        search: '?tab=all',
+      },
+    };
+    win.top = win;
+    (globalThis as Record<string, unknown>).window = win;
+
+    clearSlugFromUrl();
+
+    expect(replaceState).toHaveBeenCalledWith(
+      existingState,
+      '',
+      '/_admin/web-actions/?tab=all',
     );
   });
 });

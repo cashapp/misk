@@ -10,6 +10,7 @@ import RealMetadataClient from '@web-actions/api/RealMetadataClient';
 import { appEvents, APP_EVENTS } from '@web-actions/events/appEvents';
 import {
   buildSlugIndex,
+  clearSlugFromUrl,
   onSlugChange,
   readSlugFromUrl,
   writeSlugToUrl,
@@ -181,6 +182,8 @@ export default class EndpointSelection extends React.Component<Props, State> {
       const slug = this.slugIndex?.slugByRoute.get(value.value);
       if (slug !== undefined) {
         writeSlugToUrl(slug);
+      } else {
+        clearSlugFromUrl();
       }
       appEvents.emit(APP_EVENTS.ENDPOINT_SELECTED, value.value);
     }

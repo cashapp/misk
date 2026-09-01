@@ -132,3 +132,16 @@ export function writeSlugToUrl(slug: string): void {
     // Deep linking is best-effort; never break selection over it.
   }
 }
+
+export function clearSlugFromUrl(): void {
+  const target = addressBarWindow();
+  try {
+    target.history.replaceState(
+      target.history.state,
+      '',
+      `${target.location.pathname}${target.location.search}`,
+    );
+  } catch {
+    // Deep linking is best-effort; never break selection over it.
+  }
+}
