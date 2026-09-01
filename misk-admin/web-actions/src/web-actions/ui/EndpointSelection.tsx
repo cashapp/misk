@@ -8,6 +8,12 @@ import Select, {
 import { MiskRoute } from '@web-actions/api/responseTypes';
 import RealMetadataClient from '@web-actions/api/RealMetadataClient';
 import { appEvents, APP_EVENTS } from '@web-actions/events/appEvents';
+import {
+  buildSlugIndex,
+  readSlugFromUrl,
+  writeSlugToUrl,
+  SlugIndex,
+} from '@web-actions/utils/deepLink';
 
 export interface EndpointOption {
   value: MiskRoute;
@@ -29,6 +35,7 @@ export default class EndpointSelection extends React.Component<Props, State> {
   private selectRef = React.createRef<any>();
   private metadataClient = new RealMetadataClient();
   private options: EndpointOption[] = [];
+  private slugIndex: SlugIndex | null = null;
 
   constructor(props: Props) {
     super(props);
@@ -93,9 +100,31 @@ export default class EndpointSelection extends React.Component<Props, State> {
         value: actionGroup,
       }));
 
+      this.slugIndex = buildSlugIndex(
+        this.options.map((option) => option.value),
+      );
+
       this.setState({ filteredOptions: this.options });
-      this.focusSelect();
+
+      const deepLinkedOption = this.findDeepLinkedOption();
+      if (deepLinkedOption) {
+        this.selectRef.current?.setValue(deepLinkedOption, 'select-option');
+      } else {
+        this.focusSelect();
+      }
     });
+  }
+
+  private findDeepLinkedOption(): EndpointOption | null {
+    const slug = readSlugFromUrl();
+    if (slug === null) {
+      return null;
+    }
+    const route = this.slugIndex?.routeBySlug.get(slug);
+    if (route === undefined) {
+      return null;
+    }
+    return this.options.find((option) => option.value === route) ?? null;
   }
 
   componentDidUpdate(_: any, prevState: State) {
@@ -127,6 +156,10 @@ export default class EndpointSelection extends React.Component<Props, State> {
 
   handleChange = (value: OnChangeValue<EndpointOption, false>) => {
     if (value) {
+      const slug = this.slugIndex?.slugByRoute.get(value.value);
+      if (slug !== undefined) {
+        writeSlugToUrl(slug);
+      }
       appEvents.emit(APP_EVENTS.ENDPOINT_SELECTED, value.value);
     }
   };
