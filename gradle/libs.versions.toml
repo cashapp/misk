@@ -4,7 +4,7 @@ aws1 = "1.12.797"
 aws2 = "2.44.3"
 bouncyCastle = "1.85"
 bucket4j = "8.16.1"
-datadog = "1.63.0"
+datadog = "1.65.1"
 dependencyAnalysisPlugin = "3.6.1"
 detekt = "1.23.8"
 docker = "3.7.1"
@@ -114,7 +114,7 @@ guiceTestLib = { module = "com.google.inject.extensions:guice-testlib" }
 hash4j = { module = "com.dynatrace.hash4j:hash4j", version = "0.26.0" }
 hibernate5Core = { module = "org.hibernate:hibernate-core", version = "5.6.15.Final" }
 hibernateJpaApi = { module = "javax.persistence:javax.persistence-api", version = "2.2" }
-hikariCp = { module = "com.zaxxer:HikariCP", version = "6.2.1" }
+hikariCp = { module = "com.zaxxer:HikariCP", version = "7.1.0" }
 hopliteCore = { module = "com.sksamuel.hoplite:hoplite-core", version.ref = "hoplite" }
 hopliteHocon = { module = "com.sksamuel.hoplite:hoplite-hocon", version.ref = "hoplite" }
 hopliteJson = { module = "com.sksamuel.hoplite:hoplite-json", version.ref = "hoplite" }
