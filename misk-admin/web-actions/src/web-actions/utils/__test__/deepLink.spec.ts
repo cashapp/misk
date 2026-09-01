@@ -1,5 +1,9 @@
 import { MiskRoute } from '@web-actions/api/responseTypes';
-import { buildSlugIndex, writeSlugToUrl } from '@web-actions/utils/deepLink';
+import {
+  buildSlugIndex,
+  onSlugChange,
+  writeSlugToUrl,
+} from '@web-actions/utils/deepLink';
 
 function route(
   actionName: string,
@@ -102,5 +106,67 @@ describe('writeSlugToUrl', () => {
       '',
       '#MyAction:GET',
     );
+  });
+});
+
+describe('onSlugChange', () => {
+  afterEach(() => {
+    delete (globalThis as Record<string, unknown>).window;
+  });
+
+  function fakeWindow() {
+    const listeners = new Map<string, Set<() => void>>();
+    const win: any = {
+      location: { href: 'http://localhost/_admin/web-actions/', hash: '' },
+      addEventListener: (type: string, fn: () => void) => {
+        if (!listeners.has(type)) {
+          listeners.set(type, new Set());
+        }
+        listeners.get(type)!.add(fn);
+      },
+      removeEventListener: (type: string, fn: () => void) => {
+        listeners.get(type)?.delete(fn);
+      },
+      dispatch: (type: string) => {
+        listeners.get(type)?.forEach((fn) => fn());
+      },
+      count: (type: string) => listeners.get(type)?.size ?? 0,
+    };
+    win.top = win;
+    return win;
+  }
+
+  it('invokes the listener on hashchange and stops after cleanup', () => {
+    const win = fakeWindow();
+    (globalThis as Record<string, unknown>).window = win;
+
+    const listener = jest.fn();
+    const cleanup = onSlugChange(listener);
+
+    win.dispatch('hashchange');
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    cleanup();
+    win.dispatch('hashchange');
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(win.count('pagehide')).toBe(0);
+    expect(win.count('pageshow')).toBe(0);
+  });
+
+  it('detaches on pagehide and reattaches on pageshow', () => {
+    const win = fakeWindow();
+    (globalThis as Record<string, unknown>).window = win;
+
+    const listener = jest.fn();
+    onSlugChange(listener);
+
+    win.dispatch('pagehide');
+    win.dispatch('hashchange');
+    expect(listener).not.toHaveBeenCalled();
+    expect(win.count('hashchange')).toBe(0);
+
+    win.dispatch('pageshow');
+    win.dispatch('hashchange');
+    expect(listener).toHaveBeenCalledTimes(1);
   });
 });

@@ -86,11 +86,24 @@ function addressBarWindow(): Window {
  * the address bar in place. Returns a cleanup function. Note that
  * `history.replaceState` does not fire this event, so writes from
  * `writeSlugToUrl` never trigger it.
+ *
+ * The listener may be attached to the top window while the app lives in an
+ * iframe. The dashboard (Turbo) can replace the iframe without unmounting
+ * React, so `pagehide` also detaches the listener to avoid leaking it on the
+ * top window, and `pageshow` reattaches it on back/forward cache restores.
  */
 export function onSlugChange(listener: () => void): () => void {
   const target = addressBarWindow();
-  target.addEventListener('hashchange', listener);
-  return () => target.removeEventListener('hashchange', listener);
+  const attach = () => target.addEventListener('hashchange', listener);
+  const detach = () => target.removeEventListener('hashchange', listener);
+  attach();
+  window.addEventListener('pagehide', detach);
+  window.addEventListener('pageshow', attach);
+  return () => {
+    detach();
+    window.removeEventListener('pagehide', detach);
+    window.removeEventListener('pageshow', attach);
+  };
 }
 
 export function readSlugFromUrl(): string | null {
