@@ -24,7 +24,7 @@ import wisp.deployment.TESTING
  * Verifies that jOOQ's render mapping uses the pool-rewritten database name (from [DataSourceService.config]) rather
  * than the original [DataSourceConfig.database].
  *
- * When a [misk.jdbc.DatabasePool] renames the database (e.g. `my_db` → `my_db__20260827__1`), jOOQ's [MappedSchema]
+ * When a [misk.jdbc.DatabasePool] renames the database (e.g. `my_db` → `my_db__20260827210452__1`), jOOQ's [MappedSchema]
  * output must reflect the renamed database so that generated SQL references the correct schema. Otherwise jOOQ queries
  * hit the original (stale) database while [misk.jdbc.JdbcTestFixture] truncates the pool-allocated one, causing state
  * to leak between tests.
@@ -46,7 +46,7 @@ class JooqRenderMappingWithDatabasePoolTest {
     assertThat(actualDatabase)
       .describedAs("The database pool should have rewritten the database name")
       .isNotEqualTo("misk_jooq_pool_test")
-      .containsPattern("misk_jooq_pool_test__[0-9]{8}__[0-9]+")
+      .containsPattern("misk_jooq_pool_test__[0-9]{14}__[0-9]+")
 
     val configuration = configurationFactory.getConfiguration(JooqTransacter.TransacterOptions())
 
