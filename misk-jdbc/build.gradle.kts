@@ -24,7 +24,7 @@ dependencies {
 
   implementation(libs.dockerTransportHttpClient)
   implementation(libs.dockerTransportCore)
-  implementation(libs.hikariCp)
+  api(libs.hikariCp)
   implementation(libs.loggingApi)
   implementation(libs.mysql)
   implementation(project(":misk-backoff"))

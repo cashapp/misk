@@ -147,6 +147,7 @@ public class misk/hibernate/HibernateModule : misk/inject/KAbstractModule {
 	public final fun getReaderConfig ()Lmisk/jdbc/DataSourceConfig;
 	protected fun getReaderTransacterProvider ()Lcom/google/inject/Provider;
 	protected fun getTransacterProvider ()Lcom/google/inject/Provider;
+	public final fun withMetricsTrackerFactory (Lcom/zaxxer/hikari/metrics/MetricsTrackerFactory;)Lmisk/hibernate/HibernateModule;
 }
 
 public final class misk/hibernate/Id : java/io/Serializable, java/lang/Comparable {
