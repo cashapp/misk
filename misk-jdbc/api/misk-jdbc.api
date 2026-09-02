@@ -352,6 +352,7 @@ public final class misk/jdbc/DataSourceService : com/google/common/util/concurre
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;Ljava/util/Set;Lmisk/jdbc/DatabasePool;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;Ljava/util/Set;Lmisk/jdbc/DatabasePool;Lio/prometheus/client/CollectorRegistry;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;Ljava/util/Set;Lmisk/jdbc/DatabasePool;Lio/prometheus/client/CollectorRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;Ljava/util/Set;Lmisk/jdbc/DatabasePool;Lio/prometheus/client/CollectorRegistry;Lcom/zaxxer/hikari/metrics/MetricsTrackerFactory;)V
 	public fun config ()Lmisk/jdbc/DataSourceConfig;
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Ljavax/sql/DataSource;
@@ -463,6 +464,7 @@ public final class misk/jdbc/JdbcModule : misk/inject/KAbstractModule {
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Z)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ZZ)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ZZLcom/zaxxer/hikari/metrics/MetricsTrackerFactory;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Z)V

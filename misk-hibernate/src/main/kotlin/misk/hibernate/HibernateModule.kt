@@ -2,6 +2,7 @@ package misk.hibernate
 
 import com.google.inject.Injector
 import com.google.inject.Provider
+import com.zaxxer.hikari.metrics.MetricsTrackerFactory
 import jakarta.inject.Inject
 import java.time.Clock
 import javax.persistence.OptimisticLockException
@@ -66,6 +67,8 @@ constructor(
   }
 
   val config = config.withDefaults()
+  private var metricsTrackerFactory: MetricsTrackerFactory? = null
+
   val readerConfig = readerConfig?.withDefaults()
 
   constructor(
@@ -134,6 +137,10 @@ constructor(
     jdbcModuleAlreadySetup = jdbcModuleAlreadySetup,
   )
 
+  fun withMetricsTrackerFactory(metricsTrackerFactory: MetricsTrackerFactory): HibernateModule = apply {
+    this.metricsTrackerFactory = metricsTrackerFactory
+  }
+
   override fun configure() {
     if (readerQualifier != null) {
       check(readerConfig != null) { "Reader not configured for datasource $readerQualifier" }
@@ -149,6 +156,7 @@ constructor(
           databasePool = databasePool,
           installHealthCheck = installHealthChecks,
           installSchemaMigrator = installSchemaMigrator,
+          metricsTrackerFactory = metricsTrackerFactory,
         )
       )
     }
