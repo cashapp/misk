@@ -5,6 +5,7 @@ import {
   JsonValidationError,
 } from '@web-actions/services/ApiService';
 import { APP_EVENTS, appEvents } from '@web-actions/events/appEvents';
+import { saveRequestBody } from '@web-actions/storage/RequestBodyStore';
 import { Header } from 'src/viewState';
 
 export interface SubmitRequestState {
@@ -29,13 +30,17 @@ export function useSubmitRequest(
 
     setLoading(true);
     try {
+      const requestBody = getRequestBody();
       const response = await ApiService.submitRequest({
         route: selectedCallable,
         path: path,
-        requestBody: getRequestBody(),
+        requestBody: requestBody,
         headers: headers,
       });
 
+      if (selectedCallable.httpMethod !== 'GET') {
+        saveRequestBody(selectedCallable, requestBody);
+      }
       setResponse(response);
     } catch (e) {
       if (e instanceof JsonValidationError) {
