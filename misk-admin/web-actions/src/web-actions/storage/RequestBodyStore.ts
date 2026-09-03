@@ -1,7 +1,7 @@
 import { MiskRoute } from '@web-actions/api/responseTypes';
 
 const KEY_PREFIX = 'web-actions.lastBody.v1';
-const MAX_BODY_LENGTH = 100 * 1024;
+const MAX_BODY_LENGTH = 100 * 1024; // 100 KiB
 
 function keyFor(route: MiskRoute): string {
   return `${KEY_PREFIX}::${route.httpMethod} ${route.path}`;
