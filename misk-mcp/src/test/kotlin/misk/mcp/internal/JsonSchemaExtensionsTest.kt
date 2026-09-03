@@ -122,8 +122,7 @@ internal class JsonSchemaExtensionsTest {
   // Test enums
   @Serializable
   enum class Status {
-    @Description("Active status")
-    ACTIVE,
+    @Description("Active status") ACTIVE,
     INACTIVE,
     PENDING,
     ARCHIVED,
@@ -634,7 +633,8 @@ internal class JsonSchemaExtensionsTest {
     assertEquals(setOf("ACTIVE", "INACTIVE", "PENDING", "ARCHIVED"), statusValues)
 
     // Verify ACTIVE has description
-    val activeOption = statusOneOf.first { ((it as JsonObject)["const"] as JsonPrimitive).content == "ACTIVE" } as JsonObject
+    val activeOption =
+      statusOneOf.first { ((it as JsonObject)["const"] as JsonPrimitive).content == "ACTIVE" } as JsonObject
     assertEquals(JsonPrimitive("Active status"), activeOption["description"])
 
     // Verify priority enum field

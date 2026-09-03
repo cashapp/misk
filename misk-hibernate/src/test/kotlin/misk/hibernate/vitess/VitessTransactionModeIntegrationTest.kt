@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 /**
- * Test suite that verifies that cross-shard transactions (reads and writes) are rejected in SINGLE
- * transaction mode and can be opted in via [allowCrossShardTransactions].
+ * Test suite that verifies that cross-shard transactions (reads and writes) are rejected in SINGLE transaction mode and
+ * can be opted in via [allowCrossShardTransactions].
  */
 @MiskTest(startService = true)
 class VitessTransactionModeIntegrationTest {
@@ -40,8 +40,7 @@ class VitessTransactionModeIntegrationTest {
       port = 29303,
     )
 
-  @MiskTestModule
-  val module = MoviesTestModule(type = DataSourceType.VITESS_MYSQL, singleTransactionMode = true)
+  @MiskTestModule val module = MoviesTestModule(type = DataSourceType.VITESS_MYSQL, singleTransactionMode = true)
 
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
@@ -56,14 +55,11 @@ class VitessTransactionModeIntegrationTest {
     val shard2 = Shard(keyspace, "80-")
 
     // Insert movies one at a time in separate transactions (each is single-shard, so succeeds).
-    val movieIds = (1..10).map { i ->
-      transacter.transaction { session -> session.save(DbMovie("Movie $i")) }
-    }
+    val movieIds = (1..10).map { i -> transacter.transaction { session -> session.save(DbMovie("Movie $i")) } }
 
     // Partition IDs by shard and pick one from each.
     val byShard = movieIds.groupBy { id -> if (shard1.contains(Shard.Key.hash(id.id))) shard1 else shard2 }
-    assertThat(byShard.keys).hasSize(2)
-      .withFailMessage("All movie IDs landed on the same shard: $movieIds")
+    assertThat(byShard.keys).hasSize(2).withFailMessage("All movie IDs landed on the same shard: $movieIds")
     crossShardIdA = byShard[shard1]!!.first()
     crossShardIdB = byShard[shard2]!!.first()
   }
@@ -77,9 +73,7 @@ class VitessTransactionModeIntegrationTest {
   @Test
   fun `cross-shard read succeeds in SINGLE transaction mode`() {
     // Vitess v23+ allows read-only multi-shard transactions in SINGLE mode (vitessio/vitess#18173).
-    val movies = transacter.transaction { session ->
-      queryFactory.newQuery<MovieQuery>().allowScatter().list(session)
-    }
+    val movies = transacter.transaction { session -> queryFactory.newQuery<MovieQuery>().allowScatter().list(session) }
     assertThat(movies).isNotEmpty()
   }
 
@@ -102,14 +96,15 @@ class VitessTransactionModeIntegrationTest {
   @Test
   fun `multi-shard write fails with SINGLE transaction mode`() {
     // Writing to multiple shards in the same transaction is rejected by SINGLE mode.
-    val exception = assertThrows<Exception> {
-      transacter.transaction { session ->
-        val movieA = session.load<DbMovie>(crossShardIdA)
-        val movieB = session.load<DbMovie>(crossShardIdB)
-        movieA.name = "Updated A"
-        movieB.name = "Updated B"
+    val exception =
+      assertThrows<Exception> {
+        transacter.transaction { session ->
+          val movieA = session.load<DbMovie>(crossShardIdA)
+          val movieB = session.load<DbMovie>(crossShardIdB)
+          movieA.name = "Updated A"
+          movieB.name = "Updated B"
+        }
       }
-    }
 
     assertThat(generateSequence(exception as Throwable) { it.cause }.any { it is CrossShardTransactionException })
       .isTrue()
@@ -142,14 +137,15 @@ class VitessTransactionModeIntegrationTest {
 
     // Second: without opt-in, a cross-shard write should still fail.
     // If this passes (doesn't throw), the session variable leaked through the connection pool.
-    val exception = assertThrows<Exception> {
-      transacter.transaction { session ->
-        val movieA = session.load<DbMovie>(crossShardIdA)
-        val movieB = session.load<DbMovie>(crossShardIdB)
-        movieA.name = "Should Fail A"
-        movieB.name = "Should Fail B"
+    val exception =
+      assertThrows<Exception> {
+        transacter.transaction { session ->
+          val movieA = session.load<DbMovie>(crossShardIdA)
+          val movieB = session.load<DbMovie>(crossShardIdB)
+          movieA.name = "Should Fail A"
+          movieB.name = "Should Fail B"
+        }
       }
-    }
 
     assertThat(generateSequence(exception as Throwable) { it.cause }.any { it is CrossShardTransactionException })
       .isTrue()
