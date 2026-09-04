@@ -133,6 +133,19 @@ public final class misk/database/TidbCluster {
 	public final fun openConnection ()Ljava/sql/Connection;
 }
 
+public final class misk/jdbc/AdminDatabaseEntry {
+	public fun <init> (Ljava/lang/String;Ljavax/sql/DataSource;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljavax/sql/DataSource;
+	public final fun copy (Ljava/lang/String;Ljavax/sql/DataSource;)Lmisk/jdbc/AdminDatabaseEntry;
+	public static synthetic fun copy$default (Lmisk/jdbc/AdminDatabaseEntry;Ljava/lang/String;Ljavax/sql/DataSource;ILjava/lang/Object;)Lmisk/jdbc/AdminDatabaseEntry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDataSource ()Ljavax/sql/DataSource;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/jdbc/Check : java/lang/Enum {
 	public static final field COWRITE Lmisk/jdbc/Check;
 	public static final field TABLE_SCAN Lmisk/jdbc/Check;
