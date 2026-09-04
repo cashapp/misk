@@ -1,0 +1,339 @@
+public final class misk/mcp/client/DefaultMcpClientManager : misk/mcp/client/McpClientManager {
+	public fun <init> ()V
+	public fun closeAll (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun createClient (Ljava/lang/String;Lmisk/mcp/client/config/McpServerConfig;)Lmisk/mcp/client/McpClient;
+	public fun getAllClients ()Ljava/util/Map;
+	public fun reconnect (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class misk/mcp/client/McpClient {
+	public abstract fun callTool (Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getPrompt (Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun listPrompts (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun listResources (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun listTools (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun ping (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun readResource (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/client/McpClient$DefaultImpls {
+	public static synthetic fun callTool$default (Lmisk/mcp/client/McpClient;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun getPrompt$default (Lmisk/mcp/client/McpClient;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface class misk/mcp/client/McpClientManager {
+	public abstract fun closeAll (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun createClient (Ljava/lang/String;Lmisk/mcp/client/config/McpServerConfig;)Lmisk/mcp/client/McpClient;
+	public abstract fun getAllClients ()Ljava/util/Map;
+	public abstract fun reconnect (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/client/McpClientModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/mcp/client/McpClientModule$Companion;
+	public synthetic fun <init> (Lmisk/mcp/client/config/McpClientConfig;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun create (Lmisk/mcp/client/config/McpClientConfig;)Lmisk/mcp/client/McpClientModule;
+	public final fun provideClientInstances (Lmisk/mcp/client/McpClientManager;)Ljava/util/Map;
+}
+
+public final class misk/mcp/client/McpClientModule$Companion {
+	public final fun create (Lmisk/mcp/client/config/McpClientConfig;)Lmisk/mcp/client/McpClientModule;
+}
+
+public final class misk/mcp/client/McpClientProvider {
+	public fun <init> (Ljava/util/Map;)V
+	public final fun provideDatabaseClient ()Lmisk/mcp/client/McpClient;
+	public final fun provideWeatherClient ()Lmisk/mcp/client/McpClient;
+}
+
+public final class misk/mcp/client/McpClientServiceModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/mcp/client/McpClientServiceModule$Companion;
+	public fun <init> (Ljava/lang/Class;)V
+}
+
+public final class misk/mcp/client/McpClientServiceModule$Companion {
+}
+
+public final class misk/mcp/client/McpConnectionException : java/lang/Exception {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/mcp/client/McpPromptArgument {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Z)Lmisk/mcp/client/McpPromptArgument;
+	public static synthetic fun copy$default (Lmisk/mcp/client/McpPromptArgument;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lmisk/mcp/client/McpPromptArgument;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getRequired ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/client/McpPromptInfo {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/mcp/client/McpPromptInfo;
+	public static synthetic fun copy$default (Lmisk/mcp/client/McpPromptInfo;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/mcp/client/McpPromptInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getArguments ()Ljava/util/List;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/client/McpPromptMessage {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lmisk/mcp/client/McpPromptMessage;
+	public static synthetic fun copy$default (Lmisk/mcp/client/McpPromptMessage;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/mcp/client/McpPromptMessage;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContent ()Ljava/lang/String;
+	public final fun getRole ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class misk/mcp/client/McpPromptResult {
+}
+
+public final class misk/mcp/client/McpPromptResult$Error : misk/mcp/client/McpPromptResult {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Integer;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Integer;)Lmisk/mcp/client/McpPromptResult$Error;
+	public static synthetic fun copy$default (Lmisk/mcp/client/McpPromptResult$Error;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)Lmisk/mcp/client/McpPromptResult$Error;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()Ljava/lang/Integer;
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/client/McpPromptResult$Success : misk/mcp/client/McpPromptResult {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lmisk/mcp/client/McpPromptResult$Success;
+	public static synthetic fun copy$default (Lmisk/mcp/client/McpPromptResult$Success;Ljava/util/List;ILjava/lang/Object;)Lmisk/mcp/client/McpPromptResult$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessages ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/client/McpResourceInfo {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/mcp/client/McpResourceInfo;
+	public static synthetic fun copy$default (Lmisk/mcp/client/McpResourceInfo;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/mcp/client/McpResourceInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getMimeType ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getUri ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class misk/mcp/client/McpResourceResult {
+}
+
+public final class misk/mcp/client/McpResourceResult$Error : misk/mcp/client/McpResourceResult {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Integer;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Integer;)Lmisk/mcp/client/McpResourceResult$Error;
+	public static synthetic fun copy$default (Lmisk/mcp/client/McpResourceResult$Error;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)Lmisk/mcp/client/McpResourceResult$Error;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()Ljava/lang/Integer;
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/client/McpResourceResult$Success : misk/mcp/client/McpResourceResult {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lmisk/mcp/client/McpResourceResult$Success;
+	public static synthetic fun copy$default (Lmisk/mcp/client/McpResourceResult$Success;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/mcp/client/McpResourceResult$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContent ()Ljava/lang/String;
+	public final fun getMimeType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/client/McpServerException : java/lang/Exception {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Integer;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getCode ()Ljava/lang/Integer;
+}
+
+public final class misk/mcp/client/McpTimeoutException : java/lang/Exception {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/mcp/client/McpToolInfo {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)Lmisk/mcp/client/McpToolInfo;
+	public static synthetic fun copy$default (Lmisk/mcp/client/McpToolInfo;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ILjava/lang/Object;)Lmisk/mcp/client/McpToolInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getInputSchema ()Lkotlinx/serialization/json/JsonElement;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class misk/mcp/client/McpToolResult {
+}
+
+public final class misk/mcp/client/McpToolResult$Error : misk/mcp/client/McpToolResult {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Integer;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Integer;)Lmisk/mcp/client/McpToolResult$Error;
+	public static synthetic fun copy$default (Lmisk/mcp/client/McpToolResult$Error;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)Lmisk/mcp/client/McpToolResult$Error;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()Ljava/lang/Integer;
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/client/McpToolResult$Success : misk/mcp/client/McpToolResult {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/mcp/client/McpToolResult$Success;
+	public static synthetic fun copy$default (Lmisk/mcp/client/McpToolResult$Success;Ljava/lang/String;ILjava/lang/Object;)Lmisk/mcp/client/McpToolResult$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContent ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/client/TestMcpServer {
+	public fun <init> ()V
+	public final fun handleRequest (Lkotlinx/serialization/json/JsonObject;)Lkotlinx/serialization/json/JsonObject;
+	public final fun registerPrompt (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun registerResource (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun registerResource$default (Lmisk/mcp/client/TestMcpServer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun registerTool (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class misk/mcp/client/config/McpClientConfig : misk/config/Config {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;)Lmisk/mcp/client/config/McpClientConfig;
+	public static synthetic fun copy$default (Lmisk/mcp/client/config/McpClientConfig;Ljava/util/Map;ILjava/lang/Object;)Lmisk/mcp/client/config/McpClientConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getServers ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/client/config/McpRetryPolicy {
+	public fun <init> ()V
+	public fun <init> (I)V
+	public fun <init> (IJ)V
+	public fun <init> (IJZ)V
+	public synthetic fun <init> (IJZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()J
+	public final fun component3 ()Z
+	public final fun copy (IJZ)Lmisk/mcp/client/config/McpRetryPolicy;
+	public static synthetic fun copy$default (Lmisk/mcp/client/config/McpRetryPolicy;IJZILjava/lang/Object;)Lmisk/mcp/client/config/McpRetryPolicy;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackoff_ms ()J
+	public final fun getExponential_backoff ()Z
+	public final fun getMax_attempts ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/client/config/McpServerConfig {
+	public fun <init> (Lmisk/mcp/client/config/McpTransportConfig;)V
+	public fun <init> (Lmisk/mcp/client/config/McpTransportConfig;J)V
+	public fun <init> (Lmisk/mcp/client/config/McpTransportConfig;JLmisk/mcp/client/config/McpRetryPolicy;)V
+	public synthetic fun <init> (Lmisk/mcp/client/config/McpTransportConfig;JLmisk/mcp/client/config/McpRetryPolicy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lmisk/mcp/client/config/McpTransportConfig;
+	public final fun component2 ()J
+	public final fun component3 ()Lmisk/mcp/client/config/McpRetryPolicy;
+	public final fun copy (Lmisk/mcp/client/config/McpTransportConfig;JLmisk/mcp/client/config/McpRetryPolicy;)Lmisk/mcp/client/config/McpServerConfig;
+	public static synthetic fun copy$default (Lmisk/mcp/client/config/McpServerConfig;Lmisk/mcp/client/config/McpTransportConfig;JLmisk/mcp/client/config/McpRetryPolicy;ILjava/lang/Object;)Lmisk/mcp/client/config/McpServerConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRetry_policy ()Lmisk/mcp/client/config/McpRetryPolicy;
+	public final fun getTimeout_ms ()J
+	public final fun getTransport ()Lmisk/mcp/client/config/McpTransportConfig;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/client/config/McpTransportConfig {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lmisk/mcp/client/config/McpTransportConfig;
+	public static synthetic fun copy$default (Lmisk/mcp/client/config/McpTransportConfig;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Lmisk/mcp/client/config/McpTransportConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHeaders ()Ljava/util/Map;
+	public final fun getType ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/client/internal/HttpMcpClient : misk/mcp/client/McpClient {
+	public fun <init> (Ljava/lang/String;Lmisk/mcp/client/config/McpServerConfig;)V
+	public fun callTool (Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getPrompt (Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun listPrompts (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun listResources (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun listTools (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun ping (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun readResource (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
