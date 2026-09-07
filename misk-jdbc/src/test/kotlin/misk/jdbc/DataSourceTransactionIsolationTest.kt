@@ -1,6 +1,9 @@
 package misk.jdbc
 
 import com.google.inject.util.Modules
+import com.zaxxer.hikari.metrics.IMetricsTracker
+import com.zaxxer.hikari.metrics.MetricsTrackerFactory
+import com.zaxxer.hikari.metrics.PoolStats
 import jakarta.inject.Inject
 import java.sql.Connection
 import misk.MiskTestingServiceModule
@@ -30,6 +33,11 @@ class DataSourceTransactionIsolationTest {
       assertThat(connection.transactionIsolation).isEqualTo(Connection.TRANSACTION_READ_COMMITTED)
       assertThat(serverSessionIsolation(connection)).isEqualTo("READ-COMMITTED")
     }
+  }
+
+  @Test
+  fun `custom metrics tracker factory instruments the connection pool`() {
+    assertThat(module.metricsTrackerFactory.poolNames).contains("Movies")
   }
 
   @Test
@@ -109,19 +117,41 @@ class DataSourceTransactionIsolationTest {
   ) : Config
 
   class TransactionIsolationTestModule(private val appName: String) : KAbstractModule() {
+    val metricsTrackerFactory = RecordingMetricsTrackerFactory()
+
     override fun configure() {
       install(Modules.override(MiskTestingServiceModule()).with(FakeClockModule(), MockTracingBackendModule()))
       install(DeploymentModule(TESTING))
       val config = MiskConfig.load<RootConfig>(appName, TESTING)
 
       install(JdbcTestingModule(Movies::class))
-      install(JdbcModule(Movies::class, config.read_committed_data_source))
+      install(
+        JdbcModule(
+          qualifier = Movies::class,
+          config = config.read_committed_data_source,
+          readerQualifier = null,
+          readerConfig = null,
+          databasePool = RealDatabasePool,
+          installHealthCheck = true,
+          installSchemaMigrator = true,
+          metricsTrackerFactory = metricsTrackerFactory,
+        )
+      )
 
       install(JdbcTestingModule(Movies2::class))
       install(JdbcModule(Movies2::class, config.default_isolation_data_source))
 
       install(JdbcTestingModule(Movies3::class))
       install(JdbcModule(Movies3::class, config.per_transaction_data_source))
+    }
+  }
+
+  class RecordingMetricsTrackerFactory : MetricsTrackerFactory {
+    val poolNames = mutableListOf<String>()
+
+    override fun create(poolName: String, poolStats: PoolStats): IMetricsTracker {
+      poolNames += poolName
+      return object : IMetricsTracker {}
     }
   }
 }

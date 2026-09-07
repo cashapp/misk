@@ -8,7 +8,6 @@ import kotlin.reflect.KClass
 import misk.ReadyService
 import misk.ServiceModule
 import misk.cloud.aws.AwsRegion
-import misk.exceptions.dynamodb.DynamoDbExceptionMapperModule
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.keyOf
@@ -98,8 +97,6 @@ constructor(
 
     bind(keyOf<DynamoDbService>(qualifier)).to(keyOf<RealDynamoDbService>(qualifier))
     install(ServiceModule<DynamoDbService>(qualifier).enhancedBy<ReadyService>())
-
-    install(DynamoDbExceptionMapperModule())
   }
 
   private fun createDynamoDbClient(

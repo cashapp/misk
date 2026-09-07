@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Provider
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import com.zaxxer.hikari.metrics.MetricsTrackerFactory
 import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
 import com.zaxxer.hikari.util.DriverDataSource
 import io.prometheus.client.CollectorRegistry
@@ -33,6 +34,20 @@ constructor(
   private val databasePool: DatabasePool,
   private val collectorRegistry: CollectorRegistry? = null,
 ) : AbstractIdleService(), DataSourceConnector, Provider<DataSource> {
+  private var metricsTrackerFactory: MetricsTrackerFactory? = null
+
+  constructor(
+    qualifier: KClass<out Annotation>,
+    baseConfig: DataSourceConfig,
+    deployment: Deployment,
+    dataSourceDecorators: Set<DataSourceDecorator>,
+    databasePool: DatabasePool,
+    collectorRegistry: CollectorRegistry?,
+    metricsTrackerFactory: MetricsTrackerFactory?,
+  ) : this(qualifier, baseConfig, deployment, dataSourceDecorators, databasePool, collectorRegistry) {
+    this.metricsTrackerFactory = metricsTrackerFactory
+  }
+
   private lateinit var config: DataSourceConfig
 
   /** The backing connection pool */
@@ -64,7 +79,7 @@ constructor(
   }
 
   private fun createDataSource(baseConfig: DataSourceConfig) {
-    // Rewrite the caller's config to get a database name like "movies__20190730__5" in tests.
+    // Rewrite the caller's config to get a database name like "movies__20190730140530__5" in tests.
     config = databasePool.takeDatabase(baseConfig)
 
     val hikariConfig = HikariConfig()
@@ -141,7 +156,9 @@ constructor(
         )
     }
 
-    collectorRegistry?.let { hikariConfig.metricsTrackerFactory = PrometheusMetricsTrackerFactory(it) }
+    (metricsTrackerFactory ?: collectorRegistry?.let(::PrometheusMetricsTrackerFactory))?.let {
+      hikariConfig.metricsTrackerFactory = it
+    }
 
     hikariDataSource = HikariDataSource(hikariConfig)
     _dataSource = decorate(hikariDataSource!!)

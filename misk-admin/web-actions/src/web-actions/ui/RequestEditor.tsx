@@ -4,10 +4,14 @@ import ace from 'ace-builds/src-noconflict/ace';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import { ContextAwareCompleter } from '@web-actions/ui/ContextAwareCompleter';
 import { Box, IconButton, Spinner } from '@chakra-ui/react';
-import { CopyIcon } from '@chakra-ui/icons';
+import { CopyIcon, RepeatIcon } from '@chakra-ui/icons';
 import { parseDocument } from '@web-actions/parsing/CommandParser';
 import { MiskFieldDefinition, MiskRoute } from '@web-actions/api/responseTypes';
 import { appEvents, APP_EVENTS } from '@web-actions/events/appEvents';
+import {
+  getSavedRequestBody,
+  removeSavedRequestBody,
+} from '@web-actions/storage/RequestBodyStore';
 
 interface Props {
   display: string;
@@ -23,6 +27,7 @@ export default class RequestEditor extends React.Component<Props, State> {
   public refEditor: HTMLElement | null = null;
   public editor: Ace.Editor | null = null;
   private errorMarkers: number[] = [];
+  private selectedRoute: MiskRoute | null = null;
 
   private readonly completer;
 
@@ -31,6 +36,7 @@ export default class RequestEditor extends React.Component<Props, State> {
     this.state = { isDisabled: false };
 
     this.copyToClipboard = this.copyToClipboard.bind(this);
+    this.resetToDefault = this.resetToDefault.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.completer = new ContextAwareCompleter();
   }
@@ -161,6 +167,7 @@ export default class RequestEditor extends React.Component<Props, State> {
   public setEndpointSelection(action: MiskRoute | undefined) {
     this.completer.setSelection(action ?? null);
     this.editor?.clearSelection();
+    this.selectedRoute = action ?? null;
 
     if (action === undefined) {
       return;
@@ -179,7 +186,8 @@ export default class RequestEditor extends React.Component<Props, State> {
         isDisabled: false,
       });
       this.editor?.setReadOnly(false);
-      const requestBody = this.generateRequestBody(action!);
+      const requestBody =
+        getSavedRequestBody(action) ?? this.generateRequestBody(action);
       this.editor?.setValue(requestBody, -1);
       const lines = this.editor?.session.getLength();
       if (lines) {
@@ -187,6 +195,16 @@ export default class RequestEditor extends React.Component<Props, State> {
       }
       this.editor?.focus();
     }
+  }
+
+  private resetToDefault() {
+    const route = this.selectedRoute;
+    if (!route || route.httpMethod === 'GET') {
+      return;
+    }
+    removeSavedRequestBody(route);
+    this.editor?.setValue(this.generateRequestBody(route), -1);
+    this.editor?.focus();
   }
 
   public focusEditor() {
@@ -276,6 +294,18 @@ export default class RequestEditor extends React.Component<Props, State> {
           onClick={this.copyToClipboard}
         >
           <CopyIcon />
+        </IconButton>
+        <IconButton
+          aria-label="Reset to default request body"
+          title="Reset to default request body"
+          zIndex="100"
+          position="absolute"
+          top="16"
+          right="4"
+          colorScheme={'blackAlpha'}
+          onClick={this.resetToDefault}
+        >
+          <RepeatIcon />
         </IconButton>
         <Box
           width="100%"
