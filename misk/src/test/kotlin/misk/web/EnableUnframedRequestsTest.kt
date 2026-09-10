@@ -32,19 +32,15 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 /**
- * Test that @[EnableUnframedRequests] enables protobuf POST on gRPC endpoints,
- * for both @[WireRpc] and @[Grpc] actions.
+ * Test that @[EnableUnframedRequests] enables protobuf POST on gRPC endpoints, for both @[WireRpc] and @[Grpc] actions.
  */
 @MiskTest(startService = true)
 internal class EnableUnframedRequestsTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
-  @Inject
-  lateinit var moshi: Moshi
+  @Inject lateinit var moshi: Moshi
 
-  @Inject
-  lateinit var jettyService: JettyService
+  @Inject lateinit var jettyService: JettyService
 
   private lateinit var httpClient: OkHttpClient
 
@@ -56,72 +52,52 @@ internal class EnableUnframedRequestsTest {
 
   @Test
   fun `protobuf POST to unframed grpc endpoint`() {
-    val requestBody = Shipment.Builder()
-      .shipment_token("abc")
-      .build()
-    val expectedResponseBody = Warehouse.Builder()
-      .warehouse_token("abc")
-      .build()
+    val requestBody = Shipment.Builder().shipment_token("abc").build()
+    val expectedResponseBody = Warehouse.Builder().warehouse_token("abc").build()
 
-    val request = Request.Builder()
-      .post(
-        requestBody.encode().toRequestBody(
-          MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE
-        )
-      )
-      .url(serverUrlBuilder().encodedPath("/test/UnframedGetDestinationWarehouse").build())
-      .build()
+    val request =
+      Request.Builder()
+        .post(requestBody.encode().toRequestBody(MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE))
+        .url(serverUrlBuilder().encodedPath("/test/UnframedGetDestinationWarehouse").build())
+        .build()
 
     val response = httpClient.newCall(request).execute()
     response.use {
       assertThat(response.code).isEqualTo(200)
       val responseBody = Warehouse.ADAPTER.decode(response.body!!.source())
       assertThat(responseBody).isEqualTo(expectedResponseBody)
-      assertThat(response.body!!.contentType())
-        .isEqualTo(MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE)
+      assertThat(response.body!!.contentType()).isEqualTo(MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE)
     }
   }
 
   @Test
   fun `json POST to unframed grpc endpoint`() {
-    val requestBody = Shipment.Builder()
-      .shipment_token("abc")
-      .build()
-    val expectedResponseBody = Warehouse.Builder()
-      .warehouse_token("abc")
-      .build()
+    val requestBody = Shipment.Builder().shipment_token("abc").build()
+    val expectedResponseBody = Warehouse.Builder().warehouse_token("abc").build()
 
-    val request = Request.Builder()
-      .post(
-        moshi.adapter(Shipment::class.java).toJson(requestBody)
-          .toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
-      )
-      .url(serverUrlBuilder().encodedPath("/test/UnframedGetDestinationWarehouse").build())
-      .build()
+    val request =
+      Request.Builder()
+        .post(
+          moshi.adapter(Shipment::class.java).toJson(requestBody).toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
+        )
+        .url(serverUrlBuilder().encodedPath("/test/UnframedGetDestinationWarehouse").build())
+        .build()
 
     val response = httpClient.newCall(request).execute()
     response.use {
       assertThat(response.code).isEqualTo(200)
       val responseBody = moshi.adapter(Warehouse::class.java).fromJson(response.body!!.source())
       assertThat(responseBody).isEqualTo(expectedResponseBody)
-      assertThat(response.body!!.contentType().toString())
-        .isEqualTo("application/json;charset=utf-8")
+      assertThat(response.body!!.contentType().toString()).isEqualTo("application/json;charset=utf-8")
     }
   }
 
   @Test
   fun `grpc to unframed grpc endpoint`() {
-    val requestBody = Shipment.Builder()
-      .shipment_token("abc")
-      .build()
-    val expectedResponseBody = Warehouse.Builder()
-      .warehouse_token("abc")
-      .build()
+    val requestBody = Shipment.Builder().shipment_token("abc").build()
+    val expectedResponseBody = Warehouse.Builder().warehouse_token("abc").build()
 
-    val grpcClient = GrpcClient.Builder()
-      .baseUrl(jettyService.httpsServerUrl!!)
-      .client(httpClient)
-      .build()
+    val grpcClient = GrpcClient.Builder().baseUrl(jettyService.httpsServerUrl!!).client(httpClient).build()
     val shippingClient = UnframedShippingClient(grpcClient)
 
     val responseBody = shippingClient.GetDestinationWarehouse().executeBlocking(requestBody)
@@ -132,12 +108,11 @@ internal class EnableUnframedRequestsTest {
   fun `protobuf POST to unframed @Grpc endpoint`() {
     val payload = "hello".toByteArray().toByteString()
 
-    val request = Request.Builder()
-      .post(
-        payload.toRequestBody(MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE)
-      )
-      .url(serverUrlBuilder().encodedPath("/test/GrpcAnnotationEcho").build())
-      .build()
+    val request =
+      Request.Builder()
+        .post(payload.toRequestBody(MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE))
+        .url(serverUrlBuilder().encodedPath("/test/GrpcAnnotationEcho").build())
+        .build()
 
     val response = httpClient.newCall(request).execute()
     response.use {
@@ -149,26 +124,19 @@ internal class EnableUnframedRequestsTest {
 
   @Test
   fun `json POST to unframed @Grpc endpoint`() {
-    val request = Request.Builder()
-      .post(
-        "\"aGVsbG8=\"".toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
-      )
-      .url(serverUrlBuilder().encodedPath("/test/GrpcAnnotationEcho").build())
-      .build()
+    val request =
+      Request.Builder()
+        .post("\"aGVsbG8=\"".toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE))
+        .url(serverUrlBuilder().encodedPath("/test/GrpcAnnotationEcho").build())
+        .build()
 
     val response = httpClient.newCall(request).execute()
-    response.use {
-      assertThat(response.code).isEqualTo(200)
-    }
+    response.use { assertThat(response.code).isEqualTo(200) }
   }
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(
-        WebServerTestingModule(
-          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG
-        )
-      )
+      install(WebServerTestingModule(webConfig = WebServerTestingModule.TESTING_WEB_CONFIG))
       install(MiskTestingServiceModule())
       install(WebActionModule.create<UnframedGrpcAction>())
       install(WebActionModule.create<UnframedGrpcAnnotationAction>())
@@ -193,13 +161,10 @@ internal class EnableUnframedRequestsTest {
   }
 
   @Suppress("TestFunctionName")
-  class UnframedGrpcAction @Inject constructor() :
-    UnframedShippingServer, WebAction {
+  class UnframedGrpcAction @Inject constructor() : UnframedShippingServer, WebAction {
     @Unauthenticated
     override fun GetDestinationWarehouse(shipment: Shipment): Warehouse {
-      return Warehouse.Builder()
-        .warehouse_token(shipment.shipment_token)
-        .build()
+      return Warehouse.Builder().warehouse_token(shipment.shipment_token).build()
     }
   }
 
@@ -208,7 +173,7 @@ internal class EnableUnframedRequestsTest {
     @WireRpc(
       path = "/test/UnframedGetDestinationWarehouse",
       requestAdapter = "com.squareup.protos.test.parsing.Shipment#ADAPTER",
-      responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER"
+      responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER",
     )
     @EnableUnframedRequests
     fun GetDestinationWarehouse(shipment: Shipment): Warehouse
@@ -219,15 +184,16 @@ internal class EnableUnframedRequestsTest {
     @WireRpc(
       path = "/test/UnframedGetDestinationWarehouse",
       requestAdapter = "com.squareup.protos.test.parsing.Shipment#ADAPTER",
-      responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER"
+      responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER",
     )
-    fun GetDestinationWarehouse(): GrpcCall<Shipment, Warehouse> = client.newCall(
-      GrpcMethod(
-        path = "/test/UnframedGetDestinationWarehouse",
-        requestAdapter = Shipment.ADAPTER,
-        responseAdapter = Warehouse.ADAPTER
+    fun GetDestinationWarehouse(): GrpcCall<Shipment, Warehouse> =
+      client.newCall(
+        GrpcMethod(
+          path = "/test/UnframedGetDestinationWarehouse",
+          requestAdapter = Shipment.ADAPTER,
+          responseAdapter = Warehouse.ADAPTER,
+        )
       )
-    )
   }
 
   private fun serverUrlBuilder(): HttpUrl.Builder {

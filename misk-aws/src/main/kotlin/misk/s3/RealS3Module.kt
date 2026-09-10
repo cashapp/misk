@@ -9,8 +9,8 @@ import misk.cloud.aws.AwsRegion
 import misk.inject.KAbstractModule
 
 @Deprecated(
-  message = "AWS SDK v1 S3 is deprecated. Use the AWS SDK v2 S3 module in " +
-    "misk-aws2-s3 (misk.aws2.s3.S3Module) instead."
+  message =
+    "AWS SDK v1 S3 is deprecated. Use the AWS SDK v2 S3 module in " + "misk-aws2-s3 (misk.aws2.s3.S3Module) instead."
 )
 open class RealS3Module : KAbstractModule() {
   override fun configure() {

@@ -8,7 +8,6 @@ import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Key
 import com.google.inject.Module
-import misk.web.WebConfig
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import kotlin.concurrent.thread
@@ -17,6 +16,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.logging.getLogger
+import misk.web.WebConfig
 import misk.web.jetty.JettyHealthService
 import misk.web.jetty.JettyService
 
@@ -112,9 +112,10 @@ private constructor(private val injectorGenerator: () -> Injector, commands: Lis
     // We manage JettyHealthService outside ServiceManager because it must start and
     // shutdown last to keep the container alive via liveness checks.
     // Skip instantiation entirely when Jetty is disabled to avoid registering Jetty metrics.
-    val jettyEnabled = injector.getExistingBinding(Key.get(WebConfig::class.java))
-      ?.let { !injector.getInstance<WebConfig>().disable_jetty }
-      ?: true
+    val jettyEnabled =
+      injector.getExistingBinding(Key.get(WebConfig::class.java))?.let {
+        !injector.getInstance<WebConfig>().disable_jetty
+      } ?: true
     val jettyHealthService: JettyHealthService?
     measureTimeMillis {
         log.info { "starting services" }
@@ -132,14 +133,15 @@ private constructor(private val injectorGenerator: () -> Injector, commands: Lis
         }
 
         // Start Health Service Last to ensure any dependencies are started.
-        jettyHealthService = if (jettyEnabled) {
-          injector.getInstance<JettyHealthService>().also {
-            it.startAsync()
-            it.awaitRunning()
+        jettyHealthService =
+          if (jettyEnabled) {
+            injector.getInstance<JettyHealthService>().also {
+              it.startAsync()
+              it.awaitRunning()
+            }
+          } else {
+            null
           }
-        } else {
-          null
-        }
       }
       .also { log.info { "all services started successfully in ${it.milliseconds}" } }
 

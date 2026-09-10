@@ -18,10 +18,8 @@ import misk.web.WebConfig
 private val logger = getLogger<TracingInterceptor>()
 
 /** Enables distributed tracing on all web actions, if a client has installed a tracer. */
-internal class TracingInterceptor internal constructor(
-  private val tracer: Tracer,
-  private val setSpanKindTag: Boolean,
-) : NetworkInterceptor {
+internal class TracingInterceptor
+internal constructor(private val tracer: Tracer, private val setSpanKindTag: Boolean) : NetworkInterceptor {
   @Singleton
   class Factory @Inject constructor() : NetworkInterceptor.Factory {
     @Inject(optional = true) var tracer: Tracer? = null
@@ -30,12 +28,7 @@ internal class TracingInterceptor internal constructor(
     // NOTE(nb): returning null ensures interceptor is filtered out when generating interceptors to
     // apply for a specific action. See WebActionModule for implementation details
     override fun create(action: Action) =
-      tracer?.let {
-        TracingInterceptor(
-          tracer = it,
-          setSpanKindTag = webConfig?.tracing_set_span_kind ?: true,
-        )
-      }
+      tracer?.let { TracingInterceptor(tracer = it, setSpanKindTag = webConfig?.tracing_set_span_kind ?: true) }
   }
 
   override fun intercept(chain: NetworkChain) {

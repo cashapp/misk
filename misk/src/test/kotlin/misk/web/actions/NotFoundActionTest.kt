@@ -150,7 +150,7 @@ class NotFoundActionTest {
         |Received:
         |POST /echo
         |Accept: application/weird
-        |Content-Type: text/plain;charset=UTF-8
+        |Content-Type: text/plain;charset=utf-8
         |
         |Alternative:
         |POST /echo

@@ -44,9 +44,7 @@ class SqsConfigTest {
 
   @Test
   fun `getQueueConfig returns all_queues when no per_queue_override exists`() {
-    val config = SqsConfig(
-      all_queues = SqsQueueConfig(concurrency = 10, parallelism = 5),
-    )
+    val config = SqsConfig(all_queues = SqsQueueConfig(concurrency = 10, parallelism = 5))
 
     val queueConfig = config.getQueueConfig(misk.jobqueue.QueueName("test-queue"))
 
@@ -56,12 +54,11 @@ class SqsConfigTest {
 
   @Test
   fun `getQueueConfig returns per_queue_override when it exists`() {
-    val config = SqsConfig(
-      all_queues = SqsQueueConfig(concurrency = 1, parallelism = 1),
-      per_queue_overrides = mapOf(
-        "test-queue" to SqsQueueConfig(concurrency = 20, parallelism = 10),
-      ),
-    )
+    val config =
+      SqsConfig(
+        all_queues = SqsQueueConfig(concurrency = 1, parallelism = 1),
+        per_queue_overrides = mapOf("test-queue" to SqsQueueConfig(concurrency = 20, parallelism = 10)),
+      )
 
     val queueConfig = config.getQueueConfig(misk.jobqueue.QueueName("test-queue"))
 
@@ -71,12 +68,11 @@ class SqsConfigTest {
 
   @Test
   fun `getQueueConfig inherits nullable fields from all_queues`() {
-    val config = SqsConfig(
-      all_queues = SqsQueueConfig(region = "us-west-2", wait_timeout = 20),
-      per_queue_overrides = mapOf(
-        "test-queue" to SqsQueueConfig(concurrency = 10),
-      ),
-    )
+    val config =
+      SqsConfig(
+        all_queues = SqsQueueConfig(region = "us-west-2", wait_timeout = 20),
+        per_queue_overrides = mapOf("test-queue" to SqsQueueConfig(concurrency = 10)),
+      )
 
     val queueConfig = config.getQueueConfig(misk.jobqueue.QueueName("test-queue"))
 

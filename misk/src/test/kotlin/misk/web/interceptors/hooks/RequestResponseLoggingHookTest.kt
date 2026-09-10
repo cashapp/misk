@@ -241,7 +241,7 @@ internal class RequestResponseLoggingHookTest {
         "RequestLoggingActionWithHeaders principal=unknown time=100.0 ms code=200 " +
           "request=hello " +
           "requestHeaders={accept=[*/*], accept-encoding=[gzip], connection=[keep-alive], " +
-          "content-length=[5], content-type=[application/json;charset=UTF-8]"
+          "content-length=[5], content-type=[application/json;charset=utf-8]"
       )
     assertThat(messages[0]).contains("response=echo: hello responseHeaders={}")
     assertThat(messages[0]).doesNotContain(headerToNotLog)
@@ -269,7 +269,7 @@ internal class RequestResponseLoggingHookTest {
       .contains(
         "RequestLoggingActionWithHeaders principal=unknown time=100.0 ms failed request=fail " +
           "requestHeaders={accept=[*/*], accept-encoding=[gzip], connection=[keep-alive], " +
-          "content-length=[4], content-type=[application/json;charset=UTF-8]"
+          "content-length=[4], content-type=[application/json;charset=utf-8]"
       )
     assertThat(messages[0]).doesNotContain(headerToNotLog)
     assertThat(messages[0]).doesNotContain(headerToNotLog.lowercase())

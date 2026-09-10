@@ -9,7 +9,6 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
-import org.eclipse.jetty.util.MultiException
 import org.eclipse.jetty.util.thread.ThreadPool
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.doThrow
@@ -29,14 +28,13 @@ class JettyServiceTest {
   }
 
   @Test
-  fun `stop suppresses MultiException when all nested exceptions are InvalidPathException`() {
+  fun `stop suppresses exception when all nested exceptions are InvalidPathException`() {
     val server = mock(Server::class.java)
-    val multi = MultiException()
-    multi.add(InvalidPathException("http-ingress.sock", "Nul character not allowed"))
-    multi.add(InvalidPathException("istio-proxy.sock", "Nul character not allowed"))
-    multi.add(InvalidPathException("grpc-ingress.sock", "Nul character not allowed"))
+    val exception = InvalidPathException("http-ingress.sock", "Nul character not allowed")
+    exception.addSuppressed(InvalidPathException("istio-proxy.sock", "Nul character not allowed"))
+    exception.addSuppressed(InvalidPathException("grpc-ingress.sock", "Nul character not allowed"))
     `when`(server.isRunning).thenReturn(true)
-    doThrow(multi).`when`(server).stop()
+    doThrow(exception).`when`(server).stop()
 
     val jettyService = jettyService(server)
 
@@ -44,11 +42,11 @@ class JettyServiceTest {
   }
 
   @Test
-  fun `stop rethrows MultiException when shutdown failures include non InvalidPathException`() {
+  fun `stop rethrows exception when shutdown failures include non InvalidPathException`() {
     val server = mock(Server::class.java)
-    val multi = MultiException()
-    multi.add(InvalidPathException("http-ingress.sock", "Nul character not allowed"))
-    multi.add(RuntimeException("unexpected shutdown failure"))
+    val multi = RuntimeException()
+    multi.addSuppressed(InvalidPathException("http-ingress.sock", "Nul character not allowed"))
+    multi.addSuppressed(RuntimeException("unexpected shutdown failure"))
     `when`(server.isRunning).thenReturn(true)
     doThrow(multi).`when`(server).stop()
 

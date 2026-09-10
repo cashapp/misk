@@ -1,7 +1,7 @@
 package misk.aws2.sqs.jobqueue.coordinated
 
-import java.util.concurrent.CompletionException
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionException
 import misk.cloud.aws.AwsAccountId
 import misk.cloud.aws.AwsRegion
 import misk.feature.Feature

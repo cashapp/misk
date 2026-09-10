@@ -5,8 +5,9 @@ package misk.jobqueue.sqs
  * is in another account, it will require an IAM policy enabling cross account access
  */
 @Deprecated(
-  message = "AWS SDK v1 SQS jobqueue is deprecated. Use misk.aws2.sqs.jobqueue.config.SqsQueueConfig " +
-    "with misk.aws2.sqs.jobqueue.SqsJobQueueModule instead."
+  message =
+    "AWS SDK v1 SQS jobqueue is deprecated. Use misk.aws2.sqs.jobqueue.config.SqsQueueConfig " +
+      "with misk.aws2.sqs.jobqueue.SqsJobQueueModule instead."
 )
 data class AwsSqsQueueConfig
 @JvmOverloads

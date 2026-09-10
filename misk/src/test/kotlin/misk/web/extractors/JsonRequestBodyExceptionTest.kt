@@ -1,6 +1,7 @@
 package misk.web.extractors
 
 import jakarta.inject.Inject
+import java.net.HttpURLConnection.HTTP_BAD_REQUEST
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -21,22 +22,19 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.net.HttpURLConnection.HTTP_BAD_REQUEST
 
 /**
- * Tests that JSON parsing exceptions (JsonDataException) are properly mapped to HTTP 400 Bad
- * Request responses via exception mappers.
+ * Tests that JSON parsing exceptions (JsonDataException) are properly mapped to HTTP 400 Bad Request responses via
+ * exception mappers.
  *
  * Note: JsonEncodingException extends IOException and is already handled by RequestBodyFeatureBinding.
  */
 @MiskTest(startService = true)
 internal class JsonRequestBodyExceptionTest {
 
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
-  @Inject
-  lateinit var jettyService: JettyService
+  @Inject lateinit var jettyService: JettyService
 
   private fun serverUrlBuilder(): HttpUrl.Builder {
     return jettyService.httpServerUrl.newBuilder()
@@ -59,10 +57,11 @@ internal class JsonRequestBodyExceptionTest {
 
   private fun postJson(path: String, body: String): okhttp3.Response {
     val httpClient = OkHttpClient()
-    val request = Request.Builder()
-      .post(body.toRequestBody("application/json".toMediaType()))
-      .url(serverUrlBuilder().encodedPath(path).build())
-      .build()
+    val request =
+      Request.Builder()
+        .post(body.toRequestBody("application/json".toMediaType()))
+        .url(serverUrlBuilder().encodedPath(path).build())
+        .build()
     return httpClient.newCall(request).execute()
   }
 

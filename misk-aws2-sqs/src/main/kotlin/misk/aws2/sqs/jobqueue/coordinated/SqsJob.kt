@@ -89,15 +89,8 @@ internal class SqsJob(
   }
 
   private fun deleteMessage(queue: ResolvedQueue, message: Message) {
-    val request =
-      DeleteMessageRequest.builder()
-        .queueUrl(queue.url)
-        .receiptHandle(message.receiptHandle())
-        .build()
-    val (deleteDuration) =
-      timed {
-        queue.call { it.deleteMessage(request) }
-      }
+    val request = DeleteMessageRequest.builder().queueUrl(queue.url).receiptHandle(message.receiptHandle()).build()
+    val (deleteDuration) = timed { queue.call { it.deleteMessage(request) } }
     metrics.sqsDeleteTime.record(deleteDuration.toMillis().toDouble(), queueName.value, queueName.value)
   }
 

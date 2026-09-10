@@ -19,7 +19,6 @@ dependencies {
   api(libs.okHttp)
   api(libs.okHttpMockWebServer3)
   api(libs.openTracingMock)
-  api(libs.servletApi)
   api(libs.logbackClassic)
   api(project(":misk"))
   api(project(":misk-actions"))

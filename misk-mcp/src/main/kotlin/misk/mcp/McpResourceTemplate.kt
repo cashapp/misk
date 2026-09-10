@@ -7,10 +7,9 @@ import misk.annotation.ExperimentalMiskApi
 /**
  * Abstraction for a resource template in the Model Context Protocol (MCP) specification.
  *
- * Resource templates are parameterized resources that use RFC 6570 URI templates
- * (e.g., `schema://database/{tableName}`) to match multiple URIs dynamically.
- * When a client reads a URI matching the template, the server extracts the variable
- * values and passes them to the handler.
+ * Resource templates are parameterized resources that use RFC 6570 URI templates (e.g.,
+ * `schema://database/{tableName}`) to match multiple URIs dynamically. When a client reads a URI matching the template,
+ * the server extracts the variable values and passes them to the handler.
  *
  * ## Implementation Requirements
  *
@@ -105,8 +104,8 @@ interface McpResourceTemplate {
    *
    * @param request The incoming resource read request containing the resolved URI
    * @param variables Map of extracted URI template variable names to their matched values. For example, template
-   *   `schema://database/{tableName}` matched against `schema://database/users` produces
-   *   `mapOf("tableName" to "users")`.
+   *   `schema://database/{tableName}` matched against `schema://database/users` produces `mapOf("tableName" to
+   *   "users")`.
    * @return The resource content with appropriate MIME type and encoding
    * @throws Exception if the resource access fails catastrophically
    */

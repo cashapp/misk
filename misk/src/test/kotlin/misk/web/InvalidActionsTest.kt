@@ -94,12 +94,19 @@ class InvalidActionsTest {
     fun sayHello(request: HelloRequest): HelloReply
   }
 
-  @Test fun failEnableUnframedRequestsGrpcWithPostProtobufAction() {
-    val exception = assertThrows<IllegalStateException>("Should throw an exception") {
-      Guice.createInjector(UnframedGrpcModule()).getInstance(ServiceManager::class.java)
-        .startAsync().awaitHealthy(Duration.ofSeconds(5))
-    }
-    assertThat(exception.message).contains("Actions [InvalidActionsTest.UnframedHelloRpcAction, InvalidActionsTest.UnframedHelloRpcAction] have identical routing annotations.")
+  @Test
+  fun failEnableUnframedRequestsGrpcWithPostProtobufAction() {
+    val exception =
+      assertThrows<IllegalStateException>("Should throw an exception") {
+        Guice.createInjector(UnframedGrpcModule())
+          .getInstance(ServiceManager::class.java)
+          .startAsync()
+          .awaitHealthy(Duration.ofSeconds(5))
+      }
+    assertThat(exception.message)
+      .contains(
+        "Actions [InvalidActionsTest.UnframedHelloRpcAction, InvalidActionsTest.UnframedHelloRpcAction] have identical routing annotations."
+      )
   }
 
   class UnframedGrpcModule : KAbstractModule() {
@@ -115,14 +122,12 @@ class InvalidActionsTest {
   class UnframedHelloRpcAction @Inject constructor() : GreeterSayHelloBlockingServer, WebAction {
 
     @EnableUnframedRequests
-    override fun SayHello(request: HelloRequest): HelloReply = HelloReply.Builder()
-      .message("howdy, ${request.name}")
-      .build()
+    override fun SayHello(request: HelloRequest): HelloReply =
+      HelloReply.Builder().message("howdy, ${request.name}").build()
 
     @Post("/helloworld.Greeter/SayHello")
     @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
     @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
     fun sayHelloProtobufOverHttp(@RequestBody request: HelloRequest) = SayHello(request)
   }
-
 }

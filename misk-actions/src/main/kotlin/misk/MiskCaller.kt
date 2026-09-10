@@ -16,8 +16,8 @@ constructor(
   /**
    * When true, this caller is authorized for all endpoints regardless of required capabilities, services, or users.
    *
-   * This is intended for use in controlled environments (e.g., staging playpens) where a trusted caller needs
-   * blanket access for testing. It should never be set in production.
+   * This is intended for use in controlled environments (e.g., staging playpens) where a trusted caller needs blanket
+   * access for testing. It should never be set in production.
    */
   val allowAll: Boolean = false,
 ) {

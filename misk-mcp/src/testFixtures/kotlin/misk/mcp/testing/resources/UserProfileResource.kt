@@ -14,19 +14,17 @@ class UserProfileResource @Inject constructor() : McpResourceTemplate {
   override val description = "Profile information for a specific user"
   override val mimeType = "application/json"
 
-  override suspend fun handler(
-    request: ReadResourceRequest,
-    variables: Map<String, String>,
-  ): ReadResourceResult {
+  override suspend fun handler(request: ReadResourceRequest, variables: Map<String, String>): ReadResourceResult {
     val userId = variables["userId"] ?: "unknown"
     return ReadResourceResult(
-      contents = listOf(
-        TextResourceContents(
-          text = """{"userId": "$userId", "name": "User $userId"}""",
-          uri = request.uri,
-          mimeType = mimeType,
+      contents =
+        listOf(
+          TextResourceContents(
+            text = """{"userId": "$userId", "name": "User $userId"}""",
+            uri = request.uri,
+            mimeType = mimeType,
+          )
         )
-      )
     )
   }
 }

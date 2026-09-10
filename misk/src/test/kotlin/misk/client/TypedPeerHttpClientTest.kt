@@ -52,9 +52,10 @@ internal class TypedPeerHttpClientTest {
     val clientFactory =
       clientInjector.getInstance(Key.get(object : TypeLiteral<TypedPeerClientFactory<ReturnADinosaur>>() {}))
 
-    val clusterMember = object : PeerIdentifier {
-      override val ipAddress = "127.0.0.1"
-    }
+    val clusterMember =
+      object : PeerIdentifier {
+        override val ipAddress = "127.0.0.1"
+      }
     val client: ReturnADinosaur = clientFactory.client(clusterMember)
 
     val response = client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()

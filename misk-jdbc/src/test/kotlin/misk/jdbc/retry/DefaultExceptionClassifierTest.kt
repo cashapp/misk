@@ -67,63 +67,61 @@ class DefaultExceptionClassifierTest {
   @Test
   fun `Vitess transaction not found is retryable when dataSourceType is VITESS_MYSQL`() {
     val classifier = DefaultExceptionClassifier(DataSourceType.VITESS_MYSQL)
-    val exception = SQLException(
-      "vttablet: rpc error: code = Aborted desc = transaction 123: not found"
-    )
+    val exception = SQLException("vttablet: rpc error: code = Aborted desc = transaction 123: not found")
     assertThat(classifier.isRetryable(exception)).isTrue()
   }
 
   @Test
   fun `Vitess transaction not found is not retryable when dataSourceType is MYSQL`() {
     val classifier = DefaultExceptionClassifier(DataSourceType.MYSQL)
-    val exception = SQLException(
-      "vttablet: rpc error: code = Aborted desc = transaction 123: not found"
-    )
+    val exception = SQLException("vttablet: rpc error: code = Aborted desc = transaction 123: not found")
     assertThat(classifier.isRetryable(exception)).isFalse()
   }
 
   @Test
   fun `Vitess transaction not found is not retryable when dataSourceType is null`() {
     val classifier = DefaultExceptionClassifier()
-    val exception = SQLException(
-      "vttablet: rpc error: code = Aborted desc = transaction 123: not found"
-    )
+    val exception = SQLException("vttablet: rpc error: code = Aborted desc = transaction 123: not found")
     assertThat(classifier.isRetryable(exception)).isFalse()
   }
 
   @Test
   fun `CockroachDB restart transaction is retryable when dataSourceType is COCKROACHDB`() {
     val classifier = DefaultExceptionClassifier(DataSourceType.COCKROACHDB)
-    val exception = object : SQLException("restart transaction") {
-      override fun getErrorCode() = 40001
-    }
+    val exception =
+      object : SQLException("restart transaction") {
+        override fun getErrorCode() = 40001
+      }
     assertThat(classifier.isRetryable(exception)).isTrue()
   }
 
   @Test
   fun `CockroachDB restart transaction is not retryable when dataSourceType is MYSQL`() {
     val classifier = DefaultExceptionClassifier(DataSourceType.MYSQL)
-    val exception = object : SQLException("restart transaction") {
-      override fun getErrorCode() = 40001
-    }
+    val exception =
+      object : SQLException("restart transaction") {
+        override fun getErrorCode() = 40001
+      }
     assertThat(classifier.isRetryable(exception)).isFalse()
   }
 
   @Test
   fun `TiDB write conflict is retryable when dataSourceType is TIDB`() {
     val classifier = DefaultExceptionClassifier(DataSourceType.TIDB)
-    val exception = object : SQLException("write conflict") {
-      override fun getErrorCode() = 9007
-    }
+    val exception =
+      object : SQLException("write conflict") {
+        override fun getErrorCode() = 9007
+      }
     assertThat(classifier.isRetryable(exception)).isTrue()
   }
 
   @Test
   fun `TiDB write conflict is not retryable when dataSourceType is MYSQL`() {
     val classifier = DefaultExceptionClassifier(DataSourceType.MYSQL)
-    val exception = object : SQLException("write conflict") {
-      override fun getErrorCode() = 9007
-    }
+    val exception =
+      object : SQLException("write conflict") {
+        override fun getErrorCode() = 9007
+      }
     assertThat(classifier.isRetryable(exception)).isFalse()
   }
 }

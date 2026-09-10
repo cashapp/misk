@@ -4,8 +4,8 @@ import java.io.File
 import java.sql.ResultSet
 import java.util.regex.Pattern
 import misk.logging.getLogger
-import misk.spirit.Spirit
 import misk.resources.ResourceLoader
+import misk.spirit.Spirit
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
 import net.sf.jsqlparser.statement.create.table.CreateTable
 
@@ -36,10 +36,7 @@ internal class DeclarativeSchemaMigrator(
         dataSourceService.dataSource.connection.use { conn ->
           conn.createStatement().use { stmt ->
             // Spirit outputs multiple DDL statements (one per line), execute each individually.
-            ddl.lines()
-              .map { it.trim() }
-              .filter { it.isNotBlank() }
-              .forEach { stmt.execute(it) }
+            ddl.lines().map { it.trim() }.filter { it.isNotBlank() }.forEach { stmt.execute(it) }
           }
         }
       }

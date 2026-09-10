@@ -22,20 +22,18 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 /**
- * Demonstrates that an empty `IN` collection on a sharding-key column causes a scatter plan at
- * vtgate. After cashapp/misk#3795 disabled server-side prepared statements for VITESS_MYSQL,
- * Hibernate renders an empty `IN` predicate by dropping it from the SQL entirely — so a query
- * like `WHERE id IN ()` is sent to vtgate as a fully unconstrained `SELECT`, which the planner
- * resolves to `engine.Scatter` because no vindex predicate remains. The `--no-scatter` vtgate
- * flag then rejects the plan with `ScatterQueryException`.
+ * Demonstrates that an empty `IN` collection on a sharding-key column causes a scatter plan at vtgate. After
+ * cashapp/misk#3795 disabled server-side prepared statements for VITESS_MYSQL, Hibernate renders an empty `IN`
+ * predicate by dropping it from the SQL entirely — so a query like `WHERE id IN ()` is sent to vtgate as a fully
+ * unconstrained `SELECT`, which the planner resolves to `engine.Scatter` because no vindex predicate remains. The
+ * `--no-scatter` vtgate flag then rejects the plan with `ScatterQueryException`.
  *
  * Three mitigations are validated:
- *
- *  1. `.allowScatter()` query hint — opts the query into a real scatter at vtgate.
- *  2. Caller-side empty-collection guard — short-circuit before issuing the query. Recommended
- *     for any code path where an `IN` collection on the sharding key can legitimately be empty,
- *     since an empty `IN` can never match anything and the query would always return zero rows.
- *  3. (Future, not tested here) Auto short-circuit inside misk-hibernate's query renderer.
+ * 1. `.allowScatter()` query hint — opts the query into a real scatter at vtgate.
+ * 2. Caller-side empty-collection guard — short-circuit before issuing the query. Recommended for any code path where
+ *    an `IN` collection on the sharding key can legitimately be empty, since an empty `IN` can never match anything and
+ *    the query would always return zero rows.
+ * 3. (Future, not tested here) Auto short-circuit inside misk-hibernate's query renderer.
  */
 @MiskTest(startService = true)
 class EmptyInScatterIntegrationTest {
@@ -76,9 +74,7 @@ class EmptyInScatterIntegrationTest {
     // entirely different routes because the SQL it receives is different.
     val exception =
       assertThrows<PersistenceException> {
-        transacter.transaction { session ->
-          queryFactory.newQuery<MoviesByIdQuery>().idIn(emptyList()).list(session)
-        }
+        transacter.transaction { session -> queryFactory.newQuery<MoviesByIdQuery>().idIn(emptyList()).list(session) }
       }
 
     assertThat(exception.cause).isInstanceOf(ScatterQueryException::class.java)
