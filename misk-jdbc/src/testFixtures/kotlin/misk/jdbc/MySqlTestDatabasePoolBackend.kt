@@ -53,6 +53,6 @@ class MySqlTestDatabasePoolBackend @Inject constructor(val config: DataSourceCon
   }
 
   private fun Connection.dropDatabase(name: String) {
-    return createStatement().use { statement -> statement.execute("DROP DATABASE $name") }
+    return createStatement().use { statement -> statement.execute("DROP DATABASE IF EXISTS $name") }
   }
 }
