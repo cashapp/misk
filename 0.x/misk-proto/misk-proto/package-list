@@ -1,0 +1,26 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.proto////PointingToDeclaration/misk-proto/misk.proto/index.md
+$dokka.location:misk.proto/Status.Builder///PointingToDeclaration/misk-proto/misk.proto/-status/-builder/index.md
+$dokka.location:misk.proto/Status.Builder/Builder/#/PointingToDeclaration/misk-proto/misk.proto/-status/-builder/-builder.md
+$dokka.location:misk.proto/Status.Builder/build/#/PointingToDeclaration/misk-proto/misk.proto/-status/-builder/build.md
+$dokka.location:misk.proto/Status.Builder/code/#/PointingToDeclaration/misk-proto/misk.proto/-status/-builder/code.md
+$dokka.location:misk.proto/Status.Builder/code/#kotlin.Int/PointingToDeclaration/misk-proto/misk.proto/-status/-builder/code.md
+$dokka.location:misk.proto/Status.Builder/details/#/PointingToDeclaration/misk-proto/misk.proto/-status/-builder/details.md
+$dokka.location:misk.proto/Status.Builder/details/#kotlin.collections.List[com.squareup.wire.AnyMessage]/PointingToDeclaration/misk-proto/misk.proto/-status/-builder/details.md
+$dokka.location:misk.proto/Status.Builder/message/#/PointingToDeclaration/misk-proto/misk.proto/-status/-builder/message.md
+$dokka.location:misk.proto/Status.Builder/message/#kotlin.String/PointingToDeclaration/misk-proto/misk.proto/-status/-builder/message.md
+$dokka.location:misk.proto/Status.Companion///PointingToDeclaration/misk-proto/misk.proto/-status/-companion/index.md
+$dokka.location:misk.proto/Status.Companion/ADAPTER/#/PointingToDeclaration/misk-proto/misk.proto/-status/-companion/-a-d-a-p-t-e-r.md
+$dokka.location:misk.proto/Status.Companion/build/#kotlin.Function1[misk.proto.Status.Builder,kotlin.Unit]/PointingToDeclaration/misk-proto/misk.proto/-status/-companion/build.md
+$dokka.location:misk.proto/Status///PointingToDeclaration/misk-proto/misk.proto/-status/index.md
+$dokka.location:misk.proto/Status/Status/#kotlin.Int#kotlin.String#kotlin.collections.List[com.squareup.wire.AnyMessage]#okio.ByteString/PointingToDeclaration/misk-proto/misk.proto/-status/-status.md
+$dokka.location:misk.proto/Status/code/#/PointingToDeclaration/misk-proto/misk.proto/-status/code.md
+$dokka.location:misk.proto/Status/copy/#kotlin.Int#kotlin.String#kotlin.collections.List[com.squareup.wire.AnyMessage]#okio.ByteString/PointingToDeclaration/misk-proto/misk.proto/-status/copy.md
+$dokka.location:misk.proto/Status/details/#/PointingToDeclaration/misk-proto/misk.proto/-status/details.md
+$dokka.location:misk.proto/Status/equals/#kotlin.Any?/PointingToDeclaration/misk-proto/misk.proto/-status/equals.md
+$dokka.location:misk.proto/Status/hashCode/#/PointingToDeclaration/misk-proto/misk.proto/-status/hash-code.md
+$dokka.location:misk.proto/Status/message/#/PointingToDeclaration/misk-proto/misk.proto/-status/message.md
+$dokka.location:misk.proto/Status/newBuilder/#/PointingToDeclaration/misk-proto/misk.proto/-status/new-builder.md
+$dokka.location:misk.proto/Status/toString/#/PointingToDeclaration/misk-proto/misk.proto/-status/to-string.md
+misk.proto

@@ -1,0 +1,43 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.lease////PointingToDeclaration/wisp-lease/wisp.lease/index.md
+$dokka.location:wisp.lease//acquireOrNull/wisp.lease.LeaseManager#kotlin.String#kotlin.Boolean/PointingToDeclaration/wisp-lease/wisp.lease/acquire-or-null.md
+$dokka.location:wisp.lease//acquireOrNull/wisp.lease.LeaseManager#kotlin.String#wisp.lease.AcquireOptions#kotlin.Boolean/PointingToDeclaration/wisp-lease/wisp.lease/acquire-or-null.md
+$dokka.location:wisp.lease/AcquireOptions///PointingToDeclaration/wisp-lease/wisp.lease/-acquire-options/index.md
+$dokka.location:wisp.lease/AcquireOptions/AcquireOptions/#wisp.lease.WaitMode#wisp.lease.UnsupportedWaitBehavior/PointingToDeclaration/wisp-lease/wisp.lease/-acquire-options/-acquire-options.md
+$dokka.location:wisp.lease/AcquireOptions/unsupportedWaitBehavior/#/PointingToDeclaration/wisp-lease/wisp.lease/-acquire-options/unsupported-wait-behavior.md
+$dokka.location:wisp.lease/AcquireOptions/wait/#/PointingToDeclaration/wisp-lease/wisp.lease/-acquire-options/wait.md
+$dokka.location:wisp.lease/AutoCloseableLease///PointingToDeclaration/wisp-lease/wisp.lease/-auto-closeable-lease/index.md
+$dokka.location:wisp.lease/AutoCloseableLease/AutoCloseableLease/#wisp.lease.Lease#kotlin.Boolean/PointingToDeclaration/wisp-lease/wisp.lease/-auto-closeable-lease/-auto-closeable-lease.md
+$dokka.location:wisp.lease/AutoCloseableLease/close/#/PointingToDeclaration/wisp-lease/wisp.lease/-auto-closeable-lease/close.md
+$dokka.location:wisp.lease/LeaderLeaseManager///PointingToDeclaration/wisp-lease/wisp.lease/-leader-lease-manager/index.md
+$dokka.location:wisp.lease/Lease.StateChangeListener///PointingToDeclaration/wisp-lease/wisp.lease/-lease/-state-change-listener/index.md
+$dokka.location:wisp.lease/Lease.StateChangeListener/afterAcquire/#wisp.lease.Lease/PointingToDeclaration/wisp-lease/wisp.lease/-lease/-state-change-listener/after-acquire.md
+$dokka.location:wisp.lease/Lease.StateChangeListener/beforeRelease/#wisp.lease.Lease/PointingToDeclaration/wisp-lease/wisp.lease/-lease/-state-change-listener/before-release.md
+$dokka.location:wisp.lease/Lease///PointingToDeclaration/wisp-lease/wisp.lease/-lease/index.md
+$dokka.location:wisp.lease/Lease/acquire/#/PointingToDeclaration/wisp-lease/wisp.lease/-lease/acquire.md
+$dokka.location:wisp.lease/Lease/acquire/#wisp.lease.AcquireOptions/PointingToDeclaration/wisp-lease/wisp.lease/-lease/acquire.md
+$dokka.location:wisp.lease/Lease/addListener/#wisp.lease.Lease.StateChangeListener/PointingToDeclaration/wisp-lease/wisp.lease/-lease/add-listener.md
+$dokka.location:wisp.lease/Lease/isHeld/#/PointingToDeclaration/wisp-lease/wisp.lease/-lease/is-held.md
+$dokka.location:wisp.lease/Lease/name/#/PointingToDeclaration/wisp-lease/wisp.lease/-lease/name.md
+$dokka.location:wisp.lease/Lease/release/#/PointingToDeclaration/wisp-lease/wisp.lease/-lease/release.md
+$dokka.location:wisp.lease/Lease/release/#kotlin.Boolean/PointingToDeclaration/wisp-lease/wisp.lease/-lease/release.md
+$dokka.location:wisp.lease/Lease/shouldHold/#/PointingToDeclaration/wisp-lease/wisp.lease/-lease/should-hold.md
+$dokka.location:wisp.lease/LeaseManager///PointingToDeclaration/wisp-lease/wisp.lease/-lease-manager/index.md
+$dokka.location:wisp.lease/LeaseManager/releaseAll/#/PointingToDeclaration/wisp-lease/wisp.lease/-lease-manager/release-all.md
+$dokka.location:wisp.lease/LeaseManager/requestLease/#kotlin.String/PointingToDeclaration/wisp-lease/wisp.lease/-lease-manager/request-lease.md
+$dokka.location:wisp.lease/LoadBalancedLeaseManager///PointingToDeclaration/wisp-lease/wisp.lease/-load-balanced-lease-manager/index.md
+$dokka.location:wisp.lease/PersistentLeaseManager///PointingToDeclaration/wisp-lease/wisp.lease/-persistent-lease-manager/index.md
+$dokka.location:wisp.lease/UnsupportedWaitBehavior.Fail///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}wisp-lease/wisp.lease/-unsupported-wait-behavior/-fail/index.md
+$dokka.location:wisp.lease/UnsupportedWaitBehavior.FallbackToNonBlocking///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}wisp-lease/wisp.lease/-unsupported-wait-behavior/-fallback-to-non-blocking/index.md
+$dokka.location:wisp.lease/UnsupportedWaitBehavior///PointingToDeclaration/wisp-lease/wisp.lease/-unsupported-wait-behavior/index.md
+$dokka.location:wisp.lease/UnsupportedWaitBehavior/entries/#/PointingToDeclaration/wisp-lease/wisp.lease/-unsupported-wait-behavior/entries.md
+$dokka.location:wisp.lease/UnsupportedWaitBehavior/valueOf/#kotlin.String/PointingToDeclaration/wisp-lease/wisp.lease/-unsupported-wait-behavior/value-of.md
+$dokka.location:wisp.lease/UnsupportedWaitBehavior/values/#/PointingToDeclaration/wisp-lease/wisp.lease/-unsupported-wait-behavior/values.md
+$dokka.location:wisp.lease/WaitMode.DoNotWait///PointingToDeclaration/wisp-lease/wisp.lease/-wait-mode/-do-not-wait/index.md
+$dokka.location:wisp.lease/WaitMode.WaitForLeaseDuration///PointingToDeclaration/wisp-lease/wisp.lease/-wait-mode/-wait-for-lease-duration/index.md
+$dokka.location:wisp.lease/WaitMode.WaitUpTo///PointingToDeclaration/wisp-lease/wisp.lease/-wait-mode/-wait-up-to/index.md
+$dokka.location:wisp.lease/WaitMode.WaitUpTo/WaitUpTo/#java.time.Duration/PointingToDeclaration/wisp-lease/wisp.lease/-wait-mode/-wait-up-to/-wait-up-to.md
+$dokka.location:wisp.lease/WaitMode.WaitUpTo/timeout/#/PointingToDeclaration/wisp-lease/wisp.lease/-wait-mode/-wait-up-to/timeout.md
+$dokka.location:wisp.lease/WaitMode///PointingToDeclaration/wisp-lease/wisp.lease/-wait-mode/index.md
+wisp.lease

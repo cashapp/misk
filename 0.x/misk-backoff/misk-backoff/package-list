@@ -1,0 +1,43 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.backoff////PointingToDeclaration/misk-backoff/misk.backoff/index.md
+$dokka.location:misk.backoff//retry/#misk.backoff.RetryConfig#kotlin.Function1[kotlin.Int,TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/misk-backoff/misk.backoff/retry.md
+$dokka.location:misk.backoff//retryableFuture/#misk.backoff.RetryConfig#kotlin.Function1[kotlin.Int,java.util.concurrent.CompletableFuture[TypeParam(bounds=[kotlin.Any?])]]/PointingToDeclaration/misk-backoff/misk.backoff/retryable-future.md
+$dokka.location:misk.backoff/Backoff///PointingToDeclaration/misk-backoff/misk.backoff/-backoff/index.md
+$dokka.location:misk.backoff/Backoff/nextRetry/#/PointingToDeclaration/misk-backoff/misk.backoff/-backoff/next-retry.md
+$dokka.location:misk.backoff/Backoff/reset/#/PointingToDeclaration/misk-backoff/misk.backoff/-backoff/reset.md
+$dokka.location:misk.backoff/DontRetryException///PointingToDeclaration/misk-backoff/misk.backoff/-dont-retry-exception/index.md
+$dokka.location:misk.backoff/DontRetryException/DontRetryException/#java.lang.Exception?/PointingToDeclaration/misk-backoff/misk.backoff/-dont-retry-exception/-dont-retry-exception.md
+$dokka.location:misk.backoff/DontRetryException/DontRetryException/#kotlin.String?#java.lang.Exception?/PointingToDeclaration/misk-backoff/misk.backoff/-dont-retry-exception/-dont-retry-exception.md
+$dokka.location:misk.backoff/DontRetryException/DontRetryException/#kotlin.String?/PointingToDeclaration/misk-backoff/misk.backoff/-dont-retry-exception/-dont-retry-exception.md
+$dokka.location:misk.backoff/ExponentialBackoff///PointingToDeclaration/misk-backoff/misk.backoff/-exponential-backoff/index.md
+$dokka.location:misk.backoff/ExponentialBackoff/ExponentialBackoff/#java.time.Duration#java.time.Duration#java.time.Duration/PointingToDeclaration/misk-backoff/misk.backoff/-exponential-backoff/-exponential-backoff.md
+$dokka.location:misk.backoff/ExponentialBackoff/ExponentialBackoff/#java.time.Duration#java.time.Duration#kotlin.Function1[kotlin.Long,java.time.Duration]/PointingToDeclaration/misk-backoff/misk.backoff/-exponential-backoff/-exponential-backoff.md
+$dokka.location:misk.backoff/ExponentialBackoff/ExponentialBackoff/#java.time.Duration#java.time.Duration/PointingToDeclaration/misk-backoff/misk.backoff/-exponential-backoff/-exponential-backoff.md
+$dokka.location:misk.backoff/ExponentialBackoff/ExponentialBackoff/#kotlin.Function0[java.time.Duration]#kotlin.Function0[java.time.Duration]#kotlin.Function0[java.time.Duration]#kotlin.Function1[kotlin.Long,java.time.Duration]/PointingToDeclaration/misk-backoff/misk.backoff/-exponential-backoff/-exponential-backoff.md
+$dokka.location:misk.backoff/ExponentialBackoff/ExponentialBackoff/#kotlin.Function0[java.time.Duration]#kotlin.Function0[java.time.Duration]#kotlin.Function1[kotlin.Long,java.time.Duration]/PointingToDeclaration/misk-backoff/misk.backoff/-exponential-backoff/-exponential-backoff.md
+$dokka.location:misk.backoff/ExponentialBackoff/ExponentialBackoff/#kotlin.Function0[java.time.Duration]#kotlin.Function0[java.time.Duration]/PointingToDeclaration/misk-backoff/misk.backoff/-exponential-backoff/-exponential-backoff.md
+$dokka.location:misk.backoff/ExponentialBackoff/nextRetry/#/PointingToDeclaration/misk-backoff/misk.backoff/-exponential-backoff/next-retry.md
+$dokka.location:misk.backoff/ExponentialBackoff/reset/#/PointingToDeclaration/misk-backoff/misk.backoff/-exponential-backoff/reset.md
+$dokka.location:misk.backoff/FlatBackoff///PointingToDeclaration/misk-backoff/misk.backoff/-flat-backoff/index.md
+$dokka.location:misk.backoff/FlatBackoff/FlatBackoff/#java.time.Duration/PointingToDeclaration/misk-backoff/misk.backoff/-flat-backoff/-flat-backoff.md
+$dokka.location:misk.backoff/FlatBackoff/duration/#/PointingToDeclaration/misk-backoff/misk.backoff/-flat-backoff/duration.md
+$dokka.location:misk.backoff/FlatBackoff/nextRetry/#/PointingToDeclaration/misk-backoff/misk.backoff/-flat-backoff/next-retry.md
+$dokka.location:misk.backoff/FlatBackoff/reset/#/PointingToDeclaration/misk-backoff/misk.backoff/-flat-backoff/reset.md
+$dokka.location:misk.backoff/FullJitterBackoff///PointingToDeclaration/misk-backoff/misk.backoff/-full-jitter-backoff/index.md
+$dokka.location:misk.backoff/FullJitterBackoff/FullJitterBackoff/#kotlin.Function0[java.time.Duration]#kotlin.Function0[java.time.Duration]/PointingToDeclaration/misk-backoff/misk.backoff/-full-jitter-backoff/-full-jitter-backoff.md
+$dokka.location:misk.backoff/RetryConfig.Builder///PointingToDeclaration/misk-backoff/misk.backoff/-retry-config/-builder/index.md
+$dokka.location:misk.backoff/RetryConfig.Builder/Builder/#kotlin.Int#misk.backoff.Backoff/PointingToDeclaration/misk-backoff/misk.backoff/-retry-config/-builder/-builder.md
+$dokka.location:misk.backoff/RetryConfig.Builder/build/#/PointingToDeclaration/misk-backoff/misk.backoff/-retry-config/-builder/build.md
+$dokka.location:misk.backoff/RetryConfig.Builder/onRetry/#/PointingToDeclaration/misk-backoff/misk.backoff/-retry-config/-builder/on-retry.md
+$dokka.location:misk.backoff/RetryConfig.Builder/onRetry/#kotlin.Function2[kotlin.Int,java.lang.Exception,kotlin.Unit]/PointingToDeclaration/misk-backoff/misk.backoff/-retry-config/-builder/on-retry.md
+$dokka.location:misk.backoff/RetryConfig.Builder/shouldRetry/#/PointingToDeclaration/misk-backoff/misk.backoff/-retry-config/-builder/should-retry.md
+$dokka.location:misk.backoff/RetryConfig.Builder/shouldRetry/#kotlin.Function1[java.lang.Exception,kotlin.Boolean]/PointingToDeclaration/misk-backoff/misk.backoff/-retry-config/-builder/should-retry.md
+$dokka.location:misk.backoff/RetryConfig.Builder/upTo/#/PointingToDeclaration/misk-backoff/misk.backoff/-retry-config/-builder/up-to.md
+$dokka.location:misk.backoff/RetryConfig.Builder/withBackoff/#/PointingToDeclaration/misk-backoff/misk.backoff/-retry-config/-builder/with-backoff.md
+$dokka.location:misk.backoff/RetryConfig///PointingToDeclaration/misk-backoff/misk.backoff/-retry-config/index.md
+$dokka.location:misk.backoff/RetryConfig/onRetry/#/PointingToDeclaration/misk-backoff/misk.backoff/-retry-config/on-retry.md
+$dokka.location:misk.backoff/RetryConfig/shouldRetry/#/PointingToDeclaration/misk-backoff/misk.backoff/-retry-config/should-retry.md
+$dokka.location:misk.backoff/RetryConfig/upTo/#/PointingToDeclaration/misk-backoff/misk.backoff/-retry-config/up-to.md
+$dokka.location:misk.backoff/RetryConfig/withBackoff/#/PointingToDeclaration/misk-backoff/misk.backoff/-retry-config/with-backoff.md
+misk.backoff
