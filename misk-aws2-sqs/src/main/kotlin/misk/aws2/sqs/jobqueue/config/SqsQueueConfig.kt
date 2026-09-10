@@ -13,7 +13,8 @@ package misk.aws2.sqs.jobqueue.config
  * defaults to the current account. `queue_name` AWS Queue Name, defaults to the application provided name of the queue.
  * `shutdown_grace_period_ms` defines how long shutdown waits for an in-flight receive to complete before aborting it.
  * Set it to 0 to abort in-flight receives immediately. Defaults to null, which uses
- * [SqsQueueConfig.DEFAULT_SHUTDOWN_GRACE_PERIOD_MS].
+ * [SqsQueueConfig.DEFAULT_SHUTDOWN_GRACE_PERIOD_MS]. `shutdown_timeout_ms` defines how long shutdown waits for
+ * in-progress handlers to finish before cancelling them. Defaults to null, which waits indefinitely.
  */
 data class SqsQueueConfig
 @JvmOverloads
@@ -28,6 +29,7 @@ constructor(
   val region: String? = null,
   val account_id: String? = null,
   val shutdown_grace_period_ms: Long? = null,
+  val shutdown_timeout_ms: Long? = null,
 ) {
   companion object {
     /**
