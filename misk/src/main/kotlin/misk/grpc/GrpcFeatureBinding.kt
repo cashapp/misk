@@ -30,18 +30,11 @@ internal class GrpcFeatureBinding(
   private val grpcMessageSourceChannelContext: CoroutineContext,
   private val grpcEncoding: String,
   private val minMessageToCompress: Long,
-  private val maxInboundMessageBytes: Long,
 ) : FeatureBinding {
 
   override fun beforeCall(subject: Subject) {
     val requestBody = subject.takeRequestBody()
-    val messageSource =
-      GrpcMessageSource(
-        requestBody,
-        requestAdapter,
-        subject.httpCall.requestHeaders["grpc-encoding"],
-        maxInboundMessageBytes,
-      )
+    val messageSource = GrpcMessageSource(requestBody, requestAdapter, subject.httpCall.requestHeaders["grpc-encoding"])
     // TODO: support the "grpc-accept-encoding" header
 
     if (streamingRequest) {
@@ -134,8 +127,6 @@ internal class GrpcFeatureBinding(
 
     private val minMessageToCompress = webConfig.minGzipSize.toLong()
 
-    private val maxInboundMessageBytes = webConfig.grpcMaxInboundMessageBytes
-
     override fun create(
       action: Action,
       pathPattern: PathPattern,
@@ -183,7 +174,6 @@ internal class GrpcFeatureBinding(
           grpcMessageSourceChannelContext = grpcMessageSourceChannelDispatcher,
           grpcEncoding = grpcEncoding,
           minMessageToCompress = minMessageToCompress,
-          maxInboundMessageBytes = maxInboundMessageBytes,
         )
       } else {
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
@@ -196,7 +186,6 @@ internal class GrpcFeatureBinding(
           grpcMessageSourceChannelContext = grpcMessageSourceChannelDispatcher,
           grpcEncoding = grpcEncoding,
           minMessageToCompress = minMessageToCompress,
-          maxInboundMessageBytes = maxInboundMessageBytes,
         )
       }
     }
