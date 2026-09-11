@@ -31,7 +31,17 @@ val config = MiskConfig.load<ExemplarConfig>("exemplar", depoyment)
 
 ## Durations
 
-`java.time.Duration` config properties require ISO-8601 strings with explicit units:
+Opt into explicit units for `java.time.Duration` config properties on each load:
+
+```kotlin
+val config = MiskConfig.load<ExemplarConfig>(
+  "exemplar",
+  deployment,
+  requireExplicitDurationUnits = true,
+)
+```
+
+With this option enabled, Duration properties require ISO-8601 strings with explicit units:
 
 ```yaml
 retry_delay: PT0.025S # 25 milliseconds
@@ -39,11 +49,17 @@ request_timeout: PT25S # 25 seconds
 ```
 
 Unitless numbers (including zero, fractions, and quoted numbers) are rejected. Use `PT0S` for zero.
-Previously, Jackson interpreted numeric durations as seconds by default, so a value such as `25`
+By default, the option is disabled and existing overloads retain Jackson's behavior: numeric
+durations are interpreted as seconds by default, so a value such as `25`
 could silently mean 25 seconds when the author intended 25 milliseconds. When migrating existing
 config, preserve its intended duration rather than assuming every number means milliseconds.
 
-This requirement applies to values loaded by `MiskConfig`, not to primitive numeric config
+The option is scoped to a single load, allowing gradual rollout by service or deployment without
+changing other consumers. Migrate common, environment, and override configurations and enable the
+option in config/injector tests before enabling it at startup. Wrappers can forward the option
+through the class-based overload, including when supplying a custom deserializer modifier.
+
+This requirement applies to opted-in values loaded by `MiskConfig`, not to primitive numeric config
 properties or other JSON mappers. Kotlin `Duration` defaults remain unchanged when a property is absent.
 
 ## Redacted

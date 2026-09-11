@@ -43,6 +43,28 @@ import wisp.deployment.Deployment
 object MiskConfig {
   private val logger = getLogger<MiskConfig>()
 
+  /** Opt into requiring explicit ISO-8601 strings for Duration properties on this load. */
+  @JvmStatic
+  inline fun <reified T : Config> load(
+    appName: String,
+    deployment: Deployment,
+    requireExplicitDurationUnits: Boolean,
+    overrideFiles: List<File> = listOf(),
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM,
+  ): T {
+    val overrideResources = overrideFiles.map { "filesystem:${it.absoluteFile}" }.filter { resourceLoader.exists(it) }
+    return load(
+      T::class.java,
+      appName,
+      deployment,
+      overrideResources,
+      null,
+      resourceLoader,
+      failOnUnknownProperties = false,
+      requireExplicitDurationUnits = requireExplicitDurationUnits,
+    )
+  }
+
   @JvmStatic
   inline fun <reified T : Config> load(
     appName: String,
@@ -129,6 +151,35 @@ object MiskConfig {
     failOnUnknownProperties: Boolean,
     deserializerModifier: ValueDeserializerModifier? = null,
   ): T {
+    return load(
+      configClass,
+      appName,
+      deployment,
+      overrideResources,
+      overrideValues,
+      resourceLoader,
+      failOnUnknownProperties,
+      deserializerModifier,
+      requireExplicitDurationUnits = false,
+    )
+  }
+
+  /**
+   * When [requireExplicitDurationUnits] is true, reject unitless Duration values in the merged config. Existing
+   * overloads retain Jackson's numeric duration handling for compatibility.
+   */
+  @JvmStatic
+  fun <T : Config> load(
+    configClass: Class<out Config>,
+    appName: String,
+    deployment: Deployment,
+    overrideResources: List<String> = listOf(),
+    overrideValues: JsonNode? = null,
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM,
+    failOnUnknownProperties: Boolean,
+    deserializerModifier: ValueDeserializerModifier? = null,
+    requireExplicitDurationUnits: Boolean,
+  ): T {
     check(!Secret::class.java.isAssignableFrom(configClass)) { "Top level service config cannot be a Secret<*>" }
 
     val configYamls = loadConfigYamlMap(appName, deployment, overrideResources, resourceLoader)
@@ -139,7 +190,9 @@ object MiskConfig {
 
     val configFile = "$appName-${configEnvironmentName.lowercase(Locale.US)}.yaml"
     return readFlattenedYaml(
-      { failOnUnknown -> newObjectMapper(resourceLoader, false, deserializerModifier, failOnUnknown) },
+      { failOnUnknown ->
+        newObjectMapper(resourceLoader, false, deserializerModifier, failOnUnknown, requireExplicitDurationUnits)
+      },
       jsonNode,
       configClass,
       configFile,
@@ -257,6 +310,7 @@ object MiskConfig {
     redactSecrets: Boolean,
     deserializerModifier: ValueDeserializerModifier?,
     failOnUnknownProperties: Boolean,
+    requireExplicitDurationUnits: Boolean = false,
   ): ObjectMapper {
     // The secret and resource deserializers parse nested documents with the very mapper they are
     // registered on. Mappers are immutable and built in one shot, so hand the modules a supplier
@@ -271,7 +325,6 @@ object MiskConfig {
         // fails while a top-level Set<String?> is accepted -- so existing config stops loading. Keep it off to match
         // Jackson 2.
         .addModule(KotlinModule.Builder().disable(KotlinFeature.StrictNullChecks).build())
-        .addModule(SimpleModule().addDeserializer(Duration::class.java, ExplicitDurationDeserializer()))
         // Fail on null ints/doubles.
         .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
         // Jackson 3 defaults this off. Config files are hand-written and a typo'd property should
@@ -283,6 +336,10 @@ object MiskConfig {
         // Jackson 3 defaults these on. Config enums are matched by name, and toString() is
         // frequently overridden for display, so switching would break existing config files.
         .disable(EnumFeature.READ_ENUMS_USING_TO_STRING, EnumFeature.WRITE_ENUMS_USING_TO_STRING)
+
+    if (requireExplicitDurationUnits) {
+      builder.addModule(SimpleModule().addDeserializer(Duration::class.java, ExplicitDurationDeserializer()))
+    }
 
     // The SecretDeserializer supports deserializing json, so bind last so it can use previous
     // mappings.

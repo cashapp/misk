@@ -63,12 +63,23 @@ class DurationConfigTest {
   fun validatesTheMergedConfig() {
     val common = File(directory, "common.yaml").apply { writeText("nested:\n  interval: 25") }
     val environment = File(directory, "environment.yaml").apply { writeText("nested:\n  interval: PT0.025S") }
-    val config = MiskConfig.load<TestConfig>("duration_config", TESTING, overrideFiles = listOf(common, environment))
+    val config =
+      MiskConfig.load<TestConfig>(
+        "duration_config",
+        TESTING,
+        requireExplicitDurationUnits = true,
+        overrideFiles = listOf(common, environment),
+      )
     assertThat(config.nested.interval).isEqualTo(Duration.ofMillis(25))
 
     val error =
       assertFailsWith<IllegalStateException> {
-        MiskConfig.load<TestConfig>("duration_config", TESTING, overrideFiles = listOf(environment, common))
+        MiskConfig.load<TestConfig>(
+          "duration_config",
+          TESTING,
+          requireExplicitDurationUnits = true,
+          overrideFiles = listOf(environment, common),
+        )
       }
     assertThat(error.message).contains("nested.interval", "ISO-8601")
   }
@@ -78,9 +89,68 @@ class DurationConfigTest {
     assertThat(JsonMapper.builder().build().readValue("25", Duration::class.java)).isEqualTo(Duration.ofSeconds(25))
   }
 
+  @ParameterizedTest
+  @ValueSource(strings = ["25", "0.025", "0", "-25"])
+  fun preservesNumericDurationsUnlessOptedIn(value: String) {
+    val file = File(directory, "duration.yaml").apply { writeText("nested:\n  interval: $value") }
+    val expected = Duration.parse("PT${value}S")
+    val defaultConfig = MiskConfig.load<TestConfig>("duration_config", TESTING, overrideFiles = listOf(file))
+    val explicitlyDisabled =
+      MiskConfig.load<TestConfig>(
+        "duration_config",
+        TESTING,
+        requireExplicitDurationUnits = false,
+        overrideFiles = listOf(file),
+      )
+    assertThat(defaultConfig.nested.interval).isEqualTo(expected)
+    assertThat(explicitlyDisabled).isEqualTo(defaultConfig)
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = ["\"25\"", "\"0.025\""])
+  fun preservesDefaultRejectionOfQuotedNumbers(value: String) {
+    val file = File(directory, "duration.yaml").apply { writeText("nested:\n  interval: $value") }
+    val defaultError =
+      assertFailsWith<IllegalStateException> {
+        MiskConfig.load<TestConfig>("duration_config", TESTING, overrideFiles = listOf(file))
+      }
+    val disabledError =
+      assertFailsWith<IllegalStateException> {
+        MiskConfig.load<TestConfig>(
+          "duration_config",
+          TESTING,
+          requireExplicitDurationUnits = false,
+          overrideFiles = listOf(file),
+        )
+      }
+    assertThat(disabledError.message).isEqualTo(defaultError.message)
+    assertThat(defaultError.message)
+      .contains("nested.interval", "Cannot deserialize")
+      .doesNotContain("requires an ISO-8601")
+  }
+
+  @Test
+  fun optInDoesNotLeakBetweenLoads() {
+    val file = File(directory, "duration.yaml").apply { writeText("nested:\n  interval: 25") }
+    assertFailsWith<IllegalStateException> { load("nested:\n  interval: 25") }
+    assertThat(MiskConfig.load<TestConfig>("duration_config", TESTING, overrideFiles = listOf(file)).nested.interval)
+      .isEqualTo(Duration.ofSeconds(25))
+  }
+
+  @Test
+  fun strictnessSurvivesUnknownPropertyFallback() {
+    val error = assertFailsWith<IllegalStateException> { load("unknown: true\nnested:\n  interval: 25") }
+    assertThat(error.message).contains("nested.interval", "ISO-8601")
+  }
+
   private fun load(yaml: String): TestConfig {
     val file = File(directory, "duration.yaml").apply { writeText(yaml) }
-    return MiskConfig.load<TestConfig>("duration_config", TESTING, overrideFiles = listOf(file))
+    return MiskConfig.load<TestConfig>(
+      "duration_config",
+      TESTING,
+      requireExplicitDurationUnits = true,
+      overrideFiles = listOf(file),
+    )
   }
 
   data class TestConfig(
