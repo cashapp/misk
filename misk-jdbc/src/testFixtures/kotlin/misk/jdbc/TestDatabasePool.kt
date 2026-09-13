@@ -259,9 +259,7 @@ class TestDatabasePool(val backend: Backend, val clock: Clock, val retention: Du
     fun showDatabases(): Set<String>
 
     /**
-     * Drops the indicated database from the data source.
-     *
-     * Throws [PersistenceException] if the database cannot be dropped (i.e. it does not exist).
+     * Drops the indicated database from the data source, if it exists.
      */
     fun dropDatabase(name: String)
 

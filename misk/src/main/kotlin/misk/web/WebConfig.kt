@@ -219,6 +219,15 @@ constructor(
 
   /** WebSocket idle timeout in seconds. Defaults to -1 (no timeout). */
   val websocket_idle_timeout_seconds: Long = -1,
+
+  /**
+   * The maximum size in bytes of a single inbound gRPC message. Decoding aborts if either the on-the-wire frame or the
+   * decoded message (after decompression) exceeds this limit, guarding against decompression bombs and
+   * oversized-message heap exhaustion. Defaults to 1 GiB, which accepts large messages but provides little protection;
+   * set an explicit lower limit (gRPC's standard is 4 MiB) sized to the largest message a service legitimately
+   * receives.
+   */
+  val grpcMaxInboundMessageBytes: Long = 1024L * 1024 * 1024,
 ) : Config
 
 data class WebSslConfig
