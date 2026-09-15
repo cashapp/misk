@@ -35,7 +35,9 @@ internal abstract class ConfigurationFactory {
     val settings = settings {
       isExecuteWithOptimisticLocking = true
       renderMapping {
-        schemata { add(MappedSchema().withInput(jooqCodeGenSchemaName).withOutput(dataSourceConfig.database)) }
+        schemata {
+          add(MappedSchema().withInput(jooqCodeGenSchemaName).withOutput(dataSourceService.config().database))
+        }
       }
     }
     val connectionProvider =

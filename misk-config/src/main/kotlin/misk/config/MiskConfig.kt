@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JacksonAnnotationsInside
 import com.google.common.base.Joiner
 import java.io.File
 import java.io.FilenameFilter
+import java.time.Duration
+import java.time.format.DateTimeParseException
 import java.util.Locale
 import kotlin.reflect.KClass
 import kotlin.time.ExperimentalTime
@@ -40,6 +42,28 @@ import wisp.deployment.Deployment
 
 object MiskConfig {
   private val logger = getLogger<MiskConfig>()
+
+  /** Opt into requiring explicit ISO-8601 strings for Duration properties on this load. */
+  @JvmStatic
+  inline fun <reified T : Config> load(
+    appName: String,
+    deployment: Deployment,
+    requireExplicitDurationUnits: Boolean,
+    overrideFiles: List<File> = listOf(),
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM,
+  ): T {
+    val overrideResources = overrideFiles.map { "filesystem:${it.absoluteFile}" }.filter { resourceLoader.exists(it) }
+    return load(
+      T::class.java,
+      appName,
+      deployment,
+      overrideResources,
+      null,
+      resourceLoader,
+      failOnUnknownProperties = false,
+      requireExplicitDurationUnits = requireExplicitDurationUnits,
+    )
+  }
 
   @JvmStatic
   inline fun <reified T : Config> load(
@@ -127,6 +151,35 @@ object MiskConfig {
     failOnUnknownProperties: Boolean,
     deserializerModifier: ValueDeserializerModifier? = null,
   ): T {
+    return load(
+      configClass,
+      appName,
+      deployment,
+      overrideResources,
+      overrideValues,
+      resourceLoader,
+      failOnUnknownProperties,
+      deserializerModifier,
+      requireExplicitDurationUnits = false,
+    )
+  }
+
+  /**
+   * When [requireExplicitDurationUnits] is true, reject unitless Duration values in the merged config. Existing
+   * overloads retain Jackson's numeric duration handling for compatibility.
+   */
+  @JvmStatic
+  fun <T : Config> load(
+    configClass: Class<out Config>,
+    appName: String,
+    deployment: Deployment,
+    overrideResources: List<String> = listOf(),
+    overrideValues: JsonNode? = null,
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM,
+    failOnUnknownProperties: Boolean,
+    deserializerModifier: ValueDeserializerModifier? = null,
+    requireExplicitDurationUnits: Boolean,
+  ): T {
     check(!Secret::class.java.isAssignableFrom(configClass)) { "Top level service config cannot be a Secret<*>" }
 
     val configYamls = loadConfigYamlMap(appName, deployment, overrideResources, resourceLoader)
@@ -137,7 +190,9 @@ object MiskConfig {
 
     val configFile = "$appName-${configEnvironmentName.lowercase(Locale.US)}.yaml"
     return readFlattenedYaml(
-      { failOnUnknown -> newObjectMapper(resourceLoader, false, deserializerModifier, failOnUnknown) },
+      { failOnUnknown ->
+        newObjectMapper(resourceLoader, false, deserializerModifier, failOnUnknown, requireExplicitDurationUnits)
+      },
       jsonNode,
       configClass,
       configFile,
@@ -255,6 +310,7 @@ object MiskConfig {
     redactSecrets: Boolean,
     deserializerModifier: ValueDeserializerModifier?,
     failOnUnknownProperties: Boolean,
+    requireExplicitDurationUnits: Boolean = false,
   ): ObjectMapper {
     // The secret and resource deserializers parse nested documents with the very mapper they are
     // registered on. Mappers are immutable and built in one shot, so hand the modules a supplier
@@ -281,6 +337,10 @@ object MiskConfig {
         // frequently overridden for display, so switching would break existing config files.
         .disable(EnumFeature.READ_ENUMS_USING_TO_STRING, EnumFeature.WRITE_ENUMS_USING_TO_STRING)
 
+    if (requireExplicitDurationUnits) {
+      builder.addModule(SimpleModule().addDeserializer(Duration::class.java, ExplicitDurationDeserializer()))
+    }
+
     // The SecretDeserializer supports deserializing json, so bind last so it can use previous
     // mappings.
     if (redactSecrets) {
@@ -302,6 +362,24 @@ object MiskConfig {
 
     mapper = builder.build()
     return mapper
+  }
+
+  private class ExplicitDurationDeserializer : ValueDeserializer<Duration>() {
+    override fun deserialize(parser: JsonParser, ctxt: DeserializationContext): Duration {
+      if (parser.currentToken() == JsonToken.VALUE_STRING) {
+        try {
+          return Duration.parse(parser.string.trim())
+        } catch (_: DateTimeParseException) {
+          // Report invalid strings and unitless numbers with the same actionable config error.
+        }
+      }
+      throw InvalidFormatException.from(
+        parser,
+        "Duration requires an ISO-8601 string with explicit units, such as PT0.025S (25 milliseconds) or PT25S (25 seconds)",
+        parser.valueAsString,
+        Duration::class.java,
+      )
+    }
   }
 
   @JvmStatic

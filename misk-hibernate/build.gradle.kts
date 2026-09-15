@@ -23,6 +23,7 @@ sourceSets {
 dependencies {
   api(libs.guava)
   api(libs.guice)
+  api(libs.hikariCp)
   api(libs.hibernate5Core)
   api(libs.jakartaInject)
   api(libs.hibernateJpaApi)

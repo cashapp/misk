@@ -1,6 +1,7 @@
 package misk.jdbc
 
 import com.google.inject.Provider
+import com.zaxxer.hikari.metrics.MetricsTrackerFactory
 import io.opentracing.Tracer
 import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Inject
@@ -41,6 +42,8 @@ constructor(
   private val installSchemaMigrator: Boolean = true,
 ) : KAbstractModule() {
   val config = config.withDefaults()
+  private var metricsTrackerFactory: MetricsTrackerFactory? = null
+
   val readerConfig = readerConfig?.withDefaults()
 
   constructor(
@@ -55,6 +58,19 @@ constructor(
     databasePool: DatabasePool = RealDatabasePool,
     installSchemaMigrator: Boolean = true,
   ) : this(qualifier, config, null, null, databasePool, true, installSchemaMigrator)
+
+  constructor(
+    qualifier: KClass<out Annotation>,
+    config: DataSourceConfig,
+    readerQualifier: KClass<out Annotation>?,
+    readerConfig: DataSourceConfig?,
+    databasePool: DatabasePool,
+    installHealthCheck: Boolean,
+    installSchemaMigrator: Boolean,
+    metricsTrackerFactory: MetricsTrackerFactory?,
+  ) : this(qualifier, config, readerQualifier, readerConfig, databasePool, installHealthCheck, installSchemaMigrator) {
+    this.metricsTrackerFactory = metricsTrackerFactory
+  }
 
   override fun configure() {
     if (readerQualifier != null) {
@@ -181,6 +197,7 @@ constructor(
               dataSourceDecorators = dataSourceDecoratorsProvider.get(),
               databasePool = databasePool,
               collectorRegistry = registry,
+              metricsTrackerFactory = metricsTrackerFactory,
             )
           }
         }
