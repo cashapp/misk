@@ -10,27 +10,20 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Test
 
-/**
- * Tests that startup fails when config_feature_flag is configured but DynamicConfig is not bound.
- */
+/** Tests that startup fails when config_feature_flag is configured but DynamicConfig is not bound. */
 @MiskTest(startService = false)
 class SubscriptionServiceConfigValidationTest {
   @MiskExternalDependency private val dockerSqs = DockerSqs
   @MiskExternalDependency private val queueCreator = SubscriptionServiceTestQueueCreator(dockerSqs)
 
   @MiskTestModule
-  private val module = SubscriptionServiceTestModule(
-    dockerSqs = dockerSqs,
-    installFakeFeatureFlags = false,
-  )
+  private val module = SubscriptionServiceTestModule(dockerSqs = dockerSqs, installFakeFeatureFlags = false)
 
   @Inject private lateinit var serviceManager: ServiceManager
 
   @Test
   fun `startUp fails when dynamic config flag configured but DynamicConfig not bound`() {
-    val exception = assertFailsWith<IllegalStateException> {
-      serviceManager.startAsync().awaitHealthy()
-    }
+    val exception = assertFailsWith<IllegalStateException> { serviceManager.startAsync().awaitHealthy() }
 
     val cause = exception.suppressedExceptions.firstOrNull()?.cause
     assertTrue(cause is IllegalStateException)

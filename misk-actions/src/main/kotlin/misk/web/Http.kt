@@ -81,9 +81,7 @@ annotation class ResponseContentType(vararg val value: String)
  * }
  * ```
  */
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION)
-annotation class EnableUnframedRequests
+@Retention(AnnotationRetention.RUNTIME) @Target(AnnotationTarget.FUNCTION) annotation class EnableUnframedRequests
 
 /**
  * When the service is overloaded Misk will intervene and reject calls by returning "HTTP 503 Service Unavailable". We

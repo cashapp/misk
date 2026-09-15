@@ -33,9 +33,7 @@ import misk.vitess.Shard
 import misk.vitess.Shard.Companion.SINGLE_SHARD_SET
 import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
-import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.ConstraintViolationException
-import org.hibernate.exception.LockAcquisitionException
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode
 
 private val logger = getLogger<RealTransacter>()
@@ -250,15 +248,17 @@ private constructor(
   }
 
   private fun <T> transactionWithRetriesInternal(block: () -> T): T {
-    val backoff = ExponentialBackoff(
-      baseDelay = Duration.ofMillis(options.minRetryDelayMillis),
-      maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
-      jitter = Duration.ofMillis(options.retryJitterMillis)
-    )
-    val retryConfig = RetryConfig.Builder(options.maxAttempts, backoff)
-      .shouldRetry { exceptionClassifier.isRetryable(it) }
-      .onRetry { attempt, e -> logger.info(e) { "$qualifierName transaction failed, retrying (attempt $attempt)" } }
-      .build()
+    val backoff =
+      ExponentialBackoff(
+        baseDelay = Duration.ofMillis(options.minRetryDelayMillis),
+        maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
+        jitter = Duration.ofMillis(options.retryJitterMillis),
+      )
+    val retryConfig =
+      RetryConfig.Builder(options.maxAttempts, backoff)
+        .shouldRetry { exceptionClassifier.isRetryable(it) }
+        .onRetry { attempt, e -> logger.info(e) { "$qualifierName transaction failed, retrying (attempt $attempt)" } }
+        .build()
     return retry(retryConfig) { block() }
   }
 

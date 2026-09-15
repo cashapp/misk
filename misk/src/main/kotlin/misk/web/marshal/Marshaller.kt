@@ -39,12 +39,13 @@ interface Marshaller<in T> {
   companion object {
     fun actualResponseType(type: KType): Type {
       val typeLiteral = type.typeLiteral()
-      val javaType = when {
-        typeLiteral.rawType == Response::class.java -> {
-          (typeLiteral.type as ParameterizedType).actualTypeArguments[0]
+      val javaType =
+        when {
+          typeLiteral.rawType == Response::class.java -> {
+            (typeLiteral.type as ParameterizedType).actualTypeArguments[0]
+          }
+          else -> typeLiteral.type
         }
-        else -> typeLiteral.type
-      }
       // Unwrap wildcard types produced by Kotlin's declaration-site variance.
       // Response<out T> can produce "? extends T" instead of "T" for suspend function return types,
       // because KType.javaType reconstructs the type from Continuation metadata rather than from

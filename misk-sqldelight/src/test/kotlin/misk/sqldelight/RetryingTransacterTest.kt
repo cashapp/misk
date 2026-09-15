@@ -2,8 +2,8 @@ package misk.sqldelight
 
 import app.cash.sqldelight.db.OptimisticLockException
 import app.cash.sqldelight.driver.jdbc.JdbcDriver
-import java.sql.SQLRecoverableException
 import jakarta.inject.Inject
+import java.sql.SQLRecoverableException
 import misk.sqldelight.testing.Movies
 import misk.sqldelight.testing.MoviesDatabase
 import misk.sqldelight.testing.MoviesQueries
@@ -151,9 +151,11 @@ class RetryingTransacterTest {
     // Create a fresh database without retry wrapper to avoid nested retries
     val rawDatabase = MoviesDatabase.invoke(jdbcDriver)
     val customOptions = TransacterOptions(maxAttempts = 5)
-    val transacterWithCustomRetries = object : RetryingTransacter(rawDatabase, customOptions), MoviesDatabase {
-      override val moviesQueries: MoviesQueries get() = rawDatabase.moviesQueries
-    }
+    val transacterWithCustomRetries =
+      object : RetryingTransacter(rawDatabase, customOptions), MoviesDatabase {
+        override val moviesQueries: MoviesQueries
+          get() = rawDatabase.moviesQueries
+      }
 
     var attempts = 0
     assertThrows<SQLRecoverableException> {

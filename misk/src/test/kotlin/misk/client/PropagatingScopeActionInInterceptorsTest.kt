@@ -64,37 +64,39 @@ class PropagatingScopeActionInInterceptorsTest {
 
   @Test
   fun `propagate action scoped using typed http client`() {
-    val response = scope.create(seedData).inScope {
-      client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
-    }
+    val response =
+      scope.create(seedData).inScope { client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute() }
     assertThat(response.body()!!.name).isEqualTo("es-US")
   }
 
   @Test
   fun `propagate action scoped using typed http client with suspended calls`() {
-    val response = scope.create(seedData).inScope {
-      runBlocking(Dispatchers.IO + scope.asContextElement()) {
-        client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
+    val response =
+      scope.create(seedData).inScope {
+        runBlocking(Dispatchers.IO + scope.asContextElement()) {
+          client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
+        }
       }
-    }
     assertThat(response.body()!!.name).isEqualTo("es-US")
   }
 
   @Test
   fun `propagate action scoped using gRPC client`() {
-    val response = scope.create(seedData).inScope {
-      dinoService.GetDinosour().executeBlocking(Dinosaur.Builder().name("trex").build())
-    }
+    val response =
+      scope.create(seedData).inScope {
+        dinoService.GetDinosour().executeBlocking(Dinosaur.Builder().name("trex").build())
+      }
     assertThat(response.name).isEqualTo("es-US")
   }
 
   @Test
   fun `propagate action scoped using gRPC client with suspended calls`() {
-    val response = scope.create(seedData).inScope {
-      runBlocking(Dispatchers.IO + scope.asContextElement()) {
-        dinoService.GetDinosour().execute(Dinosaur.Builder().name("trex").build())
+    val response =
+      scope.create(seedData).inScope {
+        runBlocking(Dispatchers.IO + scope.asContextElement()) {
+          dinoService.GetDinosour().execute(Dinosaur.Builder().name("trex").build())
+        }
       }
-    }
     assertThat(response.name).isEqualTo("es-US")
   }
 

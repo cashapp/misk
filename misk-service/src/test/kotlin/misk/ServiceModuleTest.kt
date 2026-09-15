@@ -3,7 +3,6 @@ package misk
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
-import com.google.inject.Key
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlin.test.assertTrue
@@ -202,7 +201,6 @@ class ServiceModuleTest {
     val disabledSwitch = TestSwitch(enabled = false)
     val log = StringBuilder()
 
-
     val injector =
       Guice.createInjector(
         MiskTestingServiceModule(),
@@ -211,9 +209,10 @@ class ServiceModuleTest {
             bind<StringBuilder>().toInstance(log)
             bind<TestSwitch>().toInstance(disabledSwitch)
             install(
-              ServiceModule<TestService>().dependsOn<UpstreamService>()
+              ServiceModule<TestService>()
+                .dependsOn<UpstreamService>()
                 .dependsOn<EnhancementService>()
-                .conditionalOn<TestSwitch>("test"),
+                .conditionalOn<TestSwitch>("test")
             )
           }
         },
@@ -284,7 +283,6 @@ class ServiceModuleTest {
     assertThat(log.toString()).contains("EnhancementService.startUp")
   }
 
-
   @Test
   fun conditionalOn_withMultipleEnhancements_whenDisabled_bindsNoOpServiceWithNoEnhancements() {
     val disabledSwitch = TestSwitch(enabled = false)
@@ -296,10 +294,12 @@ class ServiceModuleTest {
           override fun configure() {
             bind<StringBuilder>().toInstance(log)
             bind<TestSwitch>().toInstance(disabledSwitch)
-            install(ServiceModule<TestService>()
-              .enhancedBy<EnhancementService>()
-              .enhancedBy<UpstreamService>()
-              .conditionalOn<TestSwitch>("test"))
+            install(
+              ServiceModule<TestService>()
+                .enhancedBy<EnhancementService>()
+                .enhancedBy<UpstreamService>()
+                .conditionalOn<TestSwitch>("test")
+            )
           }
         },
       )

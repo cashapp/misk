@@ -14,9 +14,9 @@ import misk.backoff.RetryConfig
 import misk.backoff.retry
 import misk.config.Config
 import misk.config.MiskConfig
-import misk.jdbc.retry.RetryTransactionException
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
+import misk.jdbc.retry.RetryTransactionException
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule

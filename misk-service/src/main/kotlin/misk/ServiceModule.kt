@@ -246,10 +246,10 @@ internal data class OptionalDependencyEdge(
   val switchType: KClass<out Switch>,
   val edge: DependencyEdge?,
   /**
-   * [dependencyKey] is added here to disambiguate when the switch is off.
-   * without it, guice tries to multibind the same instance for each dependency, when the off impl [edge] is null.
+   * [dependencyKey] is added here to disambiguate when the switch is off. without it, guice tries to multibind the same
+   * instance for each dependency, when the off impl [edge] is null.
    */
-  val dependencyKey: Key<out Service>
+  val dependencyKey: Key<out Service>,
 )
 
 internal data class OptionalEnhancementEdge(
@@ -258,8 +258,8 @@ internal data class OptionalEnhancementEdge(
   val switchType: KClass<out Switch>,
   val edge: EnhancementEdge?,
   /**
-   * [dependencyKey] is added here to disambiguate when the switch is off.
-   * without it, guice tries to multibind the same instance for each dependency, when the off impl [edge] is null.
+   * [dependencyKey] is added here to disambiguate when the switch is off. without it, guice tries to multibind the same
+   * instance for each dependency, when the off impl [edge] is null.
    */
-  val dependencyKey: Key<out Service>
+  val dependencyKey: Key<out Service>,
 )

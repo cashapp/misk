@@ -25,9 +25,7 @@ internal class SqsAsyncSwitchTest {
   @MiskExternalDependency private val dockerSqs = DockerSqs
   @MiskTestModule
   private val module =
-    Modules.override(
-      SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client),
-    ).with(FakeSwitchModule())
+    Modules.override(SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client)).with(FakeSwitchModule())
   @Inject private lateinit var sqs: AmazonSQS
   @Inject private lateinit var queue: JobQueue
   @Inject private lateinit var consumer: JobConsumer

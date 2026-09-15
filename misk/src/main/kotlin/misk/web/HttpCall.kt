@@ -1,9 +1,12 @@
 package misk.web
 
+import java.net.InetSocketAddress
+import java.net.UnixDomainSocketAddress
 import jakarta.servlet.http.Cookie
 import misk.api.HttpRequest
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
+import misk.web.http.HttpVersion
 import misk.web.mediatype.MediaRange
 import okhttp3.Headers
 import okhttp3.MediaType
@@ -18,6 +21,16 @@ sealed class SocketAddress {
   class Network(val ipAddress: String, val port: Int) : SocketAddress()
 
   class Unix(val path: String) : SocketAddress()
+
+  companion object {
+    internal fun from(javaSocketAddress: java.net.SocketAddress): SocketAddress {
+      return when (javaSocketAddress) {
+        is InetSocketAddress -> Network(javaSocketAddress.address.hostAddress, javaSocketAddress.port)
+        is UnixDomainSocketAddress -> Unix(javaSocketAddress.path.toString())
+        else -> throw IllegalArgumentException("Unknown SocketAddress type ${javaSocketAddress.javaClass.simpleName}")
+      }
+    }
+  }
 }
 
 /** A live HTTP call from a client for use by a chain of network interceptors. */
@@ -43,6 +56,8 @@ interface HttpCall : HttpRequest {
 
   /** Timestamp when the request was received (milliseconds since epoch) */
   val requestReceivedTimestamp: Long
+
+  val httpVersion: HttpVersion
 
   /** Set both the raw network status code and the meaningful status code that's recorded in metrics */
   fun setStatusCodes(statusCode: Int, networkStatusCode: Int)

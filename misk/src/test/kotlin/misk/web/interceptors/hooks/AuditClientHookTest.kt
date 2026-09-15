@@ -140,7 +140,7 @@ internal class AuditClientHookTest {
         automatedChange = false,
         description = "AuditRequestActionWithHeaders principal=unknown",
         richDescription =
-          "AuditRequestActionWithHeaders principal=unknown time=100.0 ms code=200 request=hello requestHeaders={accept=[*/*], accept-encoding=[gzip], connection=[keep-alive], content-length=[5], content-type=[application/json;charset=UTF-8]} response=echo: hello responseHeaders={}",
+          "AuditRequestActionWithHeaders principal=unknown time=100.0 ms code=200 request=hello requestHeaders={accept=[*/*], accept-encoding=[gzip], connection=[keep-alive], content-length=[5], content-type=[application/json;charset=utf-8]} response=echo: hello responseHeaders={}",
         environment = "testing",
         detailURL = null,
         region = "us-west-2",

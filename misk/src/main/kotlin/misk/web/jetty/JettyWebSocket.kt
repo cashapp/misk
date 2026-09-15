@@ -7,16 +7,17 @@ import misk.web.ServletHttpCall
 import misk.web.actions.WebAction
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
+import misk.web.http.HttpVersion
 import okhttp3.Headers
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import okio.utf8Size
-import org.eclipse.jetty.websocket.api.Session
-import org.eclipse.jetty.websocket.api.WebSocketAdapter
-import org.eclipse.jetty.websocket.api.WriteCallback
-import org.eclipse.jetty.websocket.server.JettyServerUpgradeRequest
-import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse
-import org.eclipse.jetty.websocket.server.JettyWebSocketCreator
+import org.eclipse.jetty.ee9.websocket.api.Session
+import org.eclipse.jetty.ee9.websocket.api.WebSocketAdapter
+import org.eclipse.jetty.ee9.websocket.api.WriteCallback
+import org.eclipse.jetty.ee9.websocket.server.JettyServerUpgradeRequest
+import org.eclipse.jetty.ee9.websocket.server.JettyServerUpgradeResponse
+import org.eclipse.jetty.ee9.websocket.server.JettyWebSocketCreator
 
 private const val MAX_QUEUE_SIZE = 16 * 1024 * 1024
 
@@ -34,7 +35,7 @@ internal class JettyWebSocket(val request: JettyServerUpgradeRequest, val respon
 
   private val adapter =
     object : WebSocketAdapter() {
-      override fun onWebSocketConnect(sess: Session?) {
+      override fun onWebSocketConnect(sess: Session) {
         super.onWebSocketConnect(sess)
         sendQueue()
       }
@@ -64,6 +65,9 @@ internal class JettyWebSocket(val request: JettyServerUpgradeRequest, val respon
         set(value) {
           response.statusCode = value
         }
+
+      override val httpVersion: HttpVersion
+        get() = error("No http version for websocket responses")
 
       override val headers: Headers
         get() = response.headers()

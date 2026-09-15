@@ -19,7 +19,7 @@ import misk.web.jetty.JettyService
 import okhttp3.HttpUrl
 
 class GrpcReflectTestingModule : KAbstractModule() {
-  val webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(port = 9090)
+  val webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(port = 9999)
 
   override fun configure() {
     install(WebTestingModule(webConfig = webConfig))

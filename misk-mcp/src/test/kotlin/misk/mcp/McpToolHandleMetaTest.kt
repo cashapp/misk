@@ -24,9 +24,9 @@ class McpToolHandleMetaTest {
   @Serializable data class CapturingInput(val name: String)
 
   /**
-   * Tool that extends the [MetaAwareMcpTool] bridge and records what its meta-aware [handle]
-   * overload receives. The bridge's `final override` of `handle(input)` fills the framework's
-   * abstract slot, so this class only declares the meta-aware overload.
+   * Tool that extends the [MetaAwareMcpTool] bridge and records what its meta-aware [handle] overload receives. The
+   * bridge's `final override` of `handle(input)` fills the framework's abstract slot, so this class only declares the
+   * meta-aware overload.
    */
   private class CapturingTool : MetaAwareMcpTool<CapturingInput>() {
     override val name = "capturing"

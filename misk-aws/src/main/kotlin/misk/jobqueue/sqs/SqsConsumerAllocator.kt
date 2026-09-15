@@ -13,8 +13,9 @@ import wisp.lease.LeaseManager
  */
 @Singleton
 @Deprecated(
-  message = "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
-    "misk-aws2-sqs (misk.aws2.sqs.jobqueue) instead."
+  message =
+    "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
+      "misk-aws2-sqs (misk.aws2.sqs.jobqueue) instead."
 )
 class SqsConsumerAllocator
 @Inject

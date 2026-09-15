@@ -6,13 +6,12 @@ import misk.annotation.ExperimentalMiskApi
 /**
  * Bridge base class for plain [McpTool] authors that need access to the request's `_meta`.
  *
- * Subclasses implement only the meta-aware [handle] overload — the input-only `handle(input)` is
- * sealed by this class and delegates to the meta-aware overload with `meta = null`, so direct
- * callers (test helpers, etc.) of the no-meta overload continue to work without re-implementing
- * the body.
+ * Subclasses implement only the meta-aware [handle] overload — the input-only `handle(input)` is sealed by this class
+ * and delegates to the meta-aware overload with `meta = null`, so direct callers (test helpers, etc.) of the no-meta
+ * overload continue to work without re-implementing the body.
  *
- * The framework's dispatcher branches on `tool is MetaAwareTool<*, *>` at invocation time, so
- * mixing this base in is the only opt-in step needed — no explicit annotations or registrations.
+ * The framework's dispatcher branches on `tool is MetaAwareTool<*, *>` at invocation time, so mixing this base in is
+ * the only opt-in step needed — no explicit annotations or registrations.
  *
  * ## Example
  *
