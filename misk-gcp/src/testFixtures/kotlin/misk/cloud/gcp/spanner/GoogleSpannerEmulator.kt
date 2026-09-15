@@ -14,6 +14,7 @@ import com.github.michaelbull.retry.policy.plus
 import com.github.michaelbull.retry.retry
 import com.google.cloud.NoCredentials
 import com.google.cloud.spanner.DatabaseId
+import com.google.cloud.spanner.ErrorCode
 import com.google.cloud.spanner.Instance
 import com.google.cloud.spanner.InstanceConfigId
 import com.google.cloud.spanner.InstanceId
@@ -92,6 +93,18 @@ class GoogleSpannerEmulator @Inject constructor(val config: SpannerConfig) : Abs
     const val IMAGE_NAME = "gcr.io/cloud-spanner-emulator/emulator"
     const val CONTAINER_NAME = "misk-spanner-testing"
     var image: String = "$IMAGE_NAME:latest"
+
+    // A fresh container needs seconds to serve its first call. The health check used to back off in single
+    // milliseconds, so it gave up long before the emulator was ready and let startup race it.
+    private const val HEALTH_CHECK_ATTEMPTS = 20
+    private const val HEALTH_CHECK_BACKOFF_BASE_MILLIS = 100L
+    private const val HEALTH_CHECK_BACKOFF_MAX_MILLIS = 2_000L
+    private const val ADMIN_ATTEMPTS = 10
+    private const val ADMIN_BACKOFF_BASE_MILLIS = 100L
+    private const val ADMIN_BACKOFF_MAX_MILLIS = 2_000L
+
+    /** Codes the emulator returns while it is still coming up. Every other code is a real failure. */
+    private val NOT_READY_ERROR_CODES = setOf(ErrorCode.UNAVAILABLE, ErrorCode.DEADLINE_EXCEEDED)
 
     fun pullImage() {
       if (imagePulled.get()) {
@@ -192,7 +205,10 @@ class GoogleSpannerEmulator @Inject constructor(val config: SpannerConfig) : Abs
   private fun waitUntilHealthy() {
     try {
       runBlocking {
-        retry(limitAttempts(20) + binaryExponentialBackoff(1L, 5L)) {
+        retry(
+          limitAttempts(HEALTH_CHECK_ATTEMPTS) +
+            binaryExponentialBackoff(HEALTH_CHECK_BACKOFF_BASE_MILLIS, HEALTH_CHECK_BACKOFF_MAX_MILLIS)
+        ) {
           // The query will fail if the server is not responding
           client.instanceAdminClient.listInstances().values
         }
@@ -202,28 +218,82 @@ class GoogleSpannerEmulator @Inject constructor(val config: SpannerConfig) : Abs
     }
   }
 
+  /**
+   * Creates the configured instance and database, and waits out an emulator that is not ready to serve admin calls.
+   *
+   * An emulator that answers `listInstances` does not always accept admin writes yet, so [waitUntilHealthy] alone does
+   * not prove readiness. Each step here reads before it writes, so the whole block is safe to repeat.
+   */
   private fun createDatabase() {
-    val instanceId = "misk-test-instance"
-    var instance: Instance
+    retryWhileUnavailable("create the instance and database") { getOrCreateDatabase(getOrCreateInstance()) }
+  }
 
+  private fun getOrCreateInstance(): Instance =
     try {
-      instance = client.instanceAdminClient.getInstance(config.instance_id)
+      client.instanceAdminClient.getInstance(config.instance_id)
     } catch (e: SpannerException) {
-      instance =
-        client.instanceAdminClient
-          .createInstance(
-            InstanceInfo.newBuilder(InstanceId.of(config.project_id, config.instance_id))
-              .setInstanceConfigId(InstanceConfigId.of(config.project_id, "emulator-config"))
-              .build()
-          )
-          .get()
+      // An unavailable emulator tells us nothing about whether the instance exists, so do not read the failure as
+      // "absent" and create it. Hand it to the retry instead.
+      if (e.isEmulatorUnavailable()) throw e
+
+      client.instanceAdminClient
+        .createInstance(
+          InstanceInfo.newBuilder(InstanceId.of(config.project_id, config.instance_id))
+            .setInstanceConfigId(InstanceConfigId.of(config.project_id, "emulator-config"))
+            .build()
+        )
+        .get()
     }
 
+  private fun getOrCreateDatabase(instance: Instance) {
     try {
       instance.getDatabase(config.database)
     } catch (e: SpannerException) {
-      instance.createDatabase(config.database, listOf())
+      if (e.isEmulatorUnavailable()) throw e
+
+      // Wait for the operation. An unawaited future can fail after startUp returns, which would hand tests a database
+      // that does not exist and put the failure outside the retry.
+      instance.createDatabase(config.database, listOf()).get()
     }
+  }
+
+  /**
+   * Runs [block] until it succeeds, and backs off while the emulator reports itself unavailable. Any other failure
+   * propagates on the first attempt.
+   */
+  private fun <T> retryWhileUnavailable(description: String, block: () -> T): T {
+    var lastFailure: Exception? = null
+    var backoffMillis = ADMIN_BACKOFF_BASE_MILLIS
+
+    repeat(ADMIN_ATTEMPTS) {
+      try {
+        return block()
+      } catch (e: Exception) {
+        if (!e.isEmulatorUnavailable()) throw e
+
+        lastFailure = e
+        logger.info("Spanner emulator cannot $description yet. Retrying in $backoffMillis ms.")
+        Thread.sleep(backoffMillis)
+        backoffMillis = (backoffMillis * 2).coerceAtMost(ADMIN_BACKOFF_MAX_MILLIS)
+      }
+    }
+
+    throw IllegalStateException("Spanner emulator did not $description in time", lastFailure)
+  }
+
+  /**
+   * Reports whether this failure, or any cause below it, is the emulator refusing a call because it is not ready. The
+   * walk down the causes matters: `OperationFuture.get` wraps the Spanner error in an `ExecutionException`.
+   */
+  private fun Throwable.isEmulatorUnavailable(): Boolean {
+    var failure: Throwable? = this
+
+    while (failure != null) {
+      if (failure is SpannerException && failure.errorCode in NOT_READY_ERROR_CODES) return true
+      failure = failure.cause
+    }
+
+    return false
   }
 
   /** Stops a Docker container running the Google Spanner emulator. */
