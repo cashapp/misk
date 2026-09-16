@@ -14,7 +14,6 @@ import com.github.michaelbull.retry.policy.plus
 import com.github.michaelbull.retry.retry
 import com.google.cloud.NoCredentials
 import com.google.cloud.spanner.DatabaseId
-import com.google.cloud.spanner.ErrorCode
 import com.google.cloud.spanner.Instance
 import com.google.cloud.spanner.InstanceConfigId
 import com.google.cloud.spanner.InstanceId
@@ -99,12 +98,6 @@ class GoogleSpannerEmulator @Inject constructor(val config: SpannerConfig) : Abs
     private const val HEALTH_CHECK_ATTEMPTS = 20
     private const val HEALTH_CHECK_BACKOFF_BASE_MILLIS = 100L
     private const val HEALTH_CHECK_BACKOFF_MAX_MILLIS = 2_000L
-    private const val ADMIN_ATTEMPTS = 10
-    private const val ADMIN_BACKOFF_BASE_MILLIS = 100L
-    private const val ADMIN_BACKOFF_MAX_MILLIS = 2_000L
-
-    /** Codes the emulator returns while it is still coming up. Every other code is a real failure. */
-    private val NOT_READY_ERROR_CODES = setOf(ErrorCode.UNAVAILABLE, ErrorCode.DEADLINE_EXCEEDED)
 
     fun pullImage() {
       if (imagePulled.get()) {
@@ -225,16 +218,18 @@ class GoogleSpannerEmulator @Inject constructor(val config: SpannerConfig) : Abs
    * not prove readiness. Each step here reads before it writes, so the whole block is safe to repeat.
    */
   private fun createDatabase() {
-    retryWhileUnavailable("create the instance and database") { getOrCreateDatabase(getOrCreateInstance()) }
+    SpannerEmulatorReadiness.retryWhileNotReady("create the instance and database") {
+      getOrCreateDatabase(getOrCreateInstance())
+    }
   }
 
   private fun getOrCreateInstance(): Instance =
     try {
       client.instanceAdminClient.getInstance(config.instance_id)
     } catch (e: SpannerException) {
-      // An unavailable emulator tells us nothing about whether the instance exists, so do not read the failure as
-      // "absent" and create it. Hand it to the retry instead.
-      if (e.isEmulatorUnavailable()) throw e
+      // An emulator that is not ready tells us nothing about whether the instance exists, so do not read the failure
+      // as "absent" and create it. Hand it to the retry instead.
+      if (SpannerEmulatorReadiness.isNotReady(e)) throw e
 
       client.instanceAdminClient
         .createInstance(
@@ -249,51 +244,12 @@ class GoogleSpannerEmulator @Inject constructor(val config: SpannerConfig) : Abs
     try {
       instance.getDatabase(config.database)
     } catch (e: SpannerException) {
-      if (e.isEmulatorUnavailable()) throw e
+      if (SpannerEmulatorReadiness.isNotReady(e)) throw e
 
       // Wait for the operation. An unawaited future can fail after startUp returns, which would hand tests a database
       // that does not exist and put the failure outside the retry.
       instance.createDatabase(config.database, listOf()).get()
     }
-  }
-
-  /**
-   * Runs [block] until it succeeds, and backs off while the emulator reports itself unavailable. Any other failure
-   * propagates on the first attempt.
-   */
-  private fun <T> retryWhileUnavailable(description: String, block: () -> T): T {
-    var lastFailure: Exception? = null
-    var backoffMillis = ADMIN_BACKOFF_BASE_MILLIS
-
-    repeat(ADMIN_ATTEMPTS) {
-      try {
-        return block()
-      } catch (e: Exception) {
-        if (!e.isEmulatorUnavailable()) throw e
-
-        lastFailure = e
-        logger.info("Spanner emulator cannot $description yet. Retrying in $backoffMillis ms.")
-        Thread.sleep(backoffMillis)
-        backoffMillis = (backoffMillis * 2).coerceAtMost(ADMIN_BACKOFF_MAX_MILLIS)
-      }
-    }
-
-    throw IllegalStateException("Spanner emulator did not $description in time", lastFailure)
-  }
-
-  /**
-   * Reports whether this failure, or any cause below it, is the emulator refusing a call because it is not ready. The
-   * walk down the causes matters: `OperationFuture.get` wraps the Spanner error in an `ExecutionException`.
-   */
-  private fun Throwable.isEmulatorUnavailable(): Boolean {
-    var failure: Throwable? = this
-
-    while (failure != null) {
-      if (failure is SpannerException && failure.errorCode in NOT_READY_ERROR_CODES) return true
-      failure = failure.cause
-    }
-
-    return false
   }
 
   /** Stops a Docker container running the Google Spanner emulator. */
