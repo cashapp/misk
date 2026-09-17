@@ -5,6 +5,7 @@ import javax.persistence.Transient
 import kotlin.reflect.KClass
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.javaField
+import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.hibernate.DbEntity
 import misk.hibernate.Transacter
@@ -35,6 +36,19 @@ internal class HibernateDatabaseQueryWebActionModule : KAbstractModule() {
       if ((isDynamicAction && !isDynamicQuery) || (!isDynamicAction && isDynamicQuery)) {
         throw BadRequestException("[queryClass=$queryClass] $status a DynamicQuery and should be handled by $action")
       }
+    }
+
+    /**
+     * Deny-by-default per-entity authorization for the Database Query actions. Mirrors [AccessInterceptor]: an entity
+     * whose access annotation resolves to no capabilities/services (and no allowAny*) is denied rather than opened up
+     * to every `@AdminDashboardAccess` holder. Broad access must be granted explicitly via the bound
+     * `AccessAnnotationEntry` (capabilities/services, or `allowAnyService`/`allowAnyUser`).
+     */
+    fun isAuthorizedForQuery(caller: MiskCaller, metadata: DatabaseQueryMetadata): Boolean {
+      if (caller.allowAll) return true
+      if (metadata.allowAnyService && caller.service != null) return true
+      if (metadata.allowAnyUser && caller.user != null) return true
+      return caller.hasCapability(metadata.allowedCapabilities) || caller.isService(metadata.allowedServices)
     }
 
     /** Find the server-side registration (metadata + authoritative KClasses) for a request's query class */

@@ -18,6 +18,7 @@ import misk.hibernate.actions.HibernateDatabaseQueryMetadataFactory.Companion.QU
 import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.checkQueryMatchesAction
 import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.findDatabaseQueryRegistration
 import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.getTransacterForDatabaseQueryAction
+import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.isAuthorizedForQuery
 import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.validateSelectPathsOrDefault
 import misk.logging.getLogger
 import misk.scope.ActionScoped
@@ -57,7 +58,7 @@ constructor(
     val transacter = getTransacterForDatabaseQueryAction(injector, registration.entityClass)
 
     val results =
-      if (caller.isAllowed(metadata.allowedCapabilities, metadata.allowedServices)) {
+      if (isAuthorizedForQuery(caller, metadata)) {
         runStaticQuery(transacter, caller.principal, request, registration)
       } else {
         throw UnauthorizedException("Unauthorized to query [dbEntity=${metadata.entityClass}]")
