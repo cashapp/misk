@@ -2,7 +2,7 @@ package misk.cloud.gcp.spanner
 
 import com.google.cloud.spanner.ErrorCode
 import com.google.cloud.spanner.SpannerException
-import mu.KotlinLogging
+import misk.logging.getLogger
 
 /**
  * Tells a Spanner emulator that is still coming up apart from a real failure, and retries around it.
@@ -13,7 +13,7 @@ import mu.KotlinLogging
  * This is public only so those retries can be tested. Service code has no reason to call it.
  */
 object SpannerEmulatorReadiness {
-  private val logger = KotlinLogging.logger {}
+  private val logger = getLogger<SpannerEmulatorReadiness>()
 
   /** Codes the emulator returns while it is still coming up. Every other code is a real failure. */
   private val NOT_READY_ERROR_CODES = setOf(ErrorCode.UNAVAILABLE, ErrorCode.DEADLINE_EXCEEDED)
