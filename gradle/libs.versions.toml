@@ -7,6 +7,8 @@ bucket4j = "8.16.1"
 datadog = "1.65.1"
 dependencyAnalysisPlugin = "3.19.1"
 detekt = "1.23.8"
+# Detekt 1.23.8 needs Kotlin 2.0.21 compiler internals despite the newer Kotlin BOM.
+detektKotlinCompiler = { strictly = "2.0.21" }
 docker = "3.7.1"
 googleAuth = "1.39.1"
 googleHttp = "2.0.0"
@@ -168,7 +170,7 @@ kotestCommon = { module = "io.kotest:kotest-common", version.ref = "kotest" }
 kotestFrameworkEngine = { module = "io.kotest:kotest-framework-engine", version.ref = "kotest" }
 kotestJunitRunnerJvm = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
 kotlinBom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
-kotlinCompilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
+kotlinCompilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "detektKotlinCompiler" }
 kotlinGradleBom = { module = "org.jetbrains.kotlin:kotlin-gradle-plugins-bom", version.ref = "kotlin" }
 kotlinNoArgPlugin = { module = "org.jetbrains.kotlin:kotlin-noarg", version.ref = "kotlin" }
 kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }

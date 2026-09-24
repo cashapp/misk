@@ -16,6 +16,7 @@ dependencies {
   testImplementation(libs.detektTest)
   testImplementation(libs.detektTestUtils)
   testImplementation(libs.guice)
+  testImplementation(libs.kotlinCompilerEmbeddable)
   testImplementation(libs.junitApi)
   testImplementation(libs.junitParams)
   testImplementation(libs.kotlinTest)
