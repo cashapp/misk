@@ -1,6 +1,7 @@
 package misk.mcp.internal
 
 import io.modelcontextprotocol.kotlin.sdk.shared.TransportSendOptions
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCError
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCNotification
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCRequest
@@ -10,6 +11,7 @@ import jakarta.inject.Inject
 import java.util.UUID
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.SendChannel
 import misk.annotation.ExperimentalMiskApi
 import misk.exceptions.BadRequestException
@@ -42,6 +44,8 @@ constructor(
 ) : MiskServerTransport() {
 
   private val initialized: AtomicBoolean = AtomicBoolean(false)
+  private var pendingRequest: JSONRPCRequest? = null
+  private var responseSent: CompletableDeferred<Unit>? = null
 
   override val streamId: String = UUID.randomUUID().toString()
 
@@ -67,6 +71,17 @@ constructor(
 
     logger.trace { "Sending SSE: $event" }
     sendChannel.send(event)
+    val request = pendingRequest
+    if (
+      request != null &&
+        when (message) {
+          is JSONRPCResponse -> message.id == request.id
+          is JSONRPCError -> message.id == request.id
+          else -> false
+        }
+    ) {
+      responseSent?.complete(Unit)
+    }
   }
 
   override suspend fun close() {
@@ -77,12 +92,16 @@ constructor(
   }
 
   override suspend fun handleMessage(message: JSONRPCMessage) {
+    val response = if (message is JSONRPCRequest) CompletableDeferred<Unit>() else null
     if (message is JSONRPCRequest) {
       mcpSessionHandler?.handleSession(message)
+      pendingRequest = message
+      responseSent = response
     }
 
     try {
       _onMessage.invoke(message)
+      response?.await()
     } catch (e: Exception) {
       _onError.invoke(e)
       throw e
