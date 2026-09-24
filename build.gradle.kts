@@ -16,13 +16,6 @@ import java.io.IOException
 import java.net.Socket
 import kotlin.time.Duration.Companion.seconds
 
-buildscript {
-  dependencies {
-    // The MCP SDK uses Kotlin 2.4 metadata, which the dependency analysis plugin's bundled reader cannot parse.
-    classpath("org.jetbrains.kotlin:kotlin-metadata-jvm:2.3.21")
-  }
-}
-
 plugins {
   alias(libs.plugins.dependencyAnalysis)
   alias(libs.plugins.binaryCompatibilityValidator)
