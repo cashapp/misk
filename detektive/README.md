@@ -1,8 +1,5 @@
 # Module: Detektive
 
-Custom detekt (static analysis) rules used in Misk and in future other cashapp libraries.
+Custom Detekt 2.0.0-alpha.2 rules used in Misk. Rule implementations use the Kotlin Analysis API; Detekt's test fixtures require Kotlin compiler 2.3.0 even though Misk uses Kotlin 2.3.21.
 
-Currently only contains the following rule:
-- `AnnotatePublicApisWithJvmOverloads` - Enforces the presence of `@JvmOverloads` annotation on public constructors and functions with default arguments. This is to prevent binary incompatible changes through transitive dependencies when a new argument with default value is added to public APIs.
-
-To suppress a rule violation on a specific class or function, annotate the element with `@Suppress("<RuleName>")` (see existing cases of `@Suppress("AnnotatePublicApisWithJvmOverloads")` as an example).
+`AnnotatePublicApisWithJvmOverloads` requires `@JvmOverloads` on public and `@PublishedApi internal` constructors and functions with default arguments. This preserves Java callers when a new defaulted parameter is added. Detekt autocorrection inserts the annotation; suppress individual violations with `@Suppress("AnnotatePublicApisWithJvmOverloads")`.

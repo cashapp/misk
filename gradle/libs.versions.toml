@@ -6,9 +6,8 @@ bouncyCastle = "1.85"
 bucket4j = "8.16.1"
 datadog = "1.65.1"
 dependencyAnalysisPlugin = "3.19.1"
-detekt = "1.23.8"
-# Detekt 1.23.8 needs Kotlin 2.0.21 compiler internals despite the newer Kotlin BOM.
-detektKotlinCompiler = { strictly = "2.0.21" }
+detekt = "2.0.0-alpha.2"
+detektKotlinCompiler = { strictly = "2.3.0" }
 docker = "3.7.1"
 googleAuth = "1.39.1"
 googleHttp = "2.0.0"
@@ -71,11 +70,12 @@ classGraph = { module = "io.github.classgraph:classgraph", version = "4.8.179" }
 concurrencyLimitsCore = { module = "com.netflix.concurrency-limits:concurrency-limits-core", version = "0.5.3" }
 cronUtils = { module = "com.cronutils:cron-utils", version = "9.2.1" }
 datasourceProxy = { module = "net.ttddyy:datasource-proxy", version = "1.11.0" }
-detektApi = { module = "io.gitlab.arturbosch.detekt:detekt-api", version.ref = "detekt" }
-detektParser = { module = "io.gitlab.arturbosch.detekt:detekt-parser", version.ref = "detekt" }
-detektPsiUtils = { module = "io.gitlab.arturbosch.detekt:detekt-psi-utils", version.ref = "detekt" }
-detektTest = { module = "io.gitlab.arturbosch.detekt:detekt-test", version.ref = "detekt" }
-detektTestUtils = { module = "io.gitlab.arturbosch.detekt:detekt-test-utils", version.ref = "detekt" }
+detektApi = { module = "dev.detekt:detekt-api", version.ref = "detekt" }
+detektParser = { module = "dev.detekt:detekt-parser", version.ref = "detekt" }
+detektPsiUtils = { module = "dev.detekt:detekt-psi-utils", version.ref = "detekt" }
+detektTest = { module = "dev.detekt:detekt-test", version.ref = "detekt" }
+detektTestJunit = { module = "dev.detekt:detekt-test-junit", version.ref = "detekt" }
+detektTestUtils = { module = "dev.detekt:detekt-test-utils", version.ref = "detekt" }
 docker = { module = "com.github.docker-java:docker-java", version.ref = "docker" }
 dockerApi = { module = "com.github.docker-java:docker-java-api", version.ref = "docker" }
 dockerCore = { module = "com.github.docker-java:docker-java-core", version.ref = "docker" }
@@ -170,7 +170,7 @@ kotestCommon = { module = "io.kotest:kotest-common", version.ref = "kotest" }
 kotestFrameworkEngine = { module = "io.kotest:kotest-framework-engine", version.ref = "kotest" }
 kotestJunitRunnerJvm = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
 kotlinBom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
-kotlinCompilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "detektKotlinCompiler" }
+kotlinCompilerForDetekt = { module = "org.jetbrains.kotlin:kotlin-compiler", version.ref = "detektKotlinCompiler" }
 kotlinGradleBom = { module = "org.jetbrains.kotlin:kotlin-gradle-plugins-bom", version.ref = "kotlin" }
 kotlinNoArgPlugin = { module = "org.jetbrains.kotlin:kotlin-noarg", version.ref = "kotlin" }
 kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
@@ -267,7 +267,7 @@ wireSchema = { module = "com.squareup.wire:wire-schema", version.ref = "wire" }
 [plugins]
 binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "kotlinBinaryCompatibilityPlugin" }
 dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysisPlugin" }
-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
 jooq = { id = "nu.studer.jooq", version = "9.0" }
 kotlinAllOpen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
