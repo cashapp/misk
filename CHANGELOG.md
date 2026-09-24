@@ -7,11 +7,6 @@ The Changelog consequently will not be updated regularly since releases only inc
 
 Major and breaking changes will still be documented in the Changelog.
 
-2026-09 Kotlin 2.3.21
-===
-
-Misk now builds with Kotlin 2.3.21. Dependency analysis uses the matching metadata reader to support libraries built with Kotlin 2.4.
-
 2024 Q2 Summary
 ===
 
