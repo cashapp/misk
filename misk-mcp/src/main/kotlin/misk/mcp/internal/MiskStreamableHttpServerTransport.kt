@@ -31,6 +31,9 @@ import misk.web.sse.ServerSentEvent
  * Adapts Misk's SSE infrastructure to the MCP Kotlin SDK transport interface. Handles session management for stateless
  * HTTP connections and sends JSON-RPC messages as SSE events to the client.
  *
+ * Each transport belongs to one HTTP response and accepts at most one JSON-RPC request. A second request fails fast
+ * rather than replacing the pending response.
+ *
  * A JSON-RPC request keeps its HTTP response open until a matching response is sent. If the transport closes first, the
  * pending HTTP request fails instead of waiting indefinitely.
  *
@@ -48,6 +51,7 @@ constructor(
 ) : MiskServerTransport() {
 
   private val initialized: AtomicBoolean = AtomicBoolean(false)
+  private val requestReceived: AtomicBoolean = AtomicBoolean(false)
   private var pendingRequest: JSONRPCRequest? = null
   @Volatile private var responseSent: CompletableDeferred<Unit>? = null
 
@@ -100,12 +104,17 @@ constructor(
   }
 
   override suspend fun handleMessage(message: JSONRPCMessage) {
-    val response = if (message is JSONRPCRequest) CompletableDeferred<Unit>() else null
-    if (message is JSONRPCRequest) {
-      mcpSessionHandler?.handleSession(message)
-      pendingRequest = message
-      responseSent = response
-    }
+    val response =
+      if (message is JSONRPCRequest) {
+        check(requestReceived.compareAndSet(expectedValue = false, newValue = true)) {
+          "Streamable HTTP transports accept only one JSON-RPC request"
+        }
+        mcpSessionHandler?.handleSession(message)
+        CompletableDeferred<Unit>().also {
+          pendingRequest = message
+          responseSent = it
+        }
+      } else null
 
     try {
       _onMessage.invoke(message)

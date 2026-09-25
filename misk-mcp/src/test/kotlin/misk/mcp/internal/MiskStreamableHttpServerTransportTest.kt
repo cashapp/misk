@@ -8,7 +8,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -66,5 +69,37 @@ class MiskStreamableHttpServerTransportTest {
         runCatching { withTimeout(100) { transport.handleMessage(request) } }.exceptionOrNull()
       )
     assertFalse(failure is TimeoutCancellationException)
+  }
+
+  @Test
+  fun `a second request cannot replace the first pending response`() = runTest {
+    val channel = Channel<ServerSentEvent>(Channel.UNLIMITED)
+    val transport = MiskStreamableHttpServerTransport(mockk<HttpCall>(relaxed = true), null, channel)
+    val secondRequest =
+      McpJson.decodeFromString<JSONRPCRequest>("""{"jsonrpc":"2.0","id":"second","method":"tools/list","params":{}}""")
+    val firstResponse =
+      McpJson.decodeFromString<JSONRPCResponse>("""{"jsonrpc":"2.0","id":"test-123","result":{"tools":[]}}""")
+    val secondResponse =
+      McpJson.decodeFromString<JSONRPCResponse>("""{"jsonrpc":"2.0","id":"second","result":{"tools":[]}}""")
+    transport.start()
+    transport.onMessage { message ->
+      launch {
+        delay(10)
+        transport.send(if (message == request) firstResponse else secondResponse)
+      }
+    }
+
+    val first = async(start = CoroutineStart.UNDISPATCHED) { withTimeout(100) { transport.handleMessage(request) } }
+    val secondFailure = runCatching { withTimeout(100) { transport.handleMessage(secondRequest) } }.exceptionOrNull()
+    val firstOutcome = runCatching { first.await() }
+
+    assertIs<IllegalStateException>(secondFailure)
+    assertFalse(secondFailure is TimeoutCancellationException)
+    assertTrue(firstOutcome.isSuccess)
+    assertEquals(
+      ServerSentEvent(event = "message", data = McpJson.encodeToString(firstResponse)),
+      channel.tryReceive().getOrNull(),
+    )
+    transport.close()
   }
 }
