@@ -11,6 +11,7 @@ import jakarta.inject.Inject
 import java.util.UUID
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.SendChannel
 import misk.annotation.ExperimentalMiskApi
@@ -30,6 +31,9 @@ import misk.web.sse.ServerSentEvent
  * Adapts Misk's SSE infrastructure to the MCP Kotlin SDK transport interface. Handles session management for stateless
  * HTTP connections and sends JSON-RPC messages as SSE events to the client.
  *
+ * A JSON-RPC request keeps its HTTP response open until a matching response is sent. If the transport closes first, the
+ * pending HTTP request fails instead of waiting indefinitely.
+ *
  * @param call The HTTP call context
  * @param mcpSessionHandler Optional session handler for managing client sessions
  * @param sendChannel Channel for sending SSE events to the client
@@ -45,7 +49,7 @@ constructor(
 
   private val initialized: AtomicBoolean = AtomicBoolean(false)
   private var pendingRequest: JSONRPCRequest? = null
-  private var responseSent: CompletableDeferred<Unit>? = null
+  @Volatile private var responseSent: CompletableDeferred<Unit>? = null
 
   override val streamId: String = UUID.randomUUID().toString()
 
@@ -87,6 +91,10 @@ constructor(
   override suspend fun close() {
     if (initialized.compareAndSet(expectedValue = true, newValue = false)) {
       sendChannel.close()
+      val pendingResponse = responseSent
+      if (pendingResponse?.isActive == true) {
+        pendingResponse.cancel(CancellationException("MCP transport closed before sending a response"))
+      }
       invokeOnCloseCallback()
     }
   }
