@@ -1,7 +1,6 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import dev.detekt.gradle.Detekt
-import dev.detekt.gradle.extensions.FailOnSeverity
-import dev.detekt.gradle.extensions.DetektExtension
+import io.gitlab.arturbosch.detekt.Detekt
+import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
@@ -52,7 +51,6 @@ dependencyAnalysis {
       }
       onIncorrectConfiguration {
         exclude("org.jetbrains.kotlin:kotlin-stdlib")
-        exclude("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
       }
     }
 
@@ -76,6 +74,11 @@ dependencyAnalysis {
       onIncorrectConfiguration {
         exclude("org.jooq:jooq")
         exclude("org.jooq:jooq-kotlin")
+      }
+    }
+    project(":detektive") {
+      onUnusedDependencies {
+        exclude("com.google.inject:guice")
       }
     }
     project(":wisp:wisp-logging-testing") {
@@ -223,22 +226,21 @@ if (hasPublishUrl) {
 subprojects {
   apply(plugin = "org.jetbrains.dokka")
   apply<DokkaMarkdownPlugin>()
-  apply(plugin = "dev.detekt")
+  apply(plugin = "io.gitlab.arturbosch.detekt")
   apply(plugin = "com.autonomousapps.dependency-analysis")
 
   if (name !in doNotDetekt) {
     extensions.configure(DetektExtension::class) {
-      parallel.set(true)
-      buildUponDefaultConfig.set(false)
-      ignoreFailures.set(false)
-      failOnSeverity.set(FailOnSeverity.Info)
-      autoCorrect.set(true)
+      parallel = true
+      buildUponDefaultConfig = false
+      ignoreFailures = false
+      autoCorrect = true
       config.setFrom(detektConfig)
     }
   } else {
     extensions.configure(DetektExtension::class) {
-      disableDefaultRuleSets.set(true)
-      ignoreFailures.set(true)
+      disableDefaultRuleSets = true
+      ignoreFailures = true
     }
   }
 
@@ -338,9 +340,6 @@ subprojects {
   tasks.withType<Detekt>().configureEach {
     dependsOn(":detektive:assemble")
     exclude { it.file.absolutePath.contains("/generated/source/") || it.file.absolutePath.contains("SampledLogger") }
-    reports.checkstyle.required.set(false)
-    reports.sarif.required.set(false)
-    reports.markdown.required.set(false)
   }
 
   plugins.withType<BasePlugin> {

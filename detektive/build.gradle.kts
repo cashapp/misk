@@ -8,14 +8,17 @@ plugins {
 
 dependencies {
   compileOnly(libs.detektApi)
+  compileOnly(libs.detektPsiUtils)
+  compileOnly(libs.kotlinCompilerEmbeddable)
 
   testImplementation(libs.assertj)
-  testImplementation(libs.kotlinCompilerForDetekt)
+  testImplementation(libs.detektParser)
   testImplementation(libs.detektTest)
-  testImplementation(libs.detektTestJunit)
   testImplementation(libs.detektTestUtils)
+  testImplementation(libs.guice)
   testImplementation(libs.junitApi)
   testImplementation(libs.junitParams)
+  testImplementation(libs.kotlinTest)
 
   testRuntimeOnly(libs.junitEngine)
 }

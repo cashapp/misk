@@ -13,7 +13,6 @@ dependencies {
   api(libs.jakartaInject)
   api(libs.kotlinXHtml)
   api(libs.moshiCore)
-  api(libs.okio)
   api(project(":wisp:wisp-deployment"))
   api(project(":wisp:wisp-resource-loader"))
   api(project(":misk-inject"))
@@ -23,6 +22,7 @@ dependencies {
   implementation(libs.jacksonDataformatYaml)
   implementation(libs.jacksonKotlin)
   implementation(libs.loggingApi)
+  implementation(libs.okio)
   implementation(project(":misk-logging"))
   implementation(project(":misk-tailwind"))
 

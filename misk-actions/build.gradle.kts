@@ -14,7 +14,7 @@ dependencies {
   implementation(libs.guava)
   implementation(libs.guice)
   implementation(libs.kotlinStdLibJdk8)
-  api(libs.okio)
+  implementation(libs.okio)
 
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)

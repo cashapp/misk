@@ -8,7 +8,7 @@ plugins {
 
 dependencies {
   api(libs.okio)
-  api(libs.wireRuntime)
+  implementation(libs.wireRuntime)
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)

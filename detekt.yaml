@@ -1,4 +1,14 @@
-# Defaults: https://github.com/detekt/detekt/blob/v2.0.0-alpha.2/detekt-core/src/main/resources/default-detekt-config.yml
+# See https://github.com/detekt/detekt/blob/master/detekt-core/src/main/resources/default-detekt-config.yml
+# for default settings.
+build:
+  excludeCorrectable: false
+
+output-reports:
+  active: true
+  exclude:
+    - 'XmlOutputReport'
+    - 'SarifOutputReport'
+    - 'MdOutputReport'
 
 console-reports:
   active: true
@@ -6,8 +16,8 @@ console-reports:
     - 'ProjectStatisticsReport'
     - 'ComplexityReport'
     - 'NotificationReport'
-    - 'FileBasedIssuesReport'
-    - 'LiteIssuesReport'
+    - 'FileBasedFindingsReport'
+    - 'LiteFindingsReport'
 
 complexity:
   LongParameterList:
@@ -16,7 +26,7 @@ complexity:
 style:
   ForbiddenImport:
     active: true
-    forbiddenImports:
+    imports:
       - value: 'javax.inject.Inject'
         reason: 'To be Guice 7+ compliant, use `jakarta.inject.Inject`'
       - value: 'javax.inject.Named'
