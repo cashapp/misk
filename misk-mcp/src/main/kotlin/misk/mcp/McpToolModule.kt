@@ -82,6 +82,44 @@ private constructor(private val toolClass: KClass<T>, private val qualifier: Bin
 
   companion object {
     /**
+     * Creates an [McpToolModule] without any group annotation.
+     *
+     * Use this when registering a tool with the default (ungrouped) MCP server.
+     * The tool will be available to any MCP server that doesn't specify a group annotation.
+     *
+     * Example:
+     * ```kotlin
+     * install(McpToolModule.create(CalculatorTool::class))
+     * ```
+     *
+     * @param T The type of [McpTool] implementation to register
+     * @param toolClass The [KClass] of the tool implementation
+     * @return A configured McpToolModule instance with no group annotation
+     */
+    @JvmName("createWithNoGroup")
+    fun <T : McpTool<*>> create(
+      toolClass: KClass<T>,
+    ) = McpToolModule(toolClass, null)
+
+    /**
+     * Creates an [McpToolModule] without any group annotation.
+     *
+     * Use this when registering a tool with the default (ungrouped) MCP server.
+     * The tool will be available to any MCP server that doesn't specify a group annotation.
+     *
+     * Example:
+     * ```kotlin
+     * install(McpToolModule.create<CalculatorTool>())
+     * ```
+     *
+     * @param T The type of [McpTool] implementation to register
+     * @return A configured McpToolModule instance with no group annotation
+     */
+    @JvmName("createWithNoGroup")
+    inline fun <reified T : McpTool<*>> create() =
+      create( T::class)
+
+    /**
      * Creates an [McpToolModule] with an optional group annotation class.
      *
      * This is the base factory method that accepts a [KClass] for both the tool and the group annotation. Use the
@@ -93,42 +131,25 @@ private constructor(private val toolClass: KClass<T>, private val qualifier: Bin
      * @return A configured McpToolModule instance
      */
     fun <T : McpTool<*>> create(toolClass: KClass<T>, groupAnnotationClass: KClass<out Annotation>?) =
-      McpToolModule(toolClass = toolClass, qualifier = groupAnnotationClass?.qualifier)
+      McpToolModule( toolClass,  groupAnnotationClass?.qualifier)
 
     /**
-     * Creates an [McpToolModule] with reified type parameters for both group annotation and tool.
+     * Creates an [McpToolModule] with a reified tool type and optional group annotation class.
      *
-     * This is the recommended way to register tools with a specific MCP server group. Both the group annotation and
-     * tool type are specified using reified generics for compile-time type safety.
+     * Convenience method that combines a reified tool type with a group annotation class parameter.
      *
      * Example:
      * ```kotlin
-     * install(McpToolModule.create<AdminMcp, AdminTool>())
+     * install(McpToolModule.create<AdminTool>(AdminMcp::class))
      * ```
      *
-     * @param GA The annotation type for the tool's MCP group (e.g., @AdminMcp, @PaymentsMcp)
      * @param T The type of [McpTool] implementation to register
+     * @param groupAnnotationClass Optional annotation class for grouping this tool with a specific MCP server
      * @return A configured McpToolModule instance
      */
-    inline fun <reified GA : Annotation, reified T : McpTool<*>> create() =
-      create(toolClass = T::class, groupAnnotationClass = GA::class)
+    inline fun <reified T : McpTool<*>> create(groupAnnotationClass: KClass<out Annotation>?) =
+      create( T::class,  groupAnnotationClass)
 
-    /**
-     * Creates an [McpToolModule] without any group annotation.
-     *
-     * Use this when registering a tool with the default (ungrouped) MCP server. The tool will be available to any MCP
-     * server that doesn't specify a group annotation.
-     *
-     * Example:
-     * ```kotlin
-     * install(McpToolModule.create<CalculatorTool>())
-     * ```
-     *
-     * @param T The type of [McpTool] implementation to register
-     * @return A configured McpToolModule instance with no group annotation
-     */
-    @JvmName("createWithNoGroup")
-    inline fun <reified T : McpTool<*>> create() = create(toolClass = T::class, groupAnnotationClass = null)
 
     /**
      * Creates an [McpToolModule] with an annotation instance for dynamic grouping.
@@ -142,7 +163,7 @@ private constructor(private val toolClass: KClass<T>, private val qualifier: Bin
      * @return A configured McpToolModule instance
      */
     fun <T : McpTool<*>> create(toolClass: KClass<T>, groupAnnotation: Annotation?) =
-      McpToolModule(toolClass = toolClass, qualifier = groupAnnotation?.qualifier)
+      McpToolModule( toolClass,  groupAnnotation?.qualifier)
 
     /**
      * Creates an [McpToolModule] with a reified tool type and annotation instance.
@@ -154,6 +175,6 @@ private constructor(private val toolClass: KClass<T>, private val qualifier: Bin
      * @return A configured McpToolModule instance
      */
     inline fun <reified T : McpTool<*>> create(groupAnnotation: Annotation?) =
-      create(toolClass = T::class, groupAnnotation = groupAnnotation)
+      create( T::class,  groupAnnotation)
   }
 }
