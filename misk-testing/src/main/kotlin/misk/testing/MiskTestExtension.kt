@@ -147,8 +147,9 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
                 e.addSuppressed(stopError)
               }
               injectedModules.invalidate(context.getSortedActionTestModules())
-              throw e
             }
+            // rethrow the exception so we fail tests instead of continuing to try starting
+            throw e
           }
           runningServices.add(context.getSortedActionTestModules())
           if (context.reuseInjector()) {
