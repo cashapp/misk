@@ -290,8 +290,10 @@ internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism? {
 }
 
 /** Extracts socket address information from an HttpServletRequest if available. */
-private fun extractLinkLayerLocalAddress(request: HttpServletRequest): SocketAddress? {
-  val jettyRequest = request as? Request ?: return null
+internal fun extractLinkLayerLocalAddress(request: HttpServletRequest): SocketAddress? {
+  // Not a plain cast: on the WebSocket upgrade path Jetty hands us a wrapper rather than the base Request, and a cast
+  // there silently yields null. getBaseRequest unwraps the ServletRequestWrapper chain.
+  val jettyRequest = Request.getBaseRequest(request) ?: return null
   val httpChannel = jettyRequest.httpChannel ?: return null
   val connector = httpChannel.connector ?: return null
 

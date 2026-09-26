@@ -157,6 +157,11 @@ internal class JettyWebSocket(val request: JettyServerUpgradeRequest, val respon
       val httpCall =
         ServletHttpCall.create(
           request = request.httpServletRequest,
+          // Without this the upgrade's HttpCall reports a null linkLayerLocalAddress, unlike every ordinary request
+          // (WebActionsServlet.handleCall passes the same thing). Callers that authenticate on the transport a request
+          // arrived over -- a trusted Unix domain socket, or plaintext loopback from a service-mesh sidecar -- cannot
+          // distinguish "no address" from "untrusted address", so they reject every WebSocket upgrade.
+          linkLayerLocalAddress = extractLinkLayerLocalAddress(request.httpServletRequest),
           dispatchMechanism = DispatchMechanism.WEBSOCKET,
           upstreamResponse = realWebSocket.upstreamResponse(),
           webSocket = realWebSocket,
