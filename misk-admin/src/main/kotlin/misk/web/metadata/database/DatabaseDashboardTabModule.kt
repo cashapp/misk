@@ -1,6 +1,7 @@
 package misk.web.metadata.database
 
 import misk.inject.KAbstractModule
+import misk.jdbc.AdminDatabaseEntry
 import misk.security.authz.AccessAnnotationEntry
 import misk.web.WebActionModule
 import misk.web.dashboard.AdminDashboard
@@ -14,8 +15,12 @@ class DatabaseDashboardTabModule(private val isDevelopment: Boolean) : KAbstract
     newMultibinder<DatabaseQueryMetadata>()
     install(WebActionModule.create<DatabaseQueryMetadataAction>())
 
+    // Admin Database Entries (auto-populated by JdbcModule for each DataSource)
+    newMultibinder<AdminDatabaseEntry>()
+
     // New Database Tab
     install(WebActionModule.create<DatabaseTabIndexAction>())
+    install(WebActionModule.create<DatabaseQueryAction>())
     install(
       DashboardModule.createHotwireTab<AdminDashboard, AdminDashboardAccess>(
         slug = "database-beta",
