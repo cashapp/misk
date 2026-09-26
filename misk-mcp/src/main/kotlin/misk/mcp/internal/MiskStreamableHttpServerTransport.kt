@@ -1,6 +1,7 @@
 package misk.mcp.internal
 
 import io.modelcontextprotocol.kotlin.sdk.shared.TransportSendOptions
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCError
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCNotification
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCRequest
@@ -10,6 +11,8 @@ import jakarta.inject.Inject
 import java.util.UUID
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.SendChannel
 import misk.annotation.ExperimentalMiskApi
 import misk.exceptions.BadRequestException
@@ -28,6 +31,12 @@ import misk.web.sse.ServerSentEvent
  * Adapts Misk's SSE infrastructure to the MCP Kotlin SDK transport interface. Handles session management for stateless
  * HTTP connections and sends JSON-RPC messages as SSE events to the client.
  *
+ * Each transport belongs to one HTTP response and accepts at most one JSON-RPC request. A second request fails fast
+ * rather than replacing the pending response.
+ *
+ * A JSON-RPC request keeps its HTTP response open until a matching response is sent. If the transport closes first, the
+ * pending HTTP request fails instead of waiting indefinitely.
+ *
  * @param call The HTTP call context
  * @param mcpSessionHandler Optional session handler for managing client sessions
  * @param sendChannel Channel for sending SSE events to the client
@@ -42,6 +51,9 @@ constructor(
 ) : MiskServerTransport() {
 
   private val initialized: AtomicBoolean = AtomicBoolean(false)
+  private val requestReceived: AtomicBoolean = AtomicBoolean(false)
+  private var pendingRequest: JSONRPCRequest? = null
+  @Volatile private var responseSent: CompletableDeferred<Unit>? = null
 
   override val streamId: String = UUID.randomUUID().toString()
 
@@ -67,22 +79,46 @@ constructor(
 
     logger.trace { "Sending SSE: $event" }
     sendChannel.send(event)
+    val request = pendingRequest
+    if (
+      request != null &&
+        when (message) {
+          is JSONRPCResponse -> message.id == request.id
+          is JSONRPCError -> message.id == request.id
+          else -> false
+        }
+    ) {
+      responseSent?.complete(Unit)
+    }
   }
 
   override suspend fun close() {
     if (initialized.compareAndSet(expectedValue = true, newValue = false)) {
       sendChannel.close()
+      val pendingResponse = responseSent
+      if (pendingResponse?.isActive == true) {
+        pendingResponse.cancel(CancellationException("MCP transport closed before sending a response"))
+      }
       invokeOnCloseCallback()
     }
   }
 
   override suspend fun handleMessage(message: JSONRPCMessage) {
-    if (message is JSONRPCRequest) {
-      mcpSessionHandler?.handleSession(message)
-    }
+    val response =
+      if (message is JSONRPCRequest) {
+        check(requestReceived.compareAndSet(expectedValue = false, newValue = true)) {
+          "Streamable HTTP transports accept only one JSON-RPC request"
+        }
+        mcpSessionHandler?.handleSession(message)
+        CompletableDeferred<Unit>().also {
+          pendingRequest = message
+          responseSent = it
+        }
+      } else null
 
     try {
       _onMessage.invoke(message)
+      response?.await()
     } catch (e: Exception) {
       _onError.invoke(e)
       throw e
