@@ -52,6 +52,7 @@ internal class StatefulRedisConnectionProviderModule<K : Any, V : Any, T : State
   private val codec: RedisCodec<K, V>,
   private val useSsl: Boolean,
   private val password: String?,
+  private val username: String?,
   private val annotation: Annotation?,
 ) : KAbstractModule() {
 
@@ -66,7 +67,13 @@ internal class StatefulRedisConnectionProviderModule<K : Any, V : Any, T : State
         withPort(port)
       }
       withSsl(useSsl)
-      password?.let { withPassword(password.toCharArray()) }
+      password?.let {
+        if (username != null) {
+          withAuthentication(username, password.toCharArray())
+        } else {
+          withPassword(password.toCharArray())
+        }
+      }
     }
 
     val connectionProviderKey = connectionProviderType.toKey(annotation)
