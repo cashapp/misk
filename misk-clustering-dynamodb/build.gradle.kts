@@ -17,6 +17,7 @@ dependencies {
   implementation(libs.jakartaInject)
   implementation(libs.loggingApi)
   implementation(project(":misk"))
+  implementation(project(":misk-aws2-dynamodb"))
   implementation(project(":misk-backoff"))
   implementation(project(":misk-clustering"))
   implementation(project(":misk-logging"))

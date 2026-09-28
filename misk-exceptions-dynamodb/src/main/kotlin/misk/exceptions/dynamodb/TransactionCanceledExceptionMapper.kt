@@ -13,6 +13,11 @@ import okhttp3.Headers.Companion.headersOf
 import org.slf4j.event.Level
 
 /** Maps certain TransactionCanceledExceptionMapper to 503 responses when the exception is concurrency related */
+@Deprecated(
+  message =
+    "AWS SDK v1 DynamoDB is deprecated. Use the AWS SDK v2 DynamoDB module in " +
+      "misk-aws2-dynamodb (misk.aws2.dynamodb.RealDynamoDbModule) instead."
+)
 class TransactionCanceledExceptionMapper @Inject constructor() : ExceptionMapper<TransactionCanceledException> {
   /**
    * Certain [TransactionCanceledException] codes are reflective of resource contention exceptions solvable by retrying

@@ -9,8 +9,8 @@ plugins {
 }
 
 // Override JVM target for detekt compatibility
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-  jvmTarget = "21"
+tasks.withType<dev.detekt.gradle.Detekt>().configureEach {
+  jvmTarget.set("21")
 }
 
 dependencies {

@@ -8,7 +8,7 @@ plugins {
 
 dependencies {
   api(libs.okio)
-  implementation(libs.wireRuntime)
+  api(libs.wireRuntime)
 }
 
 mavenPublishing {
