@@ -121,10 +121,26 @@ internal class GrpcClientProviderTest {
     assertThat(robotLocator.toString()).isEqualTo("GrpcClient:${RobotLocator::class.qualifiedName}")
   }
 
-  inner class ClientModule(val jetty: JettyService) : KAbstractModule() {
+  @Test
+  fun usesGrpcClientConstructorAmongOthers() {
+    // The order of KClass.constructors is unspecified, so declare the GrpcClient constructor both first and last.
+    for (grpcClientModule in
+      listOf(
+        GrpcClientModule.create<RobotLocator, GrpcClientConstructorFirstRobotLocator>("robots"),
+        GrpcClientModule.create<RobotLocator, GrpcClientConstructorLastRobotLocator>("robots"),
+      )) {
+      val robotLocator = Guice.createInjector(ClientModule(jetty, grpcClientModule)).getInstance<RobotLocator>()
+      assertThat(robotLocator.toString()).isEqualTo("GrpcClient:${RobotLocator::class.qualifiedName}")
+    }
+  }
+
+  inner class ClientModule(
+    val jetty: JettyService,
+    private val grpcClientModule: KAbstractModule = GrpcClientModule.create<RobotLocator, GrpcRobotLocator>("robots"),
+  ) : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
-      install(GrpcClientModule.create<RobotLocator, GrpcRobotLocator>("robots"))
+      install(grpcClientModule)
       install(ClientNetworkInterceptorsModule())
       multibind<ClientNetworkInterceptor.Factory>().toInstance(SimpleInterceptorFactory())
       multibind<ClientApplicationInterceptorFactory>()
@@ -188,6 +204,15 @@ internal class GrpcClientProviderTest {
           responseAdapter = HelloReply.ADAPTER,
         )
       )
+  }
+
+  class GrpcClientConstructorFirstRobotLocator(client: GrpcClient) : RobotLocator by GrpcRobotLocator(client) {
+    constructor(client: GrpcClient, @Suppress("UNUSED_PARAMETER") unused: String) : this(client)
+  }
+
+  class GrpcClientConstructorLastRobotLocator(client: GrpcClient, @Suppress("unused") private val unused: String) :
+    RobotLocator by GrpcRobotLocator(client) {
+    constructor(client: GrpcClient) : this(client, "")
   }
 
   interface MisconfiguredService : Service {
