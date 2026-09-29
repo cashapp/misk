@@ -7,6 +7,14 @@ The Changelog consequently will not be updated regularly since releases only inc
 
 Major and breaking changes will still be documented in the Changelog.
 
+Unreleased
+===
+
+`QueuedLogCollector` now snapshots logged arguments and structured key-value values as strings (or null)
+to avoid retaining application objects and test fixtures. Tests that inspect these values must assert on
+the rendered strings instead of the original objects. Raw and formatted messages are preserved, and
+throwable details remain available through a detached diagnostic proxy.
+
 2024 Q2 Summary
 ===
 

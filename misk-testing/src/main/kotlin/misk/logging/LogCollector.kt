@@ -8,6 +8,10 @@ import misk.testing.TestFixture
 /**
  * Collects log messages, so they may be asserted on for testing.
  *
+ * [QueuedLogCollector] snapshots events when they are logged. Message arguments and structured key-value values are
+ * rendered strings (or null), and throwables are copied as diagnostic proxies, so collected events do not retain those
+ * application objects. Raw and formatted messages are preserved.
+ *
  * Use the optional parameters of [takeMessages] to constrain which log messages are returned.
  */
 interface LogCollector : TestFixture {

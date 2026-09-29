@@ -3,6 +3,7 @@ package misk.logging
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.classic.spi.LoggingEventVO
 import ch.qos.logback.core.UnsynchronizedAppenderBase
 import com.google.common.util.concurrent.AbstractIdleService
 import jakarta.inject.Inject
@@ -12,6 +13,8 @@ import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 import org.slf4j.LoggerFactory
+import org.slf4j.event.KeyValuePair
+import org.slf4j.helpers.MessageFormatter
 
 @Singleton
 class QueuedLogCollector @Inject constructor() : AbstractIdleService(), LogCollector, LogCollectorService {
@@ -23,7 +26,7 @@ class QueuedLogCollector @Inject constructor() : AbstractIdleService(), LogColle
   private val appender =
     object : UnsynchronizedAppenderBase<ILoggingEvent>() {
       override fun append(event: ILoggingEvent) {
-        queue.put(event)
+        queue.put(CollectedLogEvent.capture(event))
       }
     }
 
@@ -160,5 +163,35 @@ class QueuedLogCollector @Inject constructor() : AbstractIdleService(), LogColle
 
   override fun reset() {
     queue.clear()
+  }
+}
+
+/** Captures diagnostic values without keeping logged service objects alive. */
+private class CollectedLogEvent(snapshot: ILoggingEvent, private val renderedMessage: String?) :
+  ILoggingEvent by snapshot {
+  override fun getFormattedMessage(): String? = renderedMessage
+
+  companion object {
+    fun capture(event: ILoggingEvent): ILoggingEvent {
+      val formattedMessage = event.formattedMessage
+      val arguments = event.argumentArray?.map { render(it) }?.toTypedArray()
+      val keyValues = event.keyValuePairs?.map { KeyValuePair(it.key, render(it.value)) }
+      val mdc = event.mdcPropertyMap?.toMap()
+      // LoggingEventVO copies these getters, so the temporary delegate is not retained.
+      val snapshot =
+        LoggingEventVO.build(
+          object : ILoggingEvent by event {
+            override fun getArgumentArray(): Array<out Any?>? = arguments
+
+            override fun getKeyValuePairs(): List<KeyValuePair>? = keyValues
+
+            override fun getMDCPropertyMap(): Map<String, String>? = mdc
+          }
+        )
+      return CollectedLogEvent(snapshot, formattedMessage)
+    }
+
+    private fun render(value: Any?): String? =
+      value?.let { MessageFormatter.arrayFormat("{}", arrayOf(it), null).message }
   }
 }
