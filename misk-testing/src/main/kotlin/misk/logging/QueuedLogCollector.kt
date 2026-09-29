@@ -174,14 +174,14 @@ private class CollectedLogEvent(snapshot: ILoggingEvent, private val renderedMes
   companion object {
     fun capture(event: ILoggingEvent): ILoggingEvent {
       val formattedMessage = event.formattedMessage
-      val arguments = event.argumentArray?.map { render(it) }?.toTypedArray()
       val keyValues = event.keyValuePairs?.map { KeyValuePair(it.key, render(it.value)) }
       val mdc = event.mdcPropertyMap?.toMap()
       // LoggingEventVO copies these getters, so the temporary delegate is not retained.
       val snapshot =
         LoggingEventVO.build(
           object : ILoggingEvent by event {
-            override fun getArgumentArray(): Array<out Any?>? = arguments
+            // The formatted message already captures used arguments; do not render them again.
+            override fun getArgumentArray(): Array<out Any?>? = null
 
             override fun getKeyValuePairs(): List<KeyValuePair>? = keyValues
 

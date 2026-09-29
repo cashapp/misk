@@ -44,7 +44,7 @@ class QueuedLogCollectorSnapshotTest {
       val event = collector.takeEvent()
       assertThat(event.message).isEqualTo("Started {}")
       assertThat(event.formattedMessage).isEqualTo("Started fixture")
-      assertThat(event.argumentArray).containsExactly("fixture")
+      assertThat(event.argumentArray).isNull()
       assertThat(otherAppender.list.single().argumentArray.single()).isSameAs(fixture)
     } finally {
       logger.detachAppender(otherAppender)
@@ -59,7 +59,19 @@ class QueuedLogCollectorSnapshotTest {
     val event = collector.takeEvent()
     assertThat(event.message).isEqualTo("arrays {} {} null {} escaped \\{}")
     assertThat(event.formattedMessage).isEqualTo("arrays [1, 2] [a, b] null null escaped \\{}")
-    assertThat(event.argumentArray).containsExactly("[1, 2]", "[a, b]", null)
+    assertThat(event.argumentArray).isNull()
+  }
+
+  @Test
+  fun doesNotRenderArgumentsAgainOrRenderUnusedArguments() {
+    val used = CountingValue()
+    val unused = CountingValue()
+    logger.info("value {}", used, unused)
+
+    val event = collector.takeEvent()
+    assertThat(event.formattedMessage).isEqualTo("value diagnostic")
+    assertThat(used.renderCount).isEqualTo(1)
+    assertThat(unused.renderCount).isZero()
   }
 
   @Test
@@ -105,6 +117,15 @@ class QueuedLogCollectorSnapshotTest {
     val fixture = Fixture("fixture")
     logger.atWarn().addKeyValue("fixture", fixture).setCause(FixtureException(fixture)).log("Failed {}", fixture)
     return WeakReference(fixture)
+  }
+
+  private class CountingValue {
+    var renderCount = 0
+
+    override fun toString(): String {
+      renderCount++
+      return "diagnostic"
+    }
   }
 
   private class Fixture(var name: String) {
