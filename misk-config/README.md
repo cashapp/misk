@@ -31,17 +31,7 @@ val config = MiskConfig.load<ExemplarConfig>("exemplar", depoyment)
 
 ## Durations
 
-Opt into explicit units for `java.time.Duration` config properties on each load:
-
-```kotlin
-val config = MiskConfig.load<ExemplarConfig>(
-  "exemplar",
-  deployment,
-  requireExplicitDurationUnits = true,
-)
-```
-
-With this option enabled, Duration properties require ISO-8601 strings with explicit units:
+`java.time.Duration` properties loaded by `MiskConfig.load` require ISO-8601 strings with explicit units:
 
 ```yaml
 retry_delay: PT0.025S # 25 milliseconds
@@ -49,18 +39,19 @@ request_timeout: PT25S # 25 seconds
 ```
 
 Unitless numbers (including zero, fractions, and quoted numbers) are rejected. Use `PT0S` for zero.
-By default, the option is disabled and existing overloads retain Jackson's behavior: numeric
-durations are interpreted as seconds by default, so a value such as `25`
-could silently mean 25 seconds when the author intended 25 milliseconds. When migrating existing
-config, preserve its intended duration rather than assuming every number means milliseconds.
+This is a breaking change from older releases, which accepted numeric durations as seconds unless
+strict parsing was enabled. For example, `25` meant 25 seconds, not 25 milliseconds.
+To preserve that effective value, use `PT25S`; only use `PT0.025S` if 25 milliseconds is the
+intended duration. Do not mechanically divide every numeric value by 1,000.
 
-The option is scoped to a single load, allowing gradual rollout by service or deployment without
-changing other consumers. Migrate common, environment, and override configurations and enable the
-option in config/injector tests before enabling it at startup. Wrappers can forward the option
-through the class-based overload, including when supplying a custom deserializer modifier.
+Before upgrading, migrate common, environment, mounted, and local override configurations and
+validate all environments with your config/injector tests. Validation applies to the final merged
+configuration. Older releases with the opt-in flag can be used to prepare for this upgrade.
+The overloads accepting `requireExplicitDurationUnits` are deprecated compatibility shims:
+both `true` and `false` now require explicit units. Remove the argument from callers.
 
-This requirement applies to opted-in values loaded by `MiskConfig`, not to primitive numeric config
-properties or other JSON mappers. Kotlin `Duration` defaults remain unchanged when a property is absent.
+This requirement applies to `java.time.Duration` values loaded by `MiskConfig`, not to primitive numeric
+config properties or other JSON mappers. Defaults declared in Kotlin remain unchanged when a property is absent.
 
 ## Redacted
 
