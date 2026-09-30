@@ -47,8 +47,9 @@ intended duration. Do not mechanically divide every numeric value by 1,000.
 Before upgrading, migrate common, environment, mounted, and local override configurations and
 validate all environments with your config/injector tests. Validation applies to the final merged
 configuration. Older releases with the opt-in flag can be used to prepare for this upgrade.
-The overloads accepting `requireExplicitDurationUnits` are deprecated compatibility shims:
-both `true` and `false` now require explicit units. Remove the argument from callers.
+The overloads accepting `requireExplicitDurationUnits` have been removed. Remove that argument
+from callers and recompile them when upgrading; this is a source and binary API break for callers
+using those overloads. Explicit units are required without an opt-out.
 
 This requirement applies to `java.time.Duration` values loaded by `MiskConfig`, not to primitive numeric
 config properties or other JSON mappers. Defaults declared in Kotlin remain unchanged when a property is absent.

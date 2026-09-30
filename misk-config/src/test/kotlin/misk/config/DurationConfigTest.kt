@@ -78,21 +78,10 @@ class DurationConfigTest {
     assertThat(JsonMapper.builder().build().readValue("25", Duration::class.java)).isEqualTo(Duration.ofSeconds(25))
   }
 
-  @Suppress("DEPRECATION")
-  @ParameterizedTest
-  @ValueSource(booleans = [true, false])
-  fun compatibilityOverloadsCannotDisableValidation(flag: Boolean) {
+  @Test
+  fun classBasedLoadRequiresExplicitUnits() {
     val file = File(directory, "duration.yaml").apply { writeText("nested:\n  interval: 25") }
-    val genericError =
-      assertFailsWith<IllegalStateException> {
-        MiskConfig.load<TestConfig>(
-          "duration_config",
-          TESTING,
-          requireExplicitDurationUnits = flag,
-          overrideFiles = listOf(file),
-        )
-      }
-    val classError =
+    val error =
       assertFailsWith<IllegalStateException> {
         MiskConfig.load<TestConfig>(
           TestConfig::class.java,
@@ -100,23 +89,9 @@ class DurationConfigTest {
           TESTING,
           overrideResources = listOf("filesystem:${file.absolutePath}"),
           failOnUnknownProperties = false,
-          requireExplicitDurationUnits = flag,
         )
       }
-    assertThat(genericError.message).contains("nested.interval", "ISO-8601")
-    assertThat(classError.message).isEqualTo(genericError.message)
-    file.writeText("nested:\n  interval: PT25S")
-    assertThat(
-        MiskConfig.load<TestConfig>(
-            "duration_config",
-            TESTING,
-            requireExplicitDurationUnits = flag,
-            overrideFiles = listOf(file),
-          )
-          .nested
-          .interval
-      )
-      .isEqualTo(Duration.ofSeconds(25))
+    assertThat(error.message).contains("nested.interval", "ISO-8601")
   }
 
   @Test

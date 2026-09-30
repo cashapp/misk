@@ -43,29 +43,6 @@ import wisp.deployment.Deployment
 object MiskConfig {
   private val logger = getLogger<MiskConfig>()
 
-  /** Compatibility overload; explicit Duration units are always required. */
-  @Deprecated("Explicit Duration units are always required. Use the overload without requireExplicitDurationUnits.")
-  @Suppress("UNUSED_PARAMETER")
-  @JvmStatic
-  inline fun <reified T : Config> load(
-    appName: String,
-    deployment: Deployment,
-    requireExplicitDurationUnits: Boolean,
-    overrideFiles: List<File> = listOf(),
-    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM,
-  ): T {
-    val overrideResources = overrideFiles.map { "filesystem:${it.absoluteFile}" }.filter { resourceLoader.exists(it) }
-    return load(
-      T::class.java,
-      appName,
-      deployment,
-      overrideResources,
-      null,
-      resourceLoader,
-      failOnUnknownProperties = false,
-    )
-  }
-
   @JvmStatic
   inline fun <reified T : Config> load(
     appName: String,
@@ -138,33 +115,6 @@ object MiskConfig {
       resourceLoader,
       failOnUnknownProperties,
       deserializerModifier = null,
-    )
-  }
-
-  /** Compatibility overload; explicit Duration units are required regardless of the argument's value. */
-  @Deprecated("Explicit Duration units are always required. Use the overload without requireExplicitDurationUnits.")
-  @Suppress("UNUSED_PARAMETER")
-  @JvmStatic
-  fun <T : Config> load(
-    configClass: Class<out Config>,
-    appName: String,
-    deployment: Deployment,
-    overrideResources: List<String> = listOf(),
-    overrideValues: JsonNode? = null,
-    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM,
-    failOnUnknownProperties: Boolean,
-    deserializerModifier: ValueDeserializerModifier? = null,
-    requireExplicitDurationUnits: Boolean,
-  ): T {
-    return load(
-      configClass,
-      appName,
-      deployment,
-      overrideResources,
-      overrideValues,
-      resourceLoader,
-      failOnUnknownProperties,
-      deserializerModifier,
     )
   }
 
