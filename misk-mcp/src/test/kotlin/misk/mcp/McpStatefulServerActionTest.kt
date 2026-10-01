@@ -7,17 +7,21 @@ import io.modelcontextprotocol.kotlin.sdk.client.StreamableHttpError
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.types.ListToolsRequest
 import io.modelcontextprotocol.kotlin.sdk.types.McpException
+import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import jakarta.inject.Inject
 import java.net.HttpURLConnection.HTTP_BAD_REQUEST
+import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 import java.net.HttpURLConnection.HTTP_NOT_FOUND
 import java.net.HttpURLConnection.HTTP_NO_CONTENT
+import java.util.concurrent.TimeUnit
 import kotlin.test.Test
-import kotlin.test.assertIs
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.Serializable
 import misk.MiskTestingServiceModule
 import misk.annotation.ExperimentalMiskApi
 import misk.inject.KAbstractModule
@@ -25,6 +29,7 @@ import misk.mcp.action.McpDelete
 import misk.mcp.action.McpPost
 import misk.mcp.action.McpStreamManager
 import misk.mcp.action.SESSION_ID_HEADER
+import misk.mcp.action.currentServerSession
 import misk.mcp.action.handleMessage
 import misk.mcp.config.McpConfig
 import misk.mcp.config.McpServerConfig
@@ -42,12 +47,25 @@ import misk.web.WebServerTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.sse.ServerSentEvent
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.junit.jupiter.api.assertThrows
 
 @MiskTest(startService = true)
 internal class McpStatefulServerActionTest {
+  @Serializable data class CloseSessionInput(val dummy: String = "unused")
+
+  class CloseSessionTool @Inject constructor() : McpTool<CloseSessionInput>() {
+    override val name = "close_session"
+    override val description = "Closes the current MCP server session"
+
+    override suspend fun handle(input: CloseSessionInput): ToolResult {
+      currentServerSession().close()
+      return ToolResult(TextContent("Session closed"))
+    }
+  }
 
   val mcpStatefulServerActionTestConfig = McpConfig(buildMap { put(SERVER_NAME, McpServerConfig(version = "1.0.0")) })
 
@@ -85,6 +103,7 @@ internal class McpStatefulServerActionTest {
         install(WebActionModule.create<McpStatefulServerActionTestPostAction>())
         install(WebActionModule.create<McpStatefulServerActionTestDeleteAction>())
         install(McpToolModule.create<SessionIdentifierTool>())
+        install(McpToolModule.create<CloseSessionTool>())
 
         install(WebServerTestingModule())
         install(MiskTestingServiceModule())
@@ -100,7 +119,7 @@ internal class McpStatefulServerActionTest {
     val mcpClient = okHttpClient.asMcpStreamableHttpClient(jettyService.httpServerUrl, "/mcp")
     val request = ListToolsRequest()
     val response = mcpClient.listTools(request)
-    assertEquals(expected = 1, actual = response.tools.size, message = "Expecting only one tool to be registered")
+    assertEquals(expected = 2, actual = response.tools.size, message = "Expecting both test tools to be registered")
 
     // Check session identifier tool
     val sessionIdentifierTool = response.tools.find { it.name == "session_identifier" }
@@ -209,6 +228,25 @@ internal class McpStatefulServerActionTest {
       }
     assertIs<StreamableHttpError>(error.cause)
     assertEquals(HTTP_BAD_REQUEST, (error.cause as StreamableHttpError).code)
+  }
+
+  @Test
+  fun `closing the server session ends the HTTP request with an error`() = runBlocking {
+    val mcpClient = okHttpClient.asMcpStreamableHttpClient(jettyService.httpServerUrl, "/mcp")
+    val sessionId = assertNotNull((mcpClient.transport as StreamableHttpClientTransport).sessionId)
+    val closeRequest =
+      Request.Builder()
+        .url(jettyService.httpServerUrl.newBuilder().encodedPath("/mcp").build())
+        .addHeader(SESSION_ID_HEADER, sessionId)
+        .post(
+          """{"jsonrpc":"2.0","id":"close-request","method":"tools/call","params":{"name":"close_session","arguments":{}}}"""
+            .toRequestBody("application/json".toMediaType())
+        )
+        .build()
+
+    okHttpClient.newBuilder().callTimeout(5, TimeUnit.SECONDS).build().newCall(closeRequest).execute().use {
+      assertEquals(HTTP_INTERNAL_ERROR, it.code)
+    }
   }
 
   companion object {

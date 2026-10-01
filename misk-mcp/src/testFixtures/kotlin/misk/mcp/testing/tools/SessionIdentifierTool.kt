@@ -1,6 +1,8 @@
 package misk.mcp.testing.tools
 
 import jakarta.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.Description
@@ -19,7 +21,7 @@ class SessionIdentifierTool @Inject constructor(private val sessionId: McpSessio
   override val description = "Returns the current MCP session ID"
 
   override suspend fun handle(input: SessionIdentifierInput): ToolResult {
-    val currentSessionId = sessionId.get()
+    val currentSessionId = withContext(Dispatchers.IO) { sessionId.get() }
     return ToolResult(SessionIdentifierOutput(sessionId = currentSessionId))
   }
 }
