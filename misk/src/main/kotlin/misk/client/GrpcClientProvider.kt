@@ -61,6 +61,9 @@ internal class GrpcClientProvider<T : Service, G : T>(
   @Inject private lateinit var appInterceptorFactories: Provider<List<ClientApplicationInterceptorFactory>>
   @Inject private lateinit var callFactoryWrappers: Provider<List<CallFactoryWrapper>>
 
+  @com.google.inject.Inject(optional = true)
+  private val clientConfigurators: Provider<List<ClientOkHttpConfigurator>> = Provider { emptyList() }
+
   override fun get(): T {
     val endpointConfig: HttpClientEndpointConfig = httpClientsConfigProvider.get()[name]
     val httpClient = httpClientProvider.get()
@@ -173,6 +176,8 @@ internal class GrpcClientProvider<T : Service, G : T>(
       val interceptor = factory.create(action) ?: continue
       clientBuilder.addNetworkInterceptor(NetworkInterceptorWrapper(action, interceptor))
     }
+
+    clientConfigurators.get().forEach { it.configure(action, clientBuilder) }
 
     val callFactoryWrapped =
       callFactoryWrappers.fold(clientBuilder.build() as Call.Factory) { callFactory, callFactoryWrapper ->

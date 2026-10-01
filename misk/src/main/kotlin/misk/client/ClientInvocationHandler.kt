@@ -40,6 +40,7 @@ internal class ClientInvocationHandler(
   tracer: Tracer?,
   moshi: Moshi,
   callFactoryWrappers: Provider<List<CallFactoryWrapper>> = Provider<List<CallFactoryWrapper>> { emptyList() },
+  clientConfigurators: Provider<List<ClientOkHttpConfigurator>> = Provider { emptyList() },
 ) : InvocationHandler {
 
   private val actionsByMethod =
@@ -62,6 +63,7 @@ internal class ClientInvocationHandler(
         if (eventListenerFactory != null) {
           clientBuilder.eventListenerFactory(eventListenerFactory)
         }
+        clientConfigurators.get().forEach { it.configure(action, clientBuilder) }
         val actionSpecificClient = clientBuilder.build()
 
         val retrofitBuilder = retrofit.newBuilder()
