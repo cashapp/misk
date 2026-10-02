@@ -13,6 +13,10 @@ constructor(
   val queryWebActionPath: String,
   val allowedCapabilities: Set<String> = setOf(),
   val allowedServices: Set<String> = setOf(),
+  /** When true, any authenticated service may run this query regardless of [allowedServices]. */
+  val allowAnyService: Boolean = false,
+  /** When true, any authenticated user may run this query regardless of [allowedCapabilities]. */
+  val allowAnyUser: Boolean = false,
   val accessAnnotation: String?,
   /** SQL table name */
   val table: String,
@@ -35,6 +39,8 @@ constructor(
     queryWebActionPath: String,
     allowedCapabilities: Set<String> = setOf(),
     allowedServices: Set<String> = setOf(),
+    allowAnyService: Boolean = false,
+    allowAnyUser: Boolean = false,
     accessAnnotation: KClass<out Annotation>? = null,
     table: String,
     entityClass: KClass<*>,
@@ -48,6 +54,8 @@ constructor(
     queryWebActionPath = queryWebActionPath,
     allowedCapabilities = allowedCapabilities,
     allowedServices = allowedServices,
+    allowAnyService = allowAnyService,
+    allowAnyUser = allowAnyUser,
     accessAnnotation = accessAnnotation?.simpleName,
     table = table,
     entityClass = entityClass.simpleName!!, // Assert not null, since this shouldn't be anonymous.
