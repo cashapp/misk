@@ -9,7 +9,7 @@ import tools.jackson.databind.JsonNode
 import tools.jackson.dataformat.yaml.YAMLMapper
 import wisp.deployment.TESTING
 
-class MiskConfigYamlTest {
+class MiskConfigYamlReferencesTest {
   data class YamlConfig(val values: Map<String, Any?>) : Config
 
   @Test
@@ -89,6 +89,22 @@ class MiskConfigYamlTest {
       )
     assertThat(config.values["first_copy"]).isEqualTo("common")
     assertThat(config.values["second_copy"]).isEqualTo("environment")
+  }
+
+  @Test
+  fun aliasesUseTheMostRecentPrecedingAnchor() {
+    val config =
+      load(
+        """
+        values:
+          first: &anchor Foo
+          first_copy: *anchor
+          second: &anchor Bar
+          second_copy: *anchor
+        """
+      )
+    assertThat(config.values["first_copy"]).isEqualTo("Foo")
+    assertThat(config.values["second_copy"]).isEqualTo("Bar")
   }
 
   @Test
