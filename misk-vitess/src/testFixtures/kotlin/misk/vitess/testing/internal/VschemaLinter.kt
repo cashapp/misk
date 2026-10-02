@@ -52,6 +52,9 @@ internal class VschemaLinter(val vschemaAdapter: VschemaAdapter) {
           val vindexParamsMap = vschemaAdapter.toMap(vindexMap["params"])
           vindexParamsMap.let { params ->
             val orderedParamsFields = mutableListOf("autocommit", "from", "ignore_nulls", "table", "to")
+            if (params.containsKey("multi_shard_autocommit")) {
+              orderedParamsFields.add(orderedParamsFields.indexOf("table"), "multi_shard_autocommit")
+            }
             if (params.containsKey("no_verify")) {
               orderedParamsFields.add(orderedParamsFields.indexOf("table"), "no_verify")
             }
