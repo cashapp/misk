@@ -29,6 +29,34 @@ val deployment = getDeploymentFromEnvironmentVariable()
 val config = MiskConfig.load<ExemplarConfig>("exemplar", depoyment)
 ```
 
+## YAML anchors and merge keys
+
+Configuration documents support anchors (`&`), aliases (`*`), and mapping merge keys (`<<:`):
+
+```yaml
+primary: &client
+  timeout: 30
+  retries: 3
+secondary:
+  <<: *client
+  timeout: 60
+```
+
+Here `secondary` has `timeout: 60` and `retries: 3`. Explicit keys win regardless of where `<<:` appears.
+For `<<: [*first, *second]`, the first mapping wins when both define a key. These merges are shallow:
+an explicit nested mapping replaces the inherited nested mapping.
+
+References resolve separately in each configuration document before the usual cross-file overrides.
+An anchor in the common file cannot be referenced from an environment or override file. Anchor holders
+such as `primary` above are ordinary configuration keys and must fit the config class. Quoted `"<<"`
+and explicitly string-tagged `!!str <<` keys remain literal keys.
+
+Cyclic references and non-mapping merge sources are rejected. Expansion is limited to 100 nesting
+levels, 100,000 nodes, and 10,000,000 scalar characters per document, in addition to SnakeYAML's input
+and collection-alias limits. Secret and resource references still resolve through Misk's deserializers.
+This support applies to the configuration documents combined by `MiskConfig.load`, not to YAML loaded
+later through a secret or resource reference.
+
 ## Durations
 
 `java.time.Duration` properties loaded by `MiskConfig.load` require ISO-8601 strings with explicit units:
