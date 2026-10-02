@@ -31,6 +31,7 @@ internal class GrpcFeatureBinding(
   private val grpcEncoding: String,
   private val minMessageToCompress: Long,
   private val maxInboundMessageBytes: Long,
+  private val maxDecompressionRatio: Long,
 ) : FeatureBinding {
 
   override fun beforeCall(subject: Subject) {
@@ -41,6 +42,7 @@ internal class GrpcFeatureBinding(
         requestAdapter,
         subject.httpCall.requestHeaders["grpc-encoding"],
         maxInboundMessageBytes,
+        maxDecompressionRatio,
       )
     // TODO: support the "grpc-accept-encoding" header
 
@@ -136,6 +138,8 @@ internal class GrpcFeatureBinding(
 
     private val maxInboundMessageBytes = webConfig.grpcMaxInboundMessageBytes
 
+    private val maxDecompressionRatio = webConfig.grpcMaxDecompressionRatio
+
     override fun create(
       action: Action,
       pathPattern: PathPattern,
@@ -184,6 +188,7 @@ internal class GrpcFeatureBinding(
           grpcEncoding = grpcEncoding,
           minMessageToCompress = minMessageToCompress,
           maxInboundMessageBytes = maxInboundMessageBytes,
+          maxDecompressionRatio = maxDecompressionRatio,
         )
       } else {
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
@@ -197,6 +202,7 @@ internal class GrpcFeatureBinding(
           grpcEncoding = grpcEncoding,
           minMessageToCompress = minMessageToCompress,
           maxInboundMessageBytes = maxInboundMessageBytes,
+          maxDecompressionRatio = maxDecompressionRatio,
         )
       }
     }
