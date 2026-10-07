@@ -7,6 +7,7 @@ import io.opentracing.Tracer
 import jakarta.inject.Inject
 import java.time.Clock
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -24,7 +25,6 @@ import misk.jobqueue.v2.JobConsumer
 import misk.jobqueue.v2.JobHandler
 import misk.logging.getLogger
 import misk.testing.TestFixture
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Instruments queue consumption.
@@ -95,12 +95,15 @@ constructor(
   }
 
   override fun unsubscribe(queueName: QueueName) {
-    subscriptions[queueName]?.handlingScope?.cancel()
+    subscriptions.remove(queueName)?.let { subscription ->
+      subscription.pollingJob.cancel()
+      subscription.handlingScope.cancel()
+    }
   }
 
   /** Called automatically between every test to prevent long-running scopes or test timeouts. */
   override fun reset() {
-    subscriptions.forEach { _, subscription -> subscription.handlingScope.cancel() }
+    subscriptions.keys.toList().forEach(::unsubscribe)
   }
 
   override fun doStart() {
@@ -112,7 +115,8 @@ constructor(
     runBlocking(scope.coroutineContext) {
       subscriptions.forEach { (queueName, subscription) ->
         // Stop issuing new receives, and give the in-flight one a chance to finish its long poll. Messages it already
-        // fetched are handled normally; abandoning it would leave them invisible until their visibility timeout expires.
+        // fetched are handled normally; abandoning it would leave them invisible until their visibility timeout
+        // expires.
         subscription.subscriber.stop()
         val gracePeriod =
           (subscription.subscriber.queueConfig.shutdown_grace_period_ms
@@ -141,7 +145,6 @@ constructor(
     val handlingScope: CoroutineScope,
     val handlingJobs: List<Job>,
   )
-
 
   companion object {
     private val logger = getLogger<SqsJobConsumer>()

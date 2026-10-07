@@ -6,8 +6,11 @@ import io.opentracing.tag.Tags
 import java.time.Clock
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.time.TimeSource
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -30,14 +33,15 @@ import software.amazon.awssdk.services.sqs.model.MessageSystemAttributeName
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
-import kotlin.math.log
 
 /**
  * Subscriber reads jobs from the channel and passes them to handler.
  *
  * It responds to handler results by either acknowledging the job or moving it to a dead letter queue.
  */
-class Subscriber(
+class Subscriber
+@JvmOverloads
+constructor(
   val queueName: QueueName,
   val queueConfig: SqsQueueConfig,
   val deadLetterQueueName: QueueName,
@@ -51,6 +55,7 @@ class Subscriber(
   val tracer: Tracer,
   val visibilityTimeoutCalculator: VisibilityTimeoutCalculator,
   val asyncSwitch: AsyncSwitch,
+  private val timeSource: TimeSource = TimeSource.Monotonic,
 ) {
   private var wasDisabled = false
   @Volatile private var isRunning = true
@@ -75,37 +80,53 @@ class Subscriber(
 
   suspend fun run() {
     for (job in channel) {
-      tracer.withSpan("process-queue-${queueName.value}") {
-        val receiveFromChannelTimestamp = clock.millis()
-        sqsMetrics.channelReceiveLag
-          .labels(queueName.value)
-          .observe((receiveFromChannelTimestamp - job.publishToChannelTimestamp).toDouble())
-        val result =
-          try {
-            val startTime = clock.millis()
-            val result =
-              tracer.withSpan("handle-queue-${queueName.value}") {
-                when (handler) {
-                  is SuspendingJobHandler -> handler.handleJob(job)
-                  is BlockingJobHandler -> runInterruptible { handler.handleJob(job) }
-                }
+      try {
+        val lease = job.visibilityLease
+        if (lease == null) process(job) else lease.whileOwned { process(job) }
+      } catch (e: CancellationException) {
+        currentCoroutineContext().ensureActive()
+        logger.warn(e) {
+          "Processing canceled for job ${job.id} from queue ${job.queueName.value}; leaving for redelivery"
+        }
+      } finally {
+        job.visibilityLease?.close()
+      }
+    }
+  }
+
+  private suspend fun process(job: SqsJob) {
+    tracer.withSpan("process-queue-${queueName.value}") {
+      val receiveFromChannelTimestamp = clock.millis()
+      sqsMetrics.channelReceiveLag
+        .labels(queueName.value)
+        .observe((receiveFromChannelTimestamp - job.publishToChannelTimestamp).toDouble())
+      val result =
+        try {
+          val startTime = clock.millis()
+          val result =
+            tracer.withSpan("handle-queue-${queueName.value}") {
+              when (handler) {
+                is SuspendingJobHandler -> handler.handleJob(job)
+                is BlockingJobHandler -> runInterruptible { handler.handleJob(job) }
               }
-            sqsMetrics.handlerDispatchTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
-            result
-          } catch (e: Exception) {
-            // Propagate cancellation of this subscriber, but recover if only the failed operation was canceled.
-            currentCoroutineContext().ensureActive()
-            logger.warn(e) { "Handler failed for job ${job.id} from queue ${job.queueName.value}" }
-            sqsMetrics.handlerFailures.labels(queueName.value).inc()
-            return@withSpan
-          }
-        when (result) {
-          JobStatus.OK -> deleteMessage(job)
-          JobStatus.DEAD_LETTER -> deadLetterMessage(job)
-          JobStatus.RETRY_WITH_BACKOFF -> retryWithBackoff(job)
-          JobStatus.RETRY_LATER -> {
-            /* no-op, will be retried after visibility timeout passes */
-          }
+            }
+          sqsMetrics.handlerDispatchTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
+          result
+        } catch (e: Exception) {
+          // Propagate cancellation of this subscriber, but recover if only the failed operation was canceled.
+          currentCoroutineContext().ensureActive()
+          logger.warn(e) { "Handler failed for job ${job.id} from queue ${job.queueName.value}" }
+          sqsMetrics.handlerFailures.labels(queueName.value).inc()
+          return@withSpan
+        }
+      job.visibilityLease?.stopRenewing()
+      currentCoroutineContext().ensureActive()
+      when (result) {
+        JobStatus.OK -> deleteMessage(job)
+        JobStatus.DEAD_LETTER -> deadLetterMessage(job)
+        JobStatus.RETRY_WITH_BACKOFF -> retryWithBackoff(job)
+        JobStatus.RETRY_LATER -> {
+          /* no-op, will be retried after visibility timeout passes */
         }
       }
     }
@@ -207,19 +228,20 @@ class Subscriber(
   }
 
   /** Polls the messages from both the regular and the retry queue. */
-  suspend fun poll() {
-    if (queueConfig.install_retry_queue) {
-        merge(messageFlow(queueName), messageFlow(queueName.retryQueue))
-      } else {
-        messageFlow(queueName)
-      }
-      .collect { received ->
-        channel.send(received)
-      }
-    channel.close()
+  suspend fun poll() = coroutineScope {
+    try {
+      if (queueConfig.install_retry_queue) {
+          merge(messageFlow(queueName, this), messageFlow(queueName.retryQueue, this))
+        } else {
+          messageFlow(queueName, this)
+        }
+        .collect { received -> channel.send(received) }
+    } finally {
+      channel.close()
+    }
   }
 
-  private fun messageFlow(queueName: QueueName) = flow {
+  private fun messageFlow(queueName: QueueName, ownershipScope: CoroutineScope) = flow {
     val queueUrl = sqsQueueResolver.getQueueUrl(queueName)
     while (isRunning) {
       if (!asyncSwitch.isEnabled("sqs")) {
@@ -235,6 +257,7 @@ class Subscriber(
         wasDisabled = false
       }
       val startTime = clock.millis()
+      val receiveStartedAt = timeSource.markNow()
       val response =
         try {
           val future = fetchMessages(queueUrl)
@@ -267,7 +290,18 @@ class Subscriber(
       sqsMetrics.sqsReceiveTime.labels(queueName.value).observe((clock.millis() - startTime).toDouble())
 
       sqsMetrics.jobsReceived.labels(queueName.value).inc(response.messages().size.toDouble())
-      response.messages().forEach { message ->
+      // Start ownership for the WHOLE receive before emit can suspend behind busy handlers.
+      val jobs =
+        response.messages().map { message ->
+          SqsJob(queueName, moshi, message, queueUrl, clock.millis()).also { job ->
+            queueConfig.visibility_heartbeat?.let { config ->
+              job.visibilityLease =
+                MessageVisibilityLease(ownershipScope, client, job, config, receiveStartedAt, timeSource)
+            }
+          }
+        }
+      jobs.forEach { job ->
+        val message = job.message
         message.attributes()[MessageSystemAttributeName.SENT_TIMESTAMP]?.let {
           val sentTimestamp = it.toLong()
           val processingLag = clock.instant().minusMillis(sentTimestamp).toEpochMilli().toDouble()
@@ -277,16 +311,7 @@ class Subscriber(
           }
           sqsMetrics.queueProcessingLag.labels(queueName.value).observe(processingLag)
         }
-        val publishToChannelTimestamp = clock.millis()
-        emit(
-          SqsJob(
-            queueName = queueName,
-            moshi = moshi,
-            message = message,
-            queueUrl = queueUrl,
-            publishToChannelTimestamp = publishToChannelTimestamp,
-          )
-        )
+        emit(job)
       }
     }
   }
@@ -299,7 +324,7 @@ class Subscriber(
         .messageSystemAttributeNames(MessageSystemAttributeName.ALL)
         .maxNumberOfMessages(queueConfig.max_number_of_messages)
         .waitTimeSeconds(queueConfig.wait_timeout)
-        .visibilityTimeout(queueConfig.visibility_timeout)
+        .visibilityTimeout(queueConfig.visibility_heartbeat?.visibility_timeout ?: queueConfig.visibility_timeout)
         .build()
     return client.receiveMessage(request)
   }

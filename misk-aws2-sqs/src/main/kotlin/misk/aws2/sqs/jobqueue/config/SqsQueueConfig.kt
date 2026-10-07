@@ -28,6 +28,7 @@ constructor(
   val region: String? = null,
   val account_id: String? = null,
   val shutdown_grace_period_ms: Long? = null,
+  val visibility_heartbeat: SqsVisibilityHeartbeatConfig? = null,
 ) {
   companion object {
     /**
@@ -37,5 +38,23 @@ constructor(
      * deliver. One that is still waiting out its `wait_timeout` has nothing to lose by being canceled.
      */
     const val DEFAULT_SHUTDOWN_GRACE_PERIOD_MS = 1000L
+  }
+}
+
+/**
+ * Opt-in visibility renewal for non-coordinated consumers, starting at receive (including buffered messages). Overrides
+ * [SqsQueueConfig.visibility_timeout] only while this consumer manages renewal. The processing deadline includes time
+ * waiting for a handler. Cancellation interrupts blocking handlers; they must cooperate with interruption or bound
+ * their own blocking I/O. Database locks are not released merely because message visibility expires.
+ */
+data class SqsVisibilityHeartbeatConfig(
+  val visibility_timeout: Int = 300,
+  val interval_ms: Long = 60_000,
+  val processing_timeout_ms: Long = 43_140_000,
+) {
+  init {
+    require(visibility_timeout in 2..43_199)
+    require(interval_ms > 0 && interval_ms < visibility_timeout * 1000L)
+    require(processing_timeout_ms in 1..43_200_000)
   }
 }

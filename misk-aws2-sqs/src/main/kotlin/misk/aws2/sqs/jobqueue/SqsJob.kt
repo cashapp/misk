@@ -13,6 +13,8 @@ class SqsJob(
   val queueUrl: String,
   val publishToChannelTimestamp: Long,
 ) : Job {
+  internal var visibilityLease: MessageVisibilityLease? = null
+
   override val body: String = message.body()
   override val attributes: Map<String, String> by lazy {
     message
