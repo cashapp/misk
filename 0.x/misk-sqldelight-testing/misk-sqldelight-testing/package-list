@@ -1,0 +1,23 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.sqldelight.testing////PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/index.md
+$dokka.location:misk.sqldelight.testing/Movies.Version///PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies/-version/index.md
+$dokka.location:misk.sqldelight.testing/Movies.Version/Version/#kotlin.Long/PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies/-version/-version.md
+$dokka.location:misk.sqldelight.testing/Movies.Version/version/#/PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies/-version/version.md
+$dokka.location:misk.sqldelight.testing/Movies///PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies/index.md
+$dokka.location:misk.sqldelight.testing/Movies/Movies/#kotlin.Long#kotlin.String#misk.sqldelight.testing.Movies.Version/PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies/-movies.md
+$dokka.location:misk.sqldelight.testing/Movies/id/#/PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies/id.md
+$dokka.location:misk.sqldelight.testing/Movies/title/#/PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies/title.md
+$dokka.location:misk.sqldelight.testing/Movies/version/#/PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies/version.md
+$dokka.location:misk.sqldelight.testing/MoviesDatabase.Companion///PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies-database/-companion/index.md
+$dokka.location:misk.sqldelight.testing/MoviesDatabase.Companion/Schema/#/PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies-database/-companion/-schema.md
+$dokka.location:misk.sqldelight.testing/MoviesDatabase.Companion/invoke/#app.cash.sqldelight.db.SqlDriver/PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies-database/-companion/invoke.md
+$dokka.location:misk.sqldelight.testing/MoviesDatabase///PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies-database/index.md
+$dokka.location:misk.sqldelight.testing/MoviesDatabase/moviesQueries/#/PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies-database/movies-queries.md
+$dokka.location:misk.sqldelight.testing/MoviesQueries///PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies-queries/index.md
+$dokka.location:misk.sqldelight.testing/MoviesQueries/MoviesQueries/#app.cash.sqldelight.db.SqlDriver/PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies-queries/-movies-queries.md
+$dokka.location:misk.sqldelight.testing/MoviesQueries/createMovie/#kotlin.Long#kotlin.String/PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies-queries/create-movie.md
+$dokka.location:misk.sqldelight.testing/MoviesQueries/getMovie/#kotlin.Long#kotlin.Function3[kotlin.Long,kotlin.String,misk.sqldelight.testing.Movies.Version,TypeParam(bounds=[kotlin.Any])]/PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies-queries/get-movie.md
+$dokka.location:misk.sqldelight.testing/MoviesQueries/getMovie/#kotlin.Long/PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies-queries/get-movie.md
+$dokka.location:misk.sqldelight.testing/MoviesQueries/updateMovie/#kotlin.String#misk.sqldelight.testing.Movies.Version#kotlin.Long/PointingToDeclaration/misk-sqldelight-testing/misk.sqldelight.testing/-movies-queries/update-movie.md
+misk.sqldelight.testing

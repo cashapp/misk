@@ -1,0 +1,14 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:cash.detektive.javacompat////PointingToDeclaration/detektive/cash.detektive.javacompat/index.md
+$dokka.location:cash.detektive.javacompat/AnnotatePublicApisWithJvmOverloads///PointingToDeclaration/detektive/cash.detektive.javacompat/-annotate-public-apis-with-jvm-overloads/index.md
+$dokka.location:cash.detektive.javacompat/AnnotatePublicApisWithJvmOverloads/AnnotatePublicApisWithJvmOverloads/#dev.detekt.api.Config/PointingToDeclaration/detektive/cash.detektive.javacompat/-annotate-public-apis-with-jvm-overloads/-annotate-public-apis-with-jvm-overloads.md
+$dokka.location:cash.detektive.javacompat/AnnotatePublicApisWithJvmOverloads/visitNamedFunction/#org.jetbrains.kotlin.psi.KtNamedFunction/PointingToDeclaration/detektive/cash.detektive.javacompat/-annotate-public-apis-with-jvm-overloads/visit-named-function.md
+$dokka.location:cash.detektive.javacompat/AnnotatePublicApisWithJvmOverloads/visitPrimaryConstructor/#org.jetbrains.kotlin.psi.KtPrimaryConstructor/PointingToDeclaration/detektive/cash.detektive.javacompat/-annotate-public-apis-with-jvm-overloads/visit-primary-constructor.md
+$dokka.location:cash.detektive////PointingToDeclaration/detektive/cash.detektive/index.md
+$dokka.location:cash.detektive/DetektiveRuleSetProvider///PointingToDeclaration/detektive/cash.detektive/-detektive-rule-set-provider/index.md
+$dokka.location:cash.detektive/DetektiveRuleSetProvider/DetektiveRuleSetProvider/#/PointingToDeclaration/detektive/cash.detektive/-detektive-rule-set-provider/-detektive-rule-set-provider.md
+$dokka.location:cash.detektive/DetektiveRuleSetProvider/instance/#/PointingToDeclaration/detektive/cash.detektive/-detektive-rule-set-provider/instance.md
+$dokka.location:cash.detektive/DetektiveRuleSetProvider/ruleSetId/#/PointingToDeclaration/detektive/cash.detektive/-detektive-rule-set-provider/rule-set-id.md
+cash.detektive
+cash.detektive.javacompat
