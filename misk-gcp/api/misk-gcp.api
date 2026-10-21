@@ -228,6 +228,13 @@ public final class misk/cloud/gcp/spanner/SpannerEmulatorConfig {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/cloud/gcp/spanner/SpannerEmulatorReadiness {
+	public static final field INSTANCE Lmisk/cloud/gcp/spanner/SpannerEmulatorReadiness;
+	public final fun isNotReady (Ljava/lang/Throwable;)Z
+	public final fun retryWhileNotReady (Ljava/lang/String;IJJLkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static synthetic fun retryWhileNotReady$default (Lmisk/cloud/gcp/spanner/SpannerEmulatorReadiness;Ljava/lang/String;IJJLkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
 public abstract class misk/cloud/gcp/storage/BaseCustomStorageRpc : com/google/cloud/storage/spi/v1/StorageRpc {
 	public fun <init> ()V
 	public fun compose (Ljava/lang/Iterable;Lcom/google/api/services/storage/model/StorageObject;Ljava/util/Map;)Lcom/google/api/services/storage/model/StorageObject;

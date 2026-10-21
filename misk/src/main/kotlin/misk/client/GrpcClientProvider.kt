@@ -186,8 +186,14 @@ internal class GrpcClientProvider<T : Service, G : T>(
         .minMessageToCompress(minMessageToCompress)
         .build()
 
-    // There should be *exactly one constructor* that takes in a grpcClient
-    val delegate: G = grpcClientClass.constructors.first().call(grpcClient)
+    // There should be *exactly one constructor* that takes in a grpcClient. Match it by signature, since the order of
+    // KClass.constructors is unspecified (and differs between kotlin-reflect versions).
+    val constructor =
+      grpcClientClass.constructors.firstOrNull { it.parameters.singleOrNull()?.type?.classifier == GrpcClient::class }
+        ?: error(
+          "${grpcClientClass.qualifiedName} has no constructor that takes only a ${GrpcClient::class.simpleName}"
+        )
+    val delegate: G = constructor.call(grpcClient)
 
     return MethodInvocationHandler(delegate, method)
   }

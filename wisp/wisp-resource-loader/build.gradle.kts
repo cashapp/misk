@@ -4,8 +4,8 @@ plugins {
 }
 
 dependencies {
+    api(libs.okio)
     implementation(libs.loggingApi)
-    implementation(libs.okio)
     implementation(project(":wisp:wisp-logging"))
     runtimeOnly(libs.bouncyCastleProvider)
 
