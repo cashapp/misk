@@ -71,6 +71,9 @@ public final class misk/aws2/dynamodb/testing/DynamoDbTable {
 
 public final class misk/aws2/dynamodb/testing/ExternalTestDynamoDbClientModule : misk/inject/KAbstractModule {
 	public fun <init> (ILjava/util/List;)V
+	public fun <init> (ILjava/util/List;Lmisk/aws2/dynamodb/testing/ResetStrategy;)V
+	public synthetic fun <init> (ILjava/util/List;Lmisk/aws2/dynamodb/testing/ResetStrategy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ILmisk/aws2/dynamodb/testing/ResetStrategy;[Lmisk/aws2/dynamodb/testing/DynamoDbTable;)V
 	public fun <init> (I[Lmisk/aws2/dynamodb/testing/DynamoDbTable;)V
 	public final fun provideRequiredTables ()Ljava/util/List;
 	public final fun providesAmazonDynamoDB (Lapp/cash/tempest2/testing/TestDynamoDbClient;)Lsoftware/amazon/awssdk/services/dynamodb/DynamoDbClient;
@@ -87,6 +90,14 @@ public final class misk/aws2/dynamodb/testing/InProcessDynamoDbModule : misk/inj
 public final class misk/aws2/dynamodb/testing/ParallelTestsTableNameMapper : misk/aws2/dynamodb/TableNameMapper {
 	public static final field INSTANCE Lmisk/aws2/dynamodb/testing/ParallelTestsTableNameMapper;
 	public fun mapName (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class misk/aws2/dynamodb/testing/ResetStrategy : java/lang/Enum {
+	public static final field DROP_RECREATE Lmisk/aws2/dynamodb/testing/ResetStrategy;
+	public static final field TRUNCATE Lmisk/aws2/dynamodb/testing/ResetStrategy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lmisk/aws2/dynamodb/testing/ResetStrategy;
+	public static fun values ()[Lmisk/aws2/dynamodb/testing/ResetStrategy;
 }
 
 public final class misk/aws2/dynamodb/testing/TestDynamoDb : com/google/common/util/concurrent/Service, misk/testing/TestFixture {
