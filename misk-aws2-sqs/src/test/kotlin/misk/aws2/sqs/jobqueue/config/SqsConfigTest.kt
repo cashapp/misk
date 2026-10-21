@@ -44,9 +44,7 @@ class SqsConfigTest {
 
   @Test
   fun `getQueueConfig returns all_queues when no per_queue_override exists`() {
-    val config = SqsConfig(
-      all_queues = SqsQueueConfig(concurrency = 10, parallelism = 5),
-    )
+    val config = SqsConfig(all_queues = SqsQueueConfig(concurrency = 10, parallelism = 5))
 
     val queueConfig = config.getQueueConfig(misk.jobqueue.QueueName("test-queue"))
 
@@ -56,12 +54,11 @@ class SqsConfigTest {
 
   @Test
   fun `getQueueConfig returns per_queue_override when it exists`() {
-    val config = SqsConfig(
-      all_queues = SqsQueueConfig(concurrency = 1, parallelism = 1),
-      per_queue_overrides = mapOf(
-        "test-queue" to SqsQueueConfig(concurrency = 20, parallelism = 10),
-      ),
-    )
+    val config =
+      SqsConfig(
+        all_queues = SqsQueueConfig(concurrency = 1, parallelism = 1),
+        per_queue_overrides = mapOf("test-queue" to SqsQueueConfig(concurrency = 20, parallelism = 10)),
+      )
 
     val queueConfig = config.getQueueConfig(misk.jobqueue.QueueName("test-queue"))
 
@@ -71,12 +68,11 @@ class SqsConfigTest {
 
   @Test
   fun `getQueueConfig inherits nullable fields from all_queues`() {
-    val config = SqsConfig(
-      all_queues = SqsQueueConfig(region = "us-west-2", wait_timeout = 20),
-      per_queue_overrides = mapOf(
-        "test-queue" to SqsQueueConfig(concurrency = 10),
-      ),
-    )
+    val config =
+      SqsConfig(
+        all_queues = SqsQueueConfig(region = "us-west-2", wait_timeout = 20),
+        per_queue_overrides = mapOf("test-queue" to SqsQueueConfig(concurrency = 10)),
+      )
 
     val queueConfig = config.getQueueConfig(misk.jobqueue.QueueName("test-queue"))
 
@@ -87,16 +83,41 @@ class SqsConfigTest {
 
   @Test
   fun `getQueueConfig resolves shutdown_grace_period_ms`() {
-    val config = SqsConfig(
-      all_queues = SqsQueueConfig(shutdown_grace_period_ms = 5_000),
-      per_queue_overrides = mapOf(
-        "inheriting-queue" to SqsQueueConfig(concurrency = 10),
-        "overriding-queue" to SqsQueueConfig(shutdown_grace_period_ms = 0),
-      ),
-    )
+    val config =
+      SqsConfig(
+        all_queues = SqsQueueConfig(shutdown_grace_period_ms = 5_000),
+        per_queue_overrides =
+          mapOf(
+            "inheriting-queue" to SqsQueueConfig(concurrency = 10),
+            "overriding-queue" to SqsQueueConfig(shutdown_grace_period_ms = 0),
+          ),
+      )
 
     assertEquals(5_000, config.getQueueConfig(misk.jobqueue.QueueName("inheriting-queue")).shutdown_grace_period_ms)
     assertEquals(0, config.getQueueConfig(misk.jobqueue.QueueName("overriding-queue")).shutdown_grace_period_ms)
     assertEquals(5_000, config.getQueueConfig(misk.jobqueue.QueueName("unconfigured-queue")).shutdown_grace_period_ms)
+  }
+
+  @Test
+  fun `shutdown_timeout_ms has null default`() {
+    val config = SqsConfig()
+    assertEquals(null, config.all_queues.shutdown_timeout_ms)
+  }
+
+  @Test
+  fun `getQueueConfig resolves shutdown_timeout_ms`() {
+    val config =
+      SqsConfig(
+        all_queues = SqsQueueConfig(shutdown_timeout_ms = 5_000),
+        per_queue_overrides =
+          mapOf(
+            "inheriting-queue" to SqsQueueConfig(concurrency = 10),
+            "overriding-queue" to SqsQueueConfig(shutdown_timeout_ms = 30_000),
+          ),
+      )
+
+    assertEquals(5_000, config.getQueueConfig(misk.jobqueue.QueueName("inheriting-queue")).shutdown_timeout_ms)
+    assertEquals(30_000, config.getQueueConfig(misk.jobqueue.QueueName("overriding-queue")).shutdown_timeout_ms)
+    assertEquals(5_000, config.getQueueConfig(misk.jobqueue.QueueName("unconfigured-queue")).shutdown_timeout_ms)
   }
 }
