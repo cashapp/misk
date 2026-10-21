@@ -158,6 +158,9 @@ class TypedClientFactory @Inject constructor() {
 
   @Inject(optional = true) private val eventListenerFactory: EventListener.Factory? = null
 
+  @Inject(optional = true)
+  private val clientConfigurators: Provider<List<ClientOkHttpConfigurator>> = Provider { emptyList() }
+
   @Inject private lateinit var httpClientConfigUrlProvider: HttpClientConfigUrlProvider
 
   @Inject private lateinit var httpClientFactory: HttpClientFactory
@@ -216,6 +219,7 @@ class TypedClientFactory @Inject constructor() {
         tracer,
         moshi,
         callFactoryWrappers,
+        clientConfigurators,
       )
 
     return kclass.cast(Proxy.newProxyInstance(kclass.java.classLoader, arrayOf(kclass.java), invocationHandler))

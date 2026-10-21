@@ -16,6 +16,7 @@ import misk.web.WebServerTestingModule
 import misk.web.jetty.JettyService
 import okhttp3.Call
 import okhttp3.EventListener
+import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -45,6 +46,7 @@ internal class HttpClientEventListenerTest {
     Assertions.assertThat(response.code()).isEqualTo(200)
     assertThat(response.body()).isNotNull()
     assertThat(testListener.started()).isTrue()
+    assertThat(response.raw().request.header("X-Transport-Configured")).isEqualTo("per-method")
   }
 
   class ClientModule(val jetty: JettyService, val eventListener: TestEventListener) : KAbstractModule() {
@@ -53,6 +55,19 @@ internal class HttpClientEventListenerTest {
       install(DinoClientModule(jetty))
       bind<EventListener.Factory>().to<TestEventListenerFactory>()
       bind<TestEventListener>().toInstance(eventListener)
+      multibind<ClientOkHttpConfigurator>()
+        .toInstance(
+          object : ClientOkHttpConfigurator {
+            override fun configure(action: ClientAction, builder: OkHttpClient.Builder) {
+              // Configuration runs after listener installation and preserves that existing listener.
+              val existing = builder.build().eventListenerFactory
+              builder.eventListenerFactory { call -> existing.create(call) + EventListener.NONE }
+              builder.addInterceptor { chain ->
+                chain.proceed(chain.request().newBuilder().header("X-Transport-Configured", "per-method").build())
+              }
+            }
+          }
+        )
     }
   }
 
