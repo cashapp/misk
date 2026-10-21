@@ -26,6 +26,7 @@ micrometer = "1.17.1"
 netty = "4.2.16.Final"
 okHttp = "5.4.0"
 okio = "3.16.4"
+openTelemetry = "1.66.0"
 prometheus = "0.16.0"
 protobuf = "3.25.8"
 retrofit = "3.0.0"
@@ -216,6 +217,9 @@ okHttpMockWebServer3 = { module = "com.squareup.okhttp3:mockwebserver3", version
 okHttpSse = { module = "com.squareup.okhttp3:okhttp-sse", version.ref = "okHttp" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 okioFakefilesystem = { module = "com.squareup.okio:okio-fakefilesystem", version.ref = "okio" }
+openTelemetryApi = { module = "io.opentelemetry:opentelemetry-api", version.ref = "openTelemetry" }
+openTelemetrySdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "openTelemetry" }
+openTelemetrySdkTesting = { module = "io.opentelemetry:opentelemetry-sdk-testing", version.ref = "openTelemetry" }
 openTracing = { module = "io.opentracing:opentracing-api", version = "0.33.0" }
 openTracingConcurrent = { module = "io.opentracing.contrib:opentracing-concurrent", version = "0.4.0" }
 openTracingDatadog = { module = "com.datadoghq:dd-trace-ot", version.ref = "datadog" }

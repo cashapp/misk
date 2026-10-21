@@ -19,6 +19,8 @@ dependencies {
   api(libs.okHttp)
   api(libs.okHttpMockWebServer3)
   api(libs.okio)
+  api(libs.openTelemetryApi)
+  api(libs.openTelemetrySdkTesting)
   api(libs.openTracingMock)
   api(libs.servletApi)
   api(libs.logbackClassic)
@@ -37,6 +39,7 @@ dependencies {
   implementation(libs.classGraph)
   implementation(libs.mockitoCore)
   implementation(libs.mockk)
+  implementation(libs.openTelemetrySdk)
   implementation(libs.openTracing)
   implementation(libs.openTracingUtil)
   implementation(libs.slf4jApi)
@@ -52,6 +55,7 @@ dependencies {
   implementation(project(":wisp:wisp-deployment"))
   implementation(testFixtures(project(":misk-metrics")))
 
+  testImplementation(libs.junitParams)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.mockitoKotlin)
 }
