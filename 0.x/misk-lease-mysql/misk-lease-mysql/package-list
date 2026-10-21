@@ -1,0 +1,31 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.lease.mysql////PointingToDeclaration/misk-lease-mysql/misk.lease.mysql/index.md
+$dokka.location:misk.lease.mysql/LeaseDatabase.Companion///PointingToDeclaration/misk-lease-mysql/misk.lease.mysql/-lease-database/-companion/index.md
+$dokka.location:misk.lease.mysql/LeaseDatabase.Companion/Schema/#/PointingToDeclaration/misk-lease-mysql/misk.lease.mysql/-lease-database/-companion/-schema.md
+$dokka.location:misk.lease.mysql/LeaseDatabase.Companion/invoke/#app.cash.sqldelight.db.SqlDriver#misk.lease.Leases.Adapter/PointingToDeclaration/misk-lease-mysql/misk.lease.mysql/-lease-database/-companion/invoke.md
+$dokka.location:misk.lease.mysql/LeaseDatabase///PointingToDeclaration/misk-lease-mysql/misk.lease.mysql/-lease-database/index.md
+$dokka.location:misk.lease.mysql/LeaseDatabase/leaseQueries/#/PointingToDeclaration/misk-lease-mysql/misk.lease.mysql/-lease-database/lease-queries.md
+$dokka.location:misk.lease.mysql/LeaseDb///PointingToDeclaration/misk-lease-mysql/misk.lease.mysql/-lease-db/index.md
+$dokka.location:misk.lease.mysql/SqlLeaseModule///PointingToDeclaration/misk-lease-mysql/misk.lease.mysql/-sql-lease-module/index.md
+$dokka.location:misk.lease.mysql/SqlLeaseModule/SqlLeaseModule/#misk.jdbc.DataSourceClustersConfig/PointingToDeclaration/misk-lease-mysql/misk.lease.mysql/-sql-lease-module/-sql-lease-module.md
+$dokka.location:misk.lease.mysql/SqlLeaseModule/provideLeaseDatabase/#com.google.inject.Provider[javax.sql.DataSource]/PointingToDeclaration/misk-lease-mysql/misk.lease.mysql/-sql-lease-module/provide-lease-database.md
+$dokka.location:misk.lease////PointingToDeclaration/misk-lease-mysql/misk.lease/index.md
+$dokka.location:misk.lease/LeaseQueries///PointingToDeclaration/misk-lease-mysql/misk.lease/-lease-queries/index.md
+$dokka.location:misk.lease/LeaseQueries/LeaseQueries/#app.cash.sqldelight.db.SqlDriver#misk.lease.Leases.Adapter/PointingToDeclaration/misk-lease-mysql/misk.lease/-lease-queries/-lease-queries.md
+$dokka.location:misk.lease/LeaseQueries/acquire/#java.time.Instant#kotlin.Long#kotlin.String#kotlin.Long/PointingToDeclaration/misk-lease-mysql/misk.lease/-lease-queries/acquire.md
+$dokka.location:misk.lease/LeaseQueries/insert/#kotlin.String#kotlin.Long#java.time.Instant/PointingToDeclaration/misk-lease-mysql/misk.lease/-lease-queries/insert.md
+$dokka.location:misk.lease/LeaseQueries/release/#kotlin.String#kotlin.Long/PointingToDeclaration/misk-lease-mysql/misk.lease/-lease-queries/release.md
+$dokka.location:misk.lease/LeaseQueries/selectByLeaseName/#kotlin.String#kotlin.Function4[kotlin.Long,kotlin.String,kotlin.Long,java.time.Instant,TypeParam(bounds=[kotlin.Any])]/PointingToDeclaration/misk-lease-mysql/misk.lease/-lease-queries/select-by-lease-name.md
+$dokka.location:misk.lease/LeaseQueries/selectByLeaseName/#kotlin.String/PointingToDeclaration/misk-lease-mysql/misk.lease/-lease-queries/select-by-lease-name.md
+$dokka.location:misk.lease/Leases.Adapter///PointingToDeclaration/misk-lease-mysql/misk.lease/-leases/-adapter/index.md
+$dokka.location:misk.lease/Leases.Adapter/Adapter/#app.cash.sqldelight.ColumnAdapter[java.time.Instant,java.time.OffsetDateTime]/PointingToDeclaration/misk-lease-mysql/misk.lease/-leases/-adapter/-adapter.md
+$dokka.location:misk.lease/Leases.Adapter/held_untilAdapter/#/PointingToDeclaration/misk-lease-mysql/misk.lease/-leases/-adapter/held_until-adapter.md
+$dokka.location:misk.lease/Leases///PointingToDeclaration/misk-lease-mysql/misk.lease/-leases/index.md
+$dokka.location:misk.lease/Leases/Leases/#kotlin.Long#kotlin.String#kotlin.Long#java.time.Instant/PointingToDeclaration/misk-lease-mysql/misk.lease/-leases/-leases.md
+$dokka.location:misk.lease/Leases/held_until/#/PointingToDeclaration/misk-lease-mysql/misk.lease/-leases/held_until.md
+$dokka.location:misk.lease/Leases/id/#/PointingToDeclaration/misk-lease-mysql/misk.lease/-leases/id.md
+$dokka.location:misk.lease/Leases/lease_name/#/PointingToDeclaration/misk-lease-mysql/misk.lease/-leases/lease_name.md
+$dokka.location:misk.lease/Leases/version/#/PointingToDeclaration/misk-lease-mysql/misk.lease/-leases/version.md
+misk.lease
+misk.lease.mysql

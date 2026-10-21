@@ -1,0 +1,27 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.tokens////PointingToDeclaration/misk-tokens/misk.tokens/index.md
+$dokka.location:misk.tokens/FakeTokenGenerator///PointingToDeclaration/misk-tokens/misk.tokens/-fake-token-generator/index.md
+$dokka.location:misk.tokens/FakeTokenGenerator/FakeTokenGenerator/#/PointingToDeclaration/misk-tokens/misk.tokens/-fake-token-generator/-fake-token-generator.md
+$dokka.location:misk.tokens/FakeTokenGenerator/generate/#kotlin.String?#kotlin.Int/PointingToDeclaration/misk-tokens/misk.tokens/-fake-token-generator/generate.md
+$dokka.location:misk.tokens/FakeTokenGenerator/reset/#/PointingToDeclaration/misk-tokens/misk.tokens/-fake-token-generator/reset.md
+$dokka.location:misk.tokens/FakeTokenGenerator2///PointingToDeclaration/misk-tokens/misk.tokens/-fake-token-generator2/index.md
+$dokka.location:misk.tokens/FakeTokenGenerator2/FakeTokenGenerator2/#/PointingToDeclaration/misk-tokens/misk.tokens/-fake-token-generator2/-fake-token-generator2.md
+$dokka.location:misk.tokens/FakeTokenGenerator2/generate/#kotlin.String?#kotlin.Int/PointingToDeclaration/misk-tokens/misk.tokens/-fake-token-generator2/generate.md
+$dokka.location:misk.tokens/FakeTokenGeneratorModule///PointingToDeclaration/misk-tokens/misk.tokens/-fake-token-generator-module/index.md
+$dokka.location:misk.tokens/FakeTokenGeneratorModule/FakeTokenGeneratorModule/#/PointingToDeclaration/misk-tokens/misk.tokens/-fake-token-generator-module/-fake-token-generator-module.md
+$dokka.location:misk.tokens/RealTokenGenerator///PointingToDeclaration/misk-tokens/misk.tokens/-real-token-generator/index.md
+$dokka.location:misk.tokens/RealTokenGenerator/RealTokenGenerator/#/PointingToDeclaration/misk-tokens/misk.tokens/-real-token-generator/-real-token-generator.md
+$dokka.location:misk.tokens/RealTokenGenerator2///PointingToDeclaration/misk-tokens/misk.tokens/-real-token-generator2/index.md
+$dokka.location:misk.tokens/RealTokenGenerator2/RealTokenGenerator2/#/PointingToDeclaration/misk-tokens/misk.tokens/-real-token-generator2/-real-token-generator2.md
+$dokka.location:misk.tokens/RealTokenGenerator2/generate/#kotlin.String?#kotlin.Int/PointingToDeclaration/misk-tokens/misk.tokens/-real-token-generator2/generate.md
+$dokka.location:misk.tokens/TokenGenerator///PointingToDeclaration/misk-tokens/misk.tokens/-token-generator/index.md
+$dokka.location:misk.tokens/TokenGenerator2.Companion///PointingToDeclaration/misk-tokens/misk.tokens/-token-generator2/-companion/index.md
+$dokka.location:misk.tokens/TokenGenerator2.Companion/CANONICALIZE_LENGTH_MAX/#/PointingToDeclaration/misk-tokens/misk.tokens/-token-generator2/-companion/-c-a-n-o-n-i-c-a-l-i-z-e_-l-e-n-g-t-h_-m-a-x.md
+$dokka.location:misk.tokens/TokenGenerator2.Companion/CANONICALIZE_LENGTH_MIN/#/PointingToDeclaration/misk-tokens/misk.tokens/-token-generator2/-companion/-c-a-n-o-n-i-c-a-l-i-z-e_-l-e-n-g-t-h_-m-i-n.md
+$dokka.location:misk.tokens/TokenGenerator2.Companion/canonicalize/#kotlin.String/PointingToDeclaration/misk-tokens/misk.tokens/-token-generator2/-companion/canonicalize.md
+$dokka.location:misk.tokens/TokenGenerator2///PointingToDeclaration/misk-tokens/misk.tokens/-token-generator2/index.md
+$dokka.location:misk.tokens/TokenGenerator2/generate/#kotlin.String?#kotlin.Int/PointingToDeclaration/misk-tokens/misk.tokens/-token-generator2/generate.md
+$dokka.location:misk.tokens/TokenGeneratorModule///PointingToDeclaration/misk-tokens/misk.tokens/-token-generator-module/index.md
+$dokka.location:misk.tokens/TokenGeneratorModule/TokenGeneratorModule/#/PointingToDeclaration/misk-tokens/misk.tokens/-token-generator-module/-token-generator-module.md
+misk.tokens
