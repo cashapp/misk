@@ -63,7 +63,13 @@ internal constructor(
               redisUri {
                 withHost(hostname.takeIf { it.isNotBlank() } ?: "localhost")
                 withPort(port)
-                withPassword(clusterGroupConfig.redis_auth_password.toCharArray())
+                val username = clusterGroupConfig.redis_auth_username
+                val password = clusterGroupConfig.redis_auth_password.toCharArray()
+                if (username != null) {
+                  withAuthentication(username, password)
+                } else {
+                  withPassword(password)
+                }
                 withSsl(clusterGroupConfig.use_ssl)
               }
             },
