@@ -123,14 +123,8 @@ constructor(
         hikariConfig.minimumIdle = 5
       }
 
-      when (config.type) {
-        DataSourceType.MYSQL -> {
-          hikariConfig.connectionInitSql = "SET time_zone = '+00:00'"
-        }
-        DataSourceType.VITESS_MYSQL -> {
-          hikariConfig.exceptionOverride = VitessExceptionHandler(collectorRegistry)
-        }
-        else -> {}
+      if (config.type == DataSourceType.VITESS_MYSQL) {
+        hikariConfig.exceptionOverride = VitessExceptionHandler(collectorRegistry)
       }
 
       hikariConfig.dataSourceProperties = config.getDataSourceProperties()
