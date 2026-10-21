@@ -18,10 +18,13 @@ dependencies {
 
   testFixturesApi(project(":misk-inject"))
   testFixturesApi(project(":misk-testing-api"))
+  testFixturesApi(libs.openTelemetryApi)
+  testFixturesApi(libs.openTelemetrySdkTesting)
   testFixturesApi(libs.prometheusClient)
   testFixturesImplementation(libs.guava)
   testFixturesImplementation(libs.guice)
   testFixturesImplementation(libs.kotlinStdLibJdk8)
+  testFixturesImplementation(libs.openTelemetrySdk)
   testFixturesImplementation(libs.micrometerCore)
   testFixturesImplementation(libs.micrometerRegistryPrometheus)
 
@@ -29,6 +32,7 @@ dependencies {
   testImplementation(project(":misk-metrics"))
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
+  testImplementation(libs.junitParams)
 
 
   testImplementation(libs.guava)

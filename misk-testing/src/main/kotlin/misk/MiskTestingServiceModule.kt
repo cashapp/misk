@@ -6,7 +6,6 @@ import misk.inject.ReusableTestModule
 import misk.metrics.FakeMetricsModule
 import misk.random.FakeRandomModule
 import misk.resources.TestingResourceLoaderModule
-import misk.testing.OpenTelemetryTestingModule
 import misk.time.FakeClockModule
 import misk.time.FakeTickerModule
 import misk.tokens.FakeTokenGeneratorModule
@@ -17,10 +16,6 @@ import misk.tokens.FakeTokenGeneratorModule
  * This should not contain application level fakes for testing. It includes a small, selective set of fake bindings to
  * replace real bindings that cannot exist in a unit testing environment (e.g system env vars and filesystem
  * dependencies).
- *
- * OpenTelemetry metrics use an injector-local SDK and an injectable in-memory reader. Collections use delta-preferred
- * temporality, and previous deltas are drained before tests when the injector is reused. No global SDK or network
- * exporter is installed.
  */
 class MiskTestingServiceModule @JvmOverloads constructor(private val installFakeMetrics: Boolean = false) :
   ReusableTestModule() {
@@ -35,7 +30,6 @@ class MiskTestingServiceModule @JvmOverloads constructor(private val installFake
     if (installFakeMetrics) {
       install(FakeMetricsModule())
     }
-    install(OpenTelemetryTestingModule())
     install(MiskCommonServiceModule(installMetrics = !installFakeMetrics))
   }
 }

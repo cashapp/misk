@@ -1,4 +1,4 @@
-package misk.testing
+package misk.metrics
 
 import com.google.inject.Guice
 import com.google.inject.Key
@@ -6,8 +6,9 @@ import com.google.inject.TypeLiteral
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader
 import java.util.concurrent.atomic.AtomicLong
-import misk.MiskTestingServiceModule
 import misk.inject.getInstance
+import misk.metrics.v2.FakeMetricsModule as FakeMetricsModuleV2
+import misk.testing.TestFixture
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -16,8 +17,9 @@ import org.junit.jupiter.params.provider.ValueSource
 class OpenTelemetryTestingTest {
   @ParameterizedTest
   @ValueSource(booleans = [false, true])
-  fun `test service metrics are collected in memory and reset between tests`(installFakeMetrics: Boolean) {
-    val injector = Guice.createInjector(MiskTestingServiceModule(installFakeMetrics))
+  fun `fake metrics collect and drain counter deltas between tests`(legacyApi: Boolean) {
+    val module = if (legacyApi) FakeMetricsModule() else FakeMetricsModuleV2()
+    val injector = Guice.createInjector(module)
     val telemetry = injector.getInstance<OpenTelemetry>()
     val reader = injector.getInstance<InMemoryMetricReader>()
     val meter = telemetry.getMeter("test")
@@ -38,7 +40,7 @@ class OpenTelemetryTestingTest {
 
   @Test
   fun `reusing a module gives each injector its own SDK and reader`() {
-    val module = MiskTestingServiceModule()
+    val module = FakeMetricsModuleV2()
     val first = Guice.createInjector(module)
     val second = Guice.createInjector(module)
     val firstTelemetry = first.getInstance<OpenTelemetry>()

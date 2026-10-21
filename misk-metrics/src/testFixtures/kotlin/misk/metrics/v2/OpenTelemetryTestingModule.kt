@@ -1,4 +1,4 @@
-package misk.testing
+package misk.metrics.v2
 
 import com.google.inject.Provides
 import io.opentelemetry.api.OpenTelemetry
@@ -9,6 +9,7 @@ import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
+import misk.testing.TestFixture
 
 internal class OpenTelemetryTestingModule : KAbstractModule() {
   override fun configure() {
