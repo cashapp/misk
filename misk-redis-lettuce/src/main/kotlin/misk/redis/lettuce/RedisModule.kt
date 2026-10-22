@@ -100,6 +100,24 @@ import misk.redis.lettuce.standalone.RedisStandaloneModule
  * )
  * install(redisModule)
  * ```
+ *
+ * ## Non-essential Redis
+ *
+ * By default Redis is essential: the app doesn't start until every configured Redis is reachable. Set `nonEssential`
+ * when the app can serve without Redis, for example when Redis is only a cache:
+ * ```kotlin
+ * install(RedisModule.create(config, nonEssential = true))
+ * ```
+ *
+ * In this mode:
+ * - [RedisService] doesn't block startup or fail if Redis is unreachable. It verifies connectivity in the background,
+ *   retrying until Redis is reachable, then loads any configured function code. The `redis_client_startup_verified`
+ *   gauge reports 1 per replication group once it has connected.
+ * - Commands are rejected immediately while a connection is disconnected, instead of queueing until Redis reconnects or
+ *   the command times out. Callers should treat these failures like a cache miss.
+ *
+ * In either mode, a [ConnectionProvider] that couldn't connect retries on later acquires (with backoff), so it recovers
+ * once Redis is reachable.
  */
 class RedisModule<K : Any, V : Any>
 internal constructor(
@@ -107,20 +125,38 @@ internal constructor(
   private val valueType: KClass<V>,
   private val config: AbstractRedisConfig,
   private val codec: RedisCodec<K, V>,
+  private val nonEssential: Boolean,
 ) : KAbstractModule() {
 
   override fun configure() {
     Multibinder.newSetBinder(binder(), connectionProviderTypeLiteral)
     newMultibinder<AbstractRedisClient>()
     newMultibinder<FunctionCodeLoader>()
+    newMultibinder<NonEssentialRedisClient>()
     requireBinding<Metrics>()
 
     when (config) {
       is RedisConfig ->
-        install(RedisStandaloneModule(config = config, keyType = keyType, valueType = valueType, codec = codec))
+        install(
+          RedisStandaloneModule(
+            config = config,
+            keyType = keyType,
+            valueType = valueType,
+            codec = codec,
+            nonEssential = nonEssential,
+          )
+        )
 
       is RedisClusterConfig ->
-        install(RedisClusterModule(config = config, keyType = keyType, valueType = valueType, codec = codec))
+        install(
+          RedisClusterModule(
+            config = config,
+            keyType = keyType,
+            valueType = valueType,
+            codec = codec,
+            nonEssential = nonEssential,
+          )
+        )
     }
     install(ServiceModule<RedisService>().enhancedBy<ReadyService>())
   }
@@ -131,13 +167,17 @@ internal constructor(
      *
      * This factory method allows full control over the Redis configuration, including key/value types and the codec
      * used for serialization.
+     *
+     * @param nonEssential see [RedisModule]
      */
+    @JvmOverloads
     fun <K : Any, V : Any> create(
       keyType: KClass<K>,
       valueType: KClass<V>,
       config: AbstractRedisConfig,
       codec: RedisCodec<K, V>,
-    ) = RedisModule(keyType, valueType, config, codec)
+      nonEssential: Boolean = false,
+    ) = RedisModule(keyType, valueType, config, codec, nonEssential)
 
     /**
      * Creates a [RedisModule] with reified type parameters.
@@ -154,8 +194,11 @@ internal constructor(
      * ```
      */
     @Suppress("SameParameterValue")
-    inline fun <reified K : Any, reified V : Any> create(config: AbstractRedisConfig, codec: RedisCodec<K, V>) =
-      create(K::class, V::class, config, codec)
+    inline fun <reified K : Any, reified V : Any> create(
+      config: AbstractRedisConfig,
+      codec: RedisCodec<K, V>,
+      nonEssential: Boolean = false,
+    ) = create(K::class, V::class, config, codec, nonEssential)
 
     /**
      * Creates a [RedisModule] with default String codec.
@@ -176,6 +219,8 @@ internal constructor(
      * )
      * ```
      */
-    fun create(config: AbstractRedisConfig) = create(config, StringCodec.UTF8)
+    @JvmOverloads
+    fun create(config: AbstractRedisConfig, nonEssential: Boolean = false) =
+      create(config, StringCodec.UTF8, nonEssential)
   }
 }

@@ -1,6 +1,7 @@
 package misk.redis.lettuce.metrics
 
 import io.lettuce.core.support.BoundedAsyncPool
+import io.prometheus.client.Gauge
 import io.prometheus.client.Histogram
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -20,6 +21,8 @@ import misk.metrics.v2.ProvidedGauge
  * 2. Operation Latency Metrics (Histograms):
  *     - First response time
  *     - Total operation time
+ * 3. Startup Metrics (Gauges):
+ *     - Whether a non-essential Redis has been reached since startup
  *
  * All metrics are labeled with relevant context information to enable detailed analysis:
  * - `name`: Client or pool identifier
@@ -196,6 +199,13 @@ internal class RedisClientMetrics @Inject constructor(metrics: Metrics) {
       labelNames = listOf(REPLICATION_GROUP_ID_LABEL, COMMAND_LABEL),
     )
 
+  internal val startupVerifiedGauge: Gauge =
+    metrics.gauge(
+      name = STARTUP_VERIFIED,
+      help = "1 once a non-essential Redis replication group has been reached after startup, 0 until then.",
+      labelNames = listOf(REPLICATION_GROUP_ID_LABEL),
+    )
+
   companion object {
     /** Maximum number of connections allowed in the pool */
     const val MAX_TOTAL_CONNECTIONS = "redis_client_max_total_connections"
@@ -217,6 +227,9 @@ internal class RedisClientMetrics @Inject constructor(metrics: Metrics) {
 
     /** Total time in milliseconds for a Redis operation to complete */
     const val OPERATION_TIME = "redis_client_operation_time_millis"
+
+    /** Whether a non-essential Redis replication group has been reached since startup */
+    const val STARTUP_VERIFIED = "redis_client_startup_verified"
 
     /** Label for the client or pool instance name */
     const val NAME_LABEL = "name"

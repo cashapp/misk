@@ -11,6 +11,7 @@ A Misk module providing Redis connectivity for both standalone and cluster confi
 - SSL/TLS support for secure connections
 - Support for Redis replication with read/write splitting
 - Support for Redis Functions with type-safe function loading and execution
+- Optional non-essential mode for Redis the app can serve without, such as a cache
 
 ## Installation
 
@@ -467,6 +468,28 @@ class MyServiceExampleModule(val config: RedisClusterConfig): KAbstractModule() 
 }
 ```
 
+## Non-essential Redis
+
+By default Redis is essential: `RedisService` verifies every configured Redis during startup, and the app doesn't start
+if one is unreachable. If the app can serve without Redis, for example when it's only a cache, create the module with
+`nonEssential = true`:
+
+```kotlin
+install(RedisModule.create(config, nonEssential = true))
+```
+
+In this mode:
+
+- Startup doesn't wait for Redis or fail if it's unreachable. `RedisService` retries in the background until Redis is
+  reachable, then loads any configured function code. `redis_client_startup_verified` reports `1` for the replication
+  group once it has connected.
+- Commands are rejected immediately while a connection is disconnected
+  (`ClientOptions.DisconnectedBehavior.REJECT_COMMANDS`), instead of queueing until Redis reconnects or the command
+  times out. Handle these failures like a cache miss.
+
+In either mode, a connection provider whose first connection attempt failed retries on later acquires, with backoff, so
+it recovers once Redis is reachable.
+
 ## Understanding Connection Pooling
 
 Lettuce, the Redis client used by misk-redis-lettuce, is designed to be thread-safe and efficient without connection pooling. Here's what you need to know:
@@ -527,6 +550,7 @@ The misk-redis2 module provides metrics for monitoring Redis operations and conn
 | Connection Pool Min Idle Connections       | `redis_client_min_idle_connections`         | Minimum number of idle connections          |
 | Connection Pool Idle Connections           | `redis_client_idle_connections`             | Current number of idle connections          |
 | Connection Pool Active Connection          | `redis_client_active_connections`           | Current number of active connections        |
+| Startup Verified                           | `redis_client_startup_verified`             | 1 once a non-essential Redis has been reached after startup, 0 until then |
 
 
 ### Common Tags
