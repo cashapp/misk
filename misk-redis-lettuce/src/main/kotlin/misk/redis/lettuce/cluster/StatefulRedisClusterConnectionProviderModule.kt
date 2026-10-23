@@ -15,6 +15,7 @@ import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.inject.toKey
 import misk.redis.lettuce.RedisConnectionPoolConfig
+import misk.redis.lettuce.RetryingLazyFuture
 import misk.redis.lettuce.connectionProviderTypeLiteral
 import misk.redis.lettuce.metrics.RedisClientMetrics
 import misk.redis.lettuce.toBoundedPoolConfig
@@ -70,17 +71,16 @@ internal class StatefulRedisClusterConnectionProviderModule<
                 object : Supplier<CompletionStage<StatefulRedisClusterConnection<K, V>>> {
                   val count = AtomicInteger(0)
 
+                  // connectAsync needs the initial topology. Load it once, asynchronously: RedisClusterClient
+                  // .getPartitions() would block the thread acquiring a connection while the cluster is unreachable.
+                  // Periodic and adaptive topology refresh keep it current after that.
+                  val initialTopology = RetryingLazyFuture { redisClientProvider.get().refreshPartitionsAsync() }
+
                   override fun get(): CompletableFuture<StatefulRedisClusterConnection<K, V>> {
                     val suffix = count.incrementAndGet().toString().padStart(5, '0')
                     return try {
                       val client = redisClientProvider.get()
-                      // Load the topology asynchronously: RedisClusterClient.getPartitions() would block the thread
-                      // acquiring a connection for up to the connect timeout while the cluster is unreachable.
-                      client
-                        .refreshPartitionsAsync()
-                        .toCompletableFuture()
-                        .thenCompose { client.connectAsync(codec) }
-                        .maybeSetClientName(suffix)
+                      initialTopology.get().thenCompose { client.connectAsync(codec) }.maybeSetClientName(suffix)
                     } catch (e: Exception) {
                       CompletableFuture.failedFuture(e)
                     }

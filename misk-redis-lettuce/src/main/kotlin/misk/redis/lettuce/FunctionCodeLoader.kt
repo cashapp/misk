@@ -1,5 +1,8 @@
 package misk.redis.lettuce
 
+import io.lettuce.core.RedisBusyException
+import io.lettuce.core.RedisCommandExecutionException
+import io.lettuce.core.RedisLoadingException
 import java.util.concurrent.CompletionStage
 import misk.redis.lettuce.cluster.ClusterFunctionCodeLoader
 import misk.redis.lettuce.standalone.StandaloneFunctionCodeLoader
@@ -38,3 +41,7 @@ import misk.redis.lettuce.standalone.StandaloneFunctionCodeLoader
 interface FunctionCodeLoader {
   fun load(): CompletionStage<Void>
 }
+
+/** Error replies from Redis won't succeed on retry, except while it's loading its dataset or busy running a script. */
+internal fun isRetryableFunctionLoadError(error: Throwable) =
+  error !is RedisCommandExecutionException || error is RedisLoadingException || error is RedisBusyException

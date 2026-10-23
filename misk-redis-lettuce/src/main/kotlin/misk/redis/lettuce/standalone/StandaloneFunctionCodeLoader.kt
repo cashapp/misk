@@ -10,10 +10,10 @@ import java.time.Duration
 import java.util.concurrent.CompletionStage
 import java.util.concurrent.TimeUnit
 import misk.backoff.ExponentialBackoff
-import misk.backoff.RetryConfig
-import misk.backoff.retryableFuture
 import misk.logging.getLogger
 import misk.redis.lettuce.FunctionCodeLoader
+import misk.redis.lettuce.isRetryableFunctionLoadError
+import misk.redis.lettuce.retryUntilSuccess
 import misk.redis.lettuce.thenComposeUsing
 
 /**
@@ -39,7 +39,12 @@ internal class StandaloneFunctionCodeLoader(
 
   override fun load(): CompletionStage<Void> {
     val code = readAsString(getResource(codeResourcePath), Charsets.UTF_8)
-    return retryableFuture(retry) {
+    // Stops retrying once the timeout fires or Redis rejects the code, e.g. it doesn't compile or the user lacks ACL
+    // permission, so a running app (see RedisModule's nonEssential) doesn't retry forever.
+    return retryUntilSuccess(
+        backoff = ExponentialBackoff(baseDelay = Duration.ofMillis(10), maxDelay = Duration.ofSeconds(5)),
+        shouldRetry = ::isRetryableFunctionLoadError,
+      ) {
         clientProvider
           .get()
           .connectAsync(StringCodec.UTF8, uri)
@@ -60,11 +65,5 @@ internal class StandaloneFunctionCodeLoader(
 
   companion object {
     private val logger = getLogger<FunctionCodeLoader>()
-    private val retry =
-      RetryConfig.Builder(
-          upTo = Int.MAX_VALUE,
-          withBackoff = ExponentialBackoff(baseDelay = { Duration.ofMillis(10) }, maxDelay = { Duration.ofSeconds(5) }),
-        )
-        .build()
   }
 }

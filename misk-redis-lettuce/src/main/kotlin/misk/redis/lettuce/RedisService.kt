@@ -109,27 +109,18 @@ internal constructor(
   private fun verifyInBackground(nonEssentialClient: NonEssentialRedisClient) {
     val replicationGroupId = nonEssentialClient.replicationGroupId
     nonEssentialClient.startupVerified.set(0.0)
-    val retryConfig =
-      RetryConfig.Builder(
-          upTo = Int.MAX_VALUE,
-          withBackoff = ExponentialBackoff(baseDelay = Duration.ofMillis(100), maxDelay = Duration.ofSeconds(10)),
-        )
-        .shouldRetry { !stopping }
-        .onRetry { retryCount, e ->
-          if (retryCount == 1) {
+    retryUntilSuccess(
+        backoff = ExponentialBackoff(baseDelay = Duration.ofMillis(100), maxDelay = Duration.ofSeconds(10)),
+        shouldRetry = { !stopping },
+        onRetry = { failures, e ->
+          if (failures == 1) {
             logger.warn(e) {
               "Non-essential Redis '$replicationGroupId' is unreachable, continuing startup and retrying in the background"
             }
           }
-        }
-        .build()
-
-    retryableFuture(retryConfig) {
-        try {
-          nonEssentialClient.ping().thenAccept(::checkPong).toCompletableFuture()
-        } catch (e: Exception) {
-          CompletableFuture.failedFuture(e)
-        }
+        },
+      ) {
+        nonEssentialClient.ping().thenAccept(::checkPong)
       }
       .thenCompose {
         nonEssentialClient.startupVerified.set(1.0)

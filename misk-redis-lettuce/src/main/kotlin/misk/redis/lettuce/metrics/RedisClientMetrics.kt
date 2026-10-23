@@ -12,7 +12,7 @@ import misk.metrics.v2.ProvidedGauge
 /**
  * Metrics collector for Redis client operations and connection pool statistics.
  *
- * This class provides comprehensive monitoring of Redis client behavior through two main types of metrics:
+ * This class provides comprehensive monitoring of Redis client behavior through three main types of metrics:
  * 1. Connection Pool Metrics (Gauges):
  *     - Max total connections
  *     - Max/min idle connections
