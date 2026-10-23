@@ -137,6 +137,11 @@ internal constructor(
           },
         ) ?: CompletableFuture.completedFuture(null)
       }
+      .whenComplete { _, e ->
+        if (e != null && !stopping) {
+          logger.error(e) { "Failed setting up non-essential Redis '$replicationGroupId' in the background" }
+        }
+      }
   }
 
   private fun <T> List<CompletionStage<T>>.joinAll() =

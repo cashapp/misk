@@ -69,12 +69,20 @@ internal abstract class RetryingFunctionCodeLoader(private val codeResourcePath:
       }
     }
 
-  /** Retries until the code is loaded, Redis rejects it, or [shouldRetry] returns false. */
+  /**
+   * Retries until the code is loaded, Redis rejects it, or [shouldRetry] returns false. Fails without retrying if the
+   * code resource can't be read.
+   */
   fun loadWithRetries(
     shouldRetry: (Throwable) -> Boolean,
     onRetry: (failures: Int, error: Throwable) -> Unit = { _, _ -> },
   ): CompletableFuture<Void> {
-    val code = readAsString(getResource(codeResourcePath), Charsets.UTF_8)
+    val code =
+      try {
+        readAsString(getResource(codeResourcePath), Charsets.UTF_8)
+      } catch (e: Exception) {
+        return CompletableFuture.failedFuture(e)
+      }
     // Returns retryUntilSuccess's own future, so completing it, e.g. with orTimeout, also stops the retries.
     return retryUntilSuccess(
       backoff = ExponentialBackoff(baseDelay = Duration.ofMillis(10), maxDelay = Duration.ofSeconds(5)),

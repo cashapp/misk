@@ -34,8 +34,21 @@ internal class RetryingFunctionCodeLoaderTest {
     assertEquals(1, loader.attempts.get())
   }
 
-  private class FakeFunctionCodeLoader(private vararg val failures: Exception) :
-    RetryingFunctionCodeLoader("redis/testlib.lua") {
+  @Test
+  fun `fails without retrying when the code resource is missing`() {
+    val loader = FakeFunctionCodeLoader(codeResourcePath = "redis/missing.lua")
+
+    val e =
+      assertFailsWith<ExecutionException> { loader.loadWithRetries(shouldRetry = { true }).get(10, TimeUnit.SECONDS) }
+
+    assertIs<IllegalArgumentException>(e.cause)
+    assertEquals(0, loader.attempts.get())
+  }
+
+  private class FakeFunctionCodeLoader(
+    private vararg val failures: Exception,
+    codeResourcePath: String = "redis/testlib.lua",
+  ) : RetryingFunctionCodeLoader(codeResourcePath) {
     val attempts = AtomicInteger()
 
     override val destination = "fake"
