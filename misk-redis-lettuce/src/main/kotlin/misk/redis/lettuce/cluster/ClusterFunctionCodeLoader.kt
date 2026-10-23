@@ -34,7 +34,13 @@ internal class ClusterFunctionCodeLoader(
   override fun loadOnce(code: String): CompletionStage<String> {
     val client = clientProvider.get()
     return client.refreshPartitionsAsync().thenCompose {
-      client.connectAsync(StringCodec.UTF8).thenComposeUsing { it.async().functionLoad(code, replace) }
+      client.connectAsync(StringCodec.UTF8).thenComposeUsing { connection ->
+        // Cluster nodes don't share functions, and a keyless FUNCTION LOAD only reaches one node, so load on every
+        // primary. Replicas get the functions from their primary.
+        connection.async().upstream().commands().functionLoad(code, replace).thenApply { libraries ->
+          libraries.first()
+        }
+      }
     }
   }
 }
