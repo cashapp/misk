@@ -12,7 +12,8 @@ import misk.backoff.Backoff
  * Unlike `misk.backoff.retryableFuture`, each retry is scheduled as a fresh attempt instead of being chained onto the
  * previous one, so completing the result doesn't recurse once per failure and can't overflow the stack after a long
  * outage. Retrying stops, failing the result with the last error, when [shouldRetry] returns false for it. It also
- * stops once the result is completed some other way, for example by [CompletableFuture.orTimeout].
+ * stops once the result is completed some other way, for example by [CompletableFuture.orTimeout], skipping any attempt
+ * still waiting out its backoff.
  */
 internal fun <T> retryUntilSuccess(
   backoff: Backoff,
@@ -23,6 +24,7 @@ internal fun <T> retryUntilSuccess(
   val result = CompletableFuture<T>()
 
   fun tryOnce(failures: Int) {
+    if (result.isDone) return
     val stage =
       try {
         attempt()
