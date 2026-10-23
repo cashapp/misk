@@ -3,6 +3,7 @@ package misk.redis.lettuce
 import io.lettuce.core.RedisCommandExecutionException
 import io.lettuce.core.RedisConnectionException
 import io.lettuce.core.RedisLoadingException
+import io.lettuce.core.RedisReadOnlyException
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
 import java.util.concurrent.ExecutionException
@@ -16,11 +17,17 @@ import org.junit.jupiter.api.Test
 internal class RetryingFunctionCodeLoaderTest {
   @Test
   fun `retries transient failures until the code loads`() {
-    val loader = FakeFunctionCodeLoader(RedisConnectionException("unreachable"), RedisLoadingException("LOADING"))
+    val loader =
+      FakeFunctionCodeLoader(
+        RedisConnectionException("unreachable"),
+        RedisLoadingException("LOADING Redis is loading the dataset in memory"),
+        RedisReadOnlyException("READONLY You can't write against a read only replica."),
+        RedisCommandExecutionException("CLUSTERDOWN The cluster is down"),
+      )
 
     loader.loadWithRetries(shouldRetry = { true }).get(10, TimeUnit.SECONDS)
 
-    assertEquals(3, loader.attempts.get())
+    assertEquals(5, loader.attempts.get())
   }
 
   @Test

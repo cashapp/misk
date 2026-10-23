@@ -5,6 +5,7 @@ import com.google.common.io.Resources.toString as readAsString
 import io.lettuce.core.RedisBusyException
 import io.lettuce.core.RedisCommandExecutionException
 import io.lettuce.core.RedisLoadingException
+import io.lettuce.core.RedisReadOnlyException
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
@@ -100,6 +101,16 @@ internal abstract class RetryingFunctionCodeLoader(private val codeResourcePath:
   }
 }
 
-/** Error replies from Redis won't succeed on retry, except while it's loading its dataset or busy running a script. */
+/**
+ * Error replies from Redis, such as code that doesn't compile, won't succeed on retry. The exceptions are replies from
+ * a node that's loading its dataset, busy running a script, or a replica, or from a cluster whose topology is changing,
+ * for example during a failover.
+ */
 internal fun isRetryableFunctionLoadError(error: Throwable) =
-  error !is RedisCommandExecutionException || error is RedisLoadingException || error is RedisBusyException
+  error !is RedisCommandExecutionException ||
+    error is RedisLoadingException ||
+    error is RedisBusyException ||
+    error is RedisReadOnlyException ||
+    transientClusterErrors.any { error.message?.startsWith(it) == true }
+
+private val transientClusterErrors = listOf("CLUSTERDOWN", "TRYAGAIN", "MASTERDOWN")
