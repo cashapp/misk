@@ -52,16 +52,17 @@ internal class ConnectionPoolMetricsTest {
     redisClient = redisClient()
     connectionProvider =
       PooledStatefulRedisConnectionProvider(
-        AsyncConnectionPoolSupport.createBoundedObjectPoolAsync(
-            { redisClient.connectAsync(StringCodec.UTF8, redisUri) },
-            BoundedPoolConfig.create(),
-            false, // this is handled directly in the connection provider
-          )
-          .thenApply {
-            clientMetrics.registerConnectionPoolMetrics(name, replicationGroupId, it)
-            it
-          }
-          .toCompletableFuture(),
+        {
+          AsyncConnectionPoolSupport.createBoundedObjectPoolAsync(
+              { redisClient.connectAsync(StringCodec.UTF8, redisUri) },
+              BoundedPoolConfig.create(),
+              false, // this is handled directly in the connection provider
+            )
+            .thenApply {
+              clientMetrics.registerConnectionPoolMetrics(name, replicationGroupId, it)
+              it
+            }
+        },
         replicationGroupId,
       )
   }
