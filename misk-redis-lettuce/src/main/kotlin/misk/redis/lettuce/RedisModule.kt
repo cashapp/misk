@@ -111,8 +111,9 @@ import misk.redis.lettuce.standalone.RedisStandaloneModule
  *
  * In this mode:
  * - [RedisService] doesn't block startup or fail if Redis is unreachable. It verifies connectivity in the background,
- *   retrying until Redis is reachable, then loads any configured function code. The `redis_client_startup_verified`
- *   gauge reports 1 per replication group once it has connected.
+ *   retrying until Redis is reachable, then loads any configured function code, retrying that too until it succeeds or
+ *   Redis rejects the code. The `redis_client_startup_verified` gauge reports 1 per replication group once it has
+ *   connected.
  * - Commands are rejected immediately while a connection is disconnected, instead of queueing until Redis reconnects or
  *   the command times out. Callers should treat these failures like a cache miss.
  *

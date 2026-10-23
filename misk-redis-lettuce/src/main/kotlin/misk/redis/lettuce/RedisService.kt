@@ -39,7 +39,8 @@ import misk.logging.getLogger
  *     - Fails fast if connections cannot be established
  *     - If there is a configured ResourcePath for function code, load it
  *     - For non-essential Redis (see [RedisModule]), none of the above blocks or fails startup: connectivity is
- *       verified in the background, retrying until Redis is reachable, and function code is loaded after that
+ *       verified in the background, retrying until Redis is reachable, and function code is loaded after that, also
+ *       retrying until it succeeds or Redis rejects the code
  * - **Shutdown**:
  *     - Gracefully closes all Redis connections
  *     - Waits for all close operations to complete
@@ -125,7 +126,16 @@ internal constructor(
       .thenCompose {
         nonEssentialClient.startupVerified.set(1.0)
         logger.info { "Connected to non-essential Redis '$replicationGroupId'" }
-        nonEssentialClient.functionCodeLoader?.load() ?: CompletableFuture.completedFuture(null)
+        nonEssentialClient.functionCodeLoader?.loadWithRetries(
+          shouldRetry = { !stopping },
+          onRetry = { failures, e ->
+            if (failures == 1) {
+              logger.warn(e) {
+                "Failed loading function code to non-essential Redis '$replicationGroupId', retrying in the background"
+              }
+            }
+          },
+        ) ?: CompletableFuture.completedFuture(null)
       }
   }
 
@@ -152,6 +162,6 @@ internal class NonEssentialRedisClient(
   val client: AbstractRedisClient,
   /** Connects and pings without blocking the calling thread. */
   val ping: () -> CompletionStage<String>,
-  val functionCodeLoader: FunctionCodeLoader?,
+  val functionCodeLoader: RetryingFunctionCodeLoader?,
   val startupVerified: Gauge.Child,
 )

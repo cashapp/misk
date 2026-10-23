@@ -481,8 +481,8 @@ install(RedisModule.create(config, nonEssential = true))
 In this mode:
 
 - Startup doesn't wait for Redis or fail if it's unreachable. `RedisService` retries in the background until Redis is
-  reachable, then loads any configured function code. `redis_client_startup_verified` reports `1` for the replication
-  group once it has connected.
+  reachable, then loads any configured function code, retrying that too until it succeeds or Redis rejects the code.
+  `redis_client_startup_verified` reports `1` for the replication group once it has connected.
 - Commands are rejected immediately while a connection is disconnected
   (`ClientOptions.DisconnectedBehavior.REJECT_COMMANDS`), instead of queueing until Redis reconnects or the command
   times out. Handle these failures like a cache miss.
