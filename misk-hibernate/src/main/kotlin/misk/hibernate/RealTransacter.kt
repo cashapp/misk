@@ -2,6 +2,8 @@ package misk.hibernate
 
 import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
+import com.google.common.util.concurrent.MoreExecutors
+import com.google.common.util.concurrent.Service
 import java.io.Closeable
 import java.sql.Connection
 import java.sql.SQLException
@@ -12,6 +14,7 @@ import java.util.EnumSet
 import java.util.UUID
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
@@ -33,9 +36,7 @@ import misk.vitess.Shard
 import misk.vitess.Shard.Companion.SINGLE_SHARD_SET
 import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
-import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.ConstraintViolationException
-import org.hibernate.exception.LockAcquisitionException
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode
 
 private val logger = getLogger<RealTransacter>()
@@ -81,6 +82,15 @@ private constructor(
     hibernateEntities = hibernateEntities,
   ) {
     shardListFetcher.init(this, config, executorServiceFactory)
+    // The fetcher queries through this session factory, so its thread is released once the factory stops.
+    sessionFactoryService.addListener(
+      object : Service.Listener() {
+        override fun terminated(from: Service.State) = shardListFetcher.shutdown()
+
+        override fun failed(from: Service.State, failure: Throwable) = shardListFetcher.shutdown()
+      },
+      MoreExecutors.directExecutor(),
+    )
   }
 
   override fun config(): DataSourceConfig = config
@@ -95,6 +105,7 @@ private constructor(
    */
   class ShardListFetcher {
     private lateinit var supplier: Supplier<Future<out Set<Shard>>>
+    private var executorService: ExecutorService? = null
 
     fun init(transacter: Transacter, config: DataSourceConfig, executorServiceFactory: ExecutorServiceFactory) {
       check(!this::supplier.isInitialized)
@@ -106,6 +117,7 @@ private constructor(
         // contention with multiple ShardListFetchers/Transacters.
         val uuid = UUID.randomUUID().toString()
         val executorService = executorServiceFactory.single(nameFormat = "shard-list-fetcher-$uuid-%d")
+        this.executorService = executorService
         this.supplier =
           Suppliers.memoizeWithExpiration(
             {
@@ -137,6 +149,11 @@ private constructor(
     }
 
     fun cachedShards(): Set<Shard> = supplier.get().get()
+
+    /** Releases the Vitess fetch thread; Misk's executor factory never shuts down the executors it creates. */
+    fun shutdown() {
+      executorService?.shutdown()
+    }
   }
 
   private val sessionFactory
@@ -250,15 +267,17 @@ private constructor(
   }
 
   private fun <T> transactionWithRetriesInternal(block: () -> T): T {
-    val backoff = ExponentialBackoff(
-      baseDelay = Duration.ofMillis(options.minRetryDelayMillis),
-      maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
-      jitter = Duration.ofMillis(options.retryJitterMillis)
-    )
-    val retryConfig = RetryConfig.Builder(options.maxAttempts, backoff)
-      .shouldRetry { exceptionClassifier.isRetryable(it) }
-      .onRetry { attempt, e -> logger.info(e) { "$qualifierName transaction failed, retrying (attempt $attempt)" } }
-      .build()
+    val backoff =
+      ExponentialBackoff(
+        baseDelay = Duration.ofMillis(options.minRetryDelayMillis),
+        maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
+        jitter = Duration.ofMillis(options.retryJitterMillis),
+      )
+    val retryConfig =
+      RetryConfig.Builder(options.maxAttempts, backoff)
+        .shouldRetry { exceptionClassifier.isRetryable(it) }
+        .onRetry { attempt, e -> logger.info(e) { "$qualifierName transaction failed, retrying (attempt $attempt)" } }
+        .build()
     return retry(retryConfig) { block() }
   }
 
