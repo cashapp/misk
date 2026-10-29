@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 class SmartTagsThreadLocalHandlerTest {
   @AfterEach
   fun clearThreadLocal() {
-    @Suppress("DEPRECATION") SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
+    SmartTagsThreadLocalHandler.clearSmartTags()
   }
 
   @Test
@@ -62,6 +62,7 @@ class SmartTagsThreadLocalHandlerTest {
     assertThat(SmartTagsThreadLocalHandler.peekThreadLocalSmartTags(th)).isEmpty()
   }
 
+  // Pins the deprecated behaviour until callers migrate. Delete along with the no-arg functions.
   @Suppress("DEPRECATION")
   @Test
   fun `deprecated no-arg peek and pop return tags regardless of the exception`() {
