@@ -54,7 +54,7 @@ private constructor(
       chain.proceed(chain.httpCall)
     } catch (th: Throwable) {
       try {
-        val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
+        val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags(th)
 
         if (chain.httpCall.dispatchMechanism == DispatchMechanism.GRPC) {
           // This response object is only used for determining the status code. toGrpcResponse

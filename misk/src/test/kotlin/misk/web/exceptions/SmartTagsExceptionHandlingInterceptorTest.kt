@@ -65,6 +65,7 @@ internal class SmartTagsExceptionHandlingInterceptorTest {
         install(WebActionModule.create<NestedLoggersExceptionCaughtAndPeekedThenRethrown>())
         install(WebActionModule.create<NestedSmartTagsBothSucceed>())
         install(WebActionModule.create<DetectWrappedExceptionsUsingCausedBy>())
+        install(WebActionModule.create<SwallowedSmartTagsExceptionThenUnrelatedFailure>())
       }
     }
   val httpClient = OkHttpClient()
@@ -618,7 +619,7 @@ internal class SmartTagsExceptionHandlingInterceptorTest {
 
       // This is testing the ThreadLocal cleanup function within SmartTags when asContext() exits
       // without throwing an exception
-      val shouldBeEmptySet = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
+      @Suppress("DEPRECATION") val shouldBeEmptySet = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
       logger.info { "Should be zero size and log with no MDC context: ${shouldBeEmptySet.size}" }
       return ""
     }
@@ -668,7 +669,7 @@ internal class SmartTagsExceptionHandlingInterceptorTest {
         try {
           functionWithNestedSmartTags()
         } catch (e: NestedSmartTagsException) {
-          val smartTags = SmartTagsThreadLocalHandler.peekThreadLocalSmartTags()
+          val smartTags = SmartTagsThreadLocalHandler.peekThreadLocalSmartTags(e)
           logger.error(e, *smartTags.toTypedArray()) { "Should include peeked tags" }
           throw e
         }
@@ -755,6 +756,44 @@ internal class SmartTagsExceptionHandlingInterceptorTest {
     companion object {
       val logger = getLogger<DetectWrappedExceptionsUsingCausedBy>()
       const val URL = "/log/DetectWrappedExceptionsUsingCausedBy/test"
+    }
+  }
+
+  @Test
+  fun shouldNotLogSmartTagsFromSwallowedExceptionOnUnrelatedFailure() {
+    val response = invoke(SwallowedSmartTagsExceptionThenUnrelatedFailure.URL, "caller")
+    assertThat(response.code).isEqualTo(500)
+
+    val miskExceptionLogs = logCollector.takeEvents(ExceptionHandlingInterceptor::class)
+
+    assertThat(miskExceptionLogs).hasSize(1)
+    with(miskExceptionLogs.single()) {
+      assertThat(throwableProxy.message).isEqualTo("Unrelated failure outside any smart tags block")
+      assertThat(level).isEqualTo(Level.ERROR)
+      assertThat(mdcPropertyMap).doesNotContainKey("swallowedTag")
+    }
+  }
+
+  class SwallowedSmartTagsExceptionThenUnrelatedFailure @Inject constructor() : WebAction {
+    @Get(URL)
+    @Unauthenticated
+    @ResponseContentType(MediaTypes.APPLICATION_JSON)
+    fun call(): String {
+      try {
+        withSmartTags("swallowedTag" to "swallowedTagValue") { throw SwallowedException("Swallowed and never logged") }
+      } catch (_: SwallowedException) {
+        // Just squash for this test, leaving the smart tags behind in the thread local
+      }
+
+      throw UnrelatedException("Unrelated failure outside any smart tags block")
+    }
+
+    class SwallowedException(message: String) : Exception(message)
+
+    class UnrelatedException(message: String) : Exception(message)
+
+    companion object {
+      const val URL = "/log/SwallowedSmartTagsExceptionThenUnrelatedFailure/test"
     }
   }
 
