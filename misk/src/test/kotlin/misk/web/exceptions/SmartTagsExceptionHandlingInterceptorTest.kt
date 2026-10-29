@@ -609,17 +609,20 @@ internal class SmartTagsExceptionHandlingInterceptorTest {
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call(): String {
+      var squashed: NestedSmartTagsException? = null
       withSmartTags("testTag" to "SpecialTagValue123") {
         try {
           functionWithNestedSmartTags()
-        } catch (_: NestedSmartTagsException) {
+        } catch (e: NestedSmartTagsException) {
           // Just squash for this test
+          squashed = e
         }
       }
 
       // This is testing the ThreadLocal cleanup function within SmartTags when asContext() exits
-      // without throwing an exception
-      @Suppress("DEPRECATION") val shouldBeEmptySet = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
+      // without throwing an exception. The squashed exception stored the nested tags, so popping
+      // with it would return them if the cleanup had not happened.
+      val shouldBeEmptySet = SmartTagsThreadLocalHandler.popThreadLocalSmartTags(squashed!!)
       logger.info { "Should be zero size and log with no MDC context: ${shouldBeEmptySet.size}" }
       return ""
     }

@@ -46,7 +46,8 @@ object SmartTagsThreadLocalHandler {
         "Pass the throwable being logged: popThreadLocalSmartTags(th).",
     level = DeprecationLevel.WARNING,
   )
-  fun popThreadLocalSmartTags(): Set<Tag> = currentTags().also { clearSmartTags() }
+  @Suppress("DEPRECATION")
+  fun popThreadLocalSmartTags(): Set<Tag> = peekThreadLocalSmartTags().also { clearSmartTags() }
 
   /**
    * Retrieves all the logging MDC tags that were added to the logger via `withSmartTags()` but leaves them in place.
@@ -62,11 +63,10 @@ object SmartTagsThreadLocalHandler {
         "Pass the throwable being logged: peekThreadLocalSmartTags(th).",
     level = DeprecationLevel.WARNING,
   )
-  fun peekThreadLocalSmartTags(): Set<Tag> = currentTags()
+  fun peekThreadLocalSmartTags(): Set<Tag> = threadLocalMdcContext.get()?.tags ?: emptySet()
 
-  private fun currentTags(): Set<Tag> = threadLocalMdcContext.get()?.tags ?: emptySet()
-
-  private fun clearSmartTags() = threadLocalMdcContext.remove()
+  /** Visible for tests, so they can reset the thread local without relying on the deprecated no-arg pop. */
+  internal fun clearSmartTags() = threadLocalMdcContext.remove()
 
   private fun setOrAppendSmartTags(throwable: Throwable, tags: Set<Tag>) {
     val existingContext = threadLocalMdcContext.get()

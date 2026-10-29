@@ -54,6 +54,8 @@ private constructor(
       chain.proceed(chain.httpCall)
     } catch (th: Throwable) {
       try {
+        // Pop here, not in the request logging hooks: this interceptor wraps every request, so it's the one place that
+        // clears the smart tags. Hooks running inside it only peek.
         val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags(th)
 
         if (chain.httpCall.dispatchMechanism == DispatchMechanism.GRPC) {
