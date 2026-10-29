@@ -282,7 +282,7 @@ internal constructor(
               metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queue.queueName, queue.queueName)
               Status.OK
             } catch (th: Throwable) {
-              val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
+              val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags(th)
 
               log.error(th, *mdcTags.toTypedArray()) { "error handling job from ${queue.queueName}" }
 
@@ -340,7 +340,7 @@ internal constructor(
           metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queue.queueName, queue.queueName)
           Status.OK
         } catch (th: Throwable) {
-          val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
+          val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags(th)
 
           log.error(th, *mdcTags.toTypedArray()) { "error handling job from ${queue.queueName}" }
 
