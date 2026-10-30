@@ -7,6 +7,7 @@ import io.opentracing.Tracer
 import jakarta.inject.Inject
 import java.time.Clock
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -24,7 +25,6 @@ import misk.jobqueue.v2.JobConsumer
 import misk.jobqueue.v2.JobHandler
 import misk.logging.getLogger
 import misk.testing.TestFixture
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Instruments queue consumption.
@@ -112,7 +112,8 @@ constructor(
     runBlocking(scope.coroutineContext) {
       subscriptions.forEach { (queueName, subscription) ->
         // Stop issuing new receives, and give the in-flight one a chance to finish its long poll. Messages it already
-        // fetched are handled normally; abandoning it would leave them invisible until their visibility timeout expires.
+        // fetched are handled normally; abandoning it would leave them invisible until their visibility timeout
+        // expires.
         subscription.subscriber.stop()
         val gracePeriod =
           (subscription.subscriber.queueConfig.shutdown_grace_period_ms
@@ -124,15 +125,19 @@ constructor(
           subscription.pollingJob.join()
         }
         // The polling job closes the channel when it completes, which is what lets the handlers finish.
-        subscription.handlingJobs.joinAll()
+        val shutdownTimeout = subscription.subscriber.queueConfig.shutdown_timeout_ms
+        if (shutdownTimeout == null) {
+          subscription.handlingJobs.joinAll()
+        } else if (withTimeoutOrNull(shutdownTimeout.milliseconds) { subscription.handlingJobs.joinAll() } == null) {
+          logger.warn {
+            "Handlers for queue ${queueName.value} did not finish within ${shutdownTimeout}ms; cancelling remaining work"
+          }
+          subscription.handlingScope.cancel()
+        }
       }
     }
     logger.info("Stopped job consumer")
     notifyStopped()
-  }
-
-  fun stop() {
-    doStop()
   }
 
   private data class Subscription(
@@ -141,7 +146,6 @@ constructor(
     val handlingScope: CoroutineScope,
     val handlingJobs: List<Job>,
   )
-
 
   companion object {
     private val logger = getLogger<SqsJobConsumer>()
