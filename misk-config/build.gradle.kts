@@ -23,6 +23,7 @@ dependencies {
   implementation(libs.jacksonDataformatYaml)
   implementation(libs.jacksonKotlin)
   implementation(libs.loggingApi)
+  implementation(libs.snakeyamlEngine)
   implementation(project(":misk-logging"))
   implementation(project(":misk-tailwind"))
 
