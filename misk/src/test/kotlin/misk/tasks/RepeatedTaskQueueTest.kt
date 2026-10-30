@@ -591,6 +591,29 @@ internal class RepeatedTaskQueueTest {
     }
   }
 
+  @Test
+  fun `releases its task executor threads when it is shut down`() {
+    val name = "executor-release-check"
+    val queue = repeatedTaskQueueFactory.new(name, RepeatedTaskQueueConfig(num_parallel_tasks = 2))
+    queue.startAsync().awaitRunning()
+    val ran = CountDownLatch(1)
+    queue.schedule(Duration.ZERO) {
+      ran.countDown()
+      Result(Status.NO_RESCHEDULE, Duration.ZERO)
+    }
+    assertThat(ran.await(5, TimeUnit.SECONDS)).isTrue()
+    assertThat(liveThreads("$name-")).isNotEmpty()
+
+    queue.stopAsync().awaitTerminated(5, TimeUnit.SECONDS)
+
+    val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5)
+    while (liveThreads("$name-").isNotEmpty() && System.nanoTime() < deadline) Thread.sleep(50)
+    assertThat(liveThreads("$name-")).isEmpty()
+  }
+
+  private fun liveThreads(prefix: String): List<String> =
+    Thread.getAllStackTraces().keys.filter { it.isAlive && it.name.startsWith(prefix) }.map { it.name }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(Modules.override(MiskTestingServiceModule()).with(FakeClockModule()))
