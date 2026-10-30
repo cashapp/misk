@@ -92,6 +92,8 @@ misk/
 ├── misk-metrics/                            # Metrics abstractions
 ├── misk-metrics-digester/                   # Metrics digester
 ├── misk-moshi/                              # Moshi JSON integration
+├── misk-opentelemetry/                      # OpenTelemetry SDK setup
+├── misk-opentelemetry-jetty/                # OpenTelemetry Jetty server and connection metrics
 ├── misk-policy/                             # Policy enforcement
 ├── misk-prometheus/                         # Prometheus metrics
 ├── misk-proto/                              # Protocol buffer utilities
