@@ -68,7 +68,13 @@ internal constructor(
           withHost(hostname.takeIf { it.isNotBlank() } ?: "localhost")
           withPort(port)
         }
-        withPassword(replicationGroupConfig.redis_auth_password.toCharArray())
+        val username = replicationGroupConfig.redis_auth_username
+        val password = replicationGroupConfig.redis_auth_password.toCharArray()
+        if (username != null) {
+          withAuthentication(username, password)
+        } else {
+          withPassword(password)
+        }
         withSsl(replicationGroupConfig.use_ssl)
       }
 
@@ -141,6 +147,7 @@ internal constructor(
             codec = codec,
             useSsl = use_ssl,
             password = redis_auth_password.takeIf { it.isNotBlank() },
+            username = redis_auth_username,
             annotation = qualifier,
           )
         )
@@ -158,6 +165,7 @@ internal constructor(
             codec = codec,
             useSsl = use_ssl,
             password = redis_auth_password.takeIf { it.isNotBlank() },
+            username = redis_auth_username,
             annotation = qualifier,
           )
         )
