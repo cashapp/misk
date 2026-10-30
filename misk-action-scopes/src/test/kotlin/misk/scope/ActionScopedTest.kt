@@ -36,6 +36,8 @@ internal class ActionScopedTest {
 
   @Inject @Named("counting") private lateinit var countingString: ActionScoped<String>
 
+  @Inject @Named("construction-counting") private lateinit var constructionCounting: ActionScoped<String>
+
   @Inject private lateinit var scope: ActionScope
 
   @Inject private lateinit var testListener: TestListener
@@ -175,9 +177,7 @@ internal class ActionScopedTest {
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
 
     scope.create(seedData).inScope {
-      runBlocking(scope.asContextElement()) {
-        assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
-      }
+      runBlocking(scope.asContextElement()) { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
     }
   }
 
@@ -218,14 +218,12 @@ internal class ActionScopedTest {
 
       val instance = scope.snapshotActionScopeInstance()
       thread {
-        try {
-          instance.inScope {
-            assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
+          try {
+            instance.inScope { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
+          } catch (t: Throwable) {
+            thrown = t
           }
-        } catch (t: Throwable) {
-          thrown = t
         }
-      }
         .join()
       assertThat(thrown).isNull()
     }
@@ -260,14 +258,12 @@ internal class ActionScopedTest {
 
       val instance = scope.snapshotActionScopeInstance()
       thread {
-        try {
-          instance.inScope {
-            assertThat(foo.get()).isEqualTo("seed-value and bar and foo!")
+          try {
+            instance.inScope { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
+          } catch (t: Throwable) {
+            thrown = t
           }
-        } catch (t: Throwable) {
-          thrown = t
         }
-      }
         .join()
       assertThat(thrown).isNull()
     }
@@ -322,7 +318,8 @@ internal class ActionScopedTest {
 
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
 
-    scope.create(seedData)
+    scope
+      .create(seedData)
       .withOverrides(seedData = mapOf(keyOf<String>(Names.named("from-seed")) to "overridden-seed"))
       .inScope { assertThat(foo.get()).isEqualTo("overridden-seed and bar and foo!") }
   }
@@ -339,7 +336,8 @@ internal class ActionScopedTest {
         override fun get(): String = "overridden-bar"
       }
 
-    scope.create(seedData)
+    scope
+      .create(seedData)
       .withOverrides(providerOverrides = mapOf(keyOf<String>(Names.named("bar")) to providerOverride))
       .inScope { assertThat(foo.get()).isEqualTo("overridden-bar and foo!") }
   }
@@ -351,9 +349,7 @@ internal class ActionScopedTest {
 
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "seed-value")
 
-    scope.create(seedData)
-      .withOverrides()
-      .inScope { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
+    scope.create(seedData).withOverrides().inScope { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
   }
 
   @Test
@@ -362,9 +358,7 @@ internal class ActionScopedTest {
     injector.injectMembers(this)
 
     val parent = scope.create(mapOf(keyOf<String>(Names.named("from-seed")) to "parent"))
-    val child = parent.withOverrides(
-      seedData = mapOf(keyOf<String>(Names.named("from-seed")) to "child"),
-    )
+    val child = parent.withOverrides(seedData = mapOf(keyOf<String>(Names.named("from-seed")) to "child"))
 
     child.inScope { assertThat(foo.get()).isEqualTo("child and bar and foo!") }
     parent.inScope { assertThat(foo.get()).isEqualTo("parent and bar and foo!") }
@@ -378,9 +372,7 @@ internal class ActionScopedTest {
     val parent = scope.create(mapOf(keyOf<String>(Names.named("from-seed")) to "parent"))
     parent.inScope { assertThat(foo.get()).isEqualTo("parent and bar and foo!") }
 
-    val child = parent.withOverrides(
-      seedData = mapOf(keyOf<String>(Names.named("from-seed")) to "child"),
-    )
+    val child = parent.withOverrides(seedData = mapOf(keyOf<String>(Names.named("from-seed")) to "child"))
 
     child.inScope { assertThat(foo.get()).isEqualTo("parent and bar and foo!") }
   }
@@ -397,7 +389,8 @@ internal class ActionScopedTest {
         override fun get(): String = "from-provider"
       }
 
-    scope.create(seedData)
+    scope
+      .create(seedData)
       .withOverrides(
         seedData = mapOf(keyOf<String>(Names.named("from-seed")) to "from-seed-direct"),
         providerOverrides = mapOf(keyOf<String>(Names.named("from-seed")) to seedKeyProviderOverride),
@@ -415,5 +408,22 @@ internal class ActionScopedTest {
 
     child.inScope { assertThat(countingString.get()).isEqualTo("Called CountingProvider 1 time(s)") }
     parent.inScope { assertThat(countingString.get()).isEqualTo("Called CountingProvider 1 time(s)") }
+  }
+
+  @Test
+  fun `providers are only constructed for keys a scope reads`() {
+    val injector = Guice.createInjector(TestActionScopedProviderModule())
+    injector.injectMembers(this)
+    val constructions = TestActionScopedProviderModule.ConstructionCountingProvider.constructions
+    constructions.set(0)
+
+    repeat(3) { scope.create(emptyMap()).inScope { assertThat(constantString.get()).isEqualTo("constant-value") } }
+    assertThat(constructions.get()).isEqualTo(0)
+
+    scope.create(emptyMap()).inScope {
+      assertThat(constructionCounting.get()).isEqualTo("constructed")
+      assertThat(constructionCounting.get()).isEqualTo("constructed")
+    }
+    assertThat(constructions.get()).isEqualTo(1)
   }
 }
