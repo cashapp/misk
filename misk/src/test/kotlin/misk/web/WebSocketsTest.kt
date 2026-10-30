@@ -6,6 +6,7 @@ import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
+import misk.scope.ActionScoped
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
@@ -48,6 +49,24 @@ internal class WebSocketsTest {
       )
   }
 
+  /**
+   * A WebSocket upgrade must report the transport it arrived over, exactly as an ordinary request does. Authenticators
+   * that trust a request because it arrived on a Unix domain socket or on plaintext loopback from a sidecar read this
+   * value first; when it is null they cannot tell "no address" from "untrusted address" and reject the upgrade.
+   */
+  @Test
+  fun webSocketUpgradeReportsLinkLayerLocalAddress() {
+    val client = OkHttpClient()
+
+    val request = Request.Builder().url(jettyService.httpServerUrl.resolve("/socket-address")!!).build()
+
+    val webSocket = client.newWebSocket(request, listener)
+
+    webSocket.send("what transport did I arrive on?")
+    // The test server is a TCP connector, so a correctly populated call reports Network. Before the fix this was null.
+    assertThat(listener.takeMessage()).startsWith("Network:")
+  }
+
   @Test
   fun loggingDisabledByEnv() {
     val client = OkHttpClient()
@@ -69,6 +88,7 @@ internal class WebSocketsTest {
       install(MiskTestingServiceModule())
       install(LogCollectorModule())
       install(WebActionModule.create<EchoWebSocket>())
+      install(WebActionModule.create<SocketAddressWebSocket>())
     }
   }
 }
@@ -96,6 +116,29 @@ class EchoWebSocket @Inject constructor() : WebAction {
       }
 
       override fun toString() = "EchoListener"
+    }
+  }
+}
+
+/** Echoes back the transport the upgrade arrived on, so a test can assert the call carries one. */
+@Singleton
+class SocketAddressWebSocket
+@Inject
+constructor(private val clientHttpCall: @JvmSuppressWildcards ActionScoped<HttpCall>) : WebAction {
+  @ConnectWebSocket("/socket-address")
+  fun connect(@Suppress("UNUSED_PARAMETER") webSocket: WebSocket): WebSocketListener {
+    // Read during upgrade negotiation, which is when an authenticator would read it.
+    val address = clientHttpCall.get().linkLayerLocalAddress
+    val described =
+      when (address) {
+        null -> "null"
+        is SocketAddress.Network -> "Network:${address.port}"
+        is SocketAddress.Unix -> "Unix:${address.path}"
+      }
+    return object : WebSocketListener() {
+      override fun onMessage(webSocket: WebSocket, text: String) {
+        webSocket.send(described)
+      }
     }
   }
 }
