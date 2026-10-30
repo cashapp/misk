@@ -106,24 +106,29 @@ private constructor(
 
     var additionalTags: Set<Tag> = setOf("response_code" to statusCode, "response_time_millis" to elapsed.toMillis())
 
-    val error = error?.unwrap()
+    val unwrappedError = error?.unwrap()
     var level = Level.INFO
 
-    if (error != null) {
+    if (error != null && unwrappedError != null) {
       // Log with the exception and smart tags applied on error.
-      level = mapperResolver.mapperFor(error)?.loggingLevel(error) ?: Level.ERROR
-      additionalTags = additionalTags + SmartTagsThreadLocalHandler.peekThreadLocalSmartTags()
+      level = mapperResolver.mapperFor(unwrappedError)?.loggingLevel(unwrappedError) ?: Level.ERROR
+      // Peek rather than pop: ExceptionHandlingInterceptor wraps every request and pops once the error reaches it, so
+      // it
+      // stays the one place that clears. This hook only runs for annotated actions, and other hooks may run after it.
+      // Pass the raw error rather than the unwrapped one: unwrap() only walks down the cause chain, so the raw error
+      // also matches tags stored against the unwrapped exception, plus any stored against the wrapper itself.
+      additionalTags = additionalTags + SmartTagsThreadLocalHandler.peekThreadLocalSmartTags(error)
     }
 
     requestResponseLoggedCapture.onLogged()
 
-    logger.log(level = level, th = error, tags = additionalTags.toTypedArray()) {
+    logger.log(level = level, th = unwrappedError, tags = additionalTags.toTypedArray()) {
       buildDescription(
         caller = caller,
         httpCall = httpCall,
         elapsedToString = elapsedToString,
         requestResponse = requestResponse,
-        error = error,
+        error = unwrappedError,
         includeBody = includeBody,
       )
     }
