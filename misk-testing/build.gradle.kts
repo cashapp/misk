@@ -54,6 +54,7 @@ dependencies {
 
   testImplementation(libs.kotlinTest)
   testImplementation(libs.mockitoKotlin)
+  testImplementation(libs.junitLauncher)
 }
 
 mavenPublishing {
