@@ -21,10 +21,10 @@ jobs:
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
-      - name: Set up Python 3.8
+      - name: Set up Python 3.15
         uses: actions/setup-python@v6
         with:
-          python-version: 3.8
+          python-version: "3.15.2"
 
       - name: Generate API docs
         run: gradle dokkaGeneratePublicationMarkdown
