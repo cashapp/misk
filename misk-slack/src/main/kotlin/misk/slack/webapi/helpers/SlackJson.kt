@@ -12,6 +12,21 @@ constructor(
   val response_type: String? = "in_channel",
   val blocks: List<Any>,
   val thread_ts: String? = null,
+  /**
+   * Pass false to stop Slack expanding text-based links in this message into previews. Note that a link to a Slack
+   * message is text-based, and unfurls into a copy of the linked message, so this is the field to set when linking to
+   * other Slack posts. Null leaves Slack's default behaviour in place.
+   *
+   * https://docs.slack.dev/messaging/unfurling-links-in-messages
+   */
+  val unfurl_links: Boolean? = null,
+  /**
+   * Pass false to stop Slack expanding media links (images and video) in this message into previews. Null leaves
+   * Slack's default behaviour in place.
+   *
+   * https://docs.slack.dev/messaging/unfurling-links-in-messages
+   */
+  val unfurl_media: Boolean? = null,
 )
 
 /**
