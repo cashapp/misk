@@ -1,5 +1,6 @@
 package misk.aws2.sqs.jobqueue.coordinated
 
+import com.google.common.annotations.VisibleForTesting
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Provider
 import com.squareup.moshi.Moshi
@@ -113,7 +114,9 @@ internal constructor(
   fun shutDown() {
     log.info { "shutting down queue consumer threads" }
     receivingThreads.shutdown()
-    receivingThreads.awaitTermination(10, TimeUnit.SECONDS)
+    if (!receivingThreads.awaitTermination(10, TimeUnit.SECONDS)) {
+      log.warn { "SQS receivers still running after 10s; shutting down handler threads anyway" }
+    }
     handlingThreads.shutdown()
     handlingThreads.awaitTermination(10, TimeUnit.SECONDS)
   }
@@ -122,7 +125,7 @@ internal constructor(
     val queue = queues.getForReceiving(queueName)
     protected val shouldKeepRunning = AtomicBoolean(true)
 
-    protected abstract fun receive(): List<Status>
+    @VisibleForTesting internal abstract fun receive(): List<Status>
 
     fun stop() {
       shouldKeepRunning.set(false)
@@ -238,43 +241,64 @@ internal constructor(
       return CompletableFuture.allOf(*futures.toTypedArray()).thenApply { futures.map { it.join() } }.join()
     }
 
-    @OptIn(ExperimentalMiskApi::class)
     private fun handleMessages(messages: List<SqsJob>): List<CompletableFuture<Status>> {
       return messages.map { message ->
-        CompletableFuture.supplyAsync(
-          {
-            metrics.jobsReceived.labels(queue.queueName, queue.queueName).inc()
-
-            tracer.traceWithNewRootSpan("handle-job-${queue.queueName}") { span ->
-              message.attributes[SqsJob.ORIGINAL_TRACE_ID_ATTR]?.let { ORIGINAL_TRACE_ID_TAG.set(span, it) }
-
-              try {
-                MDC.put(SQS_JOB_ID_MDC, message.id)
-                MDC.put(SQS_JOB_ID_STRUCTURED_MDC, message.id)
-                MDC.put(SQS_QUEUE_NAME_MDC, message.queueName.value)
-                MDC.put(SQS_QUEUE_TYPE_MDC, SQS_QUEUE_TYPE)
-                val (duration) = timed { handler.handleJob(message) }
-                metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queue.queueName, queue.queueName)
-                Status.OK
-              } catch (th: Throwable) {
-                val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
-
-                log.error(th, *mdcTags.toTypedArray()) { "error handling job from ${queue.queueName}" }
-
-                metrics.handlerFailures.labels(queue.queueName, queue.queueName).inc()
-                Tags.ERROR.set(span, true)
-                Status.FAILED
-              } finally {
-                MDC.remove(SQS_JOB_ID_MDC)
-                MDC.remove(SQS_JOB_ID_STRUCTURED_MDC)
-                MDC.remove(SQS_QUEUE_NAME_MDC)
-                MDC.remove(SQS_QUEUE_TYPE_MDC)
-              }
-            }
-          },
-          handlingThreads,
-        )
+        try {
+          submit(message)
+        } catch (e: RejectedExecutionException) {
+          // shutDown() terminates the handler pool once its wait for receivers times out, so a
+          // receive still in flight can return jobs with nowhere to run them.
+          if (shouldKeepRunning.get()) throw e
+          release(message)
+          CompletableFuture.completedFuture(Status.NO_WORK)
+        }
       }
+    }
+
+    /** Makes an unhandled job visible again right away instead of after its visibility timeout. */
+    private fun release(message: SqsJob) {
+      try {
+        message.changeVisibility(0)
+      } catch (e: Exception) {
+        log.warn(e) { "unable to release job ${message.id} back to ${queue.queueName} during shutdown" }
+      }
+    }
+
+    @OptIn(ExperimentalMiskApi::class)
+    private fun submit(message: SqsJob): CompletableFuture<Status> {
+      return CompletableFuture.supplyAsync(
+        {
+          metrics.jobsReceived.labels(queue.queueName, queue.queueName).inc()
+
+          tracer.traceWithNewRootSpan("handle-job-${queue.queueName}") { span ->
+            message.attributes[SqsJob.ORIGINAL_TRACE_ID_ATTR]?.let { ORIGINAL_TRACE_ID_TAG.set(span, it) }
+
+            try {
+              MDC.put(SQS_JOB_ID_MDC, message.id)
+              MDC.put(SQS_JOB_ID_STRUCTURED_MDC, message.id)
+              MDC.put(SQS_QUEUE_NAME_MDC, message.queueName.value)
+              MDC.put(SQS_QUEUE_TYPE_MDC, SQS_QUEUE_TYPE)
+              val (duration) = timed { handler.handleJob(message) }
+              metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queue.queueName, queue.queueName)
+              Status.OK
+            } catch (th: Throwable) {
+              val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
+
+              log.error(th, *mdcTags.toTypedArray()) { "error handling job from ${queue.queueName}" }
+
+              metrics.handlerFailures.labels(queue.queueName, queue.queueName).inc()
+              Tags.ERROR.set(span, true)
+              Status.FAILED
+            } finally {
+              MDC.remove(SQS_JOB_ID_MDC)
+              MDC.remove(SQS_JOB_ID_STRUCTURED_MDC)
+              MDC.remove(SQS_QUEUE_NAME_MDC)
+              MDC.remove(SQS_QUEUE_TYPE_MDC)
+            }
+          }
+        },
+        handlingThreads,
+      )
     }
   }
 
