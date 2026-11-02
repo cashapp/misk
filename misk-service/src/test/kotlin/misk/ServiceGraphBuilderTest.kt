@@ -138,6 +138,13 @@ class ServiceGraphBuilderTest {
   }
 
   @Test
+  fun unregisteredDependent() {
+    val failure = buildAndExpectFailure(listOf(keyA)) { addDependency(dependsOn = keyA, dependent = unregistered) }
+    assertThat(failure)
+      .hasMessage("$unregistered depends on $keyA but $unregistered was not registered with the builder")
+  }
+
+  @Test
   fun failuresPropagate() {
     val bomb =
       object : AbstractService() {

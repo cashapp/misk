@@ -89,8 +89,10 @@ constructor(private val serviceManagerConfig: ServiceManagerConfig = ServiceMana
       builder.addService(entry.key, entry.key.typeLiteral.toString(), injector.getProvider(entry.key))
     }
 
+    val registeredKeys = allServiceEntries.mapTo(mutableSetOf()) { it.key }
     val allDependencies = dependencies + optionalDependencies.mapNotNull { it.edge }
     for (edge in allDependencies) {
+      if (edge.ifRegistered && (edge.dependent !in registeredKeys || edge.dependsOn !in registeredKeys)) continue
       builder.addDependency(dependent = edge.dependent, dependsOn = edge.dependsOn)
     }
 

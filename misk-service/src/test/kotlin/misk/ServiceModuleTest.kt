@@ -4,8 +4,11 @@ import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Key
+import com.google.inject.Module
+import com.google.inject.ProvisionException
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import misk.inject.AlwaysEnabledSwitch
 import misk.inject.AsyncSwitch
@@ -202,7 +205,6 @@ class ServiceModuleTest {
     val disabledSwitch = TestSwitch(enabled = false)
     val log = StringBuilder()
 
-
     val injector =
       Guice.createInjector(
         MiskTestingServiceModule(),
@@ -211,9 +213,10 @@ class ServiceModuleTest {
             bind<StringBuilder>().toInstance(log)
             bind<TestSwitch>().toInstance(disabledSwitch)
             install(
-              ServiceModule<TestService>().dependsOn<UpstreamService>()
+              ServiceModule<TestService>()
+                .dependsOn<UpstreamService>()
                 .dependsOn<EnhancementService>()
-                .conditionalOn<TestSwitch>("test"),
+                .conditionalOn<TestSwitch>("test")
             )
           }
         },
@@ -284,7 +287,6 @@ class ServiceModuleTest {
     assertThat(log.toString()).contains("EnhancementService.startUp")
   }
 
-
   @Test
   fun conditionalOn_withMultipleEnhancements_whenDisabled_bindsNoOpServiceWithNoEnhancements() {
     val disabledSwitch = TestSwitch(enabled = false)
@@ -296,10 +298,12 @@ class ServiceModuleTest {
           override fun configure() {
             bind<StringBuilder>().toInstance(log)
             bind<TestSwitch>().toInstance(disabledSwitch)
-            install(ServiceModule<TestService>()
-              .enhancedBy<EnhancementService>()
-              .enhancedBy<UpstreamService>()
-              .conditionalOn<TestSwitch>("test"))
+            install(
+              ServiceModule<TestService>()
+                .enhancedBy<EnhancementService>()
+                .enhancedBy<UpstreamService>()
+                .conditionalOn<TestSwitch>("test")
+            )
           }
         },
       )
@@ -646,5 +650,108 @@ class ServiceModuleTest {
     // Should only start once
     assertThat(log.toString()).contains("TestService.startUp")
     assertThat(log.toString().split("TestService.startUp").size - 1).isEqualTo(1)
+  }
+
+  @Test
+  fun dependsOnIfRegistered_whenUpstreamMissing_dropsEdge() {
+    val log = startAndStop(ServiceModule<TestService>().dependsOnIfRegistered<UpstreamService>())
+
+    assertThat(log).isEqualTo("TestService.startUp\nTestService.shutDown\n")
+  }
+
+  @Test
+  fun dependsOnIfRegistered_whenUpstreamRegistered_ordersStartAndStop() {
+    val log =
+      startAndStop(
+        ServiceModule<TestService>().dependsOnIfRegistered<UpstreamService>(),
+        ServiceModule<UpstreamService>(),
+      )
+
+    assertThat(log)
+      .isEqualTo("UpstreamService.startUp\nTestService.startUp\nTestService.shutDown\nUpstreamService.shutDown\n")
+  }
+
+  @Test
+  fun dependsOnIfRegistered_whenUpstreamDisabledBySwitch_dropsEdge() {
+    val log =
+      startAndStop(
+        Module { it.bind(TestSwitch::class.java).toInstance(TestSwitch(enabled = false)) },
+        ServiceModule<TestService>().dependsOnIfRegistered<UpstreamService>(),
+        ServiceModule<UpstreamService>().conditionalOn<TestSwitch>("test"),
+      )
+
+    assertThat(log).isEqualTo("TestService.startUp\nTestService.shutDown\n")
+  }
+
+  @Test
+  fun dependsOnIfRegistered_onConditionalService_ordersStartAndStop() {
+    val log =
+      startAndStop(
+        Module { it.bind(TestSwitch::class.java).toInstance(TestSwitch(enabled = true)) },
+        ServiceModule<TestService>().dependsOnIfRegistered<UpstreamService>().conditionalOn<TestSwitch>("test"),
+        ServiceModule<UpstreamService>(),
+      )
+
+    assertThat(log)
+      .isEqualTo("UpstreamService.startUp\nTestService.startUp\nTestService.shutDown\nUpstreamService.shutDown\n")
+  }
+
+  @Test
+  fun serviceDependencyModule_addsEdgeToServiceRegisteredElsewhere() {
+    val log =
+      startAndStop(
+        ServiceModule<TestService>(),
+        ServiceModule<UpstreamService>(),
+        ServiceDependencyModule<TestService>().dependsOn<UpstreamService>(),
+      )
+
+    assertThat(log)
+      .isEqualTo("UpstreamService.startUp\nTestService.startUp\nTestService.shutDown\nUpstreamService.shutDown\n")
+  }
+
+  @Test
+  fun serviceDependencyModule_dependsOnIfRegistered_dropsEdgeWhenEitherServiceMissing() {
+    val log =
+      startAndStop(
+        ServiceModule<TestService>(),
+        ServiceDependencyModule<TestService>().dependsOnIfRegistered<UpstreamService>(),
+        ServiceDependencyModule<EnhancementService>().dependsOnIfRegistered<TestService>(),
+      )
+
+    assertThat(log).isEqualTo("TestService.startUp\nTestService.shutDown\n")
+  }
+
+  @Test
+  fun serviceDependencyModule_whenDependentMissing_fails() {
+    val failure =
+      assertFailsWith<ProvisionException> {
+        startAndStop(
+          ServiceModule<UpstreamService>(),
+          ServiceDependencyModule<TestService>().dependsOn<UpstreamService>(),
+        )
+      }
+
+    assertThat(failure.message)
+      .contains(
+        "${Key.get(TestService::class.java)} depends on ${Key.get(UpstreamService::class.java)} " +
+          "but ${Key.get(TestService::class.java)} was not registered with the builder"
+      )
+  }
+
+  private fun startAndStop(vararg modules: Module): String {
+    val log = StringBuilder()
+    val injector =
+      Guice.createInjector(
+        MiskTestingServiceModule(),
+        Module { it.bind(StringBuilder::class.java).toInstance(log) },
+        *modules,
+      )
+
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+    return log.toString()
   }
 }

@@ -80,6 +80,35 @@ block of a Guice [KAbstractModule], you would set up the above relationship as f
  }
  ```
 
+### Optional dependencies
+
+Use `dependsOnIfRegistered` when the upstream service may not be installed, for example because
+it is replaced by a fake in tests or it is disabled by a `Switch`. The dependency edge is dropped
+when either service is not registered; otherwise it behaves exactly like `dependsOn`. Edges added
+with `dependsOn` still fail injector creation if the upstream service is missing.
+
+ ```kotlin
+ install(
+   ServiceModule<MoviesService>()
+     .dependsOnIfRegistered<RecommendationsService>()
+ )
+ ```
+
+### Dependencies of services registered elsewhere
+
+A `ServiceModule` registers its service, so it must be installed once per service (identical
+installs are de-duplicated). To order a service registered by another module, install a
+`ServiceDependencyModule`, which adds dependency edges without registering the service.
+Enhancements can be expressed the same way, as a dependency of the enhancement on the enhanced
+service.
+
+ ```kotlin
+ install(
+   ServiceDependencyModule<MoviesService>()
+     .dependsOnIfRegistered<RecommendationsService>()
+ )
+ ```
+
 ### How does this work?
 
 Bindings are hooked up for a `ServiceManager` provider, which decorates the service with its

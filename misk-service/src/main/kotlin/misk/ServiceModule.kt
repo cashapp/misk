@@ -64,6 +64,30 @@ import misk.inject.toKey
  * }
  * ```
  *
+ * ### Optional dependencies
+ *
+ * Use [dependsOnIfRegistered] when the upstream service may not be installed, for example because it is replaced by a
+ * fake in tests or it is disabled by a [Switch]. The dependency edge is dropped when either service is not registered;
+ * otherwise it behaves exactly like [dependsOn]. Edges added with [dependsOn] still fail injector creation if the
+ * upstream service is missing.
+ *
+ * ```
+ * install(ServiceModule<MoviesService>()
+ *     .dependsOnIfRegistered<RecommendationsService>())
+ * ```
+ *
+ * ### Dependencies of services registered elsewhere
+ *
+ * A [ServiceModule] registers its service, so it must be installed once per service (identical installs are
+ * de-duplicated). To order a service registered by another module, install a [ServiceDependencyModule], which adds
+ * dependency edges without registering the service. Enhancements can be expressed the same way, as a dependency of the
+ * enhancement on the enhanced service.
+ *
+ * ```
+ * install(ServiceDependencyModule<MoviesService>()
+ *     .dependsOnIfRegistered<RecommendationsService>())
+ * ```
+ *
  * ### How does this work?
  *
  * Bindings are hooked up for a [ServiceManager] provider, which decorates the service with its dependencies and
@@ -73,16 +97,25 @@ import misk.inject.toKey
  * the `STOPPING` state until all dependent services are `TERMINATED`.
  */
 class ServiceModule
-// TODO re-enable JVM overloads and remove the alternative constructors once downstream usages have been migrated
-// @JvmOverloads
-@Suppress("detekt:AnnotatePublicApisWithJvmOverloads")
-constructor(
+private constructor(
   val key: Key<out Service>,
-  val dependsOn: List<Key<out Service>> = listOf(),
-  val enhancedBy: List<Key<out Service>> = listOf(),
-  private val switchKey: String = "default",
-  private val switchType: KClass<out Switch>? = null,
+  val dependsOn: List<Key<out Service>>,
+  val enhancedBy: List<Key<out Service>>,
+  private val switchKey: String,
+  private val switchType: KClass<out Switch>?,
+  val dependsOnIfRegistered: List<Key<out Service>>,
 ) : KAbstractModule() {
+
+  // TODO re-enable JVM overloads and remove the alternative constructors once downstream usages have been migrated
+  // @JvmOverloads
+  @Suppress("detekt:AnnotatePublicApisWithJvmOverloads")
+  constructor(
+    key: Key<out Service>,
+    dependsOn: List<Key<out Service>> = listOf(),
+    enhancedBy: List<Key<out Service>> = listOf(),
+    switchKey: String = "default",
+    switchType: KClass<out Switch>? = null,
+  ) : this(key, dependsOn, enhancedBy, switchKey, switchType, listOf())
 
   // This constructor exists for binary-compatibility with older callers.
   @Deprecated("the enhances argument does nothing please don't use this.")
@@ -124,25 +157,10 @@ constructor(
     }
 
     for (dependsOnKey in dependsOn) {
-      if (switchType != null) {
-        multibind<OptionalDependencyEdge>()
-          .toProvider(
-            ConditionalProvider(
-              switchKey,
-              switchType,
-              OptionalDependencyEdge::class,
-              DependencyEdge::class,
-              DependencyEdge(dependent = key, dependsOn = dependsOnKey),
-              null,
-            ) {
-              OptionalDependencyEdge(key, switchKey, switchType, it, dependsOnKey)
-            }
-          )
-          .asSingleton()
-      } else {
-        // TODO remove this branch and rely solely on ConditionalProvider after further testing in all cases
-        multibind<DependencyEdge>().toInstance(DependencyEdge(dependent = key, dependsOn = dependsOnKey))
-      }
+      bindDependencyEdge(dependsOnKey, ifRegistered = false)
+    }
+    for (dependsOnKey in dependsOnIfRegistered) {
+      bindDependencyEdge(dependsOnKey, ifRegistered = true)
     }
     for (enhancedByKey in enhancedBy) {
       if (switchType != null) {
@@ -167,20 +185,44 @@ constructor(
     }
   }
 
+  private fun bindDependencyEdge(dependsOnKey: Key<out Service>, ifRegistered: Boolean) {
+    val edge = DependencyEdge(dependent = key, dependsOn = dependsOnKey, ifRegistered = ifRegistered)
+    if (switchType != null) {
+      multibind<OptionalDependencyEdge>()
+        .toProvider(
+          ConditionalProvider(switchKey, switchType, OptionalDependencyEdge::class, DependencyEdge::class, edge, null) {
+            OptionalDependencyEdge(key, switchKey, switchType, it, dependsOnKey, ifRegistered)
+          }
+        )
+        .asSingleton()
+    } else {
+      // TODO remove this branch and rely solely on ConditionalProvider after further testing in all cases
+      multibind<DependencyEdge>().toInstance(edge)
+    }
+  }
+
   fun conditionalOn(switchKey: String, switchType: KClass<out Switch>) =
-    ServiceModule(key, dependsOn, enhancedBy, switchKey, switchType)
+    ServiceModule(key, dependsOn, enhancedBy, switchKey, switchType, dependsOnIfRegistered)
 
   fun dependsOn(upstream: Key<out Service>) =
-    ServiceModule(key, dependsOn + upstream, enhancedBy, switchKey, switchType)
+    ServiceModule(key, dependsOn + upstream, enhancedBy, switchKey, switchType, dependsOnIfRegistered)
 
   fun dependsOn(upstream: List<Key<out Service>>) =
-    ServiceModule(key, dependsOn + upstream, enhancedBy, switchKey, switchType)
+    ServiceModule(key, dependsOn + upstream, enhancedBy, switchKey, switchType, dependsOnIfRegistered)
+
+  /** Like [dependsOn], but the edge is dropped if either this service or [upstream] is not registered. */
+  fun dependsOnIfRegistered(upstream: Key<out Service>) =
+    ServiceModule(key, dependsOn, enhancedBy, switchKey, switchType, dependsOnIfRegistered + upstream)
+
+  /** Like [dependsOn], but each edge is dropped if either this service or its upstream is not registered. */
+  fun dependsOnIfRegistered(upstream: List<Key<out Service>>) =
+    ServiceModule(key, dependsOn, enhancedBy, switchKey, switchType, dependsOnIfRegistered + upstream)
 
   fun enhancedBy(enhancement: Key<out Service>) =
-    ServiceModule(key, dependsOn, enhancedBy + enhancement, switchKey, switchType)
+    ServiceModule(key, dependsOn, enhancedBy + enhancement, switchKey, switchType, dependsOnIfRegistered)
 
   fun enhancedBy(enhancement: List<Key<out Service>>) =
-    ServiceModule(key, dependsOn, enhancedBy + enhancement, switchKey, switchType)
+    ServiceModule(key, dependsOn, enhancedBy + enhancement, switchKey, switchType, dependsOnIfRegistered)
 
   @JvmOverloads
   inline fun <reified T : Switch> conditionalOn(switchKey: String = "default") = conditionalOn(switchKey, T::class)
@@ -188,6 +230,10 @@ constructor(
   @JvmOverloads
   inline fun <reified T : Service> dependsOn(qualifier: KClass<out Annotation>? = null) =
     dependsOn(T::class.toKey(qualifier))
+
+  @JvmOverloads
+  inline fun <reified T : Service> dependsOnIfRegistered(qualifier: KClass<out Annotation>? = null) =
+    dependsOnIfRegistered(T::class.toKey(qualifier))
 
   @JvmOverloads
   inline fun <reified T : Service> enhancedBy(qualifier: KClass<out Annotation>? = null) =
@@ -226,7 +272,8 @@ inline fun <reified T : Service, reified Q : Annotation> ServiceModule() = Servi
 
 internal data class EnhancementEdge(val toBeEnhanced: Key<*>, val enhancement: Key<*>)
 
-internal data class DependencyEdge(val dependent: Key<*>, val dependsOn: Key<*>)
+/** [ifRegistered] edges are dropped when either endpoint is not registered. */
+internal data class DependencyEdge(val dependent: Key<*>, val dependsOn: Key<*>, val ifRegistered: Boolean = false)
 
 internal data class ServiceEntry(val key: Key<out Service>)
 
@@ -246,10 +293,12 @@ internal data class OptionalDependencyEdge(
   val switchType: KClass<out Switch>,
   val edge: DependencyEdge?,
   /**
-   * [dependencyKey] is added here to disambiguate when the switch is off.
-   * without it, guice tries to multibind the same instance for each dependency, when the off impl [edge] is null.
+   * [dependencyKey] is added here to disambiguate when the switch is off. without it, guice tries to multibind the same
+   * instance for each dependency, when the off impl [edge] is null.
    */
-  val dependencyKey: Key<out Service>
+  val dependencyKey: Key<out Service>,
+  /** Disambiguates [dependencyKey] being both a required and an optional dependency when the switch is off. */
+  val ifRegistered: Boolean = false,
 )
 
 internal data class OptionalEnhancementEdge(
@@ -258,8 +307,8 @@ internal data class OptionalEnhancementEdge(
   val switchType: KClass<out Switch>,
   val edge: EnhancementEdge?,
   /**
-   * [dependencyKey] is added here to disambiguate when the switch is off.
-   * without it, guice tries to multibind the same instance for each dependency, when the off impl [edge] is null.
+   * [dependencyKey] is added here to disambiguate when the switch is off. without it, guice tries to multibind the same
+   * instance for each dependency, when the off impl [edge] is null.
    */
-  val dependencyKey: Key<out Service>
+  val dependencyKey: Key<out Service>,
 )

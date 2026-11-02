@@ -23,6 +23,19 @@ public final class misk/ReadyService : com/google/common/util/concurrent/Abstrac
 public final class misk/ReadyService$Companion {
 }
 
+public final class misk/ServiceDependencyModule : misk/inject/KAbstractModule {
+	public fun <init> (Lcom/google/inject/Key;)V
+	public final synthetic fun dependsOn ()Lmisk/ServiceDependencyModule;
+	public final fun dependsOn (Lcom/google/inject/Key;)Lmisk/ServiceDependencyModule;
+	public final fun dependsOn (Ljava/util/List;)Lmisk/ServiceDependencyModule;
+	public final synthetic fun dependsOnIfRegistered ()Lmisk/ServiceDependencyModule;
+	public final fun dependsOnIfRegistered (Lcom/google/inject/Key;)Lmisk/ServiceDependencyModule;
+	public final fun dependsOnIfRegistered (Ljava/util/List;)Lmisk/ServiceDependencyModule;
+	public final fun getDependsOn ()Ljava/util/List;
+	public final fun getDependsOnIfRegistered ()Ljava/util/List;
+	public final fun getKey ()Lcom/google/inject/Key;
+}
+
 public final class misk/ServiceGraphBuilderMetadata {
 	public fun <init> (Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/util/Map;
@@ -75,10 +88,14 @@ public final class misk/ServiceModule : misk/inject/KAbstractModule {
 	public final synthetic fun dependsOn ()Lmisk/ServiceModule;
 	public final fun dependsOn (Lcom/google/inject/Key;)Lmisk/ServiceModule;
 	public final fun dependsOn (Ljava/util/List;)Lmisk/ServiceModule;
+	public final synthetic fun dependsOnIfRegistered ()Lmisk/ServiceModule;
+	public final fun dependsOnIfRegistered (Lcom/google/inject/Key;)Lmisk/ServiceModule;
+	public final fun dependsOnIfRegistered (Ljava/util/List;)Lmisk/ServiceModule;
 	public final synthetic fun enhancedBy ()Lmisk/ServiceModule;
 	public final fun enhancedBy (Lcom/google/inject/Key;)Lmisk/ServiceModule;
 	public final fun enhancedBy (Ljava/util/List;)Lmisk/ServiceModule;
 	public final fun getDependsOn ()Ljava/util/List;
+	public final fun getDependsOnIfRegistered ()Ljava/util/List;
 	public final fun getEnhancedBy ()Ljava/util/List;
 	public final fun getKey ()Lcom/google/inject/Key;
 }

@@ -94,11 +94,16 @@ internal class ServiceGraphBuilder {
   }
 
   /**
-   * Checks that each service registered with this builder has its dependencies registered. (i.e. no one service
-   * requires a dependency or enhancement that doesn't exist.)
+   * Checks that both ends of every dependency and enhancement edge are registered with this builder. (i.e. no one
+   * service requires a dependency or enhancement that doesn't exist.)
    */
   private fun validateDependencyMap() {
     for ((service, dependents) in dependencyMap.asMap()) {
+      for (dependent in dependents) {
+        check(serviceMap[dependent] != null) {
+          "$dependent depends on $service but $dependent was not registered with the builder"
+        }
+      }
       check(serviceMap[service] != null) {
         val stringBuilder = StringBuilder()
         for (dependent in dependents) {
