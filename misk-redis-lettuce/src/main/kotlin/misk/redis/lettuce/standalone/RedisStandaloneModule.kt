@@ -2,8 +2,10 @@ package misk.redis.lettuce.standalone
 
 import com.google.inject.name.Names
 import io.lettuce.core.AbstractRedisClient
+import io.lettuce.core.ClientOptions.DisconnectedBehavior
 import io.lettuce.core.RedisClient
 import io.lettuce.core.codec.RedisCodec
+import io.lettuce.core.codec.StringCodec
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.toJavaDuration
@@ -11,11 +13,13 @@ import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.redis.lettuce.FunctionCodeLoader
+import misk.redis.lettuce.NonEssentialRedisClient
 import misk.redis.lettuce.RedisConfig
 import misk.redis.lettuce.RedisReplicationGroupConfig
 import misk.redis.lettuce.connectionProviderTypeLiteral
 import misk.redis.lettuce.metrics.RedisClientMetrics
 import misk.redis.lettuce.redisUri
+import misk.redis.lettuce.thenComposeUsing
 import misk.redis2.metrics.RedisClientMetricsCommandLatencyRecorder
 
 /**
@@ -45,6 +49,7 @@ internal constructor(
   private val keyType: KClass<K>,
   private val valueType: KClass<V>,
   private val codec: RedisCodec<K, V>,
+  private val nonEssential: Boolean,
 ) : KAbstractModule() {
 
   override fun configure() {
@@ -75,6 +80,7 @@ internal constructor(
             clientOptions =
               clientOptions {
                 socketOptions { connectTimeout(replicationGroupConfig.timeout_ms.milliseconds.toJavaDuration()) }
+                if (nonEssential) disconnectedBehavior(DisconnectedBehavior.REJECT_COMMANDS)
               },
             clientResources =
               clientResources {
@@ -94,14 +100,30 @@ internal constructor(
 
       // Add a binding for a function loader if there is configuration
       val clientProvider = getProvider(redisClientKey)
-      replicationGroupConfig.function_code_file_path?.also { codeResourcePath ->
-        multibind<FunctionCodeLoader>().toProvider {
+      val functionCodeLoader =
+        replicationGroupConfig.function_code_file_path?.let { codeResourcePath ->
           StandaloneFunctionCodeLoader(
             clientProvider = clientProvider,
             uri = redisPrimaryUri,
             codeResourcePath = codeResourcePath,
           )
         }
+      if (nonEssential) {
+        multibind<NonEssentialRedisClient>().toProvider {
+          NonEssentialRedisClient(
+            replicationGroupId = replicationGroupId,
+            client = clientProvider.get(),
+            ping = {
+              clientProvider.get().connectAsync(StringCodec.UTF8, redisPrimaryUri).thenComposeUsing {
+                it.async().ping()
+              }
+            },
+            functionCodeLoader = functionCodeLoader,
+            startupVerified = redisClientMetricsProvider.get().startupVerifiedGauge.labels(replicationGroupId),
+          )
+        }
+      } else if (functionCodeLoader != null) {
+        multibind<FunctionCodeLoader>().toInstance(functionCodeLoader)
       }
 
       with(replicationGroupConfig) {
