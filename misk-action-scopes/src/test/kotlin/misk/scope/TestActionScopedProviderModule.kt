@@ -20,6 +20,7 @@ internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
     bindProvider(nullableStringTypeLiteral, NullableFooProvider::class, Names.named("nullable-foo"))
     bindProvider(nullableStringTypeLiteral, NullableBasedOnFooProvider::class, Names.named("nullable-based-on-foo"))
     bindProvider(String::class, CountingProvider::class, Names.named(("counting")))
+    bindProvider(String::class, ConstructionCountingProvider::class, Names.named("construction-counting"))
     bindListener<TestListener>()
   }
 
@@ -75,6 +76,19 @@ internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
     private var callCount = 0
 
     override fun get(): String = "Called CountingProvider ${++callCount} time(s)"
+  }
+
+  /** Unscoped, like most consumer providers; counts how many instances Guice builds. */
+  class ConstructionCountingProvider @Inject internal constructor() : ActionScopedProvider<String> {
+    init {
+      constructions.incrementAndGet()
+    }
+
+    override fun get(): String = "constructed"
+
+    companion object {
+      val constructions = java.util.concurrent.atomic.AtomicInteger()
+    }
   }
 
   @Singleton

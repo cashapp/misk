@@ -5,10 +5,11 @@ import kotlin.concurrent.withLock
 
 private object UNINITIALIZED_VALUE
 
-internal class SynchronizedLazy(
-  private val provider: ActionScopedProvider<*>,
-  private val providerFactory: () -> ActionScopedProvider<*> = { provider },
-) : Lazy<Any?> {
+/**
+ * Computes an action-scoped value on first read. [providerFactory] is only invoked then, so keys that a scope never
+ * reads cost nothing beyond this wrapper.
+ */
+internal class SynchronizedLazy(private val providerFactory: () -> ActionScopedProvider<*>) : Lazy<Any?> {
   @Volatile private var _value: Any? = UNINITIALIZED_VALUE
 
   private val lock = ReentrantLock()
@@ -24,7 +25,7 @@ internal class SynchronizedLazy(
         if (existingValue != UNINITIALIZED_VALUE) {
           existingValue
         } else {
-          _value = provider.get()
+          _value = providerFactory().get()
           _value
         }
       }
@@ -34,5 +35,5 @@ internal class SynchronizedLazy(
     return _value != UNINITIALIZED_VALUE
   }
 
-  internal fun copy(): SynchronizedLazy = SynchronizedLazy(providerFactory(), providerFactory)
+  internal fun copy(): SynchronizedLazy = SynchronizedLazy(providerFactory)
 }
