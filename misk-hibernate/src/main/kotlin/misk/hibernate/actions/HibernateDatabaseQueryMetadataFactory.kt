@@ -23,6 +23,7 @@ import misk.hibernate.Session
 import misk.hibernate.actions.HibernateDatabaseQueryDynamicAction.Companion.HIBERNATE_QUERY_DYNAMIC_WEBACTION_PATH
 import misk.hibernate.actions.HibernateDatabaseQueryStaticAction.Companion.HIBERNATE_QUERY_STATIC_WEBACTION_PATH
 import misk.inject.typeLiteral
+import misk.logging.getLogger
 import misk.security.authz.AccessAnnotationEntry
 import misk.web.MiskWebFormBuilder.Companion.createEnumField
 import misk.web.MiskWebFormBuilder.Companion.createSyntheticEnumField
@@ -46,6 +47,19 @@ constructor(private val accessAnnotationEntries: List<AccessAnnotationEntry>) {
     val accessAnnotationEntry = accessAnnotationEntries.find { it.annotation == accessAnnotationClass }
     val allowedCapabilities = accessAnnotationEntry?.capabilities?.toSet() ?: setOf()
     val allowedServices = accessAnnotationEntry?.services?.toSet() ?: setOf()
+    val allowAnyService = accessAnnotationEntry?.allowAnyService ?: false
+    val allowAnyUser = accessAnnotationEntry?.allowAnyUser ?: false
+
+    // An access annotation that resolves to no access denies all queries for this entity. Warn so the missing
+    // AccessAnnotationEntry is discovered rather than silently locking the entity out.
+    if (allowedCapabilities.isEmpty() && allowedServices.isEmpty() && !allowAnyService && !allowAnyUser) {
+      logger.warn {
+        "Database Query entity [dbEntity=${dbEntityClass.simpleName}] uses access annotation " +
+          "[@${accessAnnotationClass.simpleName}] with no matching AccessAnnotationEntry (or an empty one). " +
+          "Queries for this entity will be denied. Register a multibind<AccessAnnotationEntry>() granting the " +
+          "required capabilities/services, or set allowAnyService/allowAnyUser to grant broad access explicitly."
+      }
+    }
 
     val constraintsResult = mutableListOf<Pair<Type, DatabaseQueryMetadata.ConstraintMetadata>>()
     val ordersResult = mutableListOf<Pair<Type, DatabaseQueryMetadata.OrderMetadata>>()
@@ -84,6 +98,8 @@ constructor(private val accessAnnotationEntries: List<AccessAnnotationEntry>) {
       queryWebActionPath = queryWebActionPath,
       allowedCapabilities = allowedCapabilities,
       allowedServices = allowedServices,
+      allowAnyService = allowAnyService,
+      allowAnyUser = allowAnyUser,
       accessAnnotation = accessAnnotationClass,
       table = table.name,
       entityClass = dbEntityClass,
@@ -259,6 +275,8 @@ constructor(private val accessAnnotationEntries: List<AccessAnnotationEntry>) {
     dbEntityClass.memberProperties.map { memberProperty -> memberProperty.name to memberProperty.returnType }.toMap()
 
   companion object {
+    private val logger = getLogger<HibernateDatabaseQueryMetadataFactory>()
+
     data class DynamicQueryConstraint(val path: String?, val operator: Operator?, val value: String?)
 
     data class DynamicQueryOrder(val path: String?, val ascending: Boolean? = false)
