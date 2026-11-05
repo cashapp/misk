@@ -28,6 +28,7 @@ dependencies {
   implementation(libs.loggingApi)
   implementation(libs.okHttp)
   implementation(project(":misk-core"))
+  implementation(project(":misk-jdbc"))
   implementation(project(":misk-hotwire"))
   implementation(project(":misk-moshi"))
   implementation(project(":misk-tailwind"))
