@@ -27,3 +27,23 @@ internal class LimitedSource(delegate: Source, private val maxBytes: Long) : For
     return read
   }
 }
+
+/** Messages decoding to at most this many bytes are always allowed, regardless of compression ratio. */
+internal const val GRPC_MIN_DECODED_MESSAGE_BYTES = 4L * 1024 * 1024
+
+/**
+ * The largest decoded message allowed for a frame of [compressedBytes] on the wire under [maxDecompressionRatio]. The
+ * decoded size may exceed [GRPC_MIN_DECODED_MESSAGE_BYTES] only by [maxDecompressionRatio] times the on-the-wire size,
+ * so a small compressed frame cannot inflate into a heap-exhausting message while genuinely large (low-ratio) payloads
+ * still pass. A [maxDecompressionRatio] below 1 is treated as 1, and an overflowing product is treated as unbounded.
+ */
+internal fun maxDecodedMessageBytes(compressedBytes: Long, maxDecompressionRatio: Long): Long {
+  val ratio = maxDecompressionRatio.coerceAtLeast(1L)
+  val scaled =
+    try {
+      Math.multiplyExact(compressedBytes, ratio)
+    } catch (e: ArithmeticException) {
+      Long.MAX_VALUE
+    }
+  return maxOf(GRPC_MIN_DECODED_MESSAGE_BYTES, scaled)
+}

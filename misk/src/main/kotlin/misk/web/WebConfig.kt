@@ -222,12 +222,19 @@ constructor(
 
   /**
    * The maximum size in bytes of a single inbound gRPC message. Decoding aborts if either the on-the-wire frame or the
-   * decoded message (after decompression) exceeds this limit, guarding against decompression bombs and
-   * oversized-message heap exhaustion. Defaults to 1 GiB, which accepts large messages but provides little protection;
-   * set an explicit lower limit (gRPC's standard is 4 MiB) sized to the largest message a service legitimately
-   * receives.
+   * decoded message (after decompression) exceeds this limit, guarding against oversized-message heap exhaustion.
+   * Defaults to 1 GiB, which accepts large messages but provides little protection; set an explicit lower limit (gRPC's
+   * standard is 4 MiB) sized to the largest message a service legitimately receives.
    */
   val grpcMaxInboundMessageBytes: Long = 1024L * 1024 * 1024,
+
+  /**
+   * An additional guard on top of [grpcMaxInboundMessageBytes]: the decoded size of a compressed inbound gRPC message
+   * may exceed a 4 MiB floor only by this factor over its on-the-wire size. This bounds gzip amplification so a tiny
+   * compressed frame cannot inflate into a heap-exhausting message even when [grpcMaxInboundMessageBytes] is large.
+   * Defaults to 100:1.
+   */
+  val grpcMaxDecompressionRatio: Long = 100,
 ) : Config
 
 data class WebSslConfig
