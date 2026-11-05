@@ -347,7 +347,7 @@ object MiskConfig {
     for ((key, value) in configYamls) {
       if (value == null) continue
       try {
-        result = mapper.readerForUpdating(result).readValue(value)
+        result = mapper.readerForUpdating(result).readValue(YamlReferences.resolve(value))
       } catch (e: Exception) {
         throw IllegalStateException("could not parse $key: ${e.message}", e)
       }
