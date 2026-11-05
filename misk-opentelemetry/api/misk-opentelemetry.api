@@ -1,0 +1,27 @@
+public final class misk/opentelemetry/OpenTelemetryExport {
+	public static final fun isOtlpMetricExportFailure (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)Z
+	public static final fun isOtlpMetricsExporterSelected (Ljava/lang/String;)Z
+	public static final fun openTelemetryMetricsExporting ()Z
+	public static final fun openTelemetryMetricsExporting (Ljava/lang/String;)Z
+	public static final fun openTelemetryMetricsExporting (Ljava/lang/String;Ljava/lang/String;)Z
+	public static synthetic fun openTelemetryMetricsExporting$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Z
+	public static final fun openTelemetrySdkEnabled ()Z
+	public static final fun openTelemetrySdkEnabled (Ljava/lang/String;)Z
+	public static synthetic fun openTelemetrySdkEnabled$default (Ljava/lang/String;ILjava/lang/Object;)Z
+}
+
+public final class misk/opentelemetry/OpenTelemetryInitialization {
+	public static final fun initializeOpenTelemetrySdk ()Lio/opentelemetry/api/OpenTelemetry;
+	public static final fun initializeOpenTelemetrySdk (Ljava/lang/String;)Lio/opentelemetry/api/OpenTelemetry;
+	public static final fun initializeOpenTelemetrySdk (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/api/OpenTelemetry;
+	public static final fun initializeOpenTelemetrySdk (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/api/OpenTelemetry;
+	public static synthetic fun initializeOpenTelemetrySdk$default (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/api/OpenTelemetry;
+	public static final fun openTelemetrySdkBuilder ()Lio/opentelemetry/sdk/autoconfigure/AutoConfiguredOpenTelemetrySdkBuilder;
+	public static final fun openTelemetrySdkBuilder (Ljava/lang/String;)Lio/opentelemetry/sdk/autoconfigure/AutoConfiguredOpenTelemetrySdkBuilder;
+	public static synthetic fun openTelemetrySdkBuilder$default (Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/sdk/autoconfigure/AutoConfiguredOpenTelemetrySdkBuilder;
+}
+
+public final class misk/opentelemetry/OpenTelemetryModule : misk/inject/KAbstractModule {
+	public fun <init> (Lio/opentelemetry/api/OpenTelemetry;)V
+}
+

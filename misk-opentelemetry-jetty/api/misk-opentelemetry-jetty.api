@@ -1,0 +1,100 @@
+public final class misk/opentelemetry/jetty/JettyJmxMetrics {
+	public static final field INSTANCE Lmisk/opentelemetry/jetty/JettyJmxMetrics;
+	public static final fun start (Lio/opentelemetry/api/OpenTelemetry;Ljavax/management/MBeanServer;)Ljava/lang/AutoCloseable;
+}
+
+public final class misk/opentelemetry/jetty/JettyMetrics {
+	public fun <init> (Lio/opentelemetry/api/OpenTelemetry;)V
+	public final fun observeStatistics (Lmisk/opentelemetry/jetty/JettyStatistics;)Ljava/lang/AutoCloseable;
+	public final fun observeThreadPool (Lmisk/opentelemetry/jetty/JettyThreads;)Ljava/lang/AutoCloseable;
+}
+
+public final class misk/opentelemetry/jetty/JettyOpenTelemetryModule : misk/inject/KAbstractModule {
+	public fun <init> (Z)V
+	public fun <init> (ZLjava/util/Set;)V
+	public fun <init> (ZLjava/util/Set;Z)V
+	public synthetic fun <init> (ZLjava/util/Set;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface class misk/opentelemetry/jetty/JettyServletStatistics : misk/opentelemetry/jetty/JettyStatistics {
+	public abstract fun asyncDispatches ()J
+	public abstract fun asyncExpires ()J
+	public abstract fun asyncRequests ()J
+	public abstract fun asyncRequestsWaiting ()J
+	public abstract fun asyncRequestsWaitingMax ()J
+	public abstract fun errors ()J
+	public abstract fun responsesThrown ()J
+}
+
+public abstract interface class misk/opentelemetry/jetty/JettyStatistics {
+	public abstract fun dispatchTimeMaxSeconds ()D
+	public abstract fun dispatchTimeTotalSeconds ()D
+	public abstract fun dispatches ()J
+	public abstract fun dispatchesActive ()J
+	public abstract fun dispatchesActiveMax ()J
+	public abstract fun requestTimeMaxSeconds ()D
+	public abstract fun requestTimeTotalSeconds ()D
+	public abstract fun requests ()J
+	public abstract fun requestsActive ()J
+	public abstract fun requestsActiveMax ()J
+	public abstract fun responses (I)J
+	public abstract fun responsesBytes ()J
+	public abstract fun uptimeSeconds ()D
+}
+
+public abstract interface class misk/opentelemetry/jetty/JettyThreads {
+	public abstract fun active ()J
+	public abstract fun idle ()J
+	public abstract fun max ()J
+	public abstract fun poolSize ()J
+	public abstract fun queued ()J
+}
+
+public final class misk/opentelemetry/jetty/OpenTelemetryConnectionMetricsModule : misk/inject/KInstallOnceModule {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Set;)V
+	public synthetic fun <init> (Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun otelJettyConnectionMetricsService (Ljava/util/Optional;Lorg/eclipse/jetty/server/handler/StatisticsHandler;Ljava/lang/String;)Lmisk/opentelemetry/jetty/OtelJettyConnectionMetricsService;
+}
+
+public final class misk/opentelemetry/jetty/OpenTelemetryJettyMetricsModule : misk/inject/KInstallOnceModule {
+	public fun <init> ()V
+	public final fun otelJettyMetricsService (Ljava/util/Optional;Lorg/eclipse/jetty/server/handler/StatisticsHandler;Lmisk/web/jetty/MeasuredThreadPool;)Lmisk/opentelemetry/jetty/OtelJettyMetricsService;
+}
+
+public final class misk/opentelemetry/jetty/OtelJettyConnectionListener : org/eclipse/jetty/io/Connection$Listener {
+	public fun <init> (Lio/opentelemetry/api/metrics/DoubleHistogram;Lio/opentelemetry/api/metrics/LongUpDownCounter;Lio/opentelemetry/api/metrics/LongCounter;Lio/opentelemetry/api/metrics/LongCounter;Lio/opentelemetry/api/metrics/LongCounter;Lio/opentelemetry/api/metrics/LongCounter;Lio/opentelemetry/api/metrics/LongCounter;Lio/opentelemetry/api/common/Attributes;)V
+	public fun onClosed (Lorg/eclipse/jetty/io/Connection;)V
+	public fun onOpened (Lorg/eclipse/jetty/io/Connection;)V
+	public final fun refreshMetrics ()V
+	public final fun stopObserving ()V
+}
+
+public final class misk/opentelemetry/jetty/OtelJettyConnectionMetricsService : com/google/common/util/concurrent/AbstractScheduledService {
+	public fun <init> (Lio/opentelemetry/api/OpenTelemetry;Lorg/eclipse/jetty/server/handler/StatisticsHandler;Ljava/lang/String;)V
+	public fun <init> (Lio/opentelemetry/api/OpenTelemetry;Lorg/eclipse/jetty/server/handler/StatisticsHandler;Ljava/lang/String;Ljava/util/Set;)V
+	public synthetic fun <init> (Lio/opentelemetry/api/OpenTelemetry;Lorg/eclipse/jetty/server/handler/StatisticsHandler;Ljava/lang/String;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/opentelemetry/jetty/OtelJettyMetricsService : com/google/common/util/concurrent/AbstractIdleService {
+	public fun <init> (Lio/opentelemetry/api/OpenTelemetry;Lorg/eclipse/jetty/server/handler/StatisticsHandler;Lmisk/web/jetty/MeasuredThreadPool;)V
+}
+
+public final class misk/opentelemetry/jetty/ResetCarryingCounter {
+	public fun <init> (Ljava/util/function/LongSupplier;Ljava/util/function/LongSupplier;)V
+	public final fun carry ()V
+	public final fun extend (Ljava/util/function/DoubleSupplier;)D
+}
+
+public final class misk/opentelemetry/jetty/WrappingIntCounter {
+	public static final field Companion Lmisk/opentelemetry/jetty/WrappingIntCounter$Companion;
+	public fun <init> (Ljava/util/function/LongSupplier;Ljava/util/function/LongSupplier;)V
+	public final fun carry ()V
+	public final fun extend (Ljava/util/function/IntSupplier;)J
+	public static final fun neverReset ()Lmisk/opentelemetry/jetty/WrappingIntCounter;
+}
+
+public final class misk/opentelemetry/jetty/WrappingIntCounter$Companion {
+	public final fun neverReset ()Lmisk/opentelemetry/jetty/WrappingIntCounter;
+}
+
