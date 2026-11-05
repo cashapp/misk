@@ -9,6 +9,7 @@ import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Key
 import com.google.inject.Module
+import com.google.inject.testing.fieldbinder.Bind
 import com.google.inject.testing.fieldbinder.BoundFieldModule
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -31,23 +32,20 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     private val runningServices = ConcurrentHashMap.newKeySet<List<Module>>()
     private val log = getLogger<MiskTestExtension>()
 
-    private val maxLruSize: Int? =
-      System.getenv("MISK_TEST_REUSE_LRU_SIZE")?.toIntOrNull()?.takeIf { it > 0 }
+    private val maxLruSize: Int? = System.getenv("MISK_TEST_REUSE_LRU_SIZE")?.toIntOrNull()?.takeIf { it > 0 }
 
     // When MISK_TEST_REUSE_LRU_SIZE is set, the cache evicts least-recently-used entries once
     // the size is exceeded; the removal listener stops services for evicted injectors. Guava's
     // cache uses ConcurrentMap internally, so callers don't need extra synchronization.
-    private val injectedModules: Cache<List<Module>, Injector> = run {
-      val builder = CacheBuilder.newBuilder()
-        .removalListener<List<Module>, Injector> { notification ->
+    private val injectedModules: Cache<List<Module>, CachedInjector> = run {
+      val builder =
+        CacheBuilder.newBuilder().removalListener<List<Module>, CachedInjector> { notification ->
           if (notification.cause == RemovalCause.EXPLICIT) return@removalListener
           val key = notification.key ?: return@removalListener
-          val injector = notification.value ?: return@removalListener
+          val injector = notification.value?.injector ?: return@removalListener
           runningServices.remove(key)
           try {
-            val serviceManager = injector
-              .getExistingBinding(Key.get(ServiceManager::class.java))
-              ?.provider?.get()
+            val serviceManager = injector.getExistingBinding(Key.get(ServiceManager::class.java))?.provider?.get()
             serviceManager?.stopAsync()?.awaitStopped(45, TimeUnit.SECONDS)
           } catch (e: Exception) {
             log.warn(e) { "Failed to stop services for evicted injector cache entry" }
@@ -56,6 +54,13 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
       if (maxLruSize != null) builder.maximumSize(maxLruSize.toLong())
       builder.build()
     }
+
+    /**
+     * A reused injector, along with the test class whose [Bind] fields were baked into it when it was created.
+     * [ReusableTestModule] equality is structural, so distinct test classes with equal module lists share a cache
+     * entry; only the owner's [Bind] fields are bound.
+     */
+    private class CachedInjector(val injector: Injector, val ownerTestClass: Class<*>)
   }
 
   override fun beforeEach(context: ExtensionContext) {
@@ -94,13 +99,38 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
     val injector =
       if (context.reuseInjector()) {
-        try {
-          injectedModules.get(context.getSortedActionTestModules()) {
-            Guice.createInjector(module)
+        val key = context.getSortedActionTestModules()
+        // ReusableTestModule equality is structural, so different test classes can share a cache
+        // entry. A cached injector only has the @Bind fields of the test class that created it;
+        // a different class reusing it would have its own @Bind fields silently ignored. Fail
+        // fast with an actionable error instead of letting Guice produce confusing
+        // MissingImplementation errors (or worse, silently resolve the wrong bindings).
+        injectedModules.getIfPresent(key)?.let { cached ->
+          if (cached.ownerTestClass != context.rootRequiredTestClass) {
+            check(!context.declaresBindFields()) {
+              """
+              |${context.rootRequiredTestClass.name} declares @Bind fields but is reusing the injector cached
+              |for ${cached.ownerTestClass.name}: both test classes' @MiskTestModule modules compare equal,
+              |so the cached injector was built with ${cached.ownerTestClass.name}'s @Bind fields and this
+              |class's would be silently ignored.
+              |
+              |Fix it one of these ways:
+              |  - Give this test a module that only compares equal to itself, e.g. install the shared
+              |    module(s) from a ReusableTestModule subclass declared next to the test class.
+              |  - Remove the @Bind fields and bind the test doubles in the module instead.
+              |  - Opt this test module out of injector reuse (miskTestReuseInjector = false, or unset
+              |    MISK_TEST_REUSE_INJECTOR).
+              """
+                .trimMargin()
+            }
           }
-        } catch (e: UncheckedExecutionException) {
-          throw e.cause ?: e
         }
+        try {
+            injectedModules.get(key) { CachedInjector(Guice.createInjector(module), context.rootRequiredTestClass) }
+          } catch (e: UncheckedExecutionException) {
+            throw e.cause ?: e
+          }
+          .injector
       } else {
         Guice.createInjector(module)
       }
@@ -242,17 +272,28 @@ private fun ExtensionContext.startService(): Boolean {
 
 // The injector is reused across tests if
 //   1. The tests module(s) used in the test extend ReusableTestModules, AND
-//   2. The environment variable MISK_TEST_REUSE_INJECTOR is set to true
+//   2. The environment variable MISK_TEST_REUSE_INJECTOR is set to true (the system property of
+//      the same name is honored as a fallback so tests can exercise reuse in-process)
 private fun ExtensionContext.reuseInjector(): Boolean {
   return getFromStoreOrCompute("reuseInjector") {
-    (System.getenv("MISK_TEST_REUSE_INJECTOR")?.toBoolean() ?: false) &&
-      getActionTestModules().all { it is ReusableTestModule }
+    val reuseInjectorEnabled =
+      (System.getenv("MISK_TEST_REUSE_INJECTOR") ?: System.getProperty("MISK_TEST_REUSE_INJECTOR"))?.toBoolean()
+        ?: false
+    reuseInjectorEnabled && getActionTestModules().all { it is ReusableTestModule }
   }
 }
 
 private fun ExtensionContext.getActionTestModules(): Iterable<Module> {
   return getFromStoreOrCompute("module") { fieldsAnnotatedBy<MiskTestModule, Module>() }
 }
+
+/** Returns true if any of the current test instances (or their superclasses) declare a [Bind] field. */
+private fun ExtensionContext.declaresBindFields(): Boolean =
+  requiredTestInstances.allInstances.any { instance ->
+    generateSequence(instance.javaClass) { it.superclass }
+      .flatMap { it.declaredFields.asSequence() }
+      .any { it.isAnnotationPresent(Bind::class.java) }
+  }
 
 private fun ExtensionContext.getSortedActionTestModules(): List<Module> {
   return getActionTestModules().sortedBy { it.javaClass.name }
