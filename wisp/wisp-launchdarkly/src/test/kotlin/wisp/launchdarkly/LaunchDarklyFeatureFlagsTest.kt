@@ -16,11 +16,32 @@ import wisp.moshi.defaultKotlinMoshi
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)
   private val moshi = defaultKotlinMoshi
-  private val featureFlags: FeatureFlags = LaunchDarklyFeatureFlags(client, moshi)
+  private val featureFlags = LaunchDarklyFeatureFlags(lazy { client }, moshi)
 
   @BeforeEach
   fun beforeEach() {
     Mockito.`when`(client.isInitialized).thenReturn(true)
+  }
+
+  @Test
+  fun startUpKeepsClientOpenUntilShutdown() {
+    featureFlags.startUp()
+
+    verify(client, never()).close()
+
+    featureFlags.shutDown()
+
+    verify(client).close()
+  }
+
+  @Test
+  fun startUpClosesClientOnTimeout() {
+    Mockito.`when`(client.isInitialized).thenReturn(false)
+
+    val exception = assertThrows<Exception> { featureFlags.startUp() }
+
+    assertThat(exception).hasMessage("LaunchDarkly did not initialize in 30 seconds")
+    verify(client).close()
   }
 
   @Test
