@@ -186,7 +186,11 @@ public final class misk/redis/lettuce/RedisModule : misk/inject/KAbstractModule 
 
 public final class misk/redis/lettuce/RedisModule$Companion {
 	public final fun create (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/redis/lettuce/AbstractRedisConfig;Lio/lettuce/core/codec/RedisCodec;)Lmisk/redis/lettuce/RedisModule;
+	public final fun create (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/redis/lettuce/AbstractRedisConfig;Lio/lettuce/core/codec/RedisCodec;Z)Lmisk/redis/lettuce/RedisModule;
 	public final fun create (Lmisk/redis/lettuce/AbstractRedisConfig;)Lmisk/redis/lettuce/RedisModule;
+	public final fun create (Lmisk/redis/lettuce/AbstractRedisConfig;Z)Lmisk/redis/lettuce/RedisModule;
+	public static synthetic fun create$default (Lmisk/redis/lettuce/RedisModule$Companion;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lmisk/redis/lettuce/AbstractRedisConfig;Lio/lettuce/core/codec/RedisCodec;ZILjava/lang/Object;)Lmisk/redis/lettuce/RedisModule;
+	public static synthetic fun create$default (Lmisk/redis/lettuce/RedisModule$Companion;Lmisk/redis/lettuce/AbstractRedisConfig;ZILjava/lang/Object;)Lmisk/redis/lettuce/RedisModule;
 }
 
 public final class misk/redis/lettuce/RedisNodeConfig {
