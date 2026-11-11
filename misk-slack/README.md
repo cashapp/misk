@@ -45,9 +45,25 @@ Add the test fixtures to your test dependencies:
 testImplementation(testFixtures("com.squareup.misk:misk-slack:<version>"))
 ```
 
-Install `misk.slack.webapi.FakeSlackClientModule` in your test module in place of
-`RealSlackClientModule`. Inject `SlackClient` into application code and
-`FakeSlackClient` into tests. The module resets the fake between Misk tests.
+Install `misk.slack.webapi.FakeSlackClientModule` in your test module. Inject `SlackClient`
+into application code and `FakeSlackClient` into tests. The module resets the fake between
+Misk tests.
+
+The fake module binds only `SlackClient`. Installing it next to `RealSlackClientModule`
+fails, because both modules bind `SlackClient`. Choose one setup:
+
+- If application code injects only `SlackClient`, install `FakeSlackClientModule` in place
+  of `RealSlackClientModule`.
+- If application code also injects `SlackApi`, `SlackConfig`, or `RealSlackClient` (for
+  example, a `SlashCommandHandler` subclass), keep the real module and override its
+  `SlackClient` binding:
+
+```kotlin
+install(Modules.override(RealSlackClientModule(config)).with(FakeSlackClientModule()))
+```
+
+Calls through `SlackApi` or `RealSlackClient` do not reach the fake. This includes
+`SlashCommandHandler.sendSlackConfirmation`.
 
 Each method has its own invocation history, response queue, and exception queue:
 
@@ -66,3 +82,5 @@ after recording the call, without consuming a response.
 Once both queues for a method are empty, messages and confirmations succeed with no
 timestamp. User lookups return a test user: email lookups use ID `123`, and ID lookups
 echo the requested ID. All histories and queues are cleared when the fake is reset.
+
+The fake is safe to call from multiple threads. Each queued outcome goes to exactly one call.

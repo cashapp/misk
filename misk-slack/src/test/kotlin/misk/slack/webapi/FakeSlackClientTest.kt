@@ -4,6 +4,9 @@ import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.TypeLiteral
 import java.io.IOException
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import misk.slack.webapi.helpers.Block
 import misk.slack.webapi.helpers.GetUserResponse
 import misk.slack.webapi.helpers.PostMessageRequest
@@ -57,6 +60,33 @@ class FakeSlackClientTest {
     assertThat(client.messages).containsExactly(request, request)
     assertThat(client.responses).containsExactly(response)
     assertThat(client.postMessage(request)).isEqualTo(response)
+  }
+
+  @Test
+  fun `concurrent callers each consume a distinct queued response`() {
+    val queued = (1..200).map { PostMessageResponse(ok = true, ts = "$it") }
+    client.responses.addAll(queued)
+    val executor = Executors.newFixedThreadPool(8)
+    val start = CountDownLatch(1)
+
+    val results =
+      try {
+        val futures =
+          queued.map {
+            executor.submit<PostMessageResponse> {
+              start.await()
+              client.postMessage(request)
+            }
+          }
+        start.countDown()
+        futures.map { it.get(10, TimeUnit.SECONDS) }
+      } finally {
+        executor.shutdownNow()
+      }
+
+    assertThat(results).containsExactlyInAnyOrderElementsOf(queued)
+    assertThat(client.messages).hasSize(queued.size)
+    assertThat(client.responses).isEmpty()
   }
 
   @Test
@@ -168,7 +198,7 @@ class FakeSlackClientTest {
   }
 
   @Test
-  fun `user lookups and confirmations retain Toolbox defaults`() {
+  fun `user lookups and confirmations succeed by default`() {
     assertThat(client.getUserByEmail("test@example.com"))
       .isEqualTo(GetUserResponse(ok = true, user = UserData(id = "123", name = "test")))
     assertThat(client.getUserById("U456"))

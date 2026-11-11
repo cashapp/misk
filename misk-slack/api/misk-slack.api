@@ -73,18 +73,18 @@ public final class misk/slack/SlackWebhookResponse : java/lang/Enum {
 
 public final class misk/slack/webapi/FakeSlackClient : misk/testing/FakeFixture, misk/slack/webapi/SlackClient {
 	public fun <init> ()V
-	public final fun getErrors ()Lkotlin/collections/ArrayDeque;
+	public final fun getErrors ()Ljava/util/Queue;
 	public final fun getGetUserByEmailCalls ()Ljava/util/List;
-	public final fun getGetUserByEmailErrors ()Lkotlin/collections/ArrayDeque;
-	public final fun getGetUserByEmailResponses ()Lkotlin/collections/ArrayDeque;
+	public final fun getGetUserByEmailErrors ()Ljava/util/Queue;
+	public final fun getGetUserByEmailResponses ()Ljava/util/Queue;
 	public final fun getGetUserByIdCalls ()Ljava/util/List;
-	public final fun getGetUserByIdErrors ()Lkotlin/collections/ArrayDeque;
-	public final fun getGetUserByIdResponses ()Lkotlin/collections/ArrayDeque;
+	public final fun getGetUserByIdErrors ()Ljava/util/Queue;
+	public final fun getGetUserByIdResponses ()Ljava/util/Queue;
 	public final fun getMessages ()Ljava/util/List;
 	public final fun getPostConfirmationCalls ()Ljava/util/List;
-	public final fun getPostConfirmationErrors ()Lkotlin/collections/ArrayDeque;
-	public final fun getPostConfirmationResponses ()Lkotlin/collections/ArrayDeque;
-	public final fun getResponses ()Lkotlin/collections/ArrayDeque;
+	public final fun getPostConfirmationErrors ()Ljava/util/Queue;
+	public final fun getPostConfirmationResponses ()Ljava/util/Queue;
+	public final fun getResponses ()Ljava/util/Queue;
 	public fun getUserByEmail (Ljava/lang/String;)Lmisk/slack/webapi/helpers/GetUserResponse;
 	public fun getUserById (Ljava/lang/String;)Lmisk/slack/webapi/helpers/GetUserResponse;
 	public fun postConfirmation (Ljava/lang/String;Lmisk/slack/webapi/helpers/PostMessageRequest;)Lmisk/slack/webapi/helpers/PostMessageResponse;
