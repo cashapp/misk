@@ -48,7 +48,7 @@ class ProtobufUnmarshaller(val adapter: ProtoAdapter<Any>) : Unmarshaller {
       adapter.decode(source)
     } catch (e: IllegalStateException) {
       // Wire throws IllegalStateException when a required field is missing.
-      throw BadRequestException("Can't parse request: ${e.message}", e)
+      throw BadRequestException("Can't parse request", e)
     }
 
   @Singleton

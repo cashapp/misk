@@ -32,7 +32,10 @@ internal class ProtobufRequestBodyExceptionTest {
 
   @Test
   fun `protobuf body missing a required field returns 400 Bad Request`() {
-    postProtobuf("/echo", ByteString.EMPTY).use { assertThat(it.code).isEqualTo(HTTP_BAD_REQUEST) }
+    postProtobuf("/echo", ByteString.EMPTY).use {
+      assertThat(it.code).isEqualTo(HTTP_BAD_REQUEST)
+      assertThat(it.body.string()).isEqualTo("Can't parse request").doesNotContain("name")
+    }
   }
 
   @Test
