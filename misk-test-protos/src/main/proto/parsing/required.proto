@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+package test;
+
+option java_package = "com.squareup.protos.test.parsing";
+
+message RequiredFieldMessage {
+  required string name = 1;
+}
