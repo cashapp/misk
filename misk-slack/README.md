@@ -36,3 +36,33 @@ slack:
 ```
 
 3. `@Inject` the `RealSlackClient`
+
+### Testing
+
+Add the test fixtures to your test dependencies:
+
+```kotlin
+testImplementation(testFixtures("com.squareup.misk:misk-slack:<version>"))
+```
+
+Install `misk.slack.webapi.FakeSlackClientModule` in your test module in place of
+`RealSlackClientModule`. Inject `SlackClient` into application code and
+`FakeSlackClient` into tests. The module resets the fake between Misk tests.
+
+Each method has its own invocation history, response queue, and exception queue:
+
+| Method | Invocations | Responses | Exceptions |
+| --- | --- | --- | --- |
+| `postMessage` | `messages` | `responses` | `errors` |
+| `postConfirmation` | `postConfirmationCalls` | `postConfirmationResponses` | `postConfirmationErrors` |
+| `getUserByEmail` | `getUserByEmailCalls` | `getUserByEmailResponses` | `getUserByEmailErrors` |
+| `getUserById` | `getUserByIdCalls` | `getUserByIdResponses` | `getUserByIdErrors` |
+
+Confirmation calls record both the URL and request. Lookup calls record the email or
+user ID. Queue response objects or exceptions to test failures and retries. Each queue
+is consumed in insertion order. Exceptions take precedence over responses and are thrown
+after recording the call, without consuming a response.
+
+Once both queues for a method are empty, messages and confirmations succeed with no
+timestamp. User lookups return a test user: email lookups use ID `123`, and ID lookups
+echo the requested ID. All histories and queues are cleared when the fake is reset.
