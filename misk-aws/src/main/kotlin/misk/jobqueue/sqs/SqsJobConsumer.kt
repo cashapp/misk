@@ -25,9 +25,9 @@ import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
 import misk.annotation.ExperimentalMiskApi
-import misk.inject.AsyncSwitch
 import misk.feature.Feature
 import misk.feature.FeatureFlags
+import misk.inject.AsyncSwitch
 import misk.jobqueue.BatchJobHandler
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobHandler
@@ -255,7 +255,7 @@ internal constructor(
                 metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queue.queueName, queue.queueName)
                 Status.OK
               } catch (th: Throwable) {
-                val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
+                val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags(th)
 
                 log.error(th, *mdcTags.toTypedArray()) { "error handling job from ${queue.queueName}" }
 
@@ -318,7 +318,7 @@ internal constructor(
           metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queue.queueName, queue.queueName)
           Status.OK
         } catch (th: Throwable) {
-          val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
+          val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags(th)
 
           log.error(th, *mdcTags.toTypedArray()) { "error handling job from ${queue.queueName}" }
 
