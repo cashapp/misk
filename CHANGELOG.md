@@ -7,6 +7,13 @@ The Changelog consequently will not be updated regularly since releases only inc
 
 Major and breaking changes will still be documented in the Changelog.
 
+Vitess exception metric labels
+===
+
+`hikaricp_misk_vitess_exception` no longer has a `message` label. It is now labeled by `errorCode`, `sqlState` and
+`decision`. MySQL messages carry row values, such as the key in a duplicate-key error, so almost every exception created
+a new series. Move any dashboards or monitors that group by `message` to `errorCode` or `sqlState`.
+
 JDBC test database isolation
 ===
 
