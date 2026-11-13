@@ -38,7 +38,7 @@ jobs:
           operations-per-run: 100
           debug-only: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run }}
           stale-pr-message: >-
-            🤖 This pull request has had no activity for 180 days and has been
+            This pull request has had no activity for 180 days and has been
             marked stale. It will be closed after another 30 days without
             activity. If this change is still relevant, please comment or
             update the pull request to reset the inactivity timer. A maintainer
@@ -46,7 +46,7 @@ jobs:
             Draft pull requests and pull requests labeled `keep-open` or
             `security` are exempt.
           close-pr-message: >-
-            🤖 This pull request has been closed after 30 more days without
+            This pull request has been closed after 30 more days without
             activity since the stale notice. If this change is still relevant,
             please reopen the pull request and comment or update it. A
             maintainer can add the `keep-open` label to prevent future closure.
