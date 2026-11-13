@@ -46,5 +46,9 @@ class SqsTestModule(private val credentials: AWSCredentialsProvider, private val
     bind<AWSCredentialsProvider>().toInstance(credentials)
     bind<AmazonSQS>().toInstance(client)
     bind<AmazonSQS>().annotatedWith<ForSqsReceiving>().toInstance(client)
+    // Don't shut down test clients - they're shared across tests
+    bind<AwsSqsClientService>().toInstance(
+      AwsSqsClientService(client, client, emptyMap(), emptyMap()).withShutdownClients(false)
+    )
   }
 }
