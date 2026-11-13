@@ -103,7 +103,7 @@ grpcApi = { module = "io.grpc:grpc-api", version = "1.75.0" }
 grpcBom = { module = "io.grpc:grpc-bom", version = "1.75.0" }
 grpcGenJava = { module = "io.grpc:protoc-gen-grpc-java", version = "1.75.0" }
 grpcNetty = { module = "io.grpc:grpc-netty", version = "1.75.0" }
-grpcProtobuf = { module = "io.grpc:grpc-protobuf", version = "1.75.0" }
+grpcProtobuf = { module = "io.grpc:grpc-protobuf", version = "1.85.1" }
 grpcStub = { module = "io.grpc:grpc-stub", version = "1.75.0" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 guavaBom = { module = "com.google.guava:guava-bom", version.ref = "guava" }
