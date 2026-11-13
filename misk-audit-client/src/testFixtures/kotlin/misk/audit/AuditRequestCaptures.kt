@@ -15,13 +15,13 @@ internal class AuditRequestCaptures {
   private val registrations = mutableMapOf<String, Registration>()
 
   internal class Registration(val id: String, val generation: Long) {
-    val completed = CompletableFuture<RecordedAuditRequest>()
+    val completionFuture = CompletableFuture<RecordedAuditRequest>()
     val events = mutableListOf<FakeAuditClient.FakeAuditEvent>()
     var applied = false
     @Volatile var claimed = false
-    var finished = false
+    var dispatchFinished = false
     var closed = false
-    var failure: Throwable? = null
+    var recordingFailure: Throwable? = null
   }
 
   fun register(): FakeAuditRequestCapture =
@@ -61,7 +61,7 @@ internal class AuditRequestCaptures {
   fun record(registration: Registration?, recordEvent: () -> FakeAuditClient.FakeAuditEvent) =
     synchronized(lock) {
       if (registration != null) {
-        check(registration.generation == generation && !registration.finished) {
+        check(registration.generation == generation && !registration.dispatchFinished) {
           "Audit recording arrived after request completion or fixture reset"
         }
       }
@@ -69,21 +69,23 @@ internal class AuditRequestCaptures {
         val recordedEvent = recordEvent()
         registration?.events?.add(recordedEvent)
       } catch (recordingFailure: Throwable) {
-        if (registration != null) registration.failure = registration.failure ?: recordingFailure
+        if (registration != null) {
+          registration.recordingFailure = registration.recordingFailure ?: recordingFailure
+        }
         throw recordingFailure
       }
     }
 
   fun finish(registration: Registration, statusCode: Int, dispatchFailure: Throwable?) =
     synchronized(lock) {
-      registration.finished = true
+      registration.dispatchFinished = true
       if (registration.closed) registrations.remove(registration.id, registration)
-      val failure = dispatchFailure ?: registration.failure
-      if (failure != null) {
-        registration.completed.completeExceptionally(failure)
+      val completionFailure = dispatchFailure ?: registration.recordingFailure
+      if (completionFailure != null) {
+        registration.completionFuture.completeExceptionally(completionFailure)
       } else {
         val snapshot = Collections.unmodifiableList(ArrayList(registration.events))
-        registration.completed.complete(RecordedAuditRequest(statusCode, snapshot))
+        registration.completionFuture.complete(RecordedAuditRequest(statusCode, snapshot))
       }
       Unit
     }
@@ -91,7 +93,7 @@ internal class AuditRequestCaptures {
   fun awaitCompleted(registration: Registration, timeout: Duration): RecordedAuditRequest {
     require(!timeout.isNegative) { "timeout must not be negative" }
     try {
-      return registration.completed.get(timeout.toNanos(), NANOSECONDS)
+      return registration.completionFuture.get(timeout.toNanos(), NANOSECONDS)
     } catch (timeoutFailure: TimeoutException) {
       val phase = if (registration.claimed) "IN_FLIGHT" else "NOT_OBSERVED"
       throw TimeoutException("Audit HTTP request $phase: request chain did not complete within $timeout")
@@ -101,22 +103,26 @@ internal class AuditRequestCaptures {
   fun close(registration: Registration) =
     synchronized(lock) {
       registration.closed = true
-      if (!registration.claimed || registration.finished) registrations.remove(registration.id, registration)
-      if (!registration.finished) {
-        registration.completed.completeExceptionally(IllegalStateException("Audit capture closed before completion"))
+      if (!registration.claimed || registration.dispatchFinished) registrations.remove(registration.id, registration)
+      if (!registration.dispatchFinished) {
+        registration.completionFuture.completeExceptionally(
+          IllegalStateException("Audit capture closed before completion")
+        )
       }
       Unit
     }
 
   fun reset(resetLegacyState: () -> Unit) =
     synchronized(lock) {
-      check(registrations.values.none { it.claimed && !it.finished }) {
+      check(registrations.values.none { it.claimed && !it.dispatchFinished }) {
         "Cannot reset with audit HTTP requests IN_FLIGHT"
       }
       registrations.values
-        .filter { !it.finished }
+        .filter { !it.dispatchFinished }
         .forEach {
-          it.completed.completeExceptionally(IllegalStateException("Audit capture reset before request was observed"))
+          it.completionFuture.completeExceptionally(
+            IllegalStateException("Audit capture reset before request was observed")
+          )
         }
       registrations.clear()
       generation++

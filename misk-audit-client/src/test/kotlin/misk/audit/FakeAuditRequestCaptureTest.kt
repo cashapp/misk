@@ -2,6 +2,7 @@ package misk.audit
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import jakarta.servlet.http.HttpServletRequest
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.CompletableFuture
@@ -16,6 +17,7 @@ import misk.MiskTestingServiceModule
 import misk.exceptions.BadRequestException
 import misk.inject.ReusableTestModule
 import misk.scope.ActionScope
+import misk.scope.ActionScoped
 import misk.security.authz.AccessControlModule
 import misk.security.authz.Authenticated
 import misk.security.authz.FakeCallerAuthenticator
@@ -82,14 +84,14 @@ internal class FakeAuditRequestCaptureTest {
   }
 
   @Test
-  fun `completion waits past response close and legacy take for synchronous hooks`() {
+  fun `completion waits past response close and legacy consumption for synchronous hooks`() {
     val hookGate = Gate()
     controls.hookGates["one"] = hookGate
     auditClient.captureHttpRequest().use { capture ->
       try {
         call("/audited/one", capture)
         hookGate.awaitEntered()
-        val legacyEvent = auditClient.sentEvents.take()
+        val legacyEvent = auditClient.sentEvents.removeFirst()
         assertThat(legacyEvent.requestorLDAP).isEqualTo("test-user")
         assertThat(legacyEvent.richDescription)
           .contains("principal=test-user")
@@ -110,6 +112,14 @@ internal class FakeAuditRequestCaptureTest {
       } finally {
         hookGate.release.countDown()
       }
+    }
+  }
+
+  @Test
+  fun `raw servlet request hides capture header and preserves ordinary headers`() {
+    auditClient.captureHttpRequest().use { capture ->
+      call("/servlet-headers", capture)
+      assertThat(capture.awaitCompleted(TIMEOUT).events).isEmpty()
     }
   }
 
@@ -146,7 +156,8 @@ internal class FakeAuditRequestCaptureTest {
       try {
         call("/audited/duplicate", capture)
         producerGate.awaitEntered()
-        assertThat(auditClient.sentEvents.take().eventTarget).isEqualTo("FakeAuditRequestCaptureTest.AuditedAction")
+        assertThat(auditClient.sentEvents.removeFirst().eventTarget)
+          .isEqualTo("FakeAuditRequestCaptureTest.AuditedAction")
         producerGate.release.countDown()
         val completedRequest = capture.awaitCompleted(TIMEOUT)
         assertThat(completedRequest.events.map { it.eventTarget })
@@ -274,7 +285,7 @@ internal class FakeAuditRequestCaptureTest {
       .isInstanceOf(IllegalStateException::class.java)
       .hasMessageContaining("fixture reset")
     auditClient.logEvent("direct", "outside HTTP")
-    assertThat(auditClient.sentEvents.take().description).isEqualTo("outside HTTP")
+    assertThat(auditClient.sentEvents.removeFirst().description).isEqualTo("outside HTTP")
   }
 
   @Test
@@ -398,6 +409,7 @@ internal class FakeAuditRequestCaptureTest {
       multibind<NetworkInterceptor.Factory>(BeforeContentEncoding::class).to<EscapingInterceptorFactory>()
       install(WebActionModule.create<AuditedAction>())
       install(WebActionModule.create<PlainAction>())
+      install(WebActionModule.create<ServletHeadersAction>())
       install(WebActionModule.create<DirectRecordingAction>())
       install(WebActionModule.create<JoinedRecordingAction>())
       install(WebActionModule.create<LateRecordingAction>())
@@ -488,6 +500,23 @@ internal class FakeAuditRequestCaptureTest {
 
   class PlainAction @Inject constructor() : WebAction {
     @Get("/plain") @Authenticated(allowAnyUser = true) fun call() = "plain"
+  }
+
+  class ServletHeadersAction @Inject constructor(private val servletRequest: ActionScoped<HttpServletRequest>) :
+    WebAction {
+    @Get("/servlet-headers")
+    @Authenticated(allowAnyUser = true)
+    fun call(): String {
+      val scopedRequest = servletRequest.get()
+      val captureHeader = AuditRequestCaptures.HEADER.lowercase()
+      check(scopedRequest.getHeader(captureHeader) == null)
+      check(scopedRequest.getHeaders(captureHeader).toList().isEmpty())
+      check(scopedRequest.headerNames.toList().none { it.equals(captureHeader, ignoreCase = true) })
+      check(scopedRequest.getIntHeader(captureHeader) == -1)
+      check(scopedRequest.getDateHeader(captureHeader) == -1L)
+      check(scopedRequest.getHeader(FakeCallerAuthenticator.USER_HEADER) == "test-user")
+      return "headers checked"
+    }
   }
 
   class DirectRecordingAction @Inject constructor(private val auditClient: AuditClient) : WebAction {

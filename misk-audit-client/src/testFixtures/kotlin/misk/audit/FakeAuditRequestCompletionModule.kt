@@ -8,6 +8,7 @@ import misk.scope.ActionScoped
 import misk.scope.ActionScopedProviderModule
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
+import misk.web.WebActionSeedDataTransformerFactory
 import misk.web.interceptors.BeforeContentEncoding
 
 /**
@@ -18,6 +19,7 @@ class FakeAuditRequestCompletionModule : ActionScopedProviderModule() {
   override fun configureProviders() {
     requireBinding<AuditClient>()
     bindProvider(AuditRequestContext::class.typeLiteral()) { AuditRequestContext() }
+    multibind<WebActionSeedDataTransformerFactory>().to<AuditCaptureHeaderTransformer>()
     multibind<NetworkInterceptor.Factory>(BeforeContentEncoding::class).to<AuditRequestCompletionInterceptor.Factory>()
   }
 }
