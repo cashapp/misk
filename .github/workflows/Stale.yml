@@ -1,0 +1,52 @@
+name: Stale PRs
+
+on:
+  schedule:
+    - cron: "23 5 * * *"
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Preview changes without updating pull requests
+        type: boolean
+        default: true
+
+permissions:
+  actions: write # Preserve scan progress when the operation limit is reached.
+  pull-requests: write
+
+concurrency:
+  group: stale-prs
+
+jobs:
+  stale:
+    if: github.repository == 'cashapp/misk'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Mark and close inactive pull requests
+        uses: actions/stale@v11
+        with:
+          days-before-issue-stale: -1
+          days-before-issue-close: -1
+          days-before-pr-stale: 180
+          days-before-pr-close: 30
+          stale-pr-label: stale
+          exempt-pr-labels: keep-open,security
+          exempt-draft-pr: true
+          remove-pr-stale-when-updated: true
+          delete-branch: false
+          operations-per-run: 100
+          debug-only: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run }}
+          stale-pr-message: >-
+            🤖 This pull request has had no activity for 180 days and has been
+            marked stale. It will be closed after another 30 days without
+            activity. If this change is still relevant, please comment or
+            update the pull request to reset the inactivity timer. A maintainer
+            can add the `keep-open` label to exempt it from this workflow.
+            Draft pull requests and pull requests labeled `keep-open` or
+            `security` are exempt.
+          close-pr-message: >-
+            🤖 This pull request has been closed after 30 more days without
+            activity since the stale notice. If this change is still relevant,
+            please reopen the pull request and comment or update it. A
+            maintainer can add the `keep-open` label to prevent future closure.
