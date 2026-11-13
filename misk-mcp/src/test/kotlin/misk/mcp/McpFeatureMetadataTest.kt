@@ -16,6 +16,7 @@ import jakarta.inject.Inject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
 import misk.MiskTestingServiceModule
@@ -93,6 +94,11 @@ internal class McpFeatureMetadataTest {
     assertEquals("Metadata Server", serverInfo.title)
     assertEquals("https://example.com", serverInfo.websiteUrl)
     assertEquals(listOf(ICON), serverInfo.icons)
+  }
+
+  @Test
+  fun `completions capability is not advertised without completion providers`() {
+    assertNull(assertNotNull(mcpClient.serverCapabilities).completions)
   }
 
   @Test

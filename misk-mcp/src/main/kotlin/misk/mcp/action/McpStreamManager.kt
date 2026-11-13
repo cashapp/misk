@@ -262,6 +262,7 @@ internal constructor(
     val serverName = mcpServer.name
     val streamId = miskServerTransport.streamId
 
+    with(mcpServer) { installCompletionHandler() }
     onInitialized { logger.info { "Initialized mcp server session for '$serverName' with stream id '$streamId'" } }
     onClose { logger.info { "Closed mcp server session for '$serverName' with stream id '$streamId'" } }
     logger.debug { "Server Session connected to transport with stream id '$streamId'" }
