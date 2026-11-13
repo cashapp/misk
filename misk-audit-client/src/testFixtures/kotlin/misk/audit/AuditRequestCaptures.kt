@@ -16,7 +16,7 @@ internal class AuditRequestCaptures {
 
   internal class Registration(val id: String, val generation: Long) {
     val completionFuture = CompletableFuture<RecordedAuditRequest>()
-    val events = mutableListOf<FakeAuditClient.FakeAuditEvent>()
+    val recordedEvents = mutableListOf<FakeAuditClient.FakeAuditEvent>()
     var applied = false
     @Volatile var claimed = false
     var dispatchFinished = false
@@ -35,18 +35,15 @@ internal class AuditRequestCaptures {
     synchronized(lock) {
       check(registration.generation == generation && !registration.closed) { "Audit capture is closed or reset" }
       check(!registration.applied) { "Audit capture can only be applied once; retries and redirects are unsupported" }
-      check(requestBuilder.build().headers.values(HEADER).isEmpty()) {
-        "Request already contains audit capture headers"
-      }
       registration.applied = true
-      requestBuilder.header(HEADER, registration.id)
+      requestBuilder.header(CORRELATION_HEADER, registration.id)
       Unit
     }
 
-  fun claim(httpCall: HttpCall): Registration? =
+  fun claimAndStripHeader(httpCall: HttpCall): Registration? =
     synchronized(lock) {
-      val captureIds = httpCall.requestHeaders.values(HEADER)
-      httpCall.requestHeaders = httpCall.requestHeaders.newBuilder().removeAll(HEADER).build()
+      val captureIds = httpCall.requestHeaders.values(CORRELATION_HEADER)
+      httpCall.requestHeaders = httpCall.requestHeaders.newBuilder().removeAll(CORRELATION_HEADER).build()
       if (captureIds.isEmpty()) return null
       check(captureIds.size == 1) { "Duplicate audit capture headers" }
       val registration =
@@ -58,7 +55,7 @@ internal class AuditRequestCaptures {
       registration
     }
 
-  fun record(registration: Registration?, recordEvent: () -> FakeAuditClient.FakeAuditEvent) =
+  fun record(registration: Registration?, recordLegacyEvent: () -> FakeAuditClient.FakeAuditEvent) =
     synchronized(lock) {
       if (registration != null) {
         check(registration.generation == generation && !registration.dispatchFinished) {
@@ -66,8 +63,8 @@ internal class AuditRequestCaptures {
         }
       }
       try {
-        val recordedEvent = recordEvent()
-        registration?.events?.add(recordedEvent)
+        val recordedEvent = recordLegacyEvent()
+        registration?.recordedEvents?.add(recordedEvent)
       } catch (recordingFailure: Throwable) {
         if (registration != null) {
           registration.recordingFailure = registration.recordingFailure ?: recordingFailure
@@ -84,7 +81,7 @@ internal class AuditRequestCaptures {
       if (completionFailure != null) {
         registration.completionFuture.completeExceptionally(completionFailure)
       } else {
-        val snapshot = Collections.unmodifiableList(ArrayList(registration.events))
+        val snapshot = Collections.unmodifiableList(ArrayList(registration.recordedEvents))
         registration.completionFuture.complete(RecordedAuditRequest(statusCode, snapshot))
       }
       Unit
@@ -130,6 +127,6 @@ internal class AuditRequestCaptures {
     }
 
   companion object {
-    const val HEADER = "X-Misk-Test-Audit-Capture"
+    const val CORRELATION_HEADER = "X-Misk-Test-Audit-Capture"
   }
 }

@@ -17,7 +17,6 @@ import misk.web.interceptors.BeforeContentEncoding
  */
 class FakeAuditRequestCompletionModule : ActionScopedProviderModule() {
   override fun configureProviders() {
-    requireBinding<AuditClient>()
     bindProvider(AuditRequestContext::class.typeLiteral()) { AuditRequestContext() }
     multibind<WebActionSeedDataTransformerFactory>().to<AuditCaptureHeaderTransformer>()
     multibind<NetworkInterceptor.Factory>(BeforeContentEncoding::class).to<AuditRequestCompletionInterceptor.Factory>()
@@ -25,7 +24,7 @@ class FakeAuditRequestCompletionModule : ActionScopedProviderModule() {
 }
 
 internal class AuditRequestContext {
-  var registration: AuditRequestCaptures.Registration? = null
+  var claimedRegistration: AuditRequestCaptures.Registration? = null
 }
 
 internal class AuditRequestCompletionInterceptor(
@@ -33,8 +32,8 @@ internal class AuditRequestCompletionInterceptor(
   private val requestContext: ActionScoped<AuditRequestContext>,
 ) : NetworkInterceptor {
   override fun intercept(chain: NetworkChain) {
-    val registration = auditClient.httpRequests.claim(chain.httpCall)
-    requestContext.get().registration = registration
+    val claimedRegistration = auditClient.requestCaptures.claimAndStripHeader(chain.httpCall)
+    requestContext.get().claimedRegistration = claimedRegistration
     var dispatchFailure: Throwable? = null
     try {
       chain.proceed(chain.httpCall)
@@ -42,17 +41,22 @@ internal class AuditRequestCompletionInterceptor(
       dispatchFailure = failure
       throw failure
     } finally {
-      if (registration != null)
-        auditClient.httpRequests.finish(registration, chain.httpCall.statusCode, dispatchFailure)
+      if (claimedRegistration != null)
+        auditClient.requestCaptures.finish(claimedRegistration, chain.httpCall.statusCode, dispatchFailure)
     }
   }
 
   @Singleton
   class Factory
   @Inject
-  constructor(private val auditClient: FakeAuditClient, private val requestContext: ActionScoped<AuditRequestContext>) :
+  constructor(auditClient: AuditClient, private val requestContext: ActionScoped<AuditRequestContext>) :
     NetworkInterceptor.Factory {
+    private val fakeAuditClient =
+      checkNotNull(auditClient as? FakeAuditClient) {
+        "FakeAuditRequestCompletionModule requires FakeAuditClientModule"
+      }
+
     override fun create(action: Action): NetworkInterceptor =
-      AuditRequestCompletionInterceptor(auditClient, requestContext)
+      AuditRequestCompletionInterceptor(fakeAuditClient, requestContext)
   }
 }

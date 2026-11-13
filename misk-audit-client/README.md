@@ -27,11 +27,13 @@ auditClient.captureHttpRequest().use { capture ->
 }
 ```
 
-Register before sending the request and apply each capture once. Disable automatic
-retries and redirects for these test requests; a second dispatch using the same
-capture is rejected. The private correlation header is removed before downstream
-handlers and request logging. Authentication still uses the application's normal
-request path.
+Register before sending the request and apply each capture once. The `WebTestClient`
+example is for non-redirecting endpoints; its default HTTP client follows redirects
+and may retry failed connections. A second dispatch using the same capture is
+rejected. To inspect redirects or connection failures, use an HTTP client with
+redirects and connection retries disabled. The private correlation header is removed
+before downstream handlers and request logging. Authentication still uses the
+application's normal request path.
 
 Completion waits for the downstream request chain and its executed synchronous
 request/response hooks, even when the response has already closed. The immutable

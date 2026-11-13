@@ -19,18 +19,18 @@ import wisp.deployment.TESTING
 @Singleton
 class FakeAuditClient @Inject constructor(private val optionalBinder: OptionalBinder) : AuditClient, FakeFixture() {
   private val region = "us-west-2"
-  internal val httpRequests = AuditRequestCaptures()
-
-  @com.google.inject.Inject(optional = true) internal var requestContext: ActionScoped<AuditRequestContext>? = null
+  internal val requestCaptures = AuditRequestCaptures()
 
   /** Registers one request before sending it. Requires [FakeAuditRequestCompletionModule]. */
   fun captureHttpRequest(): FakeAuditRequestCapture {
-    check(requestContext != null) { "Install FakeAuditRequestCompletionModule before capturing HTTP requests" }
-    return httpRequests.register()
+    check(optionalBinder.requestContext != null) {
+      "Install FakeAuditRequestCompletionModule before capturing HTTP requests"
+    }
+    return requestCaptures.register()
   }
 
   override fun reset() {
-    httpRequests.reset { super.reset() }
+    requestCaptures.reset { super.reset() }
   }
 
   val sentEvents: LinkedBlockingDeque<FakeAuditEvent> by resettable { LinkedBlockingDeque<FakeAuditEvent>() }
@@ -63,7 +63,7 @@ class FakeAuditClient @Inject constructor(private val optionalBinder: OptionalBi
     environment: String?,
     timestampSent: Instant?,
   ) {
-    httpRequests.record(requestContext?.getIfInScope()?.registration) {
+    requestCaptures.record(optionalBinder.requestContext?.getIfInScope()?.claimedRegistration) {
       val recordedEvent =
         FakeAuditEvent(
           eventSource = optionalBinder.appName,
@@ -109,6 +109,8 @@ class FakeAuditClient @Inject constructor(private val optionalBinder: OptionalBi
    */
   @Singleton
   class OptionalBinder @Inject constructor() {
+    @com.google.inject.Inject(optional = true) internal var requestContext: ActionScoped<AuditRequestContext>? = null
+
     @com.google.inject.Inject(optional = true) @AppName var appName: String = "test-app"
 
     @com.google.inject.Inject(optional = true)

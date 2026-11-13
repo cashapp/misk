@@ -16,6 +16,8 @@ import misk.MiskCaller
 import misk.MiskTestingServiceModule
 import misk.exceptions.BadRequestException
 import misk.inject.ReusableTestModule
+import misk.logging.LogCollector
+import misk.logging.LogCollectorModule
 import misk.scope.ActionScope
 import misk.scope.ActionScoped
 import misk.security.authz.AccessControlModule
@@ -52,8 +54,9 @@ internal class FakeAuditRequestCaptureTest {
   @MiskTestModule val module = TestModule()
   @Inject private lateinit var auditClient: FakeAuditClient
   @Inject private lateinit var webTestClient: WebTestClient
-  @Inject private lateinit var controls: RequestControls
+  @Inject private lateinit var requestControls: RequestControls
   @Inject private lateinit var auditBindings: FakeAuditClient.OptionalBinder
+  @Inject private lateinit var logCollector: LogCollector
 
   @Test
   fun `completion timeout returns while fake recording is blocked`() {
@@ -68,7 +71,7 @@ internal class FakeAuditRequestCaptureTest {
               return super.instant()
             }
           }
-        call("/audited/blocked-recording", capture)
+        callWithCapture("/audited/blocked-recording", capture)
         recordingGate.awaitEntered()
         val timeoutFailure =
           CompletableFuture.supplyAsync { catchThrowable { capture.awaitCompleted(Duration.ofMillis(50)) } }
@@ -86,16 +89,18 @@ internal class FakeAuditRequestCaptureTest {
   @Test
   fun `completion waits past response close and legacy consumption for synchronous hooks`() {
     val hookGate = Gate()
-    controls.hookGates["one"] = hookGate
+    requestControls.hookGates["one"] = hookGate
     auditClient.captureHttpRequest().use { capture ->
       try {
-        call("/audited/one", capture)
+        callWithCapture("/audited/one", capture)
         hookGate.awaitEntered()
-        val legacyEvent = auditClient.sentEvents.removeFirst()
+        assertThat(auditClient.sentEvents).hasSize(1)
+        val legacyEvent = auditClient.sentEvents.take()
         assertThat(legacyEvent.requestorLDAP).isEqualTo("test-user")
-        assertThat(legacyEvent.richDescription)
-          .contains("principal=test-user")
-          .doesNotContain(AuditRequestCaptures.HEADER.lowercase())
+        assertThat(legacyEvent.richDescription).contains("principal=test-user")
+        val hookHeaders = requestControls.hookHeaders.getValue("one")
+        assertThat(hookHeaders[AuditRequestCaptures.CORRELATION_HEADER]).isNull()
+        assertThat(hookHeaders[FakeCallerAuthenticator.USER_HEADER]).isEqualTo("test-user")
         assertThatThrownBy { capture.awaitCompleted(Duration.ZERO) }
           .isInstanceOf(TimeoutException::class.java)
           .hasMessageContaining("IN_FLIGHT")
@@ -116,9 +121,44 @@ internal class FakeAuditRequestCaptureTest {
   }
 
   @Test
+  fun `uncaptured HTTP request still records to the legacy queue`() {
+    val hookGate = Gate()
+    requestControls.hookGates["uncaptured"] = hookGate
+    try {
+      webTestClient
+        .call("/audited/uncaptured") { header(FakeCallerAuthenticator.USER_HEADER, "test-user") }
+        .response
+        .use { assertThat(it.code).isEqualTo(200) }
+      hookGate.awaitEntered()
+      assertThat(auditClient.sentEvents).hasSize(1)
+      val legacyEvent = auditClient.sentEvents.take()
+      assertThat(legacyEvent.eventTarget).isEqualTo("FakeAuditRequestCaptureTest.AuditedAction")
+      assertThat(legacyEvent.requestorLDAP).isEqualTo("test-user")
+    } finally {
+      hookGate.release.countDown()
+    }
+  }
+
+  @Test
+  fun `capture can be applied before the request URL is configured`() {
+    auditClient.captureHttpRequest().use { capture ->
+      val requestBuilder = Request.Builder()
+      capture.applyTo(requestBuilder)
+      webTestClient
+        .call("/plain") {
+          headers(requestBuilder.url(build().url).build().headers)
+          header(FakeCallerAuthenticator.USER_HEADER, "test-user")
+        }
+        .response
+        .use { assertThat(it.code).isEqualTo(200) }
+      assertThat(capture.awaitCompleted(TIMEOUT).events).isEmpty()
+    }
+  }
+
+  @Test
   fun `raw servlet request hides capture header and preserves ordinary headers`() {
     auditClient.captureHttpRequest().use { capture ->
-      call("/servlet-headers", capture)
+      callWithCapture("/servlet-headers", capture)
       assertThat(capture.awaitCompleted(TIMEOUT).events).isEmpty()
     }
   }
@@ -126,10 +166,10 @@ internal class FakeAuditRequestCaptureTest {
   @Test
   fun `unannotated request waits for chain exit before returning zero recordings`() {
     val plainGate = Gate()
-    controls.plainGate = plainGate
+    requestControls.plainGate = plainGate
     auditClient.captureHttpRequest().use { capture ->
       try {
-        call("/plain", capture)
+        callWithCapture("/plain", capture)
         plainGate.awaitEntered()
         assertThatThrownBy { capture.awaitCompleted(Duration.ZERO) }.isInstanceOf(TimeoutException::class.java)
         plainGate.release.countDown()
@@ -143,7 +183,7 @@ internal class FakeAuditRequestCaptureTest {
   @Test
   fun `unannotated action can record directly`() {
     auditClient.captureHttpRequest().use { capture ->
-      call("/direct", capture)
+      callWithCapture("/direct", capture)
       assertThat(capture.awaitCompleted(TIMEOUT).events.single().description).isEqualTo("direct recording")
     }
   }
@@ -151,13 +191,13 @@ internal class FakeAuditRequestCaptureTest {
   @Test
   fun `delayed second producer is included and single assertion detects duplicate`() {
     val producerGate = Gate { auditClient.logEvent("second", "second recording") }
-    controls.hookGates["duplicate"] = producerGate
+    requestControls.hookGates["duplicate"] = producerGate
     auditClient.captureHttpRequest().use { capture ->
       try {
-        call("/audited/duplicate", capture)
+        callWithCapture("/audited/duplicate", capture)
         producerGate.awaitEntered()
-        assertThat(auditClient.sentEvents.removeFirst().eventTarget)
-          .isEqualTo("FakeAuditRequestCaptureTest.AuditedAction")
+        assertThat(auditClient.sentEvents).hasSize(1)
+        assertThat(auditClient.sentEvents.take().eventTarget).isEqualTo("FakeAuditRequestCaptureTest.AuditedAction")
         producerGate.release.countDown()
         val completedRequest = capture.awaitCompleted(TIMEOUT)
         assertThat(completedRequest.events.map { it.eventTarget })
@@ -173,13 +213,13 @@ internal class FakeAuditRequestCaptureTest {
   fun `same action requests have independent completion and recordings`() {
     val firstGate = Gate()
     val secondGate = Gate()
-    controls.hookGates["first"] = firstGate
-    controls.hookGates["second"] = secondGate
+    requestControls.hookGates["first"] = firstGate
+    requestControls.hookGates["second"] = secondGate
     auditClient.captureHttpRequest().use { firstCapture ->
       auditClient.captureHttpRequest().use { secondCapture ->
         try {
-          call("/audited/first", firstCapture)
-          call("/audited/second", secondCapture)
+          callWithCapture("/audited/first", firstCapture)
+          callWithCapture("/audited/second", secondCapture)
           firstGate.awaitEntered()
           secondGate.awaitEntered()
           secondGate.release.countDown()
@@ -199,7 +239,7 @@ internal class FakeAuditRequestCaptureTest {
   @Test
   fun `joined scope propagated recording belongs to its request`() {
     auditClient.captureHttpRequest().use { capture ->
-      call("/joined", capture)
+      callWithCapture("/joined", capture)
       assertThat(capture.awaitCompleted(TIMEOUT).events.single().eventTarget).isEqualTo("joined")
     }
   }
@@ -207,7 +247,7 @@ internal class FakeAuditRequestCaptureTest {
   @Test
   fun `mapped handler failure retains final status and actual recording`() {
     auditClient.captureHttpRequest().use { capture ->
-      call("/audited/mapped", capture, expectedStatus = 400)
+      callWithCapture("/audited/mapped", capture, expectedStatus = 400)
       assertThat(capture.awaitCompleted(TIMEOUT).statusCode).isEqualTo(400)
       assertThat(capture.awaitCompleted(TIMEOUT).events).hasSize(1)
     }
@@ -216,7 +256,7 @@ internal class FakeAuditRequestCaptureTest {
   @Test
   fun `unmapped handler failure retains final status and actual recording`() {
     auditClient.captureHttpRequest().use { capture ->
-      call("/audited/unmapped", capture, expectedStatus = 500)
+      callWithCapture("/audited/unmapped", capture, expectedStatus = 500)
       assertThat(capture.awaitCompleted(TIMEOUT).statusCode).isEqualTo(500)
       assertThat(capture.awaitCompleted(TIMEOUT).events).hasSize(1)
     }
@@ -236,17 +276,17 @@ internal class FakeAuditRequestCaptureTest {
   @Test
   fun `escaping dispatch failure fails capture with original cause`() {
     auditClient.captureHttpRequest().use { capture ->
-      call("/escape", capture, expectedStatus = 500)
+      callWithCapture("/escape", capture, expectedStatus = 500)
       assertThatThrownBy { capture.awaitCompleted(TIMEOUT) }
         .isInstanceOf(ExecutionException::class.java)
-        .hasCause(controls.dispatchFailure)
+        .hasCause(requestControls.dispatchFailure)
     }
   }
 
   @Test
   fun `swallowed hook failure before fake is an empty actual recording snapshot`() {
     auditClient.captureHttpRequest().use { capture ->
-      call("/audited/hook-failure", capture)
+      callWithCapture("/audited/hook-failure", capture)
       assertThat(capture.awaitCompleted(TIMEOUT).events).isEmpty()
     }
   }
@@ -254,7 +294,7 @@ internal class FakeAuditRequestCaptureTest {
   @Test
   fun `fake construction failure is retained even when hook runner swallows it`() {
     auditClient.captureHttpRequest().use { capture ->
-      call("/audited/recording-failure", capture)
+      callWithCapture("/audited/recording-failure", capture)
       assertThatThrownBy { capture.awaitCompleted(TIMEOUT) }
         .isInstanceOf(ExecutionException::class.java)
         .hasRootCauseInstanceOf(ArithmeticException::class.java)
@@ -264,9 +304,9 @@ internal class FakeAuditRequestCaptureTest {
   @Test
   fun `late scoped recording fails without changing completed snapshot`() {
     auditClient.captureHttpRequest().use { capture ->
-      call("/late", capture)
+      callWithCapture("/late", capture)
       val completedRequest = capture.awaitCompleted(TIMEOUT)
-      assertThatThrownBy { controls.lateRecording!!() }
+      assertThatThrownBy { requestControls.lateRecording!!() }
         .isInstanceOf(IllegalStateException::class.java)
         .hasMessageContaining("after request completion")
       assertThat(completedRequest.events).isEmpty()
@@ -277,24 +317,25 @@ internal class FakeAuditRequestCaptureTest {
   @Test
   fun `reset rejects stale propagated writes and direct legacy logging still works`() {
     auditClient.captureHttpRequest().use { capture ->
-      call("/late", capture)
+      callWithCapture("/late", capture)
       capture.awaitCompleted(TIMEOUT)
     }
     auditClient.reset()
-    assertThatThrownBy { controls.lateRecording!!() }
+    assertThatThrownBy { requestControls.lateRecording!!() }
       .isInstanceOf(IllegalStateException::class.java)
       .hasMessageContaining("fixture reset")
     auditClient.logEvent("direct", "outside HTTP")
-    assertThat(auditClient.sentEvents.removeFirst().description).isEqualTo("outside HTTP")
+    assertThat(auditClient.sentEvents).hasSize(1)
+    assertThat(auditClient.sentEvents.take().description).isEqualTo("outside HTTP")
   }
 
   @Test
   fun `reset refuses running capture even after close and permits injector reuse after exit`() {
     val hookGate = Gate()
-    controls.hookGates["reset"] = hookGate
+    requestControls.hookGates["reset"] = hookGate
     val capture = auditClient.captureHttpRequest()
     try {
-      call("/audited/reset", capture)
+      callWithCapture("/audited/reset", capture)
       hookGate.awaitEntered()
       capture.close()
       assertThatThrownBy { auditClient.reset() }
@@ -303,10 +344,10 @@ internal class FakeAuditRequestCaptureTest {
     } finally {
       hookGate.release.countDown()
     }
-    check(controls.chainExited.await(10, SECONDS)) { "Abandoned chain did not exit" }
+    check(requestControls.resetChainExited.await(10, SECONDS)) { "Abandoned chain did not exit" }
     auditClient.reset()
     auditClient.captureHttpRequest().use { nextCapture ->
-      call("/plain", nextCapture)
+      callWithCapture("/plain", nextCapture)
       assertThat(nextCapture.awaitCompleted(TIMEOUT).events).isEmpty()
       assertThat(auditClient.sentEvents).isEmpty()
     }
@@ -315,7 +356,7 @@ internal class FakeAuditRequestCaptureTest {
   @Test
   fun `action construction failure never fabricates an empty completed request`() {
     auditClient.captureHttpRequest().use { capture ->
-      call("/construction-failure", capture, expectedStatus = 500)
+      callWithCapture("/construction-failure", capture, expectedStatus = 500)
       assertThatThrownBy { capture.awaitCompleted(Duration.ZERO) }
         .isInstanceOf(TimeoutException::class.java)
         .hasMessageContaining("NOT_OBSERVED")
@@ -323,65 +364,110 @@ internal class FakeAuditRequestCaptureTest {
   }
 
   @Test
-  fun `unobserved requests and cancelled unsent registrations fail diagnostically`() {
+  fun `unobserved request times out without an empty completed snapshot`() {
     auditClient.captureHttpRequest().use { capture ->
       assertThatThrownBy { capture.awaitCompleted(Duration.ZERO) }
         .isInstanceOf(TimeoutException::class.java)
         .hasMessageContaining("NOT_OBSERVED")
+    }
+  }
+
+  @Test
+  fun `closing an unsent capture fails its completion`() {
+    auditClient.captureHttpRequest().use { capture ->
       capture.close()
       assertThatThrownBy { capture.awaitCompleted(TIMEOUT) }
         .isInstanceOf(ExecutionException::class.java)
         .hasMessageContaining("closed")
     }
+  }
+
+  @Test
+  fun `reset cancels an unsent capture and prevents applying it`() {
     val resetCapture = auditClient.captureHttpRequest()
     auditClient.reset()
     assertThatThrownBy { resetCapture.awaitCompleted(TIMEOUT) }
       .isInstanceOf(ExecutionException::class.java)
       .hasMessageContaining("reset")
-    assertThatThrownBy { resetCapture.applyTo(Request.Builder().url("http://localhost/")) }
+    assertThatThrownBy { resetCapture.applyTo(Request.Builder()) }
       .isInstanceOf(IllegalStateException::class.java)
+      .hasMessageContaining("closed or reset")
   }
 
   @Test
-  fun `unknown duplicate reused and reset correlation IDs are rejected`() {
+  fun `unknown correlation ID is rejected`() {
     webTestClient
-      .call("/plain") { addHeader(AuditRequestCaptures.HEADER, "unknown") }
+      .call("/plain") { addHeader(AuditRequestCaptures.CORRELATION_HEADER, "unknown") }
       .response
       .use { assertThat(it.code).isEqualTo(500) }
+    assertThat(logCollector.takeEvents().map { it.throwableProxy?.message })
+      .contains("Unknown, reset or previously used audit capture ID")
+  }
+
+  @Test
+  fun `duplicate correlation IDs are rejected`() {
+    auditClient.captureHttpRequest().use { capture ->
+      webTestClient
+        .call("/plain") {
+          capture.applyTo(this)
+          addHeader(AuditRequestCaptures.CORRELATION_HEADER, "duplicate")
+        }
+        .response
+        .use { assertThat(it.code).isEqualTo(500) }
+      assertThat(logCollector.takeEvents().map { it.throwableProxy?.message })
+        .contains("Duplicate audit capture headers")
+    }
+  }
+
+  @Test
+  fun `capture and its correlation ID cannot be reused`() {
     auditClient.captureHttpRequest().use { capture ->
       lateinit var capturedRequest: Request
       webTestClient
         .call("/plain") {
           capture.applyTo(this)
+          header(FakeCallerAuthenticator.USER_HEADER, "test-user")
           capturedRequest = build()
         }
         .response
-        .close()
+        .use { assertThat(it.code).isEqualTo(200) }
       capture.awaitCompleted(TIMEOUT)
       assertThatThrownBy { capture.applyTo(capturedRequest.newBuilder()) }
         .isInstanceOf(IllegalStateException::class.java)
+        .hasMessageContaining("only be applied once")
       webTestClient
         .call("/plain") { headers(capturedRequest.headers) }
         .response
         .use { assertThat(it.code).isEqualTo(500) }
+      assertThat(logCollector.takeEvents().map { it.throwableProxy?.message })
+        .contains("Audit capture ID already used or closed; retries and redirects are unsupported")
+    }
+  }
+
+  @Test
+  fun `correlation ID from a reset fixture is rejected`() {
+    auditClient.captureHttpRequest().use { capture ->
+      lateinit var capturedRequest: Request
+      webTestClient
+        .call("/plain") {
+          capture.applyTo(this)
+          header(FakeCallerAuthenticator.USER_HEADER, "test-user")
+          capturedRequest = build()
+        }
+        .response
+        .use { assertThat(it.code).isEqualTo(200) }
+      capture.awaitCompleted(TIMEOUT)
       auditClient.reset()
       webTestClient
         .call("/plain") { headers(capturedRequest.headers) }
         .response
         .use { assertThat(it.code).isEqualTo(500) }
-    }
-    auditClient.captureHttpRequest().use { duplicateCapture ->
-      webTestClient
-        .call("/plain") {
-          duplicateCapture.applyTo(this)
-          addHeader(AuditRequestCaptures.HEADER, "duplicate")
-        }
-        .response
-        .use { assertThat(it.code).isEqualTo(500) }
+      assertThat(logCollector.takeEvents().map { it.throwableProxy?.message })
+        .contains("Unknown, reset or previously used audit capture ID")
     }
   }
 
-  private fun call(path: String, capture: FakeAuditRequestCapture, expectedStatus: Int = 200) {
+  private fun callWithCapture(path: String, capture: FakeAuditRequestCapture, expectedStatus: Int = 200) {
     webTestClient
       .call(path) {
         capture.applyTo(this)
@@ -398,15 +484,17 @@ internal class FakeAuditRequestCaptureTest {
     override fun configure() {
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())
+      install(LogCollectorModule())
       multibind<TestFixture>().to<RequestControls>()
       install(AccessControlModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-      multibind<NetworkInterceptor.Factory>(BeforeContentEncoding::class).to<ChainExitFactory>()
+      multibind<NetworkInterceptor.Factory>(BeforeContentEncoding::class).to<ResetChainExitFactory>()
       multibind<RequestResponseHook.Factory>().to<BeforeAuditHookFactory>()
       install(FakeAuditClientModule())
       install(FakeAuditRequestCompletionModule())
       multibind<RequestResponseHook.Factory>().to<GateHookFactory>()
       multibind<NetworkInterceptor.Factory>(BeforeContentEncoding::class).to<EscapingInterceptorFactory>()
+      multibind<NetworkInterceptor.Factory>(BeforeContentEncoding::class).to<PlainChainGateFactory>()
       install(WebActionModule.create<AuditedAction>())
       install(WebActionModule.create<PlainAction>())
       install(WebActionModule.create<ServletHeadersAction>())
@@ -436,7 +524,8 @@ internal class FakeAuditRequestCaptureTest {
   @Singleton
   class RequestControls @Inject constructor() : FakeFixture() {
     val hookGates by resettable { ConcurrentHashMap<String, Gate>() }
-    val chainExited by resettable { CountDownLatch(1) }
+    val hookHeaders by resettable { ConcurrentHashMap<String, Headers>() }
+    val resetChainExited by resettable { CountDownLatch(1) }
     val dispatchFailure = IllegalStateException("uncaught dispatch failure")
     var lateRecording by resettable<(() -> Unit)?> { null }
     var plainGate by resettable<Gate?> { null }
@@ -454,36 +543,54 @@ internal class FakeAuditRequestCaptureTest {
       else null
   }
 
-  class GateHookFactory @Inject constructor(private val controls: RequestControls) : RequestResponseHook.Factory {
+  class GateHookFactory @Inject constructor(private val requestControls: RequestControls) :
+    RequestResponseHook.Factory {
     override fun create(action: Action): RequestResponseHook? =
       if (action.name == "FakeAuditRequestCaptureTest.AuditedAction")
-        hook { httpCall -> controls.hookGates[httpCall.url.pathSegments.last()]?.block() }
+        hook { httpCall ->
+          val requestMessage = httpCall.url.pathSegments.last()
+          requestControls.hookHeaders[requestMessage] = httpCall.requestHeaders
+          requestControls.hookGates[requestMessage]?.block()
+        }
       else null
   }
 
-  class ChainExitFactory @Inject constructor(private val controls: RequestControls) : NetworkInterceptor.Factory {
+  class ResetChainExitFactory @Inject constructor(private val requestControls: RequestControls) :
+    NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor =
       object : NetworkInterceptor {
         override fun intercept(chain: NetworkChain) {
           try {
             chain.proceed(chain.httpCall)
           } finally {
-            if (chain.httpCall.url.pathSegments.last() == "reset") controls.chainExited.countDown()
+            if (chain.httpCall.url.pathSegments.last() == "reset") requestControls.resetChainExited.countDown()
           }
         }
       }
   }
 
-  class EscapingInterceptorFactory @Inject constructor(private val controls: RequestControls) :
+  class EscapingInterceptorFactory @Inject constructor(private val requestControls: RequestControls) :
     NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor =
       object : NetworkInterceptor {
         override fun intercept(chain: NetworkChain) {
-          if (action.name == "FakeAuditRequestCaptureTest.EscapeAction") throw controls.dispatchFailure
+          if (action.name == "FakeAuditRequestCaptureTest.EscapeAction") throw requestControls.dispatchFailure
           chain.proceed(chain.httpCall)
-          if (action.name == "FakeAuditRequestCaptureTest.PlainAction") controls.plainGate?.block()
         }
       }
+  }
+
+  class PlainChainGateFactory @Inject constructor(private val requestControls: RequestControls) :
+    NetworkInterceptor.Factory {
+    override fun create(action: Action): NetworkInterceptor? =
+      if (action.name == "FakeAuditRequestCaptureTest.PlainAction")
+        object : NetworkInterceptor {
+          override fun intercept(chain: NetworkChain) {
+            chain.proceed(chain.httpCall)
+            requestControls.plainGate?.block()
+          }
+        }
+      else null
   }
 
   class AuditedAction @Inject constructor() : WebAction {
@@ -491,7 +598,7 @@ internal class FakeAuditRequestCaptureTest {
     @Authenticated(allowAnyUser = true)
     @AuditRequestResponse(includeRequestHeaders = true, includeResponse = true)
     fun call(@PathParam message: String, @RequestHeaders headers: Headers): String {
-      check(headers[AuditRequestCaptures.HEADER] == null)
+      check(headers[AuditRequestCaptures.CORRELATION_HEADER] == null)
       if (message == "mapped") throw BadRequestException("mapped failure")
       if (message == "unmapped") error("unmapped failure")
       return message
@@ -508,7 +615,7 @@ internal class FakeAuditRequestCaptureTest {
     @Authenticated(allowAnyUser = true)
     fun call(): String {
       val scopedRequest = servletRequest.get()
-      val captureHeader = AuditRequestCaptures.HEADER.lowercase()
+      val captureHeader = AuditRequestCaptures.CORRELATION_HEADER.lowercase()
       check(scopedRequest.getHeader(captureHeader) == null)
       check(scopedRequest.getHeaders(captureHeader).toList().isEmpty())
       check(scopedRequest.headerNames.toList().none { it.equals(captureHeader, ignoreCase = true) })
@@ -545,12 +652,12 @@ internal class FakeAuditRequestCaptureTest {
   constructor(
     private val auditClient: AuditClient,
     private val scope: ActionScope,
-    private val controls: RequestControls,
+    private val requestControls: RequestControls,
   ) : WebAction {
     @Get("/late")
     @Authenticated(allowAnyUser = true)
     fun call(): String {
-      controls.lateRecording = scope.propagate { auditClient.logEvent("late", "late recording") }
+      requestControls.lateRecording = scope.propagate { auditClient.logEvent("late", "late recording") }
       return "late"
     }
   }
