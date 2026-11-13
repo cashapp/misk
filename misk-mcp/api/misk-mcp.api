@@ -23,6 +23,16 @@ public final class misk/mcp/JsonKt {
 	public static final fun getMcpJson ()Lkotlinx/serialization/json/Json;
 }
 
+public abstract interface class misk/mcp/McpCompletionProvider {
+	public static final field Companion Lmisk/mcp/McpCompletionProvider$Companion;
+	public static final field MAX_COMPLETION_VALUES I
+	public abstract fun complete (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/McpCompletionProvider$Companion {
+	public static final field MAX_COMPLETION_VALUES I
+}
+
 public final class misk/mcp/McpProgressKt {
 	public static final fun reportProgress (DLjava/lang/Double;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun reportProgress$default (DLjava/lang/Double;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -482,8 +492,9 @@ public final class misk/mcp/testing/InMemoryMcpSessionHandler : misk/mcp/McpSess
 	public fun terminate (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class misk/mcp/testing/prompts/KotlinDeveloperPrompt : misk/mcp/McpPrompt {
+public final class misk/mcp/testing/prompts/KotlinDeveloperPrompt : misk/mcp/McpCompletionProvider, misk/mcp/McpPrompt {
 	public fun <init> ()V
+	public fun complete (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getArguments ()Ljava/util/List;
 	public fun getDescription ()Ljava/lang/String;
 	public fun getIcons ()Ljava/util/List;
@@ -492,8 +503,9 @@ public final class misk/mcp/testing/prompts/KotlinDeveloperPrompt : misk/mcp/Mcp
 	public fun handler (Lio/modelcontextprotocol/kotlin/sdk/types/GetPromptRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class misk/mcp/testing/resources/UserProfileResource : misk/mcp/McpResourceTemplate {
+public final class misk/mcp/testing/resources/UserProfileResource : misk/mcp/McpCompletionProvider, misk/mcp/McpResourceTemplate {
 	public fun <init> ()V
+	public fun complete (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getDescription ()Ljava/lang/String;
 	public fun getIcons ()Ljava/util/List;
 	public fun getMimeType ()Ljava/lang/String;

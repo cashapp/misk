@@ -5,12 +5,21 @@ import io.modelcontextprotocol.kotlin.sdk.server.ClientConnection
 import io.modelcontextprotocol.kotlin.sdk.server.RegisteredResource
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
+import io.modelcontextprotocol.kotlin.sdk.server.ServerSession
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequest
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
+import io.modelcontextprotocol.kotlin.sdk.types.CompleteRequest
+import io.modelcontextprotocol.kotlin.sdk.types.CompleteResult
+import io.modelcontextprotocol.kotlin.sdk.types.EmptyJsonObject
 import io.modelcontextprotocol.kotlin.sdk.types.Implementation
+import io.modelcontextprotocol.kotlin.sdk.types.McpException
+import io.modelcontextprotocol.kotlin.sdk.types.Method
 import io.modelcontextprotocol.kotlin.sdk.types.Prompt
+import io.modelcontextprotocol.kotlin.sdk.types.PromptReference
+import io.modelcontextprotocol.kotlin.sdk.types.RPCError
 import io.modelcontextprotocol.kotlin.sdk.types.Resource
 import io.modelcontextprotocol.kotlin.sdk.types.ResourceTemplate
+import io.modelcontextprotocol.kotlin.sdk.types.ResourceTemplateReference
 import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.Tool
 import io.modelcontextprotocol.kotlin.sdk.types.ToolAnnotations
@@ -131,7 +140,12 @@ internal constructor(
       capabilities =
         ServerCapabilities(
           experimental = null,
-          completions = null,
+          completions =
+            if (prompts.any { it is McpCompletionProvider } || resourceTemplates.any { it is McpCompletionProvider }) {
+              EmptyJsonObject
+            } else {
+              null
+            },
           logging = null,
           prompts = if (prompts.isNotEmpty()) config.prompts.asPrompts() else null,
           resources =
@@ -144,6 +158,12 @@ internal constructor(
     ),
     instructionsProvider = instructionsProvider?.let { { it.get() } },
   ) {
+
+  private val promptCompletions: Map<String, McpCompletionProvider?> =
+    prompts.associate { it.name to it as? McpCompletionProvider }
+
+  private val resourceTemplateCompletions: Map<String, McpCompletionProvider?> =
+    resourceTemplates.associate { it.uriTemplate to it as? McpCompletionProvider }
 
   init {
     prompts.forEach { prompt ->
@@ -216,6 +236,40 @@ internal constructor(
       )
     }
   }
+
+  /** The SDK has no server-side `completion/complete` handler, so each session needs one installed. */
+  internal fun ServerSession.installCompletionHandler() {
+    if (promptCompletions.values.none { it != null } && resourceTemplateCompletions.values.none { it != null }) return
+    setRequestHandler<CompleteRequest>(Method.Defined.CompletionComplete) { request, _ ->
+      withContext(McpServerSession(this)) { complete(request) }
+    }
+  }
+
+  private suspend fun complete(request: CompleteRequest): CompleteResult {
+    val provider =
+      when (val ref = request.ref) {
+        is PromptReference ->
+          promptCompletions.getOrElse(ref.name) { throw invalidParams("Prompt not found: ${ref.name}") }
+        is ResourceTemplateReference ->
+          resourceTemplateCompletions.getOrElse(ref.uri) {
+            throw invalidParams("Resource template not found: ${ref.uri}")
+          }
+        else -> throw invalidParams("Unsupported completion reference: $ref")
+      }
+    val values =
+      provider
+        ?.complete(request.argument.name, request.argument.value, request.params.context?.arguments.orEmpty())
+        .orEmpty()
+    return CompleteResult(
+      CompleteResult.Completion(
+        values = values.take(McpCompletionProvider.MAX_COMPLETION_VALUES),
+        total = values.size,
+        hasMore = values.size > McpCompletionProvider.MAX_COMPLETION_VALUES,
+      )
+    )
+  }
+
+  private fun invalidParams(message: String) = McpException(RPCError.ErrorCode.INVALID_PARAMS, message)
 
   // Handlers run on the SDK's handler scope once a session is initialized, so session context is re-installed here.
   private fun ClientConnection.handlerContext(): CoroutineContext =

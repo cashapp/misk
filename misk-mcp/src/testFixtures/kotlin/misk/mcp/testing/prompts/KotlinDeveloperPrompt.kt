@@ -8,14 +8,19 @@ import io.modelcontextprotocol.kotlin.sdk.types.Role
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import jakarta.inject.Inject
 import misk.annotation.ExperimentalMiskApi
+import misk.mcp.McpCompletionProvider
 import misk.mcp.McpPrompt
 
 @OptIn(ExperimentalMiskApi::class)
-class KotlinDeveloperPrompt @Inject constructor() : McpPrompt {
+class KotlinDeveloperPrompt @Inject constructor() : McpPrompt, McpCompletionProvider {
   override val name = "Kotlin Developer"
   override val description = "Develop small kotlin applications"
   override val arguments =
     listOf(PromptArgument(name = "Project Name", description = "Project name for the new project", required = true))
+
+  /** Suggests more names than one completion response can hold, to exercise truncation. */
+  override suspend fun complete(argumentName: String, value: String, contextArguments: Map<String, String>) =
+    if (argumentName == "Project Name") List(150) { "$value$it" } else emptyList()
 
   override suspend fun handler(request: GetPromptRequest) =
     GetPromptResult(

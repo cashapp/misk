@@ -23,6 +23,8 @@ misk-mcp Kotlin MCP SDK 0.16.0
   top-level `Tool.title`, not only as `annotations.title`.
 - Tool handlers can call `reportProgress(progress, total, message)` to send `notifications/progress` for the current
   call. It does nothing when the client did not send a `progressToken`.
+- Prompts and resource templates can implement `McpCompletionProvider` to answer `completion/complete` requests. The
+  server advertises the `completions` capability only when at least one registered prompt or resource template does.
 
 Vitess exception metric labels
 ===

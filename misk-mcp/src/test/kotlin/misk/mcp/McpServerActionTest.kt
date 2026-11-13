@@ -6,6 +6,8 @@ import com.google.inject.Module
 import com.google.inject.util.Modules
 import io.modelcontextprotocol.kotlin.sdk.client.Client
 import io.modelcontextprotocol.kotlin.sdk.shared.RequestOptions
+import io.modelcontextprotocol.kotlin.sdk.types.CompleteRequest
+import io.modelcontextprotocol.kotlin.sdk.types.CompleteRequestParams
 import io.modelcontextprotocol.kotlin.sdk.types.ElicitResult
 import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequest
 import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequestParams
@@ -17,8 +19,10 @@ import io.modelcontextprotocol.kotlin.sdk.types.ListResourcesRequest
 import io.modelcontextprotocol.kotlin.sdk.types.ListToolsRequest
 import io.modelcontextprotocol.kotlin.sdk.types.Method
 import io.modelcontextprotocol.kotlin.sdk.types.Progress
+import io.modelcontextprotocol.kotlin.sdk.types.PromptReference
 import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceRequest
 import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceRequestParams
+import io.modelcontextprotocol.kotlin.sdk.types.ResourceTemplateReference
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.TextResourceContents
 import io.prometheus.client.CollectorRegistry
@@ -623,6 +627,43 @@ internal abstract class McpServerActionTest {
     val response = mcpClient.callTool(name = "progress", arguments = emptyMap())
 
     assertEquals("done", (response.content.single() as TextContent).text)
+  }
+
+  @Test
+  fun `test prompt argument completion is capped at 100 values`() = runBlocking {
+    assertNotNull(mcpClient.serverCapabilities?.completions)
+
+    val result =
+      mcpClient.complete(
+        CompleteRequest(
+          CompleteRequestParams(
+            argument = CompleteRequestParams.Argument(name = "Project Name", value = "proj"),
+            ref = PromptReference(name = "Kotlin Developer"),
+          )
+        )
+      )
+
+    assertEquals(100, result.completion.values.size)
+    assertEquals("proj0", result.completion.values.first())
+    assertEquals(150, result.completion.total)
+    assertEquals(true, result.completion.hasMore)
+  }
+
+  @Test
+  fun `test resource template variable completion`() = runBlocking {
+    val result =
+      mcpClient.complete(
+        CompleteRequest(
+          CompleteRequestParams(
+            argument = CompleteRequestParams.Argument(name = "userId", value = "al"),
+            ref = ResourceTemplateReference(uri = "users://{userId}/profile"),
+          )
+        )
+      )
+
+    assertEquals(listOf("alice", "albert"), result.completion.values)
+    assertEquals(2, result.completion.total)
+    assertEquals(false, result.completion.hasMore)
   }
 
   companion object {
