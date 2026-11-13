@@ -6,17 +6,17 @@ https://www.jooq.org/
 In order to use jooq in your service you need to a few things:
 
 1. Add this module as a dependency to your project.
-1. You need to generate a jooq model from your database. 
-   Jooq's fluent API SQL generation depends on this generated model. 
-   There's more information on the jooq website here - 
+1. You need to generate a jooq model from your database.
+   Jooq's fluent API SQL generation depends on this generated model.
+   There's more information on the jooq website here -
    https://www.jooq.org/doc/latest/manual/code-generation/
-   
-This is best done from running your migrations, and pointing 
-jooq-code-gen to it. There's an example of how to do this in this 
-   module's build.gradle.kts. We are using it to generate a test db model in 
-   order to test classes in this module.  
-   But the steps are here anyway:
-   
+
+This is best done from running your migrations, and pointing
+jooq-code-gen to it. There's an example of how to do this in this
+module's build.gradle.kts. We are using it to generate a test db model in
+order to test classes in this module.  
+But the steps are here anyway:
+
 a. Add the below lines to your build.gradle.kts
 
 ```kotlin
@@ -95,7 +95,7 @@ d. Make sure to run `jooq-test-regenerate.sh` every time you add a migration.
 
 After wiring the `JooqModule` in like this
 
-```
+```kotlin
   install(JooqModule(
       qualifier = JooqDBIdentifier::class,
       dataSourceClusterConfig = datasourceConfig,
@@ -109,9 +109,9 @@ After wiring the `JooqModule` in like this
     ))
 ```
 
-You can now start using the `JooqTransacter` anywhere like this  
+You can now start using the `JooqTransacter` anywhere like this
 
-```
+```kotlin
 class Service @Inject constructor(
    @JooqDBIdentifier val transacter: JooqTransacter
 ) {
@@ -146,11 +146,86 @@ ctx.select()
 
 ```
 
-## Future 
+### Unified transacter
+
+The `JooqUnifiedTransacterModule` sits on top of `JooqModule`. It provides a `misk.jooq.transacter.Transacter` interface
+similar to that provided by `misk-jdbc` and `misk-hibernate`. Installing the module can be done as follows:
+
+```kotlin
+install(
+    JooqUnifiedTransacterModule(
+        writerQualifier = JooqDBIdentifier::class,
+        readerQualifier = JooqDBReadOnlyIdentifier::class,
+        // optional defaultTransacterOptions
+        // optional transacterBindingQualifier
+    )
+)
+```
+
+Using the transacter can be done as follows:
+
+```kotlin
+class Service @Inject constructor(
+    val transacter: Transacter
+) {
+    fun readOnlyExample() {
+        // Reads from the writer but forbids writes
+        transacter.readOnly().transaction { session ->
+            session.ctx
+                .selectFrom(AUTHOR)
+                .fetch()
+        }
+    }
+
+    fun replicaReadExample() {
+        // Reads from the reader if a reader qualifier annotation was provided
+        transacter.replicaRead { session ->
+            session.ctx
+                .selectFrom(AUTHOR)
+                .fetch()
+        }
+    }
+
+    fun mixingOptionsExample() {
+        transacter.readOnly().noRetries().transaction {
+            session.ctx
+                .selectFrom(AUTHOR)
+                .fetch()
+        }
+    }
+
+    fun noRetriesExample() {
+        transacter.noRetries().transaction { session ->
+            session.ctx
+                .selectFrom(AUTHOR)
+                .fetch()
+        }
+    }
+
+    fun moreRetriesExample() {
+        transacter.maxAttempts(10).transaction { session ->
+            session.ctx
+                .selectFrom(AUTHOR)
+                .fetch()
+        }
+    }
+}
+
+class MyServiceRpcClient constructor(
+    val transacter: Transacter
+) {
+    fun makeRpc() {
+        check(!transacter.inTransaction) { "Cannot make an RPC while holding a database connection" }
+    }
+}
+
+```
+
+## Future
 
 1. Further, in order to use jooq we can't have migrations placed in a folder called `migrations`.
-   The issue is jooq.jar ships with a directory called `migrations` with the some 
-   [migrations](https://github.com/jOOQ/jOOQ/tree/main/jOOQ/src/main/resources/migrations) 
-   we don't care about in it. When the service starts up it finds this folder as well and tries 
+   The issue is jooq.jar ships with a directory called `migrations` with the some
+   [migrations](https://github.com/jOOQ/jOOQ/tree/main/jOOQ/src/main/resources/migrations)
+   we don't care about in it. When the service starts up it finds this folder as well and tries
    to run those migrations. Renaming misk service migrations to somethinq like `db-migrations` works. 
 

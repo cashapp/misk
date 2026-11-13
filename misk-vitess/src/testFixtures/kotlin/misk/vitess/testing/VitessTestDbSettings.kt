@@ -3,6 +3,10 @@ package misk.vitess.testing
 import java.time.Duration
 import misk.containers.ContainerUtil
 
+private val DEFAULT_VTCTLD_CLIENT_TIMEOUT = Duration.ofSeconds(10)
+private const val VTCTLDCLIENT_CONTAINER_START_DELAY_MS_ENV = "VTCTLDCLIENT_CONTAINER_START_DELAY_MS"
+private const val VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS_ENV = "VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS"
+
 object DefaultSettings {
   const val AUTO_APPLY_SCHEMA_CHANGES = true
   const val CONTAINER_NAME = "vitess_test_db"
@@ -18,20 +22,37 @@ object DefaultSettings {
   const val IN_MEMORY_STORAGE_SIZE = "1024M"
   const val KEEP_ALIVE = true
   const val LINT_SCHEMA = false
-  const val MYSQL_VERSION = "8.0.42"
+  const val MYSQL_VERSION = "8.4.3"
   const val PORT = 27003
   const val SCHEMA_DIR = "classpath:/vitess/schema"
   const val SQL_MODE: String =
     "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
   @JvmField var TRANSACTION_ISOLATION_LEVEL: TransactionIsolationLevel = TransactionIsolationLevel.REPEATABLE_READ
+  @JvmField val TRANSACTION_MODE: TransactionMode = TransactionMode.MULTI
   @JvmField var TRANSACTION_TIMEOUT_SECONDS: Duration = Duration.ofSeconds(30)
+  @JvmField var VTCTLD_CLIENT_TIMEOUT: Duration = vtctldClientTimeoutFromEnvironment()
   const val VITESS_DOCKER_NETWORK_NAME = "vitess-network"
   const val VITESS_DOCKER_NETWORK_TYPE = "bridge"
-  const val VITESS_IMAGE = "vitess/vttestserver:v21.0.5-mysql80"
-  const val VITESS_VERSION = 21
-  const val VTCTLD_CLIENT_IMAGE = "vitess/vtctldclient:v21.0.4"
+  const val VITESS_IMAGE = "ghcr.io/block/vitess/vttestserver:23.0.3-block.1-mysql84"
+  const val VITESS_VERSION = 23
+  const val VTCTLD_CLIENT_IMAGE = "ghcr.io/block/vitess/vtctldclient:23.0.3-block.1"
   const val VTGATE_USER = "root"
   const val VTGATE_USER_PASSWORD = ""
+}
+
+internal fun vtctldClientTimeoutFromEnvironment(
+  environment: Map<String, String> = System.getenv(),
+): Duration {
+  return listOfNotNull(
+    environment[VTCTLDCLIENT_CONTAINER_START_DELAY_MS_ENV]?.toMillisecondsDuration(),
+    environment[VTCTLDCLIENT_APPLY_VSCHEMA_TIMEOUT_MS_ENV]?.toMillisecondsDuration(),
+  ).maxOrNull() ?: DEFAULT_VTCTLD_CLIENT_TIMEOUT
+}
+
+private fun String.toMillisecondsDuration(): Duration? {
+  return removeSuffix("ms")
+    .toLongOrNull()
+    ?.let(Duration::ofMillis)
 }
 
 enum class TransactionIsolationLevel(val value: String) {
@@ -39,6 +60,12 @@ enum class TransactionIsolationLevel(val value: String) {
   READ_COMMITTED("READ-COMMITTED"),
   REPEATABLE_READ("REPEATABLE-READ"),
   SERIALIZABLE("SERIALIZABLE"),
+}
+
+enum class TransactionMode(val value: String) {
+  SINGLE("SINGLE"),
+  MULTI("MULTI"),
+  TWOPC("TWOPC"),
 }
 
 val hostname: String

@@ -47,6 +47,50 @@ public final class misk/client/NetworkInterceptorWrapper : okhttp3/Interceptor {
 	public fun intercept (Lokhttp3/Interceptor$Chain;)Lokhttp3/Response;
 }
 
+public class misk/client/OkHttpInterceptorChain : okhttp3/Interceptor$Chain {
+	public fun <init> (Lmisk/client/ClientNetworkChain;)V
+	public fun call ()Lokhttp3/Call;
+	public fun connectTimeoutMillis ()I
+	public fun connection ()Lokhttp3/Connection;
+	public fun getAuthenticator ()Lokhttp3/Authenticator;
+	public fun getCache ()Lokhttp3/Cache;
+	public fun getCertificatePinner ()Lokhttp3/CertificatePinner;
+	public fun getConnectionPool ()Lokhttp3/ConnectionPool;
+	public fun getCookieJar ()Lokhttp3/CookieJar;
+	public fun getDns ()Lokhttp3/Dns;
+	public fun getEventListener ()Lokhttp3/EventListener;
+	public fun getFollowRedirects ()Z
+	public fun getFollowSslRedirects ()Z
+	public fun getHostnameVerifier ()Ljavax/net/ssl/HostnameVerifier;
+	public fun getProxy ()Ljava/net/Proxy;
+	public fun getProxyAuthenticator ()Lokhttp3/Authenticator;
+	public fun getProxySelector ()Ljava/net/ProxySelector;
+	public fun getRetryOnConnectionFailure ()Z
+	public fun getSocketFactory ()Ljavax/net/SocketFactory;
+	public fun getSslSocketFactoryOrNull ()Ljavax/net/ssl/SSLSocketFactory;
+	public fun getX509TrustManagerOrNull ()Ljavax/net/ssl/X509TrustManager;
+	public fun proceed (Lokhttp3/Request;)Lokhttp3/Response;
+	public fun readTimeoutMillis ()I
+	public fun request ()Lokhttp3/Request;
+	public fun withAuthenticator (Lokhttp3/Authenticator;)Lokhttp3/Interceptor$Chain;
+	public fun withCache (Lokhttp3/Cache;)Lokhttp3/Interceptor$Chain;
+	public fun withCertificatePinner (Lokhttp3/CertificatePinner;)Lokhttp3/Interceptor$Chain;
+	public fun withConnectTimeout (ILjava/util/concurrent/TimeUnit;)Lokhttp3/Interceptor$Chain;
+	public fun withConnectionPool (Lokhttp3/ConnectionPool;)Lokhttp3/Interceptor$Chain;
+	public fun withCookieJar (Lokhttp3/CookieJar;)Lokhttp3/Interceptor$Chain;
+	public fun withDns (Lokhttp3/Dns;)Lokhttp3/Interceptor$Chain;
+	public fun withHostnameVerifier (Ljavax/net/ssl/HostnameVerifier;)Lokhttp3/Interceptor$Chain;
+	public fun withProxy (Ljava/net/Proxy;)Lokhttp3/Interceptor$Chain;
+	public fun withProxyAuthenticator (Lokhttp3/Authenticator;)Lokhttp3/Interceptor$Chain;
+	public fun withProxySelector (Ljava/net/ProxySelector;)Lokhttp3/Interceptor$Chain;
+	public fun withReadTimeout (ILjava/util/concurrent/TimeUnit;)Lokhttp3/Interceptor$Chain;
+	public fun withRetryOnConnectionFailure (Z)Lokhttp3/Interceptor$Chain;
+	public fun withSocketFactory (Ljavax/net/SocketFactory;)Lokhttp3/Interceptor$Chain;
+	public fun withSslSocketFactory (Ljavax/net/ssl/SSLSocketFactory;Ljavax/net/ssl/X509TrustManager;)Lokhttp3/Interceptor$Chain;
+	public fun withWriteTimeout (ILjava/util/concurrent/TimeUnit;)Lokhttp3/Interceptor$Chain;
+	public fun writeTimeoutMillis ()I
+}
+
 public abstract interface class misk/logging/Mdc {
 	public abstract fun clear ()V
 	public abstract fun get (Ljava/lang/String;)Ljava/lang/String;

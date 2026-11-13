@@ -201,6 +201,10 @@ public final class wisp/feature/testing/FakeLegacyFeatureFlags$Companion {
 	public final fun getDefaultAttributes ()Lwisp/feature/Attributes;
 }
 
+public abstract interface class wisp/feature/testing/FakeLegacyFeatureFlags$JsonValue {
+	public abstract fun get ()Ljava/lang/String;
+}
+
 public final class wisp/feature/testing/FakeStrongFeatureFlags : wisp/feature/StrongFeatureFlags {
 	public fun <init> ()V
 	public fun get (Lwisp/feature/BooleanFeatureFlag;)Z

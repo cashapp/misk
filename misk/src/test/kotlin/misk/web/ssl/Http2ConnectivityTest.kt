@@ -5,11 +5,11 @@ import com.google.inject.Guice
 import com.google.inject.Provides
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import jakarta.servlet.http.HttpServletRequest
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeUnit
-import javax.servlet.http.HttpServletRequest
 import kotlin.test.assertFailsWith
 import misk.Action
 import misk.MiskDefault

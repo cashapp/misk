@@ -22,6 +22,11 @@ import misk.testing.TestFixture
  * Note that this may not be used alongside [DockerDynamoDbModule] and `@MiskExternalDependency DockerDynamoDb`.
  * DynamoDB may execute in Docker or in-process, but never both.
  */
+@Deprecated(
+  message =
+    "AWS SDK v1 DynamoDB is deprecated. Use the AWS SDK v2 DynamoDB testing module in " +
+      "misk-aws2-dynamodb (misk.aws2.dynamodb.testing.InProcessDynamoDbModule) instead."
+)
 class InProcessDynamoDbModule(private val tables: List<DynamoDbTable>) : KAbstractModule() {
 
   constructor(vararg tables: DynamoDbTable) : this(tables.toList())

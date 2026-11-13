@@ -12,6 +12,10 @@ import wisp.lease.LeaseManager
  * computation is based off of the [AwsSqsJobReceiverPolicy] specification.
  */
 @Singleton
+@Deprecated(
+  message = "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
+    "misk-aws2-sqs (misk.aws2.sqs.jobqueue) instead."
+)
 class SqsConsumerAllocator
 @Inject
 constructor(private val leaseManager: LeaseManager, private val featureFlags: FeatureFlags) {

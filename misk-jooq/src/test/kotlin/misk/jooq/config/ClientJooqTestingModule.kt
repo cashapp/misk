@@ -14,6 +14,7 @@ import misk.jooq.listeners.JooqTimestampRecordListenerOptions
 import misk.jooq.listeners.RecordSignatureListener
 import misk.jooq.listeners.TableSignatureDetails
 import misk.jooq.testgen.tables.references.RECORD_SIGNATURE_TEST
+import misk.jooq.transacter.JooqUnifiedTransacterModule
 import misk.logging.LogCollectorModule
 import org.jooq.Configuration
 import org.jooq.RecordListenerProvider
@@ -60,6 +61,12 @@ class ClientJooqTestingModule : KAbstractModule() {
           ),
         readerQualifier = JooqDBReadOnlyIdentifier::class,
         jooqConfigExtension = JOOQ_CONFIG_EXTENSION,
+      )
+    )
+    install(
+      JooqUnifiedTransacterModule(
+        writerQualifier = JooqDBIdentifier::class,
+        readerQualifier = JooqDBReadOnlyIdentifier::class,
       )
     )
     install(JdbcTestingModule(JooqDBIdentifier::class))

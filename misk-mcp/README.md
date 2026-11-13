@@ -6,7 +6,7 @@ This module provides Misk with Model Context Protocol (MCP) server capabilities,
 
 The [Model Context Protocol](https://modelcontextprotocol.io/specification/2025-06-18) is an open protocol that enables seamless integration between LLM applications and external data sources and tools. MCP provides a standardized way for applications to:
 
-- **Share contextual information** with language models through resources
+- **Share contextual information** with language models through resources and resource templates
 - **Expose tools and capabilities** to AI systems for function execution  
 - **Create reusable prompt templates** and workflows for users
 - **Build composable integrations** across the AI ecosystem
@@ -27,6 +27,7 @@ class MyAppModule : KAbstractModule() {
     // Register your MCP components
     install(McpToolModule.create<CalculatorTool>())
     install(McpResourceModule.create<DatabaseSchemaResource>())
+    install(McpResourceTemplateModule.create<UserProfileResource>())
     install(McpPromptModule.create<CodeReviewPrompt>())
   }
 }
@@ -579,6 +580,47 @@ class WeatherTool @Inject constructor(
 }
 ```
 
+#### Accessing Request Meta (RequestMeta)
+
+When a tool needs access to the inbound `CallToolRequest._meta` field — for example to read a `progressToken` so it can stream progress notifications back, or to inspect related-task metadata — extend one of the meta-aware bridge classes instead of `McpTool` / `StructuredMcpTool`:
+
+- `MetaAwareMcpTool<I>` — for tools that return `ToolResult` (text/media/error content).
+- `MetaAwareStructuredMcpTool<I, O>` — for tools that return structured `O` typed output.
+
+Authors override the meta-aware `handle(input, meta)` overload; the bridge classes seal the input-only `handle(input)` overload to delegate with `meta = null`. The framework's dispatcher routes to the meta-aware overload automatically — no annotation or registration change is needed beyond picking the right base class.
+
+```kotlin
+@Serializable
+data class LongRunningInput(
+  @Description("How many steps the operation should run for")
+  val steps: Int
+)
+
+@ExperimentalMiskApi
+@Singleton
+class LongRunningTool @Inject constructor(
+  private val notifier: ProgressNotifier,
+) : MetaAwareMcpTool<LongRunningInput>() {
+  override val name = "long_running"
+  override val description = "Performs a long-running operation with progress reporting"
+
+  override suspend fun handle(input: LongRunningInput, meta: RequestMeta?): ToolResult {
+    val token = meta?.progressToken
+    repeat(input.steps) { step ->
+      // ... do work ...
+      if (token != null) {
+        notifier.notify(token, progress = step + 1, total = input.steps)
+      }
+    }
+    return ToolResult(TextContent("Completed ${input.steps} steps"))
+  }
+}
+```
+
+Use `MetaAwareStructuredMcpTool<I, O>` the same way; build the typed result with the inherited `ToolResult(result: O, ...)` factories. The interface-level return type is `McpTool.ToolResult`, not `StructuredToolResult<O>` — the typed `O` is preserved at value construction, not at signature.
+
+Tools that don't need meta should keep extending `McpTool` / `StructuredMcpTool` — meta-awareness is strictly opt-in.
+
 Register tools:
 
 ```kotlin
@@ -695,6 +737,46 @@ Register the resource:
 
 ```kotlin
 install(McpResourceModule.create<DatabaseSchemaResource>())
+```
+
+### Resource Templates
+
+Resource templates provide parameterized resources using [RFC 6570](https://datatracker.ietf.org/doc/html/rfc6570) URI templates. They allow clients to read dynamic resources by extracting variables from the URI. Implement the `McpResourceTemplate` interface:
+
+```kotlin
+@Singleton
+class UserProfileResource @Inject constructor(
+  private val userService: UserService
+) : McpResourceTemplate {
+  override val uriTemplate = "users://{userId}/profile"
+  override val name = "User Profile"
+  override val description = "Profile information for a specific user"
+  override val mimeType = "application/json"
+
+  override suspend fun handler(
+    request: ReadResourceRequest,
+    variables: Map<String, String>,
+  ): ReadResourceResult {
+    val userId = variables["userId"] ?: error("Missing userId")
+    val user = userService.getUser(userId)
+
+    return ReadResourceResult(
+      contents = listOf(
+        TextResourceContents(
+          text = Json.encodeToString(user),
+          uri = request.uri,
+          mimeType = mimeType,
+        )
+      )
+    )
+  }
+}
+```
+
+Register the resource template:
+
+```kotlin
+install(McpResourceTemplateModule.create<UserProfileResource>())
 ```
 
 ### Prompts

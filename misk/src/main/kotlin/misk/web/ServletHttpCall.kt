@@ -1,7 +1,7 @@
 package misk.web
 
-import javax.servlet.http.Cookie
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.Cookie
+import jakarta.servlet.http.HttpServletRequest
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import misk.web.jetty.headers

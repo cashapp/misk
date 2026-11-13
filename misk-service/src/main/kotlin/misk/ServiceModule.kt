@@ -135,7 +135,7 @@ constructor(
               DependencyEdge(dependent = key, dependsOn = dependsOnKey),
               null,
             ) {
-              OptionalDependencyEdge(key, switchKey, switchType, it)
+              OptionalDependencyEdge(key, switchKey, switchType, it, dependsOnKey)
             }
           )
           .asSingleton()
@@ -156,7 +156,7 @@ constructor(
               EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey),
               null,
             ) {
-              OptionalEnhancementEdge(key, switchKey, switchType, it)
+              OptionalEnhancementEdge(key, switchKey, switchType, it, enhancedByKey)
             }
           )
           .asSingleton()
@@ -245,6 +245,11 @@ internal data class OptionalDependencyEdge(
   val switchKey: String,
   val switchType: KClass<out Switch>,
   val edge: DependencyEdge?,
+  /**
+   * [dependencyKey] is added here to disambiguate when the switch is off.
+   * without it, guice tries to multibind the same instance for each dependency, when the off impl [edge] is null.
+   */
+  val dependencyKey: Key<out Service>
 )
 
 internal data class OptionalEnhancementEdge(
@@ -252,4 +257,9 @@ internal data class OptionalEnhancementEdge(
   val switchKey: String,
   val switchType: KClass<out Switch>,
   val edge: EnhancementEdge?,
+  /**
+   * [dependencyKey] is added here to disambiguate when the switch is off.
+   * without it, guice tries to multibind the same instance for each dependency, when the off impl [edge] is null.
+   */
+  val dependencyKey: Key<out Service>
 )

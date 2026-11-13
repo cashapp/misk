@@ -18,6 +18,11 @@ import misk.web.dashboard.DashboardTab
 import misk.web.v2.DashboardIndexAction.Companion.titlecase
 import wisp.deployment.Deployment
 
+/** Configuration for dashboard page layout behavior. */
+data class DashboardLayoutConfig @JvmOverloads constructor(
+  val enableTurbo: Boolean = true,
+)
+
 /**
  * Builds dashboard UI for index homepage.
  *
@@ -33,6 +38,7 @@ constructor(
   private val callerProvider: ActionScoped<MiskCaller?>,
   private val deployment: Deployment,
   private val clientHttpCall: ActionScoped<HttpCall>,
+  private val layoutConfig: DashboardLayoutConfig,
 ) {
   private var newBuilder = false
   private var headBlock: TagConsumer<*>.() -> Unit = {}
@@ -45,6 +51,7 @@ constructor(
   private val dashboardHomeUrl by lazy { allHomeUrls.firstOrNull { path.startsWith(it.url) } }
   private val homeUrl by lazy { dashboardHomeUrl?.url ?: "/" }
   private var hotReload = true
+  private var enableTurbo: Boolean? = null
 
   private fun setNewBuilder() = apply { newBuilder = true }
 
@@ -57,6 +64,7 @@ constructor(
         callerProvider = callerProvider,
         deployment = deployment,
         clientHttpCall = clientHttpCall,
+        layoutConfig = layoutConfig,
       )
       .setNewBuilder()
 
@@ -66,6 +74,8 @@ constructor(
     }
 
   fun hotReload(hotReload: Boolean) = apply { this.hotReload = hotReload }
+
+  fun enableTurbo(enableTurbo: Boolean) = apply { this.enableTurbo = enableTurbo }
 
   fun headBlock(block: TagConsumer<*>.() -> Unit) = apply { this.headBlock = block }
 
@@ -103,6 +113,7 @@ constructor(
         playCdn = deployment.isLocalDevelopment,
         headBlock = headBlock,
         hotReload = hotReload,
+        enableTurbo = enableTurbo ?: layoutConfig.enableTurbo,
       ) {
         Navbar(appName = appName, deployment = deployment, homeHref = homeUrl, menuSections = menuSections) {
           // TODO make this a src so it loads page changes with turbo

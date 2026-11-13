@@ -27,6 +27,7 @@ import kotlin.math.min
 import misk.annotation.ExperimentalMiskApi
 import misk.feature.Feature
 import misk.feature.FeatureFlags
+import misk.inject.AsyncSwitch
 import misk.jobqueue.BatchJobHandler
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobHandler
@@ -56,10 +57,12 @@ internal constructor(
   private val tracer: Tracer,
   private val clock: Clock,
   awsSqsJobQueueConfig: AwsSqsJobQueueConfig,
+  private val asyncSwitch: AsyncSwitch,
 ) : JobConsumer {
   private val receiverPolicy = awsSqsJobQueueConfig.aws_sqs_job_receiver_policy
 
   private val subscriptions = ConcurrentHashMap<QueueName, QueueReceiver>()
+  private var wasDisabled = false
 
   override fun subscribe(queueName: QueueName, handler: JobHandler) {
     subscribe(queueName, IndividualQueueReceiver(queueName, handler))
@@ -74,10 +77,19 @@ internal constructor(
 
     log.info { "subscribing to queue ${queueName.value}" }
     taskQueue.scheduleWithBackoff(Duration.ZERO) {
+      val enabled = asyncSwitch.isEnabled("sqs")
+      if (!enabled && !wasDisabled) {
+        log.info { "Async SQS tasks disabled. Consumer paused." }
+        wasDisabled = true
+      }
+      if (enabled && wasDisabled) {
+        log.info { "Async SQS tasks re-enabled. Consumer resuming." }
+        wasDisabled = false
+      }
 
       // Don't call handlers until all services are ready, otherwise handlers will crash because
       // the services they might need (databases, etc.) won't be ready.
-      if (serviceManagerProvider.get().isHealthy) {
+      if (serviceManagerProvider.get().isHealthy && enabled) {
         receiver.run()
       } else {
         Status.NO_WORK
@@ -243,7 +255,7 @@ internal constructor(
                 metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queue.queueName, queue.queueName)
                 Status.OK
               } catch (th: Throwable) {
-                val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
+                val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags(th)
 
                 log.error(th, *mdcTags.toTypedArray()) { "error handling job from ${queue.queueName}" }
 
@@ -306,7 +318,7 @@ internal constructor(
           metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queue.queueName, queue.queueName)
           Status.OK
         } catch (th: Throwable) {
-          val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags()
+          val mdcTags = SmartTagsThreadLocalHandler.popThreadLocalSmartTags(th)
 
           log.error(th, *mdcTags.toTypedArray()) { "error handling job from ${queue.queueName}" }
 

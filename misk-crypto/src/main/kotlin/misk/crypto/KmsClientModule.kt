@@ -9,13 +9,14 @@ import jakarta.inject.Singleton
 import misk.inject.KAbstractModule
 
 /**
- * AWS specific KMS client module. Currently uses a file path to a JSON credentials file to initialize the client. If no
- * file is provided, tries to initialize the client using the default credentials path as specified in
- * [AwsKmsClient.withDefaultCredentials]
+ * AWS specific KMS client module. Currently uses a file path to a credentials file to initialize the client. If no file
+ * is provided, tries to initialize the client using the default credentials path as specified in
+ * [AwsKmsClient.withDefaultCredentials].
+ *
+ * As of tink-awskms 2.x (built on the AWS SDK v2), the credentials file uses the standard AWS profile format
+ * (`~/.aws/credentials` style ini file) rather than the legacy tink `.cred` JSON format.
  */
 class AwsKmsClientModule @JvmOverloads constructor(private val credentialsPath: String? = null) : KAbstractModule() {
-  // TODO: Allow initializing an AWS KMS client with a credentials provider
-  // once tink supports it: https://github.com/google/tink/pull/184
   @Provides
   @Singleton
   fun getKmsClient(): KmsClient =
@@ -35,8 +36,8 @@ class GcpKmsClientModule @JvmOverloads constructor(private val credentialsPath: 
 }
 
 /**
- * This annotation is used to specify which [com.amazonaws.services.kms.AWSKMS] instance should be used by misk to
- * construct a [KmsClient] and communicate with the KMS service
+ * This annotation is used to specify which [software.amazon.awssdk.services.kms.KmsClient] instance should be used by
+ * misk to construct a [KmsClient] and communicate with the KMS service
  */
 @Qualifier
 @Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)

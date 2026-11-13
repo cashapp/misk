@@ -5,6 +5,7 @@ import java.sql.DriverManager
 import java.sql.SQLRecoverableException
 import java.sql.SQLTransientException
 import java.sql.Statement
+import misk.vitess.testing.TransactionMode
 import misk.vitess.testing.VitessTable
 import misk.vitess.testing.VitessTableType
 import misk.vitess.testing.VitessTestDbException
@@ -15,6 +16,7 @@ internal class VitessQueryExecutor(
   val vtgatePort: Int,
   val vtgateUser: String,
   val vtgateUserPassword: String,
+  val transactionMode: TransactionMode = TransactionMode.MULTI,
 ) {
   init {
     try {
@@ -76,9 +78,12 @@ internal class VitessQueryExecutor(
   fun executeTransaction(query: String, target: String = "@primary"): Boolean {
     val connection = getVtgateConnection()
     return connection.use { conn ->
-      conn.autoCommit = false
+      // Use explicit BEGIN instead of SET autocommit=0. Since vitessio/vitess#19277 (v22.0.4+),
+      // vtgate defers implicit transaction start for autocommit=0, so vttablet doesn't apply
+      // --queryserver-config-transaction-timeout to those queries.
+      execute(conn, "BEGIN;", target)
       val result = execute(conn, query, target)
-      conn.commit()
+      execute(conn, "COMMIT;", target)
       result
     }
   }
@@ -90,7 +95,20 @@ internal class VitessQueryExecutor(
 
   fun truncate() {
     val connection = getVtgateConnection()
-    connection.use { conn -> truncate(conn) }
+    connection.use { conn ->
+      if (transactionMode == TransactionMode.SINGLE) {
+        // Truncate deletes across all shards, which SINGLE mode blocks. Temporarily override to
+        // MULTI, then reset to UNSPECIFIED (vtgate default) after.
+        conn.createStatement().execute("SET transaction_mode = 'multi'")
+        try {
+          truncate(conn)
+        } finally {
+          conn.createStatement().execute("SET transaction_mode = 'unspecified'")
+        }
+      } else {
+        truncate(conn)
+      }
+    }
   }
 
   fun truncate(connection: Connection) {

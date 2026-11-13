@@ -36,6 +36,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

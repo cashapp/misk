@@ -12,6 +12,14 @@ constructor(
 
   /** Set of capabilities given to a human user, typically provided by the SSO infrastructure */
   val capabilities: Set<String> = setOf(),
+
+  /**
+   * When true, this caller is authorized for all endpoints regardless of required capabilities, services, or users.
+   *
+   * This is intended for use in controlled environments (e.g., staging playpens) where a trusted caller needs
+   * blanket access for testing. It should never be set in production.
+   */
+  val allowAll: Boolean = false,
 ) {
   init {
     require(service != null || user != null) { "one of service or user is required" }

@@ -70,6 +70,28 @@ class HibernateDatabaseQueryDynamicActionTest {
     }
   }
 
+  /**
+   * Regression: a caller authorized for `DbMovieDynamicQuery` must NOT be able to read a different
+   * registered entity (`DbActor`) by switching `entityClass`. Authorization is checked against
+   * `queryClass`, so the request passes the capability gate, but the binding check on the resolved
+   * entity must reject execution. Without that binding check, one allowed query class becomes a
+   * read primitive over every registered Hibernate entity in the service.
+   */
+  @Test
+  fun `entityClass not matching authorized queryClass throws unauthorized`() {
+    assertFailsWith<UnauthorizedException> {
+      realActionRequestExecuter.executeRequest(
+        HibernateDatabaseQueryDynamicAction.Request(
+          entityClass = DbActor::class.simpleName!!,
+          queryClass = "DbMovieDynamicQuery",
+          query = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(),
+        ),
+        user = "joey",
+        capabilities = AUTHORIZED_CAPABILITIES,
+      )
+    }
+  }
+
   @Test
   fun `default request`() {
     val results =

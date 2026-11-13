@@ -173,7 +173,7 @@ Wire.
 class HelloGrpcAction @Inject internal constructor()
   : GreeterServiceHelloBlockingServer, WebAction {
 
-  @Unauthorized
+  @Unauthenticated
   override fun Hello(request: HelloRequest): HelloResponse {
     return HelloResponse("message")
   }
@@ -218,37 +218,80 @@ regular function. Your implementing class will then look like this:
 class HelloGrpcAction @Inject internal constructor()
   : GreeterServiceHelloBlockingServer, WebAction {
 
-  @Unauthorized
+  @Unauthenticated
   override suspend fun Hello(request: HelloRequest): HelloResponse {
     return HelloResponse("message")
   }
 }
 ```
 
-Creating a gRPC action automatically creates a JSON endpoint with all of the same annotations in the 
-path defined by the `...BlockingServer`, typically `/<package>.<service name>/<rpc name>`.
+### Automatic JSON endpoint
 
-You can also create a second class that extends WebAction to customize this further. Read more about 
-HTTP actions in [Web Actions](#web-actions). If you're building both a gRPC and a HTTP action, a 
-common pattern is to have them both use a common dependency:
+Misk automatically creates a JSON variant for every protobuf-based action. This applies to both
+gRPC actions (`@com.squareup.wire.WireRpc` or `@misk.web.Grpc`) and POST Protobuf actions (`@Post` with
+`@RequestContentType(MediaTypes.APPLICATION_PROTOBUF)`). The JSON variant has the same path and
+annotations but accepts `Content-Type: application/json` via plain HTTP `POST` — no gRPC framing
+or HTTP/2 required. Request and response bodies are JSON-serialized versions of the protobuf
+messages. This is useful for debugging, browser-based clients, and environments where gRPC or HTTP/2 is not
+available.
+
+### Unframed requests
+
+Misk web supports serving unary RPC methods (no streaming request or response) without
+[gRPC](https://grpc.io/) wire format framing. This can be useful for gradually migrating an existing
+HTTP POST based API to gRPC. To accept plain HTTP `POST` with `application/x-protobuf` (raw protobuf
+bytes without gRPC framing), add `@EnableUnframedRequests` to your action's method.
+
+```kotlin
+@Singleton
+class HelloGrpcAction @Inject constructor() : GreeterServiceHelloBlockingServer, WebAction {
+
+  @Unauthenticated
+  @EnableUnframedRequests
+  override fun Hello(request: HelloRequest): HelloResponse {
+    return HelloResponse("message")
+  }
+}
+```
+
+With `@EnableUnframedRequests` and the [Automatic JSON endpoint](#automatic-json-endpoint), a single
+action accepts all three protocols:
+
+| Protocol      | Content-Type             | Notes                                |
+|---------------|--------------------------|--------------------------------------|
+| gRPC          | `application/grpc`       | Standard gRPC with HTTP/2 framing    |
+| JSON POST     | `application/json`       | Automatic, always enabled            |
+| Protobuf POST | `application/x-protobuf` | Opt-in via `@EnableUnframedRequests` |
+
+This is particularly useful for services migrating from [Armeria](https://armeria.dev/docs/server-grpc/#unframed-requests),
+where unframed protobuf POST is supported out of the box. It eliminates the need to define a
+separate `WebAction` class and path for protobuf POST support.
+
+`@EnableUnframedRequests` only applies to unary gRPC actions (single request parameter). Streaming
+actions require gRPC framing and are not supported.
+
+### Custom HTTP endpoints alongside gRPC
+
+You can also create a separate `WebAction` class for a custom HTTP endpoint alongside a gRPC action.
+A common pattern is to have them share a dependency:
 
 ```kotlin
 @Singleton
 class HelloGrpcAction @Inject constructor(val greeter: Greeter)
   : GreeterServiceHelloBlockingServer, WebAction {
-  @Unauthorized override fun hello() = HelloResponse(greeter.greet())
+  @Unauthenticated override fun Hello(request: HelloRequest) = HelloResponse(greeter.greet())
 }
 
 @Singleton
 class HelloWebAction @Inject constructor(val greeter: Greeter) : WebAction {
-  @Unauthorized
+  @Unauthenticated
   @Get("/hello")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun hello() = HelloResponse(greeter.greet())
 }
 
 @Singleton
-class Greeter @Inject constructor()  {
+class Greeter @Inject constructor() {
   fun greet() = "Hello world"
 }
 ```

@@ -1,5 +1,7 @@
 package misk.clustering
 
+import misk.client.PeerIdentifier
+
 /** A [ClusterWatch] is a callback function triggered when cluster membership changes */
 typealias ClusterWatch = (Cluster.Changes) -> Unit
 
@@ -8,7 +10,7 @@ typealias ClusterWatch = (Cluster.Changes) -> Unit
  * of its peers
  */
 interface Cluster {
-  data class Member(val name: String, val ipAddress: String)
+  data class Member(val name: String, override final val ipAddress: String) : PeerIdentifier
 
   data class Changes
   @JvmOverloads

@@ -12,7 +12,7 @@ import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.jobqueue.QueueName
-import misk.jobqueue.sqs.parentQueue
+import misk.aws2.sqs.jobqueue.parentQueue
 import misk.jobqueue.v2.JobEnqueuer
 import misk.moshi.adapter
 import misk.tokens.TokenGenerator

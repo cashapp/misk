@@ -37,22 +37,20 @@ internal class HibernateDatabaseQueryWebActionModule : KAbstractModule() {
       }
     }
 
-    /** Find the corresponding DatabaseQueryMetadata for a request */
-    fun findDatabaseQueryMetadata(
-      databaseQueryMetadata: List<DatabaseQueryMetadata>,
+    /** Find the server-side registration (metadata + authoritative KClasses) for a request's query class */
+    fun findDatabaseQueryRegistration(
+      registrations: List<HibernateDatabaseQueryRegistration>,
       queryClass: String,
-    ): DatabaseQueryMetadata =
-      databaseQueryMetadata.find { it.queryClass == queryClass } ?: throw BadRequestException("Invalid Query Class")
+    ): HibernateDatabaseQueryRegistration =
+      registrations.find { it.metadata.queryClass == queryClass } ?: throw BadRequestException("Invalid Query Class")
 
-    /** Common to both Dynamic and Static actions, get Transacter for a given request's DbEntity */
-    fun getTransacterForDatabaseQueryAction(injector: Injector, metadata: DatabaseQueryMetadata): Transacter =
+    /** Common to both Dynamic and Static actions, get the Transacter that owns the authorized [entityClass]. */
+    fun getTransacterForDatabaseQueryAction(injector: Injector, entityClass: KClass<out DbEntity<*>>): Transacter =
       injector
         .findBindingsByType(Transacter::class.typeLiteral())
-        .find { transacterBinding ->
-          transacterBinding.provider.get().entities().map { it.simpleName!! }.contains(metadata.entityClass)
-        }
+        .find { transacterBinding -> transacterBinding.provider.get().entities().contains(entityClass) }
         ?.provider
-        ?.get() ?: throw BadRequestException("[dbEntity=${metadata.entityClass}] has no associated Transacter")
+        ?.get() ?: throw BadRequestException("[dbEntity=${entityClass.simpleName}] has no associated Transacter")
 
     /** Validate provided Select paths or include all (ignoring some that we can't query on like rootId) */
     fun validateSelectPathsOrDefault(dbEntity: KClass<out DbEntity<*>>, paths: List<String>?): List<String> {

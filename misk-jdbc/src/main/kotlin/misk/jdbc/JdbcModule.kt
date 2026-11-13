@@ -1,6 +1,7 @@
 package misk.jdbc
 
 import com.google.inject.Provider
+import com.zaxxer.hikari.metrics.MetricsTrackerFactory
 import io.opentracing.Tracer
 import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Inject
@@ -16,6 +17,7 @@ import misk.inject.keyOf
 import misk.inject.setOfType
 import misk.inject.toKey
 import misk.resources.ResourceLoader
+import misk.spirit.Spirit
 import wisp.deployment.Deployment
 
 /**
@@ -40,6 +42,8 @@ constructor(
   private val installSchemaMigrator: Boolean = true,
 ) : KAbstractModule() {
   val config = config.withDefaults()
+  private var metricsTrackerFactory: MetricsTrackerFactory? = null
+
   val readerConfig = readerConfig?.withDefaults()
 
   constructor(
@@ -54,6 +58,19 @@ constructor(
     databasePool: DatabasePool = RealDatabasePool,
     installSchemaMigrator: Boolean = true,
   ) : this(qualifier, config, null, null, databasePool, true, installSchemaMigrator)
+
+  constructor(
+    qualifier: KClass<out Annotation>,
+    config: DataSourceConfig,
+    readerQualifier: KClass<out Annotation>?,
+    readerConfig: DataSourceConfig?,
+    databasePool: DatabasePool,
+    installHealthCheck: Boolean,
+    installSchemaMigrator: Boolean,
+    metricsTrackerFactory: MetricsTrackerFactory?,
+  ) : this(qualifier, config, readerQualifier, readerConfig, databasePool, installHealthCheck, installSchemaMigrator) {
+    this.metricsTrackerFactory = metricsTrackerFactory
+  }
 
   override fun configure() {
     if (readerQualifier != null) {
@@ -87,19 +104,6 @@ constructor(
       val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
       val schemaMigratorProvider = getProvider(schemaMigratorKey)
       val connectorProvider = getProvider(keyOf<DataSourceConnector>(qualifier))
-      val skeemaWrapperKey = SkeemaWrapper::class.toKey(qualifier)
-      val skeemaWrapperProvider = getProvider(skeemaWrapperKey)
-
-      bind(skeemaWrapperKey)
-        .toProvider(
-          object : Provider<SkeemaWrapper> {
-            @Inject lateinit var resourceLoader: ResourceLoader
-
-            override fun get(): SkeemaWrapper =
-              SkeemaWrapper(qualifier = qualifier, resourceLoader = resourceLoader, dataSourceConfig = config)
-          }
-        )
-        .asSingleton()
 
       val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
       bind(schemaMigratorKey)
@@ -122,7 +126,7 @@ constructor(
                     resourceLoader = resourceLoader,
                     dataSourceService = dataSourceServiceProvider.get(),
                     connector = connectorProvider.get(),
-                    skeemaWrapper = skeemaWrapperProvider.get(),
+                    spirit = Spirit(),
                   )
                 MigrationsFormat.EXTERNALLY_MANAGED ->
                   throw IllegalStateException("SchemaMigrator should not be created for externally managed migrations")
@@ -193,6 +197,7 @@ constructor(
               dataSourceDecorators = dataSourceDecoratorsProvider.get(),
               databasePool = databasePool,
               collectorRegistry = registry,
+              metricsTrackerFactory = metricsTrackerFactory,
             )
           }
         }
@@ -206,7 +211,7 @@ constructor(
         .let { if (installHealthCheck) it.dependsOn<PingDatabaseService>(qualifier) else it }
         .enhancedBy<ReadyService>()
     )
-    bind(keyOf<Transacter>(qualifier)).toProvider { RealTransacter(dataSourceServiceProvider.get()) }
+    bind(keyOf<Transacter>(qualifier)).toProvider { RealTransacter(dataSourceServiceProvider.get(), config) }
 
     if (config.type == DataSourceType.VITESS_MYSQL) {
       val spanInjectorDecoratorKey = SpanInjector::class.toKey(qualifier)

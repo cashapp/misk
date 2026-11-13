@@ -14,6 +14,12 @@ import misk.jdbc.JdbcTestingModule
  *
  *     install(HibernateModule(MyDatabase::class, dataSourceConfig, SHARED_TEST_DATABASE_POOL))
  *
+ * If a test configures writer and reader data sources against the same local database, wrap the shared pool so both
+ * data sources use the same leased database:
+ *
+ *     val databasePool = SharedLeaseDatabasePool(SHARED_TEST_DATABASE_POOL)
+ *     install(HibernateModule(MyDatabase::class, MyDatabaseReader::class, cluster, databasePool))
+ *
  * See [misk.jdbc.SHARED_TEST_DATABASE_POOL].
  */
 @Deprecated("Use JdbcTestingModule instead")

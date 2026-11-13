@@ -3,7 +3,6 @@ package misk.aws2.sqs.jobqueue
 import kotlin.reflect.KClass
 import misk.ReadyService
 import misk.ServiceModule
-import misk.inject.AsyncSwitch
 import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
 import misk.jobqueue.QueueName
@@ -16,7 +15,7 @@ private constructor(private val queueName: QueueName, private val handler: KClas
     newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
 
     install(DefaultAsyncSwitchModule())
-    install(ServiceModule<SubscriptionService>().conditionalOn<AsyncSwitch>("sqs").dependsOn<ReadyService>())
+    install(ServiceModule<SubscriptionService>().dependsOn<ReadyService>())
   }
 
   companion object {

@@ -11,9 +11,14 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
+import wisp.lease.AcquireOptions
 import wisp.lease.LeaseManager
+import wisp.lease.UnsupportedWaitBehavior
+import wisp.lease.WaitMode
+import wisp.lease.acquireOrNull
 
 @MiskTest(startService = true)
 class SqlLeaseManagerTest {
@@ -147,5 +152,40 @@ class SqlLeaseManagerTest {
     assertThat(defaultLease.checkHeld()).isTrue()
     assertThat(longLease.isHeld()).isTrue()
     assertThat(longLease.checkHeld()).isTrue()
+  }
+
+  @Test
+  fun acquireOrNullWithOptionsAcquiresSqlLease() {
+    val lease = leaseManager.acquireOrNull("acquire-or-null-with-options", AcquireOptions())
+
+    assertThat(lease).isNotNull()
+    lease!!.use { assertThat(it.isHeld()).isTrue() }
+  }
+
+  @Test
+  fun acquireOrNullWithUnsupportedWaitReleasesSqlLeaseBeforeThrowing() {
+    assertThatThrownBy {
+        leaseManager.acquireOrNull("unsupported-wait-releases", AcquireOptions(wait = WaitMode.WaitForLeaseDuration))
+      }
+      .isInstanceOf(UnsupportedOperationException::class.java)
+
+    val reacquired = leaseManager.requestLease("unsupported-wait-releases")
+    assertThat(reacquired.isHeld()).isTrue()
+    reacquired.release()
+  }
+
+  @Test
+  fun acquireOrNullWithFallbackToNonBlockingAcquiresSqlLease() {
+    val lease =
+      leaseManager.acquireOrNull(
+        "fallback-to-non-blocking",
+        AcquireOptions(
+          wait = WaitMode.WaitForLeaseDuration,
+          unsupportedWaitBehavior = UnsupportedWaitBehavior.FallbackToNonBlocking,
+        ),
+      )
+
+    assertThat(lease).isNotNull()
+    lease!!.use { assertThat(it.isHeld()).isTrue() }
   }
 }

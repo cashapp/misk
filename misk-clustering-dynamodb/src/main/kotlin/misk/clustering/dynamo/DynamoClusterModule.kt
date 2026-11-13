@@ -6,10 +6,10 @@ import jakarta.inject.Singleton
 import java.util.UUID
 import misk.ReadyService
 import misk.ServiceModule
+import misk.aws2.dynamodb.DynamoDbService
 import misk.clustering.Cluster
 import misk.clustering.ClusterService
 import misk.clustering.DefaultCluster
-import misk.inject.AsyncSwitch
 import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
 import misk.tasks.RepeatedTaskQueue
@@ -25,13 +25,14 @@ class DynamoClusterModule @JvmOverloads constructor(private val config: DynamoCl
     bind<ClusterService>().toInstance(defaultCluster)
     install(ServiceModule<ClusterService>())
     install(DefaultAsyncSwitchModule())
+    install(ServiceModule<RepeatedTaskQueue>(ForDynamoDbClusterWatching::class))
     install(
       ServiceModule<DynamoClusterWatcherTask>()
-        .conditionalOn<AsyncSwitch>("clustering")
+        .dependsOn<RepeatedTaskQueue>(ForDynamoDbClusterWatching::class)
+        .dependsOn<DynamoDbService>()
         .dependsOn<ClusterService>()
         .enhancedBy<ReadyService>()
     )
-    install(ServiceModule<RepeatedTaskQueue>(ForDynamoDbClusterWatching::class))
   }
 
   @Provides

@@ -1,6 +1,6 @@
 package misk.web.extractors
 
-import javax.servlet.http.Cookie
+import jakarta.servlet.http.Cookie
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType

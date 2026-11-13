@@ -1,46 +1,11 @@
-public final class misk/cloud/aws/AwsAccountId {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lmisk/cloud/aws/AwsAccountId;
-	public static synthetic fun copy$default (Lmisk/cloud/aws/AwsAccountId;Ljava/lang/String;ILjava/lang/Object;)Lmisk/cloud/aws/AwsAccountId;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getValue ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/cloud/aws/AwsEnvironment {
-	public static final field INSTANCE Lmisk/cloud/aws/AwsEnvironment;
-	public final fun awsAccountId (Lwisp/deployment/EnvironmentVariableLoader;Ljava/lang/String;)Lmisk/cloud/aws/AwsAccountId;
-	public static synthetic fun awsAccountId$default (Lmisk/cloud/aws/AwsEnvironment;Lwisp/deployment/EnvironmentVariableLoader;Ljava/lang/String;ILjava/lang/Object;)Lmisk/cloud/aws/AwsAccountId;
-	public final fun awsRegion (Lwisp/deployment/EnvironmentVariableLoader;Ljava/util/List;Ljava/lang/String;)Lmisk/cloud/aws/AwsRegion;
-	public static synthetic fun awsRegion$default (Lmisk/cloud/aws/AwsEnvironment;Lwisp/deployment/EnvironmentVariableLoader;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lmisk/cloud/aws/AwsRegion;
-}
-
 public final class misk/cloud/aws/AwsEnvironmentModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public final fun awsAccountId (Lmisk/environment/EnvVarLoader;)Lmisk/cloud/aws/AwsAccountId;
 	public final fun awsRegion (Lmisk/environment/EnvVarLoader;)Lmisk/cloud/aws/AwsRegion;
 }
 
-public final class misk/cloud/aws/AwsRegion {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lmisk/cloud/aws/AwsRegion;
-	public static synthetic fun copy$default (Lmisk/cloud/aws/AwsRegion;Ljava/lang/String;ILjava/lang/Object;)Lmisk/cloud/aws/AwsRegion;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class misk/cloud/aws/FakeAwsEnvironmentModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
-}
-
-public final class misk/cloud/aws/TypesKt {
-	public static final fun toMiskAwsAccountId (Lwisp/aws/environment/AwsAccountId;)Lmisk/cloud/aws/AwsAccountId;
-	public static final fun toMiskAwsRegion (Lwisp/aws/environment/AwsRegion;)Lmisk/cloud/aws/AwsRegion;
 }
 
 public final class misk/jobqueue/sqs/AwsSqsBatchJobHandlerModule : misk/inject/KAbstractModule {

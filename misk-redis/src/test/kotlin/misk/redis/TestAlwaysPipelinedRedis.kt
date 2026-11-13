@@ -149,6 +149,10 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(private val unifiedJ
     error("multi is not supported in TestAlwaysPipelinedRedis")
   }
 
+  override fun transaction(block: DeferredRedis.() -> Unit) {
+    error("transaction is not supported in TestAlwaysPipelinedRedis")
+  }
+
   @Deprecated("Use pipelining instead.")
   override fun pipelined(): Pipeline {
     error("pipelined is not supported in TestAlwaysPipelinedRedis")
@@ -208,9 +212,16 @@ internal class TestAlwaysPipelinedRedis @Inject constructor(private val unifiedJ
     limit: Redis.ZRangeLimit?,
   ): List<Pair<ByteString?, Double>> = runPipeline { zrangeWithScores(key, type, start, stop, reverse, limit) }
 
+  override fun zrem(key: String, vararg members: String): Long = runPipeline { zrem(key, *members) }
+
   override fun zremRangeByRank(key: String, start: Redis.ZRangeRankMarker, stop: Redis.ZRangeRankMarker): Long =
     runPipeline {
       zremRangeByRank(key, start, stop)
+    }
+
+  override fun zremRangeByScore(key: String, start: Redis.ZRangeScoreMarker, stop: Redis.ZRangeScoreMarker): Long =
+    runPipeline {
+      zremRangeByScore(key, start, stop)
     }
 
   override fun zcard(key: String): Long = runPipeline { zcard(key) }

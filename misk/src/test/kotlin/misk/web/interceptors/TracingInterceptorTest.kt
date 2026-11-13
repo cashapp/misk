@@ -75,6 +75,29 @@ class TracingInterceptorTest {
   }
 
   @Test
+  fun doesNotSetSpanKindWhenDisabled() {
+    val tracingInterceptorFactory =
+      TracingInterceptor.Factory().apply {
+        tracer = this@TracingInterceptorTest.tracer
+        webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(tracing_set_span_kind = false)
+      }
+    val tracingInterceptor = tracingInterceptorFactory.create(TracingTestAction::call.asAction(DispatchMechanism.GET))!!
+    val httpCall = FakeHttpCall(url = "http://foo.bar".toHttpUrl())
+    val chain =
+      RealNetworkChain(
+        TracingTestAction::call.asAction(DispatchMechanism.GET),
+        tracingTestAction,
+        httpCall,
+        listOf(tracingInterceptor, TerminalInterceptor(200)),
+      )
+
+    chain.proceed(chain.httpCall)
+
+    val span = tracer.take("http.action")
+    assertThat(span.tags()[Tags.SPAN_KIND.key]).isNull()
+  }
+
+  @Test
   fun looksForParentContext() {
     val tracingInterceptor = tracingInterceptorFactory.create(TracingTestAction::call.asAction(DispatchMechanism.GET))!!
     val httpCall =

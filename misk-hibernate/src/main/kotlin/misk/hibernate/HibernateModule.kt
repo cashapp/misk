@@ -2,6 +2,7 @@ package misk.hibernate
 
 import com.google.inject.Injector
 import com.google.inject.Provider
+import com.zaxxer.hikari.metrics.MetricsTrackerFactory
 import jakarta.inject.Inject
 import java.time.Clock
 import javax.persistence.OptimisticLockException
@@ -24,6 +25,7 @@ import misk.jdbc.DataSourceService
 import misk.jdbc.DataSourceType
 import misk.jdbc.DatabasePool
 import misk.jdbc.JdbcModule
+import misk.jdbc.MigrationsFormat
 import misk.jdbc.RealDatabasePool
 import misk.jdbc.SchemaMigratorService
 import misk.web.exceptions.ExceptionMapperModule
@@ -65,6 +67,8 @@ constructor(
   }
 
   val config = config.withDefaults()
+  private var metricsTrackerFactory: MetricsTrackerFactory? = null
+
   val readerConfig = readerConfig?.withDefaults()
 
   constructor(
@@ -133,6 +137,10 @@ constructor(
     jdbcModuleAlreadySetup = jdbcModuleAlreadySetup,
   )
 
+  fun withMetricsTrackerFactory(metricsTrackerFactory: MetricsTrackerFactory): HibernateModule = apply {
+    this.metricsTrackerFactory = metricsTrackerFactory
+  }
+
   override fun configure() {
     if (readerQualifier != null) {
       check(readerConfig != null) { "Reader not configured for datasource $readerQualifier" }
@@ -148,6 +156,7 @@ constructor(
           databasePool = databasePool,
           installHealthCheck = installHealthChecks,
           installSchemaMigrator = installSchemaMigrator,
+          metricsTrackerFactory = metricsTrackerFactory,
         )
       )
     }
@@ -167,7 +176,8 @@ constructor(
     val transacterKey = Transacter::class.toKey(qualifier)
 
     // Only install SchemaMigratorService module if schema migrator is enabled
-    if (installSchemaMigrator) {
+    // and migrations are not externally managed.
+    if (installSchemaMigrator && config.migrations_format != MigrationsFormat.EXTERNALLY_MANAGED) {
       install(
         ServiceModule<SchemaMigratorService>(qualifier)
           .dependsOn<DataSourceService>(qualifier)
@@ -291,7 +301,8 @@ constructor(
         ServiceModule<TransacterService>(qualifier).dependsOn<DataSourceService>(qualifier).enhancedBy<ReadyService>()
 
       // Only enhance with SchemaMigratorService if it's installed
-      if (installSchemaMigrator) {
+      // and migrations are not externally managed.
+      if (installSchemaMigrator && config.migrations_format != MigrationsFormat.EXTERNALLY_MANAGED) {
         install(transacterServiceModule.enhancedBy<SchemaMigratorService>(qualifier))
       } else {
         install(transacterServiceModule)

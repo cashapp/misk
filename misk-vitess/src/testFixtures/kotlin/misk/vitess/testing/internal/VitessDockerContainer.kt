@@ -31,13 +31,13 @@ import misk.vitess.testing.ApplySchemaResult
 import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_BASE
 import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_MYSQL
 import misk.vitess.testing.DefaultSettings.CONTAINER_PORT_VTGATE
-import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_NAME
 import misk.vitess.testing.DefaultSettings.VITESS_DOCKER_NETWORK_TYPE
 import misk.vitess.testing.DefaultSettings.VTGATE_USER
 import misk.vitess.testing.DefaultSettings.VTGATE_USER_PASSWORD
 import misk.vitess.testing.RemoveContainerResult
 import misk.vitess.testing.StartContainerResult
 import misk.vitess.testing.TransactionIsolationLevel
+import misk.vitess.testing.TransactionMode
 import misk.vitess.testing.VitessTestDbException
 import misk.vitess.testing.VitessTestDbStartupException
 import misk.vitess.testing.hostname
@@ -47,6 +47,7 @@ internal class VitessDockerContainer(
   private val autoApplySchemaChanges: Boolean,
   private val containerName: String,
   private val debugStartup: Boolean,
+  private val dockerNetworkName: String,
   private val enableDeclarativeSchemaChanges: Boolean,
   private val enableInMemoryStorage: Boolean,
   private val enableScatters: Boolean,
@@ -57,7 +58,9 @@ internal class VitessDockerContainer(
   private val schemaDir: String,
   private val sqlMode: String,
   private val transactionIsolationLevel: TransactionIsolationLevel,
+  private val transactionMode: TransactionMode,
   private val transactionTimeoutSeconds: Duration,
+  private val vtctldClientTimeout: Duration,
   private val userPort: Int,
   private val vitessImage: String,
   private val vitessVersion: Int,
@@ -73,6 +76,7 @@ internal class VitessDockerContainer(
     const val PORT_ENV = "PORT"
     const val SQL_MODE_ENV = "SQL_MODE"
     const val TRANSACTION_ISOLATION_LEVEL_ENV = "TRANSACTION_ISOLATION_LEVEL"
+    const val TRANSACTION_MODE_ENV = "TRANSACTION_MODE"
     const val TRANSACTION_TIMEOUT_SECONDS_ENV = "TRANSACTION_TIMEOUT_SECONDS"
     const val VITESS_IMAGE_ENV = "VITESS_IMAGE"
     const val VITESS_VERSION_ENV = "VITESS_VERSION"
@@ -110,6 +114,7 @@ internal class VitessDockerContainer(
   fun start(): StartContainerResult {
     validateVitessVersionArgs()
     validateInMemoryStorageSize()
+    validateVtctldClientTimeout()
 
     val vitessSchemaPreparer = VitessSchemaPreparer(lintSchema, schemaDir)
 
@@ -244,6 +249,7 @@ internal class VitessDockerContainer(
         vtgatePort = vtgatePort,
         vtgateUser = VTGATE_USER,
         vtgateUserPassword = VTGATE_USER_PASSWORD,
+        transactionMode = transactionMode,
       )
     }
 
@@ -308,6 +314,12 @@ internal class VitessDockerContainer(
     }
   }
 
+  private fun validateVtctldClientTimeout() {
+    require(!vtctldClientTimeout.isZero && !vtctldClientTimeout.isNegative) {
+      "Invalid `vtctldClientTimeout`: `$vtctldClientTimeout`. Must be positive."
+    }
+  }
+
   /**
    * This method checks if the container should be created based on the user arguments and the schema directory
    * contents.
@@ -369,6 +381,7 @@ internal class VitessDockerContainer(
         PORT_ENV to ("${userPort}" to "port"),
         SQL_MODE_ENV to (sqlMode to "sqlMode"),
         TRANSACTION_ISOLATION_LEVEL_ENV to (transactionIsolationLevel.value to "transactionIsolationLevel"),
+        TRANSACTION_MODE_ENV to (transactionMode.value to "transactionMode"),
         TRANSACTION_TIMEOUT_SECONDS_ENV to ("${transactionTimeoutSeconds.seconds}" to "transactionTimeoutSeconds"),
         VITESS_IMAGE_ENV to (vitessImage to "vitessImage"),
         VITESS_VERSION_ENV to ("$vitessVersion" to "vitessVersion"),
@@ -579,7 +592,14 @@ internal class VitessDockerContainer(
     val images: List<Image> = dockerClient.listImagesCmd().withReferenceFilter(vitessImage).exec()
     if (images.isEmpty()) {
       println("Vitess image `$vitessImage` does not exist, proceeding to pull.")
-      dockerClient.pullImageCmd(vitessImage).start().awaitCompletion()
+      try {
+        dockerClient.pullImageCmd(vitessImage).start().awaitCompletion()
+      } catch (e: NotFoundException) {
+        if ("no matching manifest" !in (e.message ?: "")) throw e
+        // No native image for this architecture; pull amd64 and let Docker emulate.
+        println("Native pull failed (no matching manifest), retrying with --platform linux/amd64")
+        dockerClient.pullImageCmd(vitessImage).withPlatform("linux/amd64").start().awaitCompletion()
+      }
     }
 
     val networkId = getOrCreateVitessNetwork()
@@ -595,7 +615,7 @@ internal class VitessDockerContainer(
       HostConfig().apply {
         withPortBindings(portBindings)
         withBinds(Bind(vitessMyCnf.optionsFilePath.pathString, Volume(optionsFileDest)))
-        withNetworkMode(VITESS_DOCKER_NETWORK_NAME)
+        withNetworkMode(dockerNetworkName)
         withAutoRemove(
           !debugStartup // If `debugStartup` is `true`, we keep the container running to inspect logs.
         ) // Otherwise, remove container when it stops.
@@ -660,6 +680,9 @@ internal class VitessDockerContainer(
       cmd.add("--no_scatter")
     }
 
+    cmd.add("--transaction_mode")
+    cmd.add(transactionMode.value)
+
     try {
       return runCreateContainerCmd(hostConfig, healthCheck, cmd, vitessPortConfig, keyspaces)
     } catch (e: ConflictException) {
@@ -682,7 +705,6 @@ internal class VitessDockerContainer(
         .createContainerCmd(vitessImage)
         .withName(containerName)
         .withHostConfig(hostConfig)
-        .withPlatform("linux/amd64")
         .withHealthcheck(healthCheck)
         .withExposedPorts(*vitessPortConfig.allPortMappings().map { ExposedPort(it.containerPort) }.toTypedArray())
         .withEnv(
@@ -696,6 +718,7 @@ internal class VitessDockerContainer(
           "$PORT_ENV=${vitessPortConfig.vtgatePort.hostPort}",
           "$SQL_MODE_ENV=$sqlMode",
           "$TRANSACTION_ISOLATION_LEVEL_ENV=${transactionIsolationLevel.value}",
+          "$TRANSACTION_MODE_ENV=${transactionMode.value}",
           "$TRANSACTION_TIMEOUT_SECONDS_ENV=${transactionTimeoutSeconds.seconds}",
           "$VITESS_IMAGE_ENV=$vitessImage",
           "$VITESS_VERSION_ENV=$vitessVersion",
@@ -818,11 +841,14 @@ internal class VitessDockerContainer(
       dbaUserPassword = DBA_USER_PASSWORD,
       debugStartup = debugStartup,
       dockerClient = dockerClient,
+      dockerNetworkName = dockerNetworkName,
       enableDeclarativeSchemaChanges = enableDeclarativeSchemaChanges,
       hostname = hostname,
       keyspaces = vitessSchemaPreparer.keyspaces,
       mysqlPort = mysqlPort,
       schemaDir = schemaDir,
+      vitessImage = vitessImage,
+      vtctldClientTimeout = vtctldClientTimeout,
       vtgatePort = vtgatePort,
       vtgateUser = VTGATE_USER,
       vtgateUserPassword = VTGATE_USER_PASSWORD,
@@ -837,20 +863,15 @@ internal class VitessDockerContainer(
       if (existingNetwork == null) {
         try {
           val newNetworkId =
-            dockerClient
-              .createNetworkCmd()
-              .withName(VITESS_DOCKER_NETWORK_NAME)
-              .withDriver(VITESS_DOCKER_NETWORK_TYPE)
-              .exec()
-              .id
+            dockerClient.createNetworkCmd().withName(dockerNetworkName).withDriver(VITESS_DOCKER_NETWORK_TYPE).exec().id
           return newNetworkId
         } catch (conflictException: ConflictException) {
           // If we are in this state, the network was already created.
-          println("Network `$VITESS_DOCKER_NETWORK_NAME` was already created, attempting to find it.")
+          println("Network `$dockerNetworkName` was already created, attempting to find it.")
           existingNetwork = findExistingNetwork()
           if (existingNetwork == null) {
             throw VitessTestDbStartupException(
-              "Network `$VITESS_DOCKER_NETWORK_NAME` was created but not found.",
+              "Network `$dockerNetworkName` was created but not found.",
               conflictException,
             )
           }
@@ -860,7 +881,7 @@ internal class VitessDockerContainer(
       // Validate the existing network we found has the expected network type.
       if (existingNetwork!!.driver != VITESS_DOCKER_NETWORK_TYPE) {
         throw VitessTestDbStartupException(
-          "Network `$VITESS_DOCKER_NETWORK_NAME` exists for network id `${existingNetwork.id}` but is not of type `$VITESS_DOCKER_NETWORK_TYPE`. " +
+          "Network `$dockerNetworkName` exists for network id `${existingNetwork.id}` but is not of type `$VITESS_DOCKER_NETWORK_TYPE`. " +
             "Found type: `${existingNetwork.driver}`. Tear down the existing network to use this version of VitessTestDb."
         )
       }
@@ -871,7 +892,7 @@ internal class VitessDockerContainer(
 
   private fun findExistingNetwork(): Network? {
     val networks = dockerClient.listNetworksCmd().exec()
-    val existingNetwork = networks.find { it.name == VITESS_DOCKER_NETWORK_NAME }
+    val existingNetwork = networks.find { it.name == dockerNetworkName }
     return existingNetwork
   }
 

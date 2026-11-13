@@ -1,12 +1,15 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import io.gitlab.arturbosch.detekt.Detekt
-import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+import dev.detekt.gradle.Detekt
+import dev.detekt.gradle.extensions.FailOnSeverity
+import dev.detekt.gradle.extensions.DetektExtension
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.STARTED
-import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.dokka.gradle.DokkaExtension
+import org.jetbrains.dokka.gradle.formats.DokkaFormatPlugin
+import org.jetbrains.dokka.gradle.internal.InternalDokkaGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -49,6 +52,7 @@ dependencyAnalysis {
       }
       onIncorrectConfiguration {
         exclude("org.jetbrains.kotlin:kotlin-stdlib")
+        exclude("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
       }
     }
 
@@ -72,11 +76,6 @@ dependencyAnalysis {
       onIncorrectConfiguration {
         exclude("org.jooq:jooq")
         exclude("org.jooq:jooq-kotlin")
-      }
-    }
-    project(":detektive") {
-      onUnusedDependencies {
-        exclude("com.google.inject:guice")
       }
     }
     project(":wisp:wisp-logging-testing") {
@@ -125,7 +124,10 @@ apiValidation {
     "exemplar",
     "exemplarchat",
     "detektive",
-    "misk-schema-migrator-gradle-plugin"
+    "misk-admin-test-protos",
+    "misk-moshi-test-protos",
+    "misk-schema-migrator-gradle-plugin",
+    "misk-test-protos"
   )
   ignoredProjects.addAll(subprojects.map { it.name }.filter { it in ignorable })
   additionalSourceSets.add("testFixtures")
@@ -220,21 +222,23 @@ if (hasPublishUrl) {
 
 subprojects {
   apply(plugin = "org.jetbrains.dokka")
-  apply(plugin = "io.gitlab.arturbosch.detekt")
+  apply<DokkaMarkdownPlugin>()
+  apply(plugin = "dev.detekt")
   apply(plugin = "com.autonomousapps.dependency-analysis")
 
   if (name !in doNotDetekt) {
     extensions.configure(DetektExtension::class) {
-      parallel = true
-      buildUponDefaultConfig = false
-      ignoreFailures = false
-      autoCorrect = true
+      parallel.set(true)
+      buildUponDefaultConfig.set(false)
+      ignoreFailures.set(false)
+      failOnSeverity.set(FailOnSeverity.Info)
+      autoCorrect.set(true)
       config.setFrom(detektConfig)
     }
   } else {
     extensions.configure(DetektExtension::class) {
-      disableDefaultRuleSets = true
-      ignoreFailures = true
+      disableDefaultRuleSets.set(true)
+      ignoreFailures.set(true)
     }
   }
 
@@ -246,12 +250,12 @@ subprojects {
   plugins.withType<KotlinPluginWrapper> {
     tasks.withType<KotlinCompile>().configureEach {
       compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_11)
-        freeCompilerArgs.add("-Xjdk-release=11")
+        jvmTarget.set(JvmTarget.JVM_17)
+        freeCompilerArgs.add("-Xjdk-release=17")
       }
     }
     tasks.withType<JavaCompile>().configureEach {
-      options.release.set(11)
+      options.release.set(17)
     }
 
     dependencies {
@@ -260,6 +264,7 @@ subprojects {
 
       // Platform/BOM dependencies constrain versions only.
       add("api", platform(project(":misk-bom")))
+      add("api", platform(rootProject.libs.bouncyCastleBom))
       add("api", platform(rootProject.libs.grpcBom))
       add("api", platform(rootProject.libs.guavaBom))
       add("api", platform(rootProject.libs.guiceBom))
@@ -278,8 +283,8 @@ subprojects {
     }
   }
 
-  tasks.withType<DokkaTask>().configureEach {
-    if (name == "dokkaGfm") {
+  extensions.configure<DokkaExtension> {
+    dokkaPublications.named("markdown") {
       outputDirectory.set(project.file("$rootDir/docs/0.x/${project.name}"))
     }
 
@@ -333,6 +338,9 @@ subprojects {
   tasks.withType<Detekt>().configureEach {
     dependsOn(":detektive:assemble")
     exclude { it.file.absolutePath.contains("/generated/source/") || it.file.absolutePath.contains("SampledLogger") }
+    reports.checkstyle.required.set(false)
+    reports.sarif.required.set(false)
+    reports.markdown.required.set(false)
   }
 
   plugins.withType<BasePlugin> {
@@ -440,6 +448,22 @@ subprojects {
   tasks.withType<AbstractArchiveTask>().configureEach {
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
+  }
+}
+
+/**
+ * Generates GitHub Flavored Markdown docs with Dokka Gradle Plugin v2, replacing the v1 dokkaGfm
+ * task. See https://github.com/Kotlin/dokka/blob/master/dokka-subprojects/plugin-gfm/README.md
+ */
+@OptIn(InternalDokkaGradlePluginApi::class)
+abstract class DokkaMarkdownPlugin : DokkaFormatPlugin(formatName = "markdown") {
+  override fun DokkaFormatPlugin.DokkaFormatPluginContext.configure() {
+    project.dependencies {
+      dokkaPlugin(dokka("gfm-plugin"))
+      formatDependencies.dokkaPublicationPluginClasspathApiOnly.dependencies.addLater(
+        dokka("gfm-template-processing-plugin")
+      )
+    }
   }
 }
 

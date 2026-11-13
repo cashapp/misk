@@ -3,7 +3,6 @@ package misk.hibernate.actions
 import com.google.inject.Injector
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
 import misk.MiskCaller
 import misk.audit.AuditRequestResponse
@@ -17,10 +16,9 @@ import misk.hibernate.Session
 import misk.hibernate.Transacter
 import misk.hibernate.actions.HibernateDatabaseQueryMetadataFactory.Companion.QUERY_CONFIG_TYPE_NAME
 import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.checkQueryMatchesAction
-import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.findDatabaseQueryMetadata
+import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.findDatabaseQueryRegistration
 import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.getTransacterForDatabaseQueryAction
 import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.validateSelectPathsOrDefault
-import misk.inject.typeLiteral
 import misk.logging.getLogger
 import misk.scope.ActionScoped
 import misk.web.Post
@@ -38,8 +36,7 @@ internal class HibernateDatabaseQueryStaticAction
 @Inject
 constructor(
   @JvmSuppressWildcards private val callerProvider: ActionScoped<MiskCaller?>,
-  private val databaseQueryMetadata: List<DatabaseQueryMetadata>,
-  private val queries: List<HibernateQuery>,
+  private val databaseQueryRegistrations: List<HibernateDatabaseQueryRegistration>,
   private val injector: Injector,
   private val queryLimitsConfig: ReflectionQuery.QueryLimitsConfig,
 ) : WebAction {
@@ -55,12 +52,13 @@ constructor(
 
     checkQueryMatchesAction(queryClass, false)
 
-    val metadata = findDatabaseQueryMetadata(databaseQueryMetadata, queryClass)
-    val transacter = getTransacterForDatabaseQueryAction(injector, metadata)
+    val registration = findDatabaseQueryRegistration(databaseQueryRegistrations, queryClass)
+    val metadata = registration.metadata
+    val transacter = getTransacterForDatabaseQueryAction(injector, registration.entityClass)
 
     val results =
       if (caller.isAllowed(metadata.allowedCapabilities, metadata.allowedServices)) {
-        runStaticQuery(transacter, caller.principal, request, metadata)
+        runStaticQuery(transacter, caller.principal, request, registration)
       } else {
         throw UnauthorizedException("Unauthorized to query [dbEntity=${metadata.entityClass}]")
       }
@@ -72,10 +70,10 @@ constructor(
     transacter: Transacter,
     principal: String,
     request: Request,
-    metadata: DatabaseQueryMetadata,
+    registration: HibernateDatabaseQueryRegistration,
   ) =
     transacter.transaction { session ->
-      val (selectPaths, rows) = runStaticQuery(session, principal, request, metadata)
+      val (selectPaths, rows) = runStaticQuery(session, principal, request, registration)
       rows.map { row ->
         // TODO (adrw) sort the map based on DbEntity order
         // TODO (adrw) Mirror this over to the static path
@@ -87,15 +85,12 @@ constructor(
     session: Session,
     principal: String,
     request: Request,
-    metadata: DatabaseQueryMetadata,
+    registration: HibernateDatabaseQueryRegistration,
   ): Pair<List<String>, List<List<Any?>>> {
-    val query =
-      queries.map { it.query }.find { it.simpleName == metadata.queryClass }
-        ?: throw BadRequestException("[query=${metadata.queryClass}] does not exist")
-    val dbEntity =
-      ((query.typeLiteral().getSupertype(Query::class.java).type as ParameterizedType).actualTypeArguments.first()
-          as Class<DbEntity<*>>)
-        .kotlin
+    val metadata = registration.metadata
+    // Use the Query/DbEntity classes from the authorized registration.
+    val query = registration.queryClass ?: throw BadRequestException("[query=${metadata.queryClass}] does not exist")
+    val dbEntity = registration.entityClass
     val maxRows =
       ((request.query[QUERY_CONFIG_TYPE_NAME] as Map<String, Any>?)?.get("maxRows") as Double?)?.toInt()
         ?: queryLimitsConfig.maxMaxRows
@@ -114,7 +109,7 @@ constructor(
   private fun getStaticSelectPaths(
     request: Request,
     metadata: DatabaseQueryMetadata,
-    dbEntity: KClass<DbEntity<*>>,
+    dbEntity: KClass<out DbEntity<*>>,
   ): List<String> {
     val selectMetadata: DatabaseQueryMetadata.SelectMetadata? =
       request.query.entries

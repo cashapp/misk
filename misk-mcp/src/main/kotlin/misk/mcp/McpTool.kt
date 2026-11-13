@@ -6,6 +6,7 @@ import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequest
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.ContentBlock
 import io.modelcontextprotocol.kotlin.sdk.types.EmptyJsonObject
+import io.modelcontextprotocol.kotlin.sdk.types.RequestMeta
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import kotlin.reflect.KClass
@@ -231,7 +232,16 @@ abstract class McpTool<I : Any> {
           )
           .toCallToolResult()
       }
-    return handle(parsedInput).toCallToolResult()
+    // Tools opt into receiving request._meta by mixing in MetaAwareTool (typically via the
+    // MetaAwareMcpTool / MetaAwareStructuredMcpTool bridge classes). Plain subclasses pay no
+    // cost — the unchecked cast is safe because the capability interface is parameterized in I/R.
+    val result =
+      if (this is MetaAwareTool<*, *>) {
+        @Suppress("UNCHECKED_CAST") (this as MetaAwareTool<I, ToolResult>).handle(parsedInput, request.meta)
+      } else {
+        handle(parsedInput)
+      }
+    return result.toCallToolResult()
   }
 
   sealed interface ToolResult {
@@ -276,6 +286,15 @@ abstract class McpTool<I : Any> {
       }
     }
 
+  /**
+   * Handles a tool invocation with the typed [input].
+   *
+   * Subclasses must override this method to implement tool behavior. Tools that need access to the
+   * request's [RequestMeta] (e.g. progress tokens, related task metadata) should extend the
+   * [MetaAwareMcpTool] (or [MetaAwareStructuredMcpTool] for structured outputs) abstract bridge
+   * class instead — the bridge implements [MetaAwareTool] and the framework dispatches through
+   * the meta-aware overload when present.
+   */
   abstract suspend fun handle(input: I): ToolResult
 
   private val inputType: KType by lazy {

@@ -11,6 +11,7 @@ class IsolationLevelAwareConnectionProvider(
   override fun acquire(): Connection {
     return dataSourceConnectionProvider.acquire().apply {
       transactionIsolation = transacterOptions.isolationLevel.value
+      isReadOnly = transacterOptions.readOnly
     }
   }
 

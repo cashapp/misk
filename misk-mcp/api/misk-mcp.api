@@ -2,7 +2,7 @@ public abstract interface annotation class misk/mcp/Description : java/lang/anno
 	public abstract fun value ()Ljava/lang/String;
 }
 
-public synthetic class misk/mcp/Description$Impl : misk/mcp/Description {
+public final synthetic class misk/mcp/Description$Impl : misk/mcp/Description {
 	public fun <init> (Ljava/lang/String;)V
 	public final synthetic fun value ()Ljava/lang/String;
 }
@@ -42,7 +42,7 @@ public final class misk/mcp/McpPromptModule$Companion {
 
 public abstract interface class misk/mcp/McpResource {
 	public abstract fun getDescription ()Ljava/lang/String;
-	public abstract fun getMimeType ()Ljava/lang/String;
+	public fun getMimeType ()Ljava/lang/String;
 	public abstract fun getName ()Ljava/lang/String;
 	public abstract fun getUri ()Ljava/lang/String;
 	public abstract fun handler (Lio/modelcontextprotocol/kotlin/sdk/types/ReadResourceRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -60,6 +60,28 @@ public final class misk/mcp/McpResourceModule : misk/inject/KAbstractModule {
 public final class misk/mcp/McpResourceModule$Companion {
 	public final fun create (Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)Lmisk/mcp/McpResourceModule;
 	public final fun create (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lmisk/mcp/McpResourceModule;
+}
+
+public abstract interface class misk/mcp/McpResourceTemplate {
+	public abstract fun getDescription ()Ljava/lang/String;
+	public fun getMimeType ()Ljava/lang/String;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getUriTemplate ()Ljava/lang/String;
+	public abstract fun handler (Lio/modelcontextprotocol/kotlin/sdk/types/ReadResourceRequest;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/McpResourceTemplate$DefaultImpls {
+	public static fun getMimeType (Lmisk/mcp/McpResourceTemplate;)Ljava/lang/String;
+}
+
+public final class misk/mcp/McpResourceTemplateModule : misk/inject/KAbstractModule {
+	public static final field Companion Lmisk/mcp/McpResourceTemplateModule$Companion;
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/inject/BindingQualifier;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class misk/mcp/McpResourceTemplateModule$Companion {
+	public final fun create (Lkotlin/reflect/KClass;Ljava/lang/annotation/Annotation;)Lmisk/mcp/McpResourceTemplateModule;
+	public final fun create (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lmisk/mcp/McpResourceTemplateModule;
 }
 
 public final class misk/mcp/McpServerModule : misk/inject/KAbstractModule {
@@ -144,6 +166,22 @@ public final class misk/mcp/McpToolModule$Companion {
 	public final fun create (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lmisk/mcp/McpToolModule;
 }
 
+public abstract class misk/mcp/MetaAwareMcpTool : misk/mcp/McpTool, misk/mcp/MetaAwareTool {
+	public fun <init> ()V
+	public final fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun handle-7zgdlzo (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class misk/mcp/MetaAwareStructuredMcpTool : misk/mcp/StructuredMcpTool, misk/mcp/MetaAwareTool {
+	public fun <init> ()V
+	public final fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun handle-7zgdlzo (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class misk/mcp/MetaAwareTool {
+	public abstract fun handle-7zgdlzo (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public final class misk/mcp/MiskMcpServer : io/modelcontextprotocol/kotlin/sdk/server/Server {
 	public final fun getConfig ()Lmisk/mcp/config/McpServerConfig;
 	public final fun getName ()Ljava/lang/String;
@@ -191,6 +229,10 @@ public final class misk/mcp/TypedCreateElicitationResult {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class misk/mcp/TypedElicitationKt {
+	public static final fun toElicitationSchema (Lkotlin/reflect/KType;)Lkotlin/Pair;
+}
+
 public abstract interface annotation class misk/mcp/action/McpDelete : java/lang/annotation/Annotation {
 }
 
@@ -201,6 +243,7 @@ public abstract interface annotation class misk/mcp/action/McpPost : java/lang/a
 }
 
 public final class misk/mcp/action/McpServerSessionsKt {
+	public static final fun currentClientConnection (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun currentServerSession (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun handleMessage (Lio/modelcontextprotocol/kotlin/sdk/server/ServerSession;Lio/modelcontextprotocol/kotlin/sdk/types/JSONRPCMessage;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -326,6 +369,21 @@ public final class misk/mcp/internal/JsonSchemaExtensionsKt {
 	public static final fun generateJsonSchema (Lkotlin/reflect/KType;)Lkotlinx/serialization/json/JsonObject;
 }
 
+public final class misk/mcp/internal/McpClientConnection : kotlin/coroutines/AbstractCoroutineContextElement {
+	public static final field Key Lmisk/mcp/internal/McpClientConnection$Key;
+	public fun <init> (Lio/modelcontextprotocol/kotlin/sdk/server/ClientConnection;)V
+	public final fun component1 ()Lio/modelcontextprotocol/kotlin/sdk/server/ClientConnection;
+	public final fun copy (Lio/modelcontextprotocol/kotlin/sdk/server/ClientConnection;)Lmisk/mcp/internal/McpClientConnection;
+	public static synthetic fun copy$default (Lmisk/mcp/internal/McpClientConnection;Lio/modelcontextprotocol/kotlin/sdk/server/ClientConnection;ILjava/lang/Object;)Lmisk/mcp/internal/McpClientConnection;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClientConnection ()Lio/modelcontextprotocol/kotlin/sdk/server/ClientConnection;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/internal/McpClientConnection$Key : kotlin/coroutines/CoroutineContext$Key {
+}
+
 public final class misk/mcp/internal/McpServerSession : kotlin/coroutines/AbstractCoroutineContextElement {
 	public static final field Key Lmisk/mcp/internal/McpServerSession$Key;
 	public fun <init> (Lio/modelcontextprotocol/kotlin/sdk/server/ServerSession;)V
@@ -381,6 +439,15 @@ public final class misk/mcp/testing/prompts/KotlinDeveloperPrompt : misk/mcp/Mcp
 	public fun handler (Lio/modelcontextprotocol/kotlin/sdk/types/GetPromptRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class misk/mcp/testing/resources/UserProfileResource : misk/mcp/McpResourceTemplate {
+	public fun <init> ()V
+	public fun getDescription ()Ljava/lang/String;
+	public fun getMimeType ()Ljava/lang/String;
+	public fun getName ()Ljava/lang/String;
+	public fun getUriTemplate ()Ljava/lang/String;
+	public fun handler (Lio/modelcontextprotocol/kotlin/sdk/types/ReadResourceRequest;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public final class misk/mcp/testing/resources/WebSearchResource : misk/mcp/McpResource {
 	public fun <init> ()V
 	public fun getDescription ()Ljava/lang/String;
@@ -426,7 +493,7 @@ public final class misk/mcp/testing/tools/CalculatorToolInput {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class misk/mcp/testing/tools/CalculatorToolInput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class misk/mcp/testing/tools/CalculatorToolInput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lmisk/mcp/testing/tools/CalculatorToolInput$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
@@ -434,6 +501,7 @@ public synthetic class misk/mcp/testing/tools/CalculatorToolInput$$serializer : 
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/CalculatorToolInput;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class misk/mcp/testing/tools/CalculatorToolInput$Companion {
@@ -469,7 +537,7 @@ public final class misk/mcp/testing/tools/CalculatorToolOutput {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class misk/mcp/testing/tools/CalculatorToolOutput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class misk/mcp/testing/tools/CalculatorToolOutput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lmisk/mcp/testing/tools/CalculatorToolOutput$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
@@ -477,9 +545,48 @@ public synthetic class misk/mcp/testing/tools/CalculatorToolOutput$$serializer :
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/CalculatorToolOutput;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class misk/mcp/testing/tools/CalculatorToolOutput$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class misk/mcp/testing/tools/ClientConnectionTool : misk/mcp/StructuredMcpToolEmptyInput {
+	public fun <init> ()V
+	public fun getDescription ()Ljava/lang/String;
+	public fun getName ()Ljava/lang/String;
+	public fun handle (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/testing/tools/ClientConnectionToolKt {
+	public static final fun callClientConnectionTool (Lio/modelcontextprotocol/kotlin/sdk/client/Client;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/testing/tools/ClientConnectionToolOutput {
+	public static final field Companion Lmisk/mcp/testing/tools/ClientConnectionToolOutput$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/mcp/testing/tools/ClientConnectionToolOutput;
+	public static synthetic fun copy$default (Lmisk/mcp/testing/tools/ClientConnectionToolOutput;Ljava/lang/String;ILjava/lang/Object;)Lmisk/mcp/testing/tools/ClientConnectionToolOutput;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSessionId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class misk/mcp/testing/tools/ClientConnectionToolOutput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lmisk/mcp/testing/tools/ClientConnectionToolOutput$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lmisk/mcp/testing/tools/ClientConnectionToolOutput;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/ClientConnectionToolOutput;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class misk/mcp/testing/tools/ClientConnectionToolOutput$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
@@ -500,7 +607,7 @@ public final class misk/mcp/testing/tools/EchoToolInput {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class misk/mcp/testing/tools/EchoToolInput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class misk/mcp/testing/tools/EchoToolInput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lmisk/mcp/testing/tools/EchoToolInput$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
@@ -508,6 +615,7 @@ public synthetic class misk/mcp/testing/tools/EchoToolInput$$serializer : kotlin
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/EchoToolInput;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class misk/mcp/testing/tools/EchoToolInput$Companion {
@@ -526,7 +634,7 @@ public final class misk/mcp/testing/tools/EchoToolOutput {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class misk/mcp/testing/tools/EchoToolOutput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class misk/mcp/testing/tools/EchoToolOutput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lmisk/mcp/testing/tools/EchoToolOutput$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
@@ -534,6 +642,7 @@ public synthetic class misk/mcp/testing/tools/EchoToolOutput$$serializer : kotli
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/EchoToolOutput;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class misk/mcp/testing/tools/EchoToolOutput$Companion {
@@ -558,7 +667,7 @@ public final class misk/mcp/testing/tools/GetNicknameRequest {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class misk/mcp/testing/tools/GetNicknameRequest$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class misk/mcp/testing/tools/GetNicknameRequest$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lmisk/mcp/testing/tools/GetNicknameRequest$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
@@ -566,6 +675,7 @@ public synthetic class misk/mcp/testing/tools/GetNicknameRequest$$serializer : k
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/GetNicknameRequest;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class misk/mcp/testing/tools/GetNicknameRequest$Companion {
@@ -595,7 +705,7 @@ public final class misk/mcp/testing/tools/HelloWorldToolOutput {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class misk/mcp/testing/tools/HelloWorldToolOutput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class misk/mcp/testing/tools/HelloWorldToolOutput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lmisk/mcp/testing/tools/HelloWorldToolOutput$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
@@ -603,6 +713,7 @@ public synthetic class misk/mcp/testing/tools/HelloWorldToolOutput$$serializer :
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/HelloWorldToolOutput;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class misk/mcp/testing/tools/HelloWorldToolOutput$Companion {
@@ -629,7 +740,7 @@ public final class misk/mcp/testing/tools/HierarchicalToolInput {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class misk/mcp/testing/tools/HierarchicalToolInput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class misk/mcp/testing/tools/HierarchicalToolInput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lmisk/mcp/testing/tools/HierarchicalToolInput$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
@@ -637,6 +748,7 @@ public synthetic class misk/mcp/testing/tools/HierarchicalToolInput$$serializer 
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/HierarchicalToolInput;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class misk/mcp/testing/tools/HierarchicalToolInput$Companion {
@@ -659,7 +771,7 @@ public final class misk/mcp/testing/tools/HierarchicalToolOutput {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class misk/mcp/testing/tools/HierarchicalToolOutput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class misk/mcp/testing/tools/HierarchicalToolOutput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lmisk/mcp/testing/tools/HierarchicalToolOutput$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
@@ -667,6 +779,7 @@ public synthetic class misk/mcp/testing/tools/HierarchicalToolOutput$$serializer
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/HierarchicalToolOutput;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class misk/mcp/testing/tools/HierarchicalToolOutput$Companion {
@@ -708,7 +821,7 @@ public final class misk/mcp/testing/tools/SessionIdentifierInput {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class misk/mcp/testing/tools/SessionIdentifierInput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class misk/mcp/testing/tools/SessionIdentifierInput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lmisk/mcp/testing/tools/SessionIdentifierInput$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
@@ -716,6 +829,7 @@ public synthetic class misk/mcp/testing/tools/SessionIdentifierInput$$serializer
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/SessionIdentifierInput;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class misk/mcp/testing/tools/SessionIdentifierInput$Companion {
@@ -734,7 +848,7 @@ public final class misk/mcp/testing/tools/SessionIdentifierOutput {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class misk/mcp/testing/tools/SessionIdentifierOutput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class misk/mcp/testing/tools/SessionIdentifierOutput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lmisk/mcp/testing/tools/SessionIdentifierOutput$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
@@ -742,6 +856,7 @@ public synthetic class misk/mcp/testing/tools/SessionIdentifierOutput$$serialize
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/SessionIdentifierOutput;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class misk/mcp/testing/tools/SessionIdentifierOutput$Companion {
@@ -776,7 +891,7 @@ public final class misk/mcp/testing/tools/ThrowingToolInput {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class misk/mcp/testing/tools/ThrowingToolInput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class misk/mcp/testing/tools/ThrowingToolInput$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lmisk/mcp/testing/tools/ThrowingToolInput$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
@@ -784,6 +899,7 @@ public synthetic class misk/mcp/testing/tools/ThrowingToolInput$$serializer : ko
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/ThrowingToolInput;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class misk/mcp/testing/tools/ThrowingToolInput$Companion {
@@ -806,7 +922,7 @@ public final class misk/mcp/testing/tools/VersionMetadata {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class misk/mcp/testing/tools/VersionMetadata$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class misk/mcp/testing/tools/VersionMetadata$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lmisk/mcp/testing/tools/VersionMetadata$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
@@ -814,6 +930,7 @@ public synthetic class misk/mcp/testing/tools/VersionMetadata$$serializer : kotl
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/VersionMetadata;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class misk/mcp/testing/tools/VersionMetadata$Companion {

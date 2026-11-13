@@ -248,7 +248,8 @@ public final class misk/jdbc/DataSourceConfig {
 	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;Lmisk/jdbc/DeclarativeSchemaConfig;)V
 	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;Lmisk/jdbc/DeclarativeSchemaConfig;Z)V
 	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;Lmisk/jdbc/DeclarativeSchemaConfig;ZLjava/lang/String;)V
-	public synthetic fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;Lmisk/jdbc/DeclarativeSchemaConfig;ZLjava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;Lmisk/jdbc/DeclarativeSchemaConfig;ZLjava/lang/String;Lmisk/jdbc/TransactionIsolationLevel;)V
+	public synthetic fun <init> (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;Lmisk/jdbc/DeclarativeSchemaConfig;ZLjava/lang/String;Lmisk/jdbc/TransactionIsolationLevel;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun asReplica ()Lmisk/jdbc/DataSourceConfig;
 	public final fun buildJdbcUrl (Lwisp/deployment/Deployment;)Ljava/lang/String;
 	public final fun canRecoverOnReplica ()Z
@@ -283,14 +284,15 @@ public final class misk/jdbc/DataSourceConfig {
 	public final fun component35 ()Lmisk/jdbc/DeclarativeSchemaConfig;
 	public final fun component36 ()Z
 	public final fun component37 ()Ljava/lang/String;
+	public final fun component38 ()Lmisk/jdbc/TransactionIsolationLevel;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/lang/String;
 	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()I
 	public final fun component8 ()Ljava/time/Duration;
 	public final fun component9 ()Ljava/time/Duration;
-	public final fun copy (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;Lmisk/jdbc/DeclarativeSchemaConfig;ZLjava/lang/String;)Lmisk/jdbc/DataSourceConfig;
-	public static synthetic fun copy$default (Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;Lmisk/jdbc/DeclarativeSchemaConfig;ZLjava/lang/String;IILjava/lang/Object;)Lmisk/jdbc/DataSourceConfig;
+	public final fun copy (Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;Lmisk/jdbc/DeclarativeSchemaConfig;ZLjava/lang/String;Lmisk/jdbc/TransactionIsolationLevel;)Lmisk/jdbc/DataSourceConfig;
+	public static synthetic fun copy$default (Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DataSourceType;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/time/Duration;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ZZLjava/util/Map;ZLmisk/jdbc/MigrationsFormat;Lmisk/jdbc/DeclarativeSchemaConfig;ZLjava/lang/String;Lmisk/jdbc/TransactionIsolationLevel;IILjava/lang/Object;)Lmisk/jdbc/DataSourceConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllow_public_key_retrieval ()Z
 	public final fun getClient_certificate_key_store_password ()Ljava/lang/String;
@@ -322,6 +324,7 @@ public final class misk/jdbc/DataSourceConfig {
 	public final fun getPort ()Ljava/lang/Integer;
 	public final fun getQuery_timeout ()Ljava/time/Duration;
 	public final fun getShow_sql ()Ljava/lang/String;
+	public final fun getTransaction_isolation ()Lmisk/jdbc/TransactionIsolationLevel;
 	public final fun getTrust_certificate_key_store_password ()Ljava/lang/String;
 	public final fun getTrust_certificate_key_store_path ()Ljava/lang/String;
 	public final fun getTrust_certificate_key_store_url ()Ljava/lang/String;
@@ -349,6 +352,7 @@ public final class misk/jdbc/DataSourceService : com/google/common/util/concurre
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;Ljava/util/Set;Lmisk/jdbc/DatabasePool;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;Ljava/util/Set;Lmisk/jdbc/DatabasePool;Lio/prometheus/client/CollectorRegistry;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;Ljava/util/Set;Lmisk/jdbc/DatabasePool;Lio/prometheus/client/CollectorRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lwisp/deployment/Deployment;Ljava/util/Set;Lmisk/jdbc/DatabasePool;Lio/prometheus/client/CollectorRegistry;Lcom/zaxxer/hikari/metrics/MetricsTrackerFactory;)V
 	public fun config ()Lmisk/jdbc/DataSourceConfig;
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Ljavax/sql/DataSource;
@@ -460,6 +464,7 @@ public final class misk/jdbc/JdbcModule : misk/inject/KAbstractModule {
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Z)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ZZ)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ZZLcom/zaxxer/hikari/metrics/MetricsTrackerFactory;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DatabasePool;Z)V
@@ -484,7 +489,7 @@ public final class misk/jdbc/JdbcTestingModule : misk/inject/KAbstractModule {
 }
 
 public abstract interface class misk/jdbc/MigrationStatus {
-	public abstract fun message ()Ljava/lang/String;
+	public fun message ()Ljava/lang/String;
 }
 
 public final class misk/jdbc/MigrationStatus$DefaultImpls {
@@ -551,10 +556,18 @@ public final class misk/jdbc/RealDatabasePool : misk/jdbc/DatabasePool {
 }
 
 public final class misk/jdbc/RealTransacter : misk/jdbc/Transacter {
+	public static final field Companion Lmisk/jdbc/RealTransacter$Companion;
 	public fun <init> (Lmisk/jdbc/DataSourceService;)V
+	public fun <init> (Lmisk/jdbc/DataSourceService;Lmisk/jdbc/DataSourceConfig;)V
 	public fun getInTransaction ()Z
+	public fun isolationLevel (Lmisk/jdbc/TransactionIsolationLevel;)Lmisk/jdbc/Transacter;
+	public fun noRetries ()Lmisk/jdbc/Transacter;
+	public fun retries (I)Lmisk/jdbc/Transacter;
 	public fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public fun transactionWithSession (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class misk/jdbc/RealTransacter$Companion {
 }
 
 public final class misk/jdbc/ScaleSafetyChecks {
@@ -571,6 +584,16 @@ public abstract interface class misk/jdbc/SchemaMigrator {
 	public abstract fun requireAll ()Lmisk/jdbc/MigrationStatus;
 }
 
+public final class misk/jdbc/SchemaMigratorFactoryKt {
+	public static final fun createSchemaMigrator (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DataSourceService;Lmisk/resources/ResourceLoader;)Lmisk/jdbc/SchemaMigrator;
+	public static synthetic fun createSchemaMigrator$default (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceConfig;Lmisk/jdbc/DataSourceService;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Lmisk/jdbc/SchemaMigrator;
+}
+
+public final class misk/jdbc/SchemaMigratorRunner {
+	public static final field INSTANCE Lmisk/jdbc/SchemaMigratorRunner;
+	public static final fun main ([Ljava/lang/String;)V
+}
+
 public final class misk/jdbc/SchemaMigratorService : com/google/common/util/concurrent/AbstractIdleService, misk/healthchecks/HealthCheck, misk/jdbc/DatabaseReadyService {
 	public fun <init> (Lkotlin/reflect/KClass;Lwisp/deployment/Deployment;Lcom/google/inject/Provider;Lcom/google/inject/Provider;)V
 	public fun status ()Lmisk/healthchecks/HealthStatus;
@@ -582,6 +605,12 @@ public abstract interface class misk/jdbc/Session {
 	public abstract fun onRollback (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun onSessionClose (Lkotlin/jvm/functions/Function0;)V
 	public abstract fun useConnection (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class misk/jdbc/SharedLeaseDatabasePool : misk/jdbc/DatabasePool {
+	public fun <init> (Lmisk/jdbc/DatabasePool;)V
+	public fun releaseDatabase (Lmisk/jdbc/DataSourceConfig;)V
+	public fun takeDatabase (Lmisk/jdbc/DataSourceConfig;)Lmisk/jdbc/DataSourceConfig;
 }
 
 public final class misk/jdbc/SpanInjector : misk/jdbc/DataSourceDecorator, net/ttddyy/dsproxy/transform/QueryTransformer {
@@ -610,9 +639,11 @@ public final class misk/jdbc/TableScanException : misk/jdbc/CheckException {
 public final class misk/jdbc/TestDatabasePool : misk/jdbc/DatabasePool {
 	public static final field Companion Lmisk/jdbc/TestDatabasePool$Companion;
 	public fun <init> (Lmisk/jdbc/TestDatabasePool$Backend;Ljava/time/Clock;)V
+	public fun <init> (Lmisk/jdbc/TestDatabasePool$Backend;Ljava/time/Clock;Ljava/time/Duration;)V
 	public final fun getBackend ()Lmisk/jdbc/TestDatabasePool$Backend;
 	public final fun getClock ()Ljava/time/Clock;
 	public final fun getPool (Lmisk/jdbc/DataSourceConfig;)Lmisk/jdbc/TestDatabasePool$ConfigSpecificPool;
+	public final fun getRetention ()Ljava/time/Duration;
 	public final fun pruneOldDatabases ()V
 	public final fun pruneOldDatabases (Ljava/time/Duration;)V
 	public static synthetic fun pruneOldDatabases$default (Lmisk/jdbc/TestDatabasePool;Ljava/time/Duration;ILjava/lang/Object;)V
@@ -627,6 +658,7 @@ public abstract interface class misk/jdbc/TestDatabasePool$Backend {
 }
 
 public final class misk/jdbc/TestDatabasePool$Companion {
+	public final fun getDEFAULT_RETENTION ()Ljava/time/Duration;
 }
 
 public final class misk/jdbc/TestDatabasePool$ConfigSpecificPool {
@@ -669,8 +701,27 @@ public final class misk/jdbc/TracingDataSourceDecorator : misk/jdbc/DataSourceDe
 
 public abstract interface class misk/jdbc/Transacter {
 	public abstract fun getInTransaction ()Z
+	public fun isolationLevel (Lmisk/jdbc/TransactionIsolationLevel;)Lmisk/jdbc/Transacter;
+	public abstract fun noRetries ()Lmisk/jdbc/Transacter;
+	public abstract fun retries (I)Lmisk/jdbc/Transacter;
 	public abstract fun transaction (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public abstract fun transactionWithSession (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class misk/jdbc/Transacter$DefaultImpls {
+	public static fun isolationLevel (Lmisk/jdbc/Transacter;Lmisk/jdbc/TransactionIsolationLevel;)Lmisk/jdbc/Transacter;
+}
+
+public final class misk/jdbc/TransactionIsolationLevel : java/lang/Enum {
+	public static final field READ_COMMITTED Lmisk/jdbc/TransactionIsolationLevel;
+	public static final field READ_UNCOMMITTED Lmisk/jdbc/TransactionIsolationLevel;
+	public static final field REPEATABLE_READ Lmisk/jdbc/TransactionIsolationLevel;
+	public static final field SERIALIZABLE Lmisk/jdbc/TransactionIsolationLevel;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getHikariValueName ()Ljava/lang/String;
+	public final fun getJdbcLevel ()I
+	public static fun valueOf (Ljava/lang/String;)Lmisk/jdbc/TransactionIsolationLevel;
+	public static fun values ()[Lmisk/jdbc/TransactionIsolationLevel;
 }
 
 public final class misk/jdbc/TruncateTablesService : com/google/common/util/concurrent/AbstractIdleService {
@@ -679,5 +730,32 @@ public final class misk/jdbc/TruncateTablesService : com/google/common/util/conc
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;)V
 	public fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;Lmisk/jdbc/JdbcTestFixture;)V
 	public synthetic fun <init> (Lkotlin/reflect/KClass;Lmisk/jdbc/DataSourceService;Lcom/google/inject/Provider;Ljava/util/List;Ljava/util/List;Lmisk/jdbc/JdbcTestFixture;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public class misk/jdbc/retry/DefaultExceptionClassifier : misk/jdbc/retry/ExceptionClassifier {
+	public fun <init> ()V
+	public fun <init> (Lmisk/jdbc/DataSourceType;)V
+	public synthetic fun <init> (Lmisk/jdbc/DataSourceType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	protected final fun isCauseRetryable (Ljava/lang/Throwable;)Z
+	public fun isRetryable (Ljava/lang/Throwable;)Z
+}
+
+public abstract interface class misk/jdbc/retry/ExceptionClassifier {
+	public abstract fun isRetryable (Ljava/lang/Throwable;)Z
+}
+
+public final class misk/jdbc/retry/RetryDefaults {
+	public static final field INSTANCE Lmisk/jdbc/retry/RetryDefaults;
+	public static final field MAX_ATTEMPTS I
+	public static final field MAX_RETRY_DELAY_MILLIS J
+	public static final field MIN_RETRY_DELAY_MILLIS J
+	public static final field RETRY_JITTER_MILLIS J
+}
+
+public class misk/jdbc/retry/RetryTransactionException : java/lang/Exception {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 

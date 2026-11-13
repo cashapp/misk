@@ -65,6 +65,7 @@ constructor(
         launchDarklyClientMetrics.onInitFailure()
         val errorMessage = "LaunchDarkly did not initialize in 30 seconds"
         logger.error { errorMessage }
+        ldClient.value.close()
         throw Exception(errorMessage)
       }
     }
@@ -234,7 +235,10 @@ constructor(
     )
 
   private fun checkInitialized() {
-    checkState(ldClient.value.isInitialized, "LaunchDarkly feature flags not initialized.")
+    checkState(
+      ldClient.value.isInitialized,
+      "LaunchDarkly feature flags not initialized. Are you trying to use feature flags during injector bootstrapping? That is unsupported.",
+    )
   }
 
   private fun <T> checkDefaultNotUsed(feature: Feature, detail: EvaluationDetail<T>) {

@@ -5,7 +5,6 @@ import com.google.inject.Key
 import kotlin.reflect.KClass
 import misk.ReadyService
 import misk.ServiceModule
-import misk.inject.AsyncSwitch
 import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
 import misk.jobqueue.BatchJobHandler
@@ -16,6 +15,10 @@ import misk.jobqueue.QueueName
  * Install this module to register a handler for an SQS queue, and if specified, registers its corresponding retry
  * queue.
  */
+@Deprecated(
+  message = "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
+    "misk-aws2-sqs (misk.aws2.sqs.jobqueue.SqsJobHandlerModule) instead."
+)
 class AwsSqsJobHandlerModule<T : JobHandler>
 private constructor(
   private val queueName: QueueName,
@@ -34,7 +37,6 @@ private constructor(
     install(DefaultAsyncSwitchModule())
     install(
       ServiceModule<AwsSqsJobHandlerSubscriptionService>()
-        .conditionalOn<AsyncSwitch>("sqs")
         .dependsOn(dependsOn)
         .dependsOn<ReadyService>()
     )

@@ -6,7 +6,9 @@ import com.google.common.annotations.VisibleForTesting
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Injector
+import com.google.inject.Key
 import com.google.inject.Module
+import misk.web.WebConfig
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import kotlin.concurrent.thread
@@ -109,7 +111,11 @@ private constructor(private val injectorGenerator: () -> Injector, commands: Lis
 
     // We manage JettyHealthService outside ServiceManager because it must start and
     // shutdown last to keep the container alive via liveness checks.
-    val jettyHealthService: JettyHealthService
+    // Skip instantiation entirely when Jetty is disabled to avoid registering Jetty metrics.
+    val jettyEnabled = injector.getExistingBinding(Key.get(WebConfig::class.java))
+      ?.let { !injector.getInstance<WebConfig>().disable_jetty }
+      ?: true
+    val jettyHealthService: JettyHealthService?
     measureTimeMillis {
         log.info { "starting services" }
         serviceManager.startAsync()
@@ -126,9 +132,14 @@ private constructor(private val injectorGenerator: () -> Injector, commands: Lis
         }
 
         // Start Health Service Last to ensure any dependencies are started.
-        jettyHealthService = injector.getInstance<JettyHealthService>()
-        jettyHealthService.startAsync()
-        jettyHealthService.awaitRunning()
+        jettyHealthService = if (jettyEnabled) {
+          injector.getInstance<JettyHealthService>().also {
+            it.startAsync()
+            it.awaitRunning()
+          }
+        } else {
+          null
+        }
       }
       .also { log.info { "all services started successfully in ${it.milliseconds}" } }
 
@@ -139,18 +150,19 @@ private constructor(private val injectorGenerator: () -> Injector, commands: Lis
             serviceManager.stopAsync()
             serviceManager.awaitStopped()
 
-            // Synchronously stops Jetty Service if it is still running, otherwise no-ops.
-            // Jetty will already be shut down when either:
-            // webConfig.sleep_in_ms is <= 0 OR
-            // (webConfig.health_port >= 0 AND webConfig.health_dedicated_jetty_instance == true)
-            val jettyService = injector.getInstance<JettyService>()
-            jettyService.stop()
+            if (jettyEnabled) {
+              // Synchronously stops Jetty Service if it is still running, otherwise no-ops.
+              // Jetty will already be shut down when either:
+              // webConfig.sleep_in_ms is <= 0 OR
+              // (webConfig.health_port >= 0 AND webConfig.health_dedicated_jetty_instance == true)
+              val jettyService = injector.getInstance<JettyService>()
+              jettyService.stop()
 
-            // Synchronously stop Jetty Health Service if it is running, otherwise no-ops.
-            // Use Guava Service methods to ensure main thread awaitTerminated is handled correctly.
-            val jettyHealthService = injector.getInstance<JettyHealthService>()
-            jettyHealthService.stopAsync()
-            jettyHealthService.awaitTerminated()
+              // Synchronously stop Jetty Health Service if it is running, otherwise no-ops.
+              // Use Guava Service methods to ensure main thread awaitTerminated is handled correctly.
+              jettyHealthService?.stopAsync()
+              jettyHealthService?.awaitTerminated()
+            }
           }
           .also { log.info { "orderly shutdown complete in ${it.milliseconds}" } }
       }
@@ -162,7 +174,7 @@ private constructor(private val injectorGenerator: () -> Injector, commands: Lis
 
         override fun awaitTerminated() {
           serviceManager.awaitStopped()
-          jettyHealthService.awaitTerminated()
+          jettyHealthService?.awaitTerminated()
           log.info { "all services stopped" }
         }
 
@@ -170,7 +182,7 @@ private constructor(private val injectorGenerator: () -> Injector, commands: Lis
           val deadline: Long = timeUnit.toMillis(time) + System.currentTimeMillis()
           try {
             serviceManager.awaitStopped(time, timeUnit)
-            jettyHealthService.awaitTerminated(deadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS)
+            jettyHealthService?.awaitTerminated(deadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS)
           } catch (_: TimeoutException) {
             return false
           }

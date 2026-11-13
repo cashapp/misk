@@ -6,8 +6,9 @@ import com.google.inject.name.Names
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.reflect.KClass
 import misk.hibernate.actions.DatabaseQueryMetadataProvider
+import misk.hibernate.actions.HibernateDatabaseQueryRegistration
+import misk.hibernate.actions.HibernateDatabaseQueryRegistrationProvider
 import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule
-import misk.hibernate.actions.HibernateQuery
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.web.metadata.database.DatabaseQueryMetadata
@@ -23,8 +24,8 @@ abstract class HibernateEntityModule(private val qualifier: KClass<out Annotatio
     // Initialize empty sets for our multibindings.
     newMultibinder<AccessAnnotationEntry>()
     newMultibinder<DatabaseQueryMetadata>()
+    newMultibinder<HibernateDatabaseQueryRegistration>()
     newMultibinder<HibernateEntity>(qualifier)
-    newMultibinder<HibernateQuery>()
     newMultibinder<ListenerRegistration>(qualifier)
 
     configureHibernate()
@@ -60,9 +61,15 @@ abstract class HibernateEntityModule(private val qualifier: KClass<out Annotatio
           accessAnnotationClass = accessAnnotationClass,
         )
       )
-    if (queryClass != null) {
-      multibind<HibernateQuery>().toInstance(HibernateQuery(queryClass as KClass<out Query<DbEntity<*>>>))
-    }
+    // Server-side companion to the metadata above that carries the entity/query KClasses the query actions run against.
+    multibind<HibernateDatabaseQueryRegistration>()
+      .toProvider(
+        HibernateDatabaseQueryRegistrationProvider(
+          dbEntityClass = dbEntityClass,
+          queryClass = queryClass,
+          accessAnnotationClass = accessAnnotationClass,
+        )
+      )
   }
 
   /** Install Entity with a default of no query access from Admin Dashboard */

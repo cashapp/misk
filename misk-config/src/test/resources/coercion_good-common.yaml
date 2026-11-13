@@ -1,0 +1,4 @@
+# Numeric and boolean values written as strings are still legal and must keep working.
+int_value: "42"
+long_value: "9000"
+boolean_value: "TRUE"

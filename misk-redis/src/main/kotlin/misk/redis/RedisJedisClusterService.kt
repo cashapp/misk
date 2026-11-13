@@ -9,6 +9,7 @@ import redis.clients.jedis.DefaultJedisClientConfig
 import redis.clients.jedis.HostAndPort
 import redis.clients.jedis.JedisCluster
 import redis.clients.jedis.UnifiedJedis
+import java.time.Duration
 
 /**
  * Controls the connection lifecycle for Redis in cluster mode.
@@ -53,13 +54,22 @@ internal class RedisJedisClusterService(
         ?: System.getenv("REDIS_HOST")
         ?: "127.0.0.1"
 
-    jedisCluster =
-      JedisCluster(
-        setOf(HostAndPort(redisHost, replicationGroup.configuration_endpoint.port)),
-        jedisClientConfig,
-        replicationGroup.max_attempts,
-        connectionPoolConfig,
-      )
+    val nodes = setOf(HostAndPort(redisHost, replicationGroup.configuration_endpoint.port))
+    val topologyRefreshPeriodMs = replicationGroup.topology_refresh_period_ms
+
+    require(topologyRefreshPeriodMs == null || topologyRefreshPeriodMs > 0) {
+      "topology_refresh_period_ms must be positive, got $topologyRefreshPeriodMs"
+    }
+
+    jedisCluster = JedisCluster(
+      nodes,
+      jedisClientConfig,
+      connectionPoolConfig,
+      topologyRefreshPeriodMs?.let { Duration.ofMillis(it) },
+      replicationGroup.max_attempts,
+      // Cap total retry wall-clock time: each attempt can take at most one socket timeout.
+      Duration.ofMillis(replicationGroup.timeout_ms.toLong() * replicationGroup.max_attempts),
+    )
   }
 
   override fun shutDown() {

@@ -163,6 +163,26 @@ class VitessSchemaParserTest {
   }
 
   @Test
+  fun `test schemabot yaml in schema directory is skipped`() {
+    val schemaDirPath = Files.createTempDirectory("schema_dir")
+    val keyspaceDir = File(schemaDirPath.toFile(), "keyspace1")
+    keyspaceDir.mkdir()
+    val sqlFile = File(keyspaceDir, "v0001__add_table.sql")
+    sqlFile.writeText("CREATE TABLE `test_table` (id int primary key);")
+    val vschemaFile = File(keyspaceDir, "vschema.json")
+    vschemaFile.writeText("{\"tables\": {\"test_table\": {}}}")
+
+    // Add schemabot.yaml alongside keyspace directories
+    val schemabotYaml = File(schemaDirPath.toFile(), "schemabot.yaml")
+    schemabotYaml.writeText("database: testdb\ntype: vitess\n")
+
+    val parser = VitessSchemaParser(false, schemaName, schemaDirPath)
+    val keyspaces = parser.validateAndParse()
+    assertTrue(keyspaces.isNotEmpty())
+    assertEquals("keyspace1", keyspaces[0].name)
+  }
+
+  @Test
   fun `test multiple keyspace directories with one invalid directory`() {
     val schemaDirPath = Files.createTempDirectory("schema_dir")
 

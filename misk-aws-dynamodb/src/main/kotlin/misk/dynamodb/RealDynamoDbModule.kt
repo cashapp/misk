@@ -23,6 +23,11 @@ import misk.inject.KAbstractModule
  *
  * @param requiredTableTypes a list of mapper classes annotated [DynamoDBTable].
  */
+@Deprecated(
+  message =
+    "AWS SDK v1 DynamoDB is deprecated. Use the AWS SDK v2 DynamoDB module in " +
+      "misk-aws2-dynamodb (misk.aws2.dynamodb.RealDynamoDbModule) instead."
+)
 open class RealDynamoDbModule
 @JvmOverloads
 constructor(

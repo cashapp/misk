@@ -21,6 +21,8 @@ class FakeLease(override val name: String, private val manager: FakeLeaseManager
     return result
   }
 
+  override fun acquire(options: AcquireOptions): Boolean = acquire()
+
   /** Release the lease. This will return true if released. Note that it will return false if the lease was not held. */
   override fun release(): Boolean {
     if (!isHeld()) {

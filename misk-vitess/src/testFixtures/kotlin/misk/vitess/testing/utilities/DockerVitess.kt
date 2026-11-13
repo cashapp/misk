@@ -2,6 +2,7 @@ package misk.vitess.testing.utilities
 
 import misk.testing.ExternalDependency
 import misk.vitess.testing.DefaultSettings
+import misk.vitess.testing.TransactionMode
 import misk.vitess.testing.VitessTestDb
 
 /**
@@ -17,13 +18,26 @@ class DockerVitess(
    * [misk.vitess.VitessQueryHints.allowScatter]).
    */
   enableScatters: Boolean = true,
+  /**
+   * The vtgate transaction mode. `MULTI` (default) allows cross-shard writes. `SINGLE` rejects cross-shard writes
+   * unless the session opts in via `SET transaction_mode = 'multi'`.
+   */
+  transactionMode: TransactionMode = DefaultSettings.TRANSACTION_MODE,
   /** The name of the Vitess container. This is used to identify the container in Docker. */
   containerName: String = DefaultSettings.CONTAINER_NAME,
   /** The port to connect to the database, which represents the vtgate. */
   port: Int = DefaultSettings.PORT,
+  /** The Docker bridge network the Vitess container attaches to. See `VitessTestDb` for guidance. */
+  dockerNetworkName: String = DefaultSettings.VITESS_DOCKER_NETWORK_NAME,
 ) : ExternalDependency {
 
-  private val vitessTestDb = VitessTestDb(containerName = containerName, enableScatters = enableScatters, port = port)
+  private val vitessTestDb = VitessTestDb(
+    containerName = containerName,
+    dockerNetworkName = dockerNetworkName,
+    enableScatters = enableScatters,
+    transactionMode = transactionMode,
+    port = port,
+  )
 
   override fun startup() {
     vitessTestDb.run()

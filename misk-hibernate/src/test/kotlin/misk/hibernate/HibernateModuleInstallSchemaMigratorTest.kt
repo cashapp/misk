@@ -11,6 +11,7 @@ import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.jdbc.DataSourceClusterConfig
 import misk.jdbc.DataSourceService
+import misk.jdbc.MigrationsFormat
 import misk.jdbc.SchemaMigratorService
 import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
@@ -89,6 +90,107 @@ internal class HibernateModuleInstallSchemaMigratorTest {
       }
     assertThat(exception.message).contains("No implementation for")
     assertThat(exception.message).contains("SchemaMigratorService")
+  }
+
+  @Test
+  fun `EXTERNALLY_MANAGED migrations format should not bind SchemaMigratorService but should bind DataSourceService`() {
+    val configWithExternalMigrations = dataSourceConfig.copy(migrations_format = MigrationsFormat.EXTERNALLY_MANAGED)
+
+    val module =
+      Modules.combine(
+        deploymentModule,
+        MiskTestingServiceModule(),
+        HibernateModule(
+          qualifier = TestDb::class,
+          config = configWithExternalMigrations,
+          readerQualifier = null,
+          readerConfig = null,
+        ),
+        object : HibernateEntityModule(TestDb::class) {
+          override fun configureHibernate() {
+            addEntities(DbMovie::class)
+          }
+        },
+      )
+
+    val injector = Guice.createInjector(module)
+
+    // SchemaMigratorService should not be bound when migrations are externally managed
+    val exception =
+      assertFailsWith<ConfigurationException> {
+        injector.getInstance(Key.get(SchemaMigratorService::class.java, TestDb::class.java))
+      }
+    assertThat(exception.message).contains("No implementation for")
+    assertThat(exception.message).contains("SchemaMigratorService")
+
+    // DataSourceService should still be bound
+    val dataSourceService = injector.getInstance(Key.get(DataSourceService::class.java, TestDb::class.java))
+    assertThat(dataSourceService).isInstanceOf(DataSourceService::class.java)
+  }
+
+  @Test
+  fun `EXTERNALLY_MANAGED with installSchemaMigrator=true should still not bind SchemaMigratorService`() {
+    val configWithExternalMigrations = dataSourceConfig.copy(migrations_format = MigrationsFormat.EXTERNALLY_MANAGED)
+
+    val module =
+      Modules.combine(
+        deploymentModule,
+        MiskTestingServiceModule(),
+        HibernateModule(
+          qualifier = TestDb::class,
+          config = configWithExternalMigrations,
+          readerQualifier = null,
+          readerConfig = null,
+          installSchemaMigrator = true, // Even with this true, EXTERNALLY_MANAGED should prevent binding
+        ),
+        object : HibernateEntityModule(TestDb::class) {
+          override fun configureHibernate() {
+            addEntities(DbMovie::class)
+          }
+        },
+      )
+
+    val injector = Guice.createInjector(module)
+
+    // SchemaMigratorService should not be bound when migrations are externally managed
+    val exception =
+      assertFailsWith<ConfigurationException> {
+        injector.getInstance(Key.get(SchemaMigratorService::class.java, TestDb::class.java))
+      }
+    assertThat(exception.message).contains("No implementation for")
+    assertThat(exception.message).contains("SchemaMigratorService")
+  }
+
+  @Test
+  fun `EXTERNALLY_MANAGED should allow ServiceManager to be created`() {
+    val configWithExternalMigrations = dataSourceConfig.copy(migrations_format = MigrationsFormat.EXTERNALLY_MANAGED)
+
+    val module =
+      Modules.combine(
+        deploymentModule,
+        MiskTestingServiceModule(),
+        HibernateModule(
+          qualifier = TestDb::class,
+          config = configWithExternalMigrations,
+          readerQualifier = null,
+          readerConfig = null,
+        ),
+        object : HibernateEntityModule(TestDb::class) {
+          override fun configureHibernate() {
+            addEntities(DbMovie::class)
+          }
+        },
+      )
+
+    val injector = Guice.createInjector(module)
+
+    // ServiceManager should be created successfully without SchemaMigratorService
+    val serviceManager = injector.getInstance(ServiceManager::class.java)
+    assertThat(serviceManager).isNotNull()
+
+    // DataSourceService should still be bound
+    val dataSourceService = injector.getInstance(Key.get(DataSourceService::class.java, TestDb::class.java))
+    assertThat(dataSourceService).isInstanceOf(DataSourceService::class.java)
   }
 
   @Test

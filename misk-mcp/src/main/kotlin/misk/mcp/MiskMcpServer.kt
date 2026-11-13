@@ -1,6 +1,7 @@
 package misk.mcp
 
 import com.google.inject.Provider
+import io.modelcontextprotocol.kotlin.sdk.server.ClientConnection
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequest
@@ -10,11 +11,13 @@ import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.Tool
 import io.modelcontextprotocol.kotlin.sdk.types.ToolAnnotations
 import kotlin.time.TimeSource
+import kotlinx.coroutines.withContext
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.config.McpServerConfig
 import misk.mcp.config.asPrompts
 import misk.mcp.config.asResources
 import misk.mcp.config.asTools
+import misk.mcp.internal.McpClientConnection
 import misk.mcp.internal.build
 
 /**
@@ -76,18 +79,20 @@ import misk.mcp.internal.build
  *
  * The server automatically determines capabilities from the [McpServerConfig] and registered components:
  * - The server enables tools capability if any [McpTool] implementations are registered
- * - The server enables resources capability if any [McpResource] implementations are registered
+ * - The server enables resources capability if any [McpResource] or [McpResourceTemplate] implementations are registered
  * - The server enables prompts capability if any [McpPrompt] implementations are registered
  *
  * @param name The unique name identifier for this MCP server instance
  * @param config Configuration settings including version and capability flags
  * @param tools Set of tool implementations to register with the server
  * @param resources Set of resource implementations to register with the server
+ * @param resourceTemplates Set of resource template implementations to register with the server
  * @param prompts Set of prompt implementations to register with the server
  * @param instructionsProvider Optional provider for server instructions text
  * @see misk.mcp.action.McpStreamManager For managing SSE streams and server lifecycle
  * @see McpTool For implementing executable tools
  * @see McpResource For implementing accessible resources
+ * @see McpResourceTemplate For implementing parameterized resource templates
  * @see McpPrompt For implementing prompt templates
  */
 @ExperimentalMiskApi
@@ -98,6 +103,7 @@ internal constructor(
   val config: McpServerConfig,
   tools: Set<McpTool<*>>,
   resources: Set<McpResource>,
+  resourceTemplates: Set<McpResourceTemplate>,
   prompts: Set<McpPrompt>,
   instructionsProvider: Provider<String>? = null,
   private val mcpMetrics: McpMetrics,
@@ -111,7 +117,7 @@ internal constructor(
           completions = null,
           logging = null,
           prompts = if (prompts.isNotEmpty()) config.prompts.asPrompts() else null,
-          resources = if (resources.isNotEmpty()) config.resources.asResources() else null,
+          resources = if (resources.isNotEmpty() || resourceTemplates.isNotEmpty()) config.resources.asResources() else null,
           tools = if (tools.isNotEmpty()) config.tools.asTools() else null,
         ),
       enforceStrictCapabilities = config.enforce_strict_capabilities,
@@ -125,7 +131,9 @@ internal constructor(
         name = prompt.name,
         description = prompt.description,
         arguments = prompt.arguments,
-        promptProvider = prompt::handler,
+        promptProvider = { request ->
+          withContext(McpClientConnection(this)) { prompt.handler(request) }
+        },
       )
     }
 
@@ -135,7 +143,21 @@ internal constructor(
         name = resource.name,
         description = resource.description,
         mimeType = resource.mimeType,
-        readHandler = resource::handler,
+        readHandler = { request ->
+          withContext(McpClientConnection(this)) { resource.handler(request) }
+        },
+      )
+    }
+
+    resourceTemplates.forEach { template ->
+      addResourceTemplate(
+        uriTemplate = template.uriTemplate,
+        name = template.name,
+        description = template.description,
+        mimeType = template.mimeType,
+        readHandler = { request, variables ->
+          withContext(McpClientConnection(this)) { template.handler(request, variables) }
+        },
       )
     }
 
@@ -163,13 +185,13 @@ internal constructor(
   private fun metricReportingHandler(
     toolName: String,
     handler: suspend (CallToolRequest) -> CallToolResult,
-  ): suspend (CallToolRequest) -> CallToolResult {
+  ): suspend ClientConnection.(CallToolRequest) -> CallToolResult {
     return { request ->
       val mark = TimeSource.Monotonic.markNow()
       var outcome = McpMetrics.ToolCallOutcome.Success
 
       try {
-        handler(request).also { result ->
+        withContext(McpClientConnection(this)) { handler(request) }.also { result ->
           outcome = if (result.isError == true) McpMetrics.ToolCallOutcome.Error else McpMetrics.ToolCallOutcome.Success
         }
       } catch (ex: Exception) {

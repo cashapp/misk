@@ -117,7 +117,7 @@ constructor(
           this.withImplicitConfigurationReplacement(it, TokensInheritanceStrategy.PROPORTIONALLY)
         }
       }
-      .build(key, bucketConfig)
+      .build(key) { bucketConfig }
   }
 
   private fun RateLimitConfiguration.toBandwidth(): Bandwidth {

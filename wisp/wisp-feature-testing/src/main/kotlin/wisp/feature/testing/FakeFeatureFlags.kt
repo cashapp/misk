@@ -5,6 +5,7 @@ import kotlin.reflect.KClass
 import wisp.config.Config
 import wisp.config.Configurable
 import wisp.feature.*
+import wisp.feature.testing.FakeLegacyFeatureFlags.JsonValue
 import wisp.moshi.defaultKotlinMoshi
 
 /** In-memory test implementation of [FeatureFlags] that allows flags to be overridden. */
@@ -131,7 +132,7 @@ private constructor(val legacyFeatureFlags: FakeLegacyFeatureFlags, val strongFe
 
   @JvmOverloads
   fun overrideKeyJsonString(feature: Feature, key: String, value: String, attributes: Attributes = defaultAttributes) {
-    overrideKey(feature, key, { value }, attributes)
+    overrideKey(feature, key, JsonValue { value }, attributes)
   }
 
   fun reset() {

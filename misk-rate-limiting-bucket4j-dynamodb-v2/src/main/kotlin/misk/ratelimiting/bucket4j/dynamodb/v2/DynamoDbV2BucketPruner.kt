@@ -2,6 +2,7 @@ package misk.ratelimiting.bucket4j.dynamodb.v2
 
 import io.micrometer.core.instrument.MeterRegistry
 import java.time.Clock
+import java.time.Duration
 import kotlin.collections.forEach
 import kotlin.system.measureTimeMillis
 import misk.logging.getLogger
@@ -23,6 +24,7 @@ constructor(
   meterRegistry: MeterRegistry,
   private val tableName: String,
   private val pageSize: Int = 1000,
+  private val retryTimeout: Duration = Duration.ofMillis(25),
 ) : Bucket4jPruner() {
   override val clockTimeMeter = ClockTimeMeter(clock)
 
@@ -35,10 +37,11 @@ constructor(
 
   private fun pruneLoop() {
     val pager =
-      dynamoDb.scanPaginator {
-        it.tableName(tableName)
-        it.limit(pageSize)
-        it.consistentRead(true)
+      dynamoDb.scanPaginator { request ->
+        request.overrideConfiguration { config -> config.apiCallTimeout(retryTimeout) }
+        request.tableName(tableName)
+        request.limit(pageSize)
+        request.consistentRead(true)
       }
 
     pager.items().forEach { item ->
@@ -64,11 +67,12 @@ constructor(
             .value(AttributeValue.fromB(SdkBytes.fromByteArray(stateBytes)))
             .build()
         val deletionResult =
-          dynamoDb.deleteItem {
-            it.tableName(tableName)
-            it.key(mapOf(HASH_ATTRIBUTE to AttributeValue.fromS(id)))
-            it.expected(mapOf(STATE_ATTRIBUTE to expectedValue))
-            it.returnValues(ReturnValue.ALL_OLD)
+          dynamoDb.deleteItem { request ->
+            request.overrideConfiguration { config -> config.apiCallTimeout(retryTimeout) }
+            request.tableName(tableName)
+            request.key(mapOf(HASH_ATTRIBUTE to AttributeValue.fromS(id)))
+            request.expected(mapOf(STATE_ATTRIBUTE to expectedValue))
+            request.returnValues(ReturnValue.ALL_OLD)
           }
 
         if (deletionResult.attributes().isNotEmpty()) {

@@ -4,6 +4,10 @@ package misk.jobqueue.sqs
  * An [AwsSqsQueueConfig] tells misk about a queue, potentially in another region and/or another account. If the queue
  * is in another account, it will require an IAM policy enabling cross account access
  */
+@Deprecated(
+  message = "AWS SDK v1 SQS jobqueue is deprecated. Use misk.aws2.sqs.jobqueue.config.SqsQueueConfig " +
+    "with misk.aws2.sqs.jobqueue.SqsJobQueueModule instead."
+)
 data class AwsSqsQueueConfig
 @JvmOverloads
 constructor(

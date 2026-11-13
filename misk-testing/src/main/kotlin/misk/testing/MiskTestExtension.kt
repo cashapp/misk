@@ -1,8 +1,13 @@
 package misk.testing
 
+import com.google.common.cache.Cache
+import com.google.common.cache.CacheBuilder
+import com.google.common.cache.RemovalCause
 import com.google.common.util.concurrent.ServiceManager
+import com.google.common.util.concurrent.UncheckedExecutionException
 import com.google.inject.Guice
 import com.google.inject.Injector
+import com.google.inject.Key
 import com.google.inject.Module
 import com.google.inject.testing.fieldbinder.BoundFieldModule
 import jakarta.inject.Inject
@@ -24,8 +29,33 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
   companion object {
     private val runningDependencies = ConcurrentHashMap.newKeySet<String>()
     private val runningServices = ConcurrentHashMap.newKeySet<List<Module>>()
-    private val injectedModules = ConcurrentHashMap<List<Module>, Injector>()
     private val log = getLogger<MiskTestExtension>()
+
+    private val maxLruSize: Int? =
+      System.getenv("MISK_TEST_REUSE_LRU_SIZE")?.toIntOrNull()?.takeIf { it > 0 }
+
+    // When MISK_TEST_REUSE_LRU_SIZE is set, the cache evicts least-recently-used entries once
+    // the size is exceeded; the removal listener stops services for evicted injectors. Guava's
+    // cache uses ConcurrentMap internally, so callers don't need extra synchronization.
+    private val injectedModules: Cache<List<Module>, Injector> = run {
+      val builder = CacheBuilder.newBuilder()
+        .removalListener<List<Module>, Injector> { notification ->
+          if (notification.cause == RemovalCause.EXPLICIT) return@removalListener
+          val key = notification.key ?: return@removalListener
+          val injector = notification.value ?: return@removalListener
+          runningServices.remove(key)
+          try {
+            val serviceManager = injector
+              .getExistingBinding(Key.get(ServiceManager::class.java))
+              ?.provider?.get()
+            serviceManager?.stopAsync()?.awaitStopped(45, TimeUnit.SECONDS)
+          } catch (e: Exception) {
+            log.warn(e) { "Failed to stop services for evicted injector cache entry" }
+          }
+        }
+      if (maxLruSize != null) builder.maximumSize(maxLruSize.toLong())
+      builder.build()
+    }
   }
 
   override fun beforeEach(context: ExtensionContext) {
@@ -64,7 +94,13 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
     val injector =
       if (context.reuseInjector()) {
-        injectedModules.getOrPut(context.getSortedActionTestModules()) { Guice.createInjector(module) }
+        try {
+          injectedModules.get(context.getSortedActionTestModules()) {
+            Guice.createInjector(module)
+          }
+        } catch (e: UncheckedExecutionException) {
+          throw e.cause ?: e
+        }
       } else {
         Guice.createInjector(module)
       }
@@ -110,7 +146,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
               } catch (stopError: Exception) {
                 e.addSuppressed(stopError)
               }
-              injectedModules.remove(context.getSortedActionTestModules())
+              injectedModules.invalidate(context.getSortedActionTestModules())
               throw e
             }
           }

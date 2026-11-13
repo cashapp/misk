@@ -14,6 +14,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.full.superclasses
 import kotlin.reflect.jvm.javaField
 import okio.ByteString
@@ -35,6 +36,9 @@ constructor(private val documentationProvider: ProtoDocumentationProvider? = nul
 
     val requestClass = requestType.classifier as KClass<*>
     if (Message::class !in requestClass.superclasses) {
+      if (requestClass.isData) {
+        return calculateDataClassTypes(requestClass)
+      }
       return mapOf()
     }
 
@@ -111,6 +115,73 @@ constructor(private val documentationProvider: ProtoDocumentationProvider? = nul
           )
         )
         stack.push(fieldClass.kotlin)
+      }
+    }
+  }
+
+  private fun calculateDataClassTypes(rootClass: KClass<*>): Map<String, Type> {
+    val typesMap = mutableMapOf<String, Type>()
+    val stack = LinkedList<KClass<*>>()
+    stack.push(rootClass)
+
+    while (stack.isNotEmpty()) {
+      val clazz = stack.pop()
+
+      if (typesMap.containsKey(clazz.java.canonicalName!!)) {
+        continue
+      }
+
+      val fields = mutableListOf<Field>()
+      val constructor = clazz.primaryConstructor
+
+      if (constructor != null) {
+        for (param in constructor.parameters) {
+          val paramName = param.name ?: continue
+          handleDataClassField(fieldType = param.type, fieldName = paramName, fields = fields, stack = stack)
+        }
+      }
+
+      typesMap[clazz.java.canonicalName!!] = Type(fields.toList())
+    }
+
+    return typesMap
+  }
+
+  private fun handleDataClassField(
+    fieldType: KType,
+    fieldName: String,
+    fields: MutableList<Field>,
+    stack: LinkedList<KClass<*>>,
+    repeated: Boolean = false,
+  ) {
+    val classifier = fieldType.classifier as? KClass<*> ?: return
+
+    when {
+      classifier == String::class -> fields.add(Field(fieldName, "String", repeated))
+      classifier == ByteString::class -> fields.add(Field(fieldName, "ByteString", repeated))
+      classifier == Char::class -> fields.add(Field(fieldName, "Char", repeated))
+      classifier == Byte::class -> fields.add(Field(fieldName, "Byte", repeated))
+      classifier == Short::class -> fields.add(Field(fieldName, "Short", repeated))
+      classifier == Int::class -> fields.add(Field(fieldName, "Int", repeated))
+      classifier == Long::class -> fields.add(Field(fieldName, "Long", repeated))
+      classifier == Float::class -> fields.add(Field(fieldName, "Float", repeated))
+      classifier == Double::class -> fields.add(Field(fieldName, "Double", repeated))
+      classifier == Boolean::class -> fields.add(Field(fieldName, "Boolean", repeated))
+      classifier == Instant::class -> fields.add(Field(fieldName, "Instant", repeated))
+      classifier == Duration::class -> fields.add(Field(fieldName, "Duration", repeated))
+      classifier == LocalDate::class -> fields.add(Field(fieldName, "LocalDate", repeated))
+      classifier.java.isEnum -> fields.add(createEnumField(classifier.java, fieldName, repeated))
+      classifier.isSubclassOf(List::class) -> {
+        val elementType = fieldType.arguments.firstOrNull()?.type ?: return
+        handleDataClassField(elementType, fieldName, fields, stack, true)
+      }
+      classifier.isSubclassOf(Map::class) -> {
+        val valueType = fieldType.arguments.getOrNull(1)?.type ?: return
+        handleDataClassField(valueType, fieldName, fields, stack, true)
+      }
+      classifier.isData -> {
+        fields.add(Field(fieldName, classifier.java.canonicalName!!, repeated))
+        stack.push(classifier)
       }
     }
   }

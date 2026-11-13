@@ -1,7 +1,9 @@
 package misk.hibernate
 
+import javax.transaction.Synchronization
 import kotlin.reflect.KClass
 import misk.jdbc.Check
+import misk.logging.getLogger
 import misk.vitess.Destination
 import misk.vitess.Keyspace
 import misk.vitess.Shard
@@ -53,3 +55,35 @@ inline fun <R : DbRoot<R>, reified S : DbSharded<R, S>> Session.loadSharded(gid:
   loadSharded(gid, S::class)
 
 inline fun <reified T : DbEntity<T>> Session.loadOrNull(id: Id<T>): T? = loadOrNull(id, T::class)
+
+private val logger = getLogger<Session>()
+
+/**
+ * Allow cross-shard transactions for this session by setting the Vitess transaction mode to MULTI. This is useful when
+ * the vtgate is configured with `--transaction_mode=SINGLE`, which rejects any transaction that spans multiple shards
+ * (both reads and writes).
+ *
+ * Must be called before any cross-shard operations in the transaction. This is Vitess-only — calling on a non-Vitess
+ * database will throw a [java.sql.SQLException] (`Unknown system variable 'transaction_mode'`).
+ */
+fun Session.allowCrossShardTransactions() {
+  hibernateSession.doWork { connection ->
+    connection.createStatement().execute("SET transaction_mode = 'multi'")
+  }
+
+  // Reset to UNSPECIFIED after the transaction completes (commit or rollback) so it doesn't leak
+  // to subsequent transactions via connection pool reuse. UNSPECIFIED falls back to whatever the
+  // vtgate-level default is, so this is safe regardless of the vtgate's configured transaction mode.
+  hibernateSession.transaction.registerSynchronization(object : Synchronization {
+    override fun beforeCompletion() {}
+    override fun afterCompletion(status: Int) {
+      try {
+        hibernateSession.doWork { connection ->
+          connection.createStatement().execute("SET transaction_mode = 'unspecified'")
+        }
+      } catch (e: Exception) {
+        logger.error(e) { "Failed to reset transaction_mode after transaction completion" }
+      }
+    }
+  })
+}

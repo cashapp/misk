@@ -22,10 +22,14 @@ internal class CronTask @Inject constructor() : AbstractIdleService() {
   override fun startUp() {
     logger.info { "Starting CronTask" }
     var lastRun = clock.instant()
+    var wasDisabled = false
     taskQueue.scheduleWithBackoff(INTERVAL) {
       when {
         asyncSwitch.isDisabled("cron") -> {
-          logger.info { "Async tasks are disabled on this node. Skipping." }
+          if (!wasDisabled) {
+            logger.info { "Async cron tasks disabled. Pausing." }
+            wasDisabled = true
+          }
           Status.OK
         }
 
@@ -35,6 +39,10 @@ internal class CronTask @Inject constructor() : AbstractIdleService() {
         }
 
         else -> {
+          if (wasDisabled) {
+            logger.info { "Async cron tasks re-enabled. Resuming." }
+            wasDisabled = false
+          }
           val now = clock.instant()
           cronManager.runReadyCrons(lastRun)
           lastRun = now

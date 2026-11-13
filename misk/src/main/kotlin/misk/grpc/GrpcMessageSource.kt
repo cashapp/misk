@@ -23,6 +23,8 @@ constructor(
   private val source: BufferedSource,
   private val messageAdapter: ProtoAdapter<T>,
   private val grpcEncoding: String? = null,
+  // Defaults to gRPC's standard 4 MiB maximum inbound message size.
+  private val maxMessageBytes: Long = 4L * 1024 * 1024,
 ) : MessageSource<T>, Closeable by source {
   override fun read(): T? {
     if (source.exhausted()) return null
@@ -45,9 +47,17 @@ constructor(
 
     val encodedLength = source.readInt().toLong() and 0xffffffffL
 
+    // Reject an oversized frame before buffering it, and cap the decoded (post-decompression)
+    // message so a small compressed frame cannot inflate into a heap-exhausting message.
+    if (encodedLength > maxMessageBytes) {
+      throw GrpcMessageTooLargeException(maxMessageBytes)
+    }
+
     val encodedMessage = Buffer().write(source, encodedLength)
 
-    return messageDecoding.decode(encodedMessage).buffer().use { messageAdapter.decode(it) }
+    return LimitedSource(messageDecoding.decode(encodedMessage), maxMessageBytes).buffer().use {
+      messageAdapter.decode(it)
+    }
   }
 
   override fun toString() = "GrpcMessageSource"

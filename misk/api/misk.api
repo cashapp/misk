@@ -1,249 +1,3 @@
-public final class com/squareup/protos/test/grpc/GreetResponse : com/squareup/wire/Message {
-	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
-	public static final field DEFAULT_MESSAGE Ljava/lang/String;
-	public final field message Ljava/lang/String;
-	public fun <init> (Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;Lokio/ByteString;)V
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun newBuilder ()Lcom/squareup/protos/test/grpc/GreetResponse$Builder;
-	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/squareup/protos/test/grpc/GreetResponse$Builder : com/squareup/wire/Message$Builder {
-	public field message Ljava/lang/String;
-	public fun <init> ()V
-	public fun build ()Lcom/squareup/protos/test/grpc/GreetResponse;
-	public synthetic fun build ()Lcom/squareup/wire/Message;
-	public fun message (Ljava/lang/String;)Lcom/squareup/protos/test/grpc/GreetResponse$Builder;
-}
-
-public abstract interface class com/squareup/protos/test/grpc/GreeterClient : com/squareup/wire/Service {
-	public abstract fun Greet ()Lcom/squareup/wire/GrpcCall;
-	public abstract fun SayHello ()Lcom/squareup/wire/GrpcCall;
-}
-
-public abstract interface class com/squareup/protos/test/grpc/GreeterGreetBlockingServer : com/squareup/wire/Service {
-	public abstract fun Greet (Lkotlin/Unit;)Lcom/squareup/protos/test/grpc/GreetResponse;
-}
-
-public abstract interface class com/squareup/protos/test/grpc/GreeterSayHelloBlockingServer : com/squareup/wire/Service {
-	public abstract fun SayHello (Lcom/squareup/protos/test/grpc/HelloRequest;)Lcom/squareup/protos/test/grpc/HelloReply;
-}
-
-public final class com/squareup/protos/test/grpc/GrpcGreeterClient : com/squareup/protos/test/grpc/GreeterClient {
-	public fun <init> (Lcom/squareup/wire/GrpcClient;)V
-	public fun Greet ()Lcom/squareup/wire/GrpcCall;
-	public fun SayHello ()Lcom/squareup/wire/GrpcCall;
-}
-
-public final class com/squareup/protos/test/grpc/HelloReply : com/squareup/wire/Message {
-	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
-	public static final field DEFAULT_MESSAGE Ljava/lang/String;
-	public final field message Ljava/lang/String;
-	public fun <init> (Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;Lokio/ByteString;)V
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun newBuilder ()Lcom/squareup/protos/test/grpc/HelloReply$Builder;
-	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/squareup/protos/test/grpc/HelloReply$Builder : com/squareup/wire/Message$Builder {
-	public field message Ljava/lang/String;
-	public fun <init> ()V
-	public fun build ()Lcom/squareup/protos/test/grpc/HelloReply;
-	public synthetic fun build ()Lcom/squareup/wire/Message;
-	public fun message (Ljava/lang/String;)Lcom/squareup/protos/test/grpc/HelloReply$Builder;
-}
-
-public final class com/squareup/protos/test/grpc/HelloRequest : com/squareup/wire/Message {
-	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
-	public static final field DEFAULT_NAME Ljava/lang/String;
-	public final field name Ljava/lang/String;
-	public fun <init> (Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;Lokio/ByteString;)V
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun newBuilder ()Lcom/squareup/protos/test/grpc/HelloRequest$Builder;
-	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/squareup/protos/test/grpc/HelloRequest$Builder : com/squareup/wire/Message$Builder {
-	public field name Ljava/lang/String;
-	public fun <init> ()V
-	public fun build ()Lcom/squareup/protos/test/grpc/HelloRequest;
-	public synthetic fun build ()Lcom/squareup/wire/Message;
-	public fun name (Ljava/lang/String;)Lcom/squareup/protos/test/grpc/HelloRequest$Builder;
-}
-
-public final class com/squareup/protos/test/parsing/Robot : com/squareup/wire/Message {
-	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
-	public static final field DEFAULT_ROBOT_ID Ljava/lang/Integer;
-	public static final field DEFAULT_ROBOT_TOKEN Ljava/lang/String;
-	public final field robot_id Ljava/lang/Integer;
-	public final field robot_token Ljava/lang/String;
-	public fun <init> (Ljava/lang/Integer;Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/Integer;Ljava/lang/String;Lokio/ByteString;)V
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun newBuilder ()Lcom/squareup/protos/test/parsing/Robot$Builder;
-	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/squareup/protos/test/parsing/Robot$Builder : com/squareup/wire/Message$Builder {
-	public field robot_id Ljava/lang/Integer;
-	public field robot_token Ljava/lang/String;
-	public fun <init> ()V
-	public fun build ()Lcom/squareup/protos/test/parsing/Robot;
-	public synthetic fun build ()Lcom/squareup/wire/Message;
-	public fun robot_id (Ljava/lang/Integer;)Lcom/squareup/protos/test/parsing/Robot$Builder;
-	public fun robot_token (Ljava/lang/String;)Lcom/squareup/protos/test/parsing/Robot$Builder;
-}
-
-public final class com/squareup/protos/test/parsing/Shipment : com/squareup/wire/Message {
-	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
-	public static final field DEFAULT_ACCOUNT_TOKEN Ljava/lang/String;
-	public static final field DEFAULT_CARD_TOKEN Ljava/lang/String;
-	public static final field DEFAULT_DELETED Ljava/lang/Boolean;
-	public static final field DEFAULT_DESTINATION_SIGNATURE Lokio/ByteString;
-	public static final field DEFAULT_LOAD_RATIO Ljava/lang/Double;
-	public static final field DEFAULT_SHIPMENT_ID Ljava/lang/Long;
-	public static final field DEFAULT_SHIPMENT_TOKEN Ljava/lang/String;
-	public static final field DEFAULT_SOURCE_SIGNATURE Lokio/ByteString;
-	public static final field DEFAULT_STATUS Lcom/squareup/protos/test/parsing/Shipment$State;
-	public static final field DEFAULT_TRANSFER_ID Ljava/lang/String;
-	public final field account_token Ljava/lang/String;
-	public final field card_token Ljava/lang/String;
-	public final field deleted Ljava/lang/Boolean;
-	public final field destination Lcom/squareup/protos/test/parsing/Warehouse;
-	public final field destination_signature Lokio/ByteString;
-	public final field load_ratio Ljava/lang/Double;
-	public final field notes Ljava/util/List;
-	public final field shipment_id Ljava/lang/Long;
-	public final field shipment_token Ljava/lang/String;
-	public final field source Lcom/squareup/protos/test/parsing/Warehouse;
-	public final field source_signature Lokio/ByteString;
-	public final field status Lcom/squareup/protos/test/parsing/Shipment$State;
-	public final field transfer_id Ljava/lang/String;
-	public fun <init> (Ljava/lang/Long;Ljava/lang/String;Lcom/squareup/protos/test/parsing/Warehouse;Lcom/squareup/protos/test/parsing/Warehouse;Lcom/squareup/protos/test/parsing/Shipment$State;Ljava/lang/Double;Ljava/lang/Boolean;Lokio/ByteString;Lokio/ByteString;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/Long;Ljava/lang/String;Lcom/squareup/protos/test/parsing/Warehouse;Lcom/squareup/protos/test/parsing/Warehouse;Lcom/squareup/protos/test/parsing/Shipment$State;Ljava/lang/Double;Ljava/lang/Boolean;Lokio/ByteString;Lokio/ByteString;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun newBuilder ()Lcom/squareup/protos/test/parsing/Shipment$Builder;
-	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/squareup/protos/test/parsing/Shipment$Builder : com/squareup/wire/Message$Builder {
-	public field account_token Ljava/lang/String;
-	public field card_token Ljava/lang/String;
-	public field deleted Ljava/lang/Boolean;
-	public field destination Lcom/squareup/protos/test/parsing/Warehouse;
-	public field destination_signature Lokio/ByteString;
-	public field load_ratio Ljava/lang/Double;
-	public field notes Ljava/util/List;
-	public field shipment_id Ljava/lang/Long;
-	public field shipment_token Ljava/lang/String;
-	public field source Lcom/squareup/protos/test/parsing/Warehouse;
-	public field source_signature Lokio/ByteString;
-	public field status Lcom/squareup/protos/test/parsing/Shipment$State;
-	public field transfer_id Ljava/lang/String;
-	public fun <init> ()V
-	public fun account_token (Ljava/lang/String;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
-	public fun build ()Lcom/squareup/protos/test/parsing/Shipment;
-	public synthetic fun build ()Lcom/squareup/wire/Message;
-	public fun card_token (Ljava/lang/String;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
-	public fun deleted (Ljava/lang/Boolean;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
-	public fun destination (Lcom/squareup/protos/test/parsing/Warehouse;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
-	public fun destination_signature (Lokio/ByteString;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
-	public fun load_ratio (Ljava/lang/Double;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
-	public fun notes (Ljava/util/List;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
-	public fun shipment_id (Ljava/lang/Long;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
-	public fun shipment_token (Ljava/lang/String;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
-	public fun source (Lcom/squareup/protos/test/parsing/Warehouse;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
-	public fun source_signature (Lokio/ByteString;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
-	public fun status (Lcom/squareup/protos/test/parsing/Shipment$State;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
-	public fun transfer_id (Ljava/lang/String;)Lcom/squareup/protos/test/parsing/Shipment$Builder;
-}
-
-public final class com/squareup/protos/test/parsing/Shipment$State : java/lang/Enum, com/squareup/wire/WireEnum {
-	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
-	public static final field CONSUMING Lcom/squareup/protos/test/parsing/Shipment$State;
-	public static final field DELIVERING Lcom/squareup/protos/test/parsing/Shipment$State;
-	public static final field PICKING_UP Lcom/squareup/protos/test/parsing/Shipment$State;
-	public static final field VALIDATING Lcom/squareup/protos/test/parsing/Shipment$State;
-	public static fun fromValue (I)Lcom/squareup/protos/test/parsing/Shipment$State;
-	public fun getValue ()I
-	public static fun valueOf (Ljava/lang/String;)Lcom/squareup/protos/test/parsing/Shipment$State;
-	public static fun values ()[Lcom/squareup/protos/test/parsing/Shipment$State;
-}
-
-public final class com/squareup/protos/test/parsing/Warehouse : com/squareup/wire/Message {
-	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
-	public static final field DEFAULT_WAREHOUSE_ID Ljava/lang/Long;
-	public static final field DEFAULT_WAREHOUSE_TOKEN Ljava/lang/String;
-	public final field alternates Ljava/util/List;
-	public final field central_repo Lcom/squareup/protos/test/parsing/Warehouse;
-	public final field dropoff_points Ljava/util/Map;
-	public final field robots Ljava/util/Map;
-	public final field warehouse_id Ljava/lang/Long;
-	public final field warehouse_token Ljava/lang/String;
-	public fun <init> (Ljava/lang/Long;Ljava/lang/String;Lcom/squareup/protos/test/parsing/Warehouse;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;)V
-	public fun <init> (Ljava/lang/Long;Ljava/lang/String;Lcom/squareup/protos/test/parsing/Warehouse;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Lokio/ByteString;)V
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun newBuilder ()Lcom/squareup/protos/test/parsing/Warehouse$Builder;
-	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/squareup/protos/test/parsing/Warehouse$Builder : com/squareup/wire/Message$Builder {
-	public field alternates Ljava/util/List;
-	public field central_repo Lcom/squareup/protos/test/parsing/Warehouse;
-	public field dropoff_points Ljava/util/Map;
-	public field robots Ljava/util/Map;
-	public field warehouse_id Ljava/lang/Long;
-	public field warehouse_token Ljava/lang/String;
-	public fun <init> ()V
-	public fun alternates (Ljava/util/List;)Lcom/squareup/protos/test/parsing/Warehouse$Builder;
-	public fun build ()Lcom/squareup/protos/test/parsing/Warehouse;
-	public synthetic fun build ()Lcom/squareup/wire/Message;
-	public fun central_repo (Lcom/squareup/protos/test/parsing/Warehouse;)Lcom/squareup/protos/test/parsing/Warehouse$Builder;
-	public fun dropoff_points (Ljava/util/Map;)Lcom/squareup/protos/test/parsing/Warehouse$Builder;
-	public fun robots (Ljava/util/Map;)Lcom/squareup/protos/test/parsing/Warehouse$Builder;
-	public fun warehouse_id (Ljava/lang/Long;)Lcom/squareup/protos/test/parsing/Warehouse$Builder;
-	public fun warehouse_token (Ljava/lang/String;)Lcom/squareup/protos/test/parsing/Warehouse$Builder;
-}
-
-public final class helpers/protos/Dinosaur : com/squareup/wire/Message {
-	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
-	public static final field DEFAULT_NAME Ljava/lang/String;
-	public final field name Ljava/lang/String;
-	public final field picture_urls Ljava/util/List;
-	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
-	public fun <init> (Ljava/lang/String;Ljava/util/List;Lokio/ByteString;)V
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
-	public fun newBuilder ()Lhelpers/protos/Dinosaur$Builder;
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class helpers/protos/Dinosaur$Builder : com/squareup/wire/Message$Builder {
-	public field name Ljava/lang/String;
-	public field picture_urls Ljava/util/List;
-	public fun <init> ()V
-	public synthetic fun build ()Lcom/squareup/wire/Message;
-	public fun build ()Lhelpers/protos/Dinosaur;
-	public fun name (Ljava/lang/String;)Lhelpers/protos/Dinosaur$Builder;
-	public fun picture_urls (Ljava/util/List;)Lhelpers/protos/Dinosaur$Builder;
-}
-
 public final class misk/Action {
 	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KFunction;Ljava/util/List;Lokhttp3/MediaType;Ljava/util/List;Lkotlin/reflect/KType;Lmisk/web/DispatchMechanism;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -365,12 +119,12 @@ public final class misk/client/BackwardsCompatibleClientsConfig {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/client/BackwardsCompatibleClientsConfigConverter : com/fasterxml/jackson/databind/util/Converter {
+public final class misk/client/BackwardsCompatibleClientsConfigConverter : tools/jackson/databind/util/StdConverter {
 	public fun <init> ()V
 	public synthetic fun convert (Ljava/lang/Object;)Ljava/lang/Object;
 	public fun convert (Lmisk/client/BackwardsCompatibleClientsConfig;)Lmisk/client/HttpClientsConfig;
-	public fun getInputType (Lcom/fasterxml/jackson/databind/type/TypeFactory;)Lcom/fasterxml/jackson/databind/JavaType;
-	public fun getOutputType (Lcom/fasterxml/jackson/databind/type/TypeFactory;)Lcom/fasterxml/jackson/databind/JavaType;
+	public fun getInputType (Ltools/jackson/databind/type/TypeFactory;)Ltools/jackson/databind/JavaType;
+	public fun getOutputType (Ltools/jackson/databind/type/TypeFactory;)Ltools/jackson/databind/JavaType;
 }
 
 public final class misk/client/BackwardsCompatibleEndpointConfig {
@@ -680,13 +434,17 @@ public final class misk/client/OkHttpClientCommonConfigurator$Companion {
 
 public final class misk/client/PeerClientFactory {
 	public fun <init> (Ljava/lang/String;Lmisk/client/HttpClientsConfig;Lmisk/client/HttpClientFactory;I)V
-	public final fun baseUrl (Lmisk/clustering/Cluster$Member;)Ljava/lang/String;
-	public final fun client (Lmisk/clustering/Cluster$Member;)Lokhttp3/OkHttpClient;
+	public final fun baseUrl (Lmisk/client/PeerIdentifier;)Ljava/lang/String;
+	public final fun client (Lmisk/client/PeerIdentifier;)Lokhttp3/OkHttpClient;
 }
 
 public final class misk/client/PeerClientModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public final fun peerClientFactory (Ljava/lang/String;Lmisk/client/HttpClientsConfig;Lmisk/client/HttpClientFactory;Lmisk/web/WebConfig;)Lmisk/client/PeerClientFactory;
+}
+
+public abstract interface class misk/client/PeerIdentifier {
+	public abstract fun getIpAddress ()Ljava/lang/String;
 }
 
 public final class misk/client/ProtoMessageHttpClient {
@@ -712,7 +470,7 @@ public final class misk/client/TypedHttpClientModule$Companion {
 }
 
 public abstract interface class misk/client/TypedPeerClientFactory {
-	public abstract fun client (Lmisk/clustering/Cluster$Member;)Ljava/lang/Object;
+	public abstract fun client (Lmisk/client/PeerIdentifier;)Ljava/lang/Object;
 }
 
 public final class misk/client/TypedPeerHttpClientModule : misk/inject/KAbstractModule {
@@ -830,6 +588,17 @@ public final class misk/concurrent/ExplicitReleaseDelayQueue : java/util/concurr
 	public fun toArray ([Ljava/lang/Object;)[Ljava/lang/Object;
 }
 
+public final class misk/concurrent/RealExecutorServiceFactory : com/google/common/util/concurrent/AbstractService, misk/concurrent/ExecutorServiceFactory {
+	public fun <init> (Ljava/time/Clock;)V
+	public fun fixed (Ljava/lang/String;I)Ljava/util/concurrent/ExecutorService;
+	public fun fixedWithMetrics (Ljava/lang/String;ILio/micrometer/core/instrument/MeterRegistry;Ljava/lang/String;Ljava/lang/String;)Ljava/util/concurrent/ExecutorService;
+	public final fun getTracer ()Lio/opentracing/Tracer;
+	public fun scheduled (Ljava/lang/String;I)Ljava/util/concurrent/ScheduledExecutorService;
+	public final fun setTracer (Lio/opentracing/Tracer;)V
+	public fun single (Ljava/lang/String;)Ljava/util/concurrent/ExecutorService;
+	public fun unbounded (Ljava/lang/String;)Ljava/util/concurrent/ExecutorService;
+}
+
 public final class misk/dev/DevApplicationKt {
 	public static final fun isRunningDevApplication ()Z
 	public static final fun runDevApplication (Lkotlin/reflect/KFunction;Ljava/util/List;)V
@@ -848,7 +617,7 @@ public final class misk/environment/DeploymentModule : misk/inject/KAbstractModu
 }
 
 public abstract interface class misk/environment/EnvVarLoader : wisp/deployment/EnvironmentVariableLoader {
-	public abstract fun getEnvVar (Ljava/lang/String;)Ljava/lang/String;
+	public fun getEnvVar (Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class misk/environment/EnvVarLoader$DefaultImpls {
@@ -875,10 +644,15 @@ public final class misk/grpc/GrpcKt {
 public final class misk/grpc/GrpcMessageSource : com/squareup/wire/MessageSource, java/io/Closeable {
 	public fun <init> (Lokio/BufferedSource;Lcom/squareup/wire/ProtoAdapter;)V
 	public fun <init> (Lokio/BufferedSource;Lcom/squareup/wire/ProtoAdapter;Ljava/lang/String;)V
-	public synthetic fun <init> (Lokio/BufferedSource;Lcom/squareup/wire/ProtoAdapter;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lokio/BufferedSource;Lcom/squareup/wire/ProtoAdapter;Ljava/lang/String;J)V
+	public synthetic fun <init> (Lokio/BufferedSource;Lcom/squareup/wire/ProtoAdapter;Ljava/lang/String;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun close ()V
 	public fun read ()Ljava/lang/Object;
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/grpc/GrpcMessageTooLargeException : java/io/IOException {
+	public fun <init> (J)V
 }
 
 public final class misk/grpc/GrpcTimeoutMarshaller {
@@ -1274,7 +1048,7 @@ public final class misk/web/BoundAction {
 	public final fun hasIdenticalRouting (Lmisk/web/BoundAction;)Z
 	public final fun match (Lmisk/web/DispatchMechanism;Lokhttp3/MediaType;Ljava/util/List;Lokhttp3/HttpUrl;)Lmisk/web/BoundActionMatch;
 	public final fun matchByUrl (Lokhttp3/HttpUrl;)Lmisk/web/BoundActionMatch;
-	public final fun scopeAndHandle (Ljavax/servlet/http/HttpServletRequest;Lmisk/web/HttpCall;Ljava/util/regex/Matcher;)V
+	public final fun scopeAndHandle (Ljakarta/servlet/http/HttpServletRequest;Lmisk/web/HttpCall;Ljava/util/regex/Matcher;)V
 	public final fun scopeAndHandle (Lmisk/web/HttpCall;Ljava/util/regex/Matcher;)V
 	public fun toString ()Ljava/lang/String;
 }
@@ -1345,8 +1119,8 @@ public final class misk/web/CorsConfig {
 }
 
 public abstract interface class misk/web/FeatureBinding {
-	public abstract fun afterCall (Lmisk/web/FeatureBinding$Subject;)V
-	public abstract fun beforeCall (Lmisk/web/FeatureBinding$Subject;)V
+	public fun afterCall (Lmisk/web/FeatureBinding$Subject;)V
+	public fun beforeCall (Lmisk/web/FeatureBinding$Subject;)V
 }
 
 public abstract interface class misk/web/FeatureBinding$Claimer {
@@ -1364,6 +1138,7 @@ public final class misk/web/FeatureBinding$DefaultImpls {
 
 public abstract interface class misk/web/FeatureBinding$Factory {
 	public abstract fun create (Lmisk/Action;Lmisk/web/PathPattern;Lmisk/web/FeatureBinding$Claimer;Ljava/util/List;)Lmisk/web/FeatureBinding;
+	public static synthetic fun create$default (Lmisk/web/FeatureBinding$Factory;Lmisk/Action;Lmisk/web/PathPattern;Lmisk/web/FeatureBinding$Claimer;Ljava/util/List;ILjava/lang/Object;)Lmisk/web/FeatureBinding;
 }
 
 public final class misk/web/FeatureBinding$Factory$DefaultImpls {
@@ -1404,11 +1179,11 @@ public final class misk/web/GracefulShutdownConfig {
 }
 
 public abstract interface class misk/web/HttpCall : misk/api/HttpRequest {
-	public abstract fun accepts ()Ljava/util/List;
+	public fun accepts ()Ljava/util/List;
 	public abstract fun addResponseHeaders (Lokhttp3/Headers;)V
-	public abstract fun asOkHttpRequest ()Lokhttp3/Request;
-	public abstract fun computeRequestHeader (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
-	public abstract fun contentType ()Lokhttp3/MediaType;
+	public fun asOkHttpRequest ()Lokhttp3/Request;
+	public fun computeRequestHeader (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun contentType ()Lokhttp3/MediaType;
 	public abstract fun getCookies ()Ljava/util/List;
 	public abstract fun getLinkLayerLocalAddress ()Lmisk/web/SocketAddress;
 	public abstract fun getNetworkStatusCode ()I
@@ -1678,10 +1453,12 @@ public final class misk/web/WebConfig : misk/config/Config {
 	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZ)V
 	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;)V
 	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;)V
-	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;I)V
-	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;IZ)V
-	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;IZJ)V
-	public synthetic fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;IZJIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;Z)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;ZI)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;ZIZ)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;ZIZJ)V
+	public fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;ZIZJJ)V
+	public synthetic fun <init> (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;ZIZJJIILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component10 ()Ljava/lang/Integer;
 	public final fun component11 ()Ljava/lang/Integer;
@@ -1720,16 +1497,18 @@ public final class misk/web/WebConfig : misk/config/Config {
 	public final fun component41 ()Z
 	public final fun component42 ()Ljava/util/List;
 	public final fun component43 ()Lmisk/web/RequestDeadlinesConfig;
-	public final fun component44 ()I
-	public final fun component45 ()Z
-	public final fun component46 ()J
+	public final fun component44 ()Z
+	public final fun component45 ()I
+	public final fun component46 ()Z
+	public final fun component47 ()J
+	public final fun component48 ()J
 	public final fun component5 ()Lmisk/web/GracefulShutdownConfig;
 	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()Lmisk/web/WebSslConfig;
 	public final fun component8 ()Lmisk/web/WebUnixDomainSocketConfig;
 	public final fun component9 ()Z
-	public final fun copy (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;IZJ)Lmisk/web/WebConfig;
-	public static synthetic fun copy$default (Lmisk/web/WebConfig;IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;IZJIILjava/lang/Object;)Lmisk/web/WebConfig;
+	public final fun copy (IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;ZIZJJ)Lmisk/web/WebConfig;
+	public static synthetic fun copy$default (Lmisk/web/WebConfig;IJIZLmisk/web/GracefulShutdownConfig;Ljava/lang/String;Lmisk/web/WebSslConfig;Lmisk/web/WebUnixDomainSocketConfig;ZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;IIIZLmisk/web/exceptions/ActionExceptionLogLevelConfig;Ljava/lang/Integer;DZZILjava/util/Map;ZLorg/slf4j/event/Level;Lmisk/web/ConcurrencyLimiterConfig;ILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;IIZZLjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZZZLjava/util/List;Lmisk/web/RequestDeadlinesConfig;ZIZJJIILjava/lang/Object;)Lmisk/web/WebConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAcceptors ()Ljava/lang/Integer;
 	public final fun getAction_exception_log_level ()Lmisk/web/exceptions/ActionExceptionLogLevelConfig;
@@ -1743,6 +1522,7 @@ public final class misk/web/WebConfig : misk/config/Config {
 	public final fun getEnable_thread_pool_queue_metrics ()Z
 	public final fun getGraceful_shutdown_config ()Lmisk/web/GracefulShutdownConfig;
 	public final fun getGrpcGzip ()Z
+	public final fun getGrpcMaxInboundMessageBytes ()J
 	public final fun getGzip ()Z
 	public final fun getHealth_dedicated_jetty_instance ()Z
 	public final fun getHealth_port ()I
@@ -1773,6 +1553,7 @@ public final class misk/web/WebConfig : misk/config/Config {
 	public final fun getSelectors ()Ljava/lang/Integer;
 	public final fun getShutdown_sleep_ms ()I
 	public final fun getSsl ()Lmisk/web/WebSslConfig;
+	public final fun getTracing_set_span_kind ()Z
 	public final fun getUnix_domain_socket ()Lmisk/web/WebUnixDomainSocketConfig;
 	public final fun getUnix_domain_sockets ()Ljava/util/List;
 	public final fun getUse_virtual_threads ()Z
@@ -1955,9 +1736,9 @@ public final class misk/web/exceptions/ExceptionHandlingInterceptorKt {
 }
 
 public abstract interface class misk/web/exceptions/ExceptionMapper {
-	public abstract fun isError (Ljava/lang/Throwable;)Z
-	public abstract fun loggingLevel (Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
-	public abstract fun toGrpcResponse (Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
+	public fun isError (Ljava/lang/Throwable;)Z
+	public fun loggingLevel (Ljava/lang/Throwable;)Lorg/slf4j/event/Level;
+	public fun toGrpcResponse (Ljava/lang/Throwable;)Lmisk/web/exceptions/GrpcErrorResponse;
 	public abstract fun toResponse (Ljava/lang/Throwable;)Lmisk/web/Response;
 }
 
@@ -2366,7 +2147,7 @@ public abstract interface class misk/web/marshal/Marshaller {
 	public static final field Companion Lmisk/web/marshal/Marshaller$Companion;
 	public abstract fun contentType ()Lokhttp3/MediaType;
 	public abstract fun responseBody (Ljava/lang/Object;)Lmisk/web/ResponseBody;
-	public abstract fun responseBody (Ljava/lang/Object;Lmisk/web/HttpCall;)Lmisk/web/ResponseBody;
+	public fun responseBody (Ljava/lang/Object;Lmisk/web/HttpCall;)Lmisk/web/ResponseBody;
 }
 
 public final class misk/web/marshal/Marshaller$Companion {
@@ -2458,7 +2239,7 @@ public abstract interface class misk/web/marshal/Unmarshaller$Factory {
 }
 
 public abstract interface class misk/web/mdc/LogContextProvider {
-	public abstract fun get (Ljavax/servlet/http/HttpServletRequest;)Ljava/lang/String;
+	public abstract fun get (Ljakarta/servlet/http/HttpServletRequest;)Ljava/lang/String;
 }
 
 public final class misk/web/metadata/guice/GuiceMetadata : misk/web/metadata/Metadata {

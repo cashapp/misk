@@ -7,17 +7,18 @@ import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
+import com.squareup.moshi.JsonDataException
 import com.squareup.wire.GrpcException
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import jakarta.servlet.http.HttpServlet
+import jakarta.servlet.http.HttpServletRequest
 import java.io.IOException
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import javax.servlet.http.HttpServlet
-import javax.servlet.http.HttpServletRequest
 import kotlin.math.min
 import misk.Action
 import misk.ApplicationInterceptor
@@ -55,6 +56,7 @@ import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
 import misk.web.exceptions.GrpcExceptionMapper
 import misk.web.exceptions.IOExceptionMapper
+import misk.web.exceptions.JsonDataExceptionMapper
 import misk.web.exceptions.RequestBodyExceptionMapper
 import misk.web.exceptions.WebActionExceptionMapper
 import misk.web.extractors.FormValueFeatureBinding
@@ -174,6 +176,7 @@ constructor(private val config: WebConfig, private val jettyDependsOn: List<Key<
     newMultibinder<ApplicationInterceptor.Factory>()
     newMultibinder<StaticResourceEntry>()
     newMultibinder<WebProxyEntry>()
+    newMultibinder<jakarta.servlet.Filter>()
     val logContextProviderBinder = MapBinder.newMapBinder(binder(), String::class.java, LogContextProvider::class.java)
     logContextProviderBinder
       .addBinding(RequestLogContextInterceptor.MDC_HTTP_METHOD)
@@ -253,6 +256,7 @@ constructor(private val config: WebConfig, private val jettyDependsOn: List<Key<
     install(ExceptionMapperModule.create<EofException, EofExceptionMapper>())
     install(ExceptionMapperModule.create<RequestBodyException, RequestBodyExceptionMapper>())
     install(ExceptionMapperModule.create<DeadlineExceededException, DeadlineExceededExceptionMapper>())
+    install(ExceptionMapperModule.create<JsonDataException, JsonDataExceptionMapper>())
 
     // Register built-in feature bindings.
     multibind<FeatureBinding.Factory>().toInstance(PathParamFeatureBinding.Factory)

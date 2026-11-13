@@ -2,10 +2,10 @@ package misk.web.jetty
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import java.net.HttpURLConnection
 import java.net.ProtocolException
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 import misk.logging.getLogger
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
@@ -47,6 +47,13 @@ constructor(
 
   companion object {
     val log = getLogger<WebActionsServlet>()
+
+    /**
+     * Maximum bytes to drain from an unconsumed request body. If the body exceeds this, we stop draining and let Jetty
+     * send RST_STREAM for the remainder. This prevents a slow client from tying up the servlet thread indefinitely.
+     * Using 1 MB for bounding worst-case drain time.
+     */
+    private const val MAX_DRAIN_BYTES = 1L * 1024 * 1024
   }
 
   internal val boundActions: MutableSet<BoundAction<out WebAction>> = mutableSetOf()
@@ -158,6 +165,34 @@ constructor(
       sendNotFound(request, response, responseBody)
     } catch (e: Throwable) {
       handleThrowable(request, response, e)
+    } finally {
+      drainRequestBody(request)
+    }
+  }
+
+  /**
+   * Drains any unconsumed request body to prevent Jetty from sending RST_STREAM(CANCEL) on HTTP/2 streams. When a
+   * servlet completes without fully reading the request body, Jetty resets the stream because the client's END_STREAM
+   * flag was never received. These server-initiated resets count toward the HTTP/2 frame rate limiter (CVE-2025-5115 /
+   * MadeYouReset mitigation), and exceeding the limit tears down the entire HTTP/2 connection, affecting all
+   * multiplexed streams.
+   */
+  private fun drainRequestBody(request: HttpServletRequest) {
+    try {
+      val input = request.inputStream
+      if (input.isFinished) return
+
+      val buf = ByteArray(4096)
+      var totalRead = 0L
+      while (totalRead < MAX_DRAIN_BYTES) {
+        val read = input.read(buf)
+        if (read == -1) break
+        totalRead += read
+      }
+    } catch (e: Throwable) {
+      // The client cancelling its stream after we've produced a response is normal and not actionable.
+      if (e is org.eclipse.jetty.io.EofException && e.message?.startsWith("Reset no_error") == true) return
+      log.warn(e) { "Failed to drain request body for ${request.method} ${request.requestURI}" }
     }
   }
 
@@ -238,7 +273,8 @@ internal fun HttpServletRequest.httpUrl(): HttpUrl {
 /** @throws ProtocolException on unexpected methods. */
 internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism? {
   return when (method) {
-    HttpMethod.GET.name -> DispatchMechanism.GET
+    HttpMethod.GET.name,
+    HttpMethod.HEAD.name -> DispatchMechanism.GET
     HttpMethod.POST.name ->
       when (contentType()) {
         MediaTypes.APPLICATION_GRPC_MEDIA_TYPE,

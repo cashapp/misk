@@ -15,6 +15,7 @@ import misk.exceptions.NotFoundException
 import misk.inject.KAbstractModule
 import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
+import misk.logging.withSmartTags
 import misk.random.FakeRandom
 import misk.security.authz.AccessControlModule
 import misk.security.authz.FakeCallerAuthenticator
@@ -209,6 +210,29 @@ internal class RequestResponseLoggingHookTest {
 
     // Other interceptors should not log.
     assertThat(logCollector.takeMessages(RequestBodyLoggingInterceptor::class, consumeUnmatchedLogs = false)).isEmpty()
+    assertThat(logCollector.takeMessages(ExceptionHandlingInterceptor::class, consumeUnmatchedLogs = false)).isEmpty()
+  }
+
+  @Test
+  fun smartTagsStoredByUnwrappedExceptionAreLogged() {
+    assertSmartTagsLoggedForWrappedException("smartTagsWrappedOutsideBlock")
+  }
+
+  @Test
+  fun smartTagsStoredByWrappingExceptionAreLogged() {
+    // The tags are stored against the wrapper, so looking them up with the unwrapped exception would miss them.
+    assertSmartTagsLoggedForWrappedException("smartTagsWrappedInsideBlock")
+  }
+
+  private fun assertSmartTagsLoggedForWrappedException(message: String) {
+    assertThat(invoke("/call/errorOnlyRequestLoggingAction/$message", "caller").code).isEqualTo(404)
+
+    val event =
+      logCollector.takeEvents(RequestLoggingInterceptor::class, Level.WARN, consumeUnmatchedLogs = false).single()
+    assertThat(event.throwableProxy.className).isEqualTo(NotFoundException::class.qualifiedName)
+    assertThat(event.mdcPropertyMap).containsEntry("smartTag", "smartTagValue")
+
+    // Other interceptors should not log.
     assertThat(logCollector.takeMessages(ExceptionHandlingInterceptor::class, consumeUnmatchedLogs = false)).isEmpty()
   }
 
@@ -485,6 +509,19 @@ internal class errorOnlyRequestLoggingAction @Inject constructor() : WebAction {
             InvocationTargetException(UncheckedExecutionException(NotFoundException(message)))
           )
         )
+      "smartTagsWrappedOutsideBlock" -> {
+        val tagged =
+          try {
+            withSmartTags("smartTag" to "smartTagValue") { throw NotFoundException(message) }
+          } catch (e: NotFoundException) {
+            e
+          }
+        throw InvocationTargetException(UncheckedExecutionException(tagged))
+      }
+      "smartTagsWrappedInsideBlock" ->
+        withSmartTags("smartTag" to "smartTagValue") {
+          throw InvocationTargetException(UncheckedExecutionException(NotFoundException(message)))
+        }
       else -> "echo: $message"
     }
 }

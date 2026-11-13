@@ -7,6 +7,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.squareup.wire.internal.newMutableList
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import jakarta.servlet.DispatcherType
 import java.io.File
 import java.io.IOException
 import java.lang.Thread.sleep
@@ -19,7 +20,6 @@ import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
-import javax.servlet.DispatcherType
 import misk.logging.getLogger
 import misk.security.ssl.CipherSuites
 import misk.security.ssl.SslLoader
@@ -55,6 +55,7 @@ import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.eclipse.jetty.unixdomain.server.UnixDomainServerConnector
 import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
 import org.eclipse.jetty.util.JavaVersion
+import org.eclipse.jetty.util.MultiException
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
@@ -71,6 +72,7 @@ internal constructor(
   private val statisticsHandler: StatisticsHandler,
   private val gzipHandler: GzipHandler,
   private val http2RateControlFactory: MeasuredWindowRateControl.Factory,
+  private val servletFilters: Set<jakarta.servlet.Filter>,
 ) : AbstractIdleService() {
   private val server = Server(threadPool)
   val healthServerUrl: HttpUrl?
@@ -353,6 +355,12 @@ internal constructor(
       servletContextHandler.addFilter(holder, path, EnumSet.of(DispatcherType.REQUEST))
     }
 
+    // Register application-provided servlet filters. These run before WebActionsServlet
+    // dispatches the request, allowing pre-routing request modification (e.g. URL normalization).
+    servletFilters.forEach { filter ->
+      servletContextHandler.addFilter(FilterHolder(filter), "/*", EnumSet.of(DispatcherType.REQUEST))
+    }
+
     server.start()
 
     logger.info {
@@ -376,6 +384,10 @@ internal constructor(
         // distinguished from a regular unix socket by the fact that the first byte of
         // the address is a null byte ('\0'). The address has no connection with filesystem
         // path names.
+      } catch (e: MultiException) {
+        // Jetty wraps multiple InvalidPathExceptions into a MultiException when stopping
+        // multiple abstract unix domain sockets (addresses starting with '\0').
+        if (!isOnlyInvalidPathExceptions(e)) throw e
       }
 
       logger.info { "Stopped Jetty in $stopwatch" }
@@ -463,6 +475,10 @@ private fun AbstractHTTP2ServerConnectionFactory.customize(webConfig: WebConfig)
   if (webConfig.jetty_initial_stream_recv_window != null) {
     initialStreamRecvWindow = webConfig.jetty_initial_stream_recv_window
   }
+}
+
+private fun isOnlyInvalidPathExceptions(e: MultiException): Boolean {
+  return e.throwables.isNotEmpty() && e.throwables.all { it is InvalidPathException }
 }
 
 /**

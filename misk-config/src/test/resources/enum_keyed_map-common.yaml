@@ -1,0 +1,5 @@
+# Deliberately not in enum declaration order: an EnumMap would iterate CHECKING, SAVINGS, BROKERAGE.
+tiers:
+  BROKERAGE: 3
+  CHECKING: 1
+  SAVINGS: 2

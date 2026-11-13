@@ -64,7 +64,7 @@ constructor(
         )
       )
       .asSingleton()
-    bindTransacter(qualifier)
+    bindTransacter(qualifier, dataSourceClusterConfig.writer)
     if (readerQualifier != null && dataSourceClusterConfig.reader != null) {
       bind<ConfigurationFactory>()
         .annotatedWith(readerQualifier.java)
@@ -78,7 +78,7 @@ constructor(
           )
         )
         .asSingleton()
-      bindTransacter(readerQualifier)
+      bindTransacter(readerQualifier, dataSourceClusterConfig.reader!!)
     }
 
     val healthCheckKey = keyOf<HealthCheck>(qualifier)
@@ -86,12 +86,17 @@ constructor(
     multibind<HealthCheck>().to(healthCheckKey)
   }
 
-  private fun bindTransacter(qualifier: KClass<out Annotation>) {
+  private fun bindTransacter(qualifier: KClass<out Annotation>, dataSourceConfig: DataSourceConfig) {
     val configurationFactoryProvider = getProvider(keyOf<ConfigurationFactory>(qualifier))
     val transacterKey = JooqTransacter::class.toKey(qualifier)
     bind(transacterKey)
       .toProvider(
-        Provider { JooqTransacter { options -> configurationFactoryProvider.get().getConfiguration(options) } }
+        Provider {
+          JooqTransacter(
+            configurationFactory = { options -> configurationFactoryProvider.get().getConfiguration(options) },
+            dataSourceType = dataSourceConfig.type,
+          )
+        }
       )
       .asSingleton()
   }

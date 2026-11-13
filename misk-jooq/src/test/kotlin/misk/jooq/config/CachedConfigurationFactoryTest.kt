@@ -14,6 +14,7 @@ import misk.jooq.listeners.AvoidUsingSelectStarListener
 import misk.jooq.listeners.JooqSQLLogger
 import misk.jooq.listeners.JooqTimestampRecordListener
 import misk.jooq.listeners.JooqTimestampRecordListenerOptions
+import misk.jooq.testutils.cartesianProduct
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -47,33 +48,30 @@ class CachedConfigurationFactoryTest {
   @Inject @JooqDBIdentifier private lateinit var transacter: JooqTransacter
 
   @Test
-  fun `multithreaded transaction initiation should result in one Configuration per transaction isolation level`() {
-    val threadCount = TransactionIsolationLevel.entries.size * 4
+  fun `multithreaded transaction initiation should cache one Configuration per options combination`() {
+    val allOptions =
+      TransactionIsolationLevel.entries.cartesianProduct(listOf(false, true)).map { (isolationLevel, readOnly) ->
+        JooqTransacter.TransacterOptions(isolationLevel = isolationLevel, readOnly = readOnly)
+      }
+    assertThat(allOptions).hasSize(8)
+    val expectedCacheSize = allOptions.size
+    val threadCount = expectedCacheSize * 4
     val startLatch = CountDownLatch(threadCount)
     val threads =
       (0..<threadCount).map { idx ->
         Thread {
-          val isolationLevel = TransactionIsolationLevel.entries[idx % 4]
+          val options = allOptions[idx % allOptions.size]
           startLatch.countDown()
           require(startLatch.await(5, TimeUnit.SECONDS)) { "Timed out waiting for latch" }
-          val time =
-            transacter.transaction(JooqTransacter.TransacterOptions(isolationLevel = isolationLevel)) { session ->
-              session.ctx.select(DSL.now()).fetchOne { it.component1().toInstant() }
-            }
-          println("Got $time")
+          transacter.transaction(options) { session ->
+            session.ctx.select(DSL.now()).fetchOne { it.component1().toInstant() }
+          }
         }
       }
     threads.forEach { it.start() }
     threads.forEach { it.join() }
-    val cacheContents = (writerConfigurationFactory as CachedConfigurationFactory).cacheContents
-    assertThat(cacheContents).hasSize(TransactionIsolationLevel.entries.size)
-    assertThat(cacheContents.map { it.key })
-      .containsExactlyInAnyOrder(
-        TransactionIsolationLevel.READ_UNCOMMITTED,
-        TransactionIsolationLevel.READ_COMMITTED,
-        TransactionIsolationLevel.REPEATABLE_READ,
-        TransactionIsolationLevel.SERIALIZABLE,
-      )
+    val cacheSize = (writerConfigurationFactory as CachedConfigurationFactory).cacheSize
+    assertThat(cacheSize).isEqualTo(expectedCacheSize)
   }
 
   @Test

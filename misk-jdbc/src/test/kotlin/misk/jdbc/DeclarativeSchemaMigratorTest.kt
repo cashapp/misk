@@ -97,14 +97,14 @@ internal class DeclarativeSchemaMigratorTest {
     resourceLoader.put(
       "$mainSource/t1.sql",
       """
-      |CREATE TABLE table_1 (id bigint, PRIMARY KEY (id))
+      |CREATE TABLE table_1 (id bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
     resourceLoader.put(
       "$mainSource/t2.sql",
       """
-      |CREATE TABLE table_2 (id bigint, PRIMARY KEY (id))
+      |CREATE TABLE table_2 (id bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
@@ -112,7 +112,7 @@ internal class DeclarativeSchemaMigratorTest {
     resourceLoader.put(
       "$librarySource/name/space/t3.sql",
       """
-      |CREATE TABLE library_table (id bigint, PRIMARY KEY (id))
+      |CREATE TABLE library_table (id bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
@@ -167,14 +167,14 @@ internal class DeclarativeSchemaMigratorTest {
     resourceLoader.put(
       "$mainSource/t1.sql",
       """
-      |CREATE TABLE table_1 (id bigint, PRIMARY KEY (id))
+      |CREATE TABLE table_1 (id bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
     resourceLoader.put(
       "$mainSource/all-migrations.sql",
       """
-      |CREATE TABLE table_2 (id bigint, PRIMARY KEY (id))
+      |CREATE TABLE table_2 (id bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
@@ -198,14 +198,14 @@ internal class DeclarativeSchemaMigratorTest {
     resourceLoader.put(
       "$mainSource/t1.sql",
       """
-      |CREATE TABLE table_1 (id bigint, PRIMARY KEY (id))
+      |CREATE TABLE table_1 (id bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
     resourceLoader.put(
       "$mainSource/t2.sql",
       """
-      |CREATE TABLE `table_2` (`id` bigint, PRIMARY KEY (id))
+      |CREATE TABLE `table_2` (`id` bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
@@ -213,7 +213,7 @@ internal class DeclarativeSchemaMigratorTest {
     resourceLoader.put(
       "$librarySource/name/space/t3.sql",
       """
-      |CREATE TABLE library_table (id bigint, PRIMARY KEY (id))
+      |CREATE TABLE library_table (id bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
@@ -269,6 +269,31 @@ internal class DeclarativeSchemaMigratorTest {
     assertThat(declarativeSchemaMigrator.applyAll("test")).isEqualTo(MigrationStatus.Success)
 
     // Verify migration worked!
+    assertThat(declarativeSchemaMigrator.requireAll()).isEqualTo(MigrationStatus.Success)
+  }
+
+  @Test
+  fun passRequireAllWithInvisibleIndexes() {
+    val mainSource = config.migrations_resources!![0]
+
+    resourceLoader.put(
+      "$mainSource/t1.sql",
+      """
+      |CREATE TABLE `table_1` (
+      |  `id` bigint NOT NULL AUTO_INCREMENT,
+      |  `status` varchar(32) NOT NULL,
+      |  `quote_id` varchar(191) NOT NULL,
+      |  PRIMARY KEY (`id`),
+      |  KEY `idx_status` (`status`) INVISIBLE,
+      |  KEY `idx_quote_id` (`quote_id`) /*!80000 INVISIBLE */
+      |) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+      |"""
+        .trimMargin(),
+    )
+
+    assertThat(declarativeSchemaMigrator.applyAll("test")).isEqualTo(MigrationStatus.Success)
+
+    // Boot-time validation must tolerate both spellings of an invisible index.
     assertThat(declarativeSchemaMigrator.requireAll()).isEqualTo(MigrationStatus.Success)
   }
 
@@ -365,7 +390,7 @@ internal class DeclarativeSchemaMigratorTest {
     resourceLoader.put(
       "$librarySource/name/space/t3.sql",
       """
-      |CREATE TABLE library_table (id bigint, PRIMARY KEY (id))
+      |CREATE TABLE library_table (id bigint NOT NULL, PRIMARY KEY (id))
       |"""
         .trimMargin(),
     )
@@ -527,7 +552,7 @@ internal class DeclarativeSchemaMigratorTest {
     resourceLoader.put(
       "$mainSource/t1.sql",
       """
-      |        CREATE TABLE excluded_table (id bigint, PRIMARY KEY (id))
+      |        CREATE TABLE excluded_table (id bigint NOT NULL, PRIMARY KEY (id))
       """
         .trimMargin(),
     )

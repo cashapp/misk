@@ -2,11 +2,11 @@ import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
+import kotlin.jvm.java
 
 plugins {
   id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
-  id("com.squareup.wire")
 }
 
 dependencies {
@@ -38,9 +38,9 @@ dependencies {
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinReflect)
   testImplementation(libs.kotlinTest)
-  testImplementation(libs.wireRuntime)
   testImplementation(project(":misk-api"))
   testImplementation(project(":misk-action-scopes"))
+  testImplementation(project(":misk-admin-test-protos"))
   testImplementation(project(":misk-service"))
   testImplementation(project(":misk-testing"))
 }
@@ -86,49 +86,9 @@ sourceSets {
   }
 }
 
-val generatedSourceDir = layout.buildDirectory.dir("generated/source/wire-test").get().asFile.path
-
-wire {
-  sourcePath {
-    srcDir("src/test/proto/")
-  }
-  kotlin {
-    out = generatedSourceDir
-    includes = listOf(
-      "test.kt.*",
-    )
-  }
-  java {
-    out = generatedSourceDir
-  }
-}
-
-// Make sure the Wire-generated sources are test-only.
-afterEvaluate {
-  val generatedSourceGlob = "$generatedSourceDir/**"
-
-  sourceSets {
-    main {
-      java.setSrcDirs(java.srcDirs.filter { !it.path.contains(generatedSourceDir) })
-    }
-    test {
-      java.srcDir(generatedSourceDir)
-    }
-  }
-
-  tasks {
-    compileJava {
-      exclude(generatedSourceGlob)
-    }
-    compileTestJava {
-      include(generatedSourceGlob)
-    }
-  }
-}
-
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }
 

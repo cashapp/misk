@@ -18,6 +18,7 @@ dependencies {
   api(libs.moshiCore)
   api(libs.okHttp)
   api(libs.okHttpMockWebServer3)
+  api(libs.okio)
   api(libs.openTracingMock)
   api(libs.servletApi)
   api(libs.logbackClassic)
@@ -36,11 +37,12 @@ dependencies {
   implementation(libs.classGraph)
   implementation(libs.mockitoCore)
   implementation(libs.mockk)
-  implementation(libs.okio)
   implementation(libs.openTracing)
   implementation(libs.openTracingUtil)
   implementation(libs.slf4jApi)
   implementation(libs.logbackCore)
+  implementation(libs.jacksonCore)
+  implementation(libs.jacksonDatabind)
   implementation(project(":misk-action-scopes"))
   implementation(project(":misk-config"))
   implementation(project(":misk-docker"))
@@ -56,6 +58,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

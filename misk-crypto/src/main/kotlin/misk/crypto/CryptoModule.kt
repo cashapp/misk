@@ -1,6 +1,5 @@
 package misk.crypto
 
-import com.amazonaws.services.s3.AmazonS3
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.DeterministicAead
 import com.google.crypto.tink.HybridDecrypt
@@ -38,6 +37,7 @@ import misk.inject.KAbstractModule
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.bouncycastle.jce.provider.BouncyCastleProvider
+import software.amazon.awssdk.services.s3.S3Client
 
 /**
  * Configures and registers the keys listed in the configuration file. Each key is read, decrypted, and then bound via
@@ -95,7 +95,7 @@ class CryptoModule(private val config: CryptoConfig) : KAbstractModule() {
 
     /* Include all configured remotely-provided keys. */
     if (externalDataKeys.isNotEmpty()) {
-      requireBinding<AmazonS3>()
+      requireBinding<S3Client>()
 
       newMultibinder<ExternalKeySource>()
       multibind<ExternalKeySource>().to<S3KeySource>()

@@ -1,8 +1,10 @@
 package misk.jdbc
 
+import java.io.File
 import java.sql.ResultSet
 import java.util.regex.Pattern
 import misk.logging.getLogger
+import misk.spirit.Spirit
 import misk.resources.ResourceLoader
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
 import net.sf.jsqlparser.statement.create.table.CreateTable
@@ -11,7 +13,7 @@ internal class DeclarativeSchemaMigrator(
   private val resourceLoader: ResourceLoader,
   private val dataSourceService: DataSourceService,
   private val connector: DataSourceConnector,
-  private val skeemaWrapper: SkeemaWrapper,
+  private val spirit: Spirit,
 ) : BaseSchemaMigrator(resourceLoader, dataSourceService) {
   private val logger = getLogger<DeclarativeSchemaMigrator>()
 
@@ -29,7 +31,18 @@ internal class DeclarativeSchemaMigrator(
     var appliedMigrations = false
     val migrationFiles = getMigrationFiles()
     if (migrationFiles.isNotEmpty()) {
-      skeemaWrapper.applyMigrations(migrationFiles)
+      val ddl = generateDiff(migrationFiles)
+      if (ddl != null) {
+        dataSourceService.dataSource.connection.use { conn ->
+          conn.createStatement().use { stmt ->
+            // Spirit outputs multiple DDL statements (one per line), execute each individually.
+            ddl.lines()
+              .map { it.trim() }
+              .filter { it.isNotBlank() }
+              .forEach { stmt.execute(it) }
+          }
+        }
+      }
       appliedMigrations = true
     }
 
@@ -50,6 +63,15 @@ internal class DeclarativeSchemaMigrator(
     compareMigrations(expectedTables, actualTables, excludedTables)
 
     return MigrationStatus.Success
+  }
+
+  private fun generateDiff(migrationFiles: List<MigrationFile>): String? {
+    val config = connector.config()
+    val dsn = "${config.username}:${config.password}@tcp(${config.host}:${config.port})/${config.database}"
+    val sqlFiles = migrationFiles.associate { File(it.filename).name to resourceLoader.utf8(it.filename)!! }
+    val result = spirit.diff(dsn, sqlFiles)
+    logger.info { "Spirit diff result: hasDiff=${result.hasDiff}" }
+    return result.diff
   }
 
   private fun excludedTables(): Set<String> {
@@ -92,7 +114,7 @@ internal class DeclarativeSchemaMigrator(
 
       try {
         // Parse the file content
-        val statement = CCJSqlParserUtil.parse(fileContent)
+        val statement = CCJSqlParserUtil.parse(stripVisibilityAttributes(fileContent))
 
         // Check if the parsed statement is a CREATE TABLE statement
         if (statement is CreateTable) {
@@ -115,6 +137,17 @@ internal class DeclarativeSchemaMigrator(
 
     return tables
   }
+
+  /**
+   * Removes MySQL `VISIBLE`/`INVISIBLE` index and column attributes before parsing.
+   *
+   * JSqlParser does not understand MySQL visibility attributes and fails on statements like
+   * `KEY idx (col) INVISIBLE`, but this validation only extracts table and column names, which
+   * visibility never affects. Backtick-quoted identifiers are left untouched, so a column
+   * named `visible` or `invisible` still parses correctly.
+   */
+  private fun stripVisibilityAttributes(sql: String): String =
+    VISIBILITY_ATTRIBUTE_REGEX.replace(sql, "")
 
   /** Helper function to parse database and extract actual tables and columns */
   private fun appliedMigrations(): Map<String, Set<String>> {
@@ -147,5 +180,9 @@ internal class DeclarativeSchemaMigrator(
     }
 
     return actualTables
+  }
+
+  companion object {
+    private val VISIBILITY_ATTRIBUTE_REGEX = Regex("(?i)(?<![`\\w])(?:IN)?VISIBLE(?![`\\w])")
   }
 }

@@ -2,7 +2,7 @@ package misk.hibernate.vitess
 
 import java.sql.SQLException
 import java.util.Optional
-import misk.vitess.CowriteException
+import misk.vitess.CrossShardTransactionException
 import org.hibernate.cfg.Environment
 import org.hibernate.dialect.Dialect
 import org.hibernate.dialect.MySQL8Dialect
@@ -36,7 +36,7 @@ class VitessDialect : MySQL8Dialect() {
       } else if (exceptionMessage != null && exceptionMessage.contains("plan includes scatter, which is disallowed")) {
         return@SQLExceptionConversionDelegate ScatterQueryException(sqlException)
       } else if (exceptionMessage != null && exceptionMessage.contains("multi-db transaction attempted")) {
-        throw CowriteException(message, sqlException)
+        throw CrossShardTransactionException(message, sqlException)
       } else if (VitessExceptionDetector.isWaiterPoolExhausted(sqlException)) {
         return@SQLExceptionConversionDelegate PoolWaiterCountExhaustedException(sqlException)
       } else {

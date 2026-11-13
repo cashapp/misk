@@ -9,16 +9,22 @@ import java.time.Clock
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
+import misk.inject.AsyncSwitch
 import misk.jobqueue.QueueName
 import misk.jobqueue.v2.JobConsumer
 import misk.jobqueue.v2.JobHandler
 import misk.logging.getLogger
 import misk.testing.TestFixture
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Instruments queue consumption.
@@ -51,10 +57,11 @@ constructor(
   private val sqsMetrics: SqsMetrics,
   private val clock: Clock,
   private val tracer: Tracer,
+  private val asyncSwitch: AsyncSwitch,
 ) : JobConsumer, AbstractService(), TestFixture {
   private val scope = CoroutineScope(Dispatchers.IO.limitedParallelism(1) + SupervisorJob())
 
-  private val handlingScopes = ConcurrentHashMap<QueueName, CoroutineScope>()
+  private val subscriptions = ConcurrentHashMap<QueueName, Subscription>()
 
   override fun subscribe(queueName: QueueName, handler: JobHandler) {
     subscribe(queueName = queueName, handler = handler, queueConfig = SqsQueueConfig())
@@ -78,21 +85,22 @@ constructor(
         clock = clock,
         tracer = tracer,
         visibilityTimeoutCalculator = visibilityTimeoutCalculator,
+        asyncSwitch = asyncSwitch,
       )
 
-    scope.launch { subscriber.poll() }
-    handlingScopes[queueName] =
-      CoroutineScope(Dispatchers.IO.limitedParallelism(queueConfig.parallelism) + SupervisorJob())
-    repeat(queueConfig.concurrency) { handlingScopes[queueName]?.launch { subscriber.run() } }
+    val pollingJob = scope.launch { subscriber.poll() }
+    val handlingScope = CoroutineScope(Dispatchers.IO.limitedParallelism(queueConfig.parallelism) + SupervisorJob())
+    val handlingJobs = List(queueConfig.concurrency) { handlingScope.launch { subscriber.run() } }
+    subscriptions[queueName] = Subscription(subscriber, pollingJob, handlingScope, handlingJobs)
   }
 
   override fun unsubscribe(queueName: QueueName) {
-    handlingScopes[queueName]?.cancel()
+    subscriptions[queueName]?.handlingScope?.cancel()
   }
 
   /** Called automatically between every test to prevent long-running scopes or test timeouts. */
   override fun reset() {
-    handlingScopes.forEach { _, scope -> scope.cancel() }
+    subscriptions.forEach { _, subscription -> subscription.handlingScope.cancel() }
   }
 
   override fun doStart() {
@@ -100,10 +108,40 @@ constructor(
   }
 
   override fun doStop() {
-    scope.cancel()
-    handlingScopes.values.forEach { it.cancel() }
+    logger.info("Stopping job consumer")
+    runBlocking(scope.coroutineContext) {
+      subscriptions.forEach { (queueName, subscription) ->
+        // Stop issuing new receives, and give the in-flight one a chance to finish its long poll. Messages it already
+        // fetched are handled normally; abandoning it would leave them invisible until their visibility timeout expires.
+        subscription.subscriber.stop()
+        val gracePeriod =
+          (subscription.subscriber.queueConfig.shutdown_grace_period_ms
+              ?: SqsQueueConfig.DEFAULT_SHUTDOWN_GRACE_PERIOD_MS)
+            .milliseconds
+        if (withTimeoutOrNull(gracePeriod) { subscription.pollingJob.join() } == null) {
+          logger.info { "Polling for queue ${queueName.value} did not stop within $gracePeriod; canceling it" }
+          subscription.subscriber.cancelInFlightReceives()
+          subscription.pollingJob.join()
+        }
+        // The polling job closes the channel when it completes, which is what lets the handlers finish.
+        subscription.handlingJobs.joinAll()
+      }
+    }
+    logger.info("Stopped job consumer")
     notifyStopped()
   }
+
+  fun stop() {
+    doStop()
+  }
+
+  private data class Subscription(
+    val subscriber: Subscriber,
+    val pollingJob: Job,
+    val handlingScope: CoroutineScope,
+    val handlingJobs: List<Job>,
+  )
+
 
   companion object {
     private val logger = getLogger<SqsJobConsumer>()

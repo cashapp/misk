@@ -8,13 +8,16 @@ import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLSession
-import misk.clustering.Cluster
 import misk.config.AppName
 import misk.inject.KAbstractModule
 import misk.security.cert.X500Name
 import misk.web.WebConfig
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
+
+interface PeerIdentifier {
+  val ipAddress: String
+}
 
 /**
  * Binds a [PeerClientFactory] that calls peers on the HTTPS port of this process's server, as determined by the SSL
@@ -80,9 +83,9 @@ class PeerClientFactory(
   private val cache =
     CacheBuilder.newBuilder()
       .expireAfterAccess(5, TimeUnit.MINUTES)
-      .build<Cluster.Member, OkHttpClient>(
-        object : CacheLoader<Cluster.Member, OkHttpClient>() {
-          override fun load(peer: Cluster.Member): OkHttpClient {
+      .build<PeerIdentifier, OkHttpClient>(
+        object : CacheLoader<PeerIdentifier, OkHttpClient>() {
+          override fun load(peer: PeerIdentifier): OkHttpClient {
             val config = httpClientsConfig[appName].copy(url = baseUrl(peer), envoy = null)
 
             return httpClientFactory
@@ -112,7 +115,7 @@ class PeerClientFactory(
   }
 
   /** Get the base URL for calling the given peer cluster member. */
-  fun baseUrl(peer: Cluster.Member): String {
+  fun baseUrl(peer: PeerIdentifier): String {
     return "https://${peer.ipAddress}:$httpsPort"
   }
 
@@ -120,5 +123,5 @@ class PeerClientFactory(
    * Get a client to call the given peer cluster member. This client will fail when calling different services, as
    * determined by the OU in the certificate returned by the called service.
    */
-  fun client(peer: Cluster.Member): OkHttpClient = cache[peer]
+  fun client(peer: PeerIdentifier): OkHttpClient = cache[peer]
 }

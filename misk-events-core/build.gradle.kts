@@ -8,11 +8,11 @@ plugins {
 
 dependencies {
   api(libs.okio)
-  implementation(libs.wireRuntime)
+  api(libs.wireRuntime)
 }
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

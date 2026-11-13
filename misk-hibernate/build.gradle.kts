@@ -23,6 +23,7 @@ sourceSets {
 dependencies {
   api(libs.guava)
   api(libs.guice)
+  api(libs.hikariCp)
   api(libs.hibernate5Core)
   api(libs.jakartaInject)
   api(libs.hibernateJpaApi)
@@ -32,6 +33,7 @@ dependencies {
   api(project(":misk-jdbc"))
   api(project(":misk-testing-api"))
   api(project(":misk-vitess"))
+  implementation(libs.javaxTransaction)
   implementation(libs.loggingApi)
   implementation(libs.kotlinReflect)
   implementation(libs.moshiCore)
@@ -70,6 +72,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

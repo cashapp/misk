@@ -3,6 +3,7 @@ package misk
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
+import com.google.inject.Key
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlin.test.assertTrue
@@ -197,6 +198,39 @@ class ServiceModuleTest {
   }
 
   @Test
+  fun conditionalOn_withMultipleDependencies_withDisabled_bindsNoOpServiceWithNoDependencies() {
+    val disabledSwitch = TestSwitch(enabled = false)
+    val log = StringBuilder()
+
+
+    val injector =
+      Guice.createInjector(
+        MiskTestingServiceModule(),
+        object : KAbstractModule() {
+          override fun configure() {
+            bind<StringBuilder>().toInstance(log)
+            bind<TestSwitch>().toInstance(disabledSwitch)
+            install(
+              ServiceModule<TestService>().dependsOn<UpstreamService>()
+                .dependsOn<EnhancementService>()
+                .conditionalOn<TestSwitch>("test"),
+            )
+          }
+        },
+      )
+
+    // the injector can build the service manager.
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+
+    // the switch is honored and the test service is not installed
+    assertThat(log.toString()).doesNotContain("TestService.startUp")
+  }
+
+  @Test
   fun conditionalOn_withEnhancements_whenEnabled_bindsRealServiceWithEnhancements() {
     val enabledSwitch = TestSwitch(enabled = true)
     val log = StringBuilder()
@@ -248,6 +282,37 @@ class ServiceModuleTest {
 
     assertThat(log.toString()).doesNotContain("TestService.startUp")
     assertThat(log.toString()).contains("EnhancementService.startUp")
+  }
+
+
+  @Test
+  fun conditionalOn_withMultipleEnhancements_whenDisabled_bindsNoOpServiceWithNoEnhancements() {
+    val disabledSwitch = TestSwitch(enabled = false)
+    val log = StringBuilder()
+    val injector =
+      Guice.createInjector(
+        MiskTestingServiceModule(),
+        object : KAbstractModule() {
+          override fun configure() {
+            bind<StringBuilder>().toInstance(log)
+            bind<TestSwitch>().toInstance(disabledSwitch)
+            install(ServiceModule<TestService>()
+              .enhancedBy<EnhancementService>()
+              .enhancedBy<UpstreamService>()
+              .conditionalOn<TestSwitch>("test"))
+          }
+        },
+      )
+
+    // the injector can build the service manager.
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+
+    // the switch is honored and the test service is not installed
+    assertThat(log.toString()).doesNotContain("TestService.startUp")
   }
 
   @Test

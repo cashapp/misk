@@ -14,7 +14,7 @@ dependencies {
   implementation(libs.guava)
   implementation(libs.guice)
   implementation(libs.kotlinStdLibJdk8)
-  implementation(libs.okio)
+  api(libs.okio)
 
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
@@ -22,6 +22,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

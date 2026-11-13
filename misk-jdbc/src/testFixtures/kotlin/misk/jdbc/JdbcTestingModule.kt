@@ -20,6 +20,12 @@ import misk.time.ForceUtcTimeZoneService
  *
  *     install(JdbcModule(MyDatabase::class, dataSourceConfig, SHARED_TEST_DATABASE_POOL))
  *
+ * If a test configures multiple data sources against the same local database, for example a writer and reader in one
+ * database cluster, wrap the shared pool so both data sources use the same leased database:
+ *
+ *     val databasePool = SharedLeaseDatabasePool(SHARED_TEST_DATABASE_POOL)
+ *     install(JdbcModule(MyDatabase::class, dataSourceConfig, databasePool))
+ *
  * See [misk.jdbc.SHARED_TEST_DATABASE_POOL].
  */
 class JdbcTestingModule(

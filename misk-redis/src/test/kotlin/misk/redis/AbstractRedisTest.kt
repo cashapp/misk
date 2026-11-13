@@ -1187,6 +1187,32 @@ abstract class AbstractRedisTest {
   }
 
   @Test
+  fun `zrange by score test - the infinity markers reach scores at and below zero`() {
+    val negative = "negative" to -1.0
+    val zero = "zero" to 0.0
+    val positive = "positive" to 5.0
+    redis.zadd(key, mapOf(negative, zero, positive))
+
+    // Double.MIN_VALUE is the -inf marker, not the tiny positive number it literally is, so nothing here is out of
+    // range.
+    checkZRangeScoreResponse(
+      mapOf(negative, zero, positive),
+      mapOf(positive, zero, negative),
+      Double.MIN_VALUE,
+      Double.MAX_VALUE,
+    )
+  }
+
+  @Test
+  fun `zrange by score test - negative infinity up to a negative bound`() {
+    val low = "low" to -9.0
+    val mid = "mid" to -5.0
+    redis.zadd(key, mapOf(low, mid, "high" to 2.0))
+
+    checkZRangeScoreResponse(mapOf(low, mid), mapOf(mid, low), Double.MIN_VALUE, -5.0)
+  }
+
+  @Test
   fun `zrange by score test - start score exceeds stop`() {
     redis.zadd(key, mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
 
@@ -1341,6 +1367,255 @@ abstract class AbstractRedisTest {
 
     val expectedZRangeMap4 = mapOf<String, Double>()
     checkZRemRangeByRankResponse(0, -1, 3, expectedZRangeMap4)
+  }
+
+  @Test
+  fun `zrem - removes a single member`() {
+    // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
+    redis.zadd(key, mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    assertEquals(1, redis.zrem(key, "bb"))
+
+    assertEquals(
+      mapOf(ba_2_3Pair, bz_2_3Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair).toEncodedListOfPairs(),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(-1)),
+    )
+  }
+
+  @Test
+  fun `zrem - removes several members at once`() {
+    // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
+    redis.zadd(key, mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    assertEquals(3, redis.zrem(key, "ba", "c", "ad"))
+
+    assertEquals(
+      mapOf(bz_2_3Pair, bb_4_5Pair, b_5Pair, yy_6_7Pair).toEncodedListOfPairs(),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(-1)),
+    )
+  }
+
+  @Test
+  fun `zrem - leaves the other member of a shared score alone`() {
+    // ba and bz both score 2.3. Removing one must not take the score's other member with it.
+    redis.zadd(key, mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair))
+
+    assertEquals(1, redis.zrem(key, "ba"))
+
+    assertNull(redis.zscore(key, "ba"))
+    assertEquals(2.3, redis.zscore(key, "bz"))
+    assertEquals(2, redis.zcard(key))
+  }
+
+  @Test
+  fun `zrem - members that are not present are ignored`() {
+    redis.zadd(key, mapOf(b_5Pair, bb_4_5Pair))
+
+    assertEquals(0, redis.zrem(key, "not a member"))
+    // Only the member that was actually there counts towards the total.
+    assertEquals(1, redis.zrem(key, "not a member", "b", "also not a member"))
+    assertEquals(1, redis.zcard(key))
+  }
+
+  @Test
+  fun `zrem - naming a member twice removes it once`() {
+    redis.zadd(key, mapOf(b_5Pair, bb_4_5Pair))
+
+    assertEquals(1, redis.zrem(key, "b", "b"))
+    assertEquals(1, redis.zcard(key))
+  }
+
+  @Test
+  fun `zrem - missing key returns zero`() {
+    assertEquals(0, redis.zrem("no such key", "b"))
+    assertFalse(redis.exists("no such key"))
+  }
+
+  @Test
+  fun `zrem - removing every member deletes the key`() {
+    redis.zadd(key, mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair))
+
+    assertEquals(3, redis.zrem(key, "ba", "bz", "bb"))
+
+    assertEquals(0, redis.zcard(key))
+    assertFalse(redis.exists(key))
+  }
+
+  @Test
+  fun `zrem - only touches the key it is given`() {
+    redis.zadd(key, mapOf(b_5Pair, bb_4_5Pair))
+    redis.zadd("another key", mapOf(b_5Pair, bb_4_5Pair))
+
+    assertEquals(2, redis.zrem(key, "b", "bb"))
+
+    assertEquals(2, redis.zcard("another key"))
+  }
+
+  @Test
+  fun `zrem - a removed member can be added back`() {
+    redis.zadd(key, mapOf(ba_2_3Pair, bb_4_5Pair))
+    assertEquals(1, redis.zrem(key, "ba"))
+
+    // A re-add is a fresh insert rather than a score update, so it counts as a new member.
+    assertEquals(1, redis.zadd(key, 7.0, "ba"))
+    assertEquals(7.0, redis.zscore(key, "ba"))
+    assertEquals(2, redis.zcard(key))
+  }
+
+  @Test
+  fun `zremRangeByScore - removes an inclusive range`() {
+    // sorted = ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, b_5Pair, c_5Pair, yy_6_7Pair, ad_9Pair
+    redis.zadd(key, mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    assertEquals(3, redis.zremRangeByScore(key, ZRangeScoreMarker(4.5), ZRangeScoreMarker(5.0)))
+    assertEquals(
+      mapOf(ba_2_3Pair, bz_2_3Pair, yy_6_7Pair, ad_9Pair).toEncodedListOfPairs(),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(-1)),
+    )
+  }
+
+  @Test
+  fun `zremRangeByScore - an excluded end is left alone`() {
+    redis.zadd(key, mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    // (4.5, 5.0] takes the two members at 5.0 and leaves bb sitting on the excluded bound.
+    assertEquals(2, redis.zremRangeByScore(key, ZRangeScoreMarker(4.5, false), ZRangeScoreMarker(5.0)))
+    assertEquals(
+      mapOf(ba_2_3Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair).toEncodedListOfPairs(),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(-1)),
+    )
+  }
+
+  @Test
+  fun `zremRangeByScore - both ends excluded`() {
+    redis.zadd(key, mapOf(b_5Pair, bz_2_3Pair, bb_4_5Pair, yy_6_7Pair, ad_9Pair, c_5Pair, ba_2_3Pair))
+
+    assertEquals(3, redis.zremRangeByScore(key, ZRangeScoreMarker(2.3, false), ZRangeScoreMarker(6.7, false)))
+    assertEquals(
+      mapOf(ba_2_3Pair, bz_2_3Pair, yy_6_7Pair, ad_9Pair).toEncodedListOfPairs(),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(-1)),
+    )
+  }
+
+  @Test
+  fun `zremRangeByScore - one score removes every member holding it`() {
+    redis.zadd(key, mapOf(b_5Pair, c_5Pair, bb_4_5Pair))
+
+    // Naming the same score at both ends is how a caller drops a level it can identify only by score.
+    assertEquals(2, redis.zremRangeByScore(key, ZRangeScoreMarker(5.0), ZRangeScoreMarker(5.0)))
+    assertEquals(
+      mapOf(bb_4_5Pair).toEncodedListOfPairs(),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(-1)),
+    )
+  }
+
+  @Test
+  fun `zremRangeByScore - a score nothing holds removes nothing`() {
+    redis.zadd(key, mapOf(b_5Pair, bb_4_5Pair))
+
+    assertEquals(0, redis.zremRangeByScore(key, ZRangeScoreMarker(3.0), ZRangeScoreMarker(3.0)))
+    assertEquals(2, redis.zcard(key))
+  }
+
+  @Test
+  fun `zremRangeByScore - start after stop removes nothing`() {
+    redis.zadd(key, mapOf(b_5Pair, bb_4_5Pair))
+
+    assertEquals(0, redis.zremRangeByScore(key, ZRangeScoreMarker(9.0), ZRangeScoreMarker(1.0)))
+    assertEquals(2, redis.zcard(key))
+  }
+
+  @Test
+  fun `zremRangeByScore - missing key returns zero`() {
+    assertEquals(0, redis.zremRangeByScore("no such key", ZRangeScoreMarker(0.0), ZRangeScoreMarker(1.0)))
+    assertFalse(redis.exists("no such key"))
+  }
+
+  @Test
+  fun `zremRangeByScore - removing every member deletes the key`() {
+    redis.zadd(key, mapOf(b_5Pair, bb_4_5Pair))
+
+    assertEquals(
+      2,
+      redis.zremRangeByScore(key, ZRangeScoreMarker(Double.MIN_VALUE), ZRangeScoreMarker(Double.MAX_VALUE)),
+    )
+    assertEquals(0, redis.zcard(key))
+    assertFalse(redis.exists(key))
+  }
+
+  @Test
+  fun `zremRangeByScore - the infinity markers reach scores at and below zero`() {
+    redis.zadd(key, mapOf("negative" to -1.0, "zero" to 0.0, "positive" to 5.0))
+
+    assertEquals(
+      3,
+      redis.zremRangeByScore(key, ZRangeScoreMarker(Double.MIN_VALUE), ZRangeScoreMarker(Double.MAX_VALUE)),
+    )
+    assertFalse(redis.exists(key))
+  }
+
+  @Test
+  fun `zremRangeByScore - negative infinity up to a negative bound`() {
+    redis.zadd(key, mapOf("low" to -9.0, "mid" to -5.0, "high" to 2.0))
+
+    assertEquals(2, redis.zremRangeByScore(key, ZRangeScoreMarker(Double.MIN_VALUE), ZRangeScoreMarker(-5.0)))
+    assertEquals(
+      listOf("high".encodeUtf8() to 2.0),
+      redis.zrangeWithScores(key, INDEX, ZRangeIndexMarker(0), ZRangeIndexMarker(-1)),
+    )
+  }
+
+  @Test
+  fun `zremRangeByScore - only touches the key it is given`() {
+    redis.zadd(key, mapOf(b_5Pair, bb_4_5Pair))
+    redis.zadd("another key", mapOf(b_5Pair, bb_4_5Pair))
+
+    assertEquals(2, redis.zremRangeByScore(key, ZRangeScoreMarker(4.0), ZRangeScoreMarker(6.0)))
+    assertEquals(2, redis.zcard("another key"))
+  }
+
+  @Test
+  fun `zadd - re-adding a member at the score it already has keeps it`() {
+    redis.zadd(key, 100.0, "m")
+
+    // Nothing new is added, and the member has to survive the write.
+    assertEquals(0, redis.zadd(key, 100.0, "m"))
+    assertEquals(100.0, redis.zscore(key, "m"))
+    assertEquals(1, redis.zcard(key))
+  }
+
+  @Test
+  fun `zadd - moving a member down onto an occupied score`() {
+    redis.zadd(key, mapOf("low" to 1.0, "m" to 9.0))
+
+    assertEquals(0, redis.zadd(key, 1.0, "m"))
+    assertEquals(1.0, redis.zscore(key, "m"))
+    assertEquals(2, redis.zcard(key))
+  }
+
+  @Test
+  fun `zadd - moving a member up onto an occupied score`() {
+    redis.zadd(key, mapOf("high" to 9.0, "m" to 1.0))
+
+    assertEquals(0, redis.zadd(key, 9.0, "m"))
+    assertEquals(9.0, redis.zscore(key, "m"))
+    assertEquals(2, redis.zcard(key))
+  }
+
+  @Test
+  fun `zremRangeByRank - a start past the end removes nothing`() {
+    redis.zadd(key, mapOf(ba_2_3Pair, bb_4_5Pair, b_5Pair))
+
+    assertEquals(0, redis.zremRangeByRank(key, ZRangeRankMarker(3), ZRangeRankMarker(-1)))
+    assertEquals(3, redis.zcard(key))
+  }
+
+  @Test
+  fun `zremRangeByRank - a stop before the first member removes nothing`() {
+    redis.zadd(key, mapOf(ba_2_3Pair, bb_4_5Pair, b_5Pair))
+
+    assertEquals(0, redis.zremRangeByRank(key, ZRangeRankMarker(0), ZRangeRankMarker(-4)))
+    assertEquals(3, redis.zcard(key))
   }
 
   @Test
@@ -1524,12 +1799,17 @@ abstract class AbstractRedisTest {
           zadd("zkey", 1.0, "a"),
           zscore("zkey", "a"),
           zrangeWithScores("zkey", start = ZRangeIndexMarker(0), stop = ZRangeIndexMarker(-1)),
+          zadd("zkey", 2.0, "b"),
+          zrem("zkey", "b"),
+          zadd("zkey", 3.0, "c"),
+          zremRangeByScore("zkey", start = ZRangeScoreMarker(3.0), stop = ZRangeScoreMarker(3.0)),
           zremRangeByRank("zkey", start = ZRangeRankMarker(0), stop = ZRangeRankMarker(-1)),
           zcard("zkey"),
         )
       )
     }
-    assertThat(suppliers.map { it.get() }).containsExactly(1L, 1.0, listOf("a".encodeUtf8() to 1.0), 1L, 0L)
+    assertThat(suppliers.map { it.get() })
+      .containsExactly(1L, 1.0, listOf("a".encodeUtf8() to 1.0), 1L, 1L, 1L, 1L, 1L, 0L)
   }
 
   @Test
@@ -1545,6 +1825,22 @@ abstract class AbstractRedisTest {
     }
     assertThat(suppliers.first().get()).isEqualTo(Unit)
     assertThrows<RuntimeException> { suppliers.last().get() }
+  }
+
+  @Test
+  fun `pipelined commands run even when their replies are never read`() {
+    redis.pipelining { zadd("zkey", 1.0, "a") }
+
+    assertEquals(1L, redis.zcard("zkey"))
+  }
+
+  @Test
+  fun `reading a pipelined reply more than once does not run the command again`() {
+    lateinit var incremented: Supplier<Long>
+    redis.pipelining { incremented = incr("counter") }
+
+    assertThat(listOf(incremented.get(), incremented.get(), incremented.get())).containsExactly(1L, 1L, 1L)
+    assertEquals("1", redis["counter"]?.utf8())
   }
 
   private fun checkZRemRangeByRankResponse(

@@ -2,53 +2,73 @@ package misk.jooq
 
 import java.time.Duration
 import misk.backoff.ExponentialBackoff
+import misk.backoff.RetryConfig
+import misk.backoff.retry
+import misk.jdbc.DataSourceType
+import misk.jdbc.retry.RetryDefaults
 import misk.logging.getLogger
 import org.jooq.Configuration
-import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 
-class JooqTransacter internal constructor(private val configurationFactory: (TransacterOptions) -> Configuration) {
+class JooqTransacter
+internal constructor(
+  private val configurationFactory: (TransacterOptions) -> Configuration,
+  private val dataSourceType: DataSourceType? = null,
+) {
+  private val exceptionClassifier = JooqExceptionClassifier(dataSourceType)
 
   @JvmOverloads
   fun <RETURN_TYPE> transaction(
     options: TransacterOptions = TransacterOptions(),
     callback: (jooqSession: JooqSession) -> RETURN_TYPE,
   ): RETURN_TYPE {
-    val backoff = ExponentialBackoff(Duration.ofMillis(10L), Duration.ofMillis(options.maxRetryDelayMillis))
-    var attempt = 0
-
-    while (true) {
-      try {
-        return performInTransaction(options, callback, ++attempt)
-      } catch (e: Exception) {
-        if (e !is DataAccessException || attempt >= options.maxAttempts) throw e
-        val sleepDuration = backoff.nextRetry()
-        if (!sleepDuration.isZero) {
-          Thread.sleep(sleepDuration.toMillis())
-        }
-      }
-    }
+    val backoff =
+      ExponentialBackoff(
+        baseDelay = Duration.ofMillis(options.minRetryDelayMillis),
+        maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
+        jitter = Duration.ofMillis(options.retryJitterMillis),
+      )
+    val retryConfig =
+      RetryConfig.Builder(options.maxAttempts, backoff)
+        .shouldRetry { exceptionClassifier.isRetryable(it) }
+        .onRetry { attempt, e -> log.info(e) { "jOOQ transaction failed, retrying (attempt $attempt)" } }
+        .build()
+    return retry(retryConfig) { performInTransaction(options, callback) }
   }
+
+  /**
+   * Runs [block] inside [ambient] if supplied; otherwise opens a new transaction and passes its [JooqSession] to
+   * [block].
+   *
+   * Designed for repository methods that may run standalone or be called from within an outer transaction. Callers that
+   * already hold a session pass it as [ambient] so the work participates in the outer commit boundary instead of
+   * opening a nested transaction.
+   *
+   * ```
+   * fun create(name: String, ambient: JooqSession? = null) =
+   *   transacter.transactionOrAmbient(ambient) { session -> ... }
+   *
+   * transacter.transactionOrAmbient { outer -> repo.create("foo", ambient = outer) }
+   * ```
+   *
+   * When [ambient] is non-null no new transaction is opened and retry/backoff is skipped — the outer transaction owns
+   * those concerns. When [ambient] is null this delegates to [transaction] with default options.
+   *
+   * Coroutine-safe by construction: the active session is passed explicitly through the call chain rather than tracked
+   * in thread-local state, so suspension and dispatcher hops cannot desynchronize the lookup from the underlying JDBC
+   * connection.
+   */
+  @JvmOverloads
+  fun <RETURN_TYPE> transactionOrAmbient(
+    ambient: JooqSession? = null,
+    block: (JooqSession) -> RETURN_TYPE,
+  ): RETURN_TYPE = if (ambient != null) block(ambient) else transaction(callback = block)
 
   private fun <RETURN_TYPE> performInTransaction(
     options: TransacterOptions,
     callback: (jooqSession: JooqSession) -> RETURN_TYPE,
-    attempt: Int,
   ): RETURN_TYPE {
-    return try {
-      val result = createDSLContextAndCallback(options, callback)
-      if (attempt > 1) {
-        log.info { "Retried jooq transaction succeeded after [attempts=$attempt]" }
-      }
-      result
-    } catch (e: Exception) {
-      if (attempt >= options.maxAttempts) {
-        log.warn(e) { "Recoverable transaction exception [attempts=$attempt], no more attempts" }
-        throw e
-      }
-      log.info(e) { "Exception thrown while transacting with the db via jooq" }
-      throw e
-    }
+    return createDSLContextAndCallback(options, callback)
   }
 
   private fun <RETURN_TYPE> createDSLContextAndCallback(
@@ -62,7 +82,7 @@ class JooqTransacter internal constructor(private val configurationFactory: (Tra
           jooqSession = JooqSession(DSL.using(configuration))
           runCatching { callback(jooqSession).also { jooqSession.executePreCommitHooks() } }
             .onFailure { jooqSession.onSessionClose { jooqSession.executeRollbackHooks(it) } }
-            .getOrElse { throw it } // JooqExtensions.kt shadows Result<T>.getOrThrow()... This is equivalent.
+            .getOrThrow()
         }
         .also { jooqSession?.executePostCommitHooks() }
     } finally {
@@ -73,9 +93,12 @@ class JooqTransacter internal constructor(private val configurationFactory: (Tra
   data class TransacterOptions
   @JvmOverloads
   constructor(
-    val maxAttempts: Int = 3,
-    val maxRetryDelayMillis: Long = 500,
+    val maxAttempts: Int = RetryDefaults.MAX_ATTEMPTS,
+    val minRetryDelayMillis: Long = RetryDefaults.MIN_RETRY_DELAY_MILLIS,
+    val maxRetryDelayMillis: Long = RetryDefaults.MAX_RETRY_DELAY_MILLIS,
+    val retryJitterMillis: Long = RetryDefaults.RETRY_JITTER_MILLIS,
     val isolationLevel: TransactionIsolationLevel = TransactionIsolationLevel.REPEATABLE_READ,
+    val readOnly: Boolean = false,
   )
 
   companion object {

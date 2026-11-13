@@ -2,15 +2,13 @@ package misk.ratelimiting.bucket4j.mysql
 
 import com.google.inject.Injector
 import com.google.inject.Provides
-import io.github.bucket4j.distributed.jdbc.BucketTableSettings
 import io.github.bucket4j.distributed.jdbc.PrimaryKeyMapper
-import io.github.bucket4j.distributed.jdbc.SQLProxyConfiguration
-import io.github.bucket4j.distributed.proxy.ClientSideConfig
 import io.github.bucket4j.distributed.proxy.ProxyManager
-import io.github.bucket4j.mysql.MySQLSelectForUpdateBasedProxyManager
+import io.github.bucket4j.mysql.Bucket4jMySQL
 import io.micrometer.core.instrument.MeterRegistry
 import jakarta.inject.Singleton
 import java.time.Clock
+import java.time.Duration
 import kotlin.reflect.KClass
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
@@ -28,6 +26,9 @@ constructor(
   private val idColumn: String,
   private val stateColumn: String,
   private val prunerPageSize: Long = 1000L,
+  private val maxRetries: Int = 3,
+  private val retryTimeout: Duration = Duration.ofMillis(25),
+  private val configMutator: Bucket4jMySQL.MySQLSelectForUpdateBasedProxyManagerBuilder<String>.() -> Unit = {},
 ) : KAbstractModule() {
   override fun configure() {
     requireBinding<Clock>()
@@ -39,14 +40,19 @@ constructor(
   @Singleton
   fun providedRateLimiter(clock: Clock, injector: Injector, meterRegistry: MeterRegistry): RateLimiter {
     val dataSourceService = injector.getInstance(keyOf<DataSourceService>(qualifier))
-    val sqlConfiguration =
-      SQLProxyConfiguration.builder()
-        .withPrimaryKeyMapper(PrimaryKeyMapper.STRING)
-        .withTableSettings(BucketTableSettings.customSettings(tableName, idColumn, stateColumn))
-        .withClientSideConfig(ClientSideConfig.getDefault().withClientClock(ClockTimeMeter(clock)))
-        .build(dataSourceService.dataSource)
 
-    val proxyManager: ProxyManager<String> = MySQLSelectForUpdateBasedProxyManager(sqlConfiguration)
+    val proxyManager: ProxyManager<String> =
+      Bucket4jMySQL.selectForUpdateBasedBuilder(dataSourceService.dataSource)
+        .primaryKeyMapper(PrimaryKeyMapper.STRING)
+        .table(tableName)
+        .idColumn(idColumn)
+        .stateColumn(stateColumn)
+        .clientClock(ClockTimeMeter(clock))
+        .requestTimeout(retryTimeout)
+        .maxRetries(maxRetries)
+        .apply { configMutator() }
+        .build()
+
     return Bucket4jRateLimiter(proxyManager, clock, meterRegistry)
   }
 

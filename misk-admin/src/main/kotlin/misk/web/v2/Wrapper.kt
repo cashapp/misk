@@ -10,6 +10,7 @@ fun TagConsumer<*>.HtmlLayout(
   playCdn: Boolean,
   headBlock: TagConsumer<*>.() -> Unit = {},
   hotReload: Boolean = true,
+  enableTurbo: Boolean = true,
   bodyBlock: TagConsumer<*>.() -> Unit,
 ) {
   TailwindHtmlLayout(
@@ -19,5 +20,6 @@ fun TagConsumer<*>.HtmlLayout(
     headBlock = headBlock,
     bodyBlock = bodyBlock,
     hotReload = hotReload,
+    enableTurbo = enableTurbo,
   )
 }

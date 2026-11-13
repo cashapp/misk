@@ -64,7 +64,7 @@ internal class MiskWebSocketServerTransport(override val call: HttpCall, private
   override suspend fun close() {
     if (initialized.compareAndSet(expectedValue = true, newValue = false)) {
       webSocket.close(1000, null)
-      _onClose.invoke()
+      invokeOnCloseCallback()
     }
   }
 

@@ -1,12 +1,15 @@
 package misk.crypto
 
-import com.amazonaws.auth.AWSCredentialsProvider
-import com.amazonaws.services.s3.AmazonS3
-import com.amazonaws.services.s3.AmazonS3ClientBuilder
-import com.amazonaws.services.s3.model.AmazonS3Exception
 import com.google.inject.Inject
 import misk.config.MiskConfig
 import misk.logging.getLogger
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
+import software.amazon.awssdk.awscore.exception.AwsServiceException
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException
+import software.amazon.awssdk.services.s3.model.S3Exception
 import wisp.deployment.Deployment
 
 /**
@@ -31,7 +34,7 @@ class S3KeySource
 @Inject
 constructor(
   private val deployment: Deployment,
-  defaultS3: AmazonS3,
+  defaultS3: S3Client,
   @ExternalDataKeys val allKeyAliases: Map<KeyAlias, KeyType>,
   @Inject(optional = true)
   private val bucketNameSource: BucketNameSource =
@@ -42,16 +45,20 @@ constructor(
   // The data keys bucket might live in a different region than the region this service executes
   // in; if BucketNameSource provides a non-standard bucket region, we need to create a new S3
   // client for that bucket, and to do that we need credentials again.
-  private val awsCredentials: AWSCredentialsProvider,
+  private val awsCredentials: AwsCredentialsProvider,
 ) : ExternalKeySource {
 
-  private val s3: AmazonS3 =
+  private val defaultRegion: String = defaultS3.serviceClientConfiguration().region().id()
+
+  private val s3: S3Client =
     bucketNameSource.getBucketRegion(deployment)?.let { region ->
-      if (region != defaultS3.regionName) {
-        logger.info("creating S3ExternalKeyManager S3 client for $region")
-        AmazonS3ClientBuilder.standard().withRegion(region).withCredentials(awsCredentials).build()
+      if (region != defaultRegion) {
+        logger.info("creating S3KeySource S3 client for $region")
+        S3Client.builder().region(Region.of(region)).credentialsProvider(awsCredentials).build()
       } else null
     } ?: defaultS3
+
+  private val bucketRegion: String = bucketNameSource.getBucketRegion(deployment) ?: defaultRegion
 
   // N.B. The path we're using for the object is based on _our_ region, not where the bucket lives
   private fun objectPath(alias: String): String {
@@ -59,7 +66,7 @@ constructor(
       if (allKeyAliases[alias] == KeyType.HYBRID_ENCRYPT) {
         "public"
       } else {
-        s3.regionName.lowercase()
+        bucketRegion.lowercase()
       }
 
     return "$alias/$basename"
@@ -68,23 +75,36 @@ constructor(
   override fun keyExists(alias: KeyAlias): Boolean {
     val path = objectPath(alias)
     val name = bucketNameSource.getBucketName(deployment)
-    return s3.doesObjectExist(name, path)
+    return try {
+      s3.headObject(HeadObjectRequest.builder().bucket(name).key(path).build())
+      true
+    } catch (_: NoSuchKeyException) {
+      false
+    } catch (e: S3Exception) {
+      // HeadObject returns a bodiless 404, which some SDK versions surface as a plain S3Exception.
+      if (e.statusCode() == 404) false else throw e
+    }
   }
 
   override fun getKey(alias: KeyAlias): Key {
     val path = objectPath(alias)
     val name = bucketNameSource.getBucketName(deployment)
     try {
-      val obj = s3.getObject(name, path)
+      s3
+        .getObject { it.bucket(name).key(path) }
+        .use { obj ->
+          val metadata = obj.response().metadata()
+          val kmsArn = metadata[METADATA_KEY_KMS_ARN]
+          val keyTypeDescription =
+            metadata[METADATA_KEY_KEY_TYPE]
+              ?: throw ExternalKeyManagerException("key alias missing $METADATA_KEY_KEY_TYPE metadata: $alias")
 
-      val kmsArn = obj.objectMetadata.getUserMetaDataOf(METADATA_KEY_KMS_ARN)
-      val keyTypeDescription = obj.objectMetadata.getUserMetaDataOf(METADATA_KEY_KEY_TYPE)
+          val keyType = KeyType.valueOf(keyTypeDescription.uppercase())
 
-      val keyType = KeyType.valueOf(keyTypeDescription.uppercase())
-
-      val keyContents = obj.objectContent.readAllBytes().toString(Charsets.UTF_8)
-      return Key(alias, keyType, MiskConfig.RealSecret(keyContents), kmsArn)
-    } catch (ex: AmazonS3Exception) {
+          val keyContents = obj.readAllBytes().toString(Charsets.UTF_8)
+          return Key(alias, keyType, MiskConfig.RealSecret(keyContents), kmsArn)
+        }
+    } catch (ex: AwsServiceException) {
       throw ExternalKeyManagerException("key alias not accessible: $alias (bucket '$name', $ex)")
     }
   }

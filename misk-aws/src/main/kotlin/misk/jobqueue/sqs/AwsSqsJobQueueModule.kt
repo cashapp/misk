@@ -18,7 +18,6 @@ import misk.cloud.aws.AwsRegion
 import misk.concurrent.ExecutorServiceModule
 import misk.config.AppName
 import misk.feature.FeatureFlags
-import misk.inject.AsyncSwitch
 import misk.inject.DefaultAsyncSwitchModule
 import misk.inject.KAbstractModule
 import misk.jobqueue.JobConsumer
@@ -31,6 +30,10 @@ import misk.tasks.RepeatedTaskQueueFactory
 import wisp.lease.LeaseManager
 
 /** [AwsSqsJobQueueModule] installs job queue support provided by SQS. */
+@Deprecated(
+  message = "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
+    "misk-aws2-sqs (misk.aws2.sqs.jobqueue.SqsJobQueueModule) instead."
+)
 open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbstractModule() {
   override fun configure() {
     requireBinding<AWSCredentialsProvider>()
@@ -82,7 +85,7 @@ open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbs
 
     install(DefaultAsyncSwitchModule())
     install(
-      ServiceModule<RepeatedTaskQueue, ForSqsHandling>().conditionalOn<AsyncSwitch>("sqs").dependsOn<ReadyService>()
+      ServiceModule<RepeatedTaskQueue, ForSqsHandling>().dependsOn<ReadyService>()
     )
   }
 
@@ -214,6 +217,10 @@ open class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbs
 }
 
 /** Modify a [QueueBufferConfig] to disable all receive pre-fetching settings. */
+@Deprecated(
+  message = "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
+    "misk-aws2-sqs (misk.aws2.sqs.jobqueue) instead."
+)
 fun QueueBufferConfig.withNoPrefetching(): QueueBufferConfig {
   return withMaxInflightReceiveBatches(0).withAdapativePrefetching(false).withMaxDoneReceiveBatches(0)
 }

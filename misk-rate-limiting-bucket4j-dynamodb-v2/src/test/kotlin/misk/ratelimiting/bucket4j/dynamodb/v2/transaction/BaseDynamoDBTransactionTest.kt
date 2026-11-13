@@ -1,6 +1,7 @@
 package misk.ratelimiting.bucket4j.dynamodb.v2.transaction
 
 import jakarta.inject.Inject
+import java.util.Optional
 import misk.ratelimiting.bucket4j.dynamodb.v2.modules.DynamoDbLongTestModule.Companion.LONG_TABLE_NAME
 import misk.ratelimiting.bucket4j.dynamodb.v2.modules.DynamoDbStringTestModule.Companion.STRING_TABLE_NAME
 import misk.ratelimiting.bucket4j.dynamodb.v2.transaction.BaseDynamoDBTransaction.Companion.DEFAULT_KEY_NAME
@@ -18,7 +19,7 @@ abstract class BaseDynamoDBTransactionTest<K> {
   @Test
   fun `should return empty when no bucket exists`() {
     val transaction = createTransaction(createRandomKey())
-    assertThat(transaction.stateData.isEmpty).isTrue()
+    assertThat(transaction.getStateData(Optional.empty<Long>()).isEmpty).isTrue()
   }
 
   @Test
@@ -28,7 +29,7 @@ abstract class BaseDynamoDBTransactionTest<K> {
     saveState(key, null)
 
     val transaction = createTransaction(key)
-    assertThat(transaction.stateData.isEmpty).isTrue()
+    assertThat(transaction.getStateData(Optional.empty<Long>()).isEmpty).isTrue()
   }
 
   @Test
@@ -39,7 +40,7 @@ abstract class BaseDynamoDBTransactionTest<K> {
     saveState(key, state)
 
     val transaction = createTransaction(key)
-    assertThrows<IllegalStateException> { transaction.stateData }
+    assertThrows<IllegalStateException> { transaction.getStateData(Optional.empty<Long>()) }
   }
 
   @Test
@@ -50,8 +51,8 @@ abstract class BaseDynamoDBTransactionTest<K> {
     saveState(key, state)
 
     val transaction = createTransaction(key)
-    assertThat(transaction.stateData.isPresent).isTrue()
-    assertThat(transaction.stateData.get()).isEqualTo(state.b().asByteArray())
+    assertThat(transaction.getStateData(Optional.empty<Long>()).isPresent).isTrue()
+    assertThat(transaction.getStateData(Optional.empty<Long>()).get()).isEqualTo(state.b().asByteArray())
   }
 
   @Test
@@ -60,7 +61,7 @@ abstract class BaseDynamoDBTransactionTest<K> {
     val update = AttributeValue.fromB(SdkBytes.fromUtf8String("update"))
     val transaction = createTransaction(key)
 
-    val result = transaction.compareAndSwap(null, update.b().asByteArray(), null)
+    val result = transaction.compareAndSwap(null, update.b().asByteArray(), null, Optional.empty<Long>())
     val state = getState(key)
 
     assertThat(result).isTrue()
@@ -74,7 +75,8 @@ abstract class BaseDynamoDBTransactionTest<K> {
     val update = AttributeValue.fromB(SdkBytes.fromUtf8String("update"))
     val transaction = createTransaction(key)
 
-    val result = transaction.compareAndSwap(original.b().asByteArray(), update.b().asByteArray(), null)
+    val result =
+      transaction.compareAndSwap(original.b().asByteArray(), update.b().asByteArray(), null, Optional.empty<Long>())
     val state = getState(key)
 
     assertThat(result).isTrue()
@@ -91,7 +93,8 @@ abstract class BaseDynamoDBTransactionTest<K> {
     saveState(key, initial)
     val transaction = createTransaction(key)
 
-    val result = transaction.compareAndSwap(original.b().asByteArray(), update.b().asByteArray(), null)
+    val result =
+      transaction.compareAndSwap(original.b().asByteArray(), update.b().asByteArray(), null, Optional.empty<Long>())
     val state = getState(key)
 
     assertThat(result).isFalse()

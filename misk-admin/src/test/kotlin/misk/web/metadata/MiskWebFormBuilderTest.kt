@@ -12,6 +12,36 @@ import misk.web.MiskWebFormBuilder.Field
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
+enum class TestColor {
+  RED,
+  GREEN,
+  BLUE,
+}
+
+data class SimpleDataClass(val name: String, val age: Int, val score: Double, val active: Boolean, val count: Long)
+
+data class NestedInner(val value: String, val count: Int)
+
+data class NestedDataClass(val label: String, val inner: NestedInner)
+
+data class DataClassWithCollections(
+  val tags: List<String>,
+  val counts: List<Int>,
+  val metadata: Map<String, String>,
+  val nested: List<NestedInner>,
+)
+
+data class DataClassWithEnum(val name: String, val color: TestColor)
+
+data class DataClassWithNullables(
+  val required: String,
+  val optional: String?,
+  val maybeCount: Int?,
+  val maybeInner: NestedInner?,
+)
+
+class NotADataClass(val value: String)
+
 internal class MiskWebFormBuilderTest {
   private val miskWebFormBuilder = MiskWebFormBuilder { "https://$it" }
 
@@ -214,5 +244,85 @@ internal class MiskWebFormBuilderTest {
           annotations = listOf("@com.squareup.protos.test.kt.SemanticDataTypeOption({ACCOUNT_TOKEN})"),
         )
       )
+  }
+
+  @Test
+  fun `handles simple data class with primitive fields`() {
+    val types = miskWebFormBuilder.calculateTypes(SimpleDataClass::class.createType())
+
+    assertThat(types).hasSize(1)
+    assertThat(types).containsKey(SimpleDataClass::class.qualifiedName)
+
+    val fields = types[SimpleDataClass::class.qualifiedName]!!.fields
+    assertThat(fields).contains(Field("name", "String", false))
+    assertThat(fields).contains(Field("age", "Int", false))
+    assertThat(fields).contains(Field("score", "Double", false))
+    assertThat(fields).contains(Field("active", "Boolean", false))
+    assertThat(fields).contains(Field("count", "Long", false))
+
+    assertThat(types[SimpleDataClass::class.qualifiedName]!!.documentationUrl).isNull()
+  }
+
+  @Test
+  fun `handles nested data classes`() {
+    val types = miskWebFormBuilder.calculateTypes(NestedDataClass::class.createType())
+
+    assertThat(types).hasSize(2)
+    assertThat(types).containsKey(NestedDataClass::class.qualifiedName)
+    assertThat(types).containsKey(NestedInner::class.qualifiedName)
+
+    val outerFields = types[NestedDataClass::class.qualifiedName]!!.fields
+    assertThat(outerFields).contains(Field("label", "String", false))
+    assertThat(outerFields).contains(Field("inner", NestedInner::class.qualifiedName!!, false))
+
+    val innerFields = types[NestedInner::class.qualifiedName]!!.fields
+    assertThat(innerFields).contains(Field("value", "String", false))
+    assertThat(innerFields).contains(Field("count", "Int", false))
+  }
+
+  @Test
+  fun `handles data class with list and map fields`() {
+    val types = miskWebFormBuilder.calculateTypes(DataClassWithCollections::class.createType())
+
+    assertThat(types).hasSize(2)
+    assertThat(types).containsKey(DataClassWithCollections::class.qualifiedName)
+    assertThat(types).containsKey(NestedInner::class.qualifiedName)
+
+    val fields = types[DataClassWithCollections::class.qualifiedName]!!.fields
+    assertThat(fields).contains(Field("tags", "String", true))
+    assertThat(fields).contains(Field("counts", "Int", true))
+    assertThat(fields).contains(Field("metadata", "String", true))
+    assertThat(fields).contains(Field("nested", NestedInner::class.qualifiedName!!, true))
+  }
+
+  @Test
+  fun `handles data class with enum fields`() {
+    val types = miskWebFormBuilder.calculateTypes(DataClassWithEnum::class.createType())
+
+    assertThat(types).hasSize(1)
+
+    val fields = types[DataClassWithEnum::class.qualifiedName]!!.fields
+    assertThat(fields).contains(Field("name", "String", false))
+    assertThat(fields).contains(Field("color", "Enum<misk.web.metadata.TestColor,RED,GREEN,BLUE>", false))
+  }
+
+  @Test
+  fun `handles data class with nullable fields`() {
+    val types = miskWebFormBuilder.calculateTypes(DataClassWithNullables::class.createType())
+
+    assertThat(types).hasSize(2)
+    assertThat(types).containsKey(DataClassWithNullables::class.qualifiedName)
+    assertThat(types).containsKey(NestedInner::class.qualifiedName)
+
+    val fields = types[DataClassWithNullables::class.qualifiedName]!!.fields
+    assertThat(fields).contains(Field("required", "String", false))
+    assertThat(fields).contains(Field("optional", "String", false))
+    assertThat(fields).contains(Field("maybeCount", "Int", false))
+    assertThat(fields).contains(Field("maybeInner", NestedInner::class.qualifiedName!!, false))
+  }
+
+  @Test
+  fun `non-data-class non-wire types still return empty`() {
+    assertThat(miskWebFormBuilder.calculateTypes(NotADataClass::class.createType())).isEmpty()
   }
 }

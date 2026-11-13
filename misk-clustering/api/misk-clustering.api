@@ -1,6 +1,6 @@
 public abstract interface class misk/clustering/Cluster {
 	public abstract fun getSnapshot ()Lmisk/clustering/Cluster$Snapshot;
-	public abstract fun newResourceMapper (Ljava/util/Set;)Lmisk/clustering/ClusterResourceMapper;
+	public fun newResourceMapper (Ljava/util/Set;)Lmisk/clustering/ClusterResourceMapper;
 	public abstract fun watch (Lkotlin/jvm/functions/Function1;)V
 }
 
@@ -27,7 +27,7 @@ public final class misk/clustering/Cluster$DefaultImpls {
 	public static fun newResourceMapper (Lmisk/clustering/Cluster;Ljava/util/Set;)Lmisk/clustering/ClusterResourceMapper;
 }
 
-public final class misk/clustering/Cluster$Member {
+public final class misk/clustering/Cluster$Member : misk/client/PeerIdentifier {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
@@ -158,6 +158,7 @@ public final class misk/clustering/fake/lease/FakeLeaderLeaseManager : misk/clus
 public final class misk/clustering/fake/lease/FakeLease : wisp/lease/Lease {
 	public fun <init> (Ljava/lang/String;Lmisk/clustering/fake/lease/FakeLeaseManager;)V
 	public fun acquire ()Z
+	public fun acquire (Lwisp/lease/AcquireOptions;)Z
 	public fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
 	public fun checkHeld ()Z
 	public fun checkHeldElsewhere ()Z
@@ -226,6 +227,7 @@ public final class misk/clustering/kubernetes/KubernetesConfig : misk/config/Con
 public final class misk/clustering/lease/ClusterAwareLease : wisp/lease/Lease {
 	public fun <init> (Ljava/lang/String;Lmisk/clustering/weights/ClusterWeightProvider;)V
 	public fun acquire ()Z
+	public fun acquire (Lwisp/lease/AcquireOptions;)Z
 	public fun addListener (Lwisp/lease/Lease$StateChangeListener;)V
 	public fun checkHeld ()Z
 	public fun checkHeldElsewhere ()Z

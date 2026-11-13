@@ -31,9 +31,11 @@ internal class ActionScopePropagationTest {
 
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "my seed data")
 
-    val callable = scope.enter(seedData).use { scope.propagate(Callable { tester.fooValue() }) }
+    val callable = scope.create(seedData).inScope {
+      scope.propagate(Callable { tester.fooValue() })
+    }
 
-    scope.enter(seedData).use {
+    scope.create(seedData).inScope {
       // Submit to same thread after we've already entered the scope
       val result = directExecutor.submit(callable).get()
       assertThat(result).isEqualTo("my seed data and bar and foo!")
@@ -48,7 +50,9 @@ internal class ActionScopePropagationTest {
 
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "my seed data")
 
-    val callable = scope.enter(seedData).use { scope.propagate(Callable { tester.fooValue() }) }
+    val callable = scope.create(seedData).inScope {
+      scope.propagate(Callable { tester.fooValue() })
+    }
 
     // Submit to other thread after we've exited the scope
     val result = singleThreadExecutor.submit(callable).get()
@@ -65,9 +69,11 @@ internal class ActionScopePropagationTest {
 
     // Propagate on the the KCallable directly
     val f: KFunction<String> = tester::fooValue
-    val callable = scope.enter(seedData).use { scope.propagate(f) }
+    val callable = scope.create(seedData).inScope {
+      scope.propagate(f)
+    }
 
-    scope.enter(seedData).use {
+    scope.create(seedData).inScope {
       // Submit to same thread after we've already entered the scope
       val result = directExecutor.submit(Callable { callable.call() }).get()
       assertThat(result).isEqualTo("my seed data and bar and foo!")
@@ -84,7 +90,9 @@ internal class ActionScopePropagationTest {
 
     // Propagate on the the KCallable directly
     val f: KFunction<String> = tester::fooValue
-    val callable = scope.enter(seedData).use { scope.propagate(f) }
+    val callable = scope.create(seedData).inScope {
+      scope.propagate(f)
+    }
 
     // Submit to other thread after we've exited the scope
     val result = singleThreadExecutor.submit(Callable { callable.call() }).get()
@@ -100,9 +108,11 @@ internal class ActionScopePropagationTest {
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "my seed data")
 
     // Propagate on a lambda directly
-    val function = scope.enter(seedData).use { scope.propagate { tester.fooValue() } }
+    val function = scope.create(seedData).inScope {
+      scope.propagate { tester.fooValue() }
+    }
 
-    scope.enter(seedData).use {
+    scope.create(seedData).inScope {
       // Submit to same thread after we've already entered the scope
       val result = directExecutor.submit(Callable { function() }).get()
       assertThat(result).isEqualTo("my seed data and bar and foo!")
@@ -118,7 +128,9 @@ internal class ActionScopePropagationTest {
     val seedData: Map<Key<*>, Any> = mapOf(keyOf<String>(Names.named("from-seed")) to "my seed data")
 
     // Propagate on a lambda directly
-    val function = scope.enter(seedData).use { scope.propagate { tester.fooValue() } }
+    val function = scope.create(seedData).inScope {
+      scope.propagate { tester.fooValue() }
+    }
 
     // Submit to other thread after we've exited the scope
     val result = singleThreadExecutor.submit(Callable { function() }).get()

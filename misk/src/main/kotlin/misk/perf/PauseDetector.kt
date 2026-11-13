@@ -62,13 +62,25 @@ constructor(
   /** Tracks the start time of the last invocation to [sleep] */
   private var startTime: Long = 0
 
+  /** The thread running the [run] loop, stored so [triggerShutdown] can interrupt it. */
+  @Volatile private var runThread: Thread? = null
+
   override fun run() {
-    while (isRunning) {
-      // NB: Broken into two different functions so that we can inject time delays for testing
-      // purposes.
-      sleep()
-      check()
+    runThread = Thread.currentThread()
+    try {
+      while (isRunning) {
+        // NB: Broken into two different functions so that we can inject time delays for testing
+        // purposes.
+        sleep()
+        check()
+      }
+    } catch (_: InterruptedException) {
+      // Expected when triggerShutdown() interrupts the sleeping thread.
     }
+  }
+
+  override fun triggerShutdown() {
+    runThread?.interrupt()
   }
 
   /**
