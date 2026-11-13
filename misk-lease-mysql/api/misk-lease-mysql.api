@@ -35,6 +35,7 @@ public abstract interface class misk/lease/mysql/LeaseDatabase : app/cash/sqldel
 }
 
 public final class misk/lease/mysql/LeaseDatabase$Companion {
+	public final fun allTableNames ()Ljava/util/List;
 	public final fun getSchema ()Lapp/cash/sqldelight/db/SqlSchema;
 	public final fun invoke (Lapp/cash/sqldelight/db/SqlDriver;Lmisk/lease/Leases$Adapter;)Lmisk/lease/mysql/LeaseDatabase;
 }

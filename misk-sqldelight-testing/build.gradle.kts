@@ -4,6 +4,8 @@ plugins {
 }
 
 dependencies {
+  api(libs.sqldelightRuntime)
+
   implementation(libs.sqldelightJdbcDriver)
 }
 
