@@ -18,3 +18,7 @@ public final class misk/tracing/backends/datadog/DatadogTracingBackendModule : m
 	public fun <init> (Z)V
 }
 
+public final class misk/tracing/backends/datadog/OtlpExportTraceInterceptorKt {
+	public static final fun registerOtlpExportTraceInterceptor (Lio/opentelemetry/sdk/autoconfigure/spi/ConfigProperties;)V
+}
+
