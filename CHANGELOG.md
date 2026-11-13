@@ -25,6 +25,8 @@ misk-mcp Kotlin MCP SDK 0.16.0
   call. It does nothing when the client did not send a `progressToken`.
 - Prompts and resource templates can implement `McpCompletionProvider` to answer `completion/complete` requests. The
   server advertises the `completions` capability only when at least one registered prompt or resource template does.
+- The `misk-mcp` README now documents server-to-client requests (WebSocket only), a polling pattern for long-running
+  work, and the title/icons, `reportProgress` and completion APIs.
 
 Vitess exception metric labels
 ===
