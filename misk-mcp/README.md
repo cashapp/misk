@@ -127,6 +127,16 @@ class MyMcpWebSocketAction @Inject constructor(
 - Want simplified connection management
 - Implementing conversational AI interfaces
 
+### Server-to-Client Requests
+
+Some MCP features are requests that the server sends to the client while it handles a tool call:
+
+- Elicitation, through `createTypedElicitation` or `ClientConnection.createElicitation`
+- Sampling, through `ClientConnection.createMessage`
+- Roots, through `ClientConnection.listRoots`
+
+These requests only work over the WebSocket transport today. Over StreamableHTTP, each POST gets a fresh `ServerSession`, so the client's reply arrives on a new session and cannot be matched to the waiting request. Notifications such as `reportProgress` work on both transports, because they need no reply.
+
 **Important**: You must install a WebActionModule to register your MCP web actions:
 
 ```kotlin
@@ -364,6 +374,13 @@ mcp:
       list_changed: false
     tools:
       list_changed: false
+    title: "My Server"                    # Optional display name sent in serverInfo
+    website_url: "https://example.com"    # Optional website sent in serverInfo
+    icons:                                # Optional icons sent in serverInfo
+      - src: "https://example.com/icon.png"
+        mime_type: "image/png"
+        sizes: ["48x48"]
+        theme: Light                      # Optional: Light or Dark
 ```
 
 **Note**: Currently, only a single server configuration is supported. The configuration must contain exactly one server entry.
@@ -373,6 +390,7 @@ mcp:
 - **version**: Server version reported to clients (semantic versioning recommended)
 - **resources.subscribe**: Enable resource update notifications (default: false)
 - **list_changed**: Whether dynamic registration is supported (default: false, not currently implemented)
+- **title**, **website_url**, **icons**: Optional server metadata reported to clients in `serverInfo` during initialization
 
 ## WebAction Scoping Best Practices
 
@@ -621,6 +639,33 @@ Use `MetaAwareStructuredMcpTool<I, O>` the same way; build the typed result with
 
 Tools that don't need meta should keep extending `McpTool` / `StructuredMcpTool` — meta-awareness is strictly opt-in.
 
+To send progress notifications, you don't need `RequestMeta`. Use `reportProgress`, described below.
+
+#### Reporting Progress
+
+Any tool handler can call `reportProgress` to send a `notifications/progress` update for the current call. It reads the `progressToken` the client sent and does nothing when the client sent none. It works over both StreamableHTTP and WebSocket.
+
+```kotlin
+override suspend fun handle(input: ImportInput): ToolResult {
+  input.files.forEachIndexed { index, file ->
+    importer.import(file)
+    reportProgress(progress = index + 1.0, total = input.files.size.toDouble(), message = "Imported ${file.name}")
+  }
+  return ToolResult(TextContent("Imported ${input.files.size} files"))
+}
+```
+
+`progress` must increase with each call. `total` and `message` are optional.
+
+#### Long-Running Work
+
+A tool call holds its HTTP request or WebSocket handler until the tool returns. For work that takes longer than a client will wait, split it into two tools:
+
+1. A start tool begins the work in the background, for example with a job queue, and returns a job ID right away.
+2. A status tool takes the job ID and returns the job's state, and its result once the job finishes.
+
+The client calls the start tool once, then polls the status tool. This pattern works on every MCP spec revision and both transports. misk-mcp does not support MCP Tasks yet. That support is planned for when the Kotlin MCP SDK ships the SEP-2663 Tasks extension (milestone 0.23.0).
+
 Register tools:
 
 ```kotlin
@@ -660,7 +705,7 @@ class DatabaseTool @Inject constructor(
 
 **Available Tool Hints:**
 
-- **`title`**: User-friendly display name for the tool (defaults to `name`)
+- **`title`**: User-friendly display name for the tool (defaults to `name`). It is sent as both `Tool.title` and `annotations.title`.
 - **`readOnlyHint`**: Whether the tool only reads data without modifying state (default: `false`)
 - **`destructiveHint`**: Whether the tool may delete or overwrite data (default: `true`, only relevant when `readOnlyHint = false`)
 - **`idempotentHint`**: Whether multiple calls with same input produce same result (default: `false`, only relevant when `readOnlyHint = false`)
@@ -671,6 +716,24 @@ These hints help AI clients:
 - Optimize caching for read-only tools
 - Implement retry logic for idempotent tools
 - Understand external dependencies
+
+#### Titles and Icons
+
+Tools, prompts, resources and resource templates can set an optional `title` and `icons`. Clients use them for display. Both default to null, except a tool's `title`, which defaults to its `name`.
+
+```kotlin
+class DatabaseSchemaResource @Inject constructor() : McpResource {
+  override val uri = "schema://database/users"
+  override val name = "users_schema"
+  override val description = "Schema of the users table"
+  override val title = "Users table schema"
+  override val icons = listOf(Icon(src = "https://example.com/table.png", mimeType = "image/png"))
+
+  override suspend fun handler(request: ReadResourceRequest): ReadResourceResult = TODO()
+}
+```
+
+To set the server's own title and icons, use the `title`, `website_url` and `icons` [configuration](#configuration) options.
 
 #### Working with ToolResult
 
@@ -844,6 +907,29 @@ Register the prompt:
 ```kotlin
 install(McpPromptModule.create<CodeReviewPrompt>())
 ```
+
+### Argument Completions
+
+A prompt or resource template can suggest values for its arguments through the `completion/complete` request. Implement `McpCompletionProvider` next to `McpPrompt` or `McpResourceTemplate`:
+
+```kotlin
+@Singleton
+class CodeReviewPrompt @Inject constructor() : McpPrompt, McpCompletionProvider {
+  // name, description, arguments and handler as above
+
+  override suspend fun complete(argumentName: String, value: String, contextArguments: Map<String, String>) =
+    when (argumentName) {
+      "language" -> listOf("java", "kotlin", "python").filter { it.startsWith(value) }
+      else -> emptyList()
+    }
+}
+```
+
+- `argumentName` is a prompt argument name, or a URI template variable name for a resource template.
+- `value` is the partial value the user has entered.
+- `contextArguments` holds values the client already resolved for other arguments.
+
+Return values best match first. The server sends the first 100 and reports the full count in `total` and `hasMore`. It advertises the `completions` capability only when at least one registered prompt or resource template implements `McpCompletionProvider`. Completions work over both StreamableHTTP and WebSocket.
 
 ## Resource URI Conventions
 
