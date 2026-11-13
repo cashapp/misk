@@ -45,7 +45,7 @@ open class CoordinatedAwsSqsJobQueueModule(private val config: AwsSqsJobQueueCon
 
     install(DefaultAsyncSwitchModule())
     install(ServiceModule<RepeatedTaskQueue, ForSqsHandling>().dependsOn<ReadyService>())
-    install(ServiceModule<RealSqsClientFactory>())
+    install(ServiceModule<RealSqsClientFactory>().enhancedBy<ReadyService>())
   }
 
   open fun configureClient(builder: SqsClientBuilder) {}

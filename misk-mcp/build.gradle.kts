@@ -23,10 +23,10 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":misk"))
   api(project(":misk-config"))
+  api(libs.kotlinxCoroutinesCore)
+  api(libs.kotlinxSerializationCore)
 
   implementation(libs.kotlinReflect)
-  implementation(libs.kotlinxCoroutinesCore)
-  implementation(libs.kotlinxSerializationCore)
 
   implementation(libs.loggingApi)
   implementation(project(":misk-core"))

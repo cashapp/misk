@@ -7,6 +7,7 @@ import com.launchdarkly.sdk.server.LDClient
 import com.launchdarkly.sdk.server.LDConfig
 import com.launchdarkly.sdk.server.integrations.EventProcessorBuilder.DEFAULT_CAPACITY
 import com.launchdarkly.sdk.server.integrations.EventProcessorBuilder.DEFAULT_FLUSH_INTERVAL
+import com.launchdarkly.sdk.server.integrations.EventProcessorBuilder.DEFAULT_USER_KEYS_CAPACITY
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import com.squareup.moshi.Moshi
 import io.micrometer.core.instrument.MeterRegistry
@@ -70,7 +71,13 @@ constructor(private val config: LaunchDarklyConfig, private val qualifier: KClas
           // Set wait to 0 to not block here. Block in service initialization instead.
           .startWait(Duration.ofMillis(0))
           .dataSource(Components.streamingDataSource())
-          .events(Components.sendEvents().capacity(config.event_capacity).flushInterval(config.flush_interval))
+          .events(
+            Components.sendEvents()
+              .capacity(config.event_capacity)
+              .flushInterval(config.flush_interval)
+              // Despite its name, this sizes the SDK's context key cache used to deduplicate index events.
+              .userKeysCapacity(config.context_keys_capacity)
+          )
           .offline(config.offline)
 
       logger.debug("Configuring service endpoints...")
@@ -113,4 +120,9 @@ constructor(
   val event_capacity: Int = DEFAULT_CAPACITY,
   val flush_interval: Duration = DEFAULT_FLUSH_INTERVAL,
   val offline: Boolean = false,
+  /**
+   * Number of distinct context keys the SDK remembers when deduplicating index events. Raise this if the service
+   * evaluates flags against a large set of repeating keys, or every evaluation sends an index event.
+   */
+  val context_keys_capacity: Int = DEFAULT_USER_KEYS_CAPACITY,
 ) : Config

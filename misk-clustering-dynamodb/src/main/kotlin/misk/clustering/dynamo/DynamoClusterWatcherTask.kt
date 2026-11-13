@@ -45,6 +45,7 @@ constructor(
   private var wasDisabled = false
 
   override fun startUp() {
+    logger.info { "starting dynamo cluster watcher" }
     taskQueue.scheduleWithBackoff(timeBetweenRuns = Duration.ofSeconds(dynamoClusterConfig.update_frequency_seconds)) {
       run()
     }
@@ -113,6 +114,7 @@ constructor(
 
   /** On pod shutdown, remove the pod from the cluster view */
   override fun shutDown() {
+    logger.info { "shutting down dynamo cluster watcher" }
     removeOurselfFromDynamo()
   }
 

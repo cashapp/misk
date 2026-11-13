@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JacksonAnnotationsInside
 import com.google.common.base.Joiner
 import java.io.File
 import java.io.FilenameFilter
+import java.time.Duration
+import java.time.format.DateTimeParseException
 import java.util.Locale
 import kotlin.reflect.KClass
 import kotlin.time.ExperimentalTime
@@ -281,6 +283,8 @@ object MiskConfig {
         // frequently overridden for display, so switching would break existing config files.
         .disable(EnumFeature.READ_ENUMS_USING_TO_STRING, EnumFeature.WRITE_ENUMS_USING_TO_STRING)
 
+    builder.addModule(SimpleModule().addDeserializer(Duration::class.java, ExplicitDurationDeserializer()))
+
     // The SecretDeserializer supports deserializing json, so bind last so it can use previous
     // mappings.
     if (redactSecrets) {
@@ -302,6 +306,24 @@ object MiskConfig {
 
     mapper = builder.build()
     return mapper
+  }
+
+  private class ExplicitDurationDeserializer : ValueDeserializer<Duration>() {
+    override fun deserialize(parser: JsonParser, ctxt: DeserializationContext): Duration {
+      if (parser.currentToken() == JsonToken.VALUE_STRING) {
+        try {
+          return Duration.parse(parser.string.trim())
+        } catch (_: DateTimeParseException) {
+          // Report invalid strings and unitless numbers with the same actionable config error.
+        }
+      }
+      throw InvalidFormatException.from(
+        parser,
+        "Duration requires an ISO-8601 string with explicit units, such as PT0.025S (25 milliseconds) or PT25S (25 seconds)",
+        parser.valueAsString,
+        Duration::class.java,
+      )
+    }
   }
 
   @JvmStatic

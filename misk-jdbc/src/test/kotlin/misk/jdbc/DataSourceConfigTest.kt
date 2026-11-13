@@ -274,6 +274,14 @@ class DataSourceConfigTest {
   }
 
   @Test
+  fun mysqlAndVitessSessionsRunInUtc() {
+    for (type in listOf(DataSourceType.MYSQL, DataSourceType.VITESS_MYSQL)) {
+      assertThat(DataSourceConfig(type).getDataSourceProperties()["sessionVariables"]).isEqualTo("time_zone='+00:00'")
+    }
+    assertThat(DataSourceConfig(DataSourceType.TIDB).getDataSourceProperties()).doesNotContainKey("sessionVariables")
+  }
+
+  @Test
   fun externallyManagedMigrationsFormatIsValid() {
     // Should not throw any exception
     val config = DataSourceConfig(DataSourceType.MYSQL, migrations_format = MigrationsFormat.EXTERNALLY_MANAGED)

@@ -93,6 +93,12 @@ class GoogleSpannerEmulator @Inject constructor(val config: SpannerConfig) : Abs
     const val CONTAINER_NAME = "misk-spanner-testing"
     var image: String = "$IMAGE_NAME:latest"
 
+    // A fresh container needs seconds to serve its first call. The health check used to back off in single
+    // milliseconds, so it gave up long before the emulator was ready and let startup race it.
+    private const val HEALTH_CHECK_ATTEMPTS = 20
+    private const val HEALTH_CHECK_BACKOFF_BASE_MILLIS = 100L
+    private const val HEALTH_CHECK_BACKOFF_MAX_MILLIS = 2_000L
+
     fun pullImage() {
       if (imagePulled.get()) {
         return
@@ -192,7 +198,10 @@ class GoogleSpannerEmulator @Inject constructor(val config: SpannerConfig) : Abs
   private fun waitUntilHealthy() {
     try {
       runBlocking {
-        retry(limitAttempts(20) + binaryExponentialBackoff(1L, 5L)) {
+        retry(
+          limitAttempts(HEALTH_CHECK_ATTEMPTS) +
+            binaryExponentialBackoff(HEALTH_CHECK_BACKOFF_BASE_MILLIS, HEALTH_CHECK_BACKOFF_MAX_MILLIS)
+        ) {
           // The query will fail if the server is not responding
           client.instanceAdminClient.listInstances().values
         }
@@ -202,27 +211,44 @@ class GoogleSpannerEmulator @Inject constructor(val config: SpannerConfig) : Abs
     }
   }
 
+  /**
+   * Creates the configured instance and database, and waits out an emulator that is not ready to serve admin calls.
+   *
+   * An emulator that answers `listInstances` does not always accept admin writes yet, so [waitUntilHealthy] alone does
+   * not prove readiness. Each step here reads before it writes, so the whole block is safe to repeat.
+   */
   private fun createDatabase() {
-    val instanceId = "misk-test-instance"
-    var instance: Instance
+    SpannerEmulatorReadiness.retryWhileNotReady("create the instance and database") {
+      getOrCreateDatabase(getOrCreateInstance())
+    }
+  }
 
+  private fun getOrCreateInstance(): Instance =
     try {
-      instance = client.instanceAdminClient.getInstance(config.instance_id)
+      client.instanceAdminClient.getInstance(config.instance_id)
     } catch (e: SpannerException) {
-      instance =
-        client.instanceAdminClient
-          .createInstance(
-            InstanceInfo.newBuilder(InstanceId.of(config.project_id, config.instance_id))
-              .setInstanceConfigId(InstanceConfigId.of(config.project_id, "emulator-config"))
-              .build()
-          )
-          .get()
+      // An emulator that is not ready tells us nothing about whether the instance exists, so do not read the failure
+      // as "absent" and create it. Hand it to the retry instead.
+      if (SpannerEmulatorReadiness.isNotReady(e)) throw e
+
+      client.instanceAdminClient
+        .createInstance(
+          InstanceInfo.newBuilder(InstanceId.of(config.project_id, config.instance_id))
+            .setInstanceConfigId(InstanceConfigId.of(config.project_id, "emulator-config"))
+            .build()
+        )
+        .get()
     }
 
+  private fun getOrCreateDatabase(instance: Instance) {
     try {
       instance.getDatabase(config.database)
     } catch (e: SpannerException) {
-      instance.createDatabase(config.database, listOf())
+      if (SpannerEmulatorReadiness.isNotReady(e)) throw e
+
+      // Wait for the operation. An unawaited future can fail after startUp returns, which would hand tests a database
+      // that does not exist and put the failure outside the retry.
+      instance.createDatabase(config.database, listOf()).get()
     }
   }
 

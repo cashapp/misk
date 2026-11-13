@@ -11,6 +11,11 @@ import misk.web.toResponseBody
 import okhttp3.Headers.Companion.headersOf
 
 /** Maps ClientExecutionTimeoutException to 503 responses because the exception is concurrency related */
+@Deprecated(
+  message =
+    "AWS SDK v1 DynamoDB is deprecated. Use the AWS SDK v2 DynamoDB module in " +
+      "misk-aws2-dynamodb (misk.aws2.dynamodb.RealDynamoDbModule) instead."
+)
 class ClientExecutionTimeoutExceptionMapper @Inject constructor() : ExceptionMapper<ClientExecutionTimeoutException> {
   override fun toResponse(th: ClientExecutionTimeoutException): Response<ResponseBody> =
     Response(

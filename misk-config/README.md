@@ -29,6 +29,31 @@ val deployment = getDeploymentFromEnvironmentVariable()
 val config = MiskConfig.load<ExemplarConfig>("exemplar", depoyment)
 ```
 
+## Durations
+
+`java.time.Duration` properties loaded by `MiskConfig.load` require ISO-8601 strings with explicit units:
+
+```yaml
+retry_delay: PT0.025S # 25 milliseconds
+request_timeout: PT25S # 25 seconds
+```
+
+Unitless numbers (including zero, fractions, and quoted numbers) are rejected. Use `PT0S` for zero.
+This is a breaking change from older releases, which accepted numeric durations as seconds unless
+strict parsing was enabled. For example, `25` meant 25 seconds, not 25 milliseconds.
+To preserve that effective value, use `PT25S`; only use `PT0.025S` if 25 milliseconds is the
+intended duration. Do not mechanically divide every numeric value by 1,000.
+
+Before upgrading, migrate common, environment, mounted, and local override configurations and
+validate all environments with your config/injector tests. Validation applies to the final merged
+configuration. Older releases with the opt-in flag can be used to prepare for this upgrade.
+The overloads accepting `requireExplicitDurationUnits` have been removed. Remove that argument
+from callers and recompile them when upgrading; this is a source and binary API break for callers
+using those overloads. Explicit units are required without an opt-out.
+
+This requirement applies to `java.time.Duration` values loaded by `MiskConfig`, not to primitive numeric
+config properties or other JSON mappers. Defaults declared in Kotlin remain unchanged when a property is absent.
+
 ## Redacted
 
 For sensitive fields, you can annotate them with `@misk.config.Redact` and the field value will not appear in serialized YAML.

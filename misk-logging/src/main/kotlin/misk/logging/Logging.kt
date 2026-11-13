@@ -111,8 +111,11 @@ fun <T> withTags(vararg tags: Tag, includeTagsOnExceptionLogs: Boolean = false, 
  * Use this function to add tags to the MDC context for the duration of the block.
  *
  * This is particularly useful (the smart aspect) when an exception is thrown within the block, the tags can be
- * retrieved outside that block using `SmartTagsThreadLocalHandler.popThreadLocalSmartTags()` and added to the MDC
+ * retrieved outside that block using `SmartTagsThreadLocalHandler.popThreadLocalSmartTags(th)` and added to the MDC
  * context again when logging the exception.
+ *
+ * Tags are only returned for the throwable that escaped the block, or one wrapping it as a cause. Any `Throwable` is
+ * covered, including `Error`s.
  *
  * Within Misk this is already built into both WebAction (`misk.web.exceptions.ExceptionHandlingInterceptor`) and
  * `misk.jobqueue.sqs.SqsJobConsumer`. These can be used as an example to extend for any other incoming "event"
