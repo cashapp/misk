@@ -1,5 +1,6 @@
 package misk.mcp
 
+import io.modelcontextprotocol.kotlin.sdk.types.Icon
 import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceRequest
 import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceResult
 import misk.annotation.ExperimentalMiskApi
@@ -119,6 +120,22 @@ interface McpResource {
    */
   val mimeType: String
     get() = "text/html"
+
+  /**
+   * Human-readable display name for this resource, shown by clients in place of [name] when set.
+   *
+   * Defaults to null.
+   */
+  val title: String?
+    get() = null
+
+  /**
+   * Icons clients can show for this resource.
+   *
+   * Defaults to null.
+   */
+  val icons: List<Icon>?
+    get() = null
 
   /**
    * Handles incoming resource read requests.

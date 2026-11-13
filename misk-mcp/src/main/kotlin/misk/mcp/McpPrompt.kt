@@ -2,6 +2,7 @@ package misk.mcp
 
 import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequest
 import io.modelcontextprotocol.kotlin.sdk.types.GetPromptResult
+import io.modelcontextprotocol.kotlin.sdk.types.Icon
 import io.modelcontextprotocol.kotlin.sdk.types.PromptArgument
 import misk.annotation.ExperimentalMiskApi
 
@@ -121,6 +122,22 @@ interface McpPrompt {
    * reusable across different contexts.
    */
   val arguments: List<PromptArgument>
+
+  /**
+   * Human-readable display name for this prompt, shown by clients in place of [name] when set.
+   *
+   * Defaults to null.
+   */
+  val title: String?
+    get() = null
+
+  /**
+   * Icons clients can show for this prompt.
+   *
+   * Defaults to null.
+   */
+  val icons: List<Icon>?
+    get() = null
 
   /**
    * Handles incoming prompt generation requests.

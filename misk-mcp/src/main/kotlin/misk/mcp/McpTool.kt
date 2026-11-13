@@ -6,6 +6,7 @@ import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequest
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.ContentBlock
 import io.modelcontextprotocol.kotlin.sdk.types.EmptyJsonObject
+import io.modelcontextprotocol.kotlin.sdk.types.Icon
 import io.modelcontextprotocol.kotlin.sdk.types.RequestMeta
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
@@ -195,6 +196,9 @@ abstract class McpTool<I : Any> {
   /** Tool metadata that will be included in the tool definition. */
   open val meta: JsonObject? = null
 
+  /** Icons clients can show for this tool. Defaults to null. */
+  open val icons: List<Icon>? = null
+
   internal val inputSchema: ToolSchema by lazy {
     val schema = inputType.generateJsonSchema()
     ToolSchema(
@@ -289,11 +293,10 @@ abstract class McpTool<I : Any> {
   /**
    * Handles a tool invocation with the typed [input].
    *
-   * Subclasses must override this method to implement tool behavior. Tools that need access to the
-   * request's [RequestMeta] (e.g. progress tokens, related task metadata) should extend the
-   * [MetaAwareMcpTool] (or [MetaAwareStructuredMcpTool] for structured outputs) abstract bridge
-   * class instead — the bridge implements [MetaAwareTool] and the framework dispatches through
-   * the meta-aware overload when present.
+   * Subclasses must override this method to implement tool behavior. Tools that need access to the request's
+   * [RequestMeta] (e.g. progress tokens, related task metadata) should extend the [MetaAwareMcpTool] (or
+   * [MetaAwareStructuredMcpTool] for structured outputs) abstract bridge class instead — the bridge implements
+   * [MetaAwareTool] and the framework dispatches through the meta-aware overload when present.
    */
   abstract suspend fun handle(input: I): ToolResult
 
@@ -555,8 +558,8 @@ abstract class StructuredMcpTool<I : Any, O : Any> : McpTool<I>() {
 /**
  * Convenience base class for MCP tools that require no input parameters.
  *
- * This abstract class extends [McpTool] with no input type, providing a simplified API for tools that
- * don't accept any input arguments. Subclasses implement a simpler `handle()` method with no parameters.
+ * This abstract class extends [McpTool] with no input type, providing a simplified API for tools that don't accept any
+ * input arguments. Subclasses implement a simpler `handle()` method with no parameters.
  *
  * ## When to Use McpToolEmptyInput
  *
@@ -612,13 +615,12 @@ abstract class McpToolEmptyInput : McpTool<EmptyInput>() {
   abstract suspend fun handle(): ToolResult
 }
 
-
 /**
  * Convenience base class for structured MCP tools that require no input parameters.
  *
- * This abstract class extends [StructuredMcpTool] with no input type, providing a simplified API for
- * tools that return structured output but don't accept any input arguments. Subclasses implement a simpler `handle()`
- * method with no parameters.
+ * This abstract class extends [StructuredMcpTool] with no input type, providing a simplified API for tools that return
+ * structured output but don't accept any input arguments. Subclasses implement a simpler `handle()` method with no
+ * parameters.
  *
  * ## When to Use StructuredMcpToolEmptyInput
  *
@@ -692,8 +694,7 @@ abstract class StructuredMcpToolEmptyInput<O : Any> : StructuredMcpTool<EmptyInp
   abstract suspend fun handle(): ToolResult
 }
 
-@Serializable
-data object EmptyInput
+@Serializable data object EmptyInput
 
 /**
  * Extracts the typed result from a [McpTool.ToolResult].

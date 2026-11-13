@@ -2,11 +2,15 @@ package misk.mcp
 
 import com.google.inject.Provider
 import io.modelcontextprotocol.kotlin.sdk.server.ClientConnection
+import io.modelcontextprotocol.kotlin.sdk.server.RegisteredResource
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequest
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.Implementation
+import io.modelcontextprotocol.kotlin.sdk.types.Prompt
+import io.modelcontextprotocol.kotlin.sdk.types.Resource
+import io.modelcontextprotocol.kotlin.sdk.types.ResourceTemplate
 import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.Tool
 import io.modelcontextprotocol.kotlin.sdk.types.ToolAnnotations
@@ -17,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.config.McpServerConfig
+import misk.mcp.config.asIcon
 import misk.mcp.config.asPrompts
 import misk.mcp.config.asResources
 import misk.mcp.config.asTools
@@ -114,7 +119,13 @@ internal constructor(
   private val mcpMetrics: McpMetrics,
 ) :
   Server(
-    Implementation(name = name, version = version),
+    Implementation(
+      name = name,
+      version = version,
+      title = config.title,
+      websiteUrl = config.website_url,
+      icons = config.icons.map { it.asIcon() }.ifEmpty { null },
+    ),
     ServerOptions(
       capabilities =
         ServerCapabilities(
@@ -136,29 +147,48 @@ internal constructor(
   init {
     prompts.forEach { prompt ->
       addPrompt(
-        name = prompt.name,
-        description = prompt.description,
-        arguments = prompt.arguments,
+        prompt =
+          Prompt(
+            name = prompt.name,
+            description = prompt.description,
+            arguments = prompt.arguments,
+            title = prompt.title,
+            icons = prompt.icons,
+          ),
         promptProvider = { request -> withContext(handlerContext()) { prompt.handler(request) } },
       )
     }
 
-    resources.forEach { resource ->
-      addResource(
-        uri = resource.uri,
-        name = resource.name,
-        description = resource.description,
-        mimeType = resource.mimeType,
-        readHandler = { request -> withContext(handlerContext()) { resource.handler(request) } },
+    // addResources requires the resources capability even for an empty list.
+    if (resources.isNotEmpty())
+      addResources(
+        resources.map { resource ->
+          RegisteredResource(
+            resource =
+              Resource(
+                uri = resource.uri,
+                name = resource.name,
+                description = resource.description,
+                mimeType = resource.mimeType,
+                title = resource.title,
+                icons = resource.icons,
+              ),
+            readHandler = { request -> withContext(handlerContext()) { resource.handler(request) } },
+          )
+        }
       )
-    }
 
     resourceTemplates.forEach { template ->
       addResourceTemplate(
-        uriTemplate = template.uriTemplate,
-        name = template.name,
-        description = template.description,
-        mimeType = template.mimeType,
+        template =
+          ResourceTemplate(
+            uriTemplate = template.uriTemplate,
+            name = template.name,
+            description = template.description,
+            mimeType = template.mimeType,
+            title = template.title,
+            icons = template.icons,
+          ),
         readHandler = { request, variables -> withContext(handlerContext()) { template.handler(request, variables) } },
       )
     }
@@ -168,6 +198,8 @@ internal constructor(
         tool =
           Tool.build(tool.name, tool.inputSchema) {
             description = tool.description
+            title = tool.title
+            icons = tool.icons
             tool.outputSchema?.let { outputSchema = it }
             annotations =
               ToolAnnotations.build {

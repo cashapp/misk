@@ -18,6 +18,9 @@ misk-mcp Kotlin MCP SDK 0.16.0
 - Registering two tools, prompts, resources or resource templates with the same name or URI now throws
   `IllegalArgumentException` at startup.
 - Requesting an unknown prompt now returns a JSON-RPC `INVALID_PARAMS` (-32602) error.
+- Tools, prompts, resources and resource templates can set an optional `title` and `icons`, and `McpServerConfig` can
+  set an optional `title`, `website_url` and `icons` for `serverInfo`. A tool's `title` is now also sent as the
+  top-level `Tool.title`, not only as `annotations.title`.
 
 Vitess exception metric labels
 ===

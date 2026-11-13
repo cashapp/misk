@@ -2,6 +2,7 @@
 
 package misk.mcp.config
 
+import io.modelcontextprotocol.kotlin.sdk.types.Icon
 import misk.annotation.ExperimentalMiskApi
 import misk.config.Config
 
@@ -62,6 +63,9 @@ class McpConfig @JvmOverloads constructor(servers: Map<String, McpServerConfig> 
  * @param prompts Configuration for prompt-related capabilities. See [McpPromptConfig].
  * @param resources Configuration for resource-related capabilities. See [McpResourceConfig].
  * @param tools Configuration for tool-related capabilities. See [McpToolConfig].
+ * @param title Optional human-readable server name reported to clients in `serverInfo` during initialization.
+ * @param website_url Optional URL of a website for this server, reported to clients in `serverInfo`.
+ * @param icons Optional icons for this server, reported to clients in `serverInfo`. See [McpIconConfig].
  */
 data class McpServerConfig
 @JvmOverloads
@@ -71,6 +75,36 @@ constructor(
   val resources: McpResourceConfig = McpResourceConfig(),
   val tools: McpToolConfig = McpToolConfig(),
   val enforce_strict_capabilities: Boolean = false,
+  val title: String? = null,
+  val website_url: String? = null,
+  val icons: List<McpIconConfig> = emptyList(),
+) : Config
+
+/**
+ * Configuration for an icon that clients can show for an MCP server.
+ *
+ * ## YAML Configuration Example
+ *
+ * ```yaml
+ * icons:
+ *   - src: "https://example.com/icon.png"
+ *     mime_type: "image/png"
+ *     sizes: ["48x48"]
+ *     theme: Light
+ * ```
+ *
+ * @param src URI of the icon, either an HTTPS URL or a `data:` URI.
+ * @param mime_type Optional MIME type of the icon.
+ * @param sizes Optional sizes the icon is available in, such as `48x48` or `any`.
+ * @param theme Optional theme the icon is designed for, `Light` or `Dark`.
+ */
+data class McpIconConfig
+@JvmOverloads
+constructor(
+  val src: String,
+  val mime_type: String? = null,
+  val sizes: List<String> = emptyList(),
+  val theme: Icon.Theme? = null,
 ) : Config
 
 /**
