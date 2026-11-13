@@ -13,6 +13,7 @@ import io.modelcontextprotocol.kotlin.sdk.types.ToolAnnotations
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.TimeSource
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.config.McpServerConfig
@@ -126,6 +127,8 @@ internal constructor(
           tools = if (tools.isNotEmpty()) config.tools.asTools() else null,
         ),
       enforceStrictCapabilities = config.enforce_strict_capabilities,
+      // Tool handlers commonly block, so keep post-initialization handlers off Dispatchers.Default.
+      handlerCoroutineContext = Dispatchers.IO,
     ),
     instructionsProvider = instructionsProvider?.let { { it.get() } },
   ) {

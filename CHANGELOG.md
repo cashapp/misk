@@ -7,6 +7,18 @@ The Changelog consequently will not be updated regularly since releases only inc
 
 Major and breaking changes will still be documented in the Changelog.
 
+misk-mcp Kotlin MCP SDK 0.16.0
+===
+
+`misk-mcp` now depends on `io.modelcontextprotocol:kotlin-sdk-*` 0.16.0 (previously 0.13.0).
+
+- Requests on an MCP WebSocket connection may now be handled concurrently on `Dispatchers.IO`. Handlers previously ran
+  one at a time per connection. Streamable HTTP (`McpPost`) handlers are unchanged and still run inline in the web
+  action's coroutine.
+- Registering two tools, prompts, resources or resource templates with the same name or URI now throws
+  `IllegalArgumentException` at startup.
+- Requesting an unknown prompt now returns a JSON-RPC `INVALID_PARAMS` (-32602) error.
+
 Vitess exception metric labels
 ===
 
