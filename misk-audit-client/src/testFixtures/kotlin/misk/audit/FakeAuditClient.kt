@@ -19,6 +19,19 @@ import wisp.deployment.TESTING
 @Singleton
 class FakeAuditClient @Inject constructor(private val optionalBinder: OptionalBinder) : AuditClient, FakeFixture() {
   private val region = "us-west-2"
+  internal val requestCaptures = AuditRequestCaptures()
+
+  /** Registers one request before sending it. Requires [FakeAuditRequestCompletionModule]. */
+  fun captureHttpRequest(): FakeAuditRequestCapture {
+    check(optionalBinder.requestContext != null) {
+      "Install FakeAuditRequestCompletionModule before capturing HTTP requests"
+    }
+    return requestCaptures.register()
+  }
+
+  override fun reset() {
+    requestCaptures.reset { super.reset() }
+  }
 
   val sentEvents: LinkedBlockingDeque<FakeAuditEvent> by resettable { LinkedBlockingDeque<FakeAuditEvent>() }
   var enableLogging: Boolean by resettable { false }
@@ -50,33 +63,39 @@ class FakeAuditClient @Inject constructor(private val optionalBinder: OptionalBi
     environment: String?,
     timestampSent: Instant?,
   ) {
-    val event =
-      FakeAuditEvent(
-        eventSource = optionalBinder.appName,
-        eventTarget = target,
-        timestampSent =
-          (timestampSent ?: optionalBinder.clock.instant()).toEpochMilli().nanoseconds.toInt(DurationUnit.NANOSECONDS),
-        applicationName = applicationName ?: optionalBinder.appName,
-        approverLDAP = approverLDAP,
-        automatedChange = automatedChange,
-        description = description,
-        richDescription = richDescription,
-        environment = environment ?: optionalBinder.deployment.mapToEnvironmentName(),
-        detailURL = detailURL,
-        region = region,
-        requestorLDAP =
-          requestorLDAP
-            ?: if (automatedChange) {
-              null
-            } else {
-              optionalBinder.callerProvider.getIfInScope()?.principal ?: DEFAULT_USER
-            },
-      )
+    requestCaptures.record(optionalBinder.requestContext?.getIfInScope()?.claimedRegistration) {
+      val recordedEvent =
+        FakeAuditEvent(
+          eventSource = optionalBinder.appName,
+          eventTarget = target,
+          timestampSent =
+            (timestampSent ?: optionalBinder.clock.instant())
+              .toEpochMilli()
+              .nanoseconds
+              .toInt(DurationUnit.NANOSECONDS),
+          applicationName = applicationName ?: optionalBinder.appName,
+          approverLDAP = approverLDAP,
+          automatedChange = automatedChange,
+          description = description,
+          richDescription = richDescription,
+          environment = environment ?: optionalBinder.deployment.mapToEnvironmentName(),
+          detailURL = detailURL,
+          region = region,
+          requestorLDAP =
+            requestorLDAP
+              ?: if (automatedChange) {
+                null
+              } else {
+                optionalBinder.callerProvider.getIfInScope()?.principal ?: DEFAULT_USER
+              },
+        )
 
-    sentEvents.add(event)
+      sentEvents.add(recordedEvent)
 
-    if (enableLogging) {
-      logger.info("Audit Event Logged [event=$event]")
+      if (enableLogging) {
+        logger.info("Audit Event Logged [event=$recordedEvent]")
+      }
+      recordedEvent
     }
   }
 
@@ -90,6 +109,8 @@ class FakeAuditClient @Inject constructor(private val optionalBinder: OptionalBi
    */
   @Singleton
   class OptionalBinder @Inject constructor() {
+    @com.google.inject.Inject(optional = true) internal var requestContext: ActionScoped<AuditRequestContext>? = null
+
     @com.google.inject.Inject(optional = true) @AppName var appName: String = "test-app"
 
     @com.google.inject.Inject(optional = true)
