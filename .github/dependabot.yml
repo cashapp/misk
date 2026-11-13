@@ -5,6 +5,10 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
+    groups:
+      grpc:
+        patterns:
+          - "io.grpc:*"
     ignore:
       - dependency-name: "com.datadoghq:dd-trace-ot"
       - dependency-name: "com.datadoghq:dd-trace-api"
