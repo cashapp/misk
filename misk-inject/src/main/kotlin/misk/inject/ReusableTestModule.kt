@@ -7,6 +7,17 @@ import kotlin.reflect.jvm.isAccessible
 /**
  * This class should be extended by test modules used in tests, for Misk to reuse the Guice injector across tests for
  * significantly faster test suite performance.
+ *
+ * Equality and hashing are structural: two instances of the same subclass whose member properties compare equal (except
+ * for those in [ignorePropertiesForEquality]) are treated as the same module. When injector reuse is enabled, test
+ * classes whose module lists compare equal share a single cached injector, so a module shared by many test classes
+ * (e.g. [misk.MiskTestingServiceModule] used with no constructor arguments) must not carry per-class state.
+ *
+ * Note that the `@Bind`-annotated fields of a test class are only applied when its injector is first created for the
+ * shared cache key. A test class that uses `@Bind` must therefore have a module list that only compares equal to itself
+ * (e.g. install the shared module(s) from a `ReusableTestModule` subclass declared next to the test class), or injector
+ * reuse must be disabled for it. Misk fails fast when such a class would otherwise silently reuse another class's
+ * bindings.
  */
 abstract class ReusableTestModule : KAbstractModule() {
   override fun equals(other: Any?): Boolean {
