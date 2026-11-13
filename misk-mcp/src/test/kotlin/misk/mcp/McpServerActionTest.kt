@@ -9,29 +9,45 @@ import io.modelcontextprotocol.kotlin.sdk.types.ElicitResult
 import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequest
 import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequestParams
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCRequest
 import io.modelcontextprotocol.kotlin.sdk.types.ListPromptsRequest
 import io.modelcontextprotocol.kotlin.sdk.types.ListResourceTemplatesRequest
 import io.modelcontextprotocol.kotlin.sdk.types.ListResourcesRequest
 import io.modelcontextprotocol.kotlin.sdk.types.ListToolsRequest
+import io.modelcontextprotocol.kotlin.sdk.types.Method
 import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceRequest
 import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceRequestParams
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.TextResourceContents
 import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.AbstractCoroutineContextElement
+import kotlin.coroutines.CoroutineContext
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
+import kotlinx.serialization.Serializable
 import misk.MiskTestingServiceModule
 import misk.annotation.ExperimentalMiskApi
 import misk.inject.KAbstractModule
 import misk.mcp.action.McpPost
 import misk.mcp.action.McpStreamManager
 import misk.mcp.action.McpWebSocket
+import misk.mcp.action.currentClientConnection
+import misk.mcp.action.currentServerSession
 import misk.mcp.action.handleMessage
 import misk.mcp.config.McpConfig
 import misk.mcp.config.McpServerConfig
@@ -43,14 +59,14 @@ import misk.mcp.testing.resources.WebSearchResource
 import misk.mcp.testing.tools.CalculatorTool
 import misk.mcp.testing.tools.CalculatorToolInput.Operation
 import misk.mcp.testing.tools.CalculatorToolOutput
+import misk.mcp.testing.tools.ClientConnectionTool
+import misk.mcp.testing.tools.ClientConnectionToolOutput
 import misk.mcp.testing.tools.GetNicknameRequest
 import misk.mcp.testing.tools.HelloWorldTool
 import misk.mcp.testing.tools.HelloWorldToolOutput
 import misk.mcp.testing.tools.HierarchicalTool
 import misk.mcp.testing.tools.HierarchicalToolOutput
 import misk.mcp.testing.tools.KotlinSdkTool
-import misk.mcp.testing.tools.ClientConnectionTool
-import misk.mcp.testing.tools.ClientConnectionToolOutput
 import misk.mcp.testing.tools.NicknameElicitationTool
 import misk.mcp.testing.tools.ThrowingTool
 import misk.mcp.testing.tools.VersionMetadata
@@ -61,8 +77,10 @@ import misk.mcp.testing.tools.callHierarchicalTool
 import misk.mcp.testing.tools.callNicknameTool
 import misk.mcp.testing.tools.callThrowingTool
 import misk.metrics.summaryCount
+import misk.scope.ActionScoped
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.HttpCall
 import misk.web.RequestBody
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
@@ -80,11 +98,19 @@ internal abstract class McpServerActionTest {
   class McpStreamableHttpServerActionTest : McpServerActionTest() {
     @OptIn(ExperimentalMiskApi::class)
     @Suppress("unused")
-    class McpServerActionTestPostAction @Inject constructor(private val mcpStreamManager: McpStreamManager) :
-      WebAction {
+    class McpServerActionTestPostAction
+    @Inject
+    constructor(private val mcpStreamManager: McpStreamManager, private val probe: InlineDispatchProbe) : WebAction {
       @McpPost
       suspend fun mcpPost(@RequestBody message: JSONRPCMessage, sendChannel: SendChannel<ServerSentEvent>) {
-        mcpStreamManager.withSseChannel(sendChannel) { handleMessage(message) }
+        withContext(CallerContextElement(CALLER_CONTEXT_VALUE)) {
+          mcpStreamManager.withSseChannel(sendChannel) {
+            handleMessage(message)
+            if (message is JSONRPCRequest && message.method == Method.Defined.ToolsCall.value) {
+              probe.handlerCompletedWhenHandleMessageReturned.complete(probe.handlerCompleted.get())
+            }
+          }
+        }
       }
     }
 
@@ -96,6 +122,24 @@ internal abstract class McpServerActionTest {
     fun setUp() = runBlocking {
       mcpClient =
         OkHttpClient().asMcpStreamableHttpClient(jettyService.httpServerUrl, "/mcp", supportsElicitation = true)
+    }
+
+    @Inject private lateinit var probe: InlineDispatchProbe
+
+    @Test
+    fun `tool handler inherits the web action's coroutine context`() = runBlocking {
+      val response = mcpClient.callTool(name = "inline_dispatch", arguments = emptyMap())
+
+      val result = assertNotNull(response.structuredContent).decode<InlineDispatchToolOutput>()
+      assertEquals(CALLER_CONTEXT_VALUE, result.callerContextValue)
+      assertEquals("/mcp", result.requestPath)
+    }
+
+    @Test
+    fun `handleMessage returns only after the tool handler completes`() = runBlocking {
+      mcpClient.callTool(name = "inline_dispatch", arguments = emptyMap())
+
+      assertTrue(withTimeout(5.seconds) { probe.handlerCompletedWhenHandleMessageReturned.await() })
     }
   }
 
@@ -173,6 +217,8 @@ internal abstract class McpServerActionTest {
         install(McpToolModule.create<NicknameElicitationTool>())
         install(McpToolModule.create<HelloWorldTool>())
         install(McpToolModule.create<ClientConnectionTool>())
+        install(McpToolModule.create<InlineDispatchTool>())
+        install(McpToolModule.create<ServerSessionTool>())
         install(McpPromptModule.create<KotlinDeveloperPrompt>())
         install(McpResourceModule.create<WebSearchResource>())
         install(McpResourceTemplateModule.create<UserProfileResource>())
@@ -188,7 +234,7 @@ internal abstract class McpServerActionTest {
   fun `test ListTools`() = runBlocking {
     val request = ListToolsRequest()
     val response = mcpClient.listTools(request)
-    assertEquals(expected = 7, actual = response.tools.size, message = "Expecting seven tools to be registered")
+    assertEquals(expected = 9, actual = response.tools.size, message = "Expecting nine tools to be registered")
 
     // Check calculator tool
     val calculatorTool = response.tools.find { it.name == "calculator" }
@@ -540,7 +586,66 @@ internal abstract class McpServerActionTest {
     assertTrue(result.sessionId.isNotBlank(), "Expected a non-blank session ID from ClientConnection")
   }
 
+  @Test
+  fun `test currentServerSession is the handler's session`() = runBlocking {
+    val response = mcpClient.callTool(name = "server_session", arguments = emptyMap())
+
+    val result = assertNotNull(response.structuredContent).decode<ServerSessionToolOutput>()
+    assertEquals(result.clientConnectionSessionId, result.serverSessionId)
+  }
+
   companion object {
     private const val SERVER_NAME = "mcp-server-action-test-server"
+    private const val CALLER_CONTEXT_VALUE = "installed-by-web-action"
+  }
+}
+
+@Serializable
+internal data class ServerSessionToolOutput(val serverSessionId: String, val clientConnectionSessionId: String)
+
+internal class ServerSessionTool @Inject constructor() : StructuredMcpToolEmptyInput<ServerSessionToolOutput>() {
+  override val name = "server_session"
+  override val description = "Returns the session IDs of the current ServerSession and ClientConnection"
+
+  override suspend fun handle(): ToolResult =
+    ToolResult(
+      ServerSessionToolOutput(
+        serverSessionId = currentServerSession().sessionId,
+        clientConnectionSessionId = currentClientConnection().sessionId,
+      )
+    )
+}
+
+/** Coroutine context element a web action installs around [McpStreamManager.withSseChannel]. */
+internal data class CallerContextElement(val value: String) : AbstractCoroutineContextElement(Key) {
+  companion object Key : CoroutineContext.Key<CallerContextElement>
+}
+
+@Singleton
+internal class InlineDispatchProbe @Inject constructor() {
+  val handlerCompleted = AtomicBoolean(false)
+  val handlerCompletedWhenHandleMessageReturned = CompletableDeferred<Boolean>()
+}
+
+@Serializable internal data class InlineDispatchToolOutput(val callerContextValue: String, val requestPath: String)
+
+/** Reports web action state that is only visible when the SDK dispatches the handler inline on the caller. */
+internal class InlineDispatchTool
+@Inject
+constructor(private val httpCall: ActionScoped<HttpCall>, private val probe: InlineDispatchProbe) :
+  StructuredMcpToolEmptyInput<InlineDispatchToolOutput>() {
+  override val name = "inline_dispatch"
+  override val description = "Reports web action context visible to the tool handler"
+
+  override suspend fun handle(): ToolResult {
+    val output =
+      InlineDispatchToolOutput(
+        callerContextValue = currentCoroutineContext()[CallerContextElement]?.value.orEmpty(),
+        requestPath = httpCall.get().url.encodedPath,
+      )
+    // Keeps an asynchronously dispatched handler running past handleMessage's return so the ordering check is reliable.
+    delay(100.milliseconds)
+    probe.handlerCompleted.set(true)
+    return ToolResult(output)
   }
 }
