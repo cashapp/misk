@@ -3,6 +3,7 @@
 package misk.mcp.internal
 
 import io.modelcontextprotocol.kotlin.sdk.types.EmptyJsonObject
+import io.modelcontextprotocol.kotlin.sdk.types.Icon
 import io.modelcontextprotocol.kotlin.sdk.types.Tool
 import io.modelcontextprotocol.kotlin.sdk.types.ToolAnnotations
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
@@ -30,6 +31,9 @@ internal class ToolBuilder(
   /** Optional metadata for the tool. */
   var meta: JsonObject = EmptyJsonObject
 
+  /** Optional icons for the tool. */
+  var icons: List<Icon>? = null
+
   fun build() =
     Tool(
       name = name,
@@ -38,6 +42,7 @@ internal class ToolBuilder(
       outputSchema = outputSchema,
       description = description,
       annotations = annotations,
+      icons = icons,
       meta = meta,
     )
 }

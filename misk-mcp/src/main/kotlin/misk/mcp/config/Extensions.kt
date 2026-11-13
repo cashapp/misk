@@ -1,5 +1,6 @@
 package misk.mcp.config
 
+import io.modelcontextprotocol.kotlin.sdk.types.Icon
 import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities.Prompts
 import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities.Resources
 import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities.Tools
@@ -19,3 +20,7 @@ internal fun McpResourceConfig.asResources() = Resources(subscribe = subscribe, 
 
 /** Converts [McpToolConfig] to MCP server [Tools] capability. */
 internal fun McpToolConfig.asTools() = Tools(listChanged = list_changed)
+
+/** Converts [McpIconConfig] to an MCP [Icon]. */
+internal fun McpIconConfig.asIcon() =
+  Icon(src = src, mimeType = mime_type, sizes = sizes.ifEmpty { null }, theme = theme)
