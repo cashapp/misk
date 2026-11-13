@@ -23,6 +23,11 @@ public final class misk/mcp/JsonKt {
 	public static final fun getMcpJson ()Lkotlinx/serialization/json/Json;
 }
 
+public final class misk/mcp/McpProgressKt {
+	public static final fun reportProgress (DLjava/lang/Double;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun reportProgress$default (DLjava/lang/Double;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
 public abstract interface class misk/mcp/McpPrompt {
 	public abstract fun getArguments ()Ljava/util/List;
 	public abstract fun getDescription ()Ljava/lang/String;

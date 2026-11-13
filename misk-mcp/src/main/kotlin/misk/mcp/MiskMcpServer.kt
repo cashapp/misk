@@ -26,6 +26,7 @@ import misk.mcp.config.asPrompts
 import misk.mcp.config.asResources
 import misk.mcp.config.asTools
 import misk.mcp.internal.McpClientConnection
+import misk.mcp.internal.McpProgressToken
 import misk.mcp.internal.McpServerSession
 import misk.mcp.internal.build
 
@@ -220,6 +221,9 @@ internal constructor(
   private fun ClientConnection.handlerContext(): CoroutineContext =
     McpClientConnection(this) + (sessions[sessionId]?.let(::McpServerSession) ?: EmptyCoroutineContext)
 
+  private fun CallToolRequest.progressTokenContext(): CoroutineContext =
+    meta?.progressToken?.let(::McpProgressToken) ?: EmptyCoroutineContext
+
   private fun metricReportingHandler(
     toolName: String,
     handler: suspend (CallToolRequest) -> CallToolResult,
@@ -229,7 +233,7 @@ internal constructor(
       var outcome = McpMetrics.ToolCallOutcome.Success
 
       try {
-        withContext(handlerContext()) { handler(request) }
+        withContext(handlerContext() + request.progressTokenContext()) { handler(request) }
           .also { result ->
             outcome =
               if (result.isError == true) McpMetrics.ToolCallOutcome.Error else McpMetrics.ToolCallOutcome.Success

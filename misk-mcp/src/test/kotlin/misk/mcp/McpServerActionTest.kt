@@ -5,6 +5,7 @@ package misk.mcp
 import com.google.inject.Module
 import com.google.inject.util.Modules
 import io.modelcontextprotocol.kotlin.sdk.client.Client
+import io.modelcontextprotocol.kotlin.sdk.shared.RequestOptions
 import io.modelcontextprotocol.kotlin.sdk.types.ElicitResult
 import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequest
 import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequestParams
@@ -15,6 +16,7 @@ import io.modelcontextprotocol.kotlin.sdk.types.ListResourceTemplatesRequest
 import io.modelcontextprotocol.kotlin.sdk.types.ListResourcesRequest
 import io.modelcontextprotocol.kotlin.sdk.types.ListToolsRequest
 import io.modelcontextprotocol.kotlin.sdk.types.Method
+import io.modelcontextprotocol.kotlin.sdk.types.Progress
 import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceRequest
 import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceRequestParams
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
@@ -33,6 +35,7 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -219,6 +222,7 @@ internal abstract class McpServerActionTest {
         install(McpToolModule.create<ClientConnectionTool>())
         install(McpToolModule.create<InlineDispatchTool>())
         install(McpToolModule.create<ServerSessionTool>())
+        install(McpToolModule.create<ProgressTool>())
         install(McpPromptModule.create<KotlinDeveloperPrompt>())
         install(McpResourceModule.create<WebSearchResource>())
         install(McpResourceTemplateModule.create<UserProfileResource>())
@@ -234,7 +238,7 @@ internal abstract class McpServerActionTest {
   fun `test ListTools`() = runBlocking {
     val request = ListToolsRequest()
     val response = mcpClient.listTools(request)
-    assertEquals(expected = 9, actual = response.tools.size, message = "Expecting nine tools to be registered")
+    assertEquals(expected = 10, actual = response.tools.size, message = "Expecting ten tools to be registered")
 
     // Check calculator tool
     val calculatorTool = response.tools.find { it.name == "calculator" }
@@ -594,6 +598,33 @@ internal abstract class McpServerActionTest {
     assertEquals(result.clientConnectionSessionId, result.serverSessionId)
   }
 
+  @Test
+  fun `test reportProgress reaches the client`() = runBlocking {
+    val progress = Channel<Progress>(Channel.UNLIMITED)
+
+    val response =
+      mcpClient.callTool(
+        name = "progress",
+        arguments = emptyMap(),
+        options = RequestOptions(onProgress = { progress.trySend(it) }),
+      )
+
+    assertEquals("done", (response.content.single() as TextContent).text)
+    val updates = withTimeout(5.seconds) { List(2) { progress.receive() } }
+    // Progress has no value equality, so compare its fields.
+    assertEquals(
+      listOf(Triple(1.0, 2.0, "halfway"), Triple(2.0, 2.0, "finished")),
+      updates.map { Triple(it.progress, it.total, it.message) },
+    )
+  }
+
+  @Test
+  fun `test reportProgress is a no-op without a progress token`() = runBlocking {
+    val response = mcpClient.callTool(name = "progress", arguments = emptyMap())
+
+    assertEquals("done", (response.content.single() as TextContent).text)
+  }
+
   companion object {
     private const val SERVER_NAME = "mcp-server-action-test-server"
     private const val CALLER_CONTEXT_VALUE = "installed-by-web-action"
@@ -614,6 +645,17 @@ internal class ServerSessionTool @Inject constructor() : StructuredMcpToolEmptyI
         clientConnectionSessionId = currentClientConnection().sessionId,
       )
     )
+}
+
+internal class ProgressTool @Inject constructor() : McpToolEmptyInput() {
+  override val name = "progress"
+  override val description = "Reports progress twice before completing"
+
+  override suspend fun handle(): ToolResult {
+    reportProgress(progress = 1.0, total = 2.0, message = "halfway")
+    reportProgress(progress = 2.0, total = 2.0, message = "finished")
+    return ToolResult(TextContent("done"))
+  }
 }
 
 /** Coroutine context element a web action installs around [McpStreamManager.withSseChannel]. */
