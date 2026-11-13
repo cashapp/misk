@@ -21,6 +21,8 @@ misk-mcp Kotlin MCP SDK 0.16.0
 - Tools, prompts, resources and resource templates can set an optional `title` and `icons`, and `McpServerConfig` can
   set an optional `title`, `website_url` and `icons` for `serverInfo`. A tool's `title` is now also sent as the
   top-level `Tool.title`, not only as `annotations.title`.
+- Tool handlers can call `reportProgress(progress, total, message)` to send `notifications/progress` for the current
+  call. It does nothing when the client did not send a `progressToken`.
 
 Vitess exception metric labels
 ===

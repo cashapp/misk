@@ -2,6 +2,7 @@ package misk.mcp.internal
 
 import io.modelcontextprotocol.kotlin.sdk.server.ClientConnection
 import io.modelcontextprotocol.kotlin.sdk.server.ServerSession
+import io.modelcontextprotocol.kotlin.sdk.types.RequestId
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 
@@ -38,4 +39,9 @@ data class McpClientConnection(val clientConnection: ClientConnection) :
 
   /** Returns a string representation of the object. */
   override fun toString(): String = "McpClientConnection"
+}
+
+/** Coroutine context element that holds the `progressToken` of the tool call being handled. */
+internal data class McpProgressToken(val progressToken: RequestId) : AbstractCoroutineContextElement(McpProgressToken) {
+  companion object Key : CoroutineContext.Key<McpProgressToken>
 }
