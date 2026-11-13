@@ -24,6 +24,7 @@ import misk.testing.FakeFixture
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.TestFixture
+import misk.time.FakeClock
 import misk.web.Get
 import misk.web.HttpCall
 import misk.web.NetworkChain
@@ -41,6 +42,7 @@ import okhttp3.Headers
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
@@ -49,6 +51,35 @@ internal class FakeAuditRequestCaptureTest {
   @Inject private lateinit var auditClient: FakeAuditClient
   @Inject private lateinit var webTestClient: WebTestClient
   @Inject private lateinit var controls: RequestControls
+  @Inject private lateinit var auditBindings: FakeAuditClient.OptionalBinder
+
+  @Test
+  fun `completion timeout returns while fake recording is blocked`() {
+    val recordingGate = Gate()
+    val originalClock = auditBindings.clock
+    auditClient.captureHttpRequest().use { capture ->
+      try {
+        auditBindings.clock =
+          object : FakeClock() {
+            override fun instant(): Instant {
+              recordingGate.block()
+              return super.instant()
+            }
+          }
+        call("/audited/blocked-recording", capture)
+        recordingGate.awaitEntered()
+        val timeoutFailure =
+          CompletableFuture.supplyAsync { catchThrowable { capture.awaitCompleted(Duration.ofMillis(50)) } }
+        assertThat(timeoutFailure.get(1, SECONDS))
+          .isInstanceOf(TimeoutException::class.java)
+          .hasMessageContaining("IN_FLIGHT")
+      } finally {
+        recordingGate.release.countDown()
+        auditBindings.clock = originalClock
+      }
+      assertThat(capture.awaitCompleted(TIMEOUT).events).hasSize(1)
+    }
+  }
 
   @Test
   fun `completion waits past response close and legacy take for synchronous hooks`() {

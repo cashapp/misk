@@ -18,7 +18,7 @@ internal class AuditRequestCaptures {
     val completed = CompletableFuture<RecordedAuditRequest>()
     val events = mutableListOf<FakeAuditClient.FakeAuditEvent>()
     var applied = false
-    var claimed = false
+    @Volatile var claimed = false
     var finished = false
     var closed = false
     var failure: Throwable? = null
@@ -93,7 +93,7 @@ internal class AuditRequestCaptures {
     try {
       return registration.completed.get(timeout.toNanos(), NANOSECONDS)
     } catch (timeoutFailure: TimeoutException) {
-      val phase = synchronized(lock) { if (registration.claimed) "IN_FLIGHT" else "NOT_OBSERVED" }
+      val phase = if (registration.claimed) "IN_FLIGHT" else "NOT_OBSERVED"
       throw TimeoutException("Audit HTTP request $phase: request chain did not complete within $timeout")
     }
   }
