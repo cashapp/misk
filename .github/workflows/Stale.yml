@@ -31,7 +31,7 @@ jobs:
           days-before-pr-stale: 180
           days-before-pr-close: 30
           stale-pr-label: stale
-          exempt-pr-labels: keep-open,security
+          exempt-pr-labels: keep-open,security,dependencies
           exempt-draft-pr: true
           remove-pr-stale-when-updated: true
           delete-branch: false
@@ -43,8 +43,8 @@ jobs:
             activity. If this change is still relevant, please comment or
             update the pull request to reset the inactivity timer. A maintainer
             can add the `keep-open` label to exempt it from this workflow.
-            Draft pull requests and pull requests labeled `keep-open` or
-            `security` are exempt.
+            Draft pull requests and pull requests labeled `keep-open`,
+            `security`, or `dependencies` are exempt.
           close-pr-message: >-
             This pull request has been closed after 30 more days without
             activity since the stale notice. If this change is still relevant,
