@@ -463,8 +463,11 @@ public final class misk/web/FakeWebSocket : misk/web/actions/WebSocket {
 
 public final class misk/web/FakeWebSocketListener : okhttp3/WebSocketListener {
 	public fun <init> ()V
+	public final fun getBinaryMessages ()Ljava/util/concurrent/LinkedBlockingDeque;
 	public final fun getMessages ()Ljava/util/concurrent/LinkedBlockingDeque;
 	public fun onMessage (Lokhttp3/WebSocket;Ljava/lang/String;)V
+	public fun onMessage (Lokhttp3/WebSocket;Lokio/ByteString;)V
+	public final fun takeBinaryMessage ()Lokio/ByteString;
 	public final fun takeMessage ()Ljava/lang/String;
 }
 
