@@ -14,26 +14,26 @@ import redis.clients.jedis.ConnectionPoolConfig
 import redis.clients.jedis.UnifiedJedis
 import wisp.deployment.TESTING
 
-/**
- * Provides test coverage/parity for pipelined operations on a connection-pooled Redis client.
- */
+/** Provides test coverage/parity for pipelined operations on a connection-pooled Redis client. */
 @MiskTest
 class PipelinedRedisTest : AbstractRedisTest() {
   @Suppress("unused")
   @MiskTestModule
-  private val module: Module = object : KAbstractModule() {
-    override fun configure() {
-      install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
-      install(MiskTestingServiceModule())
-      install(DeploymentModule(TESTING))
-      install(RedisTestFlushModule())
+  private val module: Module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
+        install(MiskTestingServiceModule())
+        install(DeploymentModule(TESTING))
+        install(RedisTestFlushModule())
 
-      val jedisProvider = getProvider(UnifiedJedis::class.java)
-      bind<Redis>().annotatedWith<AlwaysPipelined>().toProvider {
-        TestAlwaysPipelinedRedis(jedisProvider.get())
-      }.asSingleton()
+        val jedisProvider = getProvider(UnifiedJedis::class.java)
+        bind<Redis>()
+          .annotatedWith<AlwaysPipelined>()
+          .toProvider { TestAlwaysPipelinedRedis(jedisProvider.get()) }
+          .asSingleton()
+      }
     }
-  }
 
   @Inject @AlwaysPipelined override lateinit var redis: Redis
 }

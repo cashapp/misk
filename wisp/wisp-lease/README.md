@@ -24,7 +24,7 @@ if (lease.acquire()) {
 }
 
 // check if the lease is held (might have timed out, etc)
-if (lease.checkHeld()) {
+if (lease.isHeld()) {
   // lease is held
 }
 
@@ -33,7 +33,7 @@ val leaseHeld = AtomicBoolean()
 lease.addListener(object : Lease.StateChangeListener {
   override fun afterAcquire(lease: Lease) {
     // lease should be held at this point, but it's best to check
-    if (lease.checkHeld()) {
+    if (lease.isHeld()) {
       leaseHeld.set(true)
     }
   }

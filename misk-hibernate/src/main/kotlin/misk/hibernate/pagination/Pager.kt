@@ -17,15 +17,12 @@ interface Pager<T> {
 fun <T : DbEntity<T>, Q : Query<T>> Q.newPager(
   paginator: Paginator<T, Q>,
   initialOffset: Offset? = null,
-  pageSize: Int = 100
+  pageSize: Int = 100,
 ): Pager<T> {
   return RealPager(this, paginator, initialOffset, pageSize)
 }
 
-fun <T : DbEntity<T>, R> Pager<T>.listAll(
-  transacter: Transacter,
-  transform: (T) -> R
-): List<R> {
+fun <T : DbEntity<T>, R> Pager<T>.listAll(transacter: Transacter, transform: (T) -> R): List<R> {
   val results = mutableListOf<R>()
   while (hasNext()) {
     val nextPage = transacter.transaction { session -> nextPage(session) }

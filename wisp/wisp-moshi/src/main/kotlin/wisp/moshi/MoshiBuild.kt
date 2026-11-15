@@ -4,16 +4,11 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
-/**
- * Default build for Moshi using the Kotlin JSON adapter
- */
+/** Default build for Moshi using the Kotlin JSON adapter */
 val defaultKotlinMoshi = buildMoshi(listOf(ProviderJsonAdapterFactory()))
 
 @JvmOverloads
-fun buildMoshi(
-  jsonAdapters: List<Any>,
-  jsonLastAdapters: List<Any> = emptyList()
-): Moshi {
+fun buildMoshi(jsonAdapters: List<Any>, jsonLastAdapters: List<Any> = emptyList()): Moshi {
   val builder = Moshi.Builder()
 
   jsonAdapters.forEach { jsonAdapter ->
@@ -34,7 +29,7 @@ fun buildMoshi(
       else -> builder.addLast(jsonAdapter)
     }
   }
-  
+
   builder.addLast(KotlinJsonAdapterFactory())
 
   return builder.build()

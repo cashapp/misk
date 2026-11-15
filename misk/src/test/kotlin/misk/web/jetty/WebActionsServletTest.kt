@@ -1,8 +1,14 @@
 package misk.web.jetty
 
 import jakarta.inject.Inject
+import java.io.File
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermissions
+import java.util.UUID
 import misk.Action
 import misk.MiskTestingServiceModule
+import misk.client.UnixDomainSocketFactory
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -23,20 +29,12 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.api.Test
-import misk.client.UnixDomainSocketFactory
-import java.io.File
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.attribute.PosixFilePermissions
-import java.util.UUID
 
 @MiskTest(startService = true)
 class WebActionsServletTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
-  @Inject
-  internal lateinit var jettyService: JettyService
+  @Inject internal lateinit var jettyService: JettyService
 
   private var socketName: String = "@udstest" + UUID.randomUUID().toString()
   private var fileSocketName: String = "/tmp/udstest" + UUID.randomUUID().toString()
@@ -44,31 +42,20 @@ class WebActionsServletTest {
   @Test
   fun networkSocketSuccess() {
     val response = get("/potato", false)
-    assertThat(response.header("ActualSocketName")).isEqualTo(
-      with(jettyService.httpServerUrl) { "$host:$port" }
-    )
+    assertThat(response.header("ActualSocketName")).isEqualTo(with(jettyService.httpServerUrl) { "$host:$port" })
   }
 
   @Test
   fun parseNonAsciiHeaders() {
-    val response = get(
-      "/potato", false, false,
-      Headers.Builder()
-        .addUnsafeNonAscii("X-device-name", "Walé Iphone")
-        .build()
-    )
+    val response =
+      get("/potato", false, false, Headers.Builder().addUnsafeNonAscii("X-device-name", "Walé Iphone").build())
 
     assertThat(response.code).isEqualTo(200)
   }
 
   @Test
   fun malformedUriQueryParamsResponseDoesNotContainStacktrace() {
-    val response = get(
-      path = "/potato",
-      viaUDS = false,
-      viaFileUDS = false,
-      encodedQuery = "test" to "%3C%a%3C",
-    )
+    val response = get(path = "/potato", viaUDS = false, viaFileUDS = false, encodedQuery = "test" to "%3C%a%3C")
 
     assertThat(response.body.string()).isEqualTo("400: Unable to parse URI query")
     assertThat(response.code).isEqualTo(400)
@@ -90,11 +77,12 @@ class WebActionsServletTest {
 
   @Test
   fun testPatch404() {
-    val response = call(
-      Request.Builder()
-        .url(jettyService.httpServerUrl.newBuilder().encodedPath("/fooasdf/").build())
-        .patch("bar".toRequestBody())
-    )
+    val response =
+      call(
+        Request.Builder()
+          .url(jettyService.httpServerUrl.newBuilder().encodedPath("/fooasdf/").build())
+          .patch("bar".toRequestBody())
+      )
     assertThat(response.body?.string()).contains("Nothing found at PATCH", "fooasdf")
   }
 
@@ -110,15 +98,14 @@ class WebActionsServletTest {
                 is SocketAddress.Unix -> this.path
                 else -> "null"
               }
-            }
+            },
           )
           .build()
       )
     }
 
     class Factory : NetworkInterceptor.Factory {
-      override fun create(action: Action): NetworkInterceptor? =
-        WebActionsServletNetworkInterceptor()
+      override fun create(action: Action): NetworkInterceptor? = WebActionsServletNetworkInterceptor()
     }
   }
 
@@ -143,7 +130,9 @@ class WebActionsServletTest {
       Request.Builder()
         .headers(headers)
         .url(
-          jettyService.httpServerUrl.newBuilder().encodedPath(path)
+          jettyService.httpServerUrl
+            .newBuilder()
+            .encodedPath(path)
             .run {
               if (encodedQuery != null) {
                 addEncodedQueryParameter(encodedQuery.first, encodedQuery.second)
@@ -174,7 +163,8 @@ class WebActionsServletTest {
   }
 
   private fun udsCall(request: Request.Builder): okhttp3.Response {
-    return OkHttpClient().newBuilder()
+    return OkHttpClient()
+      .newBuilder()
       .socketFactory(UnixDomainSocketFactory(File(socketName)))
       .build()
       .newCall(request.build())
@@ -182,7 +172,8 @@ class WebActionsServletTest {
   }
 
   private fun fileUdsCall(request: Request.Builder): okhttp3.Response {
-    return OkHttpClient().newBuilder()
+    return OkHttpClient()
+      .newBuilder()
       .socketFactory(UnixDomainSocketFactory(File(fileSocketName)))
       .build()
       .newCall(request.build())
@@ -198,19 +189,16 @@ class WebActionsServletTest {
     override fun configure() {
       install(
         WebServerTestingModule(
-          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
-            unix_domain_sockets = listOf(
-              WebUnixDomainSocketConfig(path = socketName),
-              WebUnixDomainSocketConfig(path = fileSocketName)
+          webConfig =
+            WebServerTestingModule.TESTING_WEB_CONFIG.copy(
+              unix_domain_sockets =
+                listOf(WebUnixDomainSocketConfig(path = socketName), WebUnixDomainSocketConfig(path = fileSocketName))
             )
-          )
         )
       )
       install(MiskTestingServiceModule())
 
-      multibind<NetworkInterceptor.Factory>().toInstance(
-        WebActionsServletNetworkInterceptor.Factory()
-      )
+      multibind<NetworkInterceptor.Factory>().toInstance(WebActionsServletNetworkInterceptor.Factory())
 
       install(WebActionModule.create<TestAction>())
     }

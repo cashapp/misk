@@ -27,17 +27,18 @@ class FakeKeyResolver : KeyResolver {
   constructor(rawKeys: List<Key>) {
     rawKeys.forEach { key ->
       val plaintextSecret = keyTypeToSecret(key.key_type)
-      val encryptedSecret = if (
-        key.key_type == KeyType.HYBRID_ENCRYPT ||
-        key.key_type == KeyType.PGP_DECRYPT ||
-        key.key_type == KeyType.PGP_ENCRYPT
-      ) {
-        plaintextSecret
-      } else if (key.key_name == "obsolete") {
-        key.encrypted_key
-      } else {
-        TestKeysets.encryptSecret(plaintextSecret)
-      }
+      val encryptedSecret =
+        if (
+          key.key_type == KeyType.HYBRID_ENCRYPT ||
+            key.key_type == KeyType.PGP_DECRYPT ||
+            key.key_type == KeyType.PGP_ENCRYPT
+        ) {
+          plaintextSecret
+        } else if (key.key_name == "obsolete") {
+          key.encrypted_key
+        } else {
+          TestKeysets.encryptSecret(plaintextSecret)
+        }
       if (key.key_type == KeyType.HYBRID_ENCRYPT) {
         returnedKeysets[key.key_name] = key.copy(encrypted_key = encryptedSecret, kms_uri = null)
       } else {
@@ -52,9 +53,10 @@ class FakeKeyResolver : KeyResolver {
       KeyType.DAEAD -> TestKeysets.DAEAD
       KeyType.STREAMING_AEAD -> TestKeysets.STREAMING_AEAD
       KeyType.MAC -> TestKeysets.MAC
-      KeyType.DIGITAL_SIGNATURE, KeyType.SIGNATURE -> TestKeysets.DIGITAL_SIGNATURE
-      KeyType.HYBRID_ENCRYPT, KeyType.HYBRID_ENCRYPT_DECRYPT ->
-        TestKeysets.HYBRID
+      KeyType.DIGITAL_SIGNATURE,
+      KeyType.SIGNATURE -> TestKeysets.DIGITAL_SIGNATURE
+      KeyType.HYBRID_ENCRYPT,
+      KeyType.HYBRID_ENCRYPT_DECRYPT -> TestKeysets.HYBRID
 
       KeyType.PGP_ENCRYPT -> TestKeysets.PGP_ENCRYPT
       KeyType.PGP_DECRYPT -> TestKeysets.PGP_DECRYPT

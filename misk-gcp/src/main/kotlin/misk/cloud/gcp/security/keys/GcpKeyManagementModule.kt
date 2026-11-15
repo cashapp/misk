@@ -4,11 +4,11 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport.newTruste
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.cloudkms.v1.CloudKMS
 import com.google.inject.Provides
+import jakarta.inject.Singleton
 import misk.config.AppName
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.security.keys.KeyService
-import jakarta.inject.Singleton
 
 class GcpKeyManagementModule(private val config: GcpKmsConfig) : KAbstractModule() {
   override fun configure() {
@@ -19,7 +19,5 @@ class GcpKeyManagementModule(private val config: GcpKmsConfig) : KAbstractModule
   @Provides
   @Singleton
   fun providesKms(@AppName appName: String): CloudKMS =
-    CloudKMS.Builder(newTrustedTransport(), JacksonFactory(), null)
-      .setApplicationName(appName)
-      .build()
+    CloudKMS.Builder(newTrustedTransport(), JacksonFactory(), null).setApplicationName(appName).build()
 }

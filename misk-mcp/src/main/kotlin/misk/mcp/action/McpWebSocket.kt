@@ -3,20 +3,18 @@ package misk.mcp.action
 import misk.annotation.ExperimentalMiskApi
 import misk.web.ConnectWebSocket
 
-
 /**
  * Annotation for WebSocket actions that handle Model Context Protocol (MCP) connections.
  *
- * This annotation combines [ConnectWebSocket] with MCP-specific configuration to create
- * WebSocket endpoints that can communicate using the MCP JSON-RPC protocol. It automatically
- * configures the WebSocket to accept connections at the "/mcp" path.
+ * This annotation combines [ConnectWebSocket] with MCP-specific configuration to create WebSocket endpoints that can
+ * communicate using the MCP JSON-RPC protocol. It automatically configures the WebSocket to accept connections at the
+ * "/mcp" path.
  *
  * ## Usage
  *
- * Apply this annotation to a function in a WebAction class that accepts a [misk.web.actions.WebSocket]
- * parameter. The function should delegate to [misk.mcp.action.McpStreamManager.withWebSocket] to
- * handle the MCP protocol communication:
- *
+ * Apply this annotation to a function in a WebAction class that accepts a [misk.web.actions.WebSocket] parameter. The
+ * function should delegate to [misk.mcp.action.McpStreamManager.withWebSocket] to handle the MCP protocol
+ * communication:
  * ```kotlin
  * @Singleton
  * class MyMcpWebSocketAction @Inject constructor(
@@ -42,7 +40,6 @@ import misk.web.ConnectWebSocket
  * - **Protocol**: JSON-RPC over WebSocket as specified by MCP
  *
  * ## Requirements
- *
  * - The annotated function must be in a class that implements [misk.web.actions.WebAction]
  * - The function must accept exactly one [misk.web.actions.WebSocket] parameter
  * - The WebAction class must be registered with [misk.web.WebActionModule]
@@ -52,7 +49,4 @@ import misk.web.ConnectWebSocket
  * @see misk.mcp.action.McpStreamManager
  * @see misk.mcp.McpServerModule
  */
-@ConnectWebSocket("/mcp")
-@Target(AnnotationTarget.FUNCTION)
-@ExperimentalMiskApi
-annotation class McpWebSocket
+@ConnectWebSocket("/mcp") @Target(AnnotationTarget.FUNCTION) @ExperimentalMiskApi annotation class McpWebSocket

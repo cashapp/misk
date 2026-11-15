@@ -1,17 +1,17 @@
 package misk.web.exceptions
 
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentMap
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.superclasses
 
 @Singleton
-class ExceptionMapperResolver @Inject internal constructor(
-  private val mappers: @JvmSuppressWildcards Map<KClass<*>, ExceptionMapper<*>>
-) {
+class ExceptionMapperResolver
+@Inject
+internal constructor(private val mappers: @JvmSuppressWildcards Map<KClass<*>, ExceptionMapper<*>>) {
   private val cache: ConcurrentMap<KClass<*>, ExceptionMapper<Throwable>> = ConcurrentHashMap()
 
   @Suppress("UNCHECKED_CAST")
@@ -34,9 +34,7 @@ class ExceptionMapperResolver @Inject internal constructor(
 
     fun doDFS(node: KClass<*>) {
       result.add(node)
-      node.superclasses
-        .filter { it.isSubclassOf(Throwable::class) }
-        .forEach { doDFS(it) }
+      node.superclasses.filter { it.isSubclassOf(Throwable::class) }.forEach { doDFS(it) }
     }
   }
 }

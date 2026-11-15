@@ -3,6 +3,11 @@ package misk.web.interceptors
 import com.squareup.wire.GrpcStatus
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.net.HttpURLConnection
+import java.time.Clock
+import java.time.Duration
+import java.time.Instant
+import kotlin.reflect.full.findAnnotation
 import misk.Action
 import misk.grpc.GrpcTimeoutMarshaller
 import misk.web.DispatchMechanism
@@ -15,18 +20,13 @@ import misk.web.RequestDeadlinesConfig
 import misk.web.WebConfig
 import misk.web.requestdeadlines.RequestDeadlineMetrics
 import misk.web.requestdeadlines.RequestDeadlineMetrics.SourceLabel
-import java.net.HttpURLConnection
-import java.time.Clock
-import java.time.Duration
-import java.time.Instant
-import kotlin.reflect.full.findAnnotation
 
-
-internal class RequestDeadlineInterceptor private constructor(
+internal class RequestDeadlineInterceptor
+private constructor(
   private val clock: Clock,
   private val requestDeadlinesConfig: RequestDeadlinesConfig,
   private val metrics: RequestDeadlineMetrics,
-  private val action: Action
+  private val action: Action,
 ) : NetworkInterceptor {
 
   override fun intercept(chain: NetworkChain) {
@@ -42,12 +42,13 @@ internal class RequestDeadlineInterceptor private constructor(
     val (timeout, timeoutSource) = determineTimeoutAndSource(action, httpCall, requestDeadlinesConfig)
     metrics.recordDeadlinePropagated(action, timeout, timeoutSource)
 
-    val requestReceivedByJettyTimestamp : Instant = Instant.ofEpochMilli(httpCall.requestReceivedTimestamp)
-    val deadline : Instant = requestReceivedByJettyTimestamp.plus(timeout)
+    val requestReceivedByJettyTimestamp: Instant = Instant.ofEpochMilli(httpCall.requestReceivedTimestamp)
+    val deadline: Instant = requestReceivedByJettyTimestamp.plus(timeout)
 
     if (clock.instant().isAfter(deadline)) {
-      val enforced = requestDeadlinesConfig.mode == RequestDeadlineMode.ENFORCE_INBOUND ||
-                    requestDeadlinesConfig.mode == RequestDeadlineMode.ENFORCE_ALL
+      val enforced =
+        requestDeadlinesConfig.mode == RequestDeadlineMode.ENFORCE_INBOUND ||
+          requestDeadlinesConfig.mode == RequestDeadlineMode.ENFORCE_ALL
 
       val timePassedSinceDeadlineMs = Duration.between(deadline, clock.instant()).toMillis()
       metrics.recordDeadlineExceeded(action, "inbound", enforced, timePassedSinceDeadlineMs)
@@ -63,9 +64,7 @@ internal class RequestDeadlineInterceptor private constructor(
           else -> {
             // For HTTP, use 504 Gateway Timeout
             httpCall.statusCode = HttpURLConnection.HTTP_GATEWAY_TIMEOUT
-            httpCall.takeResponseBody()?.use { sink ->
-              sink.writeUtf8(DEADLINE_EXCEEDED_MESSAGE)
-            }
+            httpCall.takeResponseBody()?.use { sink -> sink.writeUtf8(DEADLINE_EXCEEDED_MESSAGE) }
           }
         }
         return
@@ -73,19 +72,21 @@ internal class RequestDeadlineInterceptor private constructor(
     }
 
     httpCall.computeRequestHeader(MISK_REQUEST_DEADLINE_HEADER) {
-      Pair(MISK_REQUEST_DEADLINE_HEADER, deadline.toString()) // prints in UTC format, for e.g. 2024-03-26T23:13:48.123456789Z
+      Pair(
+        MISK_REQUEST_DEADLINE_HEADER,
+        deadline.toString(),
+      ) // prints in UTC format, for e.g. 2024-03-26T23:13:48.123456789Z
     }
     chain.proceed(httpCall)
   }
 
-
   /**
    * Determines the timeout duration and its source for a given request, which is tracked in metrics.
    *
-   * For gRPC requests, uses the grpc-timeout header if present and positive, otherwise falls back to defaults.
-   * For HTTP requests, examines X-Request-Deadline (supports both seconds and ISO8601 duration format)
-   * and x-envoy-expected-rq-timeout-ms headers, selecting the minimum positive value if multiple
-   * are present, otherwise uses defaults.
+   * For gRPC requests, uses the grpc-timeout header if present and positive, otherwise falls back to defaults. For HTTP
+   * requests, examines X-Request-Deadline (supports both seconds and ISO8601 duration format) and
+   * x-envoy-expected-rq-timeout-ms headers, selecting the minimum positive value if multiple are present, otherwise
+   * uses defaults.
    *
    * Priority order for fallback: action annotation timeout > global default timeout.
    *
@@ -94,7 +95,7 @@ internal class RequestDeadlineInterceptor private constructor(
   private fun determineTimeoutAndSource(
     action: Action,
     httpCall: HttpCall,
-    requestDeadlinesConfig: RequestDeadlinesConfig
+    requestDeadlinesConfig: RequestDeadlinesConfig,
   ): Pair<Duration, String> {
     val annotationTimeoutMs = action.function.findAnnotation<RequestDeadlineTimeout>()?.timeoutMs
     val fallbackTimeout = Duration.ofMillis(annotationTimeoutMs ?: requestDeadlinesConfig.global_timeout_ms)
@@ -105,9 +106,11 @@ internal class RequestDeadlineInterceptor private constructor(
         val grpcTimeoutValue = httpCall.requestHeaders[GrpcTimeoutMarshaller.TIMEOUT_KEY]
         val grpcTimeoutNanos = grpcTimeoutValue?.let { GrpcTimeoutMarshaller.parseAsciiString(it) }?.takeIf { it > 0 }
 
-        // "shadow" grpc headers used in METRICS_ONLY/PROPAGATE_ONLY mode to prevent GrpcClient actually hanging up on grpc-timeout
+        // "shadow" grpc headers used in METRICS_ONLY/PROPAGATE_ONLY mode to prevent GrpcClient actually hanging up on
+        // grpc-timeout
         val shadowGrpcTimeoutValue = httpCall.requestHeaders[CUSTOM_GRPC_TIMEOUT_PROPAGATE_HEADER]
-        val shadowGrpcTimeoutNanos = shadowGrpcTimeoutValue?.let { GrpcTimeoutMarshaller.parseAsciiString(it) }?.takeIf { it > 0 }
+        val shadowGrpcTimeoutNanos =
+          shadowGrpcTimeoutValue?.let { GrpcTimeoutMarshaller.parseAsciiString(it) }?.takeIf { it > 0 }
 
         // Prefer actual to shadow value, though only one of them should be set.
         val effectiveGrpcTimeout = grpcTimeoutNanos ?: shadowGrpcTimeoutNanos
@@ -119,16 +122,15 @@ internal class RequestDeadlineInterceptor private constructor(
       }
       else -> {
         // HTTP timeout logic with source tracking
-        val xRequestDeadlineTimeout = parseXRequestDeadlineHeader(httpCall.requestHeaders[HTTP_HEADER_X_REQUEST_DEADLINE])
+        val xRequestDeadlineTimeout =
+          parseXRequestDeadlineHeader(httpCall.requestHeaders[HTTP_HEADER_X_REQUEST_DEADLINE])
         val envoyTimeoutMs = httpCall.requestHeaders[HTTP_HEADER_ENVOY_DEADLINE]?.toLongOrNull()
 
         val validTimeouts = mutableListOf<Pair<Duration, String>>()
         xRequestDeadlineTimeout?.let { duration ->
           if (!duration.isNegative && !duration.isZero) validTimeouts.add(duration to SourceLabel.X_REQUEST_DEADLINE)
         }
-        envoyTimeoutMs?.let { ms ->
-          if (ms > 0) validTimeouts.add(Duration.ofMillis(ms) to SourceLabel.ENVOY_HEADER)
-        }
+        envoyTimeoutMs?.let { ms -> if (ms > 0) validTimeouts.add(Duration.ofMillis(ms) to SourceLabel.ENVOY_HEADER) }
 
         if (validTimeouts.isNotEmpty()) {
           validTimeouts.minBy { it.first }
@@ -142,9 +144,8 @@ internal class RequestDeadlineInterceptor private constructor(
   /**
    * Parses the X-Request-Deadline header which can be either:
    * 1. A number representing seconds
-   * 2. An ISO8601 duration string (e.g., "PT30S", "PT5M", "PT1H30M")
-   * This is consistent with what JSC expects:
-   * https://github.com/squareup/java/blob/master/webservice/src/main/java/com/squareup/webservice/framework/HttpRequestDeadlines.java
+   * 2. An ISO8601 duration string (e.g., "PT30S", "PT5M", "PT1H30M") This is consistent with what JSC expects:
+   *    https://github.com/squareup/java/blob/master/webservice/src/main/java/com/squareup/webservice/framework/HttpRequestDeadlines.java
    *
    * @param headerValue the raw header value
    * @return timeout as Duration, or null if invalid/unparseable
@@ -180,17 +181,17 @@ internal class RequestDeadlineInterceptor private constructor(
   }
 
   @Singleton
-  class Factory @Inject constructor(
-    private val clock: Clock,
-    private val webConfig: WebConfig,
-    private val metrics: RequestDeadlineMetrics,
-  ) : NetworkInterceptor.Factory {
+  class Factory
+  @Inject
+  constructor(private val clock: Clock, private val webConfig: WebConfig, private val metrics: RequestDeadlineMetrics) :
+    NetworkInterceptor.Factory {
 
-    override fun create(action: Action) = RequestDeadlineInterceptor(
-      clock = clock,
-      requestDeadlinesConfig = webConfig.request_deadlines,
-      metrics = metrics,
-      action = action
-    )
+    override fun create(action: Action) =
+      RequestDeadlineInterceptor(
+        clock = clock,
+        requestDeadlinesConfig = webConfig.request_deadlines,
+        metrics = metrics,
+        action = action,
+      )
   }
 }

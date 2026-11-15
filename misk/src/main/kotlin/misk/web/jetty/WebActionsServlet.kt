@@ -2,6 +2,10 @@ package misk.web.jetty
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import java.net.HttpURLConnection
+import java.net.ProtocolException
 import misk.logging.getLogger
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
@@ -31,13 +35,11 @@ import org.eclipse.jetty.unixsocket.server.UnixSocketConnector
 import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse
 import org.eclipse.jetty.websocket.server.JettyWebSocketServlet
 import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory
-import java.net.HttpURLConnection
-import java.net.ProtocolException
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Singleton
-internal class WebActionsServlet @Inject constructor(
+internal class WebActionsServlet
+@Inject
+constructor(
   webActionFactory: WebActionFactory,
   webActionEntries: List<WebActionEntry>,
   private val webConfig: WebConfig,
@@ -45,13 +47,18 @@ internal class WebActionsServlet @Inject constructor(
 
   companion object {
     val log = getLogger<WebActionsServlet>()
+
+    /**
+     * Maximum bytes to drain from an unconsumed request body. If the body exceeds this, we stop draining and let Jetty
+     * send RST_STREAM for the remainder. This prevents a slow client from tying up the servlet thread indefinitely.
+     * Using 1 MB for bounding worst-case drain time.
+     */
+    private const val MAX_DRAIN_BYTES = 1L * 1024 * 1024
   }
 
   internal val boundActions: MutableSet<BoundAction<out WebAction>> = mutableSetOf()
 
-  internal val webActionsMetadata: List<WebActionMetadata> by lazy {
-    boundActions.map { it.metadata }
-  }
+  internal val webActionsMetadata: List<WebActionMetadata> by lazy { boundActions.map { it.metadata } }
 
   init {
     for (entry in webActionEntries) {
@@ -70,9 +77,9 @@ internal class WebActionsServlet @Inject constructor(
     // Check http2 is enabled if any gRPC actions are bound.
     if (boundActions.any { it.action.dispatchMechanism == DispatchMechanism.GRPC }) {
       val isHttp2Enabled =
-        webConfig.http2 || webConfig.unix_domain_socket?.h2c ?: false || webConfig.unix_domain_sockets?.any {
-          it.h2c ?: false
-        } ?: false
+        webConfig.http2 ||
+          webConfig.unix_domain_socket?.h2c ?: false ||
+          webConfig.unix_domain_sockets?.any { it.h2c ?: false } ?: false
       if (!isHttp2Enabled) {
         log.warn {
           "HTTP/2 must be enabled either via a unix domain socket or HTTP listener if any " +
@@ -96,11 +103,7 @@ internal class WebActionsServlet @Inject constructor(
     try {
       super.service(request, response)
     } catch (e: Throwable) {
-      handleThrowable(
-        request,
-        response,
-        e,
-      )
+      handleThrowable(request, response, e)
     }
   }
 
@@ -127,28 +130,30 @@ internal class WebActionsServlet @Inject constructor(
   private fun handleCall(request: HttpServletRequest, response: HttpServletResponse) {
     try {
       val responseBody = response.outputStream.sink().buffer()
-      val dispatchMechanism =
-        request.dispatchMechanism() ?: return sendNotFound(request, response, responseBody)
+      val dispatchMechanism = request.dispatchMechanism() ?: return sendNotFound(request, response, responseBody)
 
-      val httpCall = ServletHttpCall.create(
-        request = request,
-        linkLayerLocalAddress = extractLinkLayerLocalAddress(request),
-        dispatchMechanism = dispatchMechanism,
-        upstreamResponse = if (response is Response) {
-          JettyServletUpstreamResponse(response)
-        } else {
-          GenericServletUpstreamResponse(response)
-        },
-        requestBody = request.inputStream.source().buffer(),
-        responseBody = responseBody
-      )
+      val httpCall =
+        ServletHttpCall.create(
+          request = request,
+          linkLayerLocalAddress = extractLinkLayerLocalAddress(request),
+          dispatchMechanism = dispatchMechanism,
+          upstreamResponse =
+            if (response is Response) {
+              JettyServletUpstreamResponse(response)
+            } else {
+              GenericServletUpstreamResponse(response)
+            },
+          requestBody = request.inputStream.source().buffer(),
+          responseBody = responseBody,
+        )
 
       val requestContentType = httpCall.contentType()
       val requestAccepts = httpCall.accepts()
 
-      val candidateActions = boundActions.mapNotNull {
-        it.match(httpCall.dispatchMechanism, requestContentType, requestAccepts, httpCall.url)
-      }
+      val candidateActions =
+        boundActions.mapNotNull {
+          it.match(httpCall.dispatchMechanism, requestContentType, requestAccepts, httpCall.url)
+        }
       val bestAction = candidateActions.minOrNull()
 
       if (bestAction != null) {
@@ -159,22 +164,40 @@ internal class WebActionsServlet @Inject constructor(
       // which are covered by the NotFoundAction.
       sendNotFound(request, response, responseBody)
     } catch (e: Throwable) {
-      handleThrowable(
-        request,
-        response,
-        e,
-      )
+      handleThrowable(request, response, e)
+    } finally {
+      drainRequestBody(request)
     }
   }
 
-  private fun handleThrowable(
-    request: HttpServletRequest,
-    response: HttpServletResponse,
-    throwable: Throwable,
-  ) {
-    log.error(throwable) {
-      "Uncaught exception on ${request.dispatchMechanism()} ${request.httpUrl()}"
+  /**
+   * Drains any unconsumed request body to prevent Jetty from sending RST_STREAM(CANCEL) on HTTP/2 streams. When a
+   * servlet completes without fully reading the request body, Jetty resets the stream because the client's END_STREAM
+   * flag was never received. These server-initiated resets count toward the HTTP/2 frame rate limiter (CVE-2025-5115 /
+   * MadeYouReset mitigation), and exceeding the limit tears down the entire HTTP/2 connection, affecting all
+   * multiplexed streams.
+   */
+  private fun drainRequestBody(request: HttpServletRequest) {
+    try {
+      val input = request.inputStream
+      if (input.isFinished) return
+
+      val buf = ByteArray(4096)
+      var totalRead = 0L
+      while (totalRead < MAX_DRAIN_BYTES) {
+        val read = input.read(buf)
+        if (read == -1) break
+        totalRead += read
+      }
+    } catch (e: Throwable) {
+      // The client cancelling its stream after we've produced a response is normal and not actionable.
+      if (e is org.eclipse.jetty.io.EofException && e.message?.startsWith("Reset no_error") == true) return
+      log.warn(e) { "Failed to drain request body for ${request.method} ${request.requestURI}" }
     }
+  }
+
+  private fun handleThrowable(request: HttpServletRequest, response: HttpServletResponse, throwable: Throwable) {
+    log.error(throwable) { "Uncaught exception on ${request.dispatchMechanism()} ${request.httpUrl()}" }
 
     when (throwable) {
       is BadMessageException -> {
@@ -192,11 +215,7 @@ internal class WebActionsServlet @Inject constructor(
     response.writer.close()
   }
 
-  private fun sendNotFound(
-    request: HttpServletRequest,
-    response: HttpServletResponse,
-    responseBody: BufferedSink,
-  ) {
+  private fun sendNotFound(request: HttpServletRequest, response: HttpServletResponse, responseBody: BufferedSink) {
     response.status = HttpURLConnection.HTTP_NOT_FOUND
     response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
     responseBody.writeUtf8("Nothing found at ${request.method} ${request.httpUrl()}")
@@ -254,11 +273,14 @@ internal fun HttpServletRequest.httpUrl(): HttpUrl {
 /** @throws ProtocolException on unexpected methods. */
 internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism? {
   return when (method) {
-    HttpMethod.GET.name -> DispatchMechanism.GET
-    HttpMethod.POST.name -> when (contentType()) {
-      MediaTypes.APPLICATION_GRPC_MEDIA_TYPE, MediaTypes.APPLICATION_GRPC_PROTOBUF_MEDIA_TYPE -> DispatchMechanism.GRPC
-      else -> DispatchMechanism.POST
-    }
+    HttpMethod.GET.name,
+    HttpMethod.HEAD.name -> DispatchMechanism.GET
+    HttpMethod.POST.name ->
+      when (contentType()) {
+        MediaTypes.APPLICATION_GRPC_MEDIA_TYPE,
+        MediaTypes.APPLICATION_GRPC_PROTOBUF_MEDIA_TYPE -> DispatchMechanism.GRPC
+        else -> DispatchMechanism.POST
+      }
 
     HttpMethod.PATCH.name -> DispatchMechanism.PATCH
     HttpMethod.PUT.name -> DispatchMechanism.PUT
@@ -267,27 +289,19 @@ internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism? {
   }
 }
 
-/**
- * Extracts socket address information from an HttpServletRequest if available.
- */
+/** Extracts socket address information from an HttpServletRequest if available. */
 private fun extractLinkLayerLocalAddress(request: HttpServletRequest): SocketAddress? {
   val jettyRequest = request as? Request ?: return null
   val httpChannel = jettyRequest.httpChannel ?: return null
   val connector = httpChannel.connector ?: return null
 
   return when (connector) {
-    is UnixDomainServerConnector -> SocketAddress.Unix(
-      connector.unixDomainPath.toString()
-    )
+    is UnixDomainServerConnector -> SocketAddress.Unix(connector.unixDomainPath.toString())
 
-    is UnixSocketConnector -> SocketAddress.Unix(
-      connector.unixSocket
-    )
+    is UnixSocketConnector -> SocketAddress.Unix(connector.unixSocket)
 
-    is ServerConnector -> SocketAddress.Network(
-      httpChannel.endPoint.remoteAddress.address.hostAddress,
-      connector.localPort
-    )
+    is ServerConnector ->
+      SocketAddress.Network(httpChannel.endPoint.remoteAddress.address.hostAddress, connector.localPort)
 
     else -> throw IllegalStateException("Unknown socket connector.")
   }

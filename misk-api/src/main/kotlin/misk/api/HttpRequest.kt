@@ -5,8 +5,8 @@ import okhttp3.Headers
 import okhttp3.HttpUrl
 
 /**
- * Represents the current incoming request. Misk makes an instance of this interface available in the action scope
- * with the `HttpRequest` key, for use in interceptors, other action scope providers, etc..
+ * Represents the current incoming request. Misk makes an instance of this interface available in the action scope with
+ * the `HttpRequest` key, for use in interceptors, other action scope providers, etc..
  */
 interface HttpRequest {
   val url: HttpUrl

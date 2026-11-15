@@ -23,10 +23,10 @@ dependencies {
   api(project(":misk-inject"))
   api(project(":misk"))
   api(project(":misk-config"))
+  api(libs.kotlinxCoroutinesCore)
+  api(libs.kotlinxSerializationCore)
 
   implementation(libs.kotlinReflect)
-  implementation(libs.kotlinxCoroutinesCore)
-  implementation(libs.kotlinxSerializationCore)
 
   implementation(libs.loggingApi)
   implementation(project(":misk-core"))
@@ -36,6 +36,7 @@ dependencies {
   implementation(libs.okio)
   implementation(libs.prometheusClient)
 
+  testImplementation(libs.jsonSchemaValidator)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.kotlinxCoroutinesTest)
@@ -58,6 +59,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

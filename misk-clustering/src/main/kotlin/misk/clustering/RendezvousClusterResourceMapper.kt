@@ -4,10 +4,8 @@ import com.dynatrace.hash4j.hashing.Hashing
 import com.github.benmanes.caffeine.cache.Caffeine
 import java.time.Duration
 
-/**
- * Maps cluster members to resources via rendezvous consistent hashing
- */
-class RendezvousClusterResourceMapper(val members: Set<Cluster.Member>): ClusterResourceMapper {
+/** Maps cluster members to resources via rendezvous consistent hashing */
+class RendezvousClusterResourceMapper(val members: Set<Cluster.Member>) : ClusterResourceMapper {
   // Use a cache with TTLs to reduce unbounded cache growth from the creation of ephemeral leases
   private val cache = Caffeine.newBuilder().expireAfterAccess(Duration.ofHours(1)).build<String, Cluster.Member>()
 
@@ -26,7 +24,7 @@ class RendezvousClusterResourceMapper(val members: Set<Cluster.Member>): Cluster
     return cache.get(resourceId) { _ -> bestMember }
   }
 
-  internal fun getFromCache(resourceId: String): Cluster.Member?  = cache.getIfPresent(resourceId)
+  internal fun getFromCache(resourceId: String): Cluster.Member? = cache.getIfPresent(resourceId)
 
   internal fun hashClusterResource(member: Cluster.Member, resourceId: String): Long {
     return Hashing.rapidhash3()
@@ -36,6 +34,6 @@ class RendezvousClusterResourceMapper(val members: Set<Cluster.Member>): Cluster
       .putString(member.ipAddress)
       .putString("###")
       .putString(resourceId)
-      .asLong;
+      .asLong
   }
 }

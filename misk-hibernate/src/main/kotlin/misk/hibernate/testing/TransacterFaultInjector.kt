@@ -8,28 +8,25 @@ import org.hibernate.event.spi.SaveOrUpdateEvent
 import org.hibernate.event.spi.SaveOrUpdateEventListener
 
 /**
- * This [TransacterFaultInjector] is used for controlling transaction failures within mySQL. It uses
- * Hibernates Event Listeners to hook into save/update/delete transactions and throw erros when
- * instructed.
+ * This [TransacterFaultInjector] is used for controlling transaction failures within mySQL. It uses Hibernates Event
+ * Listeners to hook into save/update/delete transactions and throw erros when instructed.
  *
  * To use, in your test class,
  *
  * `install(TransacterFaultInjectorModule(MyDbClass::class))`
- *
  */
-class TransacterFaultInjector @Inject constructor(
-) : FakeFixture(), SaveOrUpdateEventListener, DeleteEventListener {
+class TransacterFaultInjector @Inject constructor() : FakeFixture(), SaveOrUpdateEventListener, DeleteEventListener {
   private val enqueuedExceptions by resettable { mutableListOf<Exception?>() }
 
   /**
-   * Enqueues a no-throw operation. Is not required for normal operation. Only required when a
-   * pattern of exceptions & successes are needed.
+   * Enqueues a no-throw operation. Is not required for normal operation. Only required when a pattern of exceptions &
+   * successes are needed.
    *
    * @param times How many times should the error be thrown. Useful for retries.
    */
   @JvmOverloads
- fun enqueueNoThrow(times: Int = 1) {
-    for(i in 0 until times) {
+  fun enqueueNoThrow(times: Int = 1) {
+    for (i in 0 until times) {
       enqueuedExceptions.add(null)
     }
   }
@@ -41,8 +38,8 @@ class TransacterFaultInjector @Inject constructor(
    * @param times How many times should the error be thrown. Useful for retries.
    */
   @JvmOverloads
- fun enqueueThrow(error: Exception, times: Int = 1) {
-    for(i in 0 until times) {
+  fun enqueueThrow(error: Exception, times: Int = 1) {
+    for (i in 0 until times) {
       enqueuedExceptions.add(error)
     }
   }

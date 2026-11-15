@@ -6,8 +6,6 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortK
 
 @DynamoDbBean
 class DyCharacter {
-  @get:DynamoDbPartitionKey
-  var movie_name: String = ""
-  @get:DynamoDbSortKey
-  var character_name: String = ""
+  @get:DynamoDbPartitionKey var movie_name: String = ""
+  @get:DynamoDbSortKey var character_name: String = ""
 }

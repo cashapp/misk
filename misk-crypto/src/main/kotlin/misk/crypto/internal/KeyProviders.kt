@@ -15,8 +15,9 @@ import com.google.crypto.tink.mac.MacFactory
 import com.google.crypto.tink.signature.PublicKeySignFactory
 import com.google.crypto.tink.signature.PublicKeyVerifyFactory
 import com.google.crypto.tink.streamingaead.StreamingAeadFactory
-import jakarta.inject.Inject
 import com.google.inject.Provider
+import jakarta.inject.Inject
+import java.security.GeneralSecurityException
 import misk.crypto.AeadKeyManager
 import misk.crypto.DeterministicAeadKeyManager
 import misk.crypto.DigitalSignature
@@ -27,14 +28,9 @@ import misk.crypto.KeyAlias
 import misk.crypto.KeyReader
 import misk.crypto.MacKeyManager
 import misk.crypto.StreamingAeadKeyManager
-import java.security.GeneralSecurityException
 
-/**
- * We only support AEAD keys via envelope encryption.
- */
-class AeadEnvelopeProvider(
-  val key: KeyAlias,
-) : Provider<Aead>, KeyReader() {
+/** We only support AEAD keys via envelope encryption. */
+class AeadEnvelopeProvider(val key: KeyAlias) : Provider<Aead>, KeyReader() {
   @Inject lateinit var keyManager: AeadKeyManager
 
   override fun get(): Aead {
@@ -45,9 +41,7 @@ class AeadEnvelopeProvider(
   }
 }
 
-class DeterministicAeadProvider(
-  val key: KeyAlias,
-) : Provider<DeterministicAead>, KeyReader() {
+class DeterministicAeadProvider(val key: KeyAlias) : Provider<DeterministicAead>, KeyReader() {
   @Inject lateinit var keyManager: DeterministicAeadKeyManager
 
   override fun get(): DeterministicAead {
@@ -58,21 +52,16 @@ class DeterministicAeadProvider(
   }
 }
 
-class MacProvider(
-  val key: KeyAlias,
-) : Provider<Mac>, KeyReader() {
+class MacProvider(val key: KeyAlias) : Provider<Mac>, KeyReader() {
   @Inject lateinit var keyManager: MacKeyManager
 
   override fun get(): Mac {
     val keysetHandle = readKey(key)
-    return MacFactory.getPrimitive(keysetHandle)
-      .also { keyManager[key] = it }
+    return MacFactory.getPrimitive(keysetHandle).also { keyManager[key] = it }
   }
 }
 
-class DigitalSignatureSignerProvider(
-  val key: KeyAlias,
-) : Provider<PublicKeySign>, KeyReader() {
+class DigitalSignatureSignerProvider(val key: KeyAlias) : Provider<PublicKeySign>, KeyReader() {
   @Inject lateinit var keyManager: DigitalSignatureKeyManager
 
   override fun get(): PublicKeySign {
@@ -84,9 +73,7 @@ class DigitalSignatureSignerProvider(
   }
 }
 
-class DigitalSignatureVerifierProvider(
-  val key: KeyAlias,
-) : Provider<PublicKeyVerify>, KeyReader() {
+class DigitalSignatureVerifierProvider(val key: KeyAlias) : Provider<PublicKeyVerify>, KeyReader() {
   @Inject lateinit var keyManager: DigitalSignatureKeyManager
 
   override fun get(): PublicKeyVerify {
@@ -98,46 +85,37 @@ class DigitalSignatureVerifierProvider(
   }
 }
 
-class HybridEncryptProvider(
-  val key: KeyAlias,
-) : Provider<HybridEncrypt>, KeyReader() {
+class HybridEncryptProvider(val key: KeyAlias) : Provider<HybridEncrypt>, KeyReader() {
   @Inject lateinit var keyManager: HybridEncryptKeyManager
 
   override fun get(): HybridEncrypt {
     val keysetHandle = readKey(key)
-    val publicKeysetHandle = try {
-      keysetHandle.publicKeysetHandle
-    } catch (e: GeneralSecurityException) {
-      keysetHandle
-    }
-    return HybridEncryptFactory.getPrimitive(publicKeysetHandle)
-      .also { keyManager[key] = it }
+    val publicKeysetHandle =
+      try {
+        keysetHandle.publicKeysetHandle
+      } catch (e: GeneralSecurityException) {
+        keysetHandle
+      }
+    return HybridEncryptFactory.getPrimitive(publicKeysetHandle).also { keyManager[key] = it }
   }
 }
 
-class HybridDecryptProvider(
-  val key: KeyAlias,
-) : Provider<HybridDecrypt>, KeyReader() {
+class HybridDecryptProvider(val key: KeyAlias) : Provider<HybridDecrypt>, KeyReader() {
   @Inject lateinit var keyDecryptManager: HybridDecryptKeyManager
   @Inject lateinit var keyEncryptManager: HybridEncryptKeyManager
 
   override fun get(): HybridDecrypt {
     val keysetHandle = readKey(key)
-    keyEncryptManager[key] =
-      HybridEncryptFactory.getPrimitive(keysetHandle.publicKeysetHandle)
-    return HybridDecryptFactory.getPrimitive(keysetHandle)
-      .also { keyDecryptManager[key] = it }
+    keyEncryptManager[key] = HybridEncryptFactory.getPrimitive(keysetHandle.publicKeysetHandle)
+    return HybridDecryptFactory.getPrimitive(keysetHandle).also { keyDecryptManager[key] = it }
   }
 }
 
-class StreamingAeadProvider(
-  val key: KeyAlias,
-) : Provider<StreamingAead>, KeyReader() {
+class StreamingAeadProvider(val key: KeyAlias) : Provider<StreamingAead>, KeyReader() {
   @Inject lateinit var streamingAeadKeyManager: StreamingAeadKeyManager
 
   override fun get(): StreamingAead {
     val keysetHandle = readKey(key)
-    return StreamingAeadFactory.getPrimitive(keysetHandle)
-      .also { streamingAeadKeyManager[key] = it }
+    return StreamingAeadFactory.getPrimitive(keysetHandle).also { streamingAeadKeyManager[key] = it }
   }
 }

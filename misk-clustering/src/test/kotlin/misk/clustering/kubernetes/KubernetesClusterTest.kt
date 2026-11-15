@@ -7,10 +7,13 @@ import io.kubernetes.client.openapi.models.V1ObjectMeta
 import io.kubernetes.client.openapi.models.V1Pod
 import io.kubernetes.client.openapi.models.V1PodStatus
 import io.kubernetes.client.util.Watches
+import jakarta.inject.Inject
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import misk.MiskTestingServiceModule
 import misk.clustering.Cluster
-import misk.clustering.HashRingClusterResourceMapper
 import misk.clustering.DefaultCluster
+import misk.clustering.HashRingClusterResourceMapper
 import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_ADDED
 import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_DELETED
 import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_MODIFIED
@@ -19,43 +22,45 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class KubernetesClusterTest {
-  @MiskTestModule val module: Module = Modules.combine(
-    MiskTestingServiceModule(),
-    object : KAbstractModule() {
-      override fun configure() {
-        install(
-          KubernetesClusterModule(
-            KubernetesConfig(
-              my_pod_namespace = TEST_NAMESPACE,
-              my_pod_name = TEST_SELF_NAME,
-              my_pod_ip = TEST_SELF_IP
+  @MiskTestModule
+  val module: Module =
+    Modules.combine(
+      MiskTestingServiceModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          install(
+            KubernetesClusterModule(
+              KubernetesConfig(
+                my_pod_namespace = TEST_NAMESPACE,
+                my_pod_name = TEST_SELF_NAME,
+                my_pod_ip = TEST_SELF_IP,
+              )
             )
           )
-        )
-      }
-    }
-  )
+        }
+      },
+    )
 
   @Inject private lateinit var cluster: DefaultCluster
 
-  @Test fun startsWithSelfNotReady() {
+  @Test
+  fun startsWithSelfNotReady() {
     val self = cluster.snapshot.self
     assertThat(self.ipAddress).isEqualTo(TEST_SELF_IP)
     assertThat(self.name).isEqualTo(TEST_SELF_NAME)
     assertThat(cluster.snapshot.selfReady).isEqualTo(false)
   }
 
-  @Test fun startsWithNoReadyMembers() {
+  @Test
+  fun startsWithNoReadyMembers() {
     assertThat(cluster.snapshot.readyMembers).isEmpty()
   }
 
-  @Test fun selfReadyNotReady() {
+  @Test
+  fun selfReadyNotReady() {
     val ready = CountDownLatch(1)
 
     val changes = mutableListOf<Cluster.Changes>()
@@ -66,37 +71,42 @@ internal class KubernetesClusterTest {
 
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
 
-    assertThat(changes).containsExactly(
-      Cluster.Changes(
-        snapshot = Cluster.Snapshot(
-          self = expectedSelf,
-          selfReady = false,
-          readyMembers = setOf(),
-          resourceMapper = HashRingClusterResourceMapper(setOf())
-        )
-      ),
-      Cluster.Changes(
-        snapshot = Cluster.Snapshot(
-          self = expectedSelf,
-          selfReady = true,
-          readyMembers = setOf(expectedSelf),
-          resourceMapper = HashRingClusterResourceMapper(setOf(expectedSelf))
+    assertThat(changes)
+      .containsExactly(
+        Cluster.Changes(
+          snapshot =
+            Cluster.Snapshot(
+              self = expectedSelf,
+              selfReady = false,
+              readyMembers = setOf(),
+              resourceMapper = HashRingClusterResourceMapper(setOf()),
+            )
         ),
-        added = setOf(expectedSelf)
-      ),
-      Cluster.Changes(
-        snapshot = Cluster.Snapshot(
-          self = expectedSelf,
-          selfReady = false,
-          readyMembers = setOf(),
-          resourceMapper = HashRingClusterResourceMapper(setOf())
+        Cluster.Changes(
+          snapshot =
+            Cluster.Snapshot(
+              self = expectedSelf,
+              selfReady = true,
+              readyMembers = setOf(expectedSelf),
+              resourceMapper = HashRingClusterResourceMapper(setOf(expectedSelf)),
+            ),
+          added = setOf(expectedSelf),
         ),
-        removed = setOf(expectedSelf)
+        Cluster.Changes(
+          snapshot =
+            Cluster.Snapshot(
+              self = expectedSelf,
+              selfReady = false,
+              readyMembers = setOf(),
+              resourceMapper = HashRingClusterResourceMapper(setOf()),
+            ),
+          removed = setOf(expectedSelf),
+        ),
       )
-    )
   }
 
-  @Test fun memberAddedIfReadyAndIPAddressAssigned() {
+  @Test
+  fun memberAddedIfReadyAndIPAddressAssigned() {
     val ready = CountDownLatch(1)
 
     val changes = mutableListOf<Cluster.Changes>()
@@ -106,45 +116,46 @@ internal class KubernetesClusterTest {
     cluster.syncPoint { ready.countDown() }
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
 
-    assertThat(changes).containsExactly(
-      Cluster.Changes(
-        snapshot = Cluster.Snapshot(
-          self = expectedSelf,
-          selfReady = false,
-          readyMembers = setOf(),
-          resourceMapper = HashRingClusterResourceMapper(setOf())
-        )
-      ),
-      Cluster.Changes(
-        snapshot = Cluster.Snapshot(
-          self = expectedSelf,
-          selfReady = false,
-          readyMembers = setOf(Cluster.Member("larry-blerp", "10.0.0.3")),
-          resourceMapper = HashRingClusterResourceMapper(setOf(Cluster.Member("larry-blerp", "10.0.0.3")))
-        ),
-        added = setOf(Cluster.Member("larry-blerp", "10.0.0.3"))
-      ),
-      Cluster.Changes(
-        snapshot = Cluster.Snapshot(
-          self = expectedSelf,
-          selfReady = false,
-          readyMembers = setOf(
-            Cluster.Member("larry-blerp", "10.0.0.3"),
-            Cluster.Member("larry-blerp2", "10.0.0.4")
-          ),
-          resourceMapper = HashRingClusterResourceMapper(
-            setOf(
-              Cluster.Member("larry-blerp", "10.0.0.3"),
-              Cluster.Member("larry-blerp2", "10.0.0.4")
+    assertThat(changes)
+      .containsExactly(
+        Cluster.Changes(
+          snapshot =
+            Cluster.Snapshot(
+              self = expectedSelf,
+              selfReady = false,
+              readyMembers = setOf(),
+              resourceMapper = HashRingClusterResourceMapper(setOf()),
             )
-          )
         ),
-        added = setOf(Cluster.Member("larry-blerp2", "10.0.0.4"))
+        Cluster.Changes(
+          snapshot =
+            Cluster.Snapshot(
+              self = expectedSelf,
+              selfReady = false,
+              readyMembers = setOf(Cluster.Member("larry-blerp", "10.0.0.3")),
+              resourceMapper = HashRingClusterResourceMapper(setOf(Cluster.Member("larry-blerp", "10.0.0.3"))),
+            ),
+          added = setOf(Cluster.Member("larry-blerp", "10.0.0.3")),
+        ),
+        Cluster.Changes(
+          snapshot =
+            Cluster.Snapshot(
+              self = expectedSelf,
+              selfReady = false,
+              readyMembers =
+                setOf(Cluster.Member("larry-blerp", "10.0.0.3"), Cluster.Member("larry-blerp2", "10.0.0.4")),
+              resourceMapper =
+                HashRingClusterResourceMapper(
+                  setOf(Cluster.Member("larry-blerp", "10.0.0.3"), Cluster.Member("larry-blerp2", "10.0.0.4"))
+                ),
+            ),
+          added = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
+        ),
       )
-    )
   }
 
-  @Test fun memberRemovedIfDeleted() {
+  @Test
+  fun memberRemovedIfDeleted() {
     val changes = mutableListOf<Cluster.Changes>()
     val ready = CountDownLatch(1)
 
@@ -158,40 +169,36 @@ internal class KubernetesClusterTest {
     cluster.syncPoint { ready.countDown() }
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
 
-    assertThat(changes).containsExactly(
-      Cluster.Changes(
-        snapshot = Cluster.Snapshot(
-          self = expectedSelf,
-          selfReady = false,
-          readyMembers = setOf(
-            Cluster.Member("larry-blerp", "10.0.0.3"),
-            Cluster.Member("larry-blerp2", "10.0.0.4")
-          ),
-          resourceMapper = HashRingClusterResourceMapper(
-            setOf(
-              Cluster.Member("larry-blerp", "10.0.0.3"),
-              Cluster.Member("larry-blerp2", "10.0.0.4")
+    assertThat(changes)
+      .containsExactly(
+        Cluster.Changes(
+          snapshot =
+            Cluster.Snapshot(
+              self = expectedSelf,
+              selfReady = false,
+              readyMembers =
+                setOf(Cluster.Member("larry-blerp", "10.0.0.3"), Cluster.Member("larry-blerp2", "10.0.0.4")),
+              resourceMapper =
+                HashRingClusterResourceMapper(
+                  setOf(Cluster.Member("larry-blerp", "10.0.0.3"), Cluster.Member("larry-blerp2", "10.0.0.4"))
+                ),
             )
-          )
-        )
-      ),
-      Cluster.Changes(
-        snapshot = Cluster.Snapshot(
-          self = expectedSelf,
-          selfReady = false,
-          readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
-          resourceMapper = HashRingClusterResourceMapper(
-            setOf(
-              Cluster.Member("larry-blerp2", "10.0.0.4")
-            )
-          )
         ),
-        removed = setOf(Cluster.Member("larry-blerp", ""))
+        Cluster.Changes(
+          snapshot =
+            Cluster.Snapshot(
+              self = expectedSelf,
+              selfReady = false,
+              readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
+              resourceMapper = HashRingClusterResourceMapper(setOf(Cluster.Member("larry-blerp2", "10.0.0.4"))),
+            ),
+          removed = setOf(Cluster.Member("larry-blerp", "")),
+        ),
       )
-    )
   }
 
-  @Test fun memberNotAddedIfNotReady() {
+  @Test
+  fun memberNotAddedIfNotReady() {
     val changes = mutableListOf<Cluster.Changes>()
     val ready = CountDownLatch(1)
 
@@ -201,19 +208,22 @@ internal class KubernetesClusterTest {
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
 
     // Not ready, so shouldn't be added or marked as removed
-    assertThat(changes).containsExactly(
-      Cluster.Changes(
-        snapshot = Cluster.Snapshot(
-          self = expectedSelf,
-          selfReady = false,
-          readyMembers = setOf(),
-          resourceMapper = HashRingClusterResourceMapper(setOf())
+    assertThat(changes)
+      .containsExactly(
+        Cluster.Changes(
+          snapshot =
+            Cluster.Snapshot(
+              self = expectedSelf,
+              selfReady = false,
+              readyMembers = setOf(),
+              resourceMapper = HashRingClusterResourceMapper(setOf()),
+            )
         )
       )
-    )
   }
 
-  @Test fun memberNotAddedIfNoIPAddressAssigned() {
+  @Test
+  fun memberNotAddedIfNoIPAddressAssigned() {
     val changes = mutableListOf<Cluster.Changes>()
     val ready = CountDownLatch(1)
 
@@ -223,19 +233,22 @@ internal class KubernetesClusterTest {
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
 
     // No IP address, so shouldn't be added or marked as removed
-    assertThat(changes).containsExactly(
-      Cluster.Changes(
-        snapshot = Cluster.Snapshot(
-          self = expectedSelf,
-          selfReady = false,
-          readyMembers = setOf(),
-          resourceMapper = HashRingClusterResourceMapper(setOf())
+    assertThat(changes)
+      .containsExactly(
+        Cluster.Changes(
+          snapshot =
+            Cluster.Snapshot(
+              self = expectedSelf,
+              selfReady = false,
+              readyMembers = setOf(),
+              resourceMapper = HashRingClusterResourceMapper(setOf()),
+            )
         )
       )
-    )
   }
 
-  @Test fun memberRemovedIfTransitionsToNotReady() {
+  @Test
+  fun memberRemovedIfTransitionsToNotReady() {
     val ready = CountDownLatch(1)
     val changes = mutableListOf<Cluster.Changes>()
 
@@ -249,40 +262,36 @@ internal class KubernetesClusterTest {
     cluster.syncPoint { ready.countDown() }
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
 
-    assertThat(changes).containsExactly(
-      Cluster.Changes(
-        snapshot = Cluster.Snapshot(
-          self = expectedSelf,
-          selfReady = false,
-          readyMembers = setOf(
-            Cluster.Member("larry-blerp", "10.0.0.3"),
-            Cluster.Member("larry-blerp2", "10.0.0.4")
-          ),
-          resourceMapper = HashRingClusterResourceMapper(
-            setOf(
-              Cluster.Member("larry-blerp", "10.0.0.3"),
-              Cluster.Member("larry-blerp2", "10.0.0.4")
+    assertThat(changes)
+      .containsExactly(
+        Cluster.Changes(
+          snapshot =
+            Cluster.Snapshot(
+              self = expectedSelf,
+              selfReady = false,
+              readyMembers =
+                setOf(Cluster.Member("larry-blerp", "10.0.0.3"), Cluster.Member("larry-blerp2", "10.0.0.4")),
+              resourceMapper =
+                HashRingClusterResourceMapper(
+                  setOf(Cluster.Member("larry-blerp", "10.0.0.3"), Cluster.Member("larry-blerp2", "10.0.0.4"))
+                ),
             )
-          )
-        )
-      ),
-      Cluster.Changes(
-        snapshot = Cluster.Snapshot(
-          self = expectedSelf,
-          selfReady = false,
-          readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
-          resourceMapper = HashRingClusterResourceMapper(
-            setOf(
-              Cluster.Member("larry-blerp2", "10.0.0.4")
-            )
-          )
         ),
-        removed = setOf(Cluster.Member("larry-blerp", "10.0.0.3"))
+        Cluster.Changes(
+          snapshot =
+            Cluster.Snapshot(
+              self = expectedSelf,
+              selfReady = false,
+              readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
+              resourceMapper = HashRingClusterResourceMapper(setOf(Cluster.Member("larry-blerp2", "10.0.0.4"))),
+            ),
+          removed = setOf(Cluster.Member("larry-blerp", "10.0.0.3")),
+        ),
       )
-    )
   }
 
-  @Test fun memberRemovedIfIPAddressLost() {
+  @Test
+  fun memberRemovedIfIPAddressLost() {
     val ready = CountDownLatch(1)
     val changes = mutableListOf<Cluster.Changes>()
 
@@ -296,37 +305,32 @@ internal class KubernetesClusterTest {
     cluster.syncPoint { ready.countDown() }
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
 
-    assertThat(changes).containsExactly(
-      Cluster.Changes(
-        snapshot = Cluster.Snapshot(
-          self = expectedSelf,
-          selfReady = false,
-          readyMembers = setOf(
-            Cluster.Member("larry-blerp", "10.0.0.3"),
-            Cluster.Member("larry-blerp2", "10.0.0.4")
-          ),
-          resourceMapper = HashRingClusterResourceMapper(
-            setOf(
-              Cluster.Member("larry-blerp", "10.0.0.3"),
-              Cluster.Member("larry-blerp2", "10.0.0.4")
+    assertThat(changes)
+      .containsExactly(
+        Cluster.Changes(
+          snapshot =
+            Cluster.Snapshot(
+              self = expectedSelf,
+              selfReady = false,
+              readyMembers =
+                setOf(Cluster.Member("larry-blerp", "10.0.0.3"), Cluster.Member("larry-blerp2", "10.0.0.4")),
+              resourceMapper =
+                HashRingClusterResourceMapper(
+                  setOf(Cluster.Member("larry-blerp", "10.0.0.3"), Cluster.Member("larry-blerp2", "10.0.0.4"))
+                ),
             )
-          )
-        )
-      ),
-      Cluster.Changes(
-        snapshot = Cluster.Snapshot(
-          self = expectedSelf,
-          selfReady = false,
-          readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
-          resourceMapper = HashRingClusterResourceMapper(
-            setOf(
-              Cluster.Member("larry-blerp2", "10.0.0.4")
-            )
-          )
         ),
-        removed = setOf(Cluster.Member("larry-blerp", ""))
+        Cluster.Changes(
+          snapshot =
+            Cluster.Snapshot(
+              self = expectedSelf,
+              selfReady = false,
+              readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
+              resourceMapper = HashRingClusterResourceMapper(setOf(Cluster.Member("larry-blerp2", "10.0.0.4"))),
+            ),
+          removed = setOf(Cluster.Member("larry-blerp", "")),
+        ),
       )
-    )
   }
 
   private fun handleWatch(type: String, pod: V1Pod) {

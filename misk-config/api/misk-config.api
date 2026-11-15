@@ -20,23 +20,23 @@ public final class misk/config/MiskConfig {
 	public static final field INSTANCE Lmisk/config/MiskConfig;
 	public static final fun filesInDir (Ljava/lang/String;Ljava/io/FilenameFilter;)Ljava/util/List;
 	public static synthetic fun filesInDir$default (Ljava/lang/String;Ljava/io/FilenameFilter;ILjava/lang/Object;)Ljava/util/List;
-	public static final fun load (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lcom/fasterxml/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;)Lmisk/config/Config;
-	public static final fun load (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lcom/fasterxml/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;Z)Lmisk/config/Config;
-	public static final fun load (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lcom/fasterxml/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;ZLcom/fasterxml/jackson/databind/deser/BeanDeserializerModifier;)Lmisk/config/Config;
 	public static final fun load (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;)Lmisk/config/Config;
-	public static synthetic fun load$default (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lcom/fasterxml/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Lmisk/config/Config;
-	public static synthetic fun load$default (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lcom/fasterxml/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;ZILjava/lang/Object;)Lmisk/config/Config;
-	public static synthetic fun load$default (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lcom/fasterxml/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;ZLcom/fasterxml/jackson/databind/deser/BeanDeserializerModifier;ILjava/lang/Object;)Lmisk/config/Config;
+	public static final fun load (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Ltools/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;)Lmisk/config/Config;
+	public static final fun load (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Ltools/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;Z)Lmisk/config/Config;
+	public static final fun load (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Ltools/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;ZLtools/jackson/databind/deser/ValueDeserializerModifier;)Lmisk/config/Config;
 	public static synthetic fun load$default (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Lmisk/config/Config;
+	public static synthetic fun load$default (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Ltools/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Lmisk/config/Config;
+	public static synthetic fun load$default (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Ltools/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;ZILjava/lang/Object;)Lmisk/config/Config;
+	public static synthetic fun load$default (Ljava/lang/Class;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Ltools/jackson/databind/JsonNode;Lmisk/resources/ResourceLoader;ZLtools/jackson/databind/deser/ValueDeserializerModifier;ILjava/lang/Object;)Lmisk/config/Config;
 	public final fun loadConfigYamlMap (Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;)Ljava/util/Map;
 	public static synthetic fun loadConfigYamlMap$default (Lmisk/config/MiskConfig;Ljava/lang/String;Lwisp/deployment/Deployment;Ljava/util/List;Lmisk/resources/ResourceLoader;ILjava/lang/Object;)Ljava/util/Map;
 	public final fun toRedactedYaml (Lmisk/config/Config;Lmisk/resources/ResourceLoader;)Ljava/lang/String;
 }
 
-public final class misk/config/MiskConfig$DeserializerModifierModule : com/fasterxml/jackson/databind/module/SimpleModule {
-	public fun <init> (Lcom/fasterxml/jackson/databind/deser/BeanDeserializerModifier;)V
-	public final fun getDeserializerModifier ()Lcom/fasterxml/jackson/databind/deser/BeanDeserializerModifier;
-	public fun setupModule (Lcom/fasterxml/jackson/databind/Module$SetupContext;)V
+public final class misk/config/MiskConfig$DeserializerModifierModule : tools/jackson/databind/module/SimpleModule {
+	public fun <init> (Ltools/jackson/databind/deser/ValueDeserializerModifier;)V
+	public final fun getDeserializerModifier ()Ltools/jackson/databind/deser/ValueDeserializerModifier;
+	public fun setupModule (Ltools/jackson/databind/JacksonModule$SetupContext;)V
 }
 
 public final class misk/config/MiskConfig$RealSecret : misk/config/Secret {
@@ -47,16 +47,17 @@ public final class misk/config/MiskConfig$RealSecret : misk/config/Secret {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class misk/config/MiskConfig$RedactSecretJacksonModule : com/fasterxml/jackson/databind/module/SimpleModule {
+public final class misk/config/MiskConfig$RedactSecretJacksonModule : tools/jackson/databind/module/SimpleModule {
 	public fun <init> ()V
-	public fun setupModule (Lcom/fasterxml/jackson/databind/Module$SetupContext;)V
+	public fun setupModule (Ltools/jackson/databind/JacksonModule$SetupContext;)V
 }
 
-public final class misk/config/MiskConfig$SecretJacksonModule : com/fasterxml/jackson/databind/module/SimpleModule {
-	public fun <init> (Lmisk/resources/ResourceLoader;Lcom/fasterxml/jackson/databind/ObjectMapper;)V
-	public final fun getMapper ()Lcom/fasterxml/jackson/databind/ObjectMapper;
+public final class misk/config/MiskConfig$SecretJacksonModule : tools/jackson/databind/module/SimpleModule {
+	public fun <init> (Lmisk/resources/ResourceLoader;Lkotlin/jvm/functions/Function0;)V
+	public fun <init> (Lmisk/resources/ResourceLoader;Ltools/jackson/databind/ObjectMapper;)V
+	public final fun getMapper ()Ltools/jackson/databind/ObjectMapper;
 	public final fun getResourceLoader ()Lmisk/resources/ResourceLoader;
-	public fun setupModule (Lcom/fasterxml/jackson/databind/Module$SetupContext;)V
+	public fun setupModule (Ltools/jackson/databind/JacksonModule$SetupContext;)V
 }
 
 public abstract interface annotation class misk/config/Redact : java/lang/annotation/Annotation {

@@ -6,16 +6,13 @@ import java.lang.ref.WeakReference
 import javax.annotation.concurrent.ThreadSafe
 
 /**
- * A [ProvidedGauge] is a variant of a [io.prometheus.client.Gauge]  that allows you to
- * register a provider for gauge value. The provider function is called when the gauge value
- * is collected. This is useful for tracking values that are already being tracked. The gauge
- * will hold a weak reference to the provider object, so it will not prevent it from being garbage
- * collected. If the provider object is garbage collected, the gauge will return 0.
+ * A [ProvidedGauge] is a variant of a [io.prometheus.client.Gauge] that allows you to register a provider for gauge
+ * value. The provider function is called when the gauge value is collected. This is useful for tracking values that are
+ * already being tracked. The gauge will hold a weak reference to the provider object, so it will not prevent it from
+ * being garbage collected. If the provider object is garbage collected, the gauge will return 0.
  */
 @ThreadSafe
-class ProvidedGauge private constructor(
-  builder: Builder
-) : SimpleCollector<ProvidedGauge.Child>(builder) {
+class ProvidedGauge private constructor(builder: Builder) : SimpleCollector<ProvidedGauge.Child>(builder) {
   class Builder : SimpleCollector.Builder<Builder, ProvidedGauge>() {
 
     override fun create(): ProvidedGauge {
@@ -31,14 +28,19 @@ class ProvidedGauge private constructor(
   class Child {
     var reference: WeakReference<Any> = WeakReference(null)
       private set
+
     private var provider: () -> Number = { 0 }
+
     fun <T : Any> registerProvider(reference: T, provider: T.() -> Number) {
       this.reference = WeakReference(reference)
       this.provider = {
-        this.reference.get()?.let {
-          @Suppress("UNCHECKED_CAST")
-          it as? T
-        }?.provider() ?: 0
+        this.reference
+          .get()
+          ?.let {
+            @Suppress("UNCHECKED_CAST")
+            it as? T
+          }
+          ?.provider() ?: 0
       }
     }
 

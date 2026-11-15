@@ -17,9 +17,7 @@ class DockerDynamoDbTest : AbstractDynamoDbTest() {
       install(
         DockerDynamoDbModule(
           DynamoDbTable(DyMovie::class),
-          DynamoDbTable(DyCharacter::class) {
-            it.withBillingMode(BillingMode.PAY_PER_REQUEST)
-          }
+          DynamoDbTable(DyCharacter::class) { it.withBillingMode(BillingMode.PAY_PER_REQUEST) },
         )
       )
     }

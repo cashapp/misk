@@ -1,6 +1,7 @@
 package misk.web
 
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -19,12 +20,10 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class ContentBasedDispatchTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   val httpClient = OkHttpClient()
 
@@ -39,14 +38,14 @@ internal class ContentBasedDispatchTest {
   @Inject private lateinit var moshi: Moshi
   @Inject private lateinit var jettyService: JettyService
 
-  private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
+  private val packetJsonAdapter
+    get() = moshi.adapter(Packet::class.java)
 
   @Test
   fun postJsonExpectJson() {
     val requestContent = packetJsonAdapter.toJson(Packet("my friend"))
     val responseContent = postHello(jsonMediaType, requestContent, jsonMediaType).source()
-    assertThat(packetJsonAdapter.fromJson(responseContent)!!.message)
-      .isEqualTo("json->json my friend")
+    assertThat(packetJsonAdapter.fromJson(responseContent)!!.message).isEqualTo("json->json my friend")
   }
 
   @Test
@@ -59,8 +58,7 @@ internal class ContentBasedDispatchTest {
   @Test
   fun postPlainTextExpectJson() {
     val responseContent = postHello(plainTextMediaType, "my friend", jsonMediaType).source()
-    assertThat(packetJsonAdapter.fromJson(responseContent)!!.message)
-      .isEqualTo("text->json my friend")
+    assertThat(packetJsonAdapter.fromJson(responseContent)!!.message).isEqualTo("text->json my friend")
   }
 
   @Test
@@ -84,17 +82,12 @@ internal class ContentBasedDispatchTest {
   @Test
   fun postArbitraryExpectJson() {
     val responseContent = postHello(weirdMediaType, "my friend", jsonMediaType).source()
-    assertThat(packetJsonAdapter.fromJson(responseContent)!!.message)
-      .isEqualTo("*->json my friend")
+    assertThat(packetJsonAdapter.fromJson(responseContent)!!.message).isEqualTo("*->json my friend")
   }
 
   @Test
   fun postArbitraryExpectArbitrary() {
-    val responseContent = postHello(
-      weirdMediaType,
-      "my friend",
-      weirdMediaType
-    ).source()
+    val responseContent = postHello(weirdMediaType, "my friend", weirdMediaType).source()
     assertThat(responseContent.readUtf8()).isEqualTo("*->* my friend")
   }
 
@@ -102,8 +95,7 @@ internal class ContentBasedDispatchTest {
   fun postGrpcExpectResponse() {
     val body = "Test".toByteArray().toByteString().toRequestBody()
     val request = newRequest("/hello-bytes", grpcMediaType, body)
-    val response = httpClient.newCall(request)
-      .execute()
+    val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
     val responseContent = response.body!!.source()
     val strResp = String(responseContent.readByteString().toByteArray())
@@ -115,14 +107,14 @@ internal class ContentBasedDispatchTest {
 
   @Test
   fun postGrpcExpect404Response() {
-    val request = newRequest(
-      "/doesnt-exist",
-      grpcMediaType,
-      "Test".toByteArray().toByteString().toRequestBody(),
-      grpcMediaType.toString()
-    )
-    val response = httpClient.newCall(request)
-      .execute()
+    val request =
+      newRequest(
+        "/doesnt-exist",
+        grpcMediaType,
+        "Test".toByteArray().toByteString().toRequestBody(),
+        grpcMediaType.toString(),
+      )
+    val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(404)
     assertThat(response.message).isEqualTo("Not Found")
     assertThat(response.headers["Content-Type"]).isEqualTo("text/plain;charset=utf-8")
@@ -201,8 +193,7 @@ internal class ContentBasedDispatchTest {
   }
 
   class PostAnythingReturnAnything @Inject constructor() : WebAction {
-    @Post("/hello")
-    fun hello(@misk.web.RequestBody message: String) = "*->* $message"
+    @Post("/hello") fun hello(@misk.web.RequestBody message: String) = "*->* $message"
   }
 
   class PostGrpcReturnResponseBody @Inject constructor() : WebAction {
@@ -215,11 +206,10 @@ internal class ContentBasedDispatchTest {
   private fun postHello(
     contentType: MediaType,
     content: String?,
-    acceptedMediaType: MediaType? = null
+    acceptedMediaType: MediaType? = null,
   ): okhttp3.ResponseBody {
     val request = newRequest("/hello", contentType, content!!.toRequestBody(contentType), acceptedMediaType.toString())
-    val response = httpClient.newCall(request)
-      .execute()
+    val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
     return response.body!!
   }
@@ -228,11 +218,10 @@ internal class ContentBasedDispatchTest {
     path: String,
     contentType: MediaType,
     requestBody: RequestBody,
-    acceptedMediaType: String? = null
+    acceptedMediaType: String? = null,
   ): Request {
-    val request = Request.Builder()
-      .post(requestBody)
-      .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
+    val request =
+      Request.Builder().post(requestBody).url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
 
     if (acceptedMediaType != null) {
       request.header("Accept", acceptedMediaType.toString())

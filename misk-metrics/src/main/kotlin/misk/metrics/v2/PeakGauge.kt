@@ -5,15 +5,14 @@ import io.prometheus.client.SimpleCollector
 import javax.annotation.concurrent.ThreadSafe
 
 /**
- * A peak gauge is a variant of a [io.prometheus.client.Gauge] that resets to an initial value of 0
- * after a metric collection.
+ * A peak gauge is a variant of a [io.prometheus.client.Gauge] that resets to an initial value of 0 after a metric
+ * collection.
  *
- * This is useful for accurately capturing maximum observed values over time. In contrast to the
- * histogram maximum which tracks the maximum value in its sampling window. That sampling window
- * typically covers multiple metric collections.
+ * This is useful for accurately capturing maximum observed values over time. In contrast to the histogram maximum which
+ * tracks the maximum value in its sampling window. That sampling window typically covers multiple metric collections.
  */
 @ThreadSafe
-class PeakGauge  : SimpleCollector<PeakGauge.Child> {
+class PeakGauge : SimpleCollector<PeakGauge.Child> {
   constructor(builder: Builder) : super(builder)
 
   class Builder : SimpleCollector.Builder<Builder, PeakGauge>() {
@@ -35,9 +34,7 @@ class PeakGauge  : SimpleCollector<PeakGauge.Child> {
     // have received an update since the last reset.
     private val value = AtomicDouble()
 
-    /**
-     * Updates the stored value if the new value is greater.
-     */
+    /** Updates the stored value if the new value is greater. */
     fun record(newValue: Double) {
       while (true) {
         val previous = value.get()
@@ -49,9 +46,7 @@ class PeakGauge  : SimpleCollector<PeakGauge.Child> {
       }
     }
 
-    /**
-     * Reset to the initial value and return previously held value.
-     */
+    /** Reset to the initial value and return previously held value. */
     fun getAndClear(): Double {
       return value.getAndSet(0.0)
     }
@@ -70,7 +65,7 @@ class PeakGauge  : SimpleCollector<PeakGauge.Child> {
   }
 
   companion object {
-    fun builder(name: String, help: String) : Builder {
+    fun builder(name: String, help: String): Builder {
       return Builder().name(name).help(help)
     }
   }

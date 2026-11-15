@@ -4,20 +4,20 @@ import com.google.common.util.concurrent.AbstractIdleService
 import io.grpc.BindableService
 import io.grpc.Server
 import io.grpc.ServerBuilder
-import misk.resources.ResourceLoader
-import okhttp3.HttpUrl
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.resources.ResourceLoader
+import okhttp3.HttpUrl
 
 /**
- * Runs a standard gRPC server: generated protoc protos and a Netty backend. This isn't how Misk
- * does gRPC, but it should be useful to confirm interoperability.
+ * Runs a standard gRPC server: generated protoc protos and a Netty backend. This isn't how Misk does gRPC, but it
+ * should be useful to confirm interoperability.
  */
 @Singleton
-class ProtocGrpcService @Inject constructor(
-  private val services: List<BindableService>,
-  private val resourceLoader: ResourceLoader
-) : AbstractIdleService() {
+class ProtocGrpcService
+@Inject
+constructor(private val services: List<BindableService>, private val resourceLoader: ResourceLoader) :
+  AbstractIdleService() {
 
   lateinit var server: Server
 

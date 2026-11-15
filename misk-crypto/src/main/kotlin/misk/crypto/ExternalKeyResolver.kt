@@ -4,16 +4,16 @@ import jakarta.inject.Inject
 import misk.logging.getLogger
 
 /**
- * [ExternalKeyResolver] implements an [KeyResolver] that fetches Tink keysets from an external
- * source, such as an S3 bucket. If multiple sources are registered (by binding implementations
- * of [KeyResolver]), the first one to contain the key (via [ExternalKeySource.keyExists]) is
- * the key that is used.
+ * [ExternalKeyResolver] implements an [KeyResolver] that fetches Tink keysets from an external source, such as an S3
+ * bucket. If multiple sources are registered (by binding implementations of [KeyResolver]), the first one to contain
+ * the key (via [ExternalKeySource.keyExists]) is the key that is used.
  *
  * If a key is not found, an [ExternalKeyManagerException] exception is raised.
  */
-class ExternalKeyResolver @Inject constructor(
+class ExternalKeyResolver
+@Inject
+constructor(
   @ExternalDataKeys override val allKeyAliases: Map<KeyAlias, KeyType>,
-
   private val externalKeySources: Set<ExternalKeySource>,
 ) : KeyResolver {
 
@@ -21,7 +21,9 @@ class ExternalKeyResolver @Inject constructor(
     for (keySource in externalKeySources) {
       logger.info("getRemoteKey: checking ${keySource::class.qualifiedName} for $alias")
       if (keySource.keyExists(alias)) {
-        keySource.getKey(alias)?.let { return it }
+        keySource.getKey(alias)?.let {
+          return it
+        }
         logger.warn("$alias is reported to exist, but not able to retrieve; continuing")
       }
     }

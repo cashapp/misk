@@ -1,6 +1,7 @@
 package misk.web
 
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -17,18 +18,19 @@ import okio.GzipSink
 import okio.buffer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class GzipTest : AbstractGzipTest() {
   @MiskTestModule val module = TestModule(gzip = true)
 
-  @Test fun `GET gzip get response body`() {
+  @Test
+  fun `GET gzip get response body`() {
     get("/miskhype/16").assertGzipEncoding(gzipped = true)
     get("/miskhype/8").assertGzipEncoding(gzipped = false)
   }
 
-  @Test fun `POST gzip response body`() {
+  @Test
+  fun `POST gzip response body`() {
     post("/miskhype/16").assertGzipEncoding(gzipped = true)
     post("/miskhype/8").assertGzipEncoding(gzipped = false)
   }
@@ -38,12 +40,14 @@ internal class GzipTest : AbstractGzipTest() {
 internal class GzipDisabledTest : AbstractGzipTest() {
   @MiskTestModule val module = TestModule(gzip = false)
 
-  @Test fun `GET gzip get response body`() {
+  @Test
+  fun `GET gzip get response body`() {
     get("/miskhype/16").assertGzipEncoding(gzipped = false)
     get("/miskhype/8").assertGzipEncoding(gzipped = false)
   }
 
-  @Test fun `POST gzip response body`() {
+  @Test
+  fun `POST gzip response body`() {
     post("/miskhype/16").assertGzipEncoding(gzipped = false)
     post("/miskhype/8").assertGzipEncoding(gzipped = false)
   }
@@ -53,35 +57,36 @@ abstract class AbstractGzipTest {
   @Inject lateinit var jetty: JettyService
   @Inject lateinit var moshi: Moshi
 
-  @Test fun `POST unspecified request body`() {
-    val response = call(
-      Request.Builder()
-        .url(jetty.httpServerUrl.resolve("/count")!!)
-        .post(miskHypeJson(false, 16))
-    )
+  @Test
+  fun `POST unspecified request body`() {
+    val response = call(Request.Builder().url(jetty.httpServerUrl.resolve("/count")!!).post(miskHypeJson(false, 16)))
 
     assertThat(response.body!!.string()).isEqualTo("16")
   }
 
-  @Test fun `POST identity request body`() {
-    val response = call(
-      Request.Builder()
-        .url(jetty.httpServerUrl.resolve("/count")!!)
-        .header("Content-Encoding", "identity")
-        .post(miskHypeJson(false, 16))
-    )
+  @Test
+  fun `POST identity request body`() {
+    val response =
+      call(
+        Request.Builder()
+          .url(jetty.httpServerUrl.resolve("/count")!!)
+          .header("Content-Encoding", "identity")
+          .post(miskHypeJson(false, 16))
+      )
 
     assertThat(response.body!!.string()).isEqualTo("16")
   }
 
   /** Gzip requests are always enabled, even if the gzip responses are not. */
-  @Test fun `POST gzip request body`() {
-    val response = call(
-      Request.Builder()
-        .url(jetty.httpServerUrl.resolve("/count")!!)
-        .header("Content-Encoding", "gzip")
-        .post(miskHypeJson(true, 16))
-    )
+  @Test
+  fun `POST gzip request body`() {
+    val response =
+      call(
+        Request.Builder()
+          .url(jetty.httpServerUrl.resolve("/count")!!)
+          .header("Content-Encoding", "gzip")
+          .post(miskHypeJson(true, 16))
+      )
     assertThat(response.body!!.string()).isEqualTo("16")
   }
 
@@ -104,16 +109,15 @@ abstract class AbstractGzipTest {
     fun postMiskHype(@RequestBody request: List<String>): Int = request.count { it == "miskhype" }
   }
 
-  fun get(path: String): Response = call(
-    Request.Builder()
-      .url(jetty.httpServerUrl.newBuilder().encodedPath(path).build())
-  )
+  fun get(path: String): Response =
+    call(Request.Builder().url(jetty.httpServerUrl.newBuilder().encodedPath(path).build()))
 
-  fun post(path: String): Response = call(
-    Request.Builder()
-      .url(jetty.httpServerUrl.newBuilder().encodedPath(path).build())
-      .post(ByteArray(0).toRequestBody())
-  )
+  fun post(path: String): Response =
+    call(
+      Request.Builder()
+        .url(jetty.httpServerUrl.newBuilder().encodedPath(path).build())
+        .post(ByteArray(0).toRequestBody())
+    )
 
   fun call(request: Request.Builder): Response {
     val httpClient = OkHttpClient()
@@ -123,19 +127,18 @@ abstract class AbstractGzipTest {
   }
 
   fun Response.assertGzipEncoding(gzipped: Boolean) {
-    use {
-      assertThat(networkResponse?.headers?.get("Content-Encoding") == "gzip").isEqualTo(gzipped)
-    }
+    use { assertThat(networkResponse?.headers?.get("Content-Encoding") == "gzip").isEqualTo(gzipped) }
   }
 
   /** Returns a JSON document like `["miskhype", "miskhype"]`. */
   fun miskHypeJson(gzip: Boolean, count: Int): okhttp3.RequestBody {
     val buffer = Buffer()
 
-    val sink = when {
-      gzip -> GzipSink(buffer).buffer()
-      else -> buffer
-    }
+    val sink =
+      when {
+        gzip -> GzipSink(buffer).buffer()
+        else -> buffer
+      }
 
     sink.use {
       sink.writeUtf8("[\"")
@@ -150,10 +153,7 @@ abstract class AbstractGzipTest {
     override fun configure() {
       install(
         WebServerTestingModule(
-          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
-            gzip = gzip,
-            minGzipSize = 128
-          )
+          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(gzip = gzip, minGzipSize = 128)
         )
       )
       install(MiskTestingServiceModule())

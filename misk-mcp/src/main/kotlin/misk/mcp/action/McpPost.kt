@@ -9,20 +9,19 @@ import misk.web.mediatype.MediaTypes
 /**
  * Marks a web action method as an MCP (Model Context Protocol) HTTP POST endpoint for StreamableHTTP transport.
  *
- * This annotation creates endpoints that handle client-to-server JSON-RPC 2.0 messages using
- * StreamableHTTP transport (Server-Sent Events). The endpoint accepts JSON-RPC requests from
- * MCP clients and responds with Server-Sent Events (SSE) for real-time bidirectional communication.
+ * This annotation creates endpoints that handle client-to-server JSON-RPC 2.0 messages using StreamableHTTP transport
+ * (Server-Sent Events). The endpoint accepts JSON-RPC requests from MCP clients and responds with Server-Sent Events
+ * (SSE) for real-time bidirectional communication.
  *
  * ## Transport Compatibility
  *
- * **StreamableHTTP Transport Only**: This annotation is designed exclusively for StreamableHTTP
- * transport using Server-Sent Events. For WebSocket-based MCP communication, use `@McpWebSocket`
- * instead, which handles all communication over a persistent WebSocket connection.
+ * **StreamableHTTP Transport Only**: This annotation is designed exclusively for StreamableHTTP transport using
+ * Server-Sent Events. For WebSocket-based MCP communication, use `@McpWebSocket` instead, which handles all
+ * communication over a persistent WebSocket connection.
  *
  * ## Purpose
- * Implements the MCP specification requirement for "sending messages to the server" by providing
- * an HTTP POST endpoint that processes client JSON-RPC 2.0 messages and maintains Server-Sent Events (SSE) connections
- * for server responses.
+ * Implements the MCP specification requirement for "sending messages to the server" by providing an HTTP POST endpoint
+ * that processes client JSON-RPC 2.0 messages and maintains Server-Sent Events (SSE) connections for server responses.
  *
  * ## Configuration
  *
@@ -32,9 +31,8 @@ import misk.web.mediatype.MediaTypes
  * - **Response Content-Type**: `text/event-stream` (for Server-Sent Events (SSE) responses)
  *
  * ## Session Support
- * The endpoint accepts an optional `Mcp-Session-Id` header (referenced by [SESSION_ID_HEADER])
- * when stateful sessions are used:
- *
+ * The endpoint accepts an optional `Mcp-Session-Id` header (referenced by [SESSION_ID_HEADER]) when stateful sessions
+ * are used:
  * ```kotlin
  * @McpPost
  * suspend fun handleMcpRequest(

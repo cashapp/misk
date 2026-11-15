@@ -8,7 +8,9 @@ import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
 
 @Singleton
-internal class AwsSqsJobHandlerSubscriptionService @Inject constructor(
+internal class AwsSqsJobHandlerSubscriptionService
+@Inject
+constructor(
   private val attributeImporter: AwsSqsQueueAttributeImporter,
   private val consumer: SqsJobConsumer,
   private val individualConsumerMapping: Map<QueueName, JobHandler>,

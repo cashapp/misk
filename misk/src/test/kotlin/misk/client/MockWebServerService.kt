@@ -1,9 +1,9 @@
 package misk.client
 
 import com.google.common.util.concurrent.AbstractIdleService
-import okhttp3.mockwebserver.MockWebServer
-import java.io.File
 import jakarta.inject.Singleton
+import java.io.File
+import okhttp3.mockwebserver.MockWebServer
 
 @Singleton
 class MockWebServerService(val unixSocketFile: String?) : AbstractIdleService() {
@@ -15,10 +15,7 @@ class MockWebServerService(val unixSocketFile: String?) : AbstractIdleService() 
     file.delete()
 
     server = MockWebServer()
-    unixSocketFile?.let {
-      server!!.serverSocketFactory =
-        UnixDomainServerSocketFactory(file)
-    }
+    unixSocketFile?.let { server!!.serverSocketFactory = UnixDomainServerSocketFactory(file) }
   }
 
   override fun shutDown() {

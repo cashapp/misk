@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit
 /**
  * Skeleton for the functionality of histograms
  *
- * A histogram samples observations (usually things like request durations or response sizes)
- * and counts them in configurable buckets.
+ * A histogram samples observations (usually things like request durations or response sizes) and counts them in
+ * configurable buckets.
  *
  * A sample implementation can be found in PrometheusHistogram
  */
@@ -36,10 +36,10 @@ interface Histogram {
   }
 
   companion object {
-    fun factory(summary: Summary) = object : Histogram {
-      override fun getHistogram() = summary
-
-    }
+    fun factory(summary: Summary) =
+      object : Histogram {
+        override fun getHistogram() = summary
+      }
   }
 }
 

@@ -3,21 +3,15 @@ package wisp.launchdarkly
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 
-class LaunchDarklyClientMetrics(
-  private val meterRegistry: MeterRegistry) {
+class LaunchDarklyClientMetrics(private val meterRegistry: MeterRegistry) {
 
-  private var initSuccess: Counter = meterRegistry
-    .counter(SUCCESS_COUNTER_NAME)
+  private var initSuccess: Counter = meterRegistry.counter(SUCCESS_COUNTER_NAME)
 
-  private var initFailure: Counter = meterRegistry
-    .counter(FAILED_COUNTER_NAME)
+  private var initFailure: Counter = meterRegistry.counter(FAILED_COUNTER_NAME)
 
   fun onInitSuccess(duration: Long) {
     initSuccess.increment()
-    meterRegistry.gauge(
-      INITIALIZATION_DURATION_NAME,
-      duration,
-    )
+    meterRegistry.gauge(INITIALIZATION_DURATION_NAME, duration)
   }
 
   fun onInitFailure() {

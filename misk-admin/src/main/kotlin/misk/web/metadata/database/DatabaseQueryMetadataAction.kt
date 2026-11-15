@@ -1,19 +1,17 @@
 package misk.web.metadata.database
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.web.Get
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
-import misk.web.mediatype.MediaTypes
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import misk.web.dashboard.AdminDashboardAccess
+import misk.web.mediatype.MediaTypes
 
 /** Display available queries and their types */
 @Singleton
-class DatabaseQueryMetadataAction @Inject constructor(
-  val metadata: List<DatabaseQueryMetadata>
-) : WebAction {
+class DatabaseQueryMetadataAction @Inject constructor(val metadata: List<DatabaseQueryMetadata>) : WebAction {
 
   @Get("/api/v1/database/query/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
@@ -23,9 +21,7 @@ class DatabaseQueryMetadataAction @Inject constructor(
     return Response(databaseQueryMetadata = metadata)
   }
 
-  data class Response(
-    val databaseQueryMetadata: List<DatabaseQueryMetadata>
-  )
+  data class Response(val databaseQueryMetadata: List<DatabaseQueryMetadata>)
 }
 
 // Potentially input for max rows

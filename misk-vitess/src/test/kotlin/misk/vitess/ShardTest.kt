@@ -7,21 +7,24 @@ class ShardIdTest {
 
   private val keyspace = Keyspace("myKeyspace")
 
-  @Test fun unsharded() {
+  @Test
+  fun unsharded() {
     val shardId = Shard(keyspace, "0")
     val keyRange = shardId.keyRange()
     assertThat(keyRange.hasLowerBound()).isFalse()
     assertThat(keyRange.hasUpperBound()).isFalse()
   }
 
-  @Test fun unbounded() {
+  @Test
+  fun unbounded() {
     val shardId = Shard(keyspace, "-")
     val keyRange = shardId.keyRange()
     assertThat(keyRange.hasLowerBound()).isFalse()
     assertThat(keyRange.hasUpperBound()).isFalse()
   }
 
-  @Test fun noLowerBound() {
+  @Test
+  fun noLowerBound() {
     val shardId = Shard(keyspace, "-80")
     val keyRange = shardId.keyRange()
     assertThat(keyRange.hasLowerBound()).isFalse()
@@ -29,7 +32,8 @@ class ShardIdTest {
     assertThat(keyRange.contains(Shard.Key("80"))).isFalse()
   }
 
-  @Test fun noUpperBound() {
+  @Test
+  fun noUpperBound() {
     val shardId = Shard(keyspace, "80-")
     val keyRange = shardId.keyRange()
     assertThat(keyRange.hasUpperBound()).isFalse()
@@ -37,7 +41,8 @@ class ShardIdTest {
     assertThat(keyRange.contains(Shard.Key("80"))).isTrue()
   }
 
-  @Test fun bounded() {
+  @Test
+  fun bounded() {
     val shardId = Shard(keyspace, "80-90")
     val keyRange = shardId.keyRange()
     assertThat(keyRange.lowerEndpoint()).isEqualTo(Shard.Key("80"))
@@ -47,7 +52,8 @@ class ShardIdTest {
     assertThat(keyRange.contains(Shard.Key("90"))).isFalse()
   }
 
-  @Test fun boundedLong() {
+  @Test
+  fun boundedLong() {
     val shardId = Shard(keyspace, "80f0-90f0")
     val keyRange = shardId.keyRange()
     assertThat(keyRange.contains(Shard.Key("90"))).isTrue()

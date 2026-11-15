@@ -1,8 +1,8 @@
 package wisp.ratelimiting.testing
 
+import java.time.Duration
 import wisp.ratelimiting.RateLimitBucketRefillStrategy
 import wisp.ratelimiting.RateLimitConfiguration
-import java.time.Duration
 
 object TestRateLimitConfig : RateLimitConfiguration {
   private const val BUCKET_CAPACITY = 5L

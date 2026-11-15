@@ -1,10 +1,10 @@
 package misk.web.dev
 
-import misk.time.FakeClock
-import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import misk.time.FakeClock
+import org.junit.jupiter.api.Test
 
 internal class ReloadSignalServiceTest {
   private val clock = FakeClock()

@@ -2,6 +2,8 @@ package misk.web.interceptors.hooks
 
 import com.google.common.testing.FakeTicker
 import jakarta.inject.Inject
+import java.util.concurrent.TimeUnit
+import kotlin.test.assertEquals
 import misk.MiskTestingServiceModule
 import misk.audit.AuditRequestResponse
 import misk.audit.FakeAuditClient
@@ -37,13 +39,10 @@ import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.concurrent.TimeUnit
-import kotlin.test.assertEquals
 
 @MiskTest(startService = true)
 internal class AuditClientHookTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
   val httpClient = OkHttpClient()
 
   @Inject private lateinit var auditClient: FakeAuditClient
@@ -61,12 +60,7 @@ internal class AuditClientHookTest {
   fun auditNothing() {
     assertEquals(0, auditClient.sentEvents.size)
     fakeRandom.nextDouble = 0.1
-    assertThat(
-      invoke(
-        "/call/logNothing/hello",
-        "test-user"
-      ).isSuccessful
-    ).isTrue()
+    assertThat(invoke("/call/logNothing/hello", "test-user").isSuccessful).isTrue()
     assertEquals(0, auditClient.sentEvents.size)
   }
 
@@ -74,12 +68,7 @@ internal class AuditClientHookTest {
   fun auditEverything() {
     assertEquals(0, auditClient.sentEvents.size)
     fakeRandom.nextDouble = 0.1
-    assertThat(
-      invoke(
-        "/call/logEverything/hello",
-        "test-user"
-      ).isSuccessful
-    ).isTrue()
+    assertThat(invoke("/call/logEverything/hello", "test-user").isSuccessful).isTrue()
 
     assertEquals(
       FakeAuditClient.FakeAuditEvent(
@@ -90,20 +79,21 @@ internal class AuditClientHookTest {
         approverLDAP = null,
         automatedChange = false,
         description = "AuditEverythingAction principal=test-user",
-        richDescription = "AuditEverythingAction principal=test-user time=100.0 ms code=200 request=hello response=echo: hello",
+        richDescription =
+          "AuditEverythingAction principal=test-user time=100.0 ms code=200 request=hello response=echo: hello",
         environment = "testing",
         detailURL = null,
         region = "us-west-2",
-        requestorLDAP = "test-user"
-      ), auditClient.sentEvents.take()
+        requestorLDAP = "test-user",
+      ),
+      auditClient.sentEvents.take(),
     )
   }
 
   @Test
   fun exceptionThrown() {
     assertEquals(0, auditClient.sentEvents.size)
-    assertThat(invoke("/call/exceptionThrowingRequestLogging/fail", "test-user").code)
-      .isEqualTo(500)
+    assertThat(invoke("/call/exceptionThrowingRequestLogging/fail", "test-user").code).isEqualTo(500)
     assertEquals(1, auditClient.sentEvents.size)
     assertEquals(
       FakeAuditClient.FakeAuditEvent(
@@ -118,8 +108,9 @@ internal class AuditClientHookTest {
         environment = "testing",
         detailURL = null,
         region = "us-west-2",
-        requestorLDAP = "test-user"
-      ), auditClient.sentEvents.take()
+        requestorLDAP = "test-user",
+      ),
+      auditClient.sentEvents.take(),
     )
   }
 
@@ -129,11 +120,15 @@ internal class AuditClientHookTest {
     val headerToNotLog = "X-Header-To-Not-Log"
     val headerValueToNotLog = "some-value"
     assertThat(
-      webTestClient.call("/call/withHeaders") {
-        post("hello".toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE))
-        addHeader(headerToNotLog, headerValueToNotLog)
-      }.response.isSuccessful
-    ).isTrue()
+        webTestClient
+          .call("/call/withHeaders") {
+            post("hello".toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE))
+            addHeader(headerToNotLog, headerValueToNotLog)
+          }
+          .response
+          .isSuccessful
+      )
+      .isTrue()
 
     assertEquals(
       FakeAuditClient.FakeAuditEvent(
@@ -149,9 +144,9 @@ internal class AuditClientHookTest {
         environment = "testing",
         detailURL = null,
         region = "us-west-2",
-        requestorLDAP = FakeAuditClient.DEFAULT_USER
+        requestorLDAP = FakeAuditClient.DEFAULT_USER,
       ),
-      auditClient.sentEvents.take()
+      auditClient.sentEvents.take(),
     )
   }
 
@@ -159,10 +154,12 @@ internal class AuditClientHookTest {
   fun auditWithOverrides() {
     assertEquals(0, auditClient.sentEvents.size)
     assertThat(
-      webTestClient.call("/call/withOverrides") {
-        post("hello".toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE))
-      }.response.isSuccessful
-    ).isTrue()
+        webTestClient
+          .call("/call/withOverrides") { post("hello".toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)) }
+          .response
+          .isSuccessful
+      )
+      .isTrue()
 
     assertEquals(
       FakeAuditClient.FakeAuditEvent(
@@ -173,13 +170,14 @@ internal class AuditClientHookTest {
         approverLDAP = null,
         automatedChange = true,
         description = "override-description",
-        richDescription = "override-rich-description AuditRequestActionWithOverrides principal=unknown time=100.0 ms code=200",
+        richDescription =
+          "override-rich-description AuditRequestActionWithOverrides principal=unknown time=100.0 ms code=200",
         environment = "testing",
         detailURL = "override-detail-url",
         region = "us-west-2",
-        requestorLDAP = null
+        requestorLDAP = null,
       ),
-      auditClient.sentEvents.take()
+      auditClient.sentEvents.take(),
     )
   }
 
@@ -190,22 +188,13 @@ internal class AuditClientHookTest {
 
   @Test
   fun `requestResponseBodyTransformer contains explosions`() {
-    assertThat(
-      invoke(
-        "/call/logEverything/Oppenheimer-the-bestest",
-        "test-user"
-      ).isSuccessful
-    ).isTrue()
+    assertThat(invoke("/call/logEverything/Oppenheimer-the-bestest", "test-user").isSuccessful).isTrue()
   }
 
   fun invoke(path: String, asUser: String? = null): Response {
-    val url = jettyService.httpServerUrl.newBuilder()
-      .encodedPath(path)
-      .build()
+    val url = jettyService.httpServerUrl.newBuilder().encodedPath(path).build()
 
-    val request = Request.Builder()
-      .url(url)
-      .get()
+    val request = Request.Builder().url(url).get()
     asUser?.let { request.addHeader(FakeCallerAuthenticator.USER_HEADER, it) }
     return httpClient.newCall(request.build()).execute()
   }
@@ -279,7 +268,7 @@ internal class AuditRequestActionWithHeaders @Inject constructor() : WebAction {
     includeRequest = true,
     includeRequestHeaders = true,
     includeResponse = true,
-    includeReseponseHeaders = true
+    includeReseponseHeaders = true,
   )
   fun call(@RequestBody message: String, @RequestHeaders headers: Headers): String {
     if (message == "fail") throw BadRequestException(message = "boom")
@@ -300,4 +289,3 @@ internal class AuditRequestActionWithOverrides @Inject constructor() : WebAction
   )
   fun call(): String = "override world"
 }
-

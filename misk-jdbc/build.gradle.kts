@@ -21,12 +21,14 @@ dependencies {
   api(project(":misk-core"))
   api(project(":misk-inject"))
   api(project(":wisp:wisp-deployment"))
+
   implementation(libs.dockerTransportHttpClient)
   implementation(libs.dockerTransportCore)
-  implementation(libs.hikariCp)
+  api(libs.hikariCp)
   implementation(libs.loggingApi)
   implementation(libs.mysql)
   implementation(project(":misk-backoff"))
+  implementation(project(":misk-spirit"))
   implementation(project(":misk-docker"))
   implementation(project(":misk-logging"))
   implementation(project(":misk-service"))
@@ -100,7 +102,7 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }
 

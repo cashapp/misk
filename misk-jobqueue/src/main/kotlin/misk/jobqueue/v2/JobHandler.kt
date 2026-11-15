@@ -2,7 +2,7 @@ package misk.jobqueue.v2
 
 sealed interface JobHandler
 
-interface BlockingJobHandler : JobHandler{
+interface BlockingJobHandler : JobHandler {
   fun handleJob(job: Job): JobStatus
 }
 

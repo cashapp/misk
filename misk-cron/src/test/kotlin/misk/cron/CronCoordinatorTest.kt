@@ -1,21 +1,22 @@
 package misk.cron
 
 import misk.clustering.fake.lease.FakeLeaseManager
+import misk.cron.SingleLeaseCronCoordinator.Companion.CRON_CLUSTER_LEASE_NAME
 import misk.inject.KAbstractModule
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
-import misk.cron.SingleLeaseCronCoordinator.Companion.CRON_CLUSTER_LEASE_NAME
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class CronCoordinatorTest {
   @Suppress("unused")
   @MiskTestModule
-  val module = object : KAbstractModule() {
-    override fun configure() {
-      install(CronTestingModule())
+  val module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(CronTestingModule())
+      }
     }
-  }
 
   private lateinit var fakeLeaseManager: FakeLeaseManager
 

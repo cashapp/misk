@@ -1,11 +1,11 @@
 package misk.web
 
 import com.squareup.wire.MessageSink
-import misk.web.marshal.Marshaller
-import okio.BufferedSink
-import misk.logging.getLogger
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import misk.logging.getLogger
+import misk.web.marshal.Marshaller
+import okio.BufferedSink
 
 @OptIn(ExperimentalAtomicApi::class)
 internal class ResponseSink<T : Any>(
@@ -34,7 +34,6 @@ internal class ResponseSink<T : Any>(
   }
 
   override fun toString() = "ResponseSink"
-
 
   companion object {
     private val logger = getLogger<ResponseSink<Any>>()

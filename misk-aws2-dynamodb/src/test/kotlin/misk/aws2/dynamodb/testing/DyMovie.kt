@@ -1,5 +1,6 @@
 package misk.aws2.dynamodb.testing
 
+import java.time.LocalDate
 import software.amazon.awssdk.enhanced.dynamodb.AttributeConverter
 import software.amazon.awssdk.enhanced.dynamodb.AttributeValueType
 import software.amazon.awssdk.enhanced.dynamodb.EnhancedType
@@ -10,20 +11,17 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecon
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import java.time.LocalDate
 
 @DynamoDbBean
 class DyMovie {
-  @get:DynamoDbPartitionKey
-  var name: String? = null
+  @get:DynamoDbPartitionKey var name: String? = null
 
   @get:DynamoDbSecondarySortKey(indexNames = ["movies.release_date_index"])
   @get:DynamoDbConvertedBy(LocalDateTypeConverter::class)
   @get:DynamoDbSortKey
   var release_date: LocalDate? = null
 
-  @get:DynamoDbSecondaryPartitionKey(indexNames = ["movies.release_date_index"])
-  var directed_by: String? = null
+  @get:DynamoDbSecondaryPartitionKey(indexNames = ["movies.release_date_index"]) var directed_by: String? = null
 }
 
 internal class LocalDateTypeConverter : AttributeConverter<LocalDate> {

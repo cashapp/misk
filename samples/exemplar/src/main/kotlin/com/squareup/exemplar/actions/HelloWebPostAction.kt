@@ -1,5 +1,7 @@
 package com.squareup.exemplar.actions
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.security.authz.Unauthenticated
 import misk.web.PathParam
 import misk.web.Post
@@ -8,8 +10,6 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @Singleton
 class HelloWebPostAction @Inject constructor() : WebAction {

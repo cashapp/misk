@@ -1,0 +1,3 @@
+# Quoted so this is a string under both YAML 1.1 and YAML 1.2. Under YAML 1.2 an unquoted 5_000 or
+# "yes" resolves to a string too, which is how these reach a numeric/boolean field in real configs.
+int_value: "not_a_number"

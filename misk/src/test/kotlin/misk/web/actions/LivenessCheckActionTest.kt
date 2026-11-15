@@ -14,11 +14,8 @@ import org.junit.jupiter.api.Test
 @MiskTest
 class LivenessCheckActionTest {
   @MiskTestModule
-  val module = Modules.combine(
-    MiskTestingServiceModule(),
-    FakeServiceModule(),
-    WebActionModule.create<LivenessCheckAction>()
-  )
+  val module =
+    Modules.combine(MiskTestingServiceModule(), FakeServiceModule(), WebActionModule.create<LivenessCheckAction>())
 
   @Inject lateinit var livenessCheckAction: LivenessCheckAction
   @Inject lateinit var serviceManager: ServiceManager

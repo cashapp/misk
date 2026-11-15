@@ -9,10 +9,8 @@ import misk.web.actions.WebAction
 
 class HelloWebGrpcAction @Inject constructor() : HelloWebServiceHelloBlockingServer, WebAction {
   @Unauthenticated
-  override fun Hello(request: HelloWebRequest): HelloWebResponse = HelloWebResponse(
-      greeting = greeting(request),
-      name = (request.nick_name?.uppercase() ?: request.name.uppercase()),
-  )
+  override fun Hello(request: HelloWebRequest): HelloWebResponse =
+    HelloWebResponse(greeting = greeting(request), name = (request.nick_name?.uppercase() ?: request.name.uppercase()))
 
   private fun greeting(request: HelloWebRequest): String {
     return if (request.greetings.isNotEmpty()) {

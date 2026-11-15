@@ -3,6 +3,8 @@ package misk.feature.testing
 import com.google.inject.Provider
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
+import kotlin.reflect.KClass
 import misk.ServiceModule
 import misk.feature.DynamicConfig
 import misk.feature.FeatureFlags
@@ -13,32 +15,29 @@ import misk.inject.asSingleton
 import misk.inject.parameterizedType
 import misk.inject.toKey
 import misk.inject.typeLiteral
-import jakarta.inject.Inject
-import kotlin.reflect.KClass
 
 /**
  * Binds a [FakeFeatureFlags] that allows tests to override values.
  *
- * To define overrides (especially test defaults) use [FakeFeatureFlagsOverrideModule].
- * In a given misk service's test setup, there is one [FakeFeatureFlagsModule] installed and many
- * [FakeFeatureFlagsOverrideModule] installed.
+ * To define overrides (especially test defaults) use [FakeFeatureFlagsOverrideModule]. In a given misk service's test
+ * setup, there is one [FakeFeatureFlagsModule] installed and many [FakeFeatureFlagsOverrideModule] installed.
  */
-class FakeFeatureFlagsModule(
-  private val qualifier: KClass<out Annotation>? = null
-) : KAbstractModule() {
+class FakeFeatureFlagsModule(private val qualifier: KClass<out Annotation>? = null) : KAbstractModule() {
   private val overrides = mutableListOf<FakeFeatureFlagsOverrideModule>()
 
   override fun configure() {
     requireBinding<Moshi>()
 
     val wispFakeFeatureFlagsKey = wisp.feature.testing.FakeFeatureFlags::class.toKey(qualifier)
-    bind(wispFakeFeatureFlagsKey).toProvider(
-      object : Provider<wisp.feature.testing.FakeFeatureFlags> {
-        @Inject private lateinit var moshi: Provider<Moshi>
-        override fun get(): wisp.feature.testing.FakeFeatureFlags =
-          wisp.feature.testing.FakeFeatureFlags(moshi.get())
-      }
-    ).asSingleton()
+    bind(wispFakeFeatureFlagsKey)
+      .toProvider(
+        object : Provider<wisp.feature.testing.FakeFeatureFlags> {
+          @Inject private lateinit var moshi: Provider<Moshi>
+
+          override fun get(): wisp.feature.testing.FakeFeatureFlags = wisp.feature.testing.FakeFeatureFlags(moshi.get())
+        }
+      )
+      .asSingleton()
     bind(wisp.feature.FeatureFlags::class.toKey(qualifier)).to(wispFakeFeatureFlagsKey)
     val wispFakeFeatureFlags = getProvider(wispFakeFeatureFlagsKey)
 
@@ -48,13 +47,14 @@ class FakeFeatureFlagsModule(
 
     val key = FakeFeatureFlags::class.toKey(qualifier)
     val overridesType =
-      parameterizedType<Set<*>>(FakeFeatureFlagsOverride::class.java).typeLiteral() as TypeLiteral<Set<FakeFeatureFlagsOverride>>
+      parameterizedType<Set<*>>(FakeFeatureFlagsOverride::class.java).typeLiteral()
+        as TypeLiteral<Set<FakeFeatureFlagsOverride>>
     val overrides = getProvider(overridesType.toKey(qualifier))
-    bind(key).toProvider {
-      FakeFeatureFlags(wispFakeFeatureFlags.get()).apply {
-        overrides.get().forEach { it.overrideLambda(this) }
+    bind(key)
+      .toProvider {
+        FakeFeatureFlags(wispFakeFeatureFlags.get()).apply { overrides.get().forEach { it.overrideLambda(this) } }
       }
-    }.asSingleton()
+      .asSingleton()
 
     bind(FeatureFlags::class.toKey(qualifier)).to(key)
     bind(FeatureService::class.toKey(qualifier)).to(key)
@@ -63,8 +63,8 @@ class FakeFeatureFlagsModule(
   }
 
   /**
-   * Add overrides for the feature flags. Allows flags to be overridden at module instantiation
-   * instead of within individual test classes.
+   * Add overrides for the feature flags. Allows flags to be overridden at module instantiation instead of within
+   * individual test classes.
    *
    * Usage:
    * ```
@@ -80,4 +80,3 @@ class FakeFeatureFlagsModule(
     return this
   }
 }
-

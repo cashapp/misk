@@ -1,6 +1,13 @@
 package misk.cron
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.time.Clock
+import java.time.Duration
+import java.time.Instant
+import java.time.ZoneId
 import misk.backoff.FlatBackoff
+import misk.backoff.RetryConfig
 import misk.backoff.retry
 import misk.clustering.weights.FakeClusterWeight
 import misk.concurrent.ExplicitReleaseDelayQueue
@@ -8,32 +15,26 @@ import misk.inject.KAbstractModule
 import misk.tasks.DelayedTask
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import misk.time.FakeClock
-import java.time.Clock
-import java.time.Duration
-import java.time.Instant
-import java.time.ZoneId
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-import misk.backoff.RetryConfig
 
 @MiskTest(startService = true)
 class CronTest {
   @Suppress("unused")
   @MiskTestModule
-  val module = object : KAbstractModule() {
-    override fun configure() {
-      install(CronTestingModule())
+  val module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(CronTestingModule())
 
-      install(CronEntryModule.create<MinuteCron>())
-      install(CronEntryModule.create<HourCron>())
-      install(CronEntryModule.create<ThrowsExceptionCron>())
-      // Override ConfigurableHourCron's schedule to every minute.
-      install(CronEntryModule.create<ConfigurableHourCron>(cronPattern = CronPattern("* * * * *")))
+        install(CronEntryModule.create<MinuteCron>())
+        install(CronEntryModule.create<HourCron>())
+        install(CronEntryModule.create<ThrowsExceptionCron>())
+        // Override ConfigurableHourCron's schedule to every minute.
+        install(CronEntryModule.create<ConfigurableHourCron>(cronPattern = CronPattern("* * * * *")))
+      }
     }
-  }
 
   @Inject private lateinit var cronManager: CronManager
   @Inject private lateinit var clock: FakeClock
@@ -96,9 +97,7 @@ class CronTest {
   }
 
   private fun waitForNextPendingTask(): DelayedTask {
-    return retry(RetryConfig.Builder(5, FlatBackoff(Duration.ofMillis(200))).build()) {
-      pendingTasks.peekPending()!!
-    }
+    return retry(RetryConfig.Builder(5, FlatBackoff(Duration.ofMillis(200))).build()) { pendingTasks.peekPending()!! }
   }
 }
 

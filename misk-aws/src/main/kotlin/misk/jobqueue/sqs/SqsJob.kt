@@ -5,19 +5,19 @@ import com.amazonaws.services.sqs.model.Message
 import com.amazonaws.services.sqs.model.SendMessageRequest
 import com.google.common.annotations.VisibleForTesting
 import com.squareup.moshi.Moshi
+import java.math.BigInteger
+import kotlin.random.Random
 import misk.jobqueue.Job
 import misk.jobqueue.QueueName
 import misk.moshi.adapter
 import misk.time.timed
-import java.math.BigInteger
-import kotlin.random.Random
 
 internal class SqsJob(
   override val queueName: QueueName,
   private val queues: QueueResolver,
   private val metrics: SqsMetrics,
   private val moshi: Moshi,
-  private val message: Message
+  private val message: Message,
 ) : Job {
   override val body: String = message.body
   override val id: String = message.messageId
@@ -28,14 +28,16 @@ internal class SqsJob(
   override val attributes: Map<String, String> by lazy {
     message.messageAttributes
       .filter { (key, _) -> key != JOBQUEUE_METADATA_ATTR }
-      .map { (key, value) -> key to value.stringValue }.toMap()
+      .map { (key, value) -> key to value.stringValue }
+      .toMap()
       .plus(message.attributes)
   }
 
   private val queue: ResolvedQueue = queues.getForReceiving(queueName)
   private val jobqueueMetadata: Map<String, String> by lazy {
-    val metadata = message.messageAttributes[JOBQUEUE_METADATA_ATTR]
-      ?: throw IllegalStateException(JOBQUEUE_METADATA_ATTR + " not found in messageAttributes")
+    val metadata =
+      message.messageAttributes[JOBQUEUE_METADATA_ATTR]
+        ?: throw IllegalStateException(JOBQUEUE_METADATA_ATTR + " not found in messageAttributes")
     moshi.adapter<Map<String, String>>().fromJson(metadata.stringValue)!!
   }
 
@@ -60,16 +62,16 @@ internal class SqsJob(
   }
 
   /**
-   *  Assign a visibility timeout for some duration X making the job invisible to the consumers for
-   *  that duration. With every subsequent retry the duration becomes longer until it hits the max
-   *  value of 10hrs.
+   * Assign a visibility timeout for some duration X making the job invisible to the consumers for that duration. With
+   * every subsequent retry the duration becomes longer until it hits the max value of 10hrs.
    */
   override fun delayWithBackoff() {
     val maxReceiveCount = queue.maxRetries
-    val visibilityTime = calculateVisibilityTimeOut(
-      currentReceiveCount = attributes[RECEIVE_COUNT]?.toInt()  ?: 1,
-      maxReceiveCount = maxReceiveCount,
-    )
+    val visibilityTime =
+      calculateVisibilityTimeOut(
+        currentReceiveCount = attributes[RECEIVE_COUNT]?.toInt() ?: 1,
+        maxReceiveCount = maxReceiveCount,
+      )
 
     queue.call { client ->
       client.changeMessageVisibility(
@@ -81,15 +83,10 @@ internal class SqsJob(
     }
     metrics.visibilityTime.labels(queueName.value, queueName.value).set(visibilityTime.toDouble())
   }
+
   private fun deleteMessage(queue: ResolvedQueue, message: Message) {
-    val (deleteDuration) = queue.call {
-      timed { it.deleteMessage(queue.url, message.receiptHandle) }
-    }
-    metrics.sqsDeleteTime.record(
-      deleteDuration.toMillis().toDouble(),
-      queueName.value,
-      queueName.value
-    )
+    val (deleteDuration) = queue.call { timed { it.deleteMessage(queue.url, message.receiptHandle) } }
+    metrics.sqsDeleteTime.record(deleteDuration.toMillis().toDouble(), queueName.value, queueName.value)
   }
 
   companion object {
@@ -99,14 +96,11 @@ internal class SqsJob(
     /** Message attribute that captures original trace id for a job, when available. */
     const val ORIGINAL_TRACE_ID_ATTR = "x-original-trace-id"
 
-    /** Message attribute used to store metadata specific to jobqueue functionality.
-     * JSON-encoded.
-     * */
+    /** Message attribute used to store metadata specific to jobqueue functionality. JSON-encoded. */
     const val JOBQUEUE_METADATA_ATTR = "_jobqueue-metadata"
 
     /**
-     * The name of the queue the job was originally submitted to.
-     * Used when operating with a global dead-letter queue,
+     * The name of the queue the job was originally submitted to. Used when operating with a global dead-letter queue,
      * so that jobs can be returned to their original (or retry) queue when reprocessing.
      */
     const val JOBQUEUE_METADATA_ORIGIN_QUEUE = "origin_queue"
@@ -115,7 +109,7 @@ internal class SqsJob(
     const val JOBQUEUE_METADATA_IDEMPOTENCE_KEY = "idempotence_key"
     const val JOBQUEUE_METADATA_ORIGINAL_TRACE_ID = "original_trace_id"
 
-    /** Estimates the current visibility timeout*/
+    /** Estimates the current visibility timeout */
     @VisibleForTesting
     fun calculateVisibilityTimeOut(currentReceiveCount: Int, maxReceiveCount: Int): Int {
       val consecutiveRetryCount = (currentReceiveCount + 1).coerceAtMost(maxReceiveCount)

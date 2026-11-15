@@ -6,7 +6,7 @@ This module provides Misk with Model Context Protocol (MCP) server capabilities,
 
 The [Model Context Protocol](https://modelcontextprotocol.io/specification/2025-06-18) is an open protocol that enables seamless integration between LLM applications and external data sources and tools. MCP provides a standardized way for applications to:
 
-- **Share contextual information** with language models through resources
+- **Share contextual information** with language models through resources and resource templates
 - **Expose tools and capabilities** to AI systems for function execution  
 - **Create reusable prompt templates** and workflows for users
 - **Build composable integrations** across the AI ecosystem
@@ -27,6 +27,7 @@ class MyAppModule : KAbstractModule() {
     // Register your MCP components
     install(McpToolModule.create<CalculatorTool>())
     install(McpResourceModule.create<DatabaseSchemaResource>())
+    install(McpResourceTemplateModule.create<UserProfileResource>())
     install(McpPromptModule.create<CodeReviewPrompt>())
   }
 }
@@ -52,7 +53,6 @@ Uses persistent WebSocket connections for full bidirectional communication:
 
 ```kotlin
 @ExperimentalMiskApi
-@Singleton
 class MyMcpSseAction @Inject constructor(
   private val mcpStreamManager: McpStreamManager
 ) : WebAction {
@@ -91,7 +91,6 @@ class MyMcpSseAction @Inject constructor(
 
 ```kotlin
 @ExperimentalMiskApi
-@Singleton
 class MyMcpWebSocketAction @Inject constructor(
   private val mcpStreamManager: McpStreamManager
 ) : WebAction {
@@ -375,6 +374,91 @@ mcp:
 - **resources.subscribe**: Enable resource update notifications (default: false)
 - **list_changed**: Whether dynamic registration is supported (default: false, not currently implemented)
 
+## WebAction Scoping Best Practices
+
+MCP WebActions can be scoped as either **unscoped** (no annotation) or **`@Singleton`**. The choice affects how `McpStreamManager` and `MiskMcpServer` instances are created.
+
+### Recommended: Unscoped WebActions (Default)
+
+**Unscoped WebActions are the preferred pattern** because they create fresh `McpStreamManager` and `MiskMcpServer` instances per request, allowing for request-specific behavior.
+
+```kotlin
+@ExperimentalMiskApi
+class MyMcpAction @Inject constructor(
+  private val mcpStreamManager: McpStreamManager  // ✅ Fresh instance per request
+) : WebAction {
+  
+  @McpPost
+  suspend fun handleMcpRequest(
+    @RequestBody message: JSONRPCMessage,
+    sendChannel: SendChannel<ServerSentEvent>
+  ) {
+    mcpStreamManager.withSseChannel(sendChannel) {
+      handleMessage(message)
+    }
+  }
+}
+```
+
+**Benefits of unscoped WebActions:**
+- Fresh server instance per request
+- Tool/resource/prompt metadata can be request-specific
+- Supports dynamic tool descriptions based on user context
+- Simpler mental model - no need for providers
+
+**Use unscoped WebActions when:**
+- Tool descriptions vary by user permissions or roles
+- Resource availability changes based on request context
+- You have multi-tenant scenarios with different tool sets
+- You want the flexibility for future dynamic behavior (recommended default)
+
+### Alternative: Singleton WebActions with Provider
+
+If you need a singleton WebAction (e.g., for expensive initialization), **you must inject `Provider<McpStreamManager>`** instead of `McpStreamManager` directly:
+
+```kotlin
+@ExperimentalMiskApi
+@Singleton
+class MyMcpAction @Inject constructor(
+  private val mcpStreamManagerProvider: Provider<McpStreamManager>  // ✅ Use Provider
+) : WebAction {
+  
+  @McpPost
+  suspend fun handleMcpRequest(
+    @RequestBody message: JSONRPCMessage,
+    sendChannel: SendChannel<ServerSentEvent>
+  ) {
+    // Get a fresh instance per request
+    mcpStreamManagerProvider.get().withSseChannel(sendChannel) {
+      handleMessage(message)
+    }
+  }
+}
+```
+
+**Important:** If you inject `McpStreamManager` directly into a `@Singleton` WebAction (without using `Provider`), you effectively create a singleton `MiskMcpServer` that is reused across all requests. While this works, it prevents request-specific tool metadata and should only be done if all your tool/resource/prompt descriptions are completely static.
+
+```kotlin
+@ExperimentalMiskApi
+@Singleton
+class MyMcpAction @Inject constructor(
+  private val mcpStreamManager: McpStreamManager  // ⚠️ Effectively singleton server
+) : WebAction {
+  // This creates ONE MiskMcpServer instance for the lifetime of the application
+  // Only use this pattern if ALL tool descriptions are static
+}
+```
+
+### Comparison
+
+| Pattern                                    | Server Lifecycle | Use Case |
+|--------------------------------------------|------------------|----------|
+| **Unscoped WebAction + Direct Injection** (Recommended)      | Fresh per request | Dynamic tool metadata, flexible, default choice |
+| **Singleton WebAction + Provider**         | Fresh per request | Expensive WebAction initialization, still supports dynamic metadata |
+| **Singleton WebAction + Direct Injection** | Singleton (one instance) | All tool/resource/prompt descriptions are completely static |
+
+**Default recommendation:** Use unscoped WebActions for the best balance of flexibility and simplicity.
+
 ## Implementing MCP Components
 
 ### Tools
@@ -496,6 +580,47 @@ class WeatherTool @Inject constructor(
 }
 ```
 
+#### Accessing Request Meta (RequestMeta)
+
+When a tool needs access to the inbound `CallToolRequest._meta` field — for example to read a `progressToken` so it can stream progress notifications back, or to inspect related-task metadata — extend one of the meta-aware bridge classes instead of `McpTool` / `StructuredMcpTool`:
+
+- `MetaAwareMcpTool<I>` — for tools that return `ToolResult` (text/media/error content).
+- `MetaAwareStructuredMcpTool<I, O>` — for tools that return structured `O` typed output.
+
+Authors override the meta-aware `handle(input, meta)` overload; the bridge classes seal the input-only `handle(input)` overload to delegate with `meta = null`. The framework's dispatcher routes to the meta-aware overload automatically — no annotation or registration change is needed beyond picking the right base class.
+
+```kotlin
+@Serializable
+data class LongRunningInput(
+  @Description("How many steps the operation should run for")
+  val steps: Int
+)
+
+@ExperimentalMiskApi
+@Singleton
+class LongRunningTool @Inject constructor(
+  private val notifier: ProgressNotifier,
+) : MetaAwareMcpTool<LongRunningInput>() {
+  override val name = "long_running"
+  override val description = "Performs a long-running operation with progress reporting"
+
+  override suspend fun handle(input: LongRunningInput, meta: RequestMeta?): ToolResult {
+    val token = meta?.progressToken
+    repeat(input.steps) { step ->
+      // ... do work ...
+      if (token != null) {
+        notifier.notify(token, progress = step + 1, total = input.steps)
+      }
+    }
+    return ToolResult(TextContent("Completed ${input.steps} steps"))
+  }
+}
+```
+
+Use `MetaAwareStructuredMcpTool<I, O>` the same way; build the typed result with the inherited `ToolResult(result: O, ...)` factories. The interface-level return type is `McpTool.ToolResult`, not `StructuredToolResult<O>` — the typed `O` is preserved at value construction, not at signature.
+
+Tools that don't need meta should keep extending `McpTool` / `StructuredMcpTool` — meta-awareness is strictly opt-in.
+
 Register tools:
 
 ```kotlin
@@ -612,6 +737,46 @@ Register the resource:
 
 ```kotlin
 install(McpResourceModule.create<DatabaseSchemaResource>())
+```
+
+### Resource Templates
+
+Resource templates provide parameterized resources using [RFC 6570](https://datatracker.ietf.org/doc/html/rfc6570) URI templates. They allow clients to read dynamic resources by extracting variables from the URI. Implement the `McpResourceTemplate` interface:
+
+```kotlin
+@Singleton
+class UserProfileResource @Inject constructor(
+  private val userService: UserService
+) : McpResourceTemplate {
+  override val uriTemplate = "users://{userId}/profile"
+  override val name = "User Profile"
+  override val description = "Profile information for a specific user"
+  override val mimeType = "application/json"
+
+  override suspend fun handler(
+    request: ReadResourceRequest,
+    variables: Map<String, String>,
+  ): ReadResourceResult {
+    val userId = variables["userId"] ?: error("Missing userId")
+    val user = userService.getUser(userId)
+
+    return ReadResourceResult(
+      contents = listOf(
+        TextResourceContents(
+          text = Json.encodeToString(user),
+          uri = request.uri,
+          mimeType = mimeType,
+        )
+      )
+    )
+  }
+}
+```
+
+Register the resource template:
+
+```kotlin
+install(McpResourceTemplateModule.create<UserProfileResource>())
 ```
 
 ### Prompts

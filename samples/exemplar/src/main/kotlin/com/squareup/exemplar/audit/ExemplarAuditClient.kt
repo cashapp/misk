@@ -3,24 +3,26 @@ package com.squareup.exemplar.audit
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
 import jakarta.inject.Inject
+import java.time.Clock
+import java.time.Instant
+import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.DurationUnit
 import misk.MiskCaller
 import misk.audit.AuditClient
 import misk.audit.AuditClientConfig
 import misk.config.AppName
+import misk.logging.getLogger
 import misk.scope.ActionScoped
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import wisp.deployment.Deployment
-import misk.logging.getLogger
-import java.time.Clock
-import java.time.Instant
-import kotlin.time.Duration.Companion.nanoseconds
-import kotlin.time.DurationUnit
 
 @OptIn(ExperimentalStdlibApi::class)
-class ExemplarAuditClient @Inject constructor(
+class ExemplarAuditClient
+@Inject
+constructor(
   moshi: Moshi,
   private val config: AuditClientConfig,
   private val clock: Clock,
@@ -44,27 +46,25 @@ class ExemplarAuditClient @Inject constructor(
     environment: String?,
     timestampSent: Instant?,
   ) {
-    val event = Event(
-      eventSource = appName,
-      eventTarget = target,
-      timestampSent = (timestampSent ?: clock.instant()).toEpochMilli().nanoseconds.toInt(DurationUnit.NANOSECONDS),
-      applicationName = applicationName ?: appName,
-      approverLDAP = approverLDAP ?: callerProvider.get()?.principal,
-      automatedChange = automatedChange,
-      description = description,
-      richDescription = richDescription,
-      environment = environment ?: deployment.mapToEnvironmentName(),
-      detailURL = detailURL,
-      region = region,
-      requestorLDAP = requestorLDAP ?: callerProvider.get()?.principal,
-    )
+    val event =
+      Event(
+        eventSource = appName,
+        eventTarget = target,
+        timestampSent = (timestampSent ?: clock.instant()).toEpochMilli().nanoseconds.toInt(DurationUnit.NANOSECONDS),
+        applicationName = applicationName ?: appName,
+        approverLDAP = approverLDAP ?: callerProvider.get()?.principal,
+        automatedChange = automatedChange,
+        description = description,
+        richDescription = richDescription,
+        environment = environment ?: deployment.mapToEnvironmentName(),
+        detailURL = detailURL,
+        region = region,
+        requestorLDAP = requestorLDAP ?: callerProvider.get()?.principal,
+      )
 
     try {
       val json = adapter.toJson(event)
-      val request = Request.Builder()
-        .url(config.url)
-        .post(json.toRequestBody("application/json".toMediaType()))
-        .build()
+      val request = Request.Builder().url(config.url).post(json.toRequestBody("application/json".toMediaType())).build()
 
       val response = okHttpClient.newCall(request).execute()
       if (!response.isSuccessful) {

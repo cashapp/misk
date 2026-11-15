@@ -7,9 +7,9 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator
 import com.amazonaws.services.dynamodbv2.model.Condition
 import jakarta.inject.Inject
+import java.time.LocalDate
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 abstract class AbstractDynamoDbTest {
   @Inject lateinit var dynamoDbClient: AmazonDynamoDB
@@ -18,8 +18,7 @@ abstract class AbstractDynamoDbTest {
   fun happyPath() {
     val dynamoDbMapper = DynamoDBMapper(dynamoDbClient)
     val movieMapper = dynamoDbMapper.newTableMapper<DyMovie, String, LocalDate>(DyMovie::class.java)
-    val characterMapper =
-      dynamoDbMapper.newTableMapper<DyCharacter, String, String>(DyCharacter::class.java)
+    val characterMapper = dynamoDbMapper.newTableMapper<DyCharacter, String, String>(DyCharacter::class.java)
 
     val movie = DyMovie()
     movie.name = "Jurassic Park"
@@ -46,40 +45,45 @@ abstract class AbstractDynamoDbTest {
     val dynamoDbMapper = DynamoDBMapper(dynamoDbClient)
     val movieMapper = dynamoDbMapper.newTableMapper<DyMovie, String, LocalDate>(DyMovie::class.java)
 
-    val movie = DyMovie().apply {
-      name = "Jurassic Park"
-      release_date = LocalDate.of(1993, 6, 9)
-      directed_by = "Steven Spielberg"
-    }
+    val movie =
+      DyMovie().apply {
+        name = "Jurassic Park"
+        release_date = LocalDate.of(1993, 6, 9)
+        directed_by = "Steven Spielberg"
+      }
     movieMapper.save(movie)
-    val movie2 = DyMovie().apply {
-      name = "The Terminal"
-      release_date = LocalDate.of(2004, 6, 18)
-      directed_by = "Steven Spielberg"
-    }
+    val movie2 =
+      DyMovie().apply {
+        name = "The Terminal"
+        release_date = LocalDate.of(2004, 6, 18)
+        directed_by = "Steven Spielberg"
+      }
     movieMapper.save(movie2)
-    val movie3 = DyMovie().apply {
-      name = "Bridge of Spies"
-      release_date = LocalDate.of(2015, 10, 16)
-      directed_by = "Steven Spielberg"
-    }
+    val movie3 =
+      DyMovie().apply {
+        name = "Bridge of Spies"
+        release_date = LocalDate.of(2015, 10, 16)
+        directed_by = "Steven Spielberg"
+      }
     movieMapper.save(movie3)
-    val movie4 = DyMovie().apply {
-      name = "Ready Player One"
-      release_date = LocalDate.of(2018, 3, 29)
-      directed_by = "Steven Spielberg"
-    }
+    val movie4 =
+      DyMovie().apply {
+        name = "Ready Player One"
+        release_date = LocalDate.of(2018, 3, 29)
+        directed_by = "Steven Spielberg"
+      }
     movieMapper.save(movie4)
 
     // Query the movies created.
-    val query = DynamoDBQueryExpression<DyMovie>()
-      .withHashKeyValues(DyMovie().apply { directed_by = "Steven Spielberg" })
-      .withRangeKeyCondition(
-        "release_date",
-        Condition()
-          .withComparisonOperator(ComparisonOperator.GE)
-          .withAttributeValueList(AttributeValue(LocalDate.of(2010, 1, 1).toString()))
-      )
+    val query =
+      DynamoDBQueryExpression<DyMovie>()
+        .withHashKeyValues(DyMovie().apply { directed_by = "Steven Spielberg" })
+        .withRangeKeyCondition(
+          "release_date",
+          Condition()
+            .withComparisonOperator(ComparisonOperator.GE)
+            .withAttributeValueList(AttributeValue(LocalDate.of(2010, 1, 1).toString())),
+        )
     // Consistent read cannot be true when querying a GSI.
     query.withConsistentRead(false)
     val newSpielbergMovies = movieMapper.query(query)

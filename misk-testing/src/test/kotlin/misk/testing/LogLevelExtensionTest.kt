@@ -1,77 +1,74 @@
 package misk.testing
 
 import ch.qos.logback.classic.Level
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
+import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
+import misk.logging.getLogger
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import misk.logging.LogCollector
-import misk.logging.getLogger
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class LogLevelExtensionTest {
 
   @MiskTestModule
-  val module = object : KAbstractModule() {
-    override fun configure() {
-      install(MiskTestingServiceModule())
-      install(LogCollectorModule())
+  val module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(MiskTestingServiceModule())
+        install(LogCollectorModule())
+      }
     }
-  }
 
   @Inject lateinit var logCollector: LogCollector
 
-  @Test fun test() {
+  @Test
+  fun test() {
     logMessages()
-    assertThat(logCollector.takeMessages(minLevel = Level.ALL)).containsExactly(
-      "Starting ready service", "this is INFO.", "this is WARN.", "this is ERROR."
-    )
-
+    assertThat(logCollector.takeMessages(minLevel = Level.ALL))
+      .containsExactly("Starting ready service", "this is INFO.", "this is WARN.", "this is ERROR.")
   }
 
   @LogLevel(level = LogLevel.Level.DEBUG)
-  @Test fun levelDebug() {
+  @Test
+  fun levelDebug() {
     logMessages()
-    assertThat(logCollector.takeMessages(minLevel = Level.ALL)).containsExactly(
-      "Starting ready service", "this is DEBUG.", "this is INFO.", "this is WARN.", "this is ERROR."
-    )
+    assertThat(logCollector.takeMessages(minLevel = Level.ALL))
+      .containsExactly("Starting ready service", "this is DEBUG.", "this is INFO.", "this is WARN.", "this is ERROR.")
   }
 
   @LogLevel(level = LogLevel.Level.INFO)
-  @Test fun levelInfo() {
+  @Test
+  fun levelInfo() {
     logMessages()
-    assertThat(logCollector.takeMessages(minLevel = Level.ALL)).containsExactly(
-      "Starting ready service", "this is INFO.", "this is WARN.", "this is ERROR."
-    )
+    assertThat(logCollector.takeMessages(minLevel = Level.ALL))
+      .containsExactly("Starting ready service", "this is INFO.", "this is WARN.", "this is ERROR.")
   }
 
   @LogLevel(level = LogLevel.Level.WARN)
-  @Test fun levelWarn() {
+  @Test
+  fun levelWarn() {
     logMessages()
-    assertThat(logCollector.takeMessages(minLevel = Level.ALL)).containsExactly(
-      "this is WARN.", "this is ERROR."
-    )
+    assertThat(logCollector.takeMessages(minLevel = Level.ALL)).containsExactly("this is WARN.", "this is ERROR.")
   }
 
   @LogLevel(level = LogLevel.Level.ERROR)
-  @Test fun levelError() {
+  @Test
+  fun levelError() {
     logMessages()
-    assertThat(logCollector.takeMessages(minLevel = Level.ALL)).containsExactly(
-      "this is ERROR."
-    )
+    assertThat(logCollector.takeMessages(minLevel = Level.ALL)).containsExactly("this is ERROR.")
   }
 
   @LogLevel(level = LogLevel.Level.ERROR)
   @Nested
   inner class `you can annotate the test` {
-    @Test fun levelError() {
+    @Test
+    fun levelError() {
       logMessages()
-      assertThat(logCollector.takeMessages(minLevel = Level.ALL)).containsExactly(
-        "this is ERROR."
-      )
+      assertThat(logCollector.takeMessages(minLevel = Level.ALL)).containsExactly("this is ERROR.")
     }
   }
 

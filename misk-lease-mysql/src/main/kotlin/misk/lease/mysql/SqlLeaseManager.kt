@@ -1,34 +1,29 @@
 package misk.lease.mysql
 
-import wisp.lease.Lease
-import wisp.lease.LeaseManager
-import misk.logging.getLogger
+import jakarta.inject.Inject
 import java.sql.SQLException
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
-import jakarta.inject.Inject
 import misk.annotation.ExperimentalMiskApi
+import misk.logging.getLogger
+import wisp.lease.AcquireOptions
+import wisp.lease.Lease
+import wisp.lease.PersistentLeaseManager
+import wisp.lease.UnsupportedWaitBehavior
+import wisp.lease.WaitMode
 
-/**
- * A LeaseManager that uses a SQL database to manage distributed leases.
- */
+/** A LeaseManager that uses a SQL database to manage distributed leases. */
 @ExperimentalMiskApi
-internal class SqlLeaseManager @Inject constructor(
-  private val clock: Clock,
-  private val database: LeaseDatabase,
-) : LeaseManager {
+internal class SqlLeaseManager @Inject constructor(private val clock: Clock, private val database: LeaseDatabase) :
+  PersistentLeaseManager {
 
-  /**
-   * Requests a lease for the given name .
-   */
+  /** Requests a lease for the given name . */
   override fun requestLease(name: String): Lease {
     return requestLease(name, DEFAULT_LEASE_DURATION)
   }
 
-  /**
-   * Requests a lease for the given name with an explicit duration.
-   */
+  /** Requests a lease for the given name with an explicit duration. */
   fun requestLease(name: String, duration: Duration): Lease {
     val lease = database.leaseQueries.selectByLeaseName(lease_name = name).executeAsOneOrNull()
     val now = clock.instant()
@@ -38,32 +33,26 @@ internal class SqlLeaseManager @Inject constructor(
       lease == null -> {
         // Lease doesn't exist, try to create it
         try {
-          database.leaseQueries.insert(
-            lease_name = name,
-            version = 1L,
-            held_until = heldUntil,
-          )
+          database.leaseQueries.insert(lease_name = name, version = 1L, held_until = heldUntil)
           RealSqlLease(name, 1L, heldUntil)
         } catch (e: SQLException) {
           logger.debug(e) { "Failed to insert lease '$name', likely due to race condition" }
           RealSqlLease(name, NOT_HELD, Instant.EPOCH)
         }
       }
-      
+
       now <= lease.held_until -> {
         // Lease is currently held by someone else
         RealSqlLease(name, NOT_HELD, Instant.EPOCH)
       }
-      
+
       else -> {
         // Lease exists but is expired, try to acquire it
         val newVersion = lease.version + 1L
-        val updatedRows = database.leaseQueries.acquire(
-          held_until = heldUntil,
-          version = newVersion,
-          lease_name = name,
-          current_version = lease.version,
-        ).value
+        val updatedRows =
+          database.leaseQueries
+            .acquire(held_until = heldUntil, version = newVersion, lease_name = name, current_version = lease.version)
+            .value
 
         if (updatedRows == 1L) {
           // Successfully acquired the lease
@@ -76,67 +65,70 @@ internal class SqlLeaseManager @Inject constructor(
     }
   }
 
-  /**
-   * Implementation of the Lease interface backed by a SQL row.
-   */
-  inner class RealSqlLease constructor(
-    override val name: String,
-    private val heldVersion: Long,
-    private val heldUntil: Instant,
-  ) : Lease {
+  /** Implementation of the Lease interface backed by a SQL row. */
+  inner class RealSqlLease
+  constructor(override val name: String, private val heldVersion: Long, private val heldUntil: Instant) : Lease {
     private val listeners = mutableListOf<Lease.StateChangeListener>()
 
     override fun shouldHold(): Boolean = true
 
-    /**
-     * Returns true if this process holds the lease.
-     */
-    override fun checkHeld(): Boolean {
+    override fun isHeld(): Boolean {
       if (heldVersion == NOT_HELD) return false
-      
+
       // We hold the lease until it expires
       return clock.instant() <= heldUntil
     }
 
-    /**
-     * Returns true if the lease is held by another process.
-     */
+    /** Returns true if this process holds the lease. */
+    override fun checkHeld(): Boolean = isHeld()
+
+    /** Returns true if the lease is held by another process. */
     override fun checkHeldElsewhere(): Boolean = !checkHeld()
 
-    /**
-     * Attempts to acquire the lease.
-     * Notifies listeners if successful.
-     */
+    /** Attempts to acquire the lease. Notifies listeners if successful. */
     override fun acquire(): Boolean {
+      if (isHeld()) {
+        notifyAfterAcquire()
+        return true
+      }
+
       val lease = requestLease(name)
-      if (lease.checkHeld()) {
+      if (lease.isHeld()) {
         notifyAfterAcquire()
         return true
       }
       return false
     }
 
-    /**
-     * Releases the lease if held.
-     * Notifies listeners before releasing.
-     */
+    override fun acquire(options: AcquireOptions): Boolean {
+      return when (options.wait) {
+        WaitMode.DoNotWait -> acquire()
+        WaitMode.WaitForLeaseDuration,
+        is WaitMode.WaitUpTo ->
+          when (options.unsupportedWaitBehavior) {
+            UnsupportedWaitBehavior.Fail -> {
+              if (isHeld()) release()
+              throw UnsupportedOperationException("Lease $name does not support waiting to acquire")
+            }
+
+            UnsupportedWaitBehavior.FallbackToNonBlocking -> acquire()
+          }
+      }
+    }
+
+    /** Releases the lease if held. Notifies listeners before releasing. */
     override fun release(): Boolean {
       if (heldVersion == NOT_HELD) return false
-      
+
       notifyBeforeRelease()
-      
-      val deletedRows = database.leaseQueries.release(
-        lease_name = name,
-        version = heldVersion
-      ).value
+
+      val deletedRows = database.leaseQueries.release(lease_name = name, version = heldVersion).value
       return deletedRows > 0
     }
 
     override fun release(lazy: Boolean): Boolean = release()
 
-    /**
-     * Registers a listener for lease state changes.
-     */
+    /** Registers a listener for lease state changes. */
     override fun addListener(listener: Lease.StateChangeListener) {
       listeners.add(listener)
     }
@@ -164,10 +156,10 @@ internal class SqlLeaseManager @Inject constructor(
 
   companion object {
     private val logger = getLogger<SqlLeaseManager>()
-    
+
     /** Default lease duration (5 minutes) */
     val DEFAULT_LEASE_DURATION: Duration = Duration.ofSeconds(300)
-    
+
     /** Version number used to indicate a lease is not held by this process */
     const val NOT_HELD = -1L
   }

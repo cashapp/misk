@@ -13,26 +13,16 @@ import misk.web.mediatype.MediaTypes
 import misk.web.v2.DashboardPageLayout
 
 @Singleton
-internal class DatabaseTabIndexAction @Inject constructor(
-  private val dashboardPageLayout: DashboardPageLayout,
-) : WebAction {
+internal class DatabaseTabIndexAction @Inject constructor(private val dashboardPageLayout: DashboardPageLayout) :
+  WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @AdminDashboardAccess
-  fun get(): String = dashboardPageLayout
-    .newBuilder()
-    .build { _, _, _ ->
-
+  fun get(): String =
+    dashboardPageLayout.newBuilder().build { _, _, _ ->
       div("container mx-auto p-8") {
-        h1("text-3xl font-bold mb-4") {
-          +"""Database Beta"""
-        }
-        AlertInfoHighlight(
-          "Execute SQL queries against your database.",
-          "Old Tab",
-          "/_admin/database/",
-        )
-
+        h1("text-3xl font-bold mb-4") { +"""Database Beta""" }
+        AlertInfoHighlight("Execute SQL queries against your database.", "Old Tab", "/_admin/database/")
       }
     }
 

@@ -4,26 +4,25 @@ import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Ports
 import com.google.common.base.Stopwatch
+import java.lang.Thread.sleep
+import java.time.Duration
+import misk.containers.Composer
+import misk.containers.Container
+import misk.containers.ContainerUtil
+import misk.logging.getLogger
 import misk.redis.RedisConfig
 import misk.redis.RedisNodeConfig
 import misk.redis.RedisReplicationGroupConfig
 import misk.testing.ExternalDependency
 import redis.clients.jedis.JedisPooled
-import misk.containers.Composer
-import misk.containers.Container
-import misk.containers.ContainerUtil
-import misk.logging.getLogger
-import java.lang.Thread.sleep
-import java.time.Duration
 
 /**
- * While [FakeRedis] is nice for running in-memory tests without standing up an actual Redis
- * instance, it can be useful to verify functionality against an actual Redis.
+ * While [FakeRedis] is nice for running in-memory tests without standing up an actual Redis instance, it can be useful
+ * to verify functionality against an actual Redis.
  *
  * To use this in tests:
- *
- * 1. Install a `RedisModule` instead of a `FakeRedisModule`.
- *    Make sure to supply the [DockerRedis.replicationGroupConfig] as the [RedisReplicationGroupConfig].
+ * 1. Install a `RedisModule` instead of a `FakeRedisModule`. Make sure to supply the
+ *    [DockerRedis.replicationGroupConfig] as the [RedisReplicationGroupConfig].
  * 2. Add `@MiskExternalDependency private val dockerRedis: DockerRedis` to your test class.
  */
 object DockerRedis : ExternalDependency {
@@ -35,33 +34,33 @@ object DockerRedis : ExternalDependency {
   private val jedis by lazy { JedisPooled(hostname, port) }
 
   private val redisNodeConfig = RedisNodeConfig(hostname, port)
-  val replicationGroupConfig = RedisReplicationGroupConfig(
-    writer_endpoint = redisNodeConfig,
-    reader_endpoint = redisNodeConfig,
-    // NB: Docker redis images won't accept a start-up password via Container->withCmd.
-    // The supported mechanism for setting a password is by mounting a custom Redis config,
-    // but we aren't in the business of maintaining a redis image just for our tests, and mounting
-    // a volume with test-specific configs is more complicated than it's worth.
-    // Hence, we supply a blank password, which will only be accepted in Fake environments.
-    redis_auth_password = "",
-    timeout_ms = 1_000, // 1 second.
-  )
+  val replicationGroupConfig =
+    RedisReplicationGroupConfig(
+      writer_endpoint = redisNodeConfig,
+      reader_endpoint = redisNodeConfig,
+      // NB: Docker redis images won't accept a start-up password via Container->withCmd.
+      // The supported mechanism for setting a password is by mounting a custom Redis config,
+      // but we aren't in the business of maintaining a redis image just for our tests, and mounting
+      // a volume with test-specific configs is more complicated than it's worth.
+      // Hence, we supply a blank password, which will only be accepted in Fake environments.
+      redis_auth_password = "",
+      timeout_ms = 1_000, // 1 second.
+    )
   val config = RedisConfig(mapOf("test-group" to replicationGroupConfig))
 
-  private val composer = Composer(
-    "misk-redis-testing",
-    Container {
-      val exposedClientPort = ExposedPort.tcp(port)
-      withImage("redis:$redisVersion-alpine")
-      withName("misk-redis-testing")
-      withExposedPorts(exposedClientPort)
-      withHostConfig(
-        HostConfig().withPortBindings(Ports().apply {
-          bind(exposedClientPort, Ports.Binding.bindPort(port))
-        })
-      )
-    }
-  )
+  private val composer =
+    Composer(
+      "misk-redis-testing",
+      Container {
+        val exposedClientPort = ExposedPort.tcp(port)
+        withImage("redis:$redisVersion-alpine")
+        withName("misk-redis-testing")
+        withExposedPorts(exposedClientPort)
+        withHostConfig(
+          HostConfig().withPortBindings(Ports().apply { bind(exposedClientPort, Ports.Binding.bindPort(port)) })
+        )
+      },
+    )
 
   override fun startup() {
     try {
@@ -110,4 +109,3 @@ fun main() {
   sleep(Duration.ofSeconds(60).toMillis())
   DockerRedis.shutdown()
 }
-

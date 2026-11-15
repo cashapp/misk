@@ -3,6 +3,7 @@ package misk.redis.lettuce.cluster
 import com.google.inject.Module
 import com.google.inject.name.Named
 import jakarta.inject.Inject
+import kotlin.test.DefaultAsserter.assertTrue
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
@@ -19,7 +20,6 @@ import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import wisp.deployment.TESTING
-import kotlin.test.DefaultAsserter.assertTrue
 
 @MiskTest(startService = true)
 @DisplayName("RedisClusterModule binding test with multiple replication groups and pooled connections")
@@ -32,47 +32,42 @@ internal class RedisClusterModuleMultipleGroupTest {
   private val clientName = "standalone-test-pooled"
 
   @MiskTestModule
-  private val module: Module = object : KAbstractModule() {
-    override fun configure() {
-      install(
-        RedisModule.create(
-          config = RedisClusterConfig(
-            mapOf(
-              REPLICATION_GROUP_ID1 to RedisClusterGroupConfig(
-                client_name = clientName,
-                configuration_endpoint = RedisNodeConfig(
-                  hostname = "localhost",
-                  port = redisSeedPort,
-                ),
-                redis_auth_password = "",
-                use_ssl = false,
-              ),
-              REPLICATION_GROUP_ID2 to RedisClusterGroupConfig(
-                client_name = clientName,
-                configuration_endpoint = RedisNodeConfig(
-                  hostname = "localhost",
-                  port = redisSeedPort,
-                ),
-                redis_auth_password = "",
-                use_ssl = false,
-              ),
-            ),
-          ),
-        ),
-      )
-      install(MiskTestingServiceModule())
-      install(DeploymentModule(TESTING))
+  private val module: Module =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(
+          RedisModule.create(
+            config =
+              RedisClusterConfig(
+                mapOf(
+                  REPLICATION_GROUP_ID1 to
+                    RedisClusterGroupConfig(
+                      client_name = clientName,
+                      configuration_endpoint = RedisNodeConfig(hostname = "localhost", port = redisSeedPort),
+                      redis_auth_password = "",
+                      use_ssl = false,
+                    ),
+                  REPLICATION_GROUP_ID2 to
+                    RedisClusterGroupConfig(
+                      client_name = clientName,
+                      configuration_endpoint = RedisNodeConfig(hostname = "localhost", port = redisSeedPort),
+                      redis_auth_password = "",
+                      use_ssl = false,
+                    ),
+                )
+              )
+          )
+        )
+        install(MiskTestingServiceModule())
+        install(DeploymentModule(TESTING))
+      }
     }
-  }
-  
+
   @Inject @Named(REPLICATION_GROUP_ID1) lateinit var clusterConnectionProvider1: ClusterConnectionProvider
   @Inject @Named(REPLICATION_GROUP_ID2) lateinit var clusterConnectionProvider2: ClusterConnectionProvider
   @Inject lateinit var redisService: RedisService
   private val connectionProviders: Map<String, StatefulRedisClusterConnectionProvider<String, String>> by lazy {
-    mapOf(
-      REPLICATION_GROUP_ID1 to clusterConnectionProvider1,
-      REPLICATION_GROUP_ID2 to clusterConnectionProvider2,
-    )
+    mapOf(REPLICATION_GROUP_ID1 to clusterConnectionProvider1, REPLICATION_GROUP_ID2 to clusterConnectionProvider2)
   }
 
   @TestFactory
@@ -88,10 +83,6 @@ internal class RedisClusterModuleMultipleGroupTest {
 
   @Test
   fun `test RedisService is started`() {
-    assertTrue(
-      message = "RedisService should be started",
-      actual = redisService.isRunning
-    )
+    assertTrue(message = "RedisService should be started", actual = redisService.isRunning)
   }
-
 }

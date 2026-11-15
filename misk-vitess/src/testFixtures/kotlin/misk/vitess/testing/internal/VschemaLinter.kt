@@ -52,6 +52,12 @@ internal class VschemaLinter(val vschemaAdapter: VschemaAdapter) {
           val vindexParamsMap = vschemaAdapter.toMap(vindexMap["params"])
           vindexParamsMap.let { params ->
             val orderedParamsFields = mutableListOf("autocommit", "from", "ignore_nulls", "table", "to")
+            if (params.containsKey("multi_shard_autocommit")) {
+              orderedParamsFields.add(orderedParamsFields.indexOf("table"), "multi_shard_autocommit")
+            }
+            if (params.containsKey("no_verify")) {
+              orderedParamsFields.add(orderedParamsFields.indexOf("table"), "no_verify")
+            }
             if (params.containsKey("write_only")) {
               orderedParamsFields.add("write_only")
             }
@@ -62,12 +68,7 @@ internal class VschemaLinter(val vschemaAdapter: VschemaAdapter) {
             )
 
             // Check if "to" field exists and equals "keyspace_id"
-            validateLookupVindex(
-              vindexType,
-              params,
-              keyspaceName,
-              vindexName
-            )
+            validateLookupVindex(vindexType, params, keyspaceName, vindexName)
           }
         }
       }

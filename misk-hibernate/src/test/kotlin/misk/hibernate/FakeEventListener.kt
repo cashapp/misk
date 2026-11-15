@@ -1,5 +1,7 @@
 package misk.hibernate
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import org.hibernate.event.spi.PreDeleteEvent
 import org.hibernate.event.spi.PreDeleteEventListener
 import org.hibernate.event.spi.PreInsertEvent
@@ -8,8 +10,6 @@ import org.hibernate.event.spi.PreLoadEvent
 import org.hibernate.event.spi.PreLoadEventListener
 import org.hibernate.event.spi.PreUpdateEvent
 import org.hibernate.event.spi.PreUpdateEventListener
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @Singleton
 class FakeEventListener @Inject constructor() :

@@ -10,8 +10,8 @@ import misk.feature.Feature
 import misk.feature.FeatureFlags
 
 /**
- * Temporary shim for buffered and unbuffered [AmazonSQS] implementations, for feature-flagged rollout of buffered
- * SQS operations across cash cloud apps.
+ * Temporary shim for buffered and unbuffered [AmazonSQS] implementations, for feature-flagged rollout of buffered SQS
+ * operations across cash cloud apps.
  *
  * Flag allows gates functionality on a per-service basis.
  *
@@ -23,11 +23,16 @@ import misk.feature.FeatureFlags
  *
  * Flag: https://app.launchdarkly.com/cash/production/features/jobqueue-buffered-sqs-client/targeting
  */
+@Deprecated(
+  message =
+    "AWS SDK v1 SQS jobqueue is deprecated. Use the AWS SDK v2 SQS jobqueue in " +
+      "misk-aws2-sqs (misk.aws2.sqs.jobqueue.SqsJobQueueModule) instead."
+)
 class FlaggedBufferedSqsClient(
   private val unbufferedSqs: AmazonSQS,
   private val bufferedSqs: AmazonSQS,
   private val appName: String,
-  private val featureFlags: FeatureFlags
+  private val featureFlags: FeatureFlags,
 ) : AmazonSQS by unbufferedSqs {
   override fun sendMessage(sendMessageRequest: SendMessageRequest): SendMessageResult {
     return client().sendMessage(sendMessageRequest)

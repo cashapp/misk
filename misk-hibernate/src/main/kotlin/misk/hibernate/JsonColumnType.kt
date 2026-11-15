@@ -2,16 +2,16 @@ package misk.hibernate
 
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
-import org.hibernate.engine.spi.SharedSessionContractImplementor
-import org.hibernate.type.spi.TypeConfiguration
-import org.hibernate.type.spi.TypeConfigurationAware
-import org.hibernate.usertype.ParameterizedType
-import org.hibernate.usertype.UserType
 import java.io.Serializable
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
 import java.util.Properties
+import org.hibernate.engine.spi.SharedSessionContractImplementor
+import org.hibernate.type.spi.TypeConfiguration
+import org.hibernate.type.spi.TypeConfigurationAware
+import org.hibernate.usertype.ParameterizedType
+import org.hibernate.usertype.UserType
 
 internal class JsonColumnType<T> : UserType, ParameterizedType, TypeConfigurationAware {
   private lateinit var _typeConfiguration: TypeConfiguration
@@ -24,8 +24,8 @@ internal class JsonColumnType<T> : UserType, ParameterizedType, TypeConfiguratio
   override fun getTypeConfiguration() = _typeConfiguration
 
   override fun setParameterValues(properties: Properties) {
-    val moshi = typeConfiguration.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
-      .getInstance(Moshi::class.java)
+    val moshi =
+      typeConfiguration.metadataBuildingContext.bootstrapContext.serviceRegistry.injector.getInstance(Moshi::class.java)
     jsonAdapter = moshi.adapter<T>(properties.getField("jsonColumnField")!!.genericType)
   }
 
@@ -45,12 +45,7 @@ internal class JsonColumnType<T> : UserType, ParameterizedType, TypeConfiguratio
   override fun disassemble(value: Any?) = value as Serializable
 
   @Suppress("UNCHECKED_CAST")
-  override fun nullSafeSet(
-    st: PreparedStatement,
-    value: Any?,
-    index: Int,
-    session: SharedSessionContractImplementor?
-  ) {
+  override fun nullSafeSet(st: PreparedStatement, value: Any?, index: Int, session: SharedSessionContractImplementor?) {
     if (value == null) {
       st.setNull(index, Types.CHAR)
     } else {
@@ -62,7 +57,7 @@ internal class JsonColumnType<T> : UserType, ParameterizedType, TypeConfiguratio
     rs: ResultSet?,
     names: Array<out String>,
     session: SharedSessionContractImplementor?,
-    owner: Any?
+    owner: Any?,
   ): Any? {
     val result = rs?.getString(names[0])
     return if (result != null) jsonAdapter.fromJson(result) else null

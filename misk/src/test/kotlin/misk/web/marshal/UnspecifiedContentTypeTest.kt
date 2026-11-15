@@ -1,6 +1,7 @@
 package misk.web.marshal
 
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -11,42 +12,33 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
-import misk.web.WebTestClient
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import okio.ByteString
-import okio.buffer
-import okio.source
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestTemplate
-import java.io.ByteArrayInputStream
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class UnspecifiedContentTypeTest {
   data class Packet(val message: String)
 
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject lateinit var moshi: Moshi
-  @Inject lateinit var  jettyService: JettyService
-
+  @Inject lateinit var jettyService: JettyService
 
   @Test
   fun `return a 400 if ContentType is not set and can't use generic`() {
     val httpClient = OkHttpClient()
 
-    val request  = Request.Builder()
-      .post("".toRequestBody(null))
-      .url(jettyService.httpServerUrl.newBuilder().encodedPath("/as-string").build())
+    val request =
+      Request.Builder()
+        .post("".toRequestBody(null))
+        .url(jettyService.httpServerUrl.newBuilder().encodedPath("/as-string").build())
 
     val response = httpClient.newCall(request.build()).execute()
 
@@ -58,9 +50,10 @@ internal class UnspecifiedContentTypeTest {
   fun `return a 500 if no marshall for content type`() {
     val httpClient = OkHttpClient()
 
-    val request  = Request.Builder()
-      .post("".toRequestBody("application/random".toMediaType()))
-      .url(jettyService.httpServerUrl.newBuilder().encodedPath("/as-random-content-type").build())
+    val request =
+      Request.Builder()
+        .post("".toRequestBody("application/random".toMediaType()))
+        .url(jettyService.httpServerUrl.newBuilder().encodedPath("/as-random-content-type").build())
 
     val response = httpClient.newCall(request.build()).execute()
 
@@ -82,7 +75,6 @@ internal class UnspecifiedContentTypeTest {
     fun call(@RequestBody message: Packet): String = "$message as-string"
   }
 
-
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebServerTestingModule())
@@ -92,4 +84,3 @@ internal class UnspecifiedContentTypeTest {
     }
   }
 }
-

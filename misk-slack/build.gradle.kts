@@ -30,13 +30,13 @@ dependencies {
   testImplementation(libs.moshiKotlin)
   testImplementation(libs.okHttpMockWebServer)
   testImplementation(project(":wisp:wisp-deployment"))
-  testImplementation("com.squareup.okio:okio:3.3.0")
+  testImplementation("com.squareup.okio:okio:3.16.4")
   testImplementation(project(":misk-service"))
   testImplementation(project(":misk-testing"))
 }
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

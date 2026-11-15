@@ -13,21 +13,20 @@ dependencies {
   api(libs.guava)
   api(libs.guice)
   api(libs.jakartaInject)
-  api(project(":wisp:wisp-aws-environment"))
+  api(project(":misk-aws-api"))
   api(project(":wisp:wisp-lease"))
   api(project(":misk"))
   api(project(":misk-config"))
   api(project(":misk-feature"))
   api(project(":misk-inject"))
   api(project(":misk-jobqueue"))
-  api(project(":wisp:wisp-deployment"))
+  implementation(project(":wisp:wisp-deployment"))
+
   implementation(libs.loggingApi)
   implementation(libs.moshiCore)
   implementation(libs.openTracing)
-  implementation(libs.openTracingDatadog)
   implementation(libs.prometheusClient)
   implementation(libs.slf4jApi)
-  implementation(libs.tracingDatadog)
   implementation(project(":misk-api"))
   implementation(project(":misk-moshi"))
   implementation(project(":misk-testing"))
@@ -37,6 +36,9 @@ dependencies {
   implementation(project(":misk-metrics"))
   implementation(project(":misk-service"))
   implementation(project(":misk-transactional-jobqueue"))
+
+  runtimeOnly(libs.openTracingDatadog)
+
   testImplementation(libs.assertj)
   testImplementation(libs.awaitility)
   testImplementation(libs.dockerApi)
@@ -55,6 +57,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown")),
   )
 }

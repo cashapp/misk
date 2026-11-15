@@ -23,14 +23,14 @@ interface ExceptionMapper<in T : Throwable> {
   fun toGrpcResponse(th: T): GrpcErrorResponse? = null
 
   /**
-   * @return the level at which the given exception should be logged. defaults to ERROR but can
-   * be overridden by the mapper for the given exception
+   * @return the level at which the given exception should be logged. defaults to ERROR but can be overridden by the
+   *   mapper for the given exception
    */
   fun loggingLevel(th: T): Level = Level.ERROR
 
   /**
-   * @return true if this exception represents an error condition. Defaults to true, but can be
-   * overridden by the mapper for the given exception
+   * @return true if this exception represents an error condition. Defaults to true, but can be overridden by the mapper
+   *   for the given exception
    */
   fun isError(th: T): Boolean = true
 }

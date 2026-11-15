@@ -1,13 +1,12 @@
 package misk.vitess
 
+import com.google.common.base.Preconditions.checkState
 import com.google.common.primitives.Longs
 import java.security.GeneralSecurityException
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import okio.ByteString
-
-import com.google.common.base.Preconditions.checkState
 
 /*
 Port of:
@@ -34,10 +33,7 @@ internal object VitessHash {
   private val NULL_SALT = IvParameterSpec(ByteArray(8))
   private val TRIPLE_DES = "DESede/CBC/NoPadding"
 
-  /**
-   * Returns the "keyspace ID" of the id. The keyspace ID is used by Vitess to map an id to a
-   * shard.
-   */
+  /** Returns the "keyspace ID" of the id. The keyspace ID is used by Vitess to map an id to a shard. */
   fun toKeyspaceId(id: Long): ByteString {
     try {
       val tripleDes = Cipher.getInstance(TRIPLE_DES)
@@ -50,18 +46,18 @@ internal object VitessHash {
   }
 
   /*
-Port of:
-go/vt/vtgate/vindexes/hash.go
+  Port of:
+  go/vt/vtgate/vindexes/hash.go
 
-func vunhash(k []byte) (uint64, error) {
-  if len(k) != 8 {
-    return 0, fmt.Errorf("invalid keyspace id: %v", hex.EncodeToString(k))
+  func vunhash(k []byte) (uint64, error) {
+    if len(k) != 8 {
+      return 0, fmt.Errorf("invalid keyspace id: %v", hex.EncodeToString(k))
+    }
+    var unhashed [8]byte
+    block3DES.Decrypt(unhashed[:], k)
+    return binary.BigEndian.Uint64(unhashed[:]), nil
   }
-  var unhashed [8]byte
-  block3DES.Decrypt(unhashed[:], k)
-  return binary.BigEndian.Uint64(unhashed[:]), nil
-}
-*/
+  */
   fun fromKeyspaceId(keyspaceId: ByteString): Long {
     try {
       val tripleDes = Cipher.getInstance(TRIPLE_DES)

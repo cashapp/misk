@@ -9,6 +9,8 @@ plugins {
 dependencies {
   api(libs.sqldelightRuntime)
 
+  api(project(":misk-jdbc"))
+
   implementation(libs.loggingApi)
   implementation(project(":misk-backoff"))
   implementation(project(":misk-logging"))
@@ -33,6 +35,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

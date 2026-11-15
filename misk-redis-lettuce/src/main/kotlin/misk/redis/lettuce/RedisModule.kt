@@ -4,20 +4,20 @@ import com.google.inject.multibindings.Multibinder
 import io.lettuce.core.AbstractRedisClient
 import io.lettuce.core.codec.RedisCodec
 import io.lettuce.core.codec.StringCodec
+import kotlin.reflect.KClass
 import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.metrics.v2.Metrics
 import misk.redis.lettuce.cluster.RedisClusterModule
 import misk.redis.lettuce.standalone.RedisStandaloneModule
-import kotlin.reflect.KClass
 
 /**
  * A Misk/Guice module for configuring Redis clients and connection management.
  *
- * This module provides Redis connectivity for both standalone and cluster configurations,
- * supporting different key-value type combinations and custom codecs. It automatically
- * handles connection management, pooling, and lifecycle based on the provided configuration.
+ * This module provides Redis connectivity for both standalone and cluster configurations, supporting different
+ * key-value type combinations and custom codecs. It automatically handles connection management, pooling, and lifecycle
+ * based on the provided configuration.
  *
  * Key features:
  * - Support for both standalone and cluster Redis configurations
@@ -100,18 +100,40 @@ import kotlin.reflect.KClass
  * )
  * install(redisModule)
  * ```
+ *
+ * ## Non-essential Redis
+ *
+ * By default Redis is essential: the app doesn't start until every configured Redis is reachable. Set `nonEssential`
+ * when the app can serve without Redis, for example when Redis is only a cache:
+ * ```kotlin
+ * install(RedisModule.create(config, nonEssential = true))
+ * ```
+ *
+ * In this mode:
+ * - [RedisService] doesn't block startup or fail if Redis is unreachable. It verifies connectivity in the background,
+ *   retrying until Redis is reachable, then loads any configured function code, retrying that too until it succeeds or
+ *   Redis rejects the code. The `redis_client_startup_verified` gauge reports 1 per replication group once it has
+ *   connected.
+ * - Commands are rejected immediately while a connection is disconnected, instead of queueing until Redis reconnects or
+ *   the command times out. Callers should treat these failures like a cache miss.
+ *
+ * In either mode, a [ConnectionProvider] that couldn't connect retries on later acquires (with backoff), so it recovers
+ * once Redis is reachable.
  */
-class RedisModule<K : Any, V : Any> internal constructor(
+class RedisModule<K : Any, V : Any>
+internal constructor(
   private val keyType: KClass<K>,
   private val valueType: KClass<V>,
   private val config: AbstractRedisConfig,
   private val codec: RedisCodec<K, V>,
+  private val nonEssential: Boolean,
 ) : KAbstractModule() {
 
   override fun configure() {
     Multibinder.newSetBinder(binder(), connectionProviderTypeLiteral)
     newMultibinder<AbstractRedisClient>()
     newMultibinder<FunctionCodeLoader>()
+    newMultibinder<NonEssentialRedisClient>()
     requireBinding<Metrics>()
 
     when (config) {
@@ -122,6 +144,7 @@ class RedisModule<K : Any, V : Any> internal constructor(
             keyType = keyType,
             valueType = valueType,
             codec = codec,
+            nonEssential = nonEssential,
           )
         )
 
@@ -132,6 +155,7 @@ class RedisModule<K : Any, V : Any> internal constructor(
             keyType = keyType,
             valueType = valueType,
             codec = codec,
+            nonEssential = nonEssential,
           )
         )
     }
@@ -142,21 +166,25 @@ class RedisModule<K : Any, V : Any> internal constructor(
     /**
      * Creates a [RedisModule] with explicit key and value types.
      *
-     * This factory method allows full control over the Redis configuration, including
-     * key/value types and the codec used for serialization.
+     * This factory method allows full control over the Redis configuration, including key/value types and the codec
+     * used for serialization.
+     *
+     * @param nonEssential see [RedisModule]
      */
+    @JvmOverloads
     fun <K : Any, V : Any> create(
       keyType: KClass<K>,
       valueType: KClass<V>,
       config: AbstractRedisConfig,
       codec: RedisCodec<K, V>,
-    ) = RedisModule(keyType, valueType, config, codec)
+      nonEssential: Boolean = false,
+    ) = RedisModule(keyType, valueType, config, codec, nonEssential)
 
     /**
      * Creates a [RedisModule] with reified type parameters.
      *
-     * This factory method uses Kotlin's reified generics to automatically determine
-     * the key and value types, while still allowing custom codec configuration.
+     * This factory method uses Kotlin's reified generics to automatically determine the key and value types, while
+     * still allowing custom codec configuration.
      *
      * Example:
      * ```kotlin
@@ -170,14 +198,14 @@ class RedisModule<K : Any, V : Any> internal constructor(
     inline fun <reified K : Any, reified V : Any> create(
       config: AbstractRedisConfig,
       codec: RedisCodec<K, V>,
-    ) = create(K::class, V::class, config, codec)
+      nonEssential: Boolean = false,
+    ) = create(K::class, V::class, config, codec, nonEssential)
 
     /**
      * Creates a [RedisModule] with default String codec.
      *
-     * This is a convenience factory method that creates a module using UTF-8 String
-     * codec for both keys and values. It's suitable for simple use cases where both
-     * keys and values are strings.
+     * This is a convenience factory method that creates a module using UTF-8 String codec for both keys and values.
+     * It's suitable for simple use cases where both keys and values are strings.
      *
      * Example:
      * ```kotlin
@@ -192,8 +220,8 @@ class RedisModule<K : Any, V : Any> internal constructor(
      * )
      * ```
      */
-    fun create(
-      config: AbstractRedisConfig,
-    ) = create(config, StringCodec.UTF8)
+    @JvmOverloads
+    fun create(config: AbstractRedisConfig, nonEssential: Boolean = false) =
+      create(config, StringCodec.UTF8, nonEssential)
   }
 }

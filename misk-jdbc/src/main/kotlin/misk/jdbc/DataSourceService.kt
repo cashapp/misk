@@ -5,32 +5,49 @@ import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Provider
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import com.zaxxer.hikari.metrics.MetricsTrackerFactory
 import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
 import com.zaxxer.hikari.util.DriverDataSource
 import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Singleton
-import wisp.deployment.Deployment
-import misk.logging.getLogger
 import java.time.Duration
 import java.util.Properties
 import javax.sql.DataSource
 import kotlin.reflect.KClass
+import misk.logging.getLogger
+import wisp.deployment.Deployment
 
 /**
  * Builds a connection pool to a JDBC database. Doesn't do any schema migration or validation.
  *
- * @param baseConfig the configuration to connect to. The actual database name used may vary as
- *     the [databasePool] can pick an alternate database name for testing.
+ * @param baseConfig the configuration to connect to. The actual database name used may vary as the [databasePool] can
+ *   pick an alternate database name for testing.
  */
 @Singleton
-class DataSourceService @JvmOverloads constructor(
+class DataSourceService
+@JvmOverloads
+constructor(
   private val qualifier: KClass<out Annotation>,
   private val baseConfig: DataSourceConfig,
   private val deployment: Deployment,
   private val dataSourceDecorators: Set<DataSourceDecorator>,
   private val databasePool: DatabasePool,
-  private val collectorRegistry: CollectorRegistry? = null
+  private val collectorRegistry: CollectorRegistry? = null,
 ) : AbstractIdleService(), DataSourceConnector, Provider<DataSource> {
+  private var metricsTrackerFactory: MetricsTrackerFactory? = null
+
+  constructor(
+    qualifier: KClass<out Annotation>,
+    baseConfig: DataSourceConfig,
+    deployment: Deployment,
+    dataSourceDecorators: Set<DataSourceDecorator>,
+    databasePool: DatabasePool,
+    collectorRegistry: CollectorRegistry?,
+    metricsTrackerFactory: MetricsTrackerFactory?,
+  ) : this(qualifier, baseConfig, deployment, dataSourceDecorators, databasePool, collectorRegistry) {
+    this.metricsTrackerFactory = metricsTrackerFactory
+  }
+
   private lateinit var config: DataSourceConfig
 
   /** The backing connection pool */
@@ -40,8 +57,8 @@ class DataSourceService @JvmOverloads constructor(
   private var _dataSource: DataSource? = null
 
   val dataSource: DataSource
-    get() = _dataSource
-      ?: error("@${qualifier.simpleName} DataSource not created: did you forget to start the service?")
+    get() =
+      _dataSource ?: error("@${qualifier.simpleName} DataSource not created: did you forget to start the service?")
 
   override fun startUp() {
     val stopwatch = Stopwatch.createStarted()
@@ -62,7 +79,7 @@ class DataSourceService @JvmOverloads constructor(
   }
 
   private fun createDataSource(baseConfig: DataSourceConfig) {
-    // Rewrite the caller's config to get a database name like "movies__20190730__5" in tests.
+    // Rewrite the caller's config to get a database name like "movies__20190730140530__5" in tests.
     config = databasePool.takeDatabase(baseConfig)
 
     val hikariConfig = HikariConfig()
@@ -79,8 +96,9 @@ class DataSourceService @JvmOverloads constructor(
     hikariConfig.poolName = qualifier.simpleName
     hikariConfig.connectionTimeout = config.connection_timeout.toMillis()
     hikariConfig.validationTimeout = config.validation_timeout.toMillis()
-    hikariConfig.idleTimeout = config.connection_idle_timeout?.toMillis()
-      ?: config.connection_max_lifetime.minus(DEFAULT_CONNECTION_IDLE_TIMEOUT_OFFSET).toMillis()
+    hikariConfig.idleTimeout =
+      config.connection_idle_timeout?.toMillis()
+        ?: config.connection_max_lifetime.minus(DEFAULT_CONNECTION_IDLE_TIMEOUT_OFFSET).toMillis()
     hikariConfig.maxLifetime = config.connection_max_lifetime.toMillis()
     hikariConfig.keepaliveTime = config.keepalive_time.toMillis()
 
@@ -90,19 +108,23 @@ class DataSourceService @JvmOverloads constructor(
       hikariConfig.isAutoCommit = false
     }
 
-    if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.VITESS_MYSQL || config.type == DataSourceType.TIDB) {
+    config.transaction_isolation?.let {
+      // Hikari applies this level as each connection is created, and resets any connection whose isolation was
+      // changed at runtime back to this level when it is returned to the pool.
+      hikariConfig.transactionIsolation = it.hikariValueName
+    }
+
+    if (
+      config.type == DataSourceType.MYSQL ||
+        config.type == DataSourceType.VITESS_MYSQL ||
+        config.type == DataSourceType.TIDB
+    ) {
       if (!config.use_fixed_pool_size) {
         hikariConfig.minimumIdle = 5
       }
 
-      when (config.type) {
-        DataSourceType.MYSQL -> {
-          hikariConfig.connectionInitSql = "SET time_zone = '+00:00'"
-        }
-        DataSourceType.VITESS_MYSQL -> {
-          hikariConfig.exceptionOverride  = VitessExceptionHandler(collectorRegistry)
-        }
-        else -> {}
+      if (config.type == DataSourceType.VITESS_MYSQL) {
+        hikariConfig.exceptionOverride = VitessExceptionHandler(collectorRegistry)
       }
 
       hikariConfig.dataSourceProperties = config.getDataSourceProperties()
@@ -111,26 +133,25 @@ class DataSourceService @JvmOverloads constructor(
     // TODO(sahilm): The same mitigation _might_ be applicable to the DataSourceTypes VITESS_MYSQL and TIDB
     if (config.type == DataSourceType.MYSQL && config.mysql_enforce_writable_connections) {
       /*
-          Q. Why isn't this a DataSourceDecorator?
-          A. Because HikariCP calls Connection.isValid() in its internal getConnection() method before returning the connection to the DataSourceDecorator.
-             Implementing this logic in a DataSourceDecorator is too late and thus must be wrapped in the DataSource that HikariCP uses internally.
-          Q. Why can't we use a connectionTestQuery like `SET [SESSION] TRANSACTION READ WRITE` as [proposed](https://groups.google.com/g/hikari-cp/c/VH7nqwGimCs) in the HikariCP mailing list?
-          A. Because MySQL does not raise an error if `SET [SESSION] TRANSACTION READ WRITE` is executed on a read only connection.
+         Q. Why isn't this a DataSourceDecorator?
+         A. Because HikariCP calls Connection.isValid() in its internal getConnection() method before returning the connection to the DataSourceDecorator.
+            Implementing this logic in a DataSourceDecorator is too late and thus must be wrapped in the DataSource that HikariCP uses internally.
+         Q. Why can't we use a connectionTestQuery like `SET [SESSION] TRANSACTION READ WRITE` as [proposed](https://groups.google.com/g/hikari-cp/c/VH7nqwGimCs) in the HikariCP mailing list?
+         A. Because MySQL does not raise an error if `SET [SESSION] TRANSACTION READ WRITE` is executed on a read only connection.
 
-          TODO(sahilm): Extract ConnectionDecoratingDataSource and WritableConnectionValidator to Wisp so the same mitigation can be used in Armeria,
-           should wait for the solution to prove itself first.
-       */
+         TODO(sahilm): Extract ConnectionDecoratingDataSource and WritableConnectionValidator to Wisp so the same mitigation can be used in Armeria,
+          should wait for the solution to prove itself first.
+      */
       val mysqlDataSource = buildDataSource(hikariConfig)
-      hikariConfig.dataSource = ConnectionDecoratingDataSource(
-        connectionDecorator = { connection ->
-          WritableConnectionValidator(connection)
-        },
-        dataSource = mysqlDataSource
-      )
+      hikariConfig.dataSource =
+        ConnectionDecoratingDataSource(
+          connectionDecorator = { connection -> WritableConnectionValidator(connection) },
+          dataSource = mysqlDataSource,
+        )
     }
 
-    collectorRegistry?.let {
-      hikariConfig.metricsTrackerFactory = PrometheusMetricsTrackerFactory(it)
+    (metricsTrackerFactory ?: collectorRegistry?.let(::PrometheusMetricsTrackerFactory))?.let {
+      hikariConfig.metricsTrackerFactory = it
     }
 
     hikariDataSource = HikariDataSource(hikariConfig)
@@ -154,7 +175,7 @@ class DataSourceService @JvmOverloads constructor(
   }
 
   companion object {
-    val logger = getLogger<DataSourceService>()
+    private val logger = getLogger<DataSourceService>()
     private val DEFAULT_CONNECTION_IDLE_TIMEOUT_OFFSET = Duration.ofSeconds(10)
   }
 
@@ -164,6 +185,7 @@ class DataSourceService @JvmOverloads constructor(
 
   /**
    * Lifted from private method com.zaxxer.hikari.pool.PoolBase#initializeDataSource()
+   *
    * @see com.zaxxer.hikari.pool.PoolBase#initializeDataSource()
    */
   private fun buildDataSource(config: HikariConfig): DriverDataSource {

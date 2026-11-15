@@ -1,5 +1,6 @@
 public abstract interface class misk/audit/AuditClient {
 	public abstract fun logEvent (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Instant;)V
+	public static synthetic fun logEvent$default (Lmisk/audit/AuditClient;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Instant;ILjava/lang/Object;)V
 }
 
 public final class misk/audit/AuditClient$DefaultImpls {

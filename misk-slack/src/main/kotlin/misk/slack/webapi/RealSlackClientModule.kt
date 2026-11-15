@@ -7,9 +7,7 @@ import misk.slack.webapi.interceptors.SlackSignedRequestsInterceptor
 import misk.web.NetworkInterceptor
 import okhttp3.Interceptor
 
-class RealSlackClientModule(
-  private val config: SlackConfig,
-) : KAbstractModule() {
+class RealSlackClientModule(private val config: SlackConfig) : KAbstractModule() {
   override fun configure() {
     install(TypedHttpClientModule.create<SlackApi>("slack"))
     multibind<Interceptor>().to<SlackClientInterceptor>()

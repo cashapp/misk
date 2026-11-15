@@ -3,29 +3,31 @@ package misk.web.actions
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.ServiceManager
+import com.google.inject.Provider
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.time.Clock
+import java.time.Duration
+import java.time.Instant
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
+import misk.logging.getLogger
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Result
 import misk.tasks.Status
 import misk.web.ReadinessRefreshQueue
 import misk.web.WebConfig
-import misk.logging.getLogger
-import java.time.Clock
-import java.time.Duration
-import java.time.Instant
-import jakarta.inject.Inject
-import com.google.inject.Provider
-import jakarta.inject.Singleton
 
 @Singleton
-internal class ReadinessCheckService @Inject constructor(
+internal class ReadinessCheckService
+@Inject
+constructor(
   private val config: WebConfig,
   private val clock: Clock,
   private val serviceManagerProvider: Provider<ServiceManager>,
   @JvmSuppressWildcards private val healthCheckProvider: Provider<List<HealthCheck>>,
   @ReadinessRefreshQueue private val taskQueue: RepeatedTaskQueue,
-): AbstractIdleService() {
+) : AbstractIdleService() {
   @Volatile
   var status: CachedStatus? = null
     private set
@@ -53,8 +55,7 @@ internal class ReadinessCheckService @Inject constructor(
 
   @VisibleForTesting
   internal fun refreshStatuses() {
-    val servicesNotRunning = serviceManagerProvider.get().servicesByState().values().asList()
-      .filterNot { it.isRunning }
+    val servicesNotRunning = serviceManagerProvider.get().servicesByState().values().asList().filterNot { it.isRunning }
 
     for (service in servicesNotRunning) {
       logger.info("Service not running: $service")
@@ -72,10 +73,7 @@ internal class ReadinessCheckService @Inject constructor(
     status = CachedStatus(lastUpdate, statuses)
   }
 
-  data class CachedStatus(
-    val lastUpdate: Instant,
-    val statuses: List<HealthStatus>
-  )
+  data class CachedStatus(val lastUpdate: Instant, val statuses: List<HealthStatus>)
 
   companion object {
     private val logger = getLogger<ReadinessCheckService>()

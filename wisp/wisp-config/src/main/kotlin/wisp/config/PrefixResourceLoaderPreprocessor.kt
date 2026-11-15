@@ -7,26 +7,33 @@ import com.sksamuel.hoplite.PrimitiveNode
 import com.sksamuel.hoplite.StringNode
 import com.sksamuel.hoplite.fp.valid
 import com.sksamuel.hoplite.preprocessor.TraversingPrimitivePreprocessor
+import java.io.FileNotFoundException
 import wisp.resources.ClasspathResourceLoaderBackend
 import wisp.resources.EnvironmentResourceLoaderBackend
 import wisp.resources.FilesystemLoaderBackend
 import wisp.resources.ResourceLoader
-import java.io.FileNotFoundException
 
 /**
- * Preprocessor for a config node.  If the node is a StringNode and the value starts with the
- * [prefix], then the node value is treated as a resource location.  This is loaded using the
- * [resourceLoader] and returned as a StringNode.
+ * Preprocessor for a config node. If the node is a StringNode and the value starts with the [prefix], then the node
+ * value is treated as a resource location. This is loaded using the [resourceLoader] and returned as a StringNode.
  *
- * [prefix] is one of [ClasspathResourceLoaderBackend.SCHEME], [EnvironmentResourceLoaderBackend.SCHEME] or [FilesystemLoaderBackend.SCHEME]
+ * [prefix] is one of [ClasspathResourceLoaderBackend.SCHEME], [EnvironmentResourceLoaderBackend.SCHEME] or
+ * [FilesystemLoaderBackend.SCHEME]
  */
-class PrefixResourceLoaderPreprocessor @JvmOverloads constructor(
-  val prefix: String,
-  val resourceLoader: ResourceLoader = ResourceLoader.SYSTEM,
-) : TraversingPrimitivePreprocessor() {
+class PrefixResourceLoaderPreprocessor
+@JvmOverloads
+constructor(val prefix: String, val resourceLoader: ResourceLoader = ResourceLoader.SYSTEM) :
+  TraversingPrimitivePreprocessor() {
 
   init {
-    require(prefix in listOf(ClasspathResourceLoaderBackend.SCHEME, FilesystemLoaderBackend.SCHEME, EnvironmentResourceLoaderBackend.SCHEME))
+    require(
+      prefix in
+        listOf(
+          ClasspathResourceLoaderBackend.SCHEME,
+          FilesystemLoaderBackend.SCHEME,
+          EnvironmentResourceLoaderBackend.SCHEME,
+        )
+    )
   }
 
   override fun handle(node: PrimitiveNode, context: DecoderContext): ConfigResult<Node> {

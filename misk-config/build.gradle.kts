@@ -13,6 +13,7 @@ dependencies {
   api(libs.jakartaInject)
   api(libs.kotlinXHtml)
   api(libs.moshiCore)
+  api(libs.okio)
   api(project(":wisp:wisp-deployment"))
   api(project(":wisp:wisp-resource-loader"))
   api(project(":misk-inject"))
@@ -20,10 +21,8 @@ dependencies {
   implementation(libs.guava)
   implementation(libs.jacksonCore)
   implementation(libs.jacksonDataformatYaml)
-  implementation(libs.jacksonJsr310)
   implementation(libs.jacksonKotlin)
   implementation(libs.loggingApi)
-  implementation(libs.okio)
   implementation(project(":misk-logging"))
   implementation(project(":misk-tailwind"))
 
@@ -44,7 +43,7 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }
 // Allows us to set environment variables in tests using JUnit Pioneer

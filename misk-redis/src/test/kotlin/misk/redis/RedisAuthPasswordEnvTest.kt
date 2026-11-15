@@ -2,6 +2,7 @@ package misk.redis
 
 import com.google.inject.Guice.createInjector
 import com.google.inject.ProvisionException
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
@@ -12,14 +13,14 @@ import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import redis.clients.jedis.ConnectionPoolConfig
 import wisp.deployment.PRODUCTION
 import wisp.deployment.TESTING
-import jakarta.inject.Inject
-import redis.clients.jedis.ConnectionPoolConfig
 
 @MiskTest
 class RedisAuthPasswordEnvTest {
-  @Test fun `injection succeeds with password-less config in fake environments`() {
+  @Test
+  fun `injection succeeds with password-less config in fake environments`() {
     assertThat(DockerRedis.replicationGroupConfig.redis_auth_password).isEmpty()
     val injector = createInjector(fakeEnv, realRedisModule)
     val redis = injector.getInstance(keyOf<RedisConsumer>()).redis
@@ -28,7 +29,8 @@ class RedisAuthPasswordEnvTest {
     assertThat(redis["hello"]?.utf8()).isEqualTo("world")
   }
 
-  @Test fun `injection fails with password-less config in real environments`() {
+  @Test
+  fun `injection fails with password-less config in real environments`() {
     assertThat(DockerRedis.replicationGroupConfig.redis_auth_password).isEmpty()
     val injector = createInjector(realEnv, realRedisModule)
     val ex = assertThrows<ProvisionException> { injector.getInstance(keyOf<RedisConsumer>()) }
@@ -43,10 +45,11 @@ class RedisAuthPasswordEnvTest {
 
   private val realEnv = DeploymentModule(PRODUCTION)
 
-  private val realRedisModule = object : KAbstractModule() {
-    override fun configure() {
-      install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
-      install(MiskTestingServiceModule())
+  private val realRedisModule =
+    object : KAbstractModule() {
+      override fun configure() {
+        install(RedisModule(DockerRedis.replicationGroupConfig, ConnectionPoolConfig(), useSsl = false))
+        install(MiskTestingServiceModule())
+      }
     }
-  }
 }

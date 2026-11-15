@@ -8,9 +8,8 @@ import misk.cloud.gcp.tracing.TracingLoggingEnhancer
 import org.slf4j.LoggerFactory
 
 /**
- * Configures Misk to send application logs to StackDriver. If credentials are
- * required to send logging, set the GOOGLE_APPLICATION_CREDENTIALS environment
- * variable with the path to the JSON credentials.
+ * Configures Misk to send application logs to StackDriver. If credentials are required to send logging, set the
+ * GOOGLE_APPLICATION_CREDENTIALS environment variable with the path to the JSON credentials.
  */
 fun enableStackDriverLogging(config: StackDriverLoggingConfig) {
   val rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger

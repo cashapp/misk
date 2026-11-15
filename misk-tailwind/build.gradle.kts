@@ -10,10 +10,13 @@ dependencies {
   api(libs.kotlinXHtml)
   api(project(":wisp:wisp-deployment"))
   implementation(project(":misk-hotwire"))
+
+  testImplementation(libs.junitApi)
+  testImplementation(libs.kotlinTest)
 }
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

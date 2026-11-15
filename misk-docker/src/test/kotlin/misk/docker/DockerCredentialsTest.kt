@@ -1,5 +1,6 @@
 package misk.docker
 
+import java.nio.file.Path
 import misk.testing.MiskTest
 import okio.Path.Companion.toPath
 import okio.fakefilesystem.FakeFileSystem
@@ -7,9 +8,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import org.junit.jupiter.api.parallel.Execution
-import org.junit.jupiter.api.parallel.ExecutionMode
-import java.nio.file.Path
 
 @MiskTest
 class DockerCredentialsTest {
@@ -28,7 +26,8 @@ class DockerCredentialsTest {
           "https://index.docker.io/v1/": {}
         }
       }
-      """.trimIndent()
+      """
+        .trimIndent()
     }
 
     val result = DockerCredentials.getDockerCredentials("https://index.docker.io/v1/", fs)
@@ -46,7 +45,8 @@ class DockerCredentialsTest {
         },
         "credsStore": "fake"
       }
-      """.trimIndent()
+      """
+        .trimIndent()
     }
 
     val result = DockerCredentials.getDockerCredentials("https://index.docker.io/v1/", fs)
@@ -66,7 +66,8 @@ class DockerCredentialsTest {
         },
         "credsStore": "fake-empty"
       }
-      """.trimIndent()
+      """
+        .trimIndent()
     }
 
     val result = DockerCredentials.getDockerCredentials("https://index.docker.io/v1/", fs)
@@ -78,9 +79,7 @@ class DockerCredentialsTest {
   private fun writeDockerConfig(dockerConfig: () -> String) =
     FakeFileSystem().apply {
       createDirectories("/fake/.docker/".toPath())
-      write("/fake/.docker/config.json".toPath()) {
-        writeUtf8(dockerConfig())
-      }
+      write("/fake/.docker/config.json".toPath()) { writeUtf8(dockerConfig()) }
     }
 
   companion object {

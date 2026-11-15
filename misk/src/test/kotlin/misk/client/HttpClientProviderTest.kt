@@ -1,6 +1,9 @@
 package misk.client
 
 import com.google.inject.Provides
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.time.Duration
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -13,15 +16,11 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.Duration
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @MiskTest
 class HttpClientProviderTest {
 
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var mockWebServer: MockWebServer
   @Inject private lateinit var client: OkHttpClient
@@ -30,12 +29,7 @@ class HttpClientProviderTest {
   fun `provides a valid client`() {
     mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("hello"))
 
-    val response = client.newCall(
-      Request.Builder()
-        .url(mockWebServer.url("/foo"))
-        .build()
-    )
-      .execute()
+    val response = client.newCall(Request.Builder().url(mockWebServer.url("/foo")).build()).execute()
 
     assertThat(response.code).isEqualTo(200)
     response.body?.use { body -> assertThat(body.string()).isEqualTo("hello") }
@@ -50,15 +44,16 @@ class HttpClientProviderTest {
       install(HttpClientModule("pinger"))
 
       // Add an interceptor that adds an HTTP header to the response
-      multibind<Interceptor>().toInstance(object : Interceptor {
-        override fun intercept(chain: Interceptor.Chain): Response {
-          val response = chain.proceed(chain.request())
+      multibind<Interceptor>()
+        .toInstance(
+          object : Interceptor {
+            override fun intercept(chain: Interceptor.Chain): Response {
+              val response = chain.proceed(chain.request())
 
-          return response.newBuilder()
-            .addHeader("interceptor-header", "added by interceptor")
-            .build()
-        }
-      })
+              return response.newBuilder().addHeader("interceptor-header", "added by interceptor").build()
+            }
+          }
+        )
     }
 
     @Provides
@@ -66,14 +61,14 @@ class HttpClientProviderTest {
     fun provideHttpClientConfig(server: MockWebServer): HttpClientsConfig {
       val url = server.url("/")
       return HttpClientsConfig(
-        endpoints = mapOf(
-          "pinger" to HttpClientEndpointConfig(
-            url = url.toString(),
-            clientConfig = HttpClientConfig(
-              readTimeout = Duration.ofMillis(100)
-            )
+        endpoints =
+          mapOf(
+            "pinger" to
+              HttpClientEndpointConfig(
+                url = url.toString(),
+                clientConfig = HttpClientConfig(readTimeout = Duration.ofMillis(100)),
+              )
           )
-        )
       )
     }
   }

@@ -13,18 +13,12 @@ import misk.web.WebServerTestingModule
 import misk.web.WebTestClient
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
 internal class UnitResponseTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var webTestClient: WebTestClient
 
@@ -56,19 +50,15 @@ internal class UnitResponseTest {
   }
 
   class ReturnAsUnitResponseBody @Inject constructor() : WebAction {
-    @Get("/response/as-unit-response-body")
-    fun call() = Response(Unit)
+    @Get("/response/as-unit-response-body") fun call() = Response(Unit)
   }
 
   class ReturnAsEmptyStringResponseBody @Inject constructor() : WebAction {
-    @Get("/response/as-no-response-content-type")
-    fun call() = ""
+    @Get("/response/as-no-response-content-type") fun call() = ""
   }
 
   class ReturnWithContentType @Inject constructor() : WebAction {
-    @Get("/response/as-application-json")
-    @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun call() = Response(Unit)
+    @Get("/response/as-application-json") @ResponseContentType(MediaTypes.APPLICATION_JSON) fun call() = Response(Unit)
   }
 
   class TestModule : KAbstractModule() {

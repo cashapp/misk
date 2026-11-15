@@ -1,6 +1,9 @@
 package misk.hibernate.advisorylocks
 
 import jakarta.inject.Inject
+import java.util.concurrent.Callable
+import java.util.concurrent.LinkedBlockingDeque
+import kotlin.test.assertTrue
 import misk.hibernate.Movies
 import misk.hibernate.MoviesTestModule
 import misk.jdbc.DataSourceType
@@ -13,14 +16,9 @@ import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import java.util.concurrent.Callable
-import java.util.concurrent.LinkedBlockingDeque
-import kotlin.test.assertTrue
 
 abstract class HibernateSessionLocksTest {
-  @Inject
-  @Movies
-  private lateinit var sessionFactory: SessionFactory
+  @Inject @Movies private lateinit var sessionFactory: SessionFactory
 
   @Test
   fun `acquiring and releasing`() {
@@ -49,38 +47,26 @@ abstract class HibernateSessionLocksTest {
 
       val callable = Callable {
         val session = openSession()
-        session.use { inner ->
-          linkedBlockingQueue.add(inner.tryAcquireLock(LOCK_KEY))
-        }
+        session.use { inner -> linkedBlockingQueue.add(inner.tryAcquireLock(LOCK_KEY)) }
       }
       val thread = Thread { callable.call() }
       thread.start()
       thread.join()
     }
-    assertThat(linkedBlockingQueue)
-      .hasSize(2)
-      .containsExactlyInAnyOrder(true, false)
+    assertThat(linkedBlockingQueue).hasSize(2).containsExactlyInAnyOrder(true, false)
   }
 
   @Test
   fun `should implicitly release lock on session close`() {
-    openSession().use { session ->
-      assertTrue(session.tryAcquireLock(LOCK_KEY))
-    }
+    openSession().use { session -> assertTrue(session.tryAcquireLock(LOCK_KEY)) }
 
     // The lock should be released when the session is closed without calling release lock explicitly
-    openSession().use { session ->
-      assertTrue(session.tryAcquireLock(LOCK_KEY))
-    }
+    openSession().use { session -> assertTrue(session.tryAcquireLock(LOCK_KEY)) }
   }
 
   @Test
   fun `releasing non-existent lock`() {
-    assertThrows<IllegalStateException> {
-      openSession().use { session ->
-        session.tryReleaseLock("test-lock")
-      }
-    }
+    assertThrows<IllegalStateException> { openSession().use { session -> session.tryReleaseLock("test-lock") } }
   }
 
   protected fun openSession(): Session =
@@ -96,68 +82,45 @@ abstract class HibernateSessionLocksTest {
 
 @MiskTest(startService = true)
 class MySQLSessionLocksTest : HibernateSessionLocksTest() {
-  @MiskTestModule
-  val module = MoviesTestModule(DataSourceType.MYSQL)
+  @MiskTestModule val module = MoviesTestModule(DataSourceType.MYSQL)
 
   @Test
   fun `should throw if key is too long`() {
     val key = "a".repeat(256)
-    assertThrows<IllegalArgumentException> {
-      openSession().use { session ->
-        session.tryAcquireLock(key)
-      }
-    }
+    assertThrows<IllegalArgumentException> { openSession().use { session -> session.tryAcquireLock(key) } }
   }
 
   @Test
   fun `should NOT throw if key is the maximum length`() {
     val key = "a".repeat(64)
-    assertDoesNotThrow {
-      openSession().use { session ->
-        session.tryAcquireLock(key)
-      }
-    }
+    assertDoesNotThrow { openSession().use { session -> session.tryAcquireLock(key) } }
   }
 }
 
 @MiskTest(startService = true)
 class PostgresSessionLocksTest : HibernateSessionLocksTest() {
-  @MiskTestModule
-  val module = MoviesTestModule(DataSourceType.POSTGRESQL)
+  @MiskTestModule val module = MoviesTestModule(DataSourceType.POSTGRESQL)
 
   @Test
   fun `should NOT throw if key is too long`() {
     val key = "a".repeat(256)
-    assertDoesNotThrow {
-      openSession().use { session ->
-        session.tryAcquireLock(key)
-      }
-    }
+    assertDoesNotThrow { openSession().use { session -> session.tryAcquireLock(key) } }
   }
 }
 
 @MiskTest(startService = true)
 class VitessSessionLocksTest : HibernateSessionLocksTest() {
-  @MiskTestModule
-  val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
+  @MiskTestModule val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
 
   @Test
   fun `should throw if key is too long`() {
     val key = "a".repeat(256)
-    assertThrows<IllegalArgumentException> {
-      openSession().use { session ->
-        session.tryAcquireLock(key)
-      }
-    }
+    assertThrows<IllegalArgumentException> { openSession().use { session -> session.tryAcquireLock(key) } }
   }
 
   @Test
   fun `should NOT throw if key is the maximum length`() {
     val key = "a".repeat(64)
-    assertDoesNotThrow {
-      openSession().use { session ->
-        session.tryAcquireLock(key)
-      }
-    }
+    assertDoesNotThrow { openSession().use { session -> session.tryAcquireLock(key) } }
   }
 }

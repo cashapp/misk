@@ -1,26 +1,27 @@
 package misk.web.extractors
 
+import kotlin.reflect.KParameter
+import kotlin.reflect.KType
+import kotlin.test.assertFailsWith
 import misk.exceptions.BadRequestException
 import misk.web.QueryParam
 import misk.web.extractors.QueryParamFeatureBinding.Factory.toQueryBinding
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import kotlin.reflect.KParameter
-import kotlin.reflect.KType
-import kotlin.test.assertFailsWith
 
 internal class QueryParamFeatureBindingTest {
-  private val stringConverterFactories = listOf<StringConverter.Factory>(
-    object: StringConverter.Factory {
-      override fun create(kType: KType): StringConverter? {
-        return if (kType.classifier == ValueClass::class) {
-          StringConverter { ValueClass(it) }
-        } else {
-          null
+  private val stringConverterFactories =
+    listOf<StringConverter.Factory>(
+      object : StringConverter.Factory {
+        override fun create(kType: KType): StringConverter? {
+          return if (kType.classifier == ValueClass::class) {
+            StringConverter { ValueClass(it) }
+          } else {
+            null
+          }
         }
       }
-    }
-  )
+    )
 
   @Test
   fun simpleString() {
@@ -133,9 +134,7 @@ internal class QueryParamFeatureBindingTest {
   @Test
   fun invalidInt() {
     val queryStringProcessor = TestMemberStore.intParameter().toQueryBinding(stringConverterFactories)!!
-    assertFailsWith<BadRequestException> {
-      queryStringProcessor.parameterValue(listOf("forty two"))
-    }
+    assertFailsWith<BadRequestException> { queryStringProcessor.parameterValue(listOf("forty two")) }
   }
 
   @Test
@@ -187,9 +186,7 @@ internal class QueryParamFeatureBindingTest {
   @Test
   fun optionalIntListPresent() {
     val queryStringProcessor = TestMemberStore.optionalIntListParameter().toQueryBinding(stringConverterFactories)!!
-    val extractedResult = queryStringProcessor.parameterValue(
-      listOf("42", "23")
-    )
+    val extractedResult = queryStringProcessor.parameterValue(listOf("42", "23"))
     assertThat(extractedResult).isNotNull()
     assertThat(extractedResult).isEqualTo(listOf(42, 23))
   }
@@ -271,11 +268,10 @@ internal class QueryParamFeatureBindingTest {
 
   enum class TestEnum {
     ONE,
-    TWO
+    TWO,
   }
 
-  @JvmInline
-  value class ValueClass(val value: String)
+  @JvmInline value class ValueClass(val value: String)
 
   @Suppress("UNUSED_PARAMETER")
   internal class TestMemberStore {
@@ -285,9 +281,8 @@ internal class QueryParamFeatureBindingTest {
       @QueryParam listStr: List<String>,
       @QueryParam optListStr: List<String>?,
       @QueryParam defaultStr: String = "default",
-      @QueryParam defaultListStr: List<String> = listOf("default1", "default2")
-    ) {
-    }
+      @QueryParam defaultListStr: List<String> = listOf("default1", "default2"),
+    ) {}
 
     fun intTest(
       @QueryParam int: Int,
@@ -295,50 +290,56 @@ internal class QueryParamFeatureBindingTest {
       @QueryParam listInt: List<Int>,
       @QueryParam optListInt: List<Int>?,
       @QueryParam defaultInt: Int = 42,
-      @QueryParam defaultListInt: List<Int> = listOf(42, 23)
-    ) {
-    }
+      @QueryParam defaultListInt: List<Int> = listOf(42, 23),
+    ) {}
 
-    fun longTest(
-      @QueryParam long: Long
-    ) {
-    }
+    fun longTest(@QueryParam long: Long) {}
 
     fun enumTest(
       @QueryParam anEnum: TestEnum,
       @QueryParam optEnum: TestEnum?,
-      @QueryParam defaultEnum: TestEnum = TestEnum.ONE
-    ) {
-    }
+      @QueryParam defaultEnum: TestEnum = TestEnum.ONE,
+    ) {}
 
-    fun unsupportedTest(
-      @QueryParam hashMap: Map<String, String>
-    ) {
-    }
+    fun unsupportedTest(@QueryParam hashMap: Map<String, String>) {}
 
-    fun customStringConverterTest(
-      @QueryParam valueClass: ValueClass,
-    ) {
-    }
+    fun customStringConverterTest(@QueryParam valueClass: ValueClass) {}
 
     companion object {
       fun stringParameter(): KParameter = TestMemberStore::strTest.parameters.get(1)
+
       fun optionalStringParameter(): KParameter = TestMemberStore::strTest.parameters.get(2)
+
       fun stringListParameter(): KParameter = TestMemberStore::strTest.parameters.get(3)
+
       fun optionalStringListParameter(): KParameter = TestMemberStore::strTest.parameters.get(4)
+
       fun defaultStringParameter(): KParameter = TestMemberStore::strTest.parameters.get(5)
+
       fun defaultStringListParameter(): KParameter = TestMemberStore::strTest.parameters.get(6)
+
       fun intParameter(): KParameter = TestMemberStore::intTest.parameters.get(1)
+
       fun optionalIntParameter(): KParameter = TestMemberStore::intTest.parameters.get(2)
+
       fun intListParameter(): KParameter = TestMemberStore::intTest.parameters.get(3)
+
       fun optionalIntListParameter(): KParameter = TestMemberStore::intTest.parameters.get(4)
+
       fun defaultIntParameter(): KParameter = TestMemberStore::intTest.parameters.get(5)
+
       fun defaultIntListParameter(): KParameter = TestMemberStore::intTest.parameters.get(6)
+
       fun longParameter(): KParameter = TestMemberStore::longTest.parameters.get(1)
+
       fun enumParameter(): KParameter = TestMemberStore::enumTest.parameters.get(1)
+
       fun optionalEnumParameter(): KParameter = TestMemberStore::enumTest.parameters.get(2)
+
       fun defaultEnumParameter(): KParameter = TestMemberStore::enumTest.parameters.get(3)
+
       fun unsupportedParameter(): KParameter = TestMemberStore::unsupportedTest.parameters.get(1)
+
       fun valueClassParameter(): KParameter = TestMemberStore::customStringConverterTest.parameters.get(1)
     }
   }

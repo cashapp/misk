@@ -1,8 +1,8 @@
 package misk.time
 
 /**
- * Wait until the duration has elapsed. Unlike [java.lang.Object.wait] this interprets 0 as
- * "don't wait" instead of "wait forever".
+ * Wait until the duration has elapsed. Unlike [java.lang.Object.wait] this interprets 0 as "don't wait" instead of
+ * "wait forever".
  */
 fun Any.waitNanosIgnoreNotifies(nanos: Long) {
   check(nanos >= 0)
@@ -15,8 +15,8 @@ fun Any.waitNanosIgnoreNotifies(nanos: Long) {
 }
 
 /**
- * Wait until either a duration is elapsed or this is notified. Unlike [java.lang.Object.wait] this
- * interprets 0 as "don't wait" instead of "wait forever".
+ * Wait until either a duration is elapsed or this is notified. Unlike [java.lang.Object.wait] this interprets 0 as
+ * "don't wait" instead of "wait forever".
  */
 @Throws(InterruptedException::class)
 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
@@ -28,8 +28,7 @@ fun Any.waitNanos(nanos: Long) {
   }
 }
 
-@Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "NOTHING_TO_INLINE")
-inline fun Any.notify() = (this as Object).notify()
+@Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "NOTHING_TO_INLINE") inline fun Any.notify() = (this as Object).notify()
 
 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "NOTHING_TO_INLINE")
 inline fun Any.notifyAll() = (this as Object).notifyAll()

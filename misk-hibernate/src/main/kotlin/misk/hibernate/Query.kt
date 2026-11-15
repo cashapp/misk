@@ -1,6 +1,5 @@
 package misk.hibernate
 
-import misk.vitess.VitessQueryHints
 import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.JoinType
 import javax.persistence.criteria.JoinType.LEFT
@@ -8,6 +7,7 @@ import javax.persistence.criteria.Predicate
 import javax.persistence.criteria.Root
 import javax.persistence.criteria.Selection
 import kotlin.reflect.KClass
+import misk.vitess.VitessQueryHints
 
 /** Base class for SQL queries. */
 interface Query<T> {
@@ -28,9 +28,7 @@ interface Query<T> {
   /** Fetch the given path as a join, using the given joinType */
   fun dynamicAddFetch(path: String, joinType: JoinType)
 
-  /**
-   * Adds a SQL hint to the query.
-   */
+  /** Adds a SQL hint to the query. */
   fun addQueryHint(hint: String)
 
   fun disableCheck(check: Check)
@@ -39,20 +37,14 @@ interface Query<T> {
   fun uniqueResult(session: Session): T?
 
   /** Manual projections are returned as a list of cells. Returns null if there were no results. */
-  fun dynamicUniqueResult(
-    session: Session,
-    selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>
-  ): List<Any?>?
+  fun dynamicUniqueResult(session: Session, selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>): List<Any?>?
 
   fun dynamicUniqueResult(session: Session, projectedPaths: List<String>): List<Any?>?
 
   fun list(session: Session): List<T>
 
   /** Manual projections are returned as a list of rows containing a list of cells. */
-  fun dynamicList(
-    session: Session,
-    selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>
-  ): List<List<Any?>>
+  fun dynamicList(session: Session, selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>): List<List<Any?>>
 
   fun dynamicList(session: Session, projectedPaths: List<String>): List<List<Any?>>
 
@@ -62,9 +54,8 @@ interface Query<T> {
   /**
    * Returns the number of rows that match the query.
    *
-   * **Warning:** The performance of this operation is comparable to a SELECT. MySQL scans all of
-   * the counted rows. A query that returns a count of 5000 is typically 10 times slower than a
-   * query that returns a count of 500.
+   * **Warning:** The performance of this operation is comparable to a SELECT. MySQL scans all of the counted rows. A
+   * query that returns a count of 5000 is typically 10 times slower than a query that returns a count of 500.
    */
   fun count(session: Session): Long
 
@@ -75,6 +66,7 @@ interface Query<T> {
   /** Creates instances of queries. */
   interface Factory {
     fun <Q : Query<*>> newQuery(queryClass: KClass<Q>): Q
+
     fun <E : DbEntity<E>> dynamicQuery(entityClass: KClass<E>): Query<E>
   }
 }
@@ -82,9 +74,8 @@ interface Query<T> {
 inline fun <reified T : Query<*>> Query.Factory.newQuery(): T = newQuery(T::class)
 
 /**
- * This functional interface accepts a set of options. Each option lambda is executed within the
- * scope of a query. It is inappropriate to call methods like list() and uniqueResult() on this
- * query.
+ * This functional interface accepts a set of options. Each option lambda is executed within the scope of a query. It is
+ * inappropriate to call methods like list() and uniqueResult() on this query.
  */
 interface OrBuilder<Q : Query<*>> {
   fun option(lambda: Q.() -> Unit)
@@ -115,9 +106,9 @@ inline fun <T, reified Q : Query<T>> Q.allowTableScan(): Q {
 }
 
 /**
- * Query extension to allow scatter queries in Vitess by applying a query hint.
- * For Vitess, this works when `no_scatter` is set at the vtgate, otherwise this serves as a no-op.
- * For non-Vitess, this function will not work and should not be used.
+ * Query extension to allow scatter queries in Vitess by applying a query hint. For Vitess, this works when `no_scatter`
+ * is set at the vtgate, otherwise this serves as a no-op. For non-Vitess, this function will not work and should not be
+ * used.
  */
 inline fun <T, reified Q : Query<T>> Q.allowScatter(): Q {
   this.addQueryHint(VitessQueryHints.allowScatter())
@@ -125,8 +116,8 @@ inline fun <T, reified Q : Query<T>> Q.allowScatter(): Q {
 }
 
 /**
- * Equivalent to Query.addConstraint, but takes the [CriteriaBuilder] as a receiver and returns
- * this. This may be easier to use with method chaining.
+ * Equivalent to Query.addConstraint, but takes the [CriteriaBuilder] as a receiver and returns this. This may be easier
+ * to use with method chaining.
  *
  * The root parameter should be used to select which property of the target entity to match against.
  *
@@ -136,26 +127,20 @@ inline fun <T, reified Q : Query<T>> Q.allowScatter(): Q {
  *     .count(session)
  * ```
  */
-fun <T, Q : Query<T>> Q.constraint(
-  block: CriteriaBuilder.(root: Root<*>) -> Predicate
-): Q {
-  addJpaConstraint { root, criteriaBuilder ->
-    criteriaBuilder.block(root)
-  }
+fun <T, Q : Query<T>> Q.constraint(block: CriteriaBuilder.(root: Root<*>) -> Predicate): Q {
+  addJpaConstraint { root, criteriaBuilder -> criteriaBuilder.block(root) }
   return this
 }
 
-/**
- * Adds query hint to the query. (Chainable version of [Query.addQueryHint].)
- */
+/** Adds query hint to the query. (Chainable version of [Query.addQueryHint].) */
 fun <T, Q : Query<T>> Q.queryHint(hint: String): Q {
   addQueryHint(hint)
   return this
 }
 
 /**
- * Annotates a function on a [Query] interface to indicate which column (or path of columns)
- * it constrains and using which [Operator].
+ * Annotates a function on a [Query] interface to indicate which column (or path of columns) it constrains and using
+ * which [Operator].
  *
  * You can think of Constraints as the rules used to build the `where` clause of a SQL query.
  *
@@ -164,16 +149,14 @@ fun <T, Q : Query<T>> Q.queryHint(hint: String): Q {
  * @Constraint(path = "name") // Uses EQ as the default operator.
  * fun matchesTitle(title: String): MovieQuery
  * ```
+ *
  * Or query for movies released after a certain date with a method like this:
  * ```
  * @Constraint(path = "release_date", operator = Operator.GT)
  * fun releasedAfter(date: LocalDate): MovieQuery
  * ```
  */
-annotation class Constraint(
-  val path: String,
-  val operator: Operator = Operator.EQ
-)
+annotation class Constraint(val path: String, val operator: Operator = Operator.EQ)
 
 enum class Operator {
   /** `a < b` */
@@ -210,57 +193,39 @@ enum class Operator {
   IS_NULL,
 
   /** `a LIKE b` */
-  LIKE
+  LIKE,
 }
 
 /**
- * Annotates a function on a [Query] interface to execute a `SELECT` query. Functions with
- * this annotation must return a `List` to fetch multiple rows results, or a regular type to fetch
- * a unique result.
+ * Annotates a function on a [Query] interface to execute a `SELECT` query. Functions with this annotation must return a
+ * `List` to fetch multiple rows results, or a regular type to fetch a unique result.
  *
  * [Select] annotated methods may return single column values, or [Projection]s of multiple columns.
  */
-annotation class Select(
-  val path: String = "",
-  val aggregation: AggregationType = AggregationType.NONE
-)
+annotation class Select(val path: String = "", val aggregation: AggregationType = AggregationType.NONE)
 
 /**
- * Annotates a function on a [Query] interface to indicate by which columns to order the
- * results. Defaults to ascending order.
+ * Annotates a function on a [Query] interface to indicate by which columns to order the results. Defaults to ascending
+ * order.
  */
-annotation class Order(
-  val path: String,
-  val asc: Boolean = true
-)
+annotation class Order(val path: String, val asc: Boolean = true)
 
 /**
- * Annotates a function on a [Query] interface to specify that the association at
- * the given [path] should be fetched in a single query. The type of join used will be
- * specified by [joinType], and defaults to a LEFT JOIN.
+ * Annotates a function on a [Query] interface to specify that the association at the given [path] should be fetched in
+ * a single query. The type of join used will be specified by [joinType], and defaults to a LEFT JOIN.
  *
- * If the query will result in a [Projection], and does not need to get the entire entity graph, set
- * [forProjection] to true. This will make the query operate as a regular JOIN query, instead
- * of a JOIN FETCH query.
+ * If the query will result in a [Projection], and does not need to get the entire entity graph, set [forProjection] to
+ * true. This will make the query operate as a regular JOIN query, instead of a JOIN FETCH query.
  */
-annotation class Fetch(
-  val path: String = "",
-  val joinType: JoinType = LEFT,
-  val forProjection: Boolean = false,
-)
+annotation class Fetch(val path: String = "", val joinType: JoinType = LEFT, val forProjection: Boolean = false)
 
 /**
- * Annotates a function on a [Query] interface to indicate that the results should be
- * grouped by the given [paths]. This is most useful with [Projection]s and aggregations.
+ * Annotates a function on a [Query] interface to indicate that the results should be grouped by the given [paths]. This
+ * is most useful with [Projection]s and aggregations.
  */
-annotation class Group(
-  val paths: Array<String> = []
-)
+annotation class Group(val paths: Array<String> = [])
 
-/**
- * Available aggregations which can be applied to a single value [Select] query,
- * or a [Property] of a projection.
- */
+/** Available aggregations which can be applied to a single value [Select] query, or a [Property] of a projection. */
 enum class AggregationType {
   /** No aggregation is applied. Like `select column`. */
   NONE,

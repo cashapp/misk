@@ -8,8 +8,7 @@ import kotlin.math.asin
 /**
  * Provides an implementation of t-digest to be used to send histogram data
  *
- * Direct port of Veneur digest created by Stripe
- * https://github.com/stripe/veneur/blob/master/tdigest/merging_digest.go
+ * Direct port of Veneur digest created by Stripe https://github.com/stripe/veneur/blob/master/tdigest/merging_digest.go
  */
 class MergingDigest(private val compression: Double) {
 
@@ -27,8 +26,8 @@ class MergingDigest(private val compression: Double) {
   private var max: Double = Double.NEGATIVE_INFINITY
 
   /**
-   * Constructs a MergingDigest with values initialized from MergingDigestData.
-   * This should be the way to generate a MergingDigest from a serialized protobuf.
+   * Constructs a MergingDigest with values initialized from MergingDigestData. This should be the way to generate a
+   * MergingDigest from a serialized protobuf.
    */
   constructor(mergingDigestData: MergingDigestData) : this(mergingDigestData.compression) {
     mainCentroids.addAll(mergingDigestData.main_centroids)
@@ -55,13 +54,10 @@ class MergingDigest(private val compression: Double) {
   }
 
   /**
-   * Adds a new value to the t-digest, with a given weight that must be positive.
-   * Infinities and NaN cannot be added.
+   * Adds a new value to the t-digest, with a given weight that must be positive. Infinities and NaN cannot be added.
    */
   fun add(value: Double, weight: Double) {
-    require(value != Double.NaN && value != Double.POSITIVE_INFINITY && weight > 0) {
-      "invalid value added"
-    }
+    require(value != Double.NaN && value != Double.POSITIVE_INFINITY && weight > 0) { "invalid value added" }
 
     if (tempCentroids.size == estimateTempBuffer(compression)) {
       mergeAllTemps()
@@ -70,19 +66,13 @@ class MergingDigest(private val compression: Double) {
     min = minOf(min, value)
     max = maxOf(max, value)
 
-    var next = Centroid(
-        value,
-        weight,
-        mutableListOf<Double>()
-    )
+    var next = Centroid(value, weight, mutableListOf<Double>())
 
     tempCentroids.add(next)
     tempWeight += weight
   }
 
-  /**
-   * Combine the mainCentroids and tempCentroids in-place into mainCentroids
-   */
+  /** Combine the mainCentroids and tempCentroids in-place into mainCentroids */
   private fun mergeAllTemps() {
     // this optimization is really important! if you remove it, the main list
     // will get merged into itself every time this is called
@@ -113,20 +103,12 @@ class MergingDigest(private val compression: Double) {
     var swappedCentroids = mutableListOf<Centroid>()
 
     while ((actualMainCentroids.size + swappedCentroids.size != 0) || tempIndex < tempCentroids.size) {
-      var nextTemp: Centroid = Centroid(
-          Double.POSITIVE_INFINITY,
-          0.0,
-          mutableListOf<Double>()
-      )
+      var nextTemp: Centroid = Centroid(Double.POSITIVE_INFINITY, 0.0, mutableListOf<Double>())
       if (tempIndex < tempCentroids.size) {
         nextTemp = tempCentroids[tempIndex]
       }
 
-      var nextMain: Centroid = Centroid(
-          Double.POSITIVE_INFINITY,
-          Double.NEGATIVE_INFINITY,
-          mutableListOf<Double>()
-      )
+      var nextMain: Centroid = Centroid(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, mutableListOf<Double>())
       if (swappedCentroids.size != 0) {
         nextMain = swappedCentroids[0]
       } else if (actualMainCentroids.size != 0) {
@@ -172,16 +154,10 @@ class MergingDigest(private val compression: Double) {
   }
 
   /**
-   * Merges a single centroid into the mergedCentroids list.
-   * Note that "merging" sometimes creates a new centroid in the list, however
-   * the length of the list has a strict upper bound (see constructor)
+   * Merges a single centroid into the mergedCentroids list. Note that "merging" sometimes creates a new centroid in the
+   * list, however the length of the list has a strict upper bound (see constructor)
    */
-  private fun mergeOne(
-    beforeWeight: Double,
-    totalWeight: Double,
-    beforeIndex: Double,
-    next: Centroid
-  ): Double {
+  private fun mergeOne(beforeWeight: Double, totalWeight: Double, beforeIndex: Double, next: Centroid): Double {
 
     // compute the quantile index of the element we're about to merge
     var nextIndex = indexEstimate((beforeWeight + next.weight) / totalWeight)
@@ -203,7 +179,8 @@ class MergingDigest(private val compression: Double) {
       var builder = mainCentroidsTemp.newBuilder()
       builder.weight += next.weight
       builder.mean +=
-          (next.mean - mainCentroids[mainCentroids.size - 1].mean) * next.weight / mainCentroids[mainCentroids.size - 1].weight
+        (next.mean - mainCentroids[mainCentroids.size - 1].mean) * next.weight /
+          mainCentroids[mainCentroids.size - 1].weight
 
       // we did not create a new centroid, so the trailing index of the previous
       // centroid remains
@@ -211,22 +188,17 @@ class MergingDigest(private val compression: Double) {
     }
   }
 
-  /**
-   * Given a quantile, estimate the index of the centroid that contains it using
-   * the given compression
-   */
+  /** Given a quantile, estimate the index of the centroid that contains it using the given compression */
   private fun indexEstimate(quantile: Double): Double {
     return compression * ((asin(2 * quantile - 1) / PI) + 0.5)
   }
 
   /**
-   * Returns a value such that the fraction of values in td below that value is
-   * approximately equal to quantile. Returns NaN if the digest is empty.
+   * Returns a value such that the fraction of values in td below that value is approximately equal to quantile. Returns
+   * NaN if the digest is empty.
    */
   fun quantile(quantile: Double): Double {
-    require(quantile in 0.toDouble().rangeTo(1.toDouble())) {
-      "quantile out of bounds"
-    }
+    require(quantile in 0.toDouble().rangeTo(1.toDouble())) { "quantile out of bounds" }
     mergeAllTemps()
 
     // add up the weights of centroids in ascending order until we reach a
@@ -259,14 +231,12 @@ class MergingDigest(private val compression: Double) {
   }
 
   /**
-   * We assume each centroid contains a uniform distribution of values
-   * the lower bound of the distribution is the midpoint between this centroid and
-   * the previous one (or the minimum, if this is the lowest centroid)
-   * similarly, the upper bound is the midpoint between this centroid and the
-   * next one (or the maximum, if this is the greatest centroid)
-   * this function returns the position of the upper bound (the lower bound is
-   * equal to the upper bound of the previous centroid)
-   * this assumption is justified empirically in dunning's paper
+   * We assume each centroid contains a uniform distribution of values the lower bound of the distribution is the
+   * midpoint between this centroid and the previous one (or the minimum, if this is the lowest centroid) similarly, the
+   * upper bound is the midpoint between this centroid and the next one (or the maximum, if this is the greatest
+   * centroid) this function returns the position of the upper bound (the lower bound is equal to the upper bound of the
+   * previous centroid) this assumption is justified empirically in dunning's paper
+   *
    * TODO: does this assumption actually apply to our implementation?
    */
   private fun centroidUpperBound(i: Int): Double {
@@ -278,8 +248,8 @@ class MergingDigest(private val compression: Double) {
   }
 
   /**
-   * Merge another digest into this one. Neither td nor other can be shared
-   * concurrently during the execution of this method.
+   * Merge another digest into this one. Neither td nor other can be shared concurrently during the execution of this
+   * method.
    */
   fun mergeFrom(other: MergingDigest) {
 
@@ -299,17 +269,11 @@ class MergingDigest(private val compression: Double) {
   }
 
   /**
-   * MergingDigestData contains all fields necessary to generate a MergingDigest.
-   * This type should generally just be used when serializing MergingDigest's,
-   * and doesn't have much of a purpose on its own.
+   * MergingDigestData contains all fields necessary to generate a MergingDigest. This type should generally just be
+   * used when serializing MergingDigest's, and doesn't have much of a purpose on its own.
    */
   fun data(): MergingDigestData {
     mergeAllTemps()
-    return MergingDigestData(
-        mainCentroids,
-        compression,
-        min,
-        max
-    )
+    return MergingDigestData(mainCentroids, compression, min, max)
   }
 }

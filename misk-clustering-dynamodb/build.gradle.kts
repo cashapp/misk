@@ -15,9 +15,12 @@ dependencies {
   implementation(libs.guava)
   implementation(libs.guice)
   implementation(libs.jakartaInject)
+  implementation(libs.loggingApi)
   implementation(project(":misk"))
+  implementation(project(":misk-aws2-dynamodb"))
   implementation(project(":misk-backoff"))
   implementation(project(":misk-clustering"))
+  implementation(project(":misk-logging"))
   implementation(project(":misk-service"))
 
   testImplementation(libs.assertj)
@@ -42,6 +45,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

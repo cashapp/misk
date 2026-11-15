@@ -2,15 +2,14 @@ package com.squareup.exemplar
 
 import com.google.inject.Injector
 import com.google.inject.Module
+import jakarta.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.testing.TestFixtureBindingValidator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
-import misk.testing.TestFixtureBindingValidator
 
 @MiskTest
-
 class ExemplarTestFixtureValidationTest {
   /**
    * Validates that all TestFixture implementations in ExemplarTestModule have proper Guice bindings.

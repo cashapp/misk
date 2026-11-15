@@ -7,8 +7,8 @@ import com.google.inject.TypeLiteral
 import com.google.inject.spi.LinkedKeyBinding
 import java.lang.reflect.Modifier
 import java.lang.reflect.ParameterizedType
-import misk.logging.getLogger
 import kotlin.collections.iterator
+import misk.logging.getLogger
 
 /**
  * Validates that all classes implementing or extending TestFixture are properly bound in Guice modules with both the
@@ -155,7 +155,7 @@ class TestFixtureBindingValidator(private val injector: Injector) {
         |    multibind<TestFixture>().to<FakeService>()  // <- Don't forget this line!
         |  }
         |}
-      """
+        """
           .trimMargin()
       )
     } else {

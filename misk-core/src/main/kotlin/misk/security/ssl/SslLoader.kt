@@ -1,6 +1,5 @@
 package misk.security.ssl
 
-import misk.resources.ResourceLoader
 import jakarta.inject.Inject
 import java.io.IOException
 import java.security.KeyFactory
@@ -9,28 +8,25 @@ import java.security.KeyStoreException
 import java.security.NoSuchAlgorithmException
 import java.security.cert.CertificateException
 import java.security.spec.PKCS8EncodedKeySpec
+import misk.resources.ResourceLoader
 import wisp.security.ssl.SslLoader as WispSslLoader
 
 /** Loads keys and certificates from the file system. */
-class SslLoader @Inject constructor(
-  val resourceLoader: ResourceLoader
-) {
+class SslLoader @Inject constructor(val resourceLoader: ResourceLoader) {
   @Deprecated("Duplicate implementations in Wisp are being migrated to the unified type in Misk.")
   val delegate: WispSslLoader by lazy { WispSslLoader(resourceLoader.delegate) }
 
   @JvmOverloads
-  fun loadTrustStore(
-    path: String,
-    format: String = FORMAT_PEM,
-    passphrase: String? = null
-  ): TrustStore? {
+  fun loadTrustStore(path: String, format: String = FORMAT_PEM, passphrase: String? = null): TrustStore? {
     return when (format) {
       FORMAT_PEM -> {
         // Load a TrustStore from a combined PEM file, returning null in the event that it contains
         // a certificate chain and no private keys.
         load(path, passphrase).toTrustStore()
       }
-      FORMAT_JCEKS, FORMAT_JKS, FORMAT_PKCS12 -> {
+      FORMAT_JCEKS,
+      FORMAT_JKS,
+      FORMAT_PKCS12 -> {
         // TODO(young): This function should check that the underlying keystore complies with what
         // TrustStore provides.
         TrustStore(loadJavaKeystore(path, format, passphrase))
@@ -40,17 +36,14 @@ class SslLoader @Inject constructor(
   }
 
   private fun load(cert_key_combo: String, passphrase: String? = null): PemComboFile {
-    val source = resourceLoader.open(cert_key_combo)
-      ?: throw IllegalArgumentException("no such resource $cert_key_combo")
+    val source =
+      resourceLoader.open(cert_key_combo) ?: throw IllegalArgumentException("no such resource $cert_key_combo")
     source.use {
       return PemComboFile.parse(source, passphrase)
     }
   }
 
-  fun loadTrustStore(config: TrustStoreConfig) = loadTrustStore(
-    config.resource, config.format,
-    config.passphrase
-  )
+  fun loadTrustStore(config: TrustStoreConfig) = loadTrustStore(config.resource, config.format, config.passphrase)
 
   private fun PemComboFile.toTrustStore(): TrustStore? {
     if (!privateKeys.isEmpty() || !privateRsaKeys.isEmpty()) return null
@@ -63,18 +56,16 @@ class SslLoader @Inject constructor(
   }
 
   @JvmOverloads
-  fun loadCertStore(
-    path: String,
-    format: String = FORMAT_PEM,
-    passphrase: String? = null
-  ): CertStore? {
+  fun loadCertStore(path: String, format: String = FORMAT_PEM, passphrase: String? = null): CertStore? {
     return when (format) {
       FORMAT_PEM -> {
         // Load a CertStore from a combined PEM file, returning null in the event that it doesn't
         // contain a single private key and a cert chain.
         load(path, passphrase).toCertStore()
       }
-      FORMAT_JCEKS, FORMAT_JKS, FORMAT_PKCS12 -> {
+      FORMAT_JCEKS,
+      FORMAT_JKS,
+      FORMAT_PKCS12 -> {
         // TODO(young): This function should check that the underlying keystore complies with what
         // CertStore provides.
         CertStore(loadJavaKeystore(path, format, passphrase))
@@ -90,32 +81,28 @@ class SslLoader @Inject constructor(
     if (certificates.isEmpty() || privateRsaKeys.size + privateKeys.size != 1) return null
 
     val keyStore = newEmptyKeyStore()
-    val privateKeySpec = if (privateKeys.isEmpty()) PemComboFile.convertPKCS1toPKCS8(
-      privateRsaKeys[0]
-    )
-    else PKCS8EncodedKeySpec(privateKeys[0].toByteArray())
+    val privateKeySpec =
+      if (privateKeys.isEmpty()) PemComboFile.convertPKCS1toPKCS8(privateRsaKeys[0])
+      else PKCS8EncodedKeySpec(privateKeys[0].toByteArray())
     val keyFactory = KeyFactory.getInstance("RSA")
     val privateKey = keyFactory.generatePrivate(privateKeySpec)
-    keyStore.setKeyEntry(
-      "key", privateKey, passphrase.toCharArray(),
-      decodeCertificates().toTypedArray()
-    )
+    keyStore.setKeyEntry("key", privateKey, passphrase.toCharArray(), decodeCertificates().toTypedArray())
     return CertStore(keyStore)
   }
 
   private fun loadJavaKeystore(path: String, type: String, passphrase: String? = null): KeyStore {
-    val source = resourceLoader.open(path)
-      ?: throw IllegalArgumentException("no such resource $path")
+    val source = resourceLoader.open(path) ?: throw IllegalArgumentException("no such resource $path")
     source.use {
-      val keystore = try {
-        KeyStore.getInstance(type)
-      } catch (e: KeyStoreException) {
-        throw IllegalStateException("no provider exists for the keystore type $type", e)
-      } catch (e: IllegalAccessException) {
-        throw IllegalStateException("no provider exists for the keystore type $type", e)
-      } catch (e: ClassNotFoundException) {
-        throw IllegalStateException("no provider exists for the keystore type $type", e)
-      }
+      val keystore =
+        try {
+          KeyStore.getInstance(type)
+        } catch (e: KeyStoreException) {
+          throw IllegalStateException("no provider exists for the keystore type $type", e)
+        } catch (e: IllegalAccessException) {
+          throw IllegalStateException("no provider exists for the keystore type $type", e)
+        } catch (e: ClassNotFoundException) {
+          throw IllegalStateException("no provider exists for the keystore type $type", e)
+        }
 
       try {
         keystore.load(source.inputStream(), passphrase?.toCharArray())

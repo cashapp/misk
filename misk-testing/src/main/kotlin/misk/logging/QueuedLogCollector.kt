@@ -7,48 +7,38 @@ import ch.qos.logback.core.UnsynchronizedAppenderBase
 import com.google.common.util.concurrent.AbstractIdleService
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
+import org.slf4j.LoggerFactory
 
 @Singleton
-class QueuedLogCollector @Inject constructor(): AbstractIdleService(), LogCollector, LogCollectorService {
+class QueuedLogCollector @Inject constructor() : AbstractIdleService(), LogCollector, LogCollectorService {
 
   private val queue = LinkedBlockingDeque<ILoggingEvent>()
 
   private var wasStarted = false
 
-  private val appender = object : UnsynchronizedAppenderBase<ILoggingEvent>() {
-    override fun append(event: ILoggingEvent) {
-      queue.put(event)
+  private val appender =
+    object : UnsynchronizedAppenderBase<ILoggingEvent>() {
+      override fun append(event: ILoggingEvent) {
+        queue.put(event)
+      }
     }
-  }
 
-  override fun takeMessages(
-    loggerClass: KClass<*>?,
-    minLevel: Level,
-    pattern: Regex?
-  ): List<String> = takeMessages(loggerClass, minLevel, pattern, consumeUnmatchedLogs = true)
+  override fun takeMessages(loggerClass: KClass<*>?, minLevel: Level, pattern: Regex?): List<String> =
+    takeMessages(loggerClass, minLevel, pattern, consumeUnmatchedLogs = true)
 
   override fun takeMessages(
     loggerClass: KClass<*>?,
     minLevel: Level,
     pattern: Regex?,
     consumeUnmatchedLogs: Boolean,
-  ): List<String> = takeEvents(
-    loggerClass,
-    minLevel,
-    pattern,
-    consumeUnmatchedLogs
-  ).map { it.message }
+  ): List<String> = takeEvents(loggerClass, minLevel, pattern, consumeUnmatchedLogs).map { it.message }
 
-  override fun takeMessage(
-    loggerClass: KClass<*>?,
-    minLevel: Level,
-    pattern: Regex?
-  ): String = takeMessage(loggerClass, minLevel, pattern, consumeUnmatchedLogs = true)
+  override fun takeMessage(loggerClass: KClass<*>?, minLevel: Level, pattern: Regex?): String =
+    takeMessage(loggerClass, minLevel, pattern, consumeUnmatchedLogs = true)
 
   override fun takeMessage(
     loggerClass: KClass<*>?,
@@ -57,11 +47,8 @@ class QueuedLogCollector @Inject constructor(): AbstractIdleService(), LogCollec
     consumeUnmatchedLogs: Boolean,
   ): String = takeEvent(loggerClass, minLevel, pattern, consumeUnmatchedLogs).message
 
-  override fun takeEvents(
-    loggerClass: KClass<*>?,
-    minLevel: Level,
-    pattern: Regex?
-  ): List<ILoggingEvent> = takeEvents(loggerClass, minLevel, pattern, consumeUnmatchedLogs = true)
+  override fun takeEvents(loggerClass: KClass<*>?, minLevel: Level, pattern: Regex?): List<ILoggingEvent> =
+    takeEvents(loggerClass, minLevel, pattern, consumeUnmatchedLogs = true)
 
   override fun takeEvents(
     loggerClass: KClass<*>?,
@@ -76,33 +63,21 @@ class QueuedLogCollector @Inject constructor(): AbstractIdleService(), LogCollec
     return takeEventsConsuming(loggerClass, minLevel, pattern)
   }
 
-  override fun takeEvent(
-    loggerClass: KClass<*>?,
-    minLevel: Level,
-    pattern: Regex?
-  ): ILoggingEvent = takeEvent(loggerClass, minLevel, pattern, consumeUnmatchedLogs = true)
+  override fun takeEvent(loggerClass: KClass<*>?, minLevel: Level, pattern: Regex?): ILoggingEvent =
+    takeEvent(loggerClass, minLevel, pattern, consumeUnmatchedLogs = true)
 
-  /**
-   * Takes all events currently on the queue which match the constraints.
-   * Leaves behind events that don't match.
-   */
-  private fun takeEventsNonConsuming(
-    loggerClass: KClass<*>?,
-    minLevel: Level,
-    pattern: Regex?
-  ): List<ILoggingEvent> {
+  /** Takes all events currently on the queue which match the constraints. Leaves behind events that don't match. */
+  private fun takeEventsNonConsuming(loggerClass: KClass<*>?, minLevel: Level, pattern: Regex?): List<ILoggingEvent> {
     val resultList = queue.filter { matchLog(it, loggerClass, minLevel, pattern) }.toList()
     queue.removeAll(resultList)
     return resultList
   }
 
-  /**
-   * Consumes the whole queue of events, returning only those which match the constraints.
-   */
+  /** Consumes the whole queue of events, returning only those which match the constraints. */
   private fun takeEventsConsuming(
     loggerClass: KClass<*>?,
     minLevel: Level,
-    pattern: Regex?
+    pattern: Regex?,
   ): MutableList<ILoggingEvent> {
     val result = mutableListOf<ILoggingEvent>()
     while (queue.isNotEmpty()) {
@@ -126,32 +101,25 @@ class QueuedLogCollector @Inject constructor(): AbstractIdleService(), LogCollec
   }
 
   /**
-   * Takes an event matching the constraints, leaving behind all other non-matching events
-   * in the queue. Throws if there are no matching events.
+   * Takes an event matching the constraints, leaving behind all other non-matching events in the queue. Throws if there
+   * are no matching events.
    */
-  private fun takeNonConsuming(
-    loggerClass: KClass<*>?,
-    minLevel: Level,
-    pattern: Regex?
-  ): ILoggingEvent {
+  private fun takeNonConsuming(loggerClass: KClass<*>?, minLevel: Level, pattern: Regex?): ILoggingEvent {
     for (i in 1..5) {
       if (queue.isEmpty()) sleep(100) else continue
     }
-    val event = queue.find { matchLog(it, loggerClass, minLevel, pattern) }
-      ?: error("no matching events for (logger=$loggerClass, minLevel=$minLevel, pattern=$pattern)")
+    val event =
+      queue.find { matchLog(it, loggerClass, minLevel, pattern) }
+        ?: error("no matching events for (logger=$loggerClass, minLevel=$minLevel, pattern=$pattern)")
     queue.remove(event)
     return event
   }
 
   /**
-   * Takes a matching event and consumes all events in the queue preceding the first match.
-   * Waits forever until there is a matching event.
+   * Takes a matching event and consumes all events in the queue preceding the first match. Waits forever until there is
+   * a matching event.
    */
-  private fun takeConsuming(
-    loggerClass: KClass<*>?,
-    minLevel: Level,
-    pattern: Regex?
-  ): ILoggingEvent {
+  private fun takeConsuming(loggerClass: KClass<*>?, minLevel: Level, pattern: Regex?): ILoggingEvent {
     while (true) {
       val event = takeOrNull(loggerClass, minLevel, pattern)
       if (event != null) return event
@@ -159,30 +127,21 @@ class QueuedLogCollector @Inject constructor(): AbstractIdleService(), LogCollec
   }
 
   /** Takes an event. Returns it if it meets the constraints and null if it doesn't. */
-  private fun takeOrNull(
-    loggerClass: KClass<*>?,
-    minLevel: Level,
-    pattern: Regex?
-  ): ILoggingEvent? {
+  private fun takeOrNull(loggerClass: KClass<*>?, minLevel: Level, pattern: Regex?): ILoggingEvent? {
     require(wasStarted) { "not collecting logs: did you forget to start the service?" }
 
-    val event = queue.poll(500, TimeUnit.MILLISECONDS)
-      ?: throw IllegalArgumentException("no events to take!")
+    val event = queue.poll(500, TimeUnit.MILLISECONDS) ?: throw IllegalArgumentException("no events to take!")
 
     return if (matchLog(event, loggerClass, minLevel, pattern)) event else null
   }
 
-  private fun matchLog(
-    event: ILoggingEvent,
-    loggerClass: KClass<*>?,
-    minLevel: Level,
-    pattern: Regex?
-  ) = when {
-    loggerClass != null && loggerClass.qualifiedName != event.loggerName -> false
-    event.level.toInt() < minLevel.toInt() -> false
-    pattern != null && !pattern.containsMatchIn(event.message.toString()) -> false
-    else -> true
-  }
+  private fun matchLog(event: ILoggingEvent, loggerClass: KClass<*>?, minLevel: Level, pattern: Regex?) =
+    when {
+      loggerClass != null && loggerClass.qualifiedName != event.loggerName -> false
+      event.level.toInt() < minLevel.toInt() -> false
+      pattern != null && !pattern.containsMatchIn(event.message.toString()) -> false
+      else -> true
+    }
 
   public override fun startUp() {
     appender.start()

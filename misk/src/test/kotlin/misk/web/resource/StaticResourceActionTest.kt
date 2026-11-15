@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level
 import com.google.inject.name.Names
 import jakarta.inject.Inject
 import jakarta.inject.Named
+import kotlin.test.assertFailsWith
 import misk.MiskTestingServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
@@ -28,98 +29,99 @@ import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 class StaticResourceActionTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
-  @Inject
-  @field:Named("static_resource_action")
-  private lateinit var httpClient: OkHttpClient
+  @Inject @field:Named("static_resource_action") private lateinit var httpClient: OkHttpClient
 
-  @Inject
-  private lateinit var jettyService: JettyService
+  @Inject private lateinit var jettyService: JettyService
 
-  @Inject
-  private lateinit var resourceLoader: ResourceLoader
+  @Inject private lateinit var resourceLoader: ResourceLoader
 
-  @Inject
-  private lateinit var logCollector: LogCollector
+  @Inject private lateinit var logCollector: LogCollector
 
   @BeforeEach
   internal fun setUp() {
     resourceLoader.put(
       "memory:/web/hi/app.js",
       """
-        |alert("hello world");
-        |""".trimMargin(),
+      |alert("hello world");
+      |"""
+        .trimMargin(),
     )
     resourceLoader.put(
       "memory:/web/hi/index.html",
       """
-        |<html>
-        |  <body>
-        |    <p>Hello world</p>
-        |  </body>
-        |</html>
-        |""".trimMargin(),
+      |<html>
+      |  <body>
+      |    <p>Hello world</p>
+      |  </body>
+      |</html>
+      |"""
+        .trimMargin(),
     )
     resourceLoader.put(
       "memory:/web/hi/main.css",
       """
-        |hello > world {
-        |  color: blue;
-        |}
-        |""".trimMargin(),
+      |hello > world {
+      |  color: blue;
+      |}
+      |"""
+        .trimMargin(),
     )
     resourceLoader.put(
       "memory:/web/nasa/command/index.html",
       """
-        |<html>
-        |  <body>
-        |    <p>Welcome to NASA Space Command Dashboard</p>
-        |  </body>
-        |</html>
-        |""".trimMargin(),
+      |<html>
+      |  <body>
+      |    <p>Welcome to NASA Space Command Dashboard</p>
+      |  </body>
+      |</html>
+      |"""
+        .trimMargin(),
     )
     resourceLoader.put(
       "memory:/web/nasa/tabs/o2fuel/tab_o2fuel.js",
       """
-        |alert("nasa world");
-        |""".trimMargin(),
+      |alert("nasa world");
+      |"""
+        .trimMargin(),
     )
     resourceLoader.put(
       "memory:/web/nasa/tabs/o2fuel/index.html",
       """
-        |<html>
-        |  <body>
-        |    <p>Your o2fuel gauge reads: this</p>
-        |  </body>
-        |</html>
-        |""".trimMargin(),
+      |<html>
+      |  <body>
+      |    <p>Your o2fuel gauge reads: this</p>
+      |  </body>
+      |</html>
+      |"""
+        .trimMargin(),
     )
     resourceLoader.put(
       "memory:/web/nasa/tabs/o2fuel/tab_o2fuel.css",
       """
-        |nasa > world {
-        |  color: blue;
-        |}
-        |""".trimMargin(),
+      |nasa > world {
+      |  color: blue;
+      |}
+      |"""
+        .trimMargin(),
     )
     resourceLoader.put(
       "memory:/build/path/to/code/SensitiveCode.class",
       """
-        |package sensitive.code;
-        |
-        |public class SensitiveCode {
-        |  public static void main(String[] args) {
-        |    System.out.println("This is sensitive code!");
-        |    }
-        |  }
-        |}
-        |""".trimMargin(),
+      |package sensitive.code;
+      |
+      |public class SensitiveCode {
+      |  public static void main(String[] args) {
+      |    System.out.println("This is sensitive code!");
+      |    }
+      |  }
+      |}
+      |"""
+        .trimMargin(),
     )
   }
 
@@ -175,9 +177,7 @@ class StaticResourceActionTest {
   fun nasaCommandRoot() {
     val response = request("/nasa/command/")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains(
-      "<p>Welcome to NASA Space Command Dashboard</p>",
-    )
+    assertThat(response.body!!.string()).contains("<p>Welcome to NASA Space Command Dashboard</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -185,9 +185,7 @@ class StaticResourceActionTest {
   fun nasaCommandHtml() {
     val response = request("/nasa/command/index.html")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains(
-      "<p>Welcome to NASA Space Command Dashboard</p>",
-    )
+    assertThat(response.body!!.string()).contains("<p>Welcome to NASA Space Command Dashboard</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -195,9 +193,7 @@ class StaticResourceActionTest {
   fun nasaFuelRoot() {
     val response = request("/nasa/tabs/o2fuel/")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains(
-      "<p>Your o2fuel gauge reads: this</p>",
-    )
+    assertThat(response.body!!.string()).contains("<p>Your o2fuel gauge reads: this</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -205,9 +201,7 @@ class StaticResourceActionTest {
   fun nasaFuelHtml() {
     val response = request("/nasa/tabs/o2fuel/index.html")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains(
-      "<p>Your o2fuel gauge reads: this</p>",
-    )
+    assertThat(response.body!!.string()).contains("<p>Your o2fuel gauge reads: this</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -231,9 +225,7 @@ class StaticResourceActionTest {
   fun nasaCommandBadPathRedirectsToPrefixIndex() {
     val response = request("/nasa/command/another/link/here/for/anti/brevity?with=query")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains(
-      "<p>Welcome to NASA Space Command Dashboard</p>",
-    )
+    assertThat(response.body!!.string()).contains("<p>Welcome to NASA Space Command Dashboard</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -241,9 +233,7 @@ class StaticResourceActionTest {
   fun nasaFuelBadPathRedirectsToPrefixIndex() {
     val response = request("/nasa/tabs/o2fuel/another/link/here/for/anti/brevity?with=query")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains(
-      "<p>Your o2fuel gauge reads: this</p>",
-    )
+    assertThat(response.body!!.string()).contains("<p>Your o2fuel gauge reads: this</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -251,9 +241,7 @@ class StaticResourceActionTest {
   fun nasaFuelSlashesOnSlashesRedirectsToPrefixIndex() {
     val response = request("/nasa/tabs/o2fuel/////anti/brevity?with=query")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains(
-      "<p>Your o2fuel gauge reads: this</p>",
-    )
+    assertThat(response.body!!.string()).contains("<p>Your o2fuel gauge reads: this</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -261,9 +249,7 @@ class StaticResourceActionTest {
   fun nasaFuelSlashesOnSlashesQueryRedirectsToPrefixIndex() {
     val response = request("/nasa/tabs/o2fuel/////anti/brevity?with=query")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains(
-      "<p>Your o2fuel gauge reads: this</p>",
-    )
+    assertThat(response.body!!.string()).contains("<p>Your o2fuel gauge reads: this</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -271,26 +257,20 @@ class StaticResourceActionTest {
   fun nasaFuelDotDirectoryRedirectsToPrefixIndex() {
     val response = request("/nasa/tabs/o2fuel/.test/.config/.ssh/anti/brevity?with=query")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains(
-      "<p>Your o2fuel gauge reads: this</p>",
-    )
+    assertThat(response.body!!.string()).contains("<p>Your o2fuel gauge reads: this</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
   @Test
   fun blockedPrefixEntryFails() {
-    assertFailsWith<IllegalArgumentException> {
-      StaticResourceEntry("/api/", "memory:/web/api/")
-    }
+    assertFailsWith<IllegalArgumentException> { StaticResourceEntry("/api/", "memory:/web/api/") }
   }
 
   @Test
   fun sensitiveResourceIsNotReturned() {
     val response = request("/build/path/to/code/SensitiveCode.class")
     assertThat(response.code).isEqualTo(404)
-    assertThat(response.body!!.string()).contains(
-      "Nothing found at /build/path/to/code/SensitiveCode.class",
-    )
+    assertThat(response.body!!.string()).contains("Nothing found at /build/path/to/code/SensitiveCode.class")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_PLAIN_UTF8)
 
     val messages = logCollector.takeMessages(StaticResourceAction::class, minLevel = Level.WARN)
@@ -302,33 +282,23 @@ class StaticResourceActionTest {
       install(
         HttpClientsConfigModule(
           HttpClientsConfig(
-            endpoints = mapOf(
-              "static_resource_action" to HttpClientEndpointConfig("http://example.com/"),
-            ),
-          ),
-        ),
+            endpoints = mapOf("static_resource_action" to HttpClientEndpointConfig("http://example.com/"))
+          )
+        )
       )
-      install(
-        HttpClientModule(
-          "static_resource_action",
-          Names.named("static_resource_action"),
-        ),
-      )
+      install(HttpClientModule("static_resource_action", Names.named("static_resource_action")))
 
       install(WebActionModule.createWithPrefix<StaticResourceAction>("/hi/"))
-      multibind<StaticResourceEntry>()
-        .toInstance(StaticResourceEntry("/hi/", "memory:/web/hi"))
+      multibind<StaticResourceEntry>().toInstance(StaticResourceEntry("/hi/", "memory:/web/hi"))
 
       install(WebActionModule.createWithPrefix<StaticResourceAction>("/nasa/command/"))
-      multibind<StaticResourceEntry>()
-        .toInstance(StaticResourceEntry("/nasa/command/", "memory:/web/nasa/command/"))
+      multibind<StaticResourceEntry>().toInstance(StaticResourceEntry("/nasa/command/", "memory:/web/nasa/command/"))
       install(WebActionModule.createWithPrefix<StaticResourceAction>("/nasa/tabs/o2fuel/"))
       multibind<StaticResourceEntry>()
         .toInstance(StaticResourceEntry("/nasa/tabs/o2fuel/", "memory:/web/nasa/tabs/o2fuel/"))
 
       install(WebActionModule.createWithPrefix<StaticResourceAction>("/build/"))
-      multibind<StaticResourceEntry>()
-        .toInstance(StaticResourceEntry("/build/", "memory:/build/"))
+      multibind<StaticResourceEntry>().toInstance(StaticResourceEntry("/build/", "memory:/build/"))
 
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())
@@ -337,11 +307,8 @@ class StaticResourceActionTest {
   }
 
   private fun request(path: String): okhttp3.Response {
-    return httpClient.newCall(
-      okhttp3.Request.Builder()
-        .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
-        .build(),
-    )
+    return httpClient
+      .newCall(okhttp3.Request.Builder().url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build()).build())
       .execute()
   }
 }

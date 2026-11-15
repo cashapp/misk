@@ -18,6 +18,7 @@ import misk.grpc.miskclient.RouteGuideCallCounter
 import misk.grpc.miskserver.RouteChatGrpcAction
 import misk.grpc.miskserver.RouteGuideMiskServiceModule
 import misk.inject.getInstance
+import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.metrics.FakeMetrics
 import misk.testing.MiskTest
@@ -39,15 +40,10 @@ import routeguide.Feature
 import routeguide.Point
 import routeguide.RouteGuideClient
 import routeguide.RouteNote
-import misk.logging.LogCollector
 
 @MiskTest(startService = true)
 class MiskClientMiskServerTest {
-  @MiskTestModule
-  val module = Modules.combine(
-    RouteGuideMiskServiceModule(),
-    LogCollectorModule()
-  )
+  @MiskTestModule val module = Modules.combine(RouteGuideMiskServiceModule(), LogCollectorModule())
 
   @Inject lateinit var logCollector: LogCollector
   @Inject lateinit var routeChatGrpcAction: RouteChatGrpcAction
@@ -66,14 +62,8 @@ class MiskClientMiskServerTest {
 
   @Test
   fun requestResponse() {
-    val point = Point(
-      latitude = 43,
-      longitude = -80
-    )
-    val feature = Feature(
-      name = "maple tree",
-      location = point
-    )
+    val point = Point(latitude = 43, longitude = -80)
+    val feature = Feature(name = "maple tree", location = point)
 
     runBlocking {
       val returnValue = routeGuide.GetFeature().execute(point)
@@ -124,8 +114,7 @@ class MiskClientMiskServerTest {
     routeChatGrpcAction.welcomeMessage = "welcome"
 
     runBlocking {
-      val (sendChannel, receiveChannel: ReceiveChannel<RouteNote>) =
-        routeGuide.RouteChat().executeIn(GlobalScope)
+      val (sendChannel, receiveChannel: ReceiveChannel<RouteNote>) = routeGuide.RouteChat().executeIn(GlobalScope)
       assertThat(receiveChannel.receive()).isEqualTo(RouteNote(message = "welcome"))
       sendChannel.close()
     }
@@ -133,15 +122,10 @@ class MiskClientMiskServerTest {
 
   @Test
   fun serverFailureGeneric() {
-    val point = Point(
-      latitude = -1,
-      longitude = 500
-    )
+    val point = Point(latitude = -1, longitude = 500)
 
     runBlocking {
-      val e = assertFailsWith<GrpcException> {
-        routeGuide.GetFeature().execute(point)
-      }
+      val e = assertFailsWith<GrpcException> { routeGuide.GetFeature().execute(point) }
       assertThat(e.grpcMessage).isEqualTo("unexpected latitude error!")
       assertThat(e.grpcStatus).isEqualTo(GrpcStatus.UNKNOWN)
 
@@ -155,7 +139,9 @@ class MiskClientMiskServerTest {
       val requestLoggingInterceptorLogs = logCollector.takeMessages(RequestLoggingInterceptor::class, Level.ERROR)
       assertEquals(1, requestLoggingInterceptorLogs.size)
       assertThat(requestLoggingInterceptorLogs[0])
-        .contains("GetFeatureGrpcAction principal=unknown time=0.000 ns failed request=Point{latitude=-1, longitude=500}")
+        .contains(
+          "GetFeatureGrpcAction principal=unknown time=0.000 ns failed request=Point{latitude=-1, longitude=500}"
+        )
 
       val exceptionLoggingInterceptorLogs = logCollector.takeMessages(ExceptionHandlingInterceptor::class)
       assertThat(exceptionLoggingInterceptorLogs).isEmpty()
@@ -164,18 +150,12 @@ class MiskClientMiskServerTest {
 
   @Test
   fun serverFailureNotFound() {
-    val point = Point(
-      latitude = -1,
-      longitude = 404
-    )
+    val point = Point(latitude = -1, longitude = 404)
 
     runBlocking {
-      val e = assertFailsWith<GrpcException> {
-        routeGuide.GetFeature().execute(point)
-      }
+      val e = assertFailsWith<GrpcException> { routeGuide.GetFeature().execute(point) }
       assertThat(e.grpcMessage).isEqualTo("unexpected latitude error!")
-      assertThat(e.grpcStatus).isEqualTo(GrpcStatus.NOT_FOUND)
-        .withFailMessage("wrong gRPC status ${e.grpcStatus.name}")
+      assertThat(e.grpcStatus).isEqualTo(GrpcStatus.NOT_FOUND).withFailMessage("wrong gRPC status ${e.grpcStatus.name}")
 
       // Assert that _metrics_ counted a 404 and no 200s, even though an HTTP 200 was returned
       // over HTTP. The 200 is implicitly asserted by the fact that we got a GrpcException, which
@@ -187,7 +167,9 @@ class MiskClientMiskServerTest {
       val requestLoggingInterceptorLogs = logCollector.takeMessages(RequestLoggingInterceptor::class, Level.WARN)
       assertEquals(1, requestLoggingInterceptorLogs.size)
       assertThat(requestLoggingInterceptorLogs[0])
-        .contains("GetFeatureGrpcAction principal=unknown time=0.000 ns failed request=Point{latitude=-1, longitude=404}")
+        .contains(
+          "GetFeatureGrpcAction principal=unknown time=0.000 ns failed request=Point{latitude=-1, longitude=404}"
+        )
 
       val exceptionLoggingInterceptorLogs = logCollector.takeMessages(ExceptionHandlingInterceptor::class)
       assertThat(exceptionLoggingInterceptorLogs).isEmpty()
@@ -195,29 +177,33 @@ class MiskClientMiskServerTest {
   }
 
   private fun assertResponseCount(code: Int, count: Int) {
-    await withPollInterval ONE_MILLISECOND atMost ONE_HUNDRED_MILLISECONDS untilCallTo {
-      metrics.histogramCount(
-        "http_request_latency_ms",
-        "action" to "GetFeatureGrpcAction",
-        "caller" to "unknown",
-        "code" to code.toString(),
-      )?.toInt() ?: 0
-    } matches { it == count }
+    await withPollInterval
+      ONE_MILLISECOND atMost
+      ONE_HUNDRED_MILLISECONDS untilCallTo
+      {
+        metrics
+          .histogramCount(
+            "http_request_latency_ms",
+            "action" to "GetFeatureGrpcAction",
+            "caller" to "unknown",
+            "code" to code.toString(),
+          )
+          ?.toInt() ?: 0
+      } matches
+      {
+        it == count
+      }
   }
 
   @Test
   fun grpcStatusError() {
-    val point = Point(
-      latitude = -91,
-      longitude = 10,
-    )
+    val point = Point(latitude = -91, longitude = 10)
 
     runBlocking {
-      val e = assertFailsWith<GrpcException> {
-        routeGuide.GetFeature().execute(point)
-      }
+      val e = assertFailsWith<GrpcException> { routeGuide.GetFeature().execute(point) }
       assertThat(e.grpcMessage).isEqualTo("invalid coordinates")
-      assertThat(e.grpcStatus).isEqualTo(GrpcStatus.INVALID_ARGUMENT)
+      assertThat(e.grpcStatus)
+        .isEqualTo(GrpcStatus.INVALID_ARGUMENT)
         .withFailMessage("wrong gRPC status ${e.grpcStatus.name}")
 
       // Assert that _metrics_ counted a HTTP_BAD_REQUEST and no 200s, even though an HTTP 200 was
@@ -227,5 +213,4 @@ class MiskClientMiskServerTest {
       assertResponseCount(HTTP_BAD_REQUEST, 1)
     }
   }
-
 }

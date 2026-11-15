@@ -2,6 +2,11 @@
 
 package misk.hibernate
 
+import java.io.Serializable
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+import java.sql.SQLException
+import java.util.Properties
 import org.hibernate.HibernateException
 import org.hibernate.MappingException
 import org.hibernate.dialect.Dialect
@@ -17,11 +22,6 @@ import org.hibernate.persister.entity.SingleTableEntityPersister
 import org.hibernate.pretty.MessageHelper
 import org.hibernate.service.ServiceRegistry
 import org.hibernate.type.Type
-import java.io.Serializable
-import java.sql.PreparedStatement
-import java.sql.ResultSet
-import java.sql.SQLException
-import java.util.Properties
 
 @Suppress("RedundantVisibilityModifier", "unused")
 public class GidGenerator : AbstractPostInsertGenerator(), Configurable {
@@ -37,7 +37,7 @@ public class GidGenerator : AbstractPostInsertGenerator(), Configurable {
   override fun getInsertGeneratedIdentifierDelegate(
     persister: PostInsertIdentityPersister,
     dialect: Dialect,
-    isGetGeneratedKeysEnabled: Boolean
+    isGetGeneratedKeysEnabled: Boolean,
   ): InsertGeneratedIdentifierDelegate {
     return GetGeneratedKeysDelegate(persister, dialect, rootColumn)
   }
@@ -45,7 +45,7 @@ public class GidGenerator : AbstractPostInsertGenerator(), Configurable {
   private class GetGeneratedKeysDelegate(
     persister: PostInsertIdentityPersister,
     val dialect: Dialect,
-    val rootColumn: String
+    val rootColumn: String,
   ) : InsertGeneratedIdentifierDelegate {
     private val persister: SingleTableEntityPersister
 
@@ -63,10 +63,9 @@ public class GidGenerator : AbstractPostInsertGenerator(), Configurable {
     override fun performInsert(
       insertSQL: String,
       session: SharedSessionContractImplementor,
-      binder: Binder
+      binder: Binder,
     ): Serializable {
-      @Suppress("UNCHECKED_CAST")
-      val entity = binder.entity as DbChild<Nothing, Nothing>
+      @Suppress("UNCHECKED_CAST") val entity = binder.entity as DbChild<Nothing, Nothing>
       // Square service container supports pre-assigning the gid by the app in which case we don't
       // generate a new autoinc value and instead just use what's there already. We use this for
       // shard migrations where we want to keep the same row id. Hopefully we never need to use that
@@ -79,7 +78,7 @@ public class GidGenerator : AbstractPostInsertGenerator(), Configurable {
       insertSQL: String,
       session: SharedSessionContractImplementor,
       binder: Binder,
-      entity: DbChild<Nothing, Nothing>
+      entity: DbChild<Nothing, Nothing>,
     ): Serializable {
       val parentId = entity.rootId
 
@@ -94,39 +93,32 @@ public class GidGenerator : AbstractPostInsertGenerator(), Configurable {
           releaseStatement(insert, session)
         }
       } catch (sqle: SQLException) {
-        throw session.factory.serviceRegistry.getService(
-          JdbcServices::class.java
-        ).sqlExceptionHelper.convert(
-          sqle,
-          "could not insert: " + MessageHelper.infoString(persister),
-          insertSQL
-        )
+        throw session.factory.serviceRegistry
+          .getService(JdbcServices::class.java)
+          .sqlExceptionHelper
+          .convert(sqle, "could not insert: " + MessageHelper.infoString(persister), insertSQL)
       }
     }
 
     @Throws(SQLException::class)
-    private fun releaseStatement(
-      insert: PreparedStatement,
-      session: SharedSessionContractImplementor
-    ) {
+    private fun releaseStatement(insert: PreparedStatement, session: SharedSessionContractImplementor) {
       session.jdbcCoordinator.logicalConnection.resourceRegistry.release(insert)
       session.jdbcCoordinator.afterStatementExecution()
     }
 
     @Throws(SQLException::class)
-    private fun prepare(
-      insertSQL: String,
-      session: SharedSessionContractImplementor
-    ): PreparedStatement {
-      return session.jdbcCoordinator.statementPreparer
-        .prepareStatement(insertSQL, PreparedStatement.RETURN_GENERATED_KEYS)
+    private fun prepare(insertSQL: String, session: SharedSessionContractImplementor): PreparedStatement {
+      return session.jdbcCoordinator.statementPreparer.prepareStatement(
+        insertSQL,
+        PreparedStatement.RETURN_GENERATED_KEYS,
+      )
     }
 
     @Throws(SQLException::class)
     private fun executeAndExtract(
       parentId: Id<Nothing>,
       insert: PreparedStatement,
-      session: SharedSessionContractImplementor
+      session: SharedSessionContractImplementor,
     ): Serializable {
       session.jdbcCoordinator.resultSetReturn.executeUpdate(insert)
       var rs: ResultSet? = null
@@ -144,10 +136,8 @@ public class GidGenerator : AbstractPostInsertGenerator(), Configurable {
     }
   }
 
-  private class IdentifierGeneratingWithParentInsert(
-    dialect: Dialect,
-    private val rootColumn: String
-  ) : IdentifierGeneratingInsert(dialect) {
+  private class IdentifierGeneratingWithParentInsert(dialect: Dialect, private val rootColumn: String) :
+    IdentifierGeneratingInsert(dialect) {
     private var rootColumnAdded = false
 
     override fun toStatementString(): String {

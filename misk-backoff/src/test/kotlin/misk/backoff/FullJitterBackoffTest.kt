@@ -1,15 +1,16 @@
 package misk.backoff
 
+import java.time.Duration
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.Duration
 
 class FullJitterBackoffTest {
-  @Test fun fullJitteredBackoff() {
-    val backoff = ExponentialBackoff(
-      Duration.ofMillis(10),
-      Duration.ofSeconds(1)
-    ) { curDelayMs: Long -> Duration.ofMillis(curDelayMs / 2 + 1) }
+  @Test
+  fun fullJitteredBackoff() {
+    val backoff =
+      ExponentialBackoff(Duration.ofMillis(10), Duration.ofSeconds(1)) { curDelayMs: Long ->
+        Duration.ofMillis(curDelayMs / 2 + 1)
+      }
 
     assertThat(backoff.nextRetry().toMillis()).isBetween(10L, 20L + 10L)
     assertThat(backoff.nextRetry().toMillis()).isBetween(20L, 30L + 20L)

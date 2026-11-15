@@ -1,11 +1,11 @@
 package misk.policy.opa
 
+import jakarta.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import jakarta.inject.Inject
 
 @MiskTest(startService = false)
 internal class FakeOpaPolicyEngineTest {
@@ -22,10 +22,7 @@ internal class FakeOpaPolicyEngineTest {
   @Test
   fun `Throws if override missing with input`() {
     assertThrows<IllegalStateException> {
-      opaPolicyEngine.evaluate<TestRequest, TestResponse>(
-        "test",
-        TestRequest("moarTests")
-      )
+      opaPolicyEngine.evaluate<TestRequest, TestResponse>("test", TestRequest("moarTests"))
     }
   }
 
@@ -99,11 +96,7 @@ internal class FakeOpaPolicyEngineTest {
     }
   }
 
-  data class TestRequest(
-    val something: String
-  ) : OpaRequest()
+  data class TestRequest(val something: String) : OpaRequest()
 
-  data class TestResponse(
-    val something: String
-  ) : OpaResponse()
+  data class TestResponse(val something: String) : OpaResponse()
 }

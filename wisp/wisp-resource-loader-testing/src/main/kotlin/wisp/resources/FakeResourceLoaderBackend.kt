@@ -4,13 +4,13 @@ import okio.Buffer
 import okio.BufferedSource
 
 /**
- * A fake [ResourceLoader.Backend] loads resources from an in-memory map. This does not have the
- * same well-formed filepath guarantees that [FakeFilesystemLoaderBackend] provides, which assumes
- * resource paths are file-like and will throw exceptions for malformed resource paths
+ * A fake [ResourceLoader.Backend] loads resources from an in-memory map. This does not have the same well-formed
+ * filepath guarantees that [FakeFilesystemLoaderBackend] provides, which assumes resource paths are file-like and will
+ * throw exceptions for malformed resource paths
  */
 @Deprecated(
   message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
-  ReplaceWith(expression = "FakeResourceLoaderBackend","misk.resources.FakeResourceLoaderBackend")
+  ReplaceWith(expression = "FakeResourceLoaderBackend", "misk.resources.FakeResourceLoaderBackend"),
 )
 class FakeResourceLoaderBackend(private val fakeResources: Map<String, String>) : ResourceLoader.Backend() {
   override fun checkPath(path: String) {

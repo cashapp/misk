@@ -3,12 +3,12 @@ package misk.logging
 import com.google.common.util.concurrent.AbstractIdleService
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.time.Duration
 import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.FeatureFlags
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
-import java.time.Duration
 
 @Singleton
 class DynamicLogLevelService
@@ -17,7 +17,6 @@ constructor(
   private val featureFlags: FeatureFlags,
   private val config: DynamicLoggingConfig,
   @DynamicLogLevel private val repeatedTaskQueue: RepeatedTaskQueue,
-
 ) : AbstractIdleService() {
 
   private val podName = System.getenv("MY_POD_NAME")
@@ -42,9 +41,7 @@ constructor(
   }
 
   fun updateLoggingLevels() {
-    val commaDelimitedPairs = featureFlags.getString(feature, "test",
-      Attributes(mapOf("pod_name" to podName))
-    )
+    val commaDelimitedPairs = featureFlags.getString(feature, "test", Attributes(mapOf("pod_name" to podName)))
     controller.refresh(commaDelimitedPairs)
   }
 

@@ -4,9 +4,7 @@ import com.google.common.util.concurrent.AbstractIdleService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 
-/**
- * A static [ClusterWeightProvider] that always returns 100
- */
+/** A static [ClusterWeightProvider] that always returns 100 */
 class ActiveClusterWeight : ClusterWeightProvider {
 
   override fun get(): Int {
@@ -17,19 +15,18 @@ class ActiveClusterWeight : ClusterWeightProvider {
 internal class NoOpClusterWeightServiceModule : KAbstractModule() {
   override fun configure() {
     install(ServiceModule<ClusterWeightService>())
-    bind<ClusterWeightService>().toInstance(object : ClusterWeightService, AbstractIdleService() {
-      override fun startUp() {
-      }
+    bind<ClusterWeightService>()
+      .toInstance(
+        object : ClusterWeightService, AbstractIdleService() {
+          override fun startUp() {}
 
-      override fun shutDown() {
-      }
-    })
+          override fun shutDown() {}
+        }
+      )
   }
 }
 
-/**
- * Provides an [ActiveClusterWeight]
- */
+/** Provides an [ActiveClusterWeight] */
 class ActiveClusterWeightModule : KAbstractModule() {
   override fun configure() {
     bind<ClusterWeightProvider>().to<ActiveClusterWeight>()

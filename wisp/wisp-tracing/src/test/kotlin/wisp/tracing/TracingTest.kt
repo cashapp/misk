@@ -16,11 +16,13 @@ import kotlin.test.assertTrue
 class TracingTest {
   private lateinit var tracer: MockTracer
 
-  @BeforeTest fun `set up`() {
+  @BeforeTest
+  fun `set up`() {
     tracer = MockTracer()
   }
 
-  @Test fun `Tracer#spanned() produces a trace and finishes the span`() {
+  @Test
+  fun `Tracer#spanned() produces a trace and finishes the span`() {
     // NB: The span isn't finished until after block executes, but is intentionally unavailable
     // afterwards to avoid undefined behaviour from re-using finished spans.
     // To assert that the span has finished, we take an AtomicReference.
@@ -36,11 +38,10 @@ class TracingTest {
     assertContains(spans.map { it.operationName() }, "test-span")
   }
 
-  @Test fun `Tracer#scoped() produces a trace`() {
+  @Test
+  fun `Tracer#scoped() produces a trace`() {
     val span = tracer.buildSpan("test-scoped").start()
-    tracer.scoped(span, finishSpan = true) {
-      assertNotFinished(span)
-    }
+    tracer.scoped(span, finishSpan = true) { assertNotFinished(span) }
     assertFinished(span)
 
     val spans = tracer.finishedSpans()
@@ -48,7 +49,8 @@ class TracingTest {
     assertContains(spans.map { it.operationName() }, "test-scoped")
   }
 
-  @Test fun `Tracer#scoped() allows spans to be re-used before they are closed`() {
+  @Test
+  fun `Tracer#scoped() allows spans to be re-used before they are closed`() {
     val span = tracer.buildSpan("test-scoped").start()
     tracer.scoped(span, finishSpan = true) { outerScope ->
       tracer.scoped(span, finishSpan = false /* default */) { innerScope ->
@@ -61,7 +63,8 @@ class TracingTest {
     assertTrue(spans.size == 1, "Expected exactly one span")
   }
 
-  @Test fun `Tracer#spanned() can be used with child spans`() {
+  @Test
+  fun `Tracer#spanned() can be used with child spans`() {
     val parentRef = AtomicReference<Span>()
     tracer.spanned("parent-span") {
       parentRef.set(span)
@@ -82,7 +85,8 @@ class TracingTest {
     assertTrue(spans.size == 2, "Expected exactly two spans")
   }
 
-  @Test fun `Tracer#spanned() can ignore active spans`() {
+  @Test
+  fun `Tracer#spanned() can ignore active spans`() {
     tracer.spanned("parent") {
       val parentId = span.context().toTraceId()
 
@@ -98,7 +102,8 @@ class TracingTest {
     }
   }
 
-  @Test fun `Tracer#spanned() can retain previous baggage`() {
+  @Test
+  fun `Tracer#spanned() can retain previous baggage`() {
     tracer.spanned("parent") {
       val baggage = mapOf("parent-baggage" to "blah blah blah")
       span.setBaggageItems(baggage)
@@ -114,10 +119,9 @@ class TracingTest {
         val childBaggage = this.span.context().baggageItems().toList()
         assertTrue(
           childBaggage.isEmpty(),
-          "Expected no baggage on child span ignoring parent without baggage retention"
+          "Expected no baggage on child span ignoring parent without baggage retention",
         )
       }
     }
   }
-
 }

@@ -12,15 +12,15 @@ import io.github.bucket4j.distributed.proxy.optimization.manual.ManuallySyncingO
 import io.github.bucket4j.distributed.proxy.optimization.predictive.PredictiveOptimization
 import io.github.bucket4j.distributed.proxy.optimization.skiponzero.SkipSyncOnZeroOptimization
 import jakarta.inject.Inject
+import java.time.Duration
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import wisp.ratelimiting.bucket4j.ClockTimeMeter
-import java.time.Duration
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 abstract class BaseBucketTest<K> {
   @Inject private lateinit var fakeClock: FakeClock
@@ -29,9 +29,8 @@ abstract class BaseBucketTest<K> {
   fun `should recreate lost buckets with recreation strategy`() {
     val key = createRandomKey()
     val proxyManager = createProxyManager()
-    val bucket = proxyManager.builder()
-      .withRecoveryStrategy(RecoveryStrategy.RECONSTRUCT)
-      .build(key) { DEFAULT_BUCKET_CONFIG }
+    val bucket =
+      proxyManager.builder().withRecoveryStrategy(RecoveryStrategy.RECONSTRUCT).build(key) { DEFAULT_BUCKET_CONFIG }
 
     assertThat(bucket.tryConsume(1)).isTrue()
 
@@ -44,9 +43,10 @@ abstract class BaseBucketTest<K> {
   fun `should throw with throwing strategy`() {
     val key = createRandomKey()
     val proxyManager = createProxyManager()
-    val bucket = proxyManager.builder()
-      .withRecoveryStrategy(RecoveryStrategy.THROW_BUCKET_NOT_FOUND_EXCEPTION)
-      .build(key) { DEFAULT_BUCKET_CONFIG }
+    val bucket =
+      proxyManager.builder().withRecoveryStrategy(RecoveryStrategy.THROW_BUCKET_NOT_FOUND_EXCEPTION).build(key) {
+        DEFAULT_BUCKET_CONFIG
+      }
 
     assertThat(bucket.tryConsume(1)).isTrue()
 
@@ -63,10 +63,12 @@ abstract class BaseBucketTest<K> {
     // Have not constructed bucket for key, should be empty
     assertThat(proxyManager.getProxyConfiguration(key).isEmpty).isTrue()
 
-    val bucket = proxyManager.builder()
-      .withRecoveryStrategy(RecoveryStrategy.RECONSTRUCT)
-      .build(key) { DEFAULT_BUCKET_CONFIG }
-      .availableTokens
+    val bucket =
+      proxyManager
+        .builder()
+        .withRecoveryStrategy(RecoveryStrategy.RECONSTRUCT)
+        .build(key) { DEFAULT_BUCKET_CONFIG }
+        .availableTokens
     // Constructed bucket for key, should not be empty
     assertThat(proxyManager.getProxyConfiguration(key).isEmpty).isFalse()
 
@@ -80,28 +82,26 @@ abstract class BaseBucketTest<K> {
   fun `optimizations should all have consistent token availability`() {
     val proxyManager = createProxyManager()
 
-    val bucketConfig = BucketConfiguration.builder()
-      .addLimit { it.capacity(10).refillIntervally(10, Duration.ofSeconds(1)) }
-      .build()
+    val bucketConfig =
+      BucketConfiguration.builder().addLimit { it.capacity(10).refillIntervally(10, Duration.ofSeconds(1)) }.build()
     val delayParameters = DelayParameters(1, Duration.ofMillis(1))
     val timeMeter = ClockTimeMeter(fakeClock)
-    val optimizations = listOf(
-      BatchingOptimization(NopeOptimizationListener.INSTANCE),
-      DelayOptimization(delayParameters, NopeOptimizationListener.INSTANCE, timeMeter),
-      ManuallySyncingOptimization(NopeOptimizationListener.INSTANCE, timeMeter),
-      PredictiveOptimization(
-        PredictionParameters.createDefault(delayParameters),
-        delayParameters,
-        NopeOptimizationListener.INSTANCE,
-        timeMeter
-      ),
-      SkipSyncOnZeroOptimization(NopeOptimizationListener.INSTANCE, timeMeter),
-    )
+    val optimizations =
+      listOf(
+        BatchingOptimization(NopeOptimizationListener.INSTANCE),
+        DelayOptimization(delayParameters, NopeOptimizationListener.INSTANCE, timeMeter),
+        ManuallySyncingOptimization(NopeOptimizationListener.INSTANCE, timeMeter),
+        PredictiveOptimization(
+          PredictionParameters.createDefault(delayParameters),
+          delayParameters,
+          NopeOptimizationListener.INSTANCE,
+          timeMeter,
+        ),
+        SkipSyncOnZeroOptimization(NopeOptimizationListener.INSTANCE, timeMeter),
+      )
     optimizations.forEach { optimization ->
       val key = createRandomKey()
-      val bucket = proxyManager.builder()
-        .withOptimization(optimization)
-        .build(key) { bucketConfig }
+      val bucket = proxyManager.builder().withOptimization(optimization).build(key) { bucketConfig }
       assertThat(bucket.availableTokens).isEqualTo(10L)
 
       repeat(5) { assertThat(bucket.tryConsume(1)).isTrue() }
@@ -121,14 +121,16 @@ abstract class BaseBucketTest<K> {
   @Test
   fun `parallel initialization of the same bucket should be well behaved`() {
     val key = createRandomKey()
-    val parallelism = if (Runtime.getRuntime().availableProcessors() > 1) {
-      Runtime.getRuntime().availableProcessors()
-    } else {
-      2
-    }
-    val bucketConfig = BucketConfiguration.builder()
-      .addLimit { it.capacity((parallelism + 10).toLong()).refillIntervally(10, Duration.ofSeconds(1)) }
-      .build()
+    val parallelism =
+      if (Runtime.getRuntime().availableProcessors() > 1) {
+        Runtime.getRuntime().availableProcessors()
+      } else {
+        2
+      }
+    val bucketConfig =
+      BucketConfiguration.builder()
+        .addLimit { it.capacity((parallelism + 10).toLong()).refillIntervally(10, Duration.ofSeconds(1)) }
+        .build()
 
     val startLatch = CountDownLatch(parallelism)
     val stopLatch = CountDownLatch(parallelism)
@@ -137,9 +139,7 @@ abstract class BaseBucketTest<K> {
       executor.submit {
         startLatch.countDown()
         startLatch.await()
-        createProxyManager().builder()
-          .build(key) { bucketConfig }
-          .tryConsume(1)
+        createProxyManager().builder().build(key) { bucketConfig }.tryConsume(1)
         stopLatch.countDown()
       }
     }
@@ -147,8 +147,7 @@ abstract class BaseBucketTest<K> {
     executor.awaitTermination(10, TimeUnit.SECONDS)
     stopLatch.await()
 
-    val bucket = createProxyManager().builder()
-      .build(key) { bucketConfig }
+    val bucket = createProxyManager().builder().build(key) { bucketConfig }
     // We should have taken parallelism tokens, leaving the extra 10
     assertThat(bucket.availableTokens).isEqualTo(10)
   }
@@ -158,9 +157,10 @@ abstract class BaseBucketTest<K> {
   internal abstract fun createRandomKey(): K
 
   companion object {
-    private val DEFAULT_BUCKET_CONFIG = BucketConfiguration.builder()
-      .addLimit { it.capacity(100).refillIntervally(100, Duration.ofMinutes(10)) }
-      .addLimit { it.capacity(10).refillIntervally(10, Duration.ofSeconds(1)) }
-      .build()
+    private val DEFAULT_BUCKET_CONFIG =
+      BucketConfiguration.builder()
+        .addLimit { it.capacity(100).refillIntervally(100, Duration.ofMinutes(10)) }
+        .addLimit { it.capacity(10).refillIntervally(10, Duration.ofSeconds(1)) }
+        .build()
   }
 }

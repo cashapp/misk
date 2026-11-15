@@ -8,13 +8,10 @@ import kotlin.annotation.AnnotationRetention.RUNTIME
  *
  * External data keys are defined in the configuration as a [Map]<[KeyAlias], [KeyType]>.
  *
- * This annotation can be useful for cases where one would need access to all external data
- * keys available to the service.
+ * This annotation can be useful for cases where one would need access to all external data keys available to the
+ * service.
  */
 @Qualifier
-@Target(
-  AnnotationTarget.FIELD,
-  AnnotationTarget.VALUE_PARAMETER
-)
+@Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 @Retention(RUNTIME)
 annotation class ExternalDataKeys

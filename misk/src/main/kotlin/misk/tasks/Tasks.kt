@@ -15,9 +15,7 @@ enum class Status(private val metricLabel: String) {
   /** The task should not be rescheduled */
   NO_RESCHEDULE("no_reschedule");
 
-  /**
-   * The metric label for the status. This is used instead of name() in case the code is refactored.
-   */
+  /** The metric label for the status. This is used instead of name() in case the code is refactored. */
   fun metricLabel(): String {
     return metricLabel
   }

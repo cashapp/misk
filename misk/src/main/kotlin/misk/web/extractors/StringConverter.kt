@@ -26,25 +26,19 @@ private val booleanTypeNullable: KType = Boolean::class.createType(nullable = tr
  * The result can be any number of things, such as a path param, query param, request cookie, or request header.
  */
 fun interface StringConverter {
-  /**
-   * If the given String can't be converted, throws an IllegalArgumentException.
-   */
-  @Throws(IllegalArgumentException::class)
-  fun convert(string: String): Any?
+  /** If the given String can't be converted, throws an IllegalArgumentException. */
+  @Throws(IllegalArgumentException::class) fun convert(string: String): Any?
 
   /**
-   * Returns a StringConverter that can deserialize a String to the correct type for the KType, or returns null
-   * if it can't handle that type.
+   * Returns a StringConverter that can deserialize a String to the correct type for the KType, or returns null if it
+   * can't handle that type.
    */
   interface Factory {
     fun create(kType: KType): StringConverter?
   }
 }
 
-fun converterFor(
-  type: KType,
-  factories: List<StringConverter.Factory> = listOf(),
-): StringConverter? {
+fun converterFor(type: KType, factories: List<StringConverter.Factory> = listOf()): StringConverter? {
   return factories.firstNotNullOfOrNull { it.create(type) }
     ?: when {
       type.isSubtypeOf(stringType) -> StringConverter { it }
@@ -76,8 +70,6 @@ private fun createFromValueOf(type: KType): StringConverter? {
     val javaClass = type.javaType.rawType
     val valueOfMethod = javaClass.getMethod("valueOf", String::class.java)
     return StringConverter { param -> valueOfMethod(null, param) }
-  } catch (_: ClassCastException) {
-  } catch (_: NoSuchMethodException) {
-  }
+  } catch (_: ClassCastException) {} catch (_: NoSuchMethodException) {}
   return null
 }

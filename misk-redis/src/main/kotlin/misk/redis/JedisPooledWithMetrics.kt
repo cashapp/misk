@@ -19,13 +19,14 @@ internal class JedisPooledWithMetrics(
   ssl: Boolean = true,
   requiresPassword: Boolean = true,
   database: Int? = null,
-) : JedisPooled(
-  PooledConnectionProviderWithMetrics(
-    metrics,
-    poolConfig,
-    ConnectionFactoryWithMetrics(metrics, replicationGroupConfig, ssl, requiresPassword, database)
+) :
+  JedisPooled(
+    PooledConnectionProviderWithMetrics(
+      metrics,
+      poolConfig,
+      ConnectionFactoryWithMetrics(metrics, replicationGroupConfig, ssl, requiresPassword, database),
+    )
   )
-)
 
 private class ConnectionFactoryWithMetrics(
   private val metrics: RedisClientMetrics,
@@ -33,13 +34,16 @@ private class ConnectionFactoryWithMetrics(
   ssl: Boolean = true,
   requiresPassword: Boolean = true,
   database: Int? = null,
-) : ConnectionFactory(
-  HostAndPort(
-    replicationGroupConfig.writer_endpoint.hostname?.takeUnless { it.isBlank() } ?: System.getenv("REDIS_HOST") ?: "127.0.0.1",
-    replicationGroupConfig.writer_endpoint.port
-  ),
-  createJedisClientConfig(replicationGroupConfig, ssl, requiresPassword, database),
-) {
+) :
+  ConnectionFactory(
+    HostAndPort(
+      replicationGroupConfig.writer_endpoint.hostname?.takeUnless { it.isBlank() }
+        ?: System.getenv("REDIS_HOST")
+        ?: "127.0.0.1",
+      replicationGroupConfig.writer_endpoint.port,
+    ),
+    createJedisClientConfig(replicationGroupConfig, ssl, requiresPassword, database),
+  ) {
 
   override fun destroyObject(pooledJedis: PooledObject<Connection>) {
     metrics.destroyedConnectionsCounter.inc()
@@ -57,16 +61,17 @@ private fun createJedisClientConfig(
   return DefaultJedisClientConfig.builder()
     .connectionTimeoutMillis(replicationGroupConfig.timeout_ms)
     .socketTimeoutMillis(replicationGroupConfig.timeout_ms)
-    .password(replicationGroupConfig.redis_auth_password
-      .ifEmpty {
+    .password(
+      replicationGroupConfig.redis_auth_password.ifEmpty {
         check(!requiresPassword) {
           "This Redis client is configured to require an auth password, but none was provided!"
         }
         null
-      })
+      }
+    )
     .let { config -> database?.let { config.database(it) } ?: config }
     .ssl(ssl)
-    //CLIENT SETINFO is only supported in Redis v7.2+
+    // CLIENT SETINFO is only supported in Redis v7.2+
     .clientSetInfoConfig(ClientSetInfoConfig.DISABLED)
     .build()
 }
@@ -74,7 +79,7 @@ private fun createJedisClientConfig(
 private class PooledConnectionProviderWithMetrics(
   private val metrics: RedisClientMetrics,
   poolConfig: ConnectionPoolConfig,
-  factory: PooledObjectFactory<Connection>?
+  factory: PooledObjectFactory<Connection>?,
 ) : PooledConnectionProvider(factory, poolConfig) {
 
   init {
@@ -84,16 +89,10 @@ private class PooledConnectionProviderWithMetrics(
   }
 
   override fun close() {
-    super.close().also {
-      metrics.setActiveIdleConnectionMetrics(this.pool)
-    }
+    super.close().also { metrics.setActiveIdleConnectionMetrics(this.pool) }
   }
 
   override fun getConnection(): Connection {
-    return super.getConnection().also {
-      metrics.setActiveIdleConnectionMetrics(this.pool)
-    }
+    return super.getConnection().also { metrics.setActiveIdleConnectionMetrics(this.pool) }
   }
-
 }
-

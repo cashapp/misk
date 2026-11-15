@@ -3,6 +3,9 @@ package com.squareup.exemplar
 import com.google.common.util.concurrent.AbstractIdleService
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.lang.Thread.sleep
+import java.time.ZoneId
+import kotlin.time.Duration.Companion.seconds
 import misk.ReadyService
 import misk.ServiceModule
 import misk.clustering.weights.FakeClusterWeightModule
@@ -12,9 +15,6 @@ import misk.cron.FakeCronModule
 import misk.inject.KAbstractModule
 import misk.inject.toKey
 import misk.logging.getLogger
-import java.lang.Thread.sleep
-import java.time.ZoneId
-import kotlin.time.Duration.Companion.seconds
 
 class ExemplarCronModule : KAbstractModule() {
   override fun configure() {
@@ -24,8 +24,8 @@ class ExemplarCronModule : KAbstractModule() {
       FakeCronModule(
         zoneId = ZoneId.of("America/Toronto"),
         dependencies = listOf(DependentService::class.toKey()),
-        installDashboardTab = true
-      ),
+        installDashboardTab = true,
+      )
     )
     install(CronEntryModule.create<MinuteCron>())
   }
@@ -40,7 +40,7 @@ class ExemplarCronModule : KAbstractModule() {
     override fun shutDown() {}
 
     companion object {
-      val logger = getLogger<DependentService>()
+      private val logger = getLogger<DependentService>()
     }
   }
 
@@ -57,7 +57,7 @@ class ExemplarCronModule : KAbstractModule() {
     }
 
     companion object {
-      val logger = getLogger<MinuteCron>()
+      private val logger = getLogger<MinuteCron>()
     }
   }
 }

@@ -2,13 +2,9 @@ package misk.crypto
 
 import wisp.deployment.Deployment
 
-/**
- * Bind this to an instance to control how external buckets are referenced.
- */
+/** Bind this to an instance to control how external buckets are referenced. */
 interface BucketNameSource {
-  /**
-   * Name of the bucket that stores keys
-   */
+  /** Name of the bucket that stores keys */
   fun getBucketName(deployment: Deployment): String
 
   /**

@@ -5,12 +5,10 @@ import misk.ServiceModule
 import misk.concurrent.Sleeper
 import misk.inject.KAbstractModule
 
-/**
- * Install this module to run the [PauseDetector] in the background.
- */
-class PauseDetectorModule @JvmOverloads constructor(
-  val pauseDetectorConfig: PauseDetectorConfig = PauseDetectorConfig(),
-) : KAbstractModule() {
+/** Install this module to run the [PauseDetector] in the background. */
+class PauseDetectorModule
+@JvmOverloads
+constructor(val pauseDetectorConfig: PauseDetectorConfig = PauseDetectorConfig()) : KAbstractModule() {
   override fun configure() {
     install(ServiceModule<PauseDetector>())
     bind<PauseDetectorConfig>().toInstance(pauseDetectorConfig)

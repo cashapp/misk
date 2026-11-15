@@ -8,19 +8,19 @@ import misk.web.mediatype.MediaTypes
 /**
  * Marks a web action method as an MCP (Model Context Protocol) HTTP GET endpoint for StreamableHTTP transport.
  *
- * This annotation creates endpoints that allow clients to listen for messages sent from the MCP server
- * using StreamableHTTP transport (Server-Sent Events). The endpoint establishes a Server-Sent Events (SSE) connection
- * for real-time server-to-client communication.
+ * This annotation creates endpoints that allow clients to listen for messages sent from the MCP server using
+ * StreamableHTTP transport (Server-Sent Events). The endpoint establishes a Server-Sent Events (SSE) connection for
+ * real-time server-to-client communication.
  *
  * ## Transport Compatibility
  *
- * **StreamableHTTP Transport Only**: This annotation is designed exclusively for StreamableHTTP
- * transport using Server-Sent Events. For WebSocket-based MCP communication, use `@McpWebSocket`
- * instead, which handles all communication over a persistent WebSocket connection.
+ * **StreamableHTTP Transport Only**: This annotation is designed exclusively for StreamableHTTP transport using
+ * Server-Sent Events. For WebSocket-based MCP communication, use `@McpWebSocket` instead, which handles all
+ * communication over a persistent WebSocket connection.
  *
  * ## Purpose
- * Implements the MCP specification requirement for "listening for messages from the server"
- * by providing a Server-Sent Events (SSE) endpoint where clients can receive server-initiated events and notifications.
+ * Implements the MCP specification requirement for "listening for messages from the server" by providing a Server-Sent
+ * Events (SSE) endpoint where clients can receive server-initiated events and notifications.
  *
  * ## Configuration
  *
@@ -30,9 +30,8 @@ import misk.web.mediatype.MediaTypes
  * - **No Request Body**: GET requests don't accept request bodies
  *
  * ## Session Support
- * The endpoint accepts an optional `Mcp-Session-Id` header (referenced by [SESSION_ID_HEADER])
- * when stateful sessions are used:
- *
+ * The endpoint accepts an optional `Mcp-Session-Id` header (referenced by [SESSION_ID_HEADER]) when stateful sessions
+ * are used:
  * ```kotlin
  * @McpGet
  * suspend fun listenForServerMessages(

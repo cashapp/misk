@@ -21,15 +21,10 @@ import misk.web.dashboard.HtmlLayout
 import misk.web.mediatype.MediaTypes
 import wisp.deployment.Deployment
 
-/**
- * Example page from Tailwind UI
- * https://tailwindui.com/components/ecommerce/page-examples/storefront-pages
- */
+/** Example page from Tailwind UI https://tailwindui.com/components/ecommerce/page-examples/storefront-pages */
 @Singleton
-class IndexPage @Inject constructor(
-  @AppName private val appName: String,
-  private val deployment: Deployment
-) : WebAction {
+class IndexPage @Inject constructor(@AppName private val appName: String, private val deployment: Deployment) :
+  WebAction {
   @Get("/")
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @AdminDashboardAccess
@@ -44,32 +39,48 @@ class IndexPage @Inject constructor(
               ul("-mx-2 space-y-1") {
                 role = "list"
                 li {
-//                +"""<!-- Current: "bg-gray-50 text-indigo-600", Default: "text-gray-700 hover:text-indigo-600 hover:bg-gray-50" -->"""
-                  a(classes = "text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold") {
+                  //                +"""<!-- Current: "bg-gray-50 text-indigo-600", Default: "text-gray-700
+                  // hover:text-indigo-600 hover:bg-gray-50" -->"""
+                  a(
+                    classes =
+                      "text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold"
+                  ) {
                     href = SimplePage.PATH
                     +"""Simple"""
                   }
                 }
                 li {
-                  a(classes = "text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold") {
+                  a(
+                    classes =
+                      "text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold"
+                  ) {
                     href = EcommerceLandingPage.PATH
                     +"""Ecommerce Landing Page"""
                   }
                 }
                 li {
-                  a(classes = "text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold") {
+                  a(
+                    classes =
+                      "text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold"
+                  ) {
                     href = GraphD3JsPage.PATH
                     +"""Graph with D3.js"""
                   }
                 }
                 li {
-                  a(classes = "text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold") {
+                  a(
+                    classes =
+                      "text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold"
+                  ) {
                     href = "/support/"
                     +"""Support Custom Dashboard"""
                   }
                 }
                 li {
-                  a(classes = "text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold") {
+                  a(
+                    classes =
+                      "text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold"
+                  ) {
                     href = AlphaIndexAction.PATH
                     +"""Custom Admin Dashboard Tab"""
                   }

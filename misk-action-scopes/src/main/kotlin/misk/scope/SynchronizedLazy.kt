@@ -7,9 +7,9 @@ private object UNINITIALIZED_VALUE
 
 internal class SynchronizedLazy(
   private val provider: ActionScopedProvider<*>,
+  private val providerFactory: () -> ActionScopedProvider<*> = { provider },
 ) : Lazy<Any?> {
-  @Volatile
-  private var _value: Any? = UNINITIALIZED_VALUE
+  @Volatile private var _value: Any? = UNINITIALIZED_VALUE
 
   private val lock = ReentrantLock()
 
@@ -33,4 +33,6 @@ internal class SynchronizedLazy(
   override fun isInitialized(): Boolean {
     return _value != UNINITIALIZED_VALUE
   }
+
+  internal fun copy(): SynchronizedLazy = SynchronizedLazy(providerFactory(), providerFactory)
 }

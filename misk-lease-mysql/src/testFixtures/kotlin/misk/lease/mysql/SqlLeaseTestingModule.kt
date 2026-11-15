@@ -10,29 +10,30 @@ import misk.jdbc.JdbcTestingModule
 
 /** Configures testing modules. */
 @OptIn(ExperimentalMiskApi::class)
-class SqlLeaseTestingModule(
-  private val dbConfig: DataSourceClustersConfig = defaultDbConfig()
-) : ReusableTestModule() {
+class SqlLeaseTestingModule(private val dbConfig: DataSourceClustersConfig = defaultDbConfig()) : ReusableTestModule() {
   override fun configure() {
     install(SqlLeaseModule(dbConfig))
     install(JdbcTestingModule<LeaseDb>())
   }
+
   companion object {
     val LEASE_DURATION_SECONDS = 60L
 
     fun defaultDbConfig(): DataSourceClustersConfig {
       return DataSourceClustersConfig(
         mapOf(
-          "misk-lease-test-001" to DataSourceClusterConfig(
-            writer = DataSourceConfig(
-              type = DataSourceType.MYSQL,
-              username = "root",
-              password = "",
-              database = "misk_lease_test_001",
-              migrations_resource = "classpath:/migrations",
-            ),
-            reader = null,
-          )
+          "misk-lease-test-001" to
+            DataSourceClusterConfig(
+              writer =
+                DataSourceConfig(
+                  type = DataSourceType.MYSQL,
+                  username = "root",
+                  password = "",
+                  database = "misk_lease_test_001",
+                  migrations_resource = "classpath:/migrations",
+                ),
+              reader = null,
+            )
         )
       )
     }

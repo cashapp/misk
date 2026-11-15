@@ -1,0 +1,17 @@
+syntax = "proto2";
+
+package transitive;
+
+import "transitive/ExtraService.proto";
+
+service MainService {
+  rpc Echo(EchoRequest) returns (EchoResponse);
+}
+
+message EchoRequest {
+  optional PingRequest ping = 1;
+}
+
+message EchoResponse {
+  optional string reply = 1;
+}

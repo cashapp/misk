@@ -1,8 +1,8 @@
 package misk.time
 
+import java.time.Clock
 import misk.ServiceModule
 import misk.inject.KAbstractModule
-import java.time.Clock
 
 internal class ClockModule : KAbstractModule() {
   override fun configure() {

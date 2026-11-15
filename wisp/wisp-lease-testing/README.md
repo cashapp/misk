@@ -23,14 +23,14 @@ fakeLeaseManager.markLeaseHeld("YourLeaseName")
 
 // to mark the lease held somewhere else
 fakeLeaseManager.markLeaseHeldElsewhere("YourLeaseName")
-assertThat(lease.checkHeld()).isFalse()
+assertThat(lease.isHeld()).isFalse()
 assertThat(lease.acquire()).isFalse()
 
 // add a listener and test if the lease is held...
 val leaseHeld = AtomicBoolean()
 lease.addListener(object : Lease.StateChangeListener {
   override fun afterAcquire(lease: Lease) {
-    if (lease.checkHeld()) {
+    if (lease.isHeld()) {
       leaseHeld.set(true)
     }
   }

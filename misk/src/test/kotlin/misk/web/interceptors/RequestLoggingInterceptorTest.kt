@@ -3,12 +3,18 @@ package misk.web.interceptors
 import com.google.common.testing.FakeTicker
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.time.Duration
+import java.util.concurrent.TimeUnit
+import kotlin.reflect.full.findAnnotation
+import kotlin.test.assertEquals
 import misk.Action
 import misk.MiskCaller
 import misk.MiskTestingServiceModule
 import misk.config.AppNameModule
 import misk.inject.KAbstractModule
+import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
+import misk.logging.getLogger
 import misk.security.authz.AccessControlModule
 import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.MiskCallerAuthenticator
@@ -35,17 +41,10 @@ import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import misk.logging.LogCollector
-import misk.logging.getLogger
-import java.time.Duration
-import java.util.concurrent.TimeUnit
-import kotlin.reflect.full.findAnnotation
-import kotlin.test.assertEquals
 
 @MiskTest(startService = true)
 internal class RequestLoggingInterceptorTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
   val httpClient = OkHttpClient()
 
   @Inject private lateinit var jettyService: JettyService
@@ -61,12 +60,7 @@ internal class RequestLoggingInterceptorTest {
   fun nothing() {
     var messages = logCollector.takeMessages(FakeRequestResponseHook::class)
     assertEquals(0, messages.size)
-    assertThat(
-      invoke(
-        "/call/logNothing/hello",
-        "caller"
-      ).isSuccessful
-    ).isTrue()
+    assertThat(invoke("/call/logNothing/hello", "caller").isSuccessful).isTrue()
     messages = logCollector.takeMessages(FakeRequestResponseHook::class)
     assertEquals(0, messages.size)
   }
@@ -75,18 +69,13 @@ internal class RequestLoggingInterceptorTest {
   fun everything() {
     var messages = logCollector.takeMessages(FakeRequestResponseHook::class)
     assertEquals(0, messages.size)
-    assertThat(
-      invoke(
-        "/call/logEverything/hello",
-        "caller"
-      ).isSuccessful
-    ).isTrue()
+    assertThat(invoke("/call/logEverything/hello", "caller").isSuccessful).isTrue()
 
     messages = logCollector.takeMessages(FakeRequestResponseHook::class)
     assertEquals(1, messages.size)
     assertEquals(
       "/call/logEverything/hello principal=caller time=100.0 ms code=200 request=[hello] response=[echo: hello]",
-      messages[0]
+      messages[0],
     )
   }
 
@@ -94,13 +83,12 @@ internal class RequestLoggingInterceptorTest {
   fun exceptionThrown() {
     var messages = logCollector.takeMessages(FakeRequestResponseHook::class)
     assertEquals(0, messages.size)
-    assertThat(invoke("/call/exceptionThrowingRequestLogging/fail", "caller").code)
-      .isEqualTo(500)
+    assertThat(invoke("/call/exceptionThrowingRequestLogging/fail", "caller").code).isEqualTo(500)
     messages = logCollector.takeMessages(FakeRequestResponseHook::class)
     assertEquals(1, messages.size)
     assertEquals(
       "/call/exceptionThrowingRequestLogging/fail principal=caller time=100.0 ms code=200 request=[fail] response=[null]",
-      messages[0]
+      messages[0],
     )
   }
 
@@ -111,22 +99,13 @@ internal class RequestLoggingInterceptorTest {
 
   @Test
   fun `requestResponseBodyTransformer contains explosions`() {
-    assertThat(
-      invoke(
-        "/call/logEverything/Oppenheimer-the-bestest",
-        "caller"
-      ).isSuccessful
-    ).isTrue()
+    assertThat(invoke("/call/logEverything/Oppenheimer-the-bestest", "caller").isSuccessful).isTrue()
   }
 
   fun invoke(path: String, asService: String? = null): Response {
-    val url = jettyService.httpServerUrl.newBuilder()
-      .encodedPath(path)
-      .build()
+    val url = jettyService.httpServerUrl.newBuilder().encodedPath(path).build()
 
-    val request = Request.Builder()
-      .url(url)
-      .get()
+    val request = Request.Builder().url(url).get()
     asService?.let { request.addHeader(FakeCallerAuthenticator.SERVICE_HEADER, it) }
     return httpClient.newCall(request.build()).execute()
   }
@@ -146,7 +125,7 @@ internal class RequestLoggingInterceptorTest {
       requestResponse: RequestResponseBody?,
       elapsed: Duration,
       elapsedToString: String,
-      error: Throwable?
+      error: Throwable?,
     ) {
       logger.info(
         "${httpCall.url.encodedPath} principal=${caller?.principal} time=${elapsedToString} " +
@@ -191,9 +170,7 @@ internal class RequestLoggingInterceptorTest {
   }
 }
 
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION)
-annotation class FakeRequestResponse
+@Retention(AnnotationRetention.RUNTIME) @Target(AnnotationTarget.FUNCTION) annotation class FakeRequestResponse
 
 internal class AuditNothingAction @Inject constructor() : WebAction {
   @Get("/call/logNothing/{message}")

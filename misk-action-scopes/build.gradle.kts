@@ -10,11 +10,11 @@ dependencies {
   api(libs.guava)
   api(libs.guice)
   api(libs.jakartaInject)
+  api(libs.kotlinxCoroutinesCore)
   api(project(":misk-api"))
   api(project(":misk-inject"))
   implementation(libs.kotlinReflect)
   implementation(libs.kotlinStdLibJdk8)
-  implementation(libs.kotlinxCoroutinesCore)
   implementation(libs.moshiCore)
 
   testImplementation(libs.assertj)
@@ -24,6 +24,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

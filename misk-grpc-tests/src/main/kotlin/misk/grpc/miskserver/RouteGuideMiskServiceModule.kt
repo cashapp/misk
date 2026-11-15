@@ -2,13 +2,13 @@ package misk.grpc.miskserver
 
 import com.google.inject.Provides
 import com.google.inject.util.Modules
+import jakarta.inject.Named
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.metrics.FakeMetricsModule
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
 import misk.web.jetty.JettyService
-import jakarta.inject.Named
 
 /** A module that runs a Misk gRPC server: Wire protos and a Jetty backend. */
 class RouteGuideMiskServiceModule : KAbstractModule() {
@@ -19,7 +19,5 @@ class RouteGuideMiskServiceModule : KAbstractModule() {
     install(WebActionModule.create<RouteChatGrpcAction>())
   }
 
-  @Provides
-  @Named("grpc server")
-  fun provideServerUrl(jetty: JettyService) = jetty.httpsServerUrl!!
+  @Provides @Named("grpc server") fun provideServerUrl(jetty: JettyService) = jetty.httpsServerUrl!!
 }

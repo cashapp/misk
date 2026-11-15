@@ -1,17 +1,17 @@
 package misk.jooq.listeners
 
-import misk.jooq.toLocalDateTime
-import org.jooq.RecordContext
-import org.jooq.RecordListener
-import org.jooq.impl.DSL
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import misk.jooq.toLocalDateTime
+import org.jooq.RecordContext
+import org.jooq.RecordListener
+import org.jooq.impl.DSL
 
 /**
- * A Record Listener that will automatically set the current timestamp for the [createdAtColumnName]
- * during insertions. And the current timestamp to the [updatedAtColumnName] while updating a row
+ * A Record Listener that will automatically set the current timestamp for the [createdAtColumnName] during insertions.
+ * And the current timestamp to the [updatedAtColumnName] while updating a row
  */
 class JooqTimestampRecordListener(
   private val clock: Clock,
@@ -31,7 +31,7 @@ class JooqTimestampRecordListener(
   private fun setTime(ctx: RecordContext?, columnName: String) {
     if (
       ctx?.record()?.field(columnName) != null &&
-      (ctx.record().get(DSL.field(columnName)) == null || !ctx.record().changed(DSL.field(columnName)))
+        (ctx.record().get(DSL.field(columnName)) == null || !ctx.record().changed(DSL.field(columnName)))
     ) {
       val precision = ctx.recordType().field(DSL.field(columnName))!!.dataType.precision()
       ctx.record().set(DSL.field(columnName), clock.instant().truncateBasedOnPrecision(precision))
@@ -55,17 +55,12 @@ class JooqTimestampRecordListener(
   }
 }
 
-
 /**
- * Use this class to configure the installation of the
- * [misk.jooq.listeners.JooqTimestampRecordListener]
- * You can use both or configure just one of the [createdAtColumnName] [updatedAtColumnName] to be
- * set to the current timestamp when inserting or updating it.
- * If you leave the one you don't want set as an empty string the [JooqTimestampRecordListener] will
- * ignore it.
+ * Use this class to configure the installation of the [misk.jooq.listeners.JooqTimestampRecordListener] You can use
+ * both or configure just one of the [createdAtColumnName] [updatedAtColumnName] to be set to the current timestamp when
+ * inserting or updating it. If you leave the one you don't want set as an empty string the
+ * [JooqTimestampRecordListener] will ignore it.
  */
-data class JooqTimestampRecordListenerOptions @JvmOverloads constructor(
-  val install: Boolean,
-  val createdAtColumnName: String = "",
-  val updatedAtColumnName: String = ""
-)
+data class JooqTimestampRecordListenerOptions
+@JvmOverloads
+constructor(val install: Boolean, val createdAtColumnName: String = "", val updatedAtColumnName: String = "")

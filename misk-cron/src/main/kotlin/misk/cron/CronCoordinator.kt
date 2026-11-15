@@ -7,9 +7,7 @@ interface CronCoordinator {
   fun shouldRunTask(taskName: String): Boolean
 }
 
-class SingleLeaseCronCoordinator @Inject constructor(
-  private val leaseManager: LeaseManager
-) : CronCoordinator {
+class SingleLeaseCronCoordinator @Inject constructor(private val leaseManager: LeaseManager) : CronCoordinator {
   override fun shouldRunTask(taskName: String): Boolean {
     val lease = leaseManager.requestLease(CRON_CLUSTER_LEASE_NAME)
     return lease.checkHeld() || lease.acquire()
@@ -20,9 +18,7 @@ class SingleLeaseCronCoordinator @Inject constructor(
   }
 }
 
-class MultipleLeaseCronCoordinator @Inject constructor(
-  private val leaseManager: LeaseManager
-) : CronCoordinator {
+class MultipleLeaseCronCoordinator @Inject constructor(private val leaseManager: LeaseManager) : CronCoordinator {
   override fun shouldRunTask(taskName: String): Boolean {
     val taskLease = leaseManager.requestLease("misk.cron.task.$taskName")
     return taskLease.checkHeld() || taskLease.acquire()

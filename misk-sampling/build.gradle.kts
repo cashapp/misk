@@ -9,6 +9,7 @@ plugins {
 dependencies {
   api(libs.guava)
   api(libs.jakartaInject)
+  api(libs.micrometerCore)
   implementation(libs.kotlinStdLibJdk8)
 
   testImplementation(libs.assertj)
@@ -32,6 +33,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

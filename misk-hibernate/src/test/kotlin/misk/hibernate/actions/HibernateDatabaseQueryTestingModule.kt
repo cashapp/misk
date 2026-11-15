@@ -1,5 +1,7 @@
 package misk.hibernate.actions
 
+import jakarta.inject.Qualifier
+import misk.audit.FakeAuditClientModule
 import misk.hibernate.DbActor
 import misk.hibernate.DbCharacter
 import misk.hibernate.DbMovie
@@ -10,10 +12,6 @@ import misk.hibernate.OperatorsMovieQuery
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceType
 import misk.security.authz.AccessAnnotationEntry
-import jakarta.inject.Qualifier
-import misk.audit.FakeAuditClientModule
-import misk.web.interceptors.hooks.AuditClientHook
-import misk.web.interceptors.hooks.RequestResponseHook
 
 class HibernateDatabaseQueryTestingModule : KAbstractModule() {
   override fun configure() {
@@ -21,17 +19,17 @@ class HibernateDatabaseQueryTestingModule : KAbstractModule() {
     install(
       MoviesTestModule(
         type = DataSourceType.MYSQL,
-        entitiesModule = object :
-          HibernateEntityModule(Movies::class) {
-          override fun configureHibernate() {
-            installHibernateAdminDashboardWebActions()
+        entitiesModule =
+          object : HibernateEntityModule(Movies::class) {
+            override fun configureHibernate() {
+              installHibernateAdminDashboardWebActions()
 
-            addEntities(DbActor::class)
-            addEntityWithDynamicQuery<DbMovie, DynamicMovieQueryAccess>()
-            addEntityWithDynamicQuery<DbCharacter, DynamicMovieQueryAccess>()
-            addEntityWithStaticQuery<DbMovie, OperatorsMovieQuery, OperatorsMovieQueryAccess>()
-          }
-        }
+              addEntities(DbActor::class)
+              addEntityWithDynamicQuery<DbMovie, DynamicMovieQueryAccess>()
+              addEntityWithDynamicQuery<DbCharacter, DynamicMovieQueryAccess>()
+              addEntityWithStaticQuery<DbMovie, OperatorsMovieQuery, OperatorsMovieQueryAccess>()
+            }
+          },
       )
     )
 
@@ -42,23 +40,13 @@ class HibernateDatabaseQueryTestingModule : KAbstractModule() {
   }
 
   companion object {
-    val DYNAMIC_MOVIE_QUERY_ACCESS_ENTRY = AccessAnnotationEntry<DynamicMovieQueryAccess>(
-      capabilities = listOf(
-        "dynamic_movie_query"
-      )
-    )
-    val OPERATORS_MOVIE_QUERY_ACCESS_ENTRY = AccessAnnotationEntry<OperatorsMovieQueryAccess>(
-      capabilities = listOf(
-        "operators_movie_query"
-      )
-    )
+    val DYNAMIC_MOVIE_QUERY_ACCESS_ENTRY =
+      AccessAnnotationEntry<DynamicMovieQueryAccess>(capabilities = listOf("dynamic_movie_query"))
+    val OPERATORS_MOVIE_QUERY_ACCESS_ENTRY =
+      AccessAnnotationEntry<OperatorsMovieQueryAccess>(capabilities = listOf("operators_movie_query"))
   }
 }
 
-@Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-annotation class DynamicMovieQueryAccess
+@Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) annotation class DynamicMovieQueryAccess
 
-@Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-annotation class OperatorsMovieQueryAccess
+@Qualifier @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION) annotation class OperatorsMovieQueryAccess

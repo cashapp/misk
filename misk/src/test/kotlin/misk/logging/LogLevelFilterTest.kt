@@ -116,16 +116,10 @@ class LogLevelFilterTest {
     assertEquals(FilterReply.ACCEPT, filter.decide(null, fooLogger, Level.DEBUG, null, null, null))
 
     // Should NOT match com.example.FooFactory (no dot after Foo)
-    assertEquals(
-      FilterReply.NEUTRAL,
-      filter.decide(null, fooFactoryLogger, Level.DEBUG, null, null, null)
-    )
+    assertEquals(FilterReply.NEUTRAL, filter.decide(null, fooFactoryLogger, Level.DEBUG, null, null, null))
 
     // Should NOT match com.example.Foobar (no dot after Foo)
-    assertEquals(
-      FilterReply.NEUTRAL,
-      filter.decide(null, foobarLogger, Level.DEBUG, null, null, null)
-    )
+    assertEquals(FilterReply.NEUTRAL, filter.decide(null, foobarLogger, Level.DEBUG, null, null, null))
   }
 
   @Test
@@ -136,16 +130,10 @@ class LogLevelFilterTest {
     val subpackageLogger = LoggerFactory.getLogger("com.example.foo.subpackage.Bar") as Logger
 
     // Should match inner classes (com.example.foo.InnerClass)
-    assertEquals(
-      FilterReply.ACCEPT,
-      filter.decide(null, innerClassLogger, Level.DEBUG, null, null, null)
-    )
+    assertEquals(FilterReply.ACCEPT, filter.decide(null, innerClassLogger, Level.DEBUG, null, null, null))
 
     // Should match subpackages (com.example.foo.subpackage.Bar)
-    assertEquals(
-      FilterReply.ACCEPT,
-      filter.decide(null, subpackageLogger, Level.DEBUG, null, null, null)
-    )
+    assertEquals(FilterReply.ACCEPT, filter.decide(null, subpackageLogger, Level.DEBUG, null, null, null))
   }
 
   @Test
@@ -159,21 +147,19 @@ class LogLevelFilterTest {
     assertEquals(FilterReply.ACCEPT, filter.decide(null, cashLogger, Level.DEBUG, null, null, null))
 
     // Should NOT match com.squareup.cashier.SomeClass (no dot after 'cash')
-    assertEquals(
-      FilterReply.NEUTRAL,
-      filter.decide(null, cashierLogger, Level.DEBUG, null, null, null)
-    )
+    assertEquals(FilterReply.NEUTRAL, filter.decide(null, cashierLogger, Level.DEBUG, null, null, null))
   }
 
   @Test
   fun `package boundary matching with real world examples`() {
-    val filter = LogLevelFilter(
-      mapOf(
-        "com.amazonaws.services.dynamodbv2.AmazonDynamoDBLockClient" to Level.TRACE,
-        "com.squareup.cash.dynamodb.lease" to Level.TRACE,
-        "org.hibernate" to Level.DEBUG
+    val filter =
+      LogLevelFilter(
+        mapOf(
+          "com.amazonaws.services.dynamodbv2.AmazonDynamoDBLockClient" to Level.TRACE,
+          "com.squareup.cash.dynamodb.lease" to Level.TRACE,
+          "org.hibernate" to Level.DEBUG,
+        )
       )
-    )
 
     // Exact match for AWS logger
     val awsLogger = LoggerFactory.getLogger("com.amazonaws.services.dynamodbv2.AmazonDynamoDBLockClient") as Logger
@@ -191,7 +177,7 @@ class LogLevelFilterTest {
     // Should NOT match similar but different packages
     val dynamodbv3Logger = LoggerFactory.getLogger("com.amazonaws.services.dynamodbv3.Client") as Logger
     val hibernateUtilLogger = LoggerFactory.getLogger("org.hibernateutil.SomeClass") as Logger
-    
+
     assertEquals(FilterReply.NEUTRAL, filter.decide(null, dynamodbv3Logger, Level.TRACE, null, null, null))
     assertEquals(FilterReply.NEUTRAL, filter.decide(null, hibernateUtilLogger, Level.DEBUG, null, null, null))
   }

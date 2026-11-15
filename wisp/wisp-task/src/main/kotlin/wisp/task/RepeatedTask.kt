@@ -9,22 +9,21 @@ import com.github.michaelbull.retry.policy.plus
 import com.github.michaelbull.retry.retry
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Metrics
+import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.runBlocking
 import wisp.logging.getLogger
 import wisp.task.exception.FailedTaskException
 import wisp.task.exception.NoWorkForTaskException
-import java.util.*
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.system.measureTimeMillis
 
 /**
  * A [RepeatedTask] runs a repeated task at the user controlled rate.
  *
- * Tasks are called with a [TaskConfig] and are expected to return a [Status] or throw an
- * exception.  By default, the retry policy will try again if an exception is thrown and will
- * apply a [binaryExponentialBackoff] using the supplied [RepeatedTaskConfig]. A [Status.NO_WORK] or
- * [Status.FAILED] will be mapped to [NoWorkForTaskException] and [FailedTaskException] and thrown
- * to apply the retry policy.
+ * Tasks are called with a [TaskConfig] and are expected to return a [Status] or throw an exception. By default, the
+ * retry policy will try again if an exception is thrown and will apply a [binaryExponentialBackoff] using the supplied
+ * [RepeatedTaskConfig]. A [Status.NO_WORK] or [Status.FAILED] will be mapped to [NoWorkForTaskException] and
+ * [FailedTaskException] and thrown to apply the retry policy.
  *
  * If the [Status.NO_RESCHEDULE] is returned, the [RepeatedTask] is shutdown.
  *
@@ -34,116 +33,107 @@ import kotlin.system.measureTimeMillis
  *       // do task stuff...
  *       return Status.OK
  *     }
- *
  *     repeatedTask.startUp()
  */
-class RepeatedTask @JvmOverloads constructor(
-    val name: String,
-    private val meterRegistry: MeterRegistry = Metrics.globalRegistry,
-    private val repeatedTaskConfig: RepeatedTaskConfig = RepeatedTaskConfig(),
-    private val retryPolicy: suspend RetryFailure<Throwable>.() -> RetryInstruction =
-        defaultThrowableRetryPolicy +
-                binaryExponentialBackoff(
-                    base = repeatedTaskConfig.defaultJitterMs,
-                    max = repeatedTaskConfig.defaultMaxDelayMs
-                ),
-    private val taskConfig: TaskConfig = TaskConfig(),
-    private val task: (name: String, taskConfig: TaskConfig) -> Status
+class RepeatedTask
+@JvmOverloads
+constructor(
+  val name: String,
+  private val meterRegistry: MeterRegistry = Metrics.globalRegistry,
+  private val repeatedTaskConfig: RepeatedTaskConfig = RepeatedTaskConfig(),
+  private val retryPolicy: suspend RetryFailure<Throwable>.() -> RetryInstruction =
+    defaultThrowableRetryPolicy +
+      binaryExponentialBackoff(base = repeatedTaskConfig.defaultJitterMs, max = repeatedTaskConfig.defaultMaxDelayMs),
+  private val taskConfig: TaskConfig = TaskConfig(),
+  private val task: (name: String, taskConfig: TaskConfig) -> Status,
 ) {
-    private val running = AtomicBoolean(false)
-    private var timer: Timer? = null
-    private val repeatedTaskMetrics = RepeatedTaskMetrics(meterRegistry)
+  private val running = AtomicBoolean(false)
+  private var timer: Timer? = null
+  private val repeatedTaskMetrics = RepeatedTaskMetrics(meterRegistry)
 
-    fun isRunning(): Boolean {
-        return running.get()
+  fun isRunning(): Boolean {
+    return running.get()
+  }
+
+  fun startUp() {
+    if (running.get()) {
+      log.warn { "Repeated Task $name already started!" }
+      return
     }
 
-    fun startUp() {
-        if (running.get()) {
-            log.warn { "Repeated Task $name already started!" }
-            return
+    timer =
+      kotlin.concurrent.timer(
+        name = name,
+        daemon = true,
+        initialDelay = repeatedTaskConfig.initialDelayMs,
+        period = repeatedTaskConfig.timeBetweenRunsMs,
+      ) {
+        val status = runWithBackoff(retryPolicy, task)
+        if (status == Status.NO_RESCHEDULE) {
+          running.set(false)
+          this.cancel()
         }
+      }
 
-        timer = kotlin.concurrent.timer(
-            name = name,
-            daemon = true,
-            initialDelay = repeatedTaskConfig.initialDelayMs,
-            period = repeatedTaskConfig.timeBetweenRunsMs
-        ) {
-            val status = runWithBackoff(retryPolicy, task)
-            if (status == Status.NO_RESCHEDULE) {
-                running.set(false)
-                this.cancel()
-            }
+    running.set(true)
+  }
+
+  fun shutDown() {
+    running.set(false)
+    timer?.cancel()
+    timer = null
+  }
+
+  private fun runWithBackoff(
+    retryPolicy: suspend RetryFailure<Throwable>.() -> RetryInstruction,
+    task: (name: String, taskConfig: TaskConfig) -> Status,
+  ): Status {
+    return runBlocking {
+      var status = Status.OK
+      retry(retryPolicy) {
+        var timedResult = 0L
+        try {
+          timedResult = measureTimeMillis { status = task(name, taskConfig) }
+        } catch (nwfte: NoWorkForTaskException) {
+          repeatedTaskMetrics.noWorkCount.increment()
+          status = Status.NO_WORK
+          throw nwfte
+        } catch (e: Exception) {
+          repeatedTaskMetrics.failedCount.increment()
+          status = Status.FAILED
+          throw e
+        } finally {
+          repeatedTaskMetrics.taskDuration(meterRegistry, name, status.toLabel()).record(timedResult.toDouble())
         }
-
-        running.set(true)
-    }
-
-    fun shutDown() {
-        running.set(false)
-        timer?.cancel()
-        timer = null
-    }
-
-    private fun runWithBackoff(
-        retryPolicy: suspend RetryFailure<Throwable>.() -> RetryInstruction,
-        task: (name: String, taskConfig: TaskConfig) -> Status
-    ): Status {
-        return runBlocking {
-            var status = Status.OK
-            retry(retryPolicy) {
-                var timedResult = 0L
-                try {
-                    timedResult = measureTimeMillis {
-                        status = task(name, taskConfig)
-                    }
-                } catch (nwfte: NoWorkForTaskException) {
-                    repeatedTaskMetrics.noWorkCount.increment()
-                    status = Status.NO_WORK
-                    throw nwfte
-                } catch (e: Exception) {
-                    repeatedTaskMetrics.failedCount.increment()
-                    status = Status.FAILED
-                    throw e
-                } finally {
-                    repeatedTaskMetrics
-                      .taskDuration(meterRegistry, name, status.toLabel())
-                      .record(timedResult.toDouble())
-                }
-                when (status) {
-                    Status.NO_WORK -> {
-                        repeatedTaskMetrics.noWorkCount.increment()
-                        throw NoWorkForTaskException()
-                    }
-                    Status.FAILED -> {
-                        repeatedTaskMetrics.failedCount.increment()
-                        throw FailedTaskException()
-                    }
-                    else -> {
-                        repeatedTaskMetrics.successCount.increment()
-                    }
-                }
-                status
-            }
+        when (status) {
+          Status.NO_WORK -> {
+            repeatedTaskMetrics.noWorkCount.increment()
+            throw NoWorkForTaskException()
+          }
+          Status.FAILED -> {
+            repeatedTaskMetrics.failedCount.increment()
+            throw FailedTaskException()
+          }
+          else -> {
+            repeatedTaskMetrics.successCount.increment()
+          }
         }
+        status
+      }
+    }
+  }
+
+  private fun Status.toLabel() =
+    when (this) {
+      Status.NO_WORK -> "no_work"
+      Status.FAILED -> "failed"
+      else -> "success"
     }
 
-    private fun Status.toLabel() = when (this) {
-        Status.NO_WORK -> "no_work"
-        Status.FAILED -> "failed"
-        else -> "success"
-    }
-
-    companion object {
-        private val log = getLogger<RepeatedTask>()
-    }
+  companion object {
+    private val log = getLogger<RepeatedTask>()
+  }
 }
 
-/**
- * By default, continue retrying
- */
-val defaultThrowableRetryPolicy: RetryPolicy<Throwable> = {
-    ContinueRetrying
-}
-
+/** By default, continue retrying */
+val defaultThrowableRetryPolicy: RetryPolicy<Throwable> = { ContinueRetrying }

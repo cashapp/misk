@@ -1,10 +1,11 @@
 package misk.web.requestdeadlines
 
+import jakarta.inject.Inject
+import java.time.Duration
+import kotlin.reflect.typeOf
 import misk.Action
 import misk.MiskTestingServiceModule
-import misk.asAction
 import misk.inject.KAbstractModule
-import misk.metrics.v2.Metrics
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.DispatchMechanism
@@ -12,14 +13,10 @@ import misk.web.Get
 import misk.web.actions.WebAction
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.Duration
-import jakarta.inject.Inject
-import kotlin.reflect.typeOf
 
 @MiskTest(startService = false)
 class RequestDeadlineMetricsTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject private lateinit var metrics: RequestDeadlineMetrics
 
@@ -31,9 +28,15 @@ class RequestDeadlineMetricsTest {
     metrics.recordDeadlinePropagated(upperCaseAction, Duration.ofSeconds(5), "test_source")
     metrics.recordDeadlinePropagated(mixedCaseAction, Duration.ofSeconds(3), "test_source")
 
-    // Verify histogram is not updated for either case  
-    assertThat(metrics.deadlineDistributionHistogram.labels("LIVENESSCHECKACTION", "test_source", "http").get().buckets.last()).isEqualTo(0.0)
-    assertThat(metrics.deadlineDistributionHistogram.labels("ReadinessCheckAction", "test_source", "http").get().buckets.last()).isEqualTo(0.0)
+    // Verify histogram is not updated for either case
+    assertThat(
+        metrics.deadlineDistributionHistogram.labels("LIVENESSCHECKACTION", "test_source", "http").get().buckets.last()
+      )
+      .isEqualTo(0.0)
+    assertThat(
+        metrics.deadlineDistributionHistogram.labels("ReadinessCheckAction", "test_source", "http").get().buckets.last()
+      )
+      .isEqualTo(0.0)
   }
 
   @Test
@@ -44,8 +47,10 @@ class RequestDeadlineMetricsTest {
     metrics.recordDeadlinePropagated(normalAction, timeout, "test_source")
 
     // Verify histogram is updated
-    assertThat(metrics.deadlineDistributionHistogram.labels("normalaction", "test_source", "http").get().buckets.last()).isEqualTo(1.0)
-    assertThat(metrics.deadlineDistributionHistogram.labels("normalaction", "test_source", "http").get().sum).isEqualTo(10000.0)
+    assertThat(metrics.deadlineDistributionHistogram.labels("normalaction", "test_source", "http").get().buckets.last())
+      .isEqualTo(1.0)
+    assertThat(metrics.deadlineDistributionHistogram.labels("normalaction", "test_source", "http").get().sum)
+      .isEqualTo(10000.0)
   }
 
   @Test
@@ -56,7 +61,14 @@ class RequestDeadlineMetricsTest {
     metrics.recordDeadlinePropagated(partialMatchAction, timeout, "test_source")
 
     // Should process this action since it's not an exact match
-    assertThat(metrics.deadlineDistributionHistogram.labels("mylivenesscheckactionextended", "test_source", "http").get().buckets.last()).isEqualTo(1.0)
+    assertThat(
+        metrics.deadlineDistributionHistogram
+          .labels("mylivenesscheckactionextended", "test_source", "http")
+          .get()
+          .buckets
+          .last()
+      )
+      .isEqualTo(1.0)
   }
 
   @Test
@@ -69,8 +81,18 @@ class RequestDeadlineMetricsTest {
     metrics.recordDeadlineExceeded(normalAction, "inbound", false, 500L)
 
     // Health check action should not be recorded, normal action should be
-    assertThat(metrics.deadlineExceededTimeHistogram.labels("livenesscheckaction", "inbound", "true", "http").get().buckets.last()).isEqualTo(0.0)
-    assertThat(metrics.deadlineExceededTimeHistogram.labels("normalaction", "inbound", "false", "http").get().buckets.last()).isEqualTo(1.0)
+    assertThat(
+        metrics.deadlineExceededTimeHistogram
+          .labels("livenesscheckaction", "inbound", "true", "http")
+          .get()
+          .buckets
+          .last()
+      )
+      .isEqualTo(0.0)
+    assertThat(
+        metrics.deadlineExceededTimeHistogram.labels("normalaction", "inbound", "false", "http").get().buckets.last()
+      )
+      .isEqualTo(1.0)
   }
 
   @Test
@@ -82,8 +104,18 @@ class RequestDeadlineMetricsTest {
     metrics.recordDeadlineExceeded(normalAction, "outbound", true, 250L)
 
     // Health check action should not be recorded due to case-insensitive matching
-    assertThat(metrics.deadlineExceededTimeHistogram.labels("ReadinessCheckAction", "outbound", "false", "http").get().buckets.last()).isEqualTo(0.0)
-    assertThat(metrics.deadlineExceededTimeHistogram.labels("testaction", "outbound", "true", "http").get().buckets.last()).isEqualTo(1.0)
+    assertThat(
+        metrics.deadlineExceededTimeHistogram
+          .labels("ReadinessCheckAction", "outbound", "false", "http")
+          .get()
+          .buckets
+          .last()
+      )
+      .isEqualTo(0.0)
+    assertThat(
+        metrics.deadlineExceededTimeHistogram.labels("testaction", "outbound", "true", "http").get().buckets.last()
+      )
+      .isEqualTo(1.0)
   }
 
   private fun createActionWithName(name: String): Action {
@@ -94,13 +126,12 @@ class RequestDeadlineMetricsTest {
       responseContentType = null,
       parameters = emptyList(),
       returnType = typeOf<String>(),
-      dispatchMechanism = DispatchMechanism.GET
+      dispatchMechanism = DispatchMechanism.GET,
     )
   }
 
   internal class TestAction @Inject constructor() : WebAction {
-    @Get("/test")
-    fun call(): String = "test"
+    @Get("/test") fun call(): String = "test"
   }
 
   class TestModule : KAbstractModule() {

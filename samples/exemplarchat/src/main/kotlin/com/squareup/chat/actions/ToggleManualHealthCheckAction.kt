@@ -1,12 +1,12 @@
 package com.squareup.chat.actions
 
 import com.squareup.chat.healthchecks.ManualHealthCheck
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.web.Post
 import misk.web.QueryParam
 import misk.web.Response
 import misk.web.actions.WebAction
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @Singleton
 class ToggleManualHealthCheckAction @Inject constructor() : WebAction {
@@ -17,8 +17,7 @@ class ToggleManualHealthCheckAction @Inject constructor() : WebAction {
     when (status) {
       "healthy" -> manualHealthCheck.setHealth()
       "unhealthy" -> manualHealthCheck.setUnhealthy()
-      else -> return Response("The query param 'status' be one of {'healthy', 'unhealthy'}",
-          statusCode = 400)
+      else -> return Response("The query param 'status' be one of {'healthy', 'unhealthy'}", statusCode = 400)
     }
 
     return Response(manualHealthCheck.status().toString())

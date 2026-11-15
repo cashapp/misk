@@ -8,47 +8,46 @@ import com.github.dockerjava.api.command.WaitContainerResultCallback
 import com.github.dockerjava.api.exception.NotFoundException
 import com.github.dockerjava.api.model.Frame
 import com.github.dockerjava.core.DefaultDockerClientConfig
-import misk.docker.withMiskDefaults
 import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
-import wisp.logging.getLogger
+import io.opentracing.util.GlobalTracer
 import java.io.File
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
-import io.opentracing.util.GlobalTracer
+import misk.docker.withMiskDefaults
+import wisp.logging.getLogger
 
 /**
  * A [Container] creates a Docker container for testing.
  *
- * Tests provide a lambda to build a [CreateContainerCmd]. The [createCmd] lambda must set
- * [CreateContainerCmd.withName] and [CreateContainerCmd.withImage]. All other fields are
- * optional. The [Composer] takes care of setting up the network.
+ * Tests provide a lambda to build a [CreateContainerCmd]. The [createCmd] lambda must set [CreateContainerCmd.withName]
+ * and [CreateContainerCmd.withImage]. All other fields are optional. The [Composer] takes care of setting up the
+ * network.
  *
- * There may be a need to configure your container between the creation and start steps.
- * [beforeStartHook] provides you with an id to your container allowing you to
- * manipulate as necessary before the command/entrypoint is invoked.
+ * There may be a need to configure your container between the creation and start steps. [beforeStartHook] provides you
+ * with an id to your container allowing you to manipulate as necessary before the command/entrypoint is invoked.
  *
  * See [Composer] for an example.
  */
 @Deprecated(
   message = "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
-  ReplaceWith(expression = "Container","misk.containers.Container")
+  ReplaceWith(expression = "Container", "misk.containers.Container"),
 )
 data class Container(
-    val createCmd: CreateContainerCmd.() -> Unit,
-    val beforeStartHook: (docker: DockerClient, id: String) -> Unit
+  val createCmd: CreateContainerCmd.() -> Unit,
+  val beforeStartHook: (docker: DockerClient, id: String) -> Unit,
 ) {
-    constructor(createCmd: CreateContainerCmd.() -> Unit) : this(createCmd, { _, _ -> })
+  constructor(createCmd: CreateContainerCmd.() -> Unit) : this(createCmd, { _, _ -> })
 }
 
 /**
  * [Composer] composes many [Container]s together to use in a unit test.
  *
- * The [Container]s are networked using a dedicated Docker network. Tests need to expose ports
- * in order for the test to communicate with the containers over 127.0.0.1.
+ * The [Container]s are networked using a dedicated Docker network. Tests need to expose ports in order for the test to
+ * communicate with the containers over 127.0.0.1.
  *
- * The following example composes Kafka and Zookeeper containers for testing. Kafka is exposed
- * to the jUnit test via 127.0.0.1:9102. In this example, Zookeeper is not exposed to the test.
+ * The following example composes Kafka and Zookeeper containers for testing. Kafka is exposed to the jUnit test via
+ * 127.0.0.1:9102. In this example, Zookeeper is not exposed to the test.
  *
  * ```
  *     val zkContainer = Container {
@@ -73,198 +72,167 @@ data class Container(
  */
 @Deprecated(
   "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
-  ReplaceWith(expression = "Composer","misk.containers.Composer")
+  ReplaceWith(expression = "Composer", "misk.containers.Composer"),
 )
 class Composer(private val name: String, private vararg val containers: Container) {
 
-    private val network = DockerNetwork(
-        "$name-net",
-        dockerClient
-    )
-    private val containerIds = mutableMapOf<String, String>()
-    val running = AtomicBoolean(false)
+  private val network = DockerNetwork("$name-net", dockerClient)
+  private val containerIds = mutableMapOf<String, String>()
+  val running = AtomicBoolean(false)
 
-    fun start() {
-        if (!running.compareAndSet(false, true)) return
-        Runtime.getRuntime().addShutdownHook(Thread { stop() })
+  fun start() {
+    if (!running.compareAndSet(false, true)) return
+    Runtime.getRuntime().addShutdownHook(Thread { stop() })
 
-        val span = GlobalTracer.get()
-          .buildSpan("${this.javaClass.canonicalName}.start")
-          .withTag("name", name)
-          .start()
+    val span = GlobalTracer.get().buildSpan("${this.javaClass.canonicalName}.start").withTag("name", name).start()
 
-        try {
-          network.start()
+    try {
+      network.start()
 
-          for (container in containers) {
-            val name = container.name()
-            val create = dockerClient.createContainerCmd("todo").apply(container.createCmd)
-            require(create.image != "todo") {
-              "must provide an image for container ${create.name}"
-            }
+      for (container in containers) {
+        val name = container.name()
+        val create = dockerClient.createContainerCmd("todo").apply(container.createCmd)
+        require(create.image != "todo") { "must provide an image for container ${create.name}" }
 
-            dockerClient.listContainersCmd()
-              .withShowAll(true)
-              .withLabelFilter(mapOf("name" to name))
-              .exec()
-              .forEach {
-                log.info { "removing previous $name container with id ${it.id}" }
-                dockerClient.removeContainerCmd(it.id).exec()
-              }
-
-            log.info { "pulling ${create.image} for $name container" }
-
-            val imageParts = create.image!!.split(":")
-            dockerClient.pullImageCmd(imageParts[0])
-              .withTag(imageParts.getOrElse(1) { "latest" })
-              .exec(PullImageResultCallback()).awaitCompletion()
-
-            log.info { "starting $name container" }
-
-            @Suppress("DEPRECATION") val id = create
-              .withNetworkMode(network.id())
-              .withLabels(mapOf("name" to name))
-              .withTty(true)
-              .exec()
-              .id
-            containerIds[name] = id
-
-            container.beforeStartHook(dockerClient, id)
-
-            dockerClient.startContainerCmd(id).exec()
-            dockerClient.logContainerCmd(id)
-              .withStdErr(true)
-              .withStdOut(true)
-              .withFollowStream(true)
-              .withSince(0)
-              .exec(LogContainerResultCallback())
-              .awaitStarted()
-
-            log.info { "started $name; container id=$id" }
-          }
-        } finally {
-          span.finish()
+        dockerClient.listContainersCmd().withShowAll(true).withLabelFilter(mapOf("name" to name)).exec().forEach {
+          log.info { "removing previous $name container with id ${it.id}" }
+          dockerClient.removeContainerCmd(it.id).exec()
         }
+
+        log.info { "pulling ${create.image} for $name container" }
+
+        val imageParts = create.image!!.split(":")
+        dockerClient
+          .pullImageCmd(imageParts[0])
+          .withTag(imageParts.getOrElse(1) { "latest" })
+          .exec(PullImageResultCallback())
+          .awaitCompletion()
+
+        log.info { "starting $name container" }
+
+        @Suppress("DEPRECATION")
+        val id = create.withNetworkMode(network.id()).withLabels(mapOf("name" to name)).withTty(true).exec().id
+        containerIds[name] = id
+
+        container.beforeStartHook(dockerClient, id)
+
+        dockerClient.startContainerCmd(id).exec()
+        dockerClient
+          .logContainerCmd(id)
+          .withStdErr(true)
+          .withStdOut(true)
+          .withFollowStream(true)
+          .withSince(0)
+          .exec(LogContainerResultCallback())
+          .awaitStarted()
+
+        log.info { "started $name; container id=$id" }
+      }
+    } finally {
+      span.finish()
     }
+  }
+
   @Suppress("DEPRECATION")
   private fun Container.name(): String {
-        val create = dockerClient.createContainerCmd("todo").apply(createCmd)
-        require(!create.name.isNullOrBlank()) {
-            "must provide a name for the container"
-        }
-        return "$name/${create.name}"
-    }
+    val create = dockerClient.createContainerCmd("todo").apply(createCmd)
+    require(!create.name.isNullOrBlank()) { "must provide a name for the container" }
+    return "$name/${create.name}"
+  }
 
-    fun stop() {
-        if (!running.compareAndSet(true, false)) return
+  fun stop() {
+    if (!running.compareAndSet(true, false)) return
 
-        for (container in containers) {
-            val name = container.name()
-            containerIds[name]?.let {
-                try {
-                    log.info { "killing $name with container id $it" }
-                    dockerClient.killContainerCmd(it).exec()
-                } catch (th: Throwable) {
-                    log.error(th) { "could not kill $name with container id $it" }
-                }
-
-                log.info { "killed $name with container id $it" }
-            }
+    for (container in containers) {
+      val name = container.name()
+      containerIds[name]?.let {
+        try {
+          log.info { "killing $name with container id $it" }
+          dockerClient.killContainerCmd(it).exec()
+        } catch (th: Throwable) {
+          log.error(th) { "could not kill $name with container id $it" }
         }
 
-        network.stop()
+        log.info { "killed $name with container id $it" }
+      }
     }
 
-    private class LogContainerResultCallback :
-        ResultCallbackTemplate<LogContainerResultCallback, Frame>() {
-        override fun onNext(item: Frame) {
-            String(item.payload).trim().split('\r', '\n').filter { it.isNotBlank() }.forEach {
-                log.info(it)
-            }
-        }
-    }
+    network.stop()
+  }
 
-    private class GracefulWaitContainerResultCallback : WaitContainerResultCallback() {
-        override fun onError(throwable: Throwable?) {
-            // this is ok, just meant that the container already terminated before we tried to wait
-            if (throwable is NotFoundException) {
-                return
-            }
-            super.onError(throwable)
-        }
+  private class LogContainerResultCallback : ResultCallbackTemplate<LogContainerResultCallback, Frame>() {
+    override fun onNext(item: Frame) {
+      String(item.payload).trim().split('\r', '\n').filter { it.isNotBlank() }.forEach { log.info(it) }
     }
+  }
 
-    companion object {
-        private val log = getLogger<Composer>()
-        private val defaultDockerClientConfig = DefaultDockerClientConfig
-          .createDefaultConfigBuilder()
-          .withMiskDefaults()
-          .build()
-        private val httpClient = ApacheDockerHttpClient.Builder()
-            .dockerHost(defaultDockerClientConfig.dockerHost)
-            .sslConfig(defaultDockerClientConfig.sslConfig)
-            .maxConnections(100)
-            .connectionTimeout(Duration.ofSeconds(60))
-            .responseTimeout(Duration.ofSeconds(120))
-            .build()
-        val dockerClient: DockerClient =
-            DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
+  private class GracefulWaitContainerResultCallback : WaitContainerResultCallback() {
+    override fun onError(throwable: Throwable?) {
+      // this is ok, just meant that the container already terminated before we tried to wait
+      if (throwable is NotFoundException) {
+        return
+      }
+      super.onError(throwable)
     }
+  }
+
+  companion object {
+    private val log = getLogger<Composer>()
+    private val defaultDockerClientConfig =
+      DefaultDockerClientConfig.createDefaultConfigBuilder().withMiskDefaults().build()
+    private val httpClient =
+      ApacheDockerHttpClient.Builder()
+        .dockerHost(defaultDockerClientConfig.dockerHost)
+        .sslConfig(defaultDockerClientConfig.sslConfig)
+        .maxConnections(100)
+        .connectionTimeout(Duration.ofSeconds(60))
+        .responseTimeout(Duration.ofSeconds(120))
+        .build()
+    val dockerClient: DockerClient = DockerClientImpl.getInstance(defaultDockerClientConfig, httpClient)
+  }
 }
 
 @Deprecated(
   "Duplicate implementations in Wisp are being migrated to the unified type in Misk.",
-  ReplaceWith(expression = "ContainerUtil","misk.containers.ContainerUtil")
+  ReplaceWith(expression = "ContainerUtil", "misk.containers.ContainerUtil"),
 )
 object ContainerUtil {
-    val isRunningInDocker = File("/proc/1/cgroup")
-        .takeIf { it.exists() }?.useLines { lines ->
-            lines.any { it.contains("/docker") }
-        } ?: false
+  val isRunningInDocker =
+    File("/proc/1/cgroup").takeIf { it.exists() }?.useLines { lines -> lines.any { it.contains("/docker") } } ?: false
 
-    fun dockerTargetOrLocalHost(): String {
-        if (isRunningInDocker)
-            return "host.docker.internal"
-        else
-            return "localhost"
-    }
+  fun dockerTargetOrLocalHost(): String {
+    if (isRunningInDocker) return "host.docker.internal" else return "localhost"
+  }
 
-    fun dockerTargetOrLocalIp(): String {
-        if (isRunningInDocker)
-            return "host.docker.internal"
-        else
-            return "127.0.0.1"
-    }
+  fun dockerTargetOrLocalIp(): String {
+    if (isRunningInDocker) return "host.docker.internal" else return "127.0.0.1"
+  }
 }
 
 private class DockerNetwork(private val name: String, private val docker: DockerClient) {
 
-    private lateinit var networkId: String
+  private lateinit var networkId: String
 
-    fun id(): String {
-        return networkId
+  fun id(): String {
+    return networkId
+  }
+
+  fun start() {
+    log.info { "creating $name network" }
+
+    docker.listNetworksCmd().withNameFilter(name).exec().forEach {
+      log.info { "removing previous $name network with id ${it.id}" }
+      docker.removeNetworkCmd(it.id).exec()
     }
+    networkId = docker.createNetworkCmd().withName(name).withCheckDuplicate(true).exec().id
+  }
 
-    fun start() {
-        log.info { "creating $name network" }
+  fun stop() {
+    log.info { "removing $name network with id $networkId" }
+    docker.removeNetworkCmd(networkId).exec()
+  }
 
-        docker.listNetworksCmd().withNameFilter(name).exec().forEach {
-            log.info { "removing previous $name network with id ${it.id}" }
-            docker.removeNetworkCmd(it.id).exec()
-        }
-        networkId = docker.createNetworkCmd()
-            .withName(name)
-            .withCheckDuplicate(true)
-            .exec()
-            .id
-    }
-
-    fun stop() {
-        log.info { "removing $name network with id $networkId" }
-        docker.removeNetworkCmd(networkId).exec()
-    }
-
-    companion object {
-        private val log = getLogger<DockerNetwork>()
-    }
+  companion object {
+    private val log = getLogger<DockerNetwork>()
+  }
 }

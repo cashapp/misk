@@ -9,8 +9,8 @@ plugins {
 dependencies {
   api(libs.moshiCore)
   api(libs.dockerCore)
+  api(libs.okio)
   implementation(libs.moshiKotlin)
-  implementation(libs.okio)
 
   testImplementation(libs.junitApi)
   testImplementation(libs.junitEngine)
@@ -21,7 +21,7 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }
 

@@ -1,6 +1,7 @@
 package misk.web.actions
 
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -20,12 +21,10 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 class NotFoundActionTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   val httpClient = OkHttpClient()
 
@@ -38,7 +37,8 @@ class NotFoundActionTest {
   @Inject private lateinit var moshi: Moshi
   @Inject private lateinit var jettyService: JettyService
 
-  private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
+  private val packetJsonAdapter
+    get() = moshi.adapter(Packet::class.java)
 
   @Test
   fun postJsonExpectJsonPathNotFound() {
@@ -90,66 +90,75 @@ class NotFoundActionTest {
     assertThat(response.code).isEqualTo(404)
   }
 
-  @Test fun responseMessageSuggestsAlternativeMethod() {
+  @Test
+  fun responseMessageSuggestsAlternativeMethod() {
     val wrongMethod = get("/echo", plainTextMediaType)
     val response = httpClient.newCall(wrongMethod).execute()
     assertThat(response.code).isEqualTo(405)
-    assertThat(response.body!!.source().readUtf8()).isEqualTo(
-      """
-      |Nothing found at /echo.
-      |
-      |Received:
-      |GET /echo
-      |Accept: text/plain;charset=utf-8
-      |
-      |Alternative:
-      |POST /echo
-      |Accept: text/plain;charset=utf-8
-      |Content-Type: text/plain;charset=utf-8
-      |""".trimMargin()
-    )
+    assertThat(response.body!!.source().readUtf8())
+      .isEqualTo(
+        """
+        |Nothing found at /echo.
+        |
+        |Received:
+        |GET /echo
+        |Accept: text/plain;charset=utf-8
+        |
+        |Alternative:
+        |POST /echo
+        |Accept: text/plain;charset=utf-8
+        |Content-Type: text/plain;charset=utf-8
+        |"""
+          .trimMargin()
+      )
   }
 
-  @Test fun responseMessageSuggestsContentType() {
+  @Test
+  fun responseMessageSuggestsContentType() {
     val wrongContentType = post("/echo", weirdMediaType, "hello")
     val response = httpClient.newCall(wrongContentType).execute()
     assertThat(response.code).isEqualTo(415)
-    assertThat(response.body!!.source().readUtf8()).isEqualTo(
-      """
-      |Nothing found at /echo.
-      |
-      |Received:
-      |POST /echo
-      |Accept: */*
-      |Content-Type: application/weird; charset=utf-8
-      |
-      |Alternative:
-      |POST /echo
-      |Accept: text/plain;charset=utf-8
-      |Content-Type: text/plain;charset=utf-8
-      |""".trimMargin()
-    )
+    assertThat(response.body!!.source().readUtf8())
+      .isEqualTo(
+        """
+        |Nothing found at /echo.
+        |
+        |Received:
+        |POST /echo
+        |Accept: */*
+        |Content-Type: application/weird; charset=utf-8
+        |
+        |Alternative:
+        |POST /echo
+        |Accept: text/plain;charset=utf-8
+        |Content-Type: text/plain;charset=utf-8
+        |"""
+          .trimMargin()
+      )
   }
 
-  @Test fun responseMessageSuggestsAcceptType() {
+  @Test
+  fun responseMessageSuggestsAcceptType() {
     val wrongAccept = post("/echo", plainTextMediaType, "hello", weirdMediaType)
     val response = httpClient.newCall(wrongAccept).execute()
     assertThat(response.code).isEqualTo(415)
-    assertThat(response.body!!.source().readUtf8()).isEqualTo(
-      """
-      |Nothing found at /echo.
-      |
-      |Received:
-      |POST /echo
-      |Accept: application/weird
-      |Content-Type: text/plain;charset=UTF-8
-      |
-      |Alternative:
-      |POST /echo
-      |Accept: text/plain;charset=utf-8
-      |Content-Type: text/plain;charset=utf-8
-      |""".trimMargin()
-    )
+    assertThat(response.body!!.source().readUtf8())
+      .isEqualTo(
+        """
+        |Nothing found at /echo.
+        |
+        |Received:
+        |POST /echo
+        |Accept: application/weird
+        |Content-Type: text/plain;charset=UTF-8
+        |
+        |Alternative:
+        |POST /echo
+        |Accept: text/plain;charset=utf-8
+        |Content-Type: text/plain;charset=utf-8
+        |"""
+          .trimMargin()
+      )
   }
 
   private fun head(path: String, acceptedMediaType: MediaType? = null): Request {
@@ -172,7 +181,7 @@ class NotFoundActionTest {
     path: String,
     contentType: MediaType,
     content: String,
-    acceptedMediaType: MediaType? = null
+    acceptedMediaType: MediaType? = null,
   ): Request {
     return Request.Builder()
       .post(content.toRequestBody(contentType))

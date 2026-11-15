@@ -1,13 +1,15 @@
 package misk.web.metadata.database
 
-import misk.inject.typeLiteral
-import misk.web.MiskWebFormBuilder
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
+import misk.inject.typeLiteral
+import misk.web.MiskWebFormBuilder
 
 // TODO(adrw) add local date, date picker support to form
 /** Metadata front end model for Database Query Misk-Web Tab */
-data class DatabaseQueryMetadata @JvmOverloads constructor(
+data class DatabaseQueryMetadata
+@JvmOverloads
+constructor(
   val queryWebActionPath: String,
   val allowedCapabilities: Set<String> = setOf(),
   val allowedServices: Set<String> = setOf(),
@@ -27,7 +29,7 @@ data class DatabaseQueryMetadata @JvmOverloads constructor(
   /** @Select functions on Misk Query interface, maps function simpleName to Type */
   val selects: List<SelectMetadata>,
   /** Contains all Types across all queries */
-  val types: Map<String, MiskWebFormBuilder.Type>
+  val types: Map<String, MiskWebFormBuilder.Type>,
 ) {
   constructor(
     queryWebActionPath: String,
@@ -41,7 +43,7 @@ data class DatabaseQueryMetadata @JvmOverloads constructor(
     constraints: List<ConstraintMetadata>,
     orders: List<OrderMetadata>,
     selects: List<SelectMetadata>,
-    types: Map<String, MiskWebFormBuilder.Type>
+    types: Map<String, MiskWebFormBuilder.Type>,
   ) : this(
     queryWebActionPath = queryWebActionPath,
     allowedCapabilities = allowedCapabilities,
@@ -50,26 +52,25 @@ data class DatabaseQueryMetadata @JvmOverloads constructor(
     table = table,
     entityClass = entityClass.simpleName!!, // Assert not null, since this shouldn't be anonymous.
     entitySchema = entitySchema.mapValues { (_, v) -> v.typeLiteral().type.typeName },
-    queryClass = queryClass?.simpleName
-      ?: "${entityClass.simpleName!!}$DYNAMIC_QUERY_KCLASS_SUFFIX",
+    queryClass = queryClass?.simpleName ?: "${entityClass.simpleName!!}$DYNAMIC_QUERY_KCLASS_SUFFIX",
     constraints = constraints,
     orders = orders,
     selects = selects,
-    types = types
+    types = types,
   )
 
   data class ConstraintMetadata(
     override val name: String,
     override val parametersTypeName: String,
     val path: String,
-    val operator: String
+    val operator: String,
   ) : DatabaseQueryFunctionMetadata
 
   data class OrderMetadata(
     override val name: String,
     override val parametersTypeName: String,
     val path: String,
-    val ascending: Boolean
+    val ascending: Boolean,
   ) : DatabaseQueryFunctionMetadata
 
   data class SelectMetadata(

@@ -6,9 +6,7 @@ import misk.web.actions.NotFoundAction
 import misk.web.jetty.WebActionsServlet
 import okhttp3.HttpUrl.Companion.toHttpUrl
 
-/**
- * Provides a way to check if a URL has a bound action in the application.
- */
+/** Provides a way to check if a URL has a bound action in the application. */
 interface UrlMatcher {
   /**
    * Returns true if there is at least one bound action that can handle the given URL.
@@ -20,9 +18,7 @@ interface UrlMatcher {
 }
 
 @Singleton
-internal class RealUrlMatcher @Inject constructor(
-  private val webActionsServlet: WebActionsServlet
-) : UrlMatcher {
+internal class RealUrlMatcher @Inject constructor(private val webActionsServlet: WebActionsServlet) : UrlMatcher {
 
   override fun hasBoundAction(url: String): Boolean {
     val httpUrl = url.toHttpUrl()

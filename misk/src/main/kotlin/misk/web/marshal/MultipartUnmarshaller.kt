@@ -1,25 +1,21 @@
 package misk.web.marshal
 
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import kotlin.reflect.KType
 import misk.exceptions.BadRequestException
 import okhttp3.Headers
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartReader
 import okio.BufferedSource
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-import kotlin.reflect.KType
 
 object MultipartUnmarshaller : Unmarshaller {
-  override fun unmarshal(
-    requestHeaders: Headers,
-    source: BufferedSource
-  ): MultipartReader {
-    val contentType = requestHeaders["Content-Type"]?.toMediaTypeOrNull()
-      ?: throw BadRequestException("required content-type missing")
-    val boundary = contentType.parameter("boundary")
-      ?: throw BadRequestException("required boundary parameter missing")
+  override fun unmarshal(requestHeaders: Headers, source: BufferedSource): MultipartReader {
+    val contentType =
+      requestHeaders["Content-Type"]?.toMediaTypeOrNull() ?: throw BadRequestException("required content-type missing")
+    val boundary = contentType.parameter("boundary") ?: throw BadRequestException("required boundary parameter missing")
     return MultipartReader(source, boundary)
   }
 

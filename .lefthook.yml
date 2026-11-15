@@ -1,0 +1,8 @@
+assert_lefthook_installed: true
+
+lefthook: ./bin/lefthook
+
+pre-commit:
+  commands:
+    format:
+      run: ./bin/kotlin-format.pre-commit.sh

@@ -17,9 +17,7 @@ internal class HibernateTest {
     assertEquals("parentVal", field(Child::class.java, parentProperty).name)
     assertEquals("childVal", field(Child::class.java, childProperty).name)
 
-    assertThrows<IllegalStateException> {
-      field(Parent::class.java, childProperty)
-    }
+    assertThrows<IllegalStateException> { field(Parent::class.java, childProperty) }
   }
 
   open class Parent {

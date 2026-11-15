@@ -1,12 +1,13 @@
 package misk.backoff
 
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicLong
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 
 class ExponentialBackoffTest {
-  @Test fun unjitteredExponentialBackoff() {
+  @Test
+  fun unjitteredExponentialBackoff() {
     val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofSeconds(1))
 
     assertThat(backoff.nextRetry().toMillis()).isEqualTo(10L)
@@ -24,12 +25,9 @@ class ExponentialBackoffTest {
     assertThat(backoff.nextRetry().toMillis()).isEqualTo(10L)
   }
 
-  @Test fun jitteredExponentialBackoff() {
-    val backoff = ExponentialBackoff(
-      Duration.ofMillis(10),
-      Duration.ofSeconds(1),
-      Duration.ofMillis(10)
-    )
+  @Test
+  fun jitteredExponentialBackoff() {
+    val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofSeconds(1), Duration.ofMillis(10))
 
     assertThat(backoff.nextRetry().toMillis()).isBetween(10L, 20L)
     assertThat(backoff.nextRetry().toMillis()).isBetween(20L, 30L)
@@ -46,11 +44,12 @@ class ExponentialBackoffTest {
     assertThat(backoff.nextRetry().toMillis()).isBetween(10L, 20L)
   }
 
-  @Test fun dynamicJitteredExponentialBackoffUsingNextDelay() {
-    val backoff = ExponentialBackoff(
-      Duration.ofMillis(10),
-      Duration.ofSeconds(1)
-    ) { curDelayMs: Long -> Duration.ofMillis(curDelayMs / 2 + 1) }
+  @Test
+  fun dynamicJitteredExponentialBackoffUsingNextDelay() {
+    val backoff =
+      ExponentialBackoff(Duration.ofMillis(10), Duration.ofSeconds(1)) { curDelayMs: Long ->
+        Duration.ofMillis(curDelayMs / 2 + 1)
+      }
 
     assertThat(backoff.nextRetry().toMillis()).isBetween(10L, 20L + 5L)
     assertThat(backoff.nextRetry().toMillis()).isBetween(20L, 30L + 10L)
@@ -67,15 +66,16 @@ class ExponentialBackoffTest {
     assertThat(backoff.nextRetry().toMillis()).isBetween(10L, 20L + 5L)
   }
 
-  @Test fun dynamicJitteredExponentialBackoff() {
+  @Test
+  fun dynamicJitteredExponentialBackoff() {
     val baseDelay = AtomicLong(10)
     val maxDelay = AtomicLong(1000L)
     val jitter = AtomicLong(10)
 
-    val backoff = ExponentialBackoff(
-      { Duration.ofMillis(baseDelay.get()) },
-      { Duration.ofMillis(maxDelay.get()) }
-    ) { Duration.ofMillis(jitter.get()) }
+    val backoff =
+      ExponentialBackoff({ Duration.ofMillis(baseDelay.get()) }, { Duration.ofMillis(maxDelay.get()) }) {
+        Duration.ofMillis(jitter.get())
+      }
 
     assertThat(backoff.nextRetry().toMillis()).isBetween(10L, 20L)
     assertThat(backoff.nextRetry().toMillis()).isBetween(20L, 30L)
@@ -94,13 +94,14 @@ class ExponentialBackoffTest {
     assertThat(backoff.nextRetry().toMillis()).isBetween(2000L, 2100L)
   }
 
-  @Test fun maxRetriesCapped() {
+  @Test
+  fun maxRetriesCapped() {
     val baseDelay = AtomicLong(100)
     val maxDelay = AtomicLong(5000L)
-    val backoff = ExponentialBackoff(
-      { Duration.ofMillis(baseDelay.get()) },
-      { Duration.ofMillis(maxDelay.get()) }
-    ) { Duration.ofMillis(0) }
+    val backoff =
+      ExponentialBackoff({ Duration.ofMillis(baseDelay.get()) }, { Duration.ofMillis(maxDelay.get()) }) {
+        Duration.ofMillis(0)
+      }
 
     // Previously the number of retries was uncapped and it would cause a long overflow at 57
     // iterations.

@@ -4,10 +4,10 @@ import com.google.cloud.datastore.Datastore
 import com.google.cloud.datastore.testing.LocalDatastoreHelper
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Provides
+import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.ServiceModule
 import misk.inject.KAbstractModule
-import jakarta.inject.Inject
 import misk.testing.TestFixture
 
 /** Installs a version of the [Datastore] that works off an in-memory local store */
@@ -17,19 +17,15 @@ class FakeDatastoreModule : KAbstractModule() {
     multibind<TestFixture>().to<FakeDatastoreService>()
   }
 
-  @Provides
-  @Singleton
-  fun provideDatastoreHelper(): LocalDatastoreHelper = datastoreHelper.value
+  @Provides @Singleton fun provideDatastoreHelper(): LocalDatastoreHelper = datastoreHelper.value
 
   @Provides
   @Singleton
-  fun provideDatastore(datastoreHelper: LocalDatastoreHelper): Datastore =
-    datastoreHelper.options.service
+  fun provideDatastore(datastoreHelper: LocalDatastoreHelper): Datastore = datastoreHelper.options.service
 
   @Singleton
-  class FakeDatastoreService @Inject constructor(
-    private val datastoreHelper: LocalDatastoreHelper
-  ) : AbstractIdleService(), TestFixture {
+  class FakeDatastoreService @Inject constructor(private val datastoreHelper: LocalDatastoreHelper) :
+    AbstractIdleService(), TestFixture {
     override fun startUp() {
       // Reset on every restart / test run
       datastoreHelper.reset()

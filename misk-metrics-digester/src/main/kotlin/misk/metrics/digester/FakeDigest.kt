@@ -2,9 +2,7 @@ package misk.metrics.digester
 
 import com.squareup.digester.protos.service.DigestData
 
-/**
- * Simulates VeneurDigest for testing purposes
- */
+/** Simulates VeneurDigest for testing purposes */
 class FakeDigest : TDigest<FakeDigest> {
 
   internal val addedValues: MutableList<Double>
@@ -15,7 +13,7 @@ class FakeDigest : TDigest<FakeDigest> {
     addedValues = mutableListOf()
   }
 
-  constructor (values: List<Double>) {
+  constructor(values: List<Double>) {
     addedValues = values.toMutableList()
   }
 

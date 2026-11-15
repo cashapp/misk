@@ -4,7 +4,7 @@ import java.io.File
 import java.io.InputStream
 import java.util.concurrent.atomic.AtomicBoolean
 
-fun runGradleAsyncCompile(projectDir : String, compilationComplete: () -> Unit, additionalGradleArgs: List<String>) {
+fun runGradleAsyncCompile(projectDir: String, compilationComplete: () -> Unit, additionalGradleArgs: List<String>) {
   val t = Thread {
     val pb = ProcessBuilder(listOf("gradle", "classes", "--continuous") + additionalGradleArgs)
     pb.environment().put("MISK_HOT_RELOAD", "true")
@@ -22,18 +22,8 @@ fun runGradleAsyncCompile(projectDir : String, compilationComplete: () -> Unit, 
       }
       println(it)
     }
-    Thread(
-      Reader(
-        lineHandler,
-        process.errorStream,
-      ),
-    ).start()
-    Thread(
-      Reader(
-        lineHandler,
-        process.inputStream,
-      ),
-    ).start()
+    Thread(Reader(lineHandler, process.errorStream)).start()
+    Thread(Reader(lineHandler, process.inputStream)).start()
     val result = process.waitFor()
     if (result != 0) {
       println("Gradle compilation failed, continuous compilation not available")
@@ -46,5 +36,4 @@ internal class Reader(val lineHandler: (line: String) -> Unit, val stream: Input
   override fun run() {
     stream.bufferedReader().forEachLine(lineHandler)
   }
-
 }

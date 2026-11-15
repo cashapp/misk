@@ -41,6 +41,14 @@ tasks.withType<Test>().configureEach {
 
 The environment variable can be set to false in order to opt your tests out of this feature entirely.
 
+By default the cache of reused injectors is unbounded, which can grow large in test suites with many distinct module sets. To bound it, set the `MISK_TEST_REUSE_LRU_SIZE` environment variable to a positive integer. The cache then evicts the least-recently-used entry when the size is exceeded, stopping its services as part of eviction.
+```kotlin
+tasks.withType<Test>().configureEach {
+  environment("MISK_TEST_REUSE_INJECTOR", "true")
+  environment("MISK_TEST_REUSE_LRU_SIZE", "8")
+}
+```
+
 Reusing the injector across tests means that the stateful dependencies such as DBs and fake objects can have their state updated during the execution of each test, which can impact the result of the following tests. Reset the state of such dependencies by:
 1. Extending the `misk.testing.TestFixture` interface.
 2. `multibind`ing the test fixture class in a Guice module to ensure that the test infrastructure can reset them between test runs. For example:

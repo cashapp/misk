@@ -1,29 +1,24 @@
 package misk.web.extractors
 
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.findAnnotation
 import misk.Action
 import misk.web.FeatureBinding
 import misk.web.FeatureBinding.Claimer
 import misk.web.FeatureBinding.Subject
 import misk.web.PathParam
 import misk.web.PathPattern
-import kotlin.reflect.KParameter
-import kotlin.reflect.full.findAnnotation
 
 /** Binds parameters annotated [PathParam] to URL path segments. */
-internal class PathParamFeatureBinding private constructor(
-  private val parameters: List<ParameterBinding>
-) : FeatureBinding {
+internal class PathParamFeatureBinding private constructor(private val parameters: List<ParameterBinding>) :
+  FeatureBinding {
   override fun beforeCall(subject: Subject) {
     for (element in parameters) {
       element.bind(subject)
     }
   }
 
-  private class ParameterBinding(
-    val patternIndex: Int,
-    val parameter: KParameter,
-    val converter: StringConverter
-  ) {
+  private class ParameterBinding(val patternIndex: Int, val parameter: KParameter, val converter: StringConverter) {
     fun bind(subject: Subject) {
       val pathParam = subject.pathMatcher.group(patternIndex + 1)
       subject.setParameter(parameter, converter.convert(pathParam))
@@ -35,11 +30,9 @@ internal class PathParamFeatureBinding private constructor(
       action: Action,
       pathPattern: PathPattern,
       claimer: Claimer,
-      stringConverterFactories: List<StringConverter.Factory>
+      stringConverterFactories: List<StringConverter.Factory>,
     ): FeatureBinding? {
-      val bindings = action.parameters.mapNotNull {
-        it.toParameterBinding(pathPattern, stringConverterFactories)
-      }
+      val bindings = action.parameters.mapNotNull { it.toParameterBinding(pathPattern, stringConverterFactories) }
       if (bindings.isEmpty()) return null
 
       for (binding in bindings) {
@@ -51,7 +44,7 @@ internal class PathParamFeatureBinding private constructor(
 
     private fun KParameter.toParameterBinding(
       pathPattern: PathPattern,
-      stringConverterFactories: List<StringConverter.Factory>
+      stringConverterFactories: List<StringConverter.Factory>,
     ): ParameterBinding? {
       val annotation = findAnnotation<PathParam>() ?: return null
       val name = if (annotation.value.isBlank()) name else annotation.value
@@ -59,8 +52,9 @@ internal class PathParamFeatureBinding private constructor(
       val patternIndex = pathPattern.variableNames.indexOf(name)
       if (patternIndex == -1) return null
 
-      val converter = converterFor(type, stringConverterFactories)
-        ?: throw IllegalArgumentException("cannot convert path parameters to $type")
+      val converter =
+        converterFor(type, stringConverterFactories)
+          ?: throw IllegalArgumentException("cannot convert path parameters to $type")
 
       return ParameterBinding(patternIndex, this, converter)
     }

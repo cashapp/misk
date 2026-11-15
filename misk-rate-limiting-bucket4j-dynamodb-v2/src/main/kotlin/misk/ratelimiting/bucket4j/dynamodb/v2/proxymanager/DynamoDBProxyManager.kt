@@ -5,18 +5,10 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 
 internal class DynamoDBProxyManager private constructor() {
   companion object {
-    fun stringKey(
-      dynamoDB: DynamoDbClient,
-      table: String,
-      config: ClientSideConfig
-    ): BaseDynamoDBProxyManager<String> =
+    fun stringKey(dynamoDB: DynamoDbClient, table: String, config: ClientSideConfig): BaseDynamoDBProxyManager<String> =
       StringDynamoDBProxyManager(dynamoDB, table, config)
 
-    fun longKey(
-      dynamoDB: DynamoDbClient,
-      table: String,
-      config: ClientSideConfig
-    ): BaseDynamoDBProxyManager<Long> =
+    fun longKey(dynamoDB: DynamoDbClient, table: String, config: ClientSideConfig): BaseDynamoDBProxyManager<Long> =
       LongDynamoDBProxyManager(dynamoDB, table, config)
   }
 }

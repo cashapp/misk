@@ -41,7 +41,7 @@ wire {
 
   // Generate service interfaces also.
   kotlin {
-    includes = listOf("routeguide.RouteGuide")
+    includes = listOf("routeguide.RouteGuide", "transitive.MainService")
     exclusive = false
     rpcRole = "server"
     rpcCallStyle = "blocking"
@@ -58,6 +58,7 @@ dependencies {
   api(libs.okHttp)
   api(libs.okio)
   api(libs.protobufJava)
+  api(libs.wireGrpcClient)
   api(project(":misk"))
   api(project(":misk-actions"))
   api(project(":misk-api"))
@@ -67,7 +68,6 @@ dependencies {
   implementation(libs.grpcNetty)
   implementation(libs.grpcProtobuf)
   implementation(libs.nettyHandler)
-  implementation(libs.wireGrpcClient)
   implementation(libs.wireRuntime)
   implementation(project(":misk-core"))
   implementation(testFixtures(project(":misk-metrics")))
@@ -86,6 +86,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

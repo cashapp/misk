@@ -1,29 +1,30 @@
 package misk.redis
 
-import okio.ByteString
-import okio.ByteString.Companion.encode
-import redis.clients.jedis.JedisPubSub
-import redis.clients.jedis.Pipeline
-import redis.clients.jedis.Transaction
-import redis.clients.jedis.args.ListDirection
+import jakarta.inject.Inject
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
-import jakarta.inject.Inject
-import misk.redis.Redis.ZRangeLimit
-import misk.redis.Redis.ZRangeMarker
-import misk.redis.Redis.ZRangeRankMarker
-import misk.redis.Redis.ZRangeType
-import org.apache.commons.io.FilenameUtils
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
+import misk.redis.Redis.ZRangeLimit
+import misk.redis.Redis.ZRangeMarker
+import misk.redis.Redis.ZRangeRankMarker
+import misk.redis.Redis.ZRangeScoreMarker
+import misk.redis.Redis.ZRangeType
+import okio.ByteString
+import okio.ByteString.Companion.encode
+import org.apache.commons.io.FilenameUtils
+import redis.clients.jedis.JedisPubSub
+import redis.clients.jedis.Pipeline
+import redis.clients.jedis.Transaction
+import redis.clients.jedis.args.ListDirection
 
 /** Mimics a Redis instance for testing. */
 @Deprecated(
   message = "Moved to misk-redis-testing. This Fake does not emulate redis correctly.",
-  replaceWith = ReplaceWith("misk.redis.testing.FakeRedis")
+  replaceWith = ReplaceWith("misk.redis.testing.FakeRedis"),
 )
 class FakeRedis : Redis {
   @Inject lateinit var clock: Clock
@@ -36,8 +37,7 @@ class FakeRedis : Redis {
   private val keyValueStore = ConcurrentHashMap<String, Value<ByteString>>()
 
   /** A nested hash map for hash operations. */
-  private val hKeyValueStore =
-    ConcurrentHashMap<String, Value<ConcurrentHashMap<String, ByteString>>>()
+  private val hKeyValueStore = ConcurrentHashMap<String, Value<ConcurrentHashMap<String, ByteString>>>()
 
   /** A hash map for list operations. */
   private val lKeyValueStore = ConcurrentHashMap<String, Value<List<ByteString>>>()
@@ -51,19 +51,15 @@ class FakeRedis : Redis {
     return deleted
   }
 
-  @Synchronized
-  override fun del(vararg keys: String): Int = keys.count { del(it) }
+  @Synchronized override fun del(vararg keys: String): Int = keys.count { del(it) }
 
-  @Synchronized
-  override fun mget(vararg keys: String): List<ByteString?> = keys.map { get(it) }
+  @Synchronized override fun mget(vararg keys: String): List<ByteString?> = keys.map { get(it) }
 
   @Synchronized
   override fun mset(vararg keyValues: ByteString) {
     require(keyValues.size % 2 == 0) { "Wrong number of arguments to mset" }
 
-    (keyValues.indices step 2).forEach {
-      set(keyValues[it].utf8(), keyValues[it + 1])
-    }
+    (keyValues.indices step 2).forEach { set(keyValues[it].utf8(), keyValues[it + 1]) }
   }
 
   @Synchronized
@@ -80,8 +76,8 @@ class FakeRedis : Redis {
 
   @Synchronized
   override fun getDel(key: String): ByteString? {
-    val value = get(key);
-    keyValueStore.remove(key);
+    val value = get(key)
+    keyValueStore.remove(key)
     return value
   }
 
@@ -129,8 +125,7 @@ class FakeRedis : Redis {
     return value.data.mapValues { it.value }
   }
 
-  @Synchronized
-  override fun hlen(key: String): Long = hKeyValueStore[key]?.data?.size?.toLong() ?: 0L
+  @Synchronized override fun hlen(key: String): Long = hKeyValueStore[key]?.data?.size?.toLong() ?: 0L
 
   @Synchronized
   override fun hkeys(key: String): List<ByteString> {
@@ -192,10 +187,7 @@ class FakeRedis : Redis {
 
   @Synchronized
   override fun set(key: String, expiryDuration: Duration, value: ByteString) {
-    keyValueStore[key] = Value(
-      data = value,
-      expiryInstant = clock.instant().plusSeconds(expiryDuration.seconds)
-    )
+    keyValueStore[key] = Value(data = value, expiryInstant = clock.instant().plusSeconds(expiryDuration.seconds))
   }
 
   @Synchronized
@@ -227,8 +219,7 @@ class FakeRedis : Redis {
     return hash.entries.sumOf { (field, value) -> hset(key, field, value) }
   }
 
-  @Synchronized
-  override fun incr(key: String): Long = incrBy(key, 1)
+  @Synchronized override fun incr(key: String): Long = incrBy(key, 1)
 
   @Synchronized
   override fun incrBy(key: String, increment: Long): Long {
@@ -244,7 +235,7 @@ class FakeRedis : Redis {
     destinationKey: String,
     from: ListDirection,
     to: ListDirection,
-    timeoutSeconds: Double
+    timeoutSeconds: Double,
   ): ByteString? = lmove(sourceKey, destinationKey, from, to)
 
   @Synchronized
@@ -258,17 +249,13 @@ class FakeRedis : Redis {
     )
 
   @Synchronized
-  override fun lmove(
-    sourceKey: String,
-    destinationKey: String,
-    from: ListDirection,
-    to: ListDirection
-  ): ByteString? {
+  override fun lmove(sourceKey: String, destinationKey: String, from: ListDirection, to: ListDirection): ByteString? {
     val sourceList = lKeyValueStore[sourceKey]?.data?.toMutableList() ?: return null
-    val sourceValue = when (from) {
-      ListDirection.LEFT -> sourceList.removeFirst()
-      ListDirection.RIGHT -> sourceList.removeLast()
-    }
+    val sourceValue =
+      when (from) {
+        ListDirection.LEFT -> sourceList.removeFirst()
+        ListDirection.RIGHT -> sourceList.removeLast()
+      }
     lKeyValueStore[sourceKey] = Value(data = sourceList, expiryInstant = Instant.MAX)
 
     val destinationList = lKeyValueStore[destinationKey]?.data?.toMutableList() ?: mutableListOf()
@@ -304,15 +291,12 @@ class FakeRedis : Redis {
     if (clock.instant() >= value.expiryInstant) {
       return emptyList()
     }
-    val result = with(value) {
-      data.subList(0, min(data.size, count)).toList()
-    }
+    val result = with(value) { data.subList(0, min(data.size, count)).toList() }
     lKeyValueStore[key] = value.copy(data = value.data.drop(count))
     return result
   }
 
-  @Synchronized
-  override fun lpop(key: String): ByteString? = lpop(key, count = 1).firstOrNull()
+  @Synchronized override fun lpop(key: String): ByteString? = lpop(key, count = 1).firstOrNull()
 
   @Synchronized
   override fun blpop(keys: Array<String>, timeoutSeconds: Double): Pair<String, ByteString>? {
@@ -334,9 +318,7 @@ class FakeRedis : Redis {
     if (clock.instant() >= value.expiryInstant) {
       return emptyList()
     }
-    val result = with(value) {
-      data.takeLast(min(data.size, count)).asReversed()
-    }
+    val result = with(value) { data.takeLast(min(data.size, count)).asReversed() }
     lKeyValueStore[key] = value.copy(data = value.data.dropLast(count))
     return result
   }
@@ -346,8 +328,7 @@ class FakeRedis : Redis {
     return lKeyValueStore[key]?.data?.size?.toLong() ?: 0L
   }
 
-  @Synchronized
-  override fun rpop(key: String): ByteString? = rpop(key, count = 1).firstOrNull()
+  @Synchronized override fun rpop(key: String): ByteString? = rpop(key, count = 1).firstOrNull()
 
   @Synchronized
   override fun lrange(key: String, start: Long, stop: Long): List<ByteString?> {
@@ -366,13 +347,14 @@ class FakeRedis : Redis {
   override fun ltrim(key: String, start: Long, stop: Long) {
     val list = lKeyValueStore[key]?.data ?: return
 
-    val trimmedList = if (stop >= 0 && start >= 0) {
-      list.subList(start.toInt(), min(list.size, stop.toInt() + 1))
-    } else {
-      val positiveStart = if (start < 0) list.size + start else start
-      val positiveStop = if (stop < 0) list.size + stop else stop
-      list.subList(positiveStart.toInt(), min(list.size, positiveStop.toInt() + 1))
-    }
+    val trimmedList =
+      if (stop >= 0 && start >= 0) {
+        list.subList(start.toInt(), min(list.size, stop.toInt() + 1))
+      } else {
+        val positiveStart = if (start < 0) list.size + start else start
+        val positiveStop = if (stop < 0) list.size + stop else stop
+        list.subList(positiveStart.toInt(), min(list.size, positiveStop.toInt() + 1))
+      }
 
     lKeyValueStore[key] = Value(data = trimmedList, expiryInstant = Instant.MAX)
   }
@@ -386,12 +368,13 @@ class FakeRedis : Redis {
 
     val list = value.data.toMutableList()
     var totalCount = count
-    val iterList = if (count < 0) {
-      totalCount = -totalCount
-      list.asReversed()
-    } else {
-      list
-    }
+    val iterList =
+      if (count < 0) {
+        totalCount = -totalCount
+        list.asReversed()
+      } else {
+        list
+      }
 
     var deleteCount = 0L
     while ((count == 0L || deleteCount < totalCount) && iterList.contains(element)) {
@@ -404,12 +387,8 @@ class FakeRedis : Redis {
   }
 
   @Synchronized
-  override fun rpoplpush(sourceKey: String, destinationKey: String) = lmove(
-    sourceKey = sourceKey,
-    destinationKey = destinationKey,
-    from = ListDirection.RIGHT,
-    to = ListDirection.LEFT
-  )
+  override fun rpoplpush(sourceKey: String, destinationKey: String) =
+    lmove(sourceKey = sourceKey, destinationKey = destinationKey, from = ListDirection.RIGHT, to = ListDirection.LEFT)
 
   @Synchronized
   override fun exists(key: String): Boolean {
@@ -425,9 +404,7 @@ class FakeRedis : Redis {
 
   @Synchronized
   override fun exists(vararg key: String): Long {
-    return key.sumOf {
-      if (exists(it)) 1L else 0L
-    }
+    return key.sumOf { if (exists(it)) 1L else 0L }
   }
 
   @Synchronized
@@ -458,8 +435,7 @@ class FakeRedis : Redis {
   }
 
   @Synchronized
-  override fun pExpire(key: String, milliseconds: Long): Boolean =
-    pExpireAt(key, clock.millis().plus(milliseconds))
+  override fun pExpire(key: String, milliseconds: Long): Boolean = pExpireAt(key, clock.millis().plus(milliseconds))
 
   @Synchronized
   override fun pExpireAt(key: String, timestampMilliseconds: Long): Boolean {
@@ -487,6 +463,10 @@ class FakeRedis : Redis {
 
   override fun multi(): Transaction {
     throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun transaction(block: DeferredRedis.() -> Unit) {
+    throw NotImplementedError("Use the fake from misk.redis.testing instead.")
   }
 
   @Deprecated("Use pipelining instead.")
@@ -520,20 +500,11 @@ class FakeRedis : Redis {
     flushAll()
   }
 
-  override fun zadd(
-    key: String,
-    score: Double,
-    member: String,
-    vararg options: Redis.ZAddOptions,
-  ): Long {
+  override fun zadd(key: String, score: Double, member: String, vararg options: Redis.ZAddOptions): Long {
     throw NotImplementedError("Fake client not implemented for this operation")
   }
 
-  override fun zadd(
-    key: String,
-    scoreMembers: Map<String, Double>,
-    vararg options: Redis.ZAddOptions,
-  ): Long {
+  override fun zadd(key: String, scoreMembers: Map<String, Double>, vararg options: Redis.ZAddOptions): Long {
     throw NotImplementedError("Fake client not implemented for this operation")
   }
 
@@ -563,17 +534,19 @@ class FakeRedis : Redis {
     throw NotImplementedError("Fake client not implemented for this operation")
   }
 
-  override fun zremRangeByRank(
-    key: String,
-    start: ZRangeRankMarker,
-    stop: ZRangeRankMarker,
-  ): Long {
+  override fun zrem(key: String, vararg members: String): Long {
     throw NotImplementedError("Fake client not implemented for this operation")
   }
 
-  override fun zcard(
-    key: String
-  ): Long {
+  override fun zremRangeByRank(key: String, start: ZRangeRankMarker, stop: ZRangeRankMarker): Long {
+    throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun zremRangeByScore(key: String, start: ZRangeScoreMarker, stop: ZRangeScoreMarker): Long {
+    throw NotImplementedError("Fake client not implemented for this operation")
+  }
+
+  override fun zcard(key: String): Long {
     throw NotImplementedError("Fake client not implemented for this operation")
   }
 }

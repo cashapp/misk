@@ -2,6 +2,7 @@ package misk.client
 
 import com.google.inject.Guice
 import helpers.protos.Dinosaur
+import jakarta.inject.Inject
 import misk.Action
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
@@ -18,15 +19,12 @@ import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class TypedHttpClientInterceptorTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
-  @Inject
-  private lateinit var jetty: JettyService
+  @Inject private lateinit var jetty: JettyService
 
   private lateinit var client: ReturnADinosaur
 
@@ -63,11 +61,9 @@ internal class TypedHttpClientInterceptorTest {
 
   class ClientActionHeaderInterceptor(val action: ClientAction) : Interceptor {
     override fun intercept(chain: Interceptor.Chain) =
-      chain.proceed(chain.request()).newBuilder()
-        .addHeader("X-Application-Action-Name", action.name)
-        .build()
+      chain.proceed(chain.request()).newBuilder().addHeader("X-Application-Action-Name", action.name).build()
 
-    class Factory: ClientApplicationInterceptorFactory {
+    class Factory : ClientApplicationInterceptorFactory {
       override fun create(action: ClientAction) = ClientActionHeaderInterceptor(action)
     }
   }
@@ -75,11 +71,7 @@ internal class TypedHttpClientInterceptorTest {
   /** [ClientNetworkInterceptor] that adds the action name as a header */
   class ClientHeaderInterceptor(private val name: String) : ClientNetworkInterceptor {
     override fun intercept(chain: ClientNetworkChain): Response =
-      chain.proceed(
-        chain.request.newBuilder()
-          .addHeader("X-From", name)
-          .build()
-      )
+      chain.proceed(chain.request.newBuilder().addHeader("X-From", name).build())
 
     class Factory : ClientNetworkInterceptor.Factory {
       override fun create(action: ClientAction) = ClientHeaderInterceptor(action.name)

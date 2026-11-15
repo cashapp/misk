@@ -2,6 +2,7 @@ package misk.jdbc
 
 import io.opentracing.mock.MockTracer
 import io.opentracing.util.GlobalTracer
+import javax.sql.DataSource
 import net.ttddyy.dsproxy.transform.TransformInfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.mockito.Mockito
-import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SpanInjectorTest {

@@ -9,9 +9,8 @@ interface TDigest<T : TDigest<T>> {
   fun add(value: Double)
 
   /**
-   * Quantile returns the estimated value at quantile.
-   * A given quantile should be in the range of [0, 1.0].
-   * If no data has been added then NaN is returned.
+   * Quantile returns the estimated value at quantile. A given quantile should be in the range of [0, 1.0]. If no data
+   * has been added then NaN is returned.
    */
   fun quantile(quantile: Double): Double
 
@@ -22,11 +21,13 @@ interface TDigest<T : TDigest<T>> {
   fun sum(): Double
 
   /**
-   * MergeInto merges the data in this digest into the other digest.
-   * The other digest is mutated and must be of the same TDigest type.
+   * MergeInto merges the data in this digest into the other digest. The other digest is mutated and must be of the same
+   * TDigest type.
    */
   fun mergeInto(other: T)
 
-  /** Proto returns a representation of the t-digest that can be later reconstituted into an instance of the same type. */
+  /**
+   * Proto returns a representation of the t-digest that can be later reconstituted into an instance of the same type.
+   */
   fun proto(): DigestData
 }

@@ -3,6 +3,7 @@ package misk.client
 import com.squareup.wire.GrpcMethod
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.time.Duration
 import misk.grpc.GrpcTimeoutMarshaller
 import misk.scope.ActionScoped
 import misk.web.RequestDeadlineMode
@@ -18,7 +19,6 @@ import misk.web.requestdeadlines.RequestDeadlineMetrics.SourceLabel.PROPAGATED_D
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
-import java.time.Duration
 
 internal class DeadlinePropagationInterceptor(
   private val clientAction: ClientAction,
@@ -41,8 +41,11 @@ internal class DeadlinePropagationInterceptor(
     // At this point we know requestDeadline is not null (null case handled above)
     return when (requestDeadlinesConfig.mode) {
       RequestDeadlineMode.METRICS_ONLY -> handleDisabledMode(requestDeadline, chain, isGrpc)
-      RequestDeadlineMode.PROPAGATE_ONLY, RequestDeadlineMode.ENFORCE_INBOUND -> handlePropagateOnlyMode(requestDeadline, chain, isGrpc)
-      RequestDeadlineMode.ENFORCE_OUTBOUND, RequestDeadlineMode.ENFORCE_ALL -> handleEnforceMode(requestDeadline, chain, isGrpc)
+      RequestDeadlineMode.PROPAGATE_ONLY,
+      RequestDeadlineMode.ENFORCE_INBOUND -> handlePropagateOnlyMode(requestDeadline, chain, isGrpc)
+
+      RequestDeadlineMode.ENFORCE_OUTBOUND,
+      RequestDeadlineMode.ENFORCE_ALL -> handleEnforceMode(requestDeadline, chain, isGrpc)
     }
   }
 
@@ -54,37 +57,37 @@ internal class DeadlinePropagationInterceptor(
       return chain.proceed(chain.request())
     }
 
-    val okhttpClientFallbackDeadline = maybeOkHttpClientCallTimeout(chain)
-      ?: return chain.proceed(chain.request())
+    val okhttpClientFallbackDeadline = maybeOkHttpClientCallTimeout(chain) ?: return chain.proceed(chain.request())
 
-    val enforced = requestDeadlinesConfig.mode in setOf(RequestDeadlineMode.ENFORCE_OUTBOUND, RequestDeadlineMode.ENFORCE_ALL)
+    val enforced =
+      requestDeadlinesConfig.mode in setOf(RequestDeadlineMode.ENFORCE_OUTBOUND, RequestDeadlineMode.ENFORCE_ALL)
     metrics.recordOutboundDeadlinePropagated(clientAction, okhttpClientFallbackDeadline, isGrpc, OKHTTP_TIMEOUT)
-    val newRequestBuilder = setRequestDeadlineHeadersOnOutbound(chain.request(), okhttpClientFallbackDeadline, isGrpc, enforced)
+    val newRequestBuilder =
+      setRequestDeadlineHeadersOnOutbound(chain.request(), okhttpClientFallbackDeadline, isGrpc, enforced)
     return chain.proceed(newRequestBuilder.build())
   }
 
-  private fun handleDisabledMode(requestDeadline: RequestDeadline, chain: Interceptor.Chain, isGrpc: Boolean): Response {
+  private fun handleDisabledMode(
+    requestDeadline: RequestDeadline,
+    chain: Interceptor.Chain,
+    isGrpc: Boolean,
+  ): Response {
     // Emit metrics, but do not propagate deadline headers or enforce
     if (requestDeadline.expired()) {
-      metrics.recordOutboundDeadlineExceeded(
-        clientAction,
-        enforced = false,
-        isGrpc,
-        requestDeadline.expiredDuration())
+      metrics.recordOutboundDeadlineExceeded(clientAction, enforced = false, isGrpc, requestDeadline.expiredDuration())
     }
     return chain.proceed(chain.request())
   }
 
-  private fun handlePropagateOnlyMode(requestDeadline: RequestDeadline, chain: Interceptor.Chain, isGrpc: Boolean): Response {
+  private fun handlePropagateOnlyMode(
+    requestDeadline: RequestDeadline,
+    chain: Interceptor.Chain,
+    isGrpc: Boolean,
+  ): Response {
     // Always emit metrics, propagate deadline headers, but do not enforce
     val enforced = false
     if (requestDeadline.expired()) {
-      metrics.recordOutboundDeadlineExceeded(
-        clientAction,
-        enforced,
-        isGrpc,
-        requestDeadline.expiredDuration()
-      )
+      metrics.recordOutboundDeadlineExceeded(clientAction, enforced, isGrpc, requestDeadline.expiredDuration())
       // Deadline has expired, but config mode specifies it cannot be enforced. For this special case, omit deadline
       // headers, otherwise it will be 0 or a negative number. Let the downstream fallback to a default in its server
       // interceptor.
@@ -100,12 +103,7 @@ internal class DeadlinePropagationInterceptor(
   private fun handleEnforceMode(requestDeadline: RequestDeadline, chain: Interceptor.Chain, isGrpc: Boolean): Response {
     val enforced = true
     if (requestDeadline.expired()) {
-      metrics.recordOutboundDeadlineExceeded(
-        clientAction,
-        enforced,
-        isGrpc,
-        requestDeadline.expiredDuration()
-      )
+      metrics.recordOutboundDeadlineExceeded(clientAction, enforced, isGrpc, requestDeadline.expiredDuration())
       throw DeadlineExceededException(
         "Deadline already expired, not initiating outbound call to ${chain.request().url}"
       )
@@ -118,11 +116,15 @@ internal class DeadlinePropagationInterceptor(
   }
 
   /**
-   * Determines the effective deadline by taking the minimum of the request deadline and OkHttp client timeout.
-   * For OkHttpClient timeout, prefer callTimeout if it exists and > 0.
+   * Determines the effective deadline by taking the minimum of the request deadline and OkHttp client timeout. For
+   * OkHttpClient timeout, prefer callTimeout if it exists and > 0.
+   *
    * @return Pair of (deadline, source) where deadline is a Duration and source indicates which timeout was used
    */
-  private fun determineEffectiveDeadline(requestDeadline: RequestDeadline, chain: Interceptor.Chain): Pair<Duration, String> {
+  private fun determineEffectiveDeadline(
+    requestDeadline: RequestDeadline,
+    chain: Interceptor.Chain,
+  ): Pair<Duration, String> {
     val propagatedDeadline = requestDeadline.remaining()!!
     val okHttpClientTimeout = maybeOkHttpClientCallTimeout(chain)
 
@@ -142,16 +144,13 @@ internal class DeadlinePropagationInterceptor(
     request: Request,
     deadline: Duration,
     isGrpc: Boolean,
-    enforced: Boolean
+    enforced: Boolean,
   ): Request.Builder {
     val builder = request.newBuilder()
     if (isGrpc) {
       // gRPC request - use real header `grpc-timeout` for enforcing modes, shadow header for non-enforcing modes
       val grpcTimeoutHeader = if (enforced) GrpcTimeoutMarshaller.TIMEOUT_KEY else CUSTOM_GRPC_TIMEOUT_PROPAGATE_HEADER
-      builder.header(
-        grpcTimeoutHeader,
-        GrpcTimeoutMarshaller.toAsciiString(deadline.toNanos()),
-      )
+      builder.header(grpcTimeoutHeader, GrpcTimeoutMarshaller.toAsciiString(deadline.toNanos()))
     } else {
       // HTTP request - only add HTTP deadline header using ISO8601 duration format
       builder.header(RequestDeadlineInterceptor.HTTP_HEADER_X_REQUEST_DEADLINE, deadline.toString())

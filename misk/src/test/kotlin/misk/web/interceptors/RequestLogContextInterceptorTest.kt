@@ -1,6 +1,7 @@
 package misk.web.interceptors
 
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.moshi.adapter
@@ -21,46 +22,35 @@ import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.slf4j.MDC
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class RequestLogContextInterceptorTest {
   data class RequestContext(val fields: Map<String, String>)
 
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
   val httpClient = OkHttpClient()
 
   @Inject private lateinit var moshi: Moshi
   @Inject private lateinit var jettyService: JettyService
 
-  @Test fun setLogContext() {
+  @Test
+  fun setLogContext() {
     val response = invoke("caller")
     assertThat(response.code).isEqualTo(200)
 
-    val contextFields =
-      moshi.adapter<RequestContext>().fromJson(response.body!!.string())!!.fields
-    assertThat(contextFields[RequestLogContextInterceptor.MDC_ACTION])
-      .isEqualTo("LogTestAction")
-    assertThat(contextFields[RequestLogContextInterceptor.MDC_CALLING_PRINCIPAL])
-      .isEqualTo("caller")
-    assertThat(contextFields[RequestLogContextInterceptor.MDC_HTTP_METHOD])
-      .isEqualTo("GET")
-    assertThat(contextFields[RequestLogContextInterceptor.MDC_PROTOCOL])
-      .isEqualTo("HTTP/1.1")
-    assertThat(contextFields[RequestLogContextInterceptor.MDC_REQUEST_URI])
-      .isEqualTo("/call/me")
+    val contextFields = moshi.adapter<RequestContext>().fromJson(response.body!!.string())!!.fields
+    assertThat(contextFields[RequestLogContextInterceptor.MDC_ACTION]).isEqualTo("LogTestAction")
+    assertThat(contextFields[RequestLogContextInterceptor.MDC_CALLING_PRINCIPAL]).isEqualTo("caller")
+    assertThat(contextFields[RequestLogContextInterceptor.MDC_HTTP_METHOD]).isEqualTo("GET")
+    assertThat(contextFields[RequestLogContextInterceptor.MDC_PROTOCOL]).isEqualTo("HTTP/1.1")
+    assertThat(contextFields[RequestLogContextInterceptor.MDC_REQUEST_URI]).isEqualTo("/call/me")
     assertThat(contextFields[RequestLogContextInterceptor.MDC_REMOTE_ADDR]).isNotEmpty()
   }
 
   fun invoke(asService: String? = null): okhttp3.Response {
-    val url = jettyService.httpServerUrl.newBuilder()
-      .encodedPath("/call/me")
-      .build()
+    val url = jettyService.httpServerUrl.newBuilder().encodedPath("/call/me").build()
 
-    val request = okhttp3.Request.Builder()
-      .url(url)
-      .get()
+    val request = okhttp3.Request.Builder().url(url).get()
     asService?.let { request.addHeader(FakeCallerAuthenticator.SERVICE_HEADER, it) }
     return httpClient.newCall(request.build()).execute()
   }

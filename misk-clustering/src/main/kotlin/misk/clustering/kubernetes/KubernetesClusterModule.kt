@@ -15,11 +15,7 @@ class KubernetesClusterModule(private val config: KubernetesConfig) : KAbstractM
     bind<Cluster>().to<DefaultCluster>()
     bind<ClusterService>().to<DefaultCluster>()
     bind<DefaultCluster>().toProvider(KubernetesClusterProvider::class.java).asSingleton()
-    install(
-      ServiceModule<KubernetesClusterWatcher>()
-        .dependsOn<ClusterService>()
-        .enhancedBy<ReadyService>()
-    )
+    install(ServiceModule<KubernetesClusterWatcher>().dependsOn<ClusterService>().enhancedBy<ReadyService>())
     install(ServiceModule<ClusterService>())
   }
 }

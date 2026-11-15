@@ -1,9 +1,8 @@
 package misk.config
 
+import java.time.Duration
 import misk.web.WebConfig
 import misk.web.exceptions.ActionExceptionLogLevelConfig
-import misk.config.Config
-import java.time.Duration
 
 data class TestConfig(
   val web: WebConfig,
@@ -12,16 +11,22 @@ data class TestConfig(
   val duration: DurationConfig,
   val nested: NestedConfig,
   val collection: List<CollectionItem>,
-  val action_exception_log_level: ActionExceptionLogLevelConfig
+  val action_exception_log_level: ActionExceptionLogLevelConfig,
 ) : Config
 
 data class ConsumerConfig(val min_items: Int = 0, val max_items: Int) : Config
+
 data class DurationConfig(val interval: Duration) : Config
 
 data class CollectionItem(val name: String, val optional: Int?) : Config
 
 data class NestedConfig(val child_nested: ChildNestedConfig) : Config
+
 data class ChildNestedConfig(val nested_value: String) : Config
+
+/** Defaults are deliberately non-zero so a silent coercion to 0/false is distinguishable from "not set". */
+data class CoercionTestConfig(val int_value: Int = 1, val long_value: Long = 1, val boolean_value: Boolean = true) :
+  Config
 
 data class EnvironmentTestConfig(
   val string_value: String,
@@ -42,3 +47,12 @@ data class EnvironmentTestConfig(
   val jdbc_url_default: String,
   val https_url_with_port_default: String,
 ) : Config
+
+/** [tiers] is deliberately a plain `Map`: that is the declaration Jackson 3 rewrites to an `EnumMap`. */
+data class EnumKeyedMapConfig(val tiers: Map<AccountTier, Int>) : Config
+
+enum class AccountTier {
+  CHECKING,
+  SAVINGS,
+  BROKERAGE,
+}

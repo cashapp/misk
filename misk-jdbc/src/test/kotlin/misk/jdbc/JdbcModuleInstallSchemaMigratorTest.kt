@@ -1,19 +1,19 @@
 package misk.jdbc
 
+import com.google.inject.ConfigurationException
 import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.util.Modules
-import com.google.inject.ConfigurationException
 import jakarta.inject.Qualifier
+import kotlin.test.assertFailsWith
 import misk.MiskTestingServiceModule
+import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import misk.config.Config
 import wisp.deployment.TESTING
-import kotlin.test.assertFailsWith
 
 @MiskTest(startService = false)
 internal class JdbcModuleInstallSchemaMigratorTest {
@@ -24,18 +24,20 @@ internal class JdbcModuleInstallSchemaMigratorTest {
 
   @Test
   fun `installSchemaMigrator=false should not bind SchemaMigratorService but should bind PingDatabaseService`() {
-    val module = Modules.combine(
-      deploymentModule,
-      MiskTestingServiceModule(),
-      JdbcModule(TestDb::class, config, installSchemaMigrator = false),
-    )
+    val module =
+      Modules.combine(
+        deploymentModule,
+        MiskTestingServiceModule(),
+        JdbcModule(TestDb::class, config, installSchemaMigrator = false),
+      )
 
     val injector = Guice.createInjector(module)
 
     // SchemaMigratorService should not be bound
-    val exception = assertFailsWith<ConfigurationException> {
-      injector.getInstance(Key.get(SchemaMigratorService::class.java, TestDb::class.java))
-    }
+    val exception =
+      assertFailsWith<ConfigurationException> {
+        injector.getInstance(Key.get(SchemaMigratorService::class.java, TestDb::class.java))
+      }
     assertThat(exception.message).contains("No implementation for")
     assertThat(exception.message).contains("SchemaMigratorService")
 
@@ -46,11 +48,12 @@ internal class JdbcModuleInstallSchemaMigratorTest {
 
   @Test
   fun `default installSchemaMigrator should bind SchemaMigratorService`() {
-    val module = Modules.combine(
-      deploymentModule,
-      MiskTestingServiceModule(),
-      JdbcModule(TestDb::class, config), // Default should be true
-    )
+    val module =
+      Modules.combine(
+        deploymentModule,
+        MiskTestingServiceModule(),
+        JdbcModule(TestDb::class, config), // Default should be true
+      )
 
     val injector = Guice.createInjector(module)
 
@@ -62,19 +65,21 @@ internal class JdbcModuleInstallSchemaMigratorTest {
   @Test
   fun `EXTERNALLY_MANAGED migrations format should not bind SchemaMigratorService but should bind PingDatabaseService`() {
     val configWithExternalMigrations = config.copy(migrations_format = MigrationsFormat.EXTERNALLY_MANAGED)
-    
-    val module = Modules.combine(
-      deploymentModule,
-      MiskTestingServiceModule(),
-      JdbcModule(TestDb::class, configWithExternalMigrations),
-    )
+
+    val module =
+      Modules.combine(
+        deploymentModule,
+        MiskTestingServiceModule(),
+        JdbcModule(TestDb::class, configWithExternalMigrations),
+      )
 
     val injector = Guice.createInjector(module)
 
     // SchemaMigratorService should not be bound when migrations are externally managed
-    val exception = assertFailsWith<ConfigurationException> {
-      injector.getInstance(Key.get(SchemaMigratorService::class.java, TestDb::class.java))
-    }
+    val exception =
+      assertFailsWith<ConfigurationException> {
+        injector.getInstance(Key.get(SchemaMigratorService::class.java, TestDb::class.java))
+      }
     assertThat(exception.message).contains("No implementation for")
     assertThat(exception.message).contains("SchemaMigratorService")
 
@@ -86,26 +91,28 @@ internal class JdbcModuleInstallSchemaMigratorTest {
   @Test
   fun `EXTERNALLY_MANAGED with installSchemaMigrator=true should still not bind SchemaMigratorService`() {
     val configWithExternalMigrations = config.copy(migrations_format = MigrationsFormat.EXTERNALLY_MANAGED)
-    
-    val module = Modules.combine(
-      deploymentModule,
-      MiskTestingServiceModule(),
-      JdbcModule(
-        qualifier = TestDb::class,
-        config = configWithExternalMigrations,
-        readerQualifier = null,
-        readerConfig = null,
-        installHealthCheck = true,
-        installSchemaMigrator = true // Even with this true, EXTERNALLY_MANAGED should prevent binding
-      ),
-    )
+
+    val module =
+      Modules.combine(
+        deploymentModule,
+        MiskTestingServiceModule(),
+        JdbcModule(
+          qualifier = TestDb::class,
+          config = configWithExternalMigrations,
+          readerQualifier = null,
+          readerConfig = null,
+          installHealthCheck = true,
+          installSchemaMigrator = true, // Even with this true, EXTERNALLY_MANAGED should prevent binding
+        ),
+      )
 
     val injector = Guice.createInjector(module)
 
     // SchemaMigratorService should not be bound when migrations are externally managed
-    val exception = assertFailsWith<ConfigurationException> {
-      injector.getInstance(Key.get(SchemaMigratorService::class.java, TestDb::class.java))
-    }
+    val exception =
+      assertFailsWith<ConfigurationException> {
+        injector.getInstance(Key.get(SchemaMigratorService::class.java, TestDb::class.java))
+      }
     assertThat(exception.message).contains("No implementation for")
     assertThat(exception.message).contains("SchemaMigratorService")
   }

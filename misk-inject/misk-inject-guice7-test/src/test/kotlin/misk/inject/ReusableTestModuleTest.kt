@@ -6,11 +6,15 @@ import org.junit.jupiter.api.Test
 
 class ReusableTestModuleTest {
 
-  class NoArgTestModuleOne: ReusableTestModule()
-  class NoArgTestModuleTwo: ReusableTestModule()
-  class OneArgTestModuleOne(private val installX: Boolean): ReusableTestModule()
-  class OneArgTestModuleTwo(private val someValue: Int): ReusableTestModule()
-  class TwoArgsTestModuleOne(private val installX: Boolean, installY: Boolean): ReusableTestModule()
+  class NoArgTestModuleOne : ReusableTestModule()
+
+  class NoArgTestModuleTwo : ReusableTestModule()
+
+  class OneArgTestModuleOne(private val installX: Boolean) : ReusableTestModule()
+
+  class OneArgTestModuleTwo(private val someValue: Int) : ReusableTestModule()
+
+  class TwoArgsTestModuleOne(private val installX: Boolean, installY: Boolean) : ReusableTestModule()
 
   @Test
   fun testEquality() {

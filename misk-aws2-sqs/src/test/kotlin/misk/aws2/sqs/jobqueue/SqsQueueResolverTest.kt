@@ -1,5 +1,7 @@
 package misk.aws2.sqs.jobqueue
 
+import java.util.concurrent.CompletableFuture
+import kotlin.test.assertEquals
 import misk.aws2.sqs.jobqueue.config.SqsConfig
 import misk.aws2.sqs.jobqueue.config.SqsQueueConfig
 import misk.jobqueue.QueueName
@@ -12,30 +14,23 @@ import org.mockito.kotlin.whenever
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlResponse
-import java.util.concurrent.CompletableFuture
-import kotlin.test.assertEquals
 
 class SqsQueueResolverTest {
   private val client = mock<SqsAsyncClient>()
   private val sqsClientFactory = mock<SqsClientFactory>()
-  private var sqsQueueResolver = SqsQueueResolver(sqsClientFactory,
-    SqsConfig(
-      all_queues = SqsQueueConfig(region = "us-west-2"),
-      per_queue_overrides = mapOf(
-        "external-test-queue" to SqsQueueConfig(
-          account_id = "12345",
-          region = "us-east-1",
-        )
-      )
-    ))
+  private var sqsQueueResolver =
+    SqsQueueResolver(
+      sqsClientFactory,
+      SqsConfig(
+        all_queues = SqsQueueConfig(region = "us-west-2"),
+        per_queue_overrides = mapOf("external-test-queue" to SqsQueueConfig(account_id = "12345", region = "us-east-1")),
+      ),
+    )
 
   @BeforeEach
   fun setup() {
-    whenever(client.getQueueUrl(any<GetQueueUrlRequest>())).thenReturn(CompletableFuture.supplyAsync {
-      GetQueueUrlResponse.builder()
-        .queueUrl("url://test-queue")
-        .build()
-    })
+    whenever(client.getQueueUrl(any<GetQueueUrlRequest>()))
+      .thenReturn(CompletableFuture.supplyAsync { GetQueueUrlResponse.builder().queueUrl("url://test-queue").build() })
 
     whenever(sqsClientFactory.get("us-west-2")).thenReturn(client)
     whenever(sqsClientFactory.get("us-east-1")).thenReturn(client)
@@ -61,11 +56,10 @@ class SqsQueueResolverTest {
 
     assertEquals("url://test-queue", result)
 
-    verify(client).getQueueUrl(GetQueueUrlRequest.builder()
-      .queueName("external-test-queue")
-      .queueOwnerAWSAccountId("12345")
-      .build()
-    )
+    verify(client)
+      .getQueueUrl(
+        GetQueueUrlRequest.builder().queueName("external-test-queue").queueOwnerAWSAccountId("12345").build()
+      )
 
     verify(sqsClientFactory).get("us-east-1")
   }

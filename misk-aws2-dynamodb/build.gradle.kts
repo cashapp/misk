@@ -10,16 +10,15 @@ plugins {
 dependencies {
   api(libs.aws2Dynamodb)
   api(libs.aws2DynamodbEnhanced)
-  api(libs.aws2Auth)
   api(libs.awsSdkCore)
   api(libs.guava)
   api(libs.guice6)
   api(libs.jakartaInject)
-  api(project(":misk-aws"))
   api(project(":misk-inject"))
+  implementation(libs.aws2Auth)
   implementation(libs.aws2Core)
   implementation(libs.aws2Regions)
-  implementation(project(":misk-exceptions-dynamodb"))
+  implementation(project(":misk-aws-api"))
   implementation(project(":misk-service"))
 
   testFixturesApi(libs.aws2Dynamodb)
@@ -48,12 +47,11 @@ dependencies {
 
   testFixturesImplementation(libs.aws2Core)
   testFixturesImplementation(libs.aws2Regions)
-  testFixturesImplementation(project(":misk-exceptions-dynamodb"))
   testFixturesImplementation(project(":misk-service"))
 }
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

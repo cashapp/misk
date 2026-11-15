@@ -1,10 +1,10 @@
 package misk.testing.fieldbind
 
 import com.google.inject.testing.fieldbinder.Bind
+import jakarta.inject.Inject
 import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest
 class BindFieldUsingFakeTest {

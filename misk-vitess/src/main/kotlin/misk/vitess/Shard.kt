@@ -45,20 +45,17 @@ data class Shard(val keyspace: Keyspace, val name: String) {
 
   data class Key(val bytes: ByteString) : Comparable<Key> {
     init {
-      check(bytes.size <= MAX_LENGTH) {
-        "${bytes.hex()} is longer than the supported max length $MAX_LENGTH"
-      }
+      check(bytes.size <= MAX_LENGTH) { "${bytes.hex()} is longer than the supported max length $MAX_LENGTH" }
     }
 
     override fun compareTo(other: Key): Int = bytes.compareTo(other.bytes)
 
     /**
-     * Vitess always converts sharding keys to a left-justified binary string for computing a shard.
-     * This left-justification makes the right-most zeroes insignificant and optional.
+     * Vitess always converts sharding keys to a left-justified binary string for computing a shard. This
+     * left-justification makes the right-most zeroes insignificant and optional.
      *
-     * To make compareTo, equals and hashCode work properly in Java, these keys are force padded
-     * with 0's at the end. Dynamic end padding when comparing would break the equals/hashCode
-     * contract in Java.
+     * To make compareTo, equals and hashCode work properly in Java, these keys are force padded with 0's at the end.
+     * Dynamic end padding when comparing would break the equals/hashCode contract in Java.
      */
     constructor(hex: String) : this(Strings.padEnd(hex, MAX_LENGTH, '0').decodeHex())
 

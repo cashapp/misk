@@ -7,6 +7,22 @@ The Changelog consequently will not be updated regularly since releases only inc
 
 Major and breaking changes will still be documented in the Changelog.
 
+Vitess exception metric labels
+===
+
+`hikaricp_misk_vitess_exception` no longer has a `message` label. It is now labeled by `errorCode`, `sqlState` and
+`decision`. MySQL messages carry row values, such as the key in a duplicate-key error, so almost every exception created
+a new series. Move any dashboards or monitors that group by `message` to `errorCode` or `sqlState`.
+
+JDBC test database isolation
+===
+
+`misk.jdbc.updateForParallelTests()` now appends `_worker_<org.gradle.test.worker>` to database names whenever it runs
+in a Gradle test worker, including single-fork test tasks. It no longer uses `_1` through `_MAX_TEST_PARALLEL_FORKS` or
+requires `MAX_TEST_PARALLEL_FORKS` to be set. Update any test database provisioning or grants that depend on the old
+names. Configuration is unchanged outside Gradle. Worker IDs isolate tests within one Gradle invocation; separate
+invocations sharing a database server still need separate namespaces.
+
 2024 Q2 Summary
 ===
 

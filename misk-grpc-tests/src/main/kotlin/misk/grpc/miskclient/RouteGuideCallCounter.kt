@@ -1,9 +1,9 @@
 package misk.grpc.miskclient
 
-import java.util.Collections
-import java.util.concurrent.atomic.AtomicInteger
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.util.Collections
+import java.util.concurrent.atomic.AtomicInteger
 import misk.client.ClientAction
 import misk.client.ClientNetworkChain
 import misk.client.ClientNetworkInterceptor
@@ -23,9 +23,7 @@ class RouteGuideCallCounter @Inject constructor() : ClientNetworkInterceptor.Fac
     return ActionCallCounter(counter)
   }
 
-  private class ActionCallCounter(
-    private val counter: AtomicInteger
-  ) : ClientNetworkInterceptor {
+  private class ActionCallCounter(private val counter: AtomicInteger) : ClientNetworkInterceptor {
     override fun intercept(chain: ClientNetworkChain): Response {
       counter.incrementAndGet()
       return chain.proceed(chain.request)

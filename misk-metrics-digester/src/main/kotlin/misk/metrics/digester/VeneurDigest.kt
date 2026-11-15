@@ -4,9 +4,7 @@ import com.squareup.digester.protos.service.DigestData
 import com.squareup.digester.protos.tdigest.MergingDigestData
 import okio.ByteString.Companion.toByteString
 
-/**
- * Wraps an adapted t-digest implementation from Stripe's Veneur project
- */
+/** Wraps an adapted t-digest implementation from Stripe's Veneur project */
 class VeneurDigest : TDigest<VeneurDigest> {
 
   private val mergingDigest: MergingDigest
@@ -18,13 +16,9 @@ class VeneurDigest : TDigest<VeneurDigest> {
     mergingDigest = MergingDigest(50.0)
   }
 
-  /**
-   * Creates a VeneurDigest from a DigestData proto
-   * The DigestData proto must have veneur_digest set correctly
-   */
-  constructor (digestData: DigestData) {
-    val mergingDigestData: MergingDigestData =
-        MergingDigestData.ADAPTER.decode(digestData.veneur_digest)
+  /** Creates a VeneurDigest from a DigestData proto The DigestData proto must have veneur_digest set correctly */
+  constructor(digestData: DigestData) {
+    val mergingDigestData: MergingDigestData = MergingDigestData.ADAPTER.decode(digestData.veneur_digest)
 
     mergingDigest = MergingDigest(mergingDigestData)
     count = digestData.count
@@ -39,8 +33,8 @@ class VeneurDigest : TDigest<VeneurDigest> {
   }
 
   /**
-   * Returns a value such that the fraction of values in td below that value is
-   * approximately equal to quantile. Returns NaN if the digest is empty.
+   * Returns a value such that the fraction of values in td below that value is approximately equal to quantile. Returns
+   * NaN if the digest is empty.
    */
   override fun quantile(quantile: Double): Double {
     return mergingDigest.quantile(quantile)

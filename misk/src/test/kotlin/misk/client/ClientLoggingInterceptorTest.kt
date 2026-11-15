@@ -3,8 +3,12 @@ package misk.client
 import com.google.inject.Provides
 import com.google.inject.name.Named
 import com.google.inject.name.Names
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.time.Duration
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
+import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -18,15 +22,10 @@ import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
-import misk.logging.LogCollector
-import java.time.Duration
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 internal class ClientLoggingInterceptorTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Named("pinger") @Inject private lateinit var client: Pinger
   @Inject private lateinit var mockWebServer: MockWebServer
@@ -54,29 +53,26 @@ internal class ClientLoggingInterceptorTest {
     fun provideHttpClientConfig(server: MockWebServer): HttpClientsConfig {
       val url = server.url("/")
       return HttpClientsConfig(
-        endpoints = mapOf(
-          "pinger" to HttpClientEndpointConfig(
-            url = url.toString(),
-            clientConfig = HttpClientConfig(
-              readTimeout = Duration.ofMillis(100)
-            )
+        endpoints =
+          mapOf(
+            "pinger" to
+              HttpClientEndpointConfig(
+                url = url.toString(),
+                clientConfig = HttpClientConfig(readTimeout = Duration.ofMillis(100)),
+              )
           ),
-        ),
-        logRequests = true
+        logRequests = true,
       )
     }
   }
 
   data class AppRequest(val desiredStatusCode: Int)
+
   data class AppResponse(val message: String?)
 
   interface Pinger {
     @POST("/ping")
-    @Headers(
-      "Accept: " + MediaTypes.APPLICATION_JSON,
-      "Content-type: " + MediaTypes.APPLICATION_JSON
-    )
+    @Headers("Accept: " + MediaTypes.APPLICATION_JSON, "Content-type: " + MediaTypes.APPLICATION_JSON)
     fun ping(@Header("X-b3-traceid") traceId: String, @Body request: AppRequest): Call<AppResponse>
   }
-
 }

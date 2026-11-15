@@ -28,8 +28,8 @@ class LogLevelFilter(val dynamicLevels: Map<String, Level>) : TurboFilter() {
     val target =
       dynamicLevels.entries
         .filter { (prefix, _) -> logger.name.startsWith("$prefix.") }
-        .maxByOrNull { it.key.length }?.value
-        ?: return FilterReply.NEUTRAL
+        .maxByOrNull { it.key.length }
+        ?.value ?: return FilterReply.NEUTRAL
 
     return if (level.isGreaterOrEqual(target)) FilterReply.ACCEPT else FilterReply.NEUTRAL
   }

@@ -1,10 +1,10 @@
 package misk.hibernate
 
 import com.google.common.collect.ImmutableSet
+import kotlin.reflect.KClass
 import org.hibernate.SessionFactory
 import org.hibernate.metamodel.spi.MetamodelImplementor
 import org.hibernate.persister.entity.AbstractEntityPersister
-import kotlin.reflect.KClass
 
 internal class PersistenceMetadata constructor(private val sessionFactory: SessionFactory) {
 
@@ -12,9 +12,7 @@ internal class PersistenceMetadata constructor(private val sessionFactory: Sessi
     return hibernateMetadataForClass(entityType).tableName
   }
 
-  fun <T : DbEntity<T>> getColumnNames(
-    entityType: KClass<out DbEntity<T>>
-  ): ImmutableSet<String> {
+  fun <T : DbEntity<T>> getColumnNames(entityType: KClass<out DbEntity<T>>): ImmutableSet<String> {
     val result = ImmutableSet.builder<String>()
 
     val classMetadata = hibernateMetadataForClass(entityType)
@@ -34,9 +32,7 @@ internal class PersistenceMetadata constructor(private val sessionFactory: Sessi
   ): AbstractEntityPersister {
     val metaModel = sessionFactory.metamodel as MetamodelImplementor
     val entityPersister = metaModel.entityPersister(entityType.java)
-    check(entityPersister != null) {
-      "${entityType.qualifiedName} does not map to a known entity type"
-    }
+    check(entityPersister != null) { "${entityType.qualifiedName} does not map to a known entity type" }
     check(entityPersister is AbstractEntityPersister) {
       "${entityType.qualifiedName} does not map to a persistent class"
     }

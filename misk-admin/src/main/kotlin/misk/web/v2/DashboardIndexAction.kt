@@ -2,6 +2,7 @@ package misk.web.v2
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import kotlin.reflect.KClass
 import kotlinx.html.TagConsumer
 import kotlinx.html.div
 import kotlinx.html.h1
@@ -20,13 +21,12 @@ import misk.web.dashboard.DashboardTab
 import misk.web.dashboard.ValidWebEntry.Companion.slugify
 import misk.web.mediatype.MediaTypes
 import wisp.deployment.Deployment
-import kotlin.reflect.KClass
 
-/**
- * Builds dashboard UI for index homepage.
- */
+/** Builds dashboard UI for index homepage. */
 @Singleton
-class DashboardIndexAction @Inject constructor(
+class DashboardIndexAction
+@Inject
+constructor(
   private val callerProvider: ActionScoped<MiskCaller?>,
   private val dashboardPageLayout: DashboardPageLayout,
   private val allTabs: List<DashboardTab>,
@@ -37,53 +37,53 @@ class DashboardIndexAction @Inject constructor(
   @Get("/{rest:.*}")
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Unauthenticated
-  fun get(@PathParam rest: String?): String = dashboardPageLayout
-    .newBuilder()
-    .title { appName, dashboardHomeUrl, _ -> "Home | $appName ${dashboardHomeUrl?.dashboardAnnotationKClass?.titlecase() ?: ""}" }
-    .build { appName, dashboardHomeUrl, _ ->
-      div("center container p-8") {
-        if (rest?.isNotBlank() == true) {
-          // Show 404 message if the tab is not found.
-          AlertError("""Dashboard tab not found for: ${rest.removeSuffix("/")}""")
-          AlertInfo("Check your DashboardModule installation to ensure that the slug, urlPathPrefix, and iframePath matches your frontend location.")
-        }
-
-        // Welcome
-        h1("text-2xl") {
-          +"""Welcome, """
-          span("font-bold font-mono") { +"""${callerProvider.get()?.user}""" }
-          +"""!"""
-        }
-        h2("text-xl py-2") {
-          +"""This is the ${dashboardHomeUrl?.dashboardAnnotationKClass?.titlecase()} for """
-          span("font-bold font-mono") { +appName }
-          +"""."""
-        }
-
-        // Access notice block.
-        val dashboardTabs =
-          allTabs.filter { it.dashboard_slug == dashboardHomeUrl?.dashboard_slug }
-        val authenticatedTabs = dashboardTabs.filter {
-          callerProvider.get()?.hasCapability(it.capabilities) ?: false
-        }
-
-        allDashboardIndexAccessBlocks.firstOrNull { slugify(it.annotation) == dashboardHomeUrl?.dashboard_slug }?.block?.let {
-          div("pt-5") {
-            it(appName, deployment, callerProvider.get(), authenticatedTabs, dashboardTabs)
+  fun get(@PathParam rest: String?): String =
+    dashboardPageLayout
+      .newBuilder()
+      .title { appName, dashboardHomeUrl, _ ->
+        "Home | $appName ${dashboardHomeUrl?.dashboardAnnotationKClass?.titlecase() ?: ""}"
+      }
+      .build { appName, dashboardHomeUrl, _ ->
+        div("center container p-8") {
+          if (rest?.isNotBlank() == true) {
+            // Show 404 message if the tab is not found.
+            AlertError("""Dashboard tab not found for: ${rest.removeSuffix("/")}""")
+            AlertInfo(
+              "Check your DashboardModule installation to ensure that the slug, urlPathPrefix, and iframePath matches your frontend location."
+            )
           }
-        }
 
-        if (authenticatedTabs.isNotEmpty()) {
-          // Only shown if authenticated for at least 1 tab to limit potential for data leak since index is unauthenticated.
-          // Other content for the dashboard homepage.
-          allDashboardIndexBlocks.filter { slugify(it.annotation) == dashboardHomeUrl?.dashboard_slug }.forEach {
-            div("pt-5") {
-              it.block(this@build)
-            }
+          // Welcome
+          h1("text-2xl") {
+            +"""Welcome, """
+            span("font-bold font-mono") { +"""${callerProvider.get()?.user}""" }
+            +"""!"""
+          }
+          h2("text-xl py-2") {
+            +"""This is the ${dashboardHomeUrl?.dashboardAnnotationKClass?.titlecase()} for """
+            span("font-bold font-mono") { +appName }
+            +"""."""
+          }
+
+          // Access notice block.
+          val dashboardTabs = allTabs.filter { it.dashboard_slug == dashboardHomeUrl?.dashboard_slug }
+          val authenticatedTabs = dashboardTabs.filter { callerProvider.get()?.hasCapability(it.capabilities) ?: false }
+
+          allDashboardIndexAccessBlocks
+            .firstOrNull { slugify(it.annotation) == dashboardHomeUrl?.dashboard_slug }
+            ?.block
+            ?.let { div("pt-5") { it(appName, deployment, callerProvider.get(), authenticatedTabs, dashboardTabs) } }
+
+          if (authenticatedTabs.isNotEmpty()) {
+            // Only shown if authenticated for at least 1 tab to limit potential for data leak since index is
+            // unauthenticated.
+            // Other content for the dashboard homepage.
+            allDashboardIndexBlocks
+              .filter { slugify(it.annotation) == dashboardHomeUrl?.dashboard_slug }
+              .forEach { div("pt-5") { it.block(this@build) } }
           }
         }
       }
-    }
 
   companion object {
     fun KClass<out Annotation>.titlecase(): String {
@@ -101,7 +101,6 @@ class DashboardIndexAction @Inject constructor(
   }
 }
 
-
 /**
  * Bind to set custom access notice for the dashboard home page.
  *
@@ -114,13 +113,29 @@ class DashboardIndexAction @Inject constructor(
  * )
  * ```
  */
-data class DashboardIndexAccessBlock @JvmOverloads constructor(
+data class DashboardIndexAccessBlock
+@JvmOverloads
+constructor(
   val annotation: KClass<out Annotation>,
-  val block: TagConsumer<*>.(appName: String, deployment: Deployment, caller: MiskCaller?, authenticatedTabs: List<DashboardTab>, dashboardTabs: List<DashboardTab>) -> Unit
+  val block:
+    TagConsumer<*>.(
+      appName: String,
+      deployment: Deployment,
+      caller: MiskCaller?,
+      authenticatedTabs: List<DashboardTab>,
+      dashboardTabs: List<DashboardTab>,
+    ) -> Unit,
 )
 
 inline fun <reified T : Annotation> DashboardIndexAccessBlock(
-  noinline block: TagConsumer<*>.(appName: String, deployment: Deployment, caller: MiskCaller?, authenticatedTabs: List<DashboardTab>, dashboardTabs: List<DashboardTab>) -> Unit
+  noinline block:
+    TagConsumer<*>.(
+      appName: String,
+      deployment: Deployment,
+      caller: MiskCaller?,
+      authenticatedTabs: List<DashboardTab>,
+      dashboardTabs: List<DashboardTab>,
+    ) -> Unit
 ): DashboardIndexAccessBlock = DashboardIndexAccessBlock(T::class, block)
 
 /**
@@ -134,10 +149,9 @@ inline fun <reified T : Annotation> DashboardIndexAccessBlock(
  * )
  * ```
  */
-data class DashboardIndexBlock @JvmOverloads constructor(
-  val annotation: KClass<out Annotation>,
-  val block: TagConsumer<*>.() -> Unit
-)
+data class DashboardIndexBlock
+@JvmOverloads
+constructor(val annotation: KClass<out Annotation>, val block: TagConsumer<*>.() -> Unit)
 
 inline fun <reified T : Annotation> DashboardIndexBlock(
   noinline block: TagConsumer<*>.() -> Unit

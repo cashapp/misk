@@ -2,14 +2,12 @@ package misk.cron
 
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Injector
-import misk.logging.getLogger
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import misk.logging.getLogger
 
 @Singleton
-internal class CronService @Inject constructor(
-  private val injector: Injector
-) : AbstractIdleService() {
+internal class CronService @Inject constructor(private val injector: Injector) : AbstractIdleService() {
   @Inject private lateinit var cronManager: CronManager
   @Inject private lateinit var cronRunnableEntries: List<CronRunnableEntry>
 
@@ -24,9 +22,10 @@ internal class CronService @Inject constructor(
       // If it's null, fall back to the pattern from the @CronPattern annotation on the class.
       // This allows the annotation pattern to serve as a default, while specifying
       // a cron pattern in CronRunnableEntry will override it if provided.
-      val cronPattern = cronRunnable.cronPattern
-        ?: annotationPattern
-        ?: throw IllegalArgumentException("Expected $name to have @CronPattern specified")
+      val cronPattern =
+        cronRunnable.cronPattern
+          ?: annotationPattern
+          ?: throw IllegalArgumentException("Expected $name to have @CronPattern specified")
 
       val runnable = injector.getProvider(cronRunnable.runnableClass.java).get()
       cronManager.addCron(name, cronPattern.pattern, runnable)

@@ -3,24 +3,19 @@ package misk.logging
 import ch.qos.logback.classic.Level
 import com.google.inject.Module
 import com.google.inject.util.Modules
+import jakarta.inject.Inject
+import kotlin.test.assertFailsWith
 import misk.MiskTestingServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import misk.logging.LogCollector
-import misk.logging.getLogger
-import jakarta.inject.Inject
-import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 class LogCollectorTest {
   @Suppress("unused")
   @MiskTestModule
-  val module: Module = Modules.combine(
-    MiskTestingServiceModule(),
-    LogCollectorModule()
-  )
+  val module: Module = Modules.combine(MiskTestingServiceModule(), LogCollectorModule())
 
   @Inject lateinit var logCollector: LogCollector
 
@@ -29,10 +24,7 @@ class LogCollectorTest {
     val logger = getLogger<LogCollectorTest>()
 
     logger.info("this is a log message!")
-    assertThat(logCollector.takeMessages()).containsExactly(
-      "Starting ready service",
-      "this is a log message!"
-    )
+    assertThat(logCollector.takeMessages()).containsExactly("Starting ready service", "this is a log message!")
 
     logger.info("another log message")
     logger.info("and a third!")
@@ -94,16 +86,14 @@ class LogCollectorTest {
     assertThat(logCollector.takeMessages(LogCollectorModule::class, consumeUnmatchedLogs = false))
       .containsExactly("Another thing happened")
     // Ready service can start before or after logCollector, so it's inconsistent without this.
-    val withoutReadyService = logCollector.takeMessages(consumeUnmatchedLogs = false)
-      .filterNot { it == "Starting ready service" }
+    val withoutReadyService =
+      logCollector.takeMessages(consumeUnmatchedLogs = false).filterNot { it == "Starting ready service" }
     assertThat(withoutReadyService).isEmpty()
 
     // We can collect messages of different error levels.
     logger.info { "this is a log message!" }
-    assertThat(logCollector.takeMessages(minLevel = Level.ERROR, consumeUnmatchedLogs = false))
-      .isEmpty()
-    assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false))
-      .containsExactly("this is a log message!")
+    assertThat(logCollector.takeMessages(minLevel = Level.ERROR, consumeUnmatchedLogs = false)).isEmpty()
+    assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false)).containsExactly("this is a log message!")
     assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false)).isEmpty()
 
     // We can collect messages matching certain patterns.
@@ -111,16 +101,13 @@ class LogCollectorTest {
     logger.info { "missed by pattern match" }
     assertThat(logCollector.takeMessages(pattern = Regex("hit.*"), consumeUnmatchedLogs = false))
       .containsExactly("hit by pattern match")
-    assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false))
-      .containsExactly("missed by pattern match")
+    assertThat(logCollector.takeMessages(consumeUnmatchedLogs = false)).containsExactly("missed by pattern match")
   }
 
   @Test
   fun takeTimeout() {
     logCollector.takeEvent()
-    val exception = assertFailsWith<IllegalArgumentException> {
-      logCollector.takeEvent()
-    }
+    val exception = assertFailsWith<IllegalArgumentException> { logCollector.takeEvent() }
     assertThat(exception).hasMessage("no events to take!")
   }
 
@@ -129,12 +116,13 @@ class LogCollectorTest {
   fun takeWaits() {
     val logger = getLogger<LogCollectorTest>()
 
-    val thread = object : Thread() {
-      override fun run() {
-        sleep(100)
-        logger.info("this is a log message!")
+    val thread =
+      object : Thread() {
+        override fun run() {
+          sleep(100)
+          logger.info("this is a log message!")
+        }
       }
-    }
     logCollector.takeMessage()
     thread.start()
 

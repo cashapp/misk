@@ -1,12 +1,11 @@
 package misk.annotation
 
 /**
- * Marks declarations that are experimental and subject to change without following SemVer
- * conventions. Both binary and source-incompatible changes are possible, including complete removal
- * of the experimental API.
+ * Marks declarations that are experimental and subject to change without following SemVer conventions. Both binary and
+ * source-incompatible changes are possible, including complete removal of the experimental API.
  *
- * Do not use these APIs in modules that may be executed using a version of Misk different from
- * the version the module was compiled with.
+ * Do not use these APIs in modules that may be executed using a version of Misk different from the version the module
+ * was compiled with.
  *
  * Do not use these APIs in published libraries.
  *

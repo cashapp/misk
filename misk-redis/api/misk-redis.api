@@ -42,13 +42,19 @@ public abstract interface class misk/redis/DeferredRedis {
 	public abstract fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun rpush (Ljava/lang/String;[Lokio/ByteString;)Ljava/util/function/Supplier;
 	public abstract fun set (Ljava/lang/String;Lokio/ByteString;Ljava/time/Duration;)Ljava/util/function/Supplier;
+	public static synthetic fun set$default (Lmisk/redis/DeferredRedis;Ljava/lang/String;Lokio/ByteString;Ljava/time/Duration;ILjava/lang/Object;)Ljava/util/function/Supplier;
 	public abstract fun setnx (Ljava/lang/String;Lokio/ByteString;Ljava/time/Duration;)Ljava/util/function/Supplier;
+	public static synthetic fun setnx$default (Lmisk/redis/DeferredRedis;Ljava/lang/String;Lokio/ByteString;Ljava/time/Duration;ILjava/lang/Object;)Ljava/util/function/Supplier;
 	public abstract fun zadd (Ljava/lang/String;DLjava/lang/String;[Lmisk/redis/Redis$ZAddOptions;)Ljava/util/function/Supplier;
 	public abstract fun zadd (Ljava/lang/String;Ljava/util/Map;[Lmisk/redis/Redis$ZAddOptions;)Ljava/util/function/Supplier;
 	public abstract fun zcard (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun zrange (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/function/Supplier;
+	public static synthetic fun zrange$default (Lmisk/redis/DeferredRedis;Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;ILjava/lang/Object;)Ljava/util/function/Supplier;
 	public abstract fun zrangeWithScores (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/function/Supplier;
+	public static synthetic fun zrangeWithScores$default (Lmisk/redis/DeferredRedis;Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;ILjava/lang/Object;)Ljava/util/function/Supplier;
+	public abstract fun zrem (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/function/Supplier;
 	public abstract fun zremRangeByRank (Ljava/lang/String;Lmisk/redis/Redis$ZRangeRankMarker;Lmisk/redis/Redis$ZRangeRankMarker;)Ljava/util/function/Supplier;
+	public abstract fun zremRangeByScore (Ljava/lang/String;Lmisk/redis/Redis$ZRangeScoreMarker;Lmisk/redis/Redis$ZRangeScoreMarker;)Ljava/util/function/Supplier;
 	public abstract fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/Supplier;
 }
 
@@ -121,6 +127,7 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
 	public fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
 	public fun subscribe (Lredis/clients/jedis/JedisPubSub;Ljava/lang/String;)V
+	public fun transaction (Lkotlin/jvm/functions/Function1;)V
 	public fun unwatch ([Ljava/lang/String;)V
 	public fun watch ([Ljava/lang/String;)V
 	public fun zadd (Ljava/lang/String;DLjava/lang/String;[Lmisk/redis/Redis$ZAddOptions;)J
@@ -128,7 +135,9 @@ public final class misk/redis/FakeRedis : misk/redis/Redis {
 	public fun zcard (Ljava/lang/String;)J
 	public fun zrange (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
 	public fun zrangeWithScores (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
+	public fun zrem (Ljava/lang/String;[Ljava/lang/String;)J
 	public fun zremRangeByRank (Ljava/lang/String;Lmisk/redis/Redis$ZRangeRankMarker;Lmisk/redis/Redis$ZRangeRankMarker;)J
+	public fun zremRangeByScore (Ljava/lang/String;Lmisk/redis/Redis$ZRangeScoreMarker;Lmisk/redis/Redis$ZRangeScoreMarker;)J
 	public fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Double;
 }
 
@@ -192,6 +201,7 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
 	public fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
 	public fun subscribe (Lredis/clients/jedis/JedisPubSub;Ljava/lang/String;)V
+	public fun transaction (Lkotlin/jvm/functions/Function1;)V
 	public fun unwatch ([Ljava/lang/String;)V
 	public fun watch ([Ljava/lang/String;)V
 	public fun zadd (Ljava/lang/String;DLjava/lang/String;[Lmisk/redis/Redis$ZAddOptions;)J
@@ -199,7 +209,9 @@ public final class misk/redis/RealRedis : misk/redis/Redis {
 	public fun zcard (Ljava/lang/String;)J
 	public fun zrange (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
 	public fun zrangeWithScores (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
+	public fun zrem (Ljava/lang/String;[Ljava/lang/String;)J
 	public fun zremRangeByRank (Ljava/lang/String;Lmisk/redis/Redis$ZRangeRankMarker;Lmisk/redis/Redis$ZRangeRankMarker;)J
+	public fun zremRangeByScore (Ljava/lang/String;Lmisk/redis/Redis$ZRangeScoreMarker;Lmisk/redis/Redis$ZRangeScoreMarker;)J
 	public fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Double;
 }
 
@@ -257,19 +269,25 @@ public abstract interface class misk/redis/Redis {
 	public abstract fun rpoplpush (Ljava/lang/String;Ljava/lang/String;)Lokio/ByteString;
 	public abstract fun rpush (Ljava/lang/String;[Lokio/ByteString;)J
 	public abstract fun scan (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)Lmisk/redis/Redis$ScanResult;
+	public static synthetic fun scan$default (Lmisk/redis/Redis;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)Lmisk/redis/Redis$ScanResult;
 	public abstract fun set (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)V
 	public abstract fun set (Ljava/lang/String;Lokio/ByteString;)V
 	public abstract fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
 	public abstract fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
 	public abstract fun subscribe (Lredis/clients/jedis/JedisPubSub;Ljava/lang/String;)V
+	public abstract fun transaction (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun unwatch ([Ljava/lang/String;)V
 	public abstract fun watch ([Ljava/lang/String;)V
 	public abstract fun zadd (Ljava/lang/String;DLjava/lang/String;[Lmisk/redis/Redis$ZAddOptions;)J
 	public abstract fun zadd (Ljava/lang/String;Ljava/util/Map;[Lmisk/redis/Redis$ZAddOptions;)J
 	public abstract fun zcard (Ljava/lang/String;)J
 	public abstract fun zrange (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
+	public static synthetic fun zrange$default (Lmisk/redis/Redis;Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;ILjava/lang/Object;)Ljava/util/List;
 	public abstract fun zrangeWithScores (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
+	public static synthetic fun zrangeWithScores$default (Lmisk/redis/Redis;Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;ILjava/lang/Object;)Ljava/util/List;
+	public abstract fun zrem (Ljava/lang/String;[Ljava/lang/String;)J
 	public abstract fun zremRangeByRank (Ljava/lang/String;Lmisk/redis/Redis$ZRangeRankMarker;Lmisk/redis/Redis$ZRangeRankMarker;)J
+	public abstract fun zremRangeByScore (Ljava/lang/String;Lmisk/redis/Redis$ZRangeScoreMarker;Lmisk/redis/Redis$ZRangeScoreMarker;)J
 	public abstract fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Double;
 }
 
@@ -421,21 +439,24 @@ public final class misk/redis/RedisClusterReplicationGroupConfig {
 	public fun <init> (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;)V
 	public fun <init> (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;)V
 	public fun <init> (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;I)V
-	public synthetic fun <init> (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;ILjava/lang/Long;)V
+	public synthetic fun <init> (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;ILjava/lang/Long;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Lmisk/redis/RedisNodeConfig;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()I
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()I
-	public final fun copy (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;I)Lmisk/redis/RedisClusterReplicationGroupConfig;
-	public static synthetic fun copy$default (Lmisk/redis/RedisClusterReplicationGroupConfig;Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;IILjava/lang/Object;)Lmisk/redis/RedisClusterReplicationGroupConfig;
+	public final fun component6 ()Ljava/lang/Long;
+	public final fun copy (Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;ILjava/lang/Long;)Lmisk/redis/RedisClusterReplicationGroupConfig;
+	public static synthetic fun copy$default (Lmisk/redis/RedisClusterReplicationGroupConfig;Lmisk/redis/RedisNodeConfig;Ljava/lang/String;ILjava/lang/String;ILjava/lang/Long;ILjava/lang/Object;)Lmisk/redis/RedisClusterReplicationGroupConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getClient_name ()Ljava/lang/String;
 	public final fun getConfiguration_endpoint ()Lmisk/redis/RedisNodeConfig;
 	public final fun getMax_attempts ()I
 	public final fun getRedis_auth_password ()Ljava/lang/String;
 	public final fun getTimeout_ms ()I
+	public final fun getTopology_refresh_period_ms ()Ljava/lang/Long;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -620,6 +641,7 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis, misk/testing
 	public fun setnx (Ljava/lang/String;Ljava/time/Duration;Lokio/ByteString;)Z
 	public fun setnx (Ljava/lang/String;Lokio/ByteString;)Z
 	public fun subscribe (Lredis/clients/jedis/JedisPubSub;Ljava/lang/String;)V
+	public fun transaction (Lkotlin/jvm/functions/Function1;)V
 	public fun unwatch ([Ljava/lang/String;)V
 	public fun watch ([Ljava/lang/String;)V
 	public fun zadd (Ljava/lang/String;DLjava/lang/String;[Lmisk/redis/Redis$ZAddOptions;)J
@@ -627,7 +649,9 @@ public final class misk/redis/testing/FakeRedis : misk/redis/Redis, misk/testing
 	public fun zcard (Ljava/lang/String;)J
 	public fun zrange (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
 	public fun zrangeWithScores (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/List;
+	public fun zrem (Ljava/lang/String;[Ljava/lang/String;)J
 	public fun zremRangeByRank (Ljava/lang/String;Lmisk/redis/Redis$ZRangeRankMarker;Lmisk/redis/Redis$ZRangeRankMarker;)J
+	public fun zremRangeByScore (Ljava/lang/String;Lmisk/redis/Redis$ZRangeScoreMarker;Lmisk/redis/Redis$ZRangeScoreMarker;)J
 	public fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Double;
 }
 
@@ -682,7 +706,9 @@ public final class misk/redis/testing/FakeRedis$FakePipelinedRedis : misk/redis/
 	public fun zcard (Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun zrange (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/function/Supplier;
 	public fun zrangeWithScores (Ljava/lang/String;Lmisk/redis/Redis$ZRangeType;Lmisk/redis/Redis$ZRangeMarker;Lmisk/redis/Redis$ZRangeMarker;ZLmisk/redis/Redis$ZRangeLimit;)Ljava/util/function/Supplier;
+	public fun zrem (Ljava/lang/String;[Ljava/lang/String;)Ljava/util/function/Supplier;
 	public fun zremRangeByRank (Ljava/lang/String;Lmisk/redis/Redis$ZRangeRankMarker;Lmisk/redis/Redis$ZRangeRankMarker;)Ljava/util/function/Supplier;
+	public fun zremRangeByScore (Ljava/lang/String;Lmisk/redis/Redis$ZRangeScoreMarker;Lmisk/redis/Redis$ZRangeScoreMarker;)Ljava/util/function/Supplier;
 	public fun zscore (Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/Supplier;
 }
 

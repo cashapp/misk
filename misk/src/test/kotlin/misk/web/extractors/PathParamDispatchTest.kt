@@ -1,5 +1,6 @@
 package misk.web.extractors
 
+import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -17,19 +18,17 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest(startService = true)
 internal class PathParamDispatchTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
   @Inject lateinit var jettyService: JettyService
 
   enum class ResourceType {
     USER,
     FILE,
-    FOLDER
+    FOLDER,
   }
 
   @Test
@@ -69,13 +68,11 @@ internal class PathParamDispatchTest {
     fun getObjectDetails(
       @PathParam resourceType: ResourceType,
       @PathParam name: String,
-      @PathParam version: Long
+      @PathParam version: Long,
     ): String = "(type=$resourceType,name=$name,version=$version)"
   }
 
-  data class Id<T>(
-    val t: T,
-  ) {
+  data class Id<T>(val t: T) {
     companion object {
       @JvmStatic
       fun valueOf(value: String): Id<Any> {
@@ -87,9 +84,7 @@ internal class PathParamDispatchTest {
   class CustomTypeWithGenerics @Inject constructor() : WebAction {
     @Get("/objects/find/{objectId}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun getObjectDetails(
-      @PathParam objectId: Id<String>,
-    ): String = "(objectId=$objectId)"
+    fun getObjectDetails(@PathParam objectId: Id<String>): String = "(objectId=$objectId)"
   }
 
   class CustomPathParamName @Inject constructor() : WebAction {
@@ -100,10 +95,7 @@ internal class PathParamDispatchTest {
 
   fun get(path: String): okhttp3.Response {
     val httpClient = OkHttpClient()
-    val request = Request.Builder()
-      .get()
-      .url(serverUrlBuilder().encodedPath(path).build())
-      .build()
+    val request = Request.Builder().get().url(serverUrlBuilder().encodedPath(path).build()).build()
     return httpClient.newCall(request).execute()
   }
 

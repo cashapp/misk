@@ -1,46 +1,11 @@
-public final class misk/cloud/aws/AwsAccountId {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lmisk/cloud/aws/AwsAccountId;
-	public static synthetic fun copy$default (Lmisk/cloud/aws/AwsAccountId;Ljava/lang/String;ILjava/lang/Object;)Lmisk/cloud/aws/AwsAccountId;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getValue ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class misk/cloud/aws/AwsEnvironment {
-	public static final field INSTANCE Lmisk/cloud/aws/AwsEnvironment;
-	public final fun awsAccountId (Lwisp/deployment/EnvironmentVariableLoader;Ljava/lang/String;)Lmisk/cloud/aws/AwsAccountId;
-	public static synthetic fun awsAccountId$default (Lmisk/cloud/aws/AwsEnvironment;Lwisp/deployment/EnvironmentVariableLoader;Ljava/lang/String;ILjava/lang/Object;)Lmisk/cloud/aws/AwsAccountId;
-	public final fun awsRegion (Lwisp/deployment/EnvironmentVariableLoader;Ljava/util/List;Ljava/lang/String;)Lmisk/cloud/aws/AwsRegion;
-	public static synthetic fun awsRegion$default (Lmisk/cloud/aws/AwsEnvironment;Lwisp/deployment/EnvironmentVariableLoader;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lmisk/cloud/aws/AwsRegion;
-}
-
 public final class misk/cloud/aws/AwsEnvironmentModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
 	public final fun awsAccountId (Lmisk/environment/EnvVarLoader;)Lmisk/cloud/aws/AwsAccountId;
 	public final fun awsRegion (Lmisk/environment/EnvVarLoader;)Lmisk/cloud/aws/AwsRegion;
 }
 
-public final class misk/cloud/aws/AwsRegion {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lmisk/cloud/aws/AwsRegion;
-	public static synthetic fun copy$default (Lmisk/cloud/aws/AwsRegion;Ljava/lang/String;ILjava/lang/Object;)Lmisk/cloud/aws/AwsRegion;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class misk/cloud/aws/FakeAwsEnvironmentModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
-}
-
-public final class misk/cloud/aws/TypesKt {
-	public static final fun toMiskAwsAccountId (Lwisp/aws/environment/AwsAccountId;)Lmisk/cloud/aws/AwsAccountId;
-	public static final fun toMiskAwsRegion (Lwisp/aws/environment/AwsRegion;)Lmisk/cloud/aws/AwsRegion;
 }
 
 public final class misk/jobqueue/sqs/AwsSqsBatchJobHandlerModule : misk/inject/KAbstractModule {
@@ -64,13 +29,12 @@ public final class misk/jobqueue/sqs/AwsSqsBatchJobHandlerModule$Companion {
 	public static synthetic fun create$default (Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule$Companion;Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;ILjava/lang/Object;)Lmisk/jobqueue/sqs/AwsSqsBatchJobHandlerModule;
 }
 
-public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule : misk/inject/KAbstractModule, misk/inject/AsyncModule {
+public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion;
 	public synthetic fun <init> (Lmisk/jobqueue/QueueName;Lkotlin/reflect/KClass;ZLjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;Z)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
 	public static final fun create (Lmisk/jobqueue/QueueName;Ljava/lang/Class;ZLjava/util/List;)Lmisk/jobqueue/sqs/AwsSqsJobHandlerModule;
-	public fun moduleWhenAsyncDisabled ()Lmisk/inject/KAbstractModule;
 }
 
 public final class misk/jobqueue/sqs/AwsSqsJobHandlerModule$Companion {
@@ -109,12 +73,14 @@ public final class misk/jobqueue/sqs/AwsSqsJobQueueConfig : misk/config/Config {
 	public final fun getTask_queue ()Lmisk/tasks/RepeatedTaskQueueConfig;
 }
 
-public class misk/jobqueue/sqs/AwsSqsJobQueueModule : misk/inject/KAbstractModule, misk/inject/AsyncModule {
+public class misk/jobqueue/sqs/AwsSqsJobQueueModule : misk/inject/KAbstractModule {
 	public static final field Companion Lmisk/jobqueue/sqs/AwsSqsJobQueueModule$Companion;
 	public fun <init> (Lmisk/jobqueue/sqs/AwsSqsJobQueueConfig;)V
 	protected fun configure ()V
 	public fun configureClient (Lcom/amazonaws/client/builder/AwsClientBuilder;)V
-	public fun moduleWhenAsyncDisabled ()Lmisk/inject/KAbstractModule;
+	public final fun consumerRepeatedTaskQueue (Lmisk/tasks/RepeatedTaskQueueFactory;Lmisk/jobqueue/sqs/AwsSqsJobQueueConfig;)Lmisk/tasks/RepeatedTaskQueue;
+	public final fun provideSQSClient (Ljava/lang/String;Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;Lmisk/feature/FeatureFlags;)Lcom/amazonaws/services/sqs/AmazonSQS;
+	public final fun provideSQSClientForReceiving (Lmisk/cloud/aws/AwsRegion;Lcom/amazonaws/auth/AWSCredentialsProvider;)Lcom/amazonaws/services/sqs/AmazonSQS;
 }
 
 public final class misk/jobqueue/sqs/AwsSqsJobQueueModule$Companion {

@@ -1,41 +1,107 @@
 package misk.jdbc
 
-import misk.logging.getLogger
 import java.sql.SQLException
 import java.time.Clock
+import java.time.DateTimeException
 import java.time.Duration
+import java.time.Instant
 import java.time.LocalDate
-import java.time.Period
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.regex.Pattern
+import misk.logging.getLogger
 
 /**
  * A [DatabasePool] that is used in tests to get a unique database for each test suite.
  *
- * See [misk.hibernate.HibernateTestingModule] for usage instructions. */
-val SHARED_TEST_DATABASE_POOL = TestDatabasePool(
-  MySqlTestDatabasePoolBackend(
-    DataSourceConfig(type = DataSourceType.MYSQL, username = "root").withDefaults()
-  ),
-  Clock.systemUTC()
-)
+ * Databases older than two hours are pruned when each database key is first used. This limit must be longer than any
+ * test using the same MySQL server could possibly run for. Tests that need longer should create a [TestDatabasePool]
+ * with a longer retention duration.
+ *
+ * See [misk.hibernate.HibernateTestingModule] for usage instructions.
+ */
+val SHARED_TEST_DATABASE_POOL =
+  TestDatabasePool(
+    MySqlTestDatabasePoolBackend(DataSourceConfig(type = DataSourceType.MYSQL, username = "root").withDefaults()),
+    Clock.systemUTC(),
+  )
 
 /**
- * Manages an inventory of databases for testing. Databases are named like
- * `movies__20190730__5` where `movies` is the database name in a [DataSourceConfig], `20190730` is
- * today's date, and 5 is a sequence number.
+ * Shares a single database lease across multiple data sources for the same test database.
  *
- * These are used _only_ in tests, so that each test gets a reserved database to avoid
- * parallelism issues.
+ * Use this for tests that configure a writer and reader against the same local database. The wrapped pool still
+ * isolates independent test suites, but concurrent writer and reader data sources in one test injector point at the
+ * same leased database.
+ */
+class SharedLeaseDatabasePool(private val delegate: DatabasePool) : DatabasePool {
+  private val leasesByKey = mutableMapOf<LeaseKey, Lease>()
+
+  override fun takeDatabase(config: DataSourceConfig): DataSourceConfig =
+    synchronized(this) {
+      val key = config.leaseKey()
+      val existingLease = leasesByKey[key]
+      if (existingLease != null) {
+        existingLease.referenceCount += 1
+        config.copy(database = existingLease.config.database)
+      } else {
+        val leasedConfig = delegate.takeDatabase(config)
+        leasesByKey[key] = Lease(config = leasedConfig, referenceCount = 1)
+        leasedConfig
+      }
+    }
+
+  override fun releaseDatabase(config: DataSourceConfig): Unit =
+    synchronized(this) {
+      val key =
+        leasesByKey.entries
+          .firstOrNull { (_, lease) -> lease.config.database == config.database }
+          ?.key ?: return
+
+      val lease = leasesByKey.getValue(key)
+      lease.referenceCount -= 1
+      if (lease.referenceCount == 0) {
+        leasesByKey.remove(key)
+        delegate.releaseDatabase(lease.config)
+      }
+    }
+
+  private fun DataSourceConfig.leaseKey() = LeaseKey(type = type, host = host, port = port, database = database)
+
+  private data class Lease(
+    val config: DataSourceConfig,
+    var referenceCount: Int,
+  )
+
+  private data class LeaseKey(
+    val type: DataSourceType,
+    val host: String?,
+    val port: Int?,
+    val database: String?,
+  )
+}
+
+/**
+ * Manages an inventory of databases for testing. Databases are named like `movies__20190730140530__5` where `movies` is
+ * the database name in a [DataSourceConfig], `20190730140530` is the creation timestamp, and 5 is a sequence number.
+ *
+ * These are used _only_ in tests, so that each test gets a reserved database to avoid parallelism issues. Old date-only
+ * database names are also recognized and pruned conservatively for rolling upgrades.
+ *
+ * Old databases are pruned once per database key, immediately before its first database is allocated. [retention]
+ * must be longer than any test using the same MySQL server could possibly run for.
  *
  * Thread-safe.
  */
-class TestDatabasePool(
-  val backend: Backend,
-  val clock: Clock
-) : DatabasePool {
+class TestDatabasePool(val backend: Backend, val clock: Clock, val retention: Duration) : DatabasePool {
+  constructor(backend: Backend, clock: Clock) : this(backend, clock, DEFAULT_RETENTION)
+
+  init {
+    require(!retention.isNegative) { "retention must not be negative" }
+  }
+
   /** The key is the config's database name. */
   private val poolsByKey = Collections.synchronizedMap(mutableMapOf<String, ConfigSpecificPool>())
 
@@ -45,6 +111,7 @@ class TestDatabasePool(
     if (config.type != DataSourceType.MYSQL) return config
 
     val pooled = getPool(config)
+    pooled.pruneOldDatabasesOnStartup()
     return config.copy(database = pooled.takeDatabase())
   }
 
@@ -53,13 +120,13 @@ class TestDatabasePool(
   }
 
   /**
-   * Drops all databases that were created by an allocator which are older than the retention
-   * duration of this allocator.
+   * Drops all databases that were created by an allocator which are older than the retention duration of this
+   * allocator.
    *
    * @param retention Must be longer than any test could possibly run for.
    */
   @JvmOverloads
-  fun pruneOldDatabases(retention: Duration = Duration.ofDays(2)) {
+  fun pruneOldDatabases(retention: Duration = this.retention) {
     for (pool in poolsByKey.values) {
       pool.pruneOldDatabases(retention)
     }
@@ -78,24 +145,27 @@ class TestDatabasePool(
   }
 
   /** A pool of databases for a particular config. Thread-safe. */
-  inner class ConfigSpecificPool(
-    val key: String,
-    val type: DataSourceType
-  ) {
-    private val databaseNameRegex = Regex("""(${Pattern.quote(key)})__([0-9]{8})__([0-9]{1,5})""")
+  inner class ConfigSpecificPool(val key: String, val type: DataSourceType) {
+    private val databaseNameRegex = Regex("""(${Pattern.quote(key)})__([0-9]{8}|[0-9]{14})__([0-9]{1,5})""")
 
-    private val formatter = DateTimeFormatter.BASIC_ISO_DATE
+    private val legacyDateFormatter = DateTimeFormatter.BASIC_ISO_DATE
+    private val timestampFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
 
     /** Database names that are available. */
     val pool = LinkedBlockingDeque<String>()
 
+    @Volatile private var prunedOnStartup = false
+
     /** Decodes a database name string. */
     fun decode(databaseName: String): DatabaseName? {
       val matchResult = databaseNameRegex.matchEntire(databaseName) ?: return null
+      val encodedTimestamp = matchResult.groups[2]!!.value
+      val timestamp = encodedTimestamp.toLong()
+      if (timestamp.toString() != encodedTimestamp || parseCreatedAt(encodedTimestamp) == null) return null
       return DatabaseName(
         matchResult.groups[1]!!.value,
-        matchResult.groups[2]!!.value.toLong(),
-        matchResult.groups[3]!!.value.toInt()
+        timestamp,
+        matchResult.groups[3]!!.value.toInt(),
       )
     }
 
@@ -115,19 +185,24 @@ class TestDatabasePool(
       pool.add(databaseName)
     }
 
+    internal fun pruneOldDatabasesOnStartup() {
+      if (prunedOnStartup) return
+      synchronized(this) {
+        if (prunedOnStartup) return
+        pruneOldDatabases()
+        prunedOnStartup = true
+      }
+    }
+
     /** Creates a database and returns its name. */
     fun allocateDatabase(): String {
-      val today = LocalDate.now(clock)
-      val todayYearMonthDay = today.format(formatter).toLong()
+      val timestamp = timestampFormatter.format(clock.instant().atOffset(ZoneOffset.UTC)).toLong()
 
-      val todaysLatest = getDatabases()
-        .filter { it.yearMonthDay == todayYearMonthDay }
-        .maxByOrNull { it.version }
+      val latest = getDatabases().filter { it.yearMonthDay == timestamp }.maxByOrNull { it.version }
 
-      val nextVersion = (todaysLatest?.version ?: 0) + 1
+      val nextVersion = (latest?.version ?: 0) + 1
 
-      var databaseName =
-        DatabaseName(key, todayYearMonthDay, nextVersion)
+      var databaseName = DatabaseName(key, timestamp, nextVersion)
 
       // Keep trying to create a database until we have found an unused name.
       while (true) {
@@ -143,18 +218,37 @@ class TestDatabasePool(
       return databaseName.toString()
     }
 
-    fun pruneOldDatabases(retention: Duration = Duration.ofDays(2)) {
-      val evictBefore = LocalDate.now(clock).minus(Period.ofDays(retention.toDays().toInt()))
-      val evictBeforeYearMonthDay = evictBefore.format(formatter).toLong()
+    fun pruneOldDatabases(retention: Duration = this@TestDatabasePool.retention) {
+      require(!retention.isNegative) { "retention must not be negative" }
+      val evictBefore = Instant.now(clock).minus(retention)
 
-      val oldDatabases = if (retention.isZero) {
-        getDatabases()
-      } else {
-        getDatabases().filter { it.yearMonthDay < evictBeforeYearMonthDay }
-      }
+      val oldDatabases =
+        if (retention.isZero) {
+          getDatabases()
+        } else {
+          getDatabases().filter { it.createdAt()?.isBefore(evictBefore) == true }
+        }
 
       for (database in oldDatabases) {
         backend.dropDatabase("$database")
+      }
+    }
+
+    private fun DatabaseName.createdAt() = parseCreatedAt(yearMonthDay.toString())
+
+    private fun parseCreatedAt(encodedTimestamp: String): Instant? {
+      return try {
+        when (encodedTimestamp.length) {
+          8 ->
+            LocalDate.parse(encodedTimestamp, legacyDateFormatter)
+              .plusDays(1)
+              .atStartOfDay(ZoneOffset.UTC)
+              .toInstant()
+          14 -> LocalDateTime.parse(encodedTimestamp, timestampFormatter).toInstant(ZoneOffset.UTC)
+          else -> null
+        }
+      } catch (_: DateTimeException) {
+        null
       }
     }
   }
@@ -165,9 +259,7 @@ class TestDatabasePool(
     fun showDatabases(): Set<String>
 
     /**
-     * Drops the indicated database from the data source.
-     *
-     * Throws [PersistenceException] if the database cannot be dropped (i.e. it does not exist).
+     * Drops the indicated database from the data source, if it exists.
      */
     fun dropDatabase(name: String)
 
@@ -180,6 +272,8 @@ class TestDatabasePool(
   }
 
   companion object {
+    val DEFAULT_RETENTION: Duration = Duration.ofHours(2)
+
     private val logger = getLogger<ConfigSpecificPool>()
   }
 

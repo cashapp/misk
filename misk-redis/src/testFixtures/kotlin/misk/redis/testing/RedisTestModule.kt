@@ -1,17 +1,14 @@
 package misk.redis.testing
 
+import jakarta.inject.Qualifier
+import kotlin.random.Random
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
 import misk.redis.Redis
+import misk.testing.TestFixture
 import misk.time.FakeClock
 
-import jakarta.inject.Qualifier
-import misk.testing.TestFixture
-import kotlin.random.Random
-
-/**
- * Installs a singleton [FakeRedis] for testing.
- */
+/** Installs a singleton [FakeRedis] for testing. */
 class RedisTestModule(private val random: Random = Random.Default) : KAbstractModule() {
   override fun configure() {
     requireBinding<FakeClock>()

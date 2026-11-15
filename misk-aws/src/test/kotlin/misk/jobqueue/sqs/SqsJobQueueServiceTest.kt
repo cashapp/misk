@@ -4,6 +4,11 @@ import com.amazonaws.services.sqs.AmazonSQS
 import com.google.common.util.concurrent.AbstractService
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.util.Modules
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.LinkedBlockingDeque
+import java.util.concurrent.TimeUnit
 import misk.ServiceModule
 import misk.feature.testing.FakeFeatureFlags
 import misk.jobqueue.JobConsumer
@@ -18,21 +23,14 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.LinkedBlockingDeque
-import java.util.concurrent.TimeUnit
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 /** This is separate from [SqsJobQueueTest] because we don't want the services started automatically. */
 @MiskTest
 internal class SqsJobQueueServiceTest {
   @MiskExternalDependency private val dockerSqs = DockerSqs
-  @MiskTestModule private val module =
-    Modules.combine(
-      SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client),
-      ServiceModule<ManualStartService>()
-    )
+  @MiskTestModule
+  private val module =
+    Modules.combine(SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client), ServiceModule<ManualStartService>())
   @Inject private lateinit var sqs: AmazonSQS
   @Inject private lateinit var queue: JobQueue
   @Inject private lateinit var consumer: JobConsumer
@@ -42,7 +40,8 @@ internal class SqsJobQueueServiceTest {
 
   private val queueName = QueueName("sqs_job_queue_service_test")
 
-  @BeforeEach fun createQueues() {
+  @BeforeEach
+  fun createQueues() {
     sqs.createQueue(queueName.value)
     fakeFeatureFlags.override(CONSUMERS_BATCH_SIZE, 10)
   }
@@ -53,7 +52,8 @@ internal class SqsJobQueueServiceTest {
     serviceManager.awaitStopped(20, TimeUnit.SECONDS)
   }
 
-  @Test fun `jobs are not handled until all services are running`() {
+  @Test
+  fun `jobs are not handled until all services are running`() {
     val log = LinkedBlockingDeque<String>()
     val jobRan = CountDownLatch(1)
 

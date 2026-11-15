@@ -17,8 +17,10 @@ dependencies {
   implementation(libs.wireMoshiAdapter)
   implementation(libs.wireRuntime)
 
+  testImplementation(project(":misk-moshi-test-protos"))
   testImplementation(project(":misk-testing"))
   testImplementation(libs.assertj)
+  testImplementation(libs.moshiKotlin)
   testRuntimeOnly(libs.junitEngine)
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
@@ -26,6 +28,6 @@ dependencies {
 
 mavenPublishing {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

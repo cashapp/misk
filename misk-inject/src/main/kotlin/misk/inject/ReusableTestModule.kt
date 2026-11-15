@@ -5,10 +5,10 @@ import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
 /**
- * This class should be extended by test modules used in tests,
- * for Misk to reuse the Guice injector across tests for significantly faster test suite performance.
+ * This class should be extended by test modules used in tests, for Misk to reuse the Guice injector across tests for
+ * significantly faster test suite performance.
  */
-abstract class ReusableTestModule: KAbstractModule() {
+abstract class ReusableTestModule : KAbstractModule() {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other == null || this::class != other::class) return false
@@ -30,9 +30,8 @@ abstract class ReusableTestModule: KAbstractModule() {
   }
 
   /**
-   * A set of property names that should be ignored when checking for equality and calculating hashCode.
-   * This is useful for properties that are mocks or other test-specific instances
-   * that should not affect the equality of the module.
+   * A set of property names that should be ignored when checking for equality and calculating hashCode. This is useful
+   * for properties that are mocks or other test-specific instances that should not affect the equality of the module.
    */
   open val ignorePropertiesForEquality: Set<String> = emptySet()
 

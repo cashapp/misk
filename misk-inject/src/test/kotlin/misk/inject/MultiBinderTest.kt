@@ -1,16 +1,15 @@
 package misk.inject
 
 import com.google.inject.TypeLiteral
+import jakarta.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import jakarta.inject.Inject
 
 @MiskTest
 class MultiBinderTest {
-  @MiskTestModule
-  val module = MultiBindingsModule()
+  @MiskTestModule val module = MultiBindingsModule()
 
   @Inject @TestAnnotation private lateinit var colorList: List<Color>
   @Inject @TestAnnotation private lateinit var colorSet: Set<Color>
@@ -19,7 +18,7 @@ class MultiBinderTest {
 
   @Inject private lateinit var unqualifiedColorList: List<Color>
   @Inject private lateinit var unqualifiedColorSet: Set<Color>
-  
+
   @Inject private lateinit var genericTypeList: List<ColorWrapper<*>>
   @Inject private lateinit var genericTypeSet: Set<ColorWrapper<*>>
 

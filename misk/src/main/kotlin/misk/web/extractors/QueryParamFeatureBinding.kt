@@ -1,5 +1,7 @@
 package misk.web.extractors
 
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.findAnnotation
 import misk.Action
 import misk.exceptions.BadRequestException
 import misk.web.FeatureBinding
@@ -7,13 +9,10 @@ import misk.web.FeatureBinding.Claimer
 import misk.web.FeatureBinding.Subject
 import misk.web.PathPattern
 import misk.web.QueryParam
-import kotlin.reflect.KParameter
-import kotlin.reflect.full.findAnnotation
 
 /** Binds parameters annotated [QueryParam] to URL query parameters. */
-internal class QueryParamFeatureBinding private constructor(
-  private val parameters: List<ParameterBinding>
-) : FeatureBinding {
+internal class QueryParamFeatureBinding private constructor(private val parameters: List<ParameterBinding>) :
+  FeatureBinding {
   override fun beforeCall(subject: Subject) {
     for (element in parameters) {
       element.bind(subject)
@@ -21,20 +20,18 @@ internal class QueryParamFeatureBinding private constructor(
   }
 
   /**
-   * A query string parameter can be two things: a *primitive* or a List<*primitive*> This class
-   * figures out which of the two is being represented based on the KParameter used, as well as
-   * finding the KType of the primitive.
+   * A query string parameter can be two things: a *primitive* or a List<*primitive*> This class figures out which of
+   * the two is being represented based on the KParameter used, as well as finding the KType of the primitive.
    */
-  internal class ParameterBinding constructor(
+  internal class ParameterBinding
+  constructor(
     val parameter: KParameter,
     private val isList: Boolean,
     private val converter: StringConverter,
-    private val name: String
+    private val name: String,
   ) {
     fun bind(subject: Subject) {
-      val values = subject.httpCall.url.queryParameterValues(name).map {
-        it ?: throw IllegalArgumentException()
-      }
+      val values = subject.httpCall.url.queryParameterValues(name).map { it ?: throw IllegalArgumentException() }
       val value = parameterValue(values)
       subject.setParameter(parameter, value)
     }
@@ -49,8 +46,7 @@ internal class QueryParamFeatureBinding private constructor(
       }
 
       try {
-        return if (isList) values.map { converter.convert(it) }
-        else converter.convert(values.first())
+        return if (isList) values.map { converter.convert(it) } else converter.convert(values.first())
       } catch (e: IllegalArgumentException) {
         throw BadRequestException("Invalid format for parameter: $name", e)
       }
@@ -62,7 +58,7 @@ internal class QueryParamFeatureBinding private constructor(
       action: Action,
       pathPattern: PathPattern,
       claimer: Claimer,
-      stringConverterFactories: List<StringConverter.Factory>
+      stringConverterFactories: List<StringConverter.Factory>,
     ): FeatureBinding? {
       val bindings = action.parameters.mapNotNull { it.toQueryBinding(stringConverterFactories) }
       if (bindings.isEmpty()) return null
@@ -74,16 +70,15 @@ internal class QueryParamFeatureBinding private constructor(
       return QueryParamFeatureBinding(bindings)
     }
 
-    internal fun KParameter.toQueryBinding(
-      stringConverterFactories: List<StringConverter.Factory>,
-    ): ParameterBinding? {
+    internal fun KParameter.toQueryBinding(stringConverterFactories: List<StringConverter.Factory>): ParameterBinding? {
       val annotation = findAnnotation<QueryParam>() ?: return null
       val name = if (annotation.value.isBlank()) name!! else annotation.value
 
       val isList = type.classifier?.equals(List::class) ?: false
       val elementType = if (isList) type.arguments.first().type!! else type
-      val stringConverter = converterFor(elementType, stringConverterFactories)
-        ?: throw IllegalArgumentException("Unable to create converter for $name")
+      val stringConverter =
+        converterFor(elementType, stringConverterFactories)
+          ?: throw IllegalArgumentException("Unable to create converter for $name")
 
       return ParameterBinding(this, isList, stringConverter, name)
     }

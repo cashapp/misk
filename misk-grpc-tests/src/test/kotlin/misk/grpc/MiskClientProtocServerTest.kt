@@ -23,11 +23,7 @@ import routeguide.RouteNote
 
 @MiskTest(startService = true)
 class MiskClientProtocServerTest {
-  @MiskTestModule
-  val module = Modules.combine(
-    RouteGuideProtocServiceModule(),
-    MiskTestingServiceModule()
-  )
+  @MiskTestModule val module = Modules.combine(RouteGuideProtocServiceModule(), MiskTestingServiceModule())
 
   @Inject @field:Named("grpc server") lateinit var serverUrl: HttpUrl
 
@@ -43,12 +39,7 @@ class MiskClientProtocServerTest {
   fun requestResponse() {
     runBlocking {
       val feature = routeGuide.GetFeature().execute(Point(latitude = 43, longitude = -80))
-      assertThat(feature).isEqualTo(
-        Feature(
-          name = "pine tree",
-          location = Point(latitude = 43, longitude = -80)
-        )
-      )
+      assertThat(feature).isEqualTo(Feature(name = "pine tree", location = Point(latitude = 43, longitude = -80)))
     }
   }
 

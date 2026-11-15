@@ -8,47 +8,44 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
 import com.squareup.protos.test.grpc.HelloRequest
 import helpers.protos.Dinosaur
+import jakarta.inject.Inject
+import java.math.BigDecimal
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
-import jakarta.inject.Inject
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
 
 @MiskTest(startService = false)
 internal class MoshiModuleTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
-  @Inject
-  lateinit var moshi: Moshi
+  @Inject lateinit var moshi: Moshi
 
   /**
-   * This test verifies that use of MoshiAdapterModule.addLast works as expected.
-   * See also https://github.com/square/moshi#precedence
+   * This test verifies that use of MoshiAdapterModule.addLast works as expected. See also
+   * https://github.com/square/moshi#precedence
    */
   @Test
   fun addAdaptersPreferredOverAddLastAdapters() {
-    
+
     // A generic dog is serialized by the Dog adapter, which was added via addLast()
     val dogAdapter = moshi.adapter<Dog>()
     val maxTheDog = Dog("Max")
     assertThat(dogAdapter.fromJson("""["Max, who is a dog"]""")!!.name).isEqualTo(maxTheDog.name)
     assertThat(dogAdapter.toJson(maxTheDog)).isEqualTo("""["Max, who is a dog"]""")
-    
+
     // But a Golden gets serialized by the GoldenRetriever adapter, which was added via add(),
     // even though that add() call happened after the Dog adapter's addLast() call
     val goldenAdapter = moshi.adapter<GoldenRetriever>()
     val cooperTheGolden = GoldenRetriever("Cooper")
     assertThat(goldenAdapter.fromJson("""["Cooper, who is SUCH a good boye!"]""")!!.name)
       .isEqualTo(cooperTheGolden.name)
-    assertThat(goldenAdapter.toJson(cooperTheGolden))
-      .isEqualTo("""["Cooper, who is SUCH a good boye!"]""")
+    assertThat(goldenAdapter.toJson(cooperTheGolden)).isEqualTo("""["Cooper, who is SUCH a good boye!"]""")
   }
 
   /** Ensure we have Moshi's Kotlin features, including named and default parameters. */
@@ -120,86 +117,92 @@ internal class MoshiModuleTest {
     override fun configure() {
       install(MiskTestingServiceModule())
       install(
-        MoshiAdapterModule(object : Any() {
-          @ToJson fun pointToJson(point: Point) = listOf(point.x, point.y)
-          @FromJson fun jsonToPoint(pair: List<Int>) = Point(pair[0], pair[1])
-        })
+        MoshiAdapterModule(
+          object : Any() {
+            @ToJson fun pointToJson(point: Point) = listOf(point.x, point.y)
+
+            @FromJson fun jsonToPoint(pair: List<Int>) = Point(pair[0], pair[1])
+          }
+        )
       )
       install(
-        MoshiAdapterModule<Hat>(object : JsonAdapter<Hat>() {
-          override fun fromJson(reader: JsonReader): Hat? {
-            return Hat(reader.nextDouble())
-          }
+        MoshiAdapterModule<Hat>(
+          object : JsonAdapter<Hat>() {
+            override fun fromJson(reader: JsonReader): Hat? {
+              return Hat(reader.nextDouble())
+            }
 
-          override fun toJson(writer: JsonWriter, value: Hat?) {
-            writer.value(value!!.size)
+            override fun toJson(writer: JsonWriter, value: Hat?) {
+              writer.value(value!!.size)
+            }
           }
-        })
+        )
       )
       install(
-        MoshiAdapterModule<Dinosaur>(object : JsonAdapter<Dinosaur>() {
-          override fun fromJson(reader: JsonReader): Dinosaur? {
-            reader.beginArray()
-            val name = reader.nextString().split(" ").last()
-            reader.endArray()
-            return Dinosaur.Builder().name(name).build()
-          }
+        MoshiAdapterModule<Dinosaur>(
+          object : JsonAdapter<Dinosaur>() {
+            override fun fromJson(reader: JsonReader): Dinosaur? {
+              reader.beginArray()
+              val name = reader.nextString().split(" ").last()
+              reader.endArray()
+              return Dinosaur.Builder().name(name).build()
+            }
 
-          override fun toJson(writer: JsonWriter, value: Dinosaur?) {
-            writer.beginArray()
-            writer.value("Rawr! My name is ${value?.name}")
-            writer.endArray()
+            override fun toJson(writer: JsonWriter, value: Dinosaur?) {
+              writer.beginArray()
+              writer.value("Rawr! My name is ${value?.name}")
+              writer.endArray()
+            }
           }
-        })
+        )
       )
       install(
-        MoshiAdapterModule<Dog>(object : JsonAdapter<Dog>() {
-          override fun fromJson(reader: JsonReader): Dog? {
-            reader.beginArray()
-            val name = reader.nextString().split(",").first()
-            reader.endArray()
-            return Dog(name)
-          }
+        MoshiAdapterModule<Dog>(
+          object : JsonAdapter<Dog>() {
+            override fun fromJson(reader: JsonReader): Dog? {
+              reader.beginArray()
+              val name = reader.nextString().split(",").first()
+              reader.endArray()
+              return Dog(name)
+            }
 
-          override fun toJson(writer: JsonWriter, value: Dog?) {
-            writer.beginArray()
-            writer.value("${value?.name}, who is a dog")
-            writer.endArray()
-          }
-        }, addLast = true)
+            override fun toJson(writer: JsonWriter, value: Dog?) {
+              writer.beginArray()
+              writer.value("${value?.name}, who is a dog")
+              writer.endArray()
+            }
+          },
+          addLast = true,
+        )
       )
       install(
-        MoshiAdapterModule<GoldenRetriever>(object : JsonAdapter<GoldenRetriever>() {
-          override fun fromJson(reader: JsonReader): GoldenRetriever? {
-            reader.beginArray()
-            val name = reader.nextString().split(",").first()
-            reader.endArray()
-            return GoldenRetriever(name)
-          }
+        MoshiAdapterModule<GoldenRetriever>(
+          object : JsonAdapter<GoldenRetriever>() {
+            override fun fromJson(reader: JsonReader): GoldenRetriever? {
+              reader.beginArray()
+              val name = reader.nextString().split(",").first()
+              reader.endArray()
+              return GoldenRetriever(name)
+            }
 
-          override fun toJson(writer: JsonWriter, value: GoldenRetriever?) {
-            writer.beginArray()
-            writer.value("${value?.name}, who is SUCH a good boye!")
-            writer.endArray()
+            override fun toJson(writer: JsonWriter, value: GoldenRetriever?) {
+              writer.beginArray()
+              writer.value("${value?.name}, who is SUCH a good boye!")
+              writer.endArray()
+            }
           }
-        })
+        )
       )
     }
   }
 
-  data class Point(
-    val x: Int,
-    val y: Int
-  )
+  data class Point(val x: Int, val y: Int)
 
-  data class Movie(
-    val name: String,
-    val release_year: Int?,
-    val genre: String = "sci-fi"
-  )
+  data class Movie(val name: String, val release_year: Int?, val genre: String = "sci-fi")
 
   data class Hat(val size: Double)
-  
+
   open class Dog(val name: String)
-  class GoldenRetriever(name: String): Dog(name)
+
+  class GoldenRetriever(name: String) : Dog(name)
 }

@@ -15,13 +15,15 @@ data class ClientAction(
   val parameterTypes: List<KType>,
 
   /** The return type fo the action */
-  val returnType: KType
+  val returnType: KType,
 ) {
-  constructor(clientName: String, method: KFunction<*>) :
-    this(
-      "$clientName.${method.name}",
-      method,
-      method.parameters.drop(1).map { it.type }, // drop the 'this' parameter
-      method.returnType
-    )
+  constructor(
+    clientName: String,
+    method: KFunction<*>,
+  ) : this(
+    "$clientName.${method.name}",
+    method,
+    method.parameters.drop(1).map { it.type }, // drop the 'this' parameter
+    method.returnType,
+  )
 }

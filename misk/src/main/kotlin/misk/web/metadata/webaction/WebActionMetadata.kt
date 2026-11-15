@@ -1,5 +1,8 @@
 package misk.web.metadata.webaction
 
+import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
+import kotlin.reflect.KType
 import misk.ApplicationInterceptor
 import misk.web.DispatchMechanism
 import misk.web.MiskWebFormBuilder
@@ -10,9 +13,6 @@ import misk.web.actions.javaMethod
 import misk.web.formatter.ClassNameFormatter
 import misk.web.mediatype.MediaRange
 import okhttp3.MediaType
-import kotlin.reflect.KFunction
-import kotlin.reflect.KParameter
-import kotlin.reflect.KType
 
 /** Metadata front end model for Web Action Misk-Web Tab */
 data class WebActionMetadata(
@@ -36,7 +36,7 @@ data class WebActionMetadata(
   val networkInterceptors: List<String>,
   val httpMethod: String,
   val allowedServices: Set<String>,
-  val allowedCapabilities: Set<String>
+  val allowedCapabilities: Set<String>,
 ) {
   constructor(
     name: String,
@@ -56,7 +56,7 @@ data class WebActionMetadata(
     dispatchMechanism: DispatchMechanism,
     allowedServices: Set<String>,
     allowedCapabilities: Set<String>,
-    documentationProvider: ProtoDocumentationProvider?
+    documentationProvider: ProtoDocumentationProvider?,
   ) : this(
     name = name,
     function = function.toString(),
@@ -66,13 +66,14 @@ data class WebActionMetadata(
     requestMediaTypes = acceptedMediaRanges.map { it.toString() },
     responseMediaType = responseContentType.toString(),
     parameterTypes = parameterTypes.map { it.toString() },
-    parameters = parameters.map { parameter ->
-      ParameterMetaData(
-        name = parameter.name,
-        annotations = parameter.annotations.map { annotation -> annotation.toString() },
-        type = parameter.type.toString()
-      )
-    },
+    parameters =
+      parameters.map { parameter ->
+        ParameterMetaData(
+          name = parameter.name,
+          annotations = parameter.annotations.map { annotation -> annotation.toString() },
+          type = parameter.type.toString(),
+        )
+      },
     requestType = requestType.toString(),
     returnType = returnType.toString(),
     responseType = responseType.toString(),
@@ -80,18 +81,12 @@ data class WebActionMetadata(
     returnTypes = MiskWebFormBuilder(documentationProvider).calculateTypes(returnType),
     responseTypes = MiskWebFormBuilder(documentationProvider).calculateTypes(responseType),
     pathPattern = pathPattern.toString(),
-    applicationInterceptors = applicationInterceptors.map {
-      ClassNameFormatter.format(it::class)
-    },
+    applicationInterceptors = applicationInterceptors.map { ClassNameFormatter.format(it::class) },
     networkInterceptors = networkInterceptors.map { ClassNameFormatter.format(it::class) },
     httpMethod = dispatchMechanism.method,
     allowedServices = allowedServices,
-    allowedCapabilities = allowedCapabilities
+    allowedCapabilities = allowedCapabilities,
   )
 
-  data class ParameterMetaData(
-    val name: String?,
-    val annotations: List<String>,
-    val type: String
-  )
+  data class ParameterMetaData(val name: String?, val annotations: List<String>, val type: String)
 }

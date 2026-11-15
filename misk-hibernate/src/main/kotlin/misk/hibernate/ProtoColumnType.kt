@@ -2,14 +2,14 @@ package misk.hibernate
 
 import com.squareup.wire.Message
 import com.squareup.wire.ProtoAdapter
-import org.hibernate.engine.spi.SharedSessionContractImplementor
-import org.hibernate.usertype.ParameterizedType
-import org.hibernate.usertype.UserType
 import java.io.Serializable
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
 import java.util.Properties
+import org.hibernate.engine.spi.SharedSessionContractImplementor
+import org.hibernate.usertype.ParameterizedType
+import org.hibernate.usertype.UserType
 
 internal class ProtoColumnType<T : Message<T, *>> : UserType, ParameterizedType {
   private lateinit var protoAdapter: ProtoAdapter<T>
@@ -36,12 +36,7 @@ internal class ProtoColumnType<T : Message<T, *>> : UserType, ParameterizedType 
   override fun disassemble(value: Any?) = value as Serializable
 
   @Suppress("UNCHECKED_CAST")
-  override fun nullSafeSet(
-    st: PreparedStatement,
-    value: Any?,
-    index: Int,
-    session: SharedSessionContractImplementor?
-  ) {
+  override fun nullSafeSet(st: PreparedStatement, value: Any?, index: Int, session: SharedSessionContractImplementor?) {
     if (value == null) {
       st.setNull(index, Types.BLOB)
     } else {
@@ -53,7 +48,7 @@ internal class ProtoColumnType<T : Message<T, *>> : UserType, ParameterizedType 
     rs: ResultSet?,
     names: Array<out String>,
     session: SharedSessionContractImplementor?,
-    owner: Any?
+    owner: Any?,
   ): Any? {
     val result = rs?.getBytes(names[0])
     return if (result != null) protoAdapter.decode(result) else null

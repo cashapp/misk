@@ -1,20 +1,18 @@
 package misk.web.interceptors
 
-import misk.sampling.RateLimiter
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
+import misk.sampling.RateLimiter
 
 /**
- * Holds rate limiters for logging success and error responses. There is a rate limiter for every
- * action and service that calls it, for both success and error. The rate limiters are created
- * according to the value set in [LogRequestResponse] annotation.
+ * Holds rate limiters for logging success and error responses. There is a rate limiter for every action and service
+ * that calls it, for both success and error. The rate limiters are created according to the value set in
+ * [LogRequestResponse] annotation.
  */
 @Singleton
-class LogRateLimiter @Inject constructor(
-  private val rateLimiterFactory: RateLimiter.Factory
-) {
+class LogRateLimiter @Inject constructor(private val rateLimiterFactory: RateLimiter.Factory) {
   private val rateLimiters = ConcurrentHashMap<LogBucketId, RateLimiter>()
 
   fun tryAcquire(bucketId: LogBucketId, ratePerSecond: Long): Boolean {
@@ -27,10 +25,10 @@ class LogRateLimiter @Inject constructor(
   }
 
   data class LogBucketId(
-    /** ActionClass from which we can grab the [LogRequestResponse] **/
+    /** ActionClass from which we can grab the [LogRequestResponse] * */
     val actionClass: String,
-    /** If the response code is error, we look up the errorRateLimiter **/
-    val isError: Boolean
+    /** If the response code is error, we look up the errorRateLimiter * */
+    val isError: Boolean,
   ) : Comparable<LogBucketId> {
     override fun toString() = "$actionClass/$isError"
 

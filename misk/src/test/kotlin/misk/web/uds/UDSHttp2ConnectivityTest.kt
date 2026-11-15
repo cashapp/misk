@@ -2,10 +2,15 @@ package misk.web.uds
 
 import com.google.inject.Guice
 import com.google.inject.Provides
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.io.File
+import java.util.UUID
 import misk.MiskTestingServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientsConfig
+import misk.client.UnixDomainSocketFactory
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.testing.MiskTest
@@ -24,19 +29,12 @@ import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import misk.client.UnixDomainSocketFactory
-import java.io.File
-import java.util.UUID
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
 @MiskTest(startService = true)
 class UDSHttp2ConnectivityTest {
-  @MiskTestModule
-  val module = TestModule()
+  @MiskTestModule val module = TestModule()
 
-  @Inject
-  private lateinit var jetty: JettyService
+  @Inject private lateinit var jetty: JettyService
 
   private lateinit var client: OkHttpClient
 
@@ -45,19 +43,18 @@ class UDSHttp2ConnectivityTest {
   @BeforeEach
   fun createClient() {
     val clientInjector = Guice.createInjector(ClientModule(jetty))
-    client = clientInjector.getInstance<OkHttpClient>().newBuilder()
-      .socketFactory(UnixDomainSocketFactory(File(socketName)))
-      .protocols(listOf(Protocol.HTTP_1_1))
-      .build()
+    client =
+      clientInjector
+        .getInstance<OkHttpClient>()
+        .newBuilder()
+        .socketFactory(UnixDomainSocketFactory(File(socketName)))
+        .protocols(listOf(Protocol.HTTP_1_1))
+        .build()
   }
 
   @Test
   fun happyPath() {
-    val call = client.newCall(
-      Request.Builder()
-        .url("http://publicobject.com/hello")
-        .build()
-    )
+    val call = client.newCall(Request.Builder().url("http://publicobject.com/hello").build())
     val response = call.execute()
     response.use {
       assertThat(response.protocol).isEqualTo(Protocol.HTTP_1_1)
@@ -66,20 +63,17 @@ class UDSHttp2ConnectivityTest {
   }
 
   class HelloAction @Inject constructor() : WebAction {
-    @Get("/hello")
-    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun sayHello() = "hello"
+    @Get("/hello") @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8) fun sayHello() = "hello"
   }
 
   inner class TestModule : KAbstractModule() {
     override fun configure() {
       install(
         WebServerTestingModule(
-          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
-            unix_domain_socket = WebUnixDomainSocketConfig(
-              path = socketName
+          webConfig =
+            WebServerTestingModule.TESTING_WEB_CONFIG.copy(
+              unix_domain_socket = WebUnixDomainSocketConfig(path = socketName)
             )
-          )
         )
       )
       install(MiskTestingServiceModule())
@@ -96,11 +90,7 @@ class UDSHttp2ConnectivityTest {
     @Provides
     @Singleton
     fun provideHttpClientsConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
-        endpoints = mapOf(
-          "default" to HttpClientEndpointConfig("http://example.com/")
-        )
-      )
+      return HttpClientsConfig(endpoints = mapOf("default" to HttpClientEndpointConfig("http://example.com/")))
     }
   }
 }

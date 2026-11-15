@@ -1,6 +1,5 @@
 package misk.logging
 
-import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
 import org.slf4j.LoggerFactory
 
@@ -44,5 +43,4 @@ class DynamicLogLevelController {
       logger.info("Applied dynamic log levels: ${newLevels.entries.joinToString()}")
     }
   }
-
 }
