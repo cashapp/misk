@@ -114,6 +114,8 @@ public final class misk/logging/SampledLogger : mu/KLogger {
 public final class misk/logging/SmartTagsThreadLocalHandler {
 	public static final field INSTANCE Lmisk/logging/SmartTagsThreadLocalHandler;
 	public final fun peekThreadLocalSmartTags ()Ljava/util/Set;
+	public final fun peekThreadLocalSmartTags (Ljava/lang/Throwable;)Ljava/util/Set;
 	public final fun popThreadLocalSmartTags ()Ljava/util/Set;
+	public final fun popThreadLocalSmartTags (Ljava/lang/Throwable;)Ljava/util/Set;
 }
 

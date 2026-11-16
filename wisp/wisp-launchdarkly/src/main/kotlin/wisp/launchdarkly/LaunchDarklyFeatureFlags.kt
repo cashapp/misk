@@ -65,6 +65,7 @@ constructor(
         launchDarklyClientMetrics.onInitFailure()
         val errorMessage = "LaunchDarkly did not initialize in 30 seconds"
         logger.error { errorMessage }
+        ldClient.value.close()
         throw Exception(errorMessage)
       }
     }

@@ -75,23 +75,24 @@ internal class StatefulRedisConnectionProviderModule<K : Any, V : Any, T : State
       .toProvider {
         @Suppress("UNCHECKED_CAST")
         PooledStatefulRedisConnectionProvider(
-          AsyncConnectionPoolSupport.createBoundedObjectPoolAsync(
-              object : Supplier<CompletionStage<StatefulRedisConnection<K, V>>> {
-                val count = AtomicInteger(0)
+          {
+            AsyncConnectionPoolSupport.createBoundedObjectPoolAsync(
+                object : Supplier<CompletionStage<StatefulRedisConnection<K, V>>> {
+                  val count = AtomicInteger(0)
 
-                override fun get(): ConnectionFuture<StatefulRedisConnection<K, V>> {
-                  val suffix = count.incrementAndGet().toString().padStart(5, '0')
-                  return redisClientProvider.get().connectAsync(codec, redisUri).maybeSetClientName(suffix)
-                }
-              },
-              connectionPoolConfig.toBoundedPoolConfig(),
-              false, // this is handled directly in the connection provider
-            )
-            .thenApply {
-              clientMetricsProvider.get().registerConnectionPoolMetrics(clientName, replicationGroupId, it)
-              it
-            }
-            .toCompletableFuture(),
+                  override fun get(): ConnectionFuture<StatefulRedisConnection<K, V>> {
+                    val suffix = count.incrementAndGet().toString().padStart(5, '0')
+                    return redisClientProvider.get().connectAsync(codec, redisUri).maybeSetClientName(suffix)
+                  }
+                },
+                connectionPoolConfig.toBoundedPoolConfig(),
+                false, // this is handled directly in the connection provider
+              )
+              .thenApply {
+                clientMetricsProvider.get().registerConnectionPoolMetrics(clientName, replicationGroupId, it)
+                it
+              }
+          },
           replicationGroupId,
         )
           as T

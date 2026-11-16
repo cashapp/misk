@@ -5,6 +5,7 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaType
+import misk.exceptions.BadRequestException
 import misk.web.ResponseBody
 import misk.web.marshal.Marshaller.Companion.actualResponseType
 import misk.web.mediatype.MediaTypes
@@ -42,7 +43,13 @@ class ProtobufMarshaller<T>(val adapter: ProtoAdapter<T>) : Marshaller<T> {
 }
 
 class ProtobufUnmarshaller(val adapter: ProtoAdapter<Any>) : Unmarshaller {
-  override fun unmarshal(requestHeaders: Headers, source: BufferedSource) = adapter.decode(source)
+  override fun unmarshal(requestHeaders: Headers, source: BufferedSource): Any =
+    try {
+      adapter.decode(source)
+    } catch (e: IllegalStateException) {
+      // Wire throws IllegalStateException when a required field is missing.
+      throw BadRequestException("Can't parse request", e)
+    }
 
   @Singleton
   class Factory @Inject constructor() : Unmarshaller.Factory {

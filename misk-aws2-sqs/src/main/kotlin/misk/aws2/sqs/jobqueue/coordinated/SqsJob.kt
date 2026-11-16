@@ -76,28 +76,25 @@ internal class SqsJob(
         maxReceiveCount = maxReceiveCount,
       )
 
+    changeVisibility(visibilityTime)
+    metrics.visibilityTime.labels(queueName.value, queueName.value).set(visibilityTime.toDouble())
+  }
+
+  internal fun changeVisibility(seconds: Int) {
     queue.call { client ->
       client.changeMessageVisibility(
         ChangeMessageVisibilityRequest.builder()
           .queueUrl(queue.url)
           .receiptHandle(message.receiptHandle())
-          .visibilityTimeout(visibilityTime)
+          .visibilityTimeout(seconds)
           .build()
       )
     }
-    metrics.visibilityTime.labels(queueName.value, queueName.value).set(visibilityTime.toDouble())
   }
 
   private fun deleteMessage(queue: ResolvedQueue, message: Message) {
-    val request =
-      DeleteMessageRequest.builder()
-        .queueUrl(queue.url)
-        .receiptHandle(message.receiptHandle())
-        .build()
-    val (deleteDuration) =
-      timed {
-        queue.call { it.deleteMessage(request) }
-      }
+    val request = DeleteMessageRequest.builder().queueUrl(queue.url).receiptHandle(message.receiptHandle()).build()
+    val (deleteDuration) = timed { queue.call { it.deleteMessage(request) } }
     metrics.sqsDeleteTime.record(deleteDuration.toMillis().toDouble(), queueName.value, queueName.value)
   }
 

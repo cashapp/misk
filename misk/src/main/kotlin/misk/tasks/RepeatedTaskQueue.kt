@@ -114,6 +114,14 @@ internal constructor(
   }
 
   /**
+   * The task executor belongs to this queue, so release its threads once the dispatch loop has stopped. Tasks already
+   * running finish; nothing new is submitted after [run] returns.
+   */
+  override fun shutDown() {
+    taskExecutor.shutdown()
+  }
+
+  /**
    * Schedules a task to run repeatedly after an initial delay. The task itself determines the next execution time.
    * Provide an optional retryDelayOnFailure parameter to determine when the job should be retried in the case of an
    * unhandled exception by the client

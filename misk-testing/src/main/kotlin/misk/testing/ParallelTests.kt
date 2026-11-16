@@ -1,11 +1,20 @@
 package misk.testing
 
+/**
+ * Identifies the current Gradle test worker, or returns null when running outside Gradle.
+ *
+ * The ID is unique within a Gradle invocation, including across different test tasks and replacement workers. Use it to
+ * namespace shared test resources. It is not bounded by `maxParallelForks` and must not be used as a Redis database
+ * number or another index into a fixed set of resources. Separate Gradle invocations may reuse the same worker IDs.
+ */
+fun gradleTestWorkerId(): String? = System.getProperty("org.gradle.test.worker")
+
 /** Provides helper methods for supporting tests running in parallel. */
 internal object ParallelTests {
 
   /**
    * Can be used for determining if tests are running in parallel (with Gradle's `maxParallelForks`), and returns a
-   * unique numeric partition ID for the current test process.
+   * bounded numeric partition ID for the current test process.
    *
    * This assumes that the environment variable `MAX_TEST_PARALLEL_FORKS` is set to the number of `maxParallelForks`.
    */
@@ -31,9 +40,8 @@ internal sealed interface PartitionedTest {
  * Applies the `update` lambda to the given `T`, if the tests are running in parallel (with Gradle's
  * `maxParallelForks`).
  *
- * This can be used for updating configurations for the purpose of providing isolation between tests running across
- * different parallel processes, such as appending the partition ID to the database name, so that it's unique for each
- * process.
+ * The partition index is bounded by `MAX_TEST_PARALLEL_FORKS`. Different test tasks or replacement workers can map to
+ * the same index. Use [gradleTestWorkerId] when naming shared resources that require a unique ID within the build.
  *
  * This assumes that the environment variable `MAX_TEST_PARALLEL_FORKS` is set to the number of `maxParallelForks`.
  */

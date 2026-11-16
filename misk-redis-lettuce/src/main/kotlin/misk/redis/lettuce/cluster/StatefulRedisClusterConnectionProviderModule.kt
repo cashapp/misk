@@ -15,6 +15,7 @@ import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.inject.toKey
 import misk.redis.lettuce.RedisConnectionPoolConfig
+import misk.redis.lettuce.RetryingLazyFuture
 import misk.redis.lettuce.connectionProviderTypeLiteral
 import misk.redis.lettuce.metrics.RedisClientMetrics
 import misk.redis.lettuce.toBoundedPoolConfig
@@ -65,27 +66,34 @@ internal class StatefulRedisClusterConnectionProviderModule<
       .toProvider {
         @Suppress("UNCHECKED_CAST")
         PooledStatefulRedisClusterConnectionProvider(
-          AsyncConnectionPoolSupport.createBoundedObjectPoolAsync(
-              object : Supplier<CompletionStage<StatefulRedisClusterConnection<K, V>>> {
-                val count = AtomicInteger(0)
+          {
+            AsyncConnectionPoolSupport.createBoundedObjectPoolAsync(
+                object : Supplier<CompletionStage<StatefulRedisClusterConnection<K, V>>> {
+                  val count = AtomicInteger(0)
 
-                override fun get(): CompletableFuture<StatefulRedisClusterConnection<K, V>> {
-                  val suffix = count.incrementAndGet().toString().padStart(5, '0')
-                  return try {
-                    redisClientProvider.get().apply { partitions }.connectAsync(codec).maybeSetClientName(suffix)
-                  } catch (e: Exception) {
-                    CompletableFuture.failedFuture(e)
+                  // connectAsync needs the initial topology. Load it once, asynchronously: RedisClusterClient
+                  // .getPartitions() would block the thread acquiring a connection while the cluster is unreachable.
+                  // Periodic and adaptive topology refresh keep it current after that.
+                  val initialTopology = RetryingLazyFuture { redisClientProvider.get().refreshPartitionsAsync() }
+
+                  override fun get(): CompletableFuture<StatefulRedisClusterConnection<K, V>> {
+                    val suffix = count.incrementAndGet().toString().padStart(5, '0')
+                    return try {
+                      val client = redisClientProvider.get()
+                      initialTopology.get().thenCompose { client.connectAsync(codec) }.maybeSetClientName(suffix)
+                    } catch (e: Exception) {
+                      CompletableFuture.failedFuture(e)
+                    }
                   }
-                }
-              },
-              connectionPoolConfig.toBoundedPoolConfig(),
-              false, // this is handled directly in the connection provider
-            )
-            .thenApply {
-              clientMetricsProvider.get().registerConnectionPoolMetrics(clientName, replicationGroupId, it)
-              it
-            }
-            .toCompletableFuture(),
+                },
+                connectionPoolConfig.toBoundedPoolConfig(),
+                false, // this is handled directly in the connection provider
+              )
+              .thenApply {
+                clientMetricsProvider.get().registerConnectionPoolMetrics(clientName, replicationGroupId, it)
+                it
+              }
+          },
           replicationGroupId,
         )
           as T

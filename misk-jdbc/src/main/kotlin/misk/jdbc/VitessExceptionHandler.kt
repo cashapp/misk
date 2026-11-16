@@ -13,7 +13,8 @@ internal class VitessExceptionHandler(registry: CollectorRegistry? = null) : SQL
   private val errorCounter =
     registry?.let { registry ->
       Counter.build("hikaricp_misk_vitess_exception", "Misk Vitess Exception that were recorded for the hikari pool")
-        .labelNames("errorCode", "sqlState", "message", "decision")
+        // No message label: messages carry row values (e.g. the duplicated key), so each one would be a new series.
+        .labelNames("errorCode", "sqlState", "decision")
         .create()
         .registerOrReplace(registry)
     }
@@ -38,6 +39,8 @@ internal class VitessExceptionHandler(registry: CollectorRegistry? = null) : SQL
       KnownErrors(sqlState = "42000", errorCode = 1064), // Syntax error
       KnownErrors(sqlState = "22001", errorCode = 1406), // Data too long
       KnownErrors(sqlState = "21S01", errorCode = 1136), // Column count mismatch
+      KnownErrors(sqlState = "40001", errorCode = 1213), // Deadlock: the transaction failed, not the connection
+      KnownErrors(sqlState = "HY000", errorCode = 1205), // Lock wait timeout: the statement failed, not the connection
     )
 
   // TODO(young): These are a bit of a band-aid, ideally we catch these with their associated error codes, but I'm
@@ -85,13 +88,11 @@ internal class VitessExceptionHandler(registry: CollectorRegistry? = null) : SQL
           "message=${sqlException.message}, " +
           "adjudicate=$result"
       if (result == SQLExceptionOverride.Override.DO_NOT_EVICT) {
-        logger.warn(message)
+        logger.debug(message)
       } else {
         logger.error(message)
       }
-      errorCounter
-        ?.labels(sqlException.errorCode.toString(), sqlException.sqlState, sqlException.message, result.toString())
-        ?.inc()
+      errorCounter?.labels(sqlException.errorCode.toString(), sqlException.sqlState ?: "", result.toString())?.inc()
     }
   }
 
@@ -107,7 +108,7 @@ internal class VitessExceptionHandler(registry: CollectorRegistry? = null) : SQL
       return if (existingCounter == null) {
         registry.register(this)
         // make sure we have some baseline labels
-        this.labels("", "", "", "CONTINUE_EVICT")
+        this.labels("", "", "CONTINUE_EVICT")
         this
       } else {
         existingCounter

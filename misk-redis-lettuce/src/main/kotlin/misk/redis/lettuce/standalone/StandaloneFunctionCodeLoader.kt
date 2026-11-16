@@ -1,19 +1,12 @@
 package misk.redis.lettuce.standalone
 
-import com.google.common.io.Resources.getResource
-import com.google.common.io.Resources.toString as readAsString
 import com.google.inject.Provider
 import io.lettuce.core.RedisClient
 import io.lettuce.core.RedisURI
 import io.lettuce.core.codec.StringCodec
-import java.time.Duration
 import java.util.concurrent.CompletionStage
-import java.util.concurrent.TimeUnit
-import misk.backoff.ExponentialBackoff
-import misk.backoff.RetryConfig
-import misk.backoff.retryableFuture
-import misk.logging.getLogger
 import misk.redis.lettuce.FunctionCodeLoader
+import misk.redis.lettuce.RetryingFunctionCodeLoader
 import misk.redis.lettuce.thenComposeUsing
 
 /**
@@ -33,38 +26,12 @@ import misk.redis.lettuce.thenComposeUsing
 internal class StandaloneFunctionCodeLoader(
   private val clientProvider: Provider<RedisClient>,
   private val uri: RedisURI,
-  private val codeResourcePath: String,
+  codeResourcePath: String,
   private val replace: Boolean = true,
-) : FunctionCodeLoader {
+) : RetryingFunctionCodeLoader(codeResourcePath) {
+  override val destination
+    get() = uri.toString()
 
-  override fun load(): CompletionStage<Void> {
-    val code = readAsString(getResource(codeResourcePath), Charsets.UTF_8)
-    return retryableFuture(retry) {
-        clientProvider
-          .get()
-          .connectAsync(StringCodec.UTF8, uri)
-          .thenComposeUsing {
-            it.async().functionLoad(code, replace).thenAccept { library ->
-              logger.info { "Loaded Redis function code library '$library' from '$codeResourcePath'" }
-            }
-          }
-          .toCompletableFuture()
-      }
-      .orTimeout(30, TimeUnit.SECONDS)
-      .whenComplete { _, e ->
-        if (e != null) {
-          logger.error(e) { "Failed loading Redis function code library in $codeResourcePath to $uri" }
-        }
-      }
-  }
-
-  companion object {
-    private val logger = getLogger<FunctionCodeLoader>()
-    private val retry =
-      RetryConfig.Builder(
-          upTo = Int.MAX_VALUE,
-          withBackoff = ExponentialBackoff(baseDelay = { Duration.ofMillis(10) }, maxDelay = { Duration.ofSeconds(5) }),
-        )
-        .build()
-  }
+  override fun loadOnce(code: String): CompletionStage<String> =
+    clientProvider.get().connectAsync(StringCodec.UTF8, uri).thenComposeUsing { it.async().functionLoad(code, replace) }
 }

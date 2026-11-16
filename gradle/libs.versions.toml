@@ -16,10 +16,10 @@ hoplite = "2.7.5"
 jackson = "3.2.1"
 jooq = "3.19.29"
 junit = "5.14.2"
-kotest = "6.0.7"
+kotest = "6.2.6"
 kotlin = "2.3.10"
 kotlinBinaryCompatibilityPlugin = "0.18.1"
-ktor = "3.3.0"
+ktor = "3.6.1"
 mavenPublish = "0.37.0"
 mcp = "0.13.0"
 micrometer = "1.17.1"
@@ -31,7 +31,7 @@ protobuf = "3.25.8"
 retrofit = "3.0.0"
 sqldelight = "2.1.0"
 tempest = "2026.09.22.032723-14c3469"
-wire = "7.0.1"
+wire = "7.2.0"
 
 [libraries]
 apacheCommonsIo = { module = "commons-io:commons-io", version = "2.20.0" }
@@ -91,7 +91,7 @@ gcpLogback = { module = "com.google.cloud:google-cloud-logging-logback", version
 gcpLogging = { module = "com.google.cloud:google-cloud-logging", version = "3.23.4" }
 gcpSpanner = { module = "com.google.cloud:google-cloud-spanner", version = "6.100.0" }
 googleApiClient = { module = "com.google.api-client:google-api-client", version = "2.8.1" }
-googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20250815-2.0.0" }
+googleApiServicesStorage = { module = "com.google.apis:google-api-services-storage", version = "v1-rev20251118-2.0.0" }
 googleAuthLibraryCredentials = { module = "com.google.auth:google-auth-library-credentials", version.ref = "googleAuth" }
 googleAuthLibraryOauth2Http = { module = "com.google.auth:google-auth-library-oauth2-http", version.ref = "googleAuth" }
 googleCloudCoreHttp = { module = "com.google.cloud:google-cloud-core-http", version = "2.60.2" }
@@ -223,7 +223,7 @@ openTracingJdbc = { module = "io.opentracing.contrib:opentracing-jdbc", version 
 openTracingMock = { module = "io.opentracing:opentracing-mock", version = "0.33.0" }
 openTracingOkHttp = { module = "io.opentracing.contrib:opentracing-okhttp3", version = "3.0.0" }
 openTracingUtil = { module = "io.opentracing:opentracing-util", version = "0.33.0" }
-postgresql = { module = "org.postgresql:postgresql", version = "42.7.11" }
+postgresql = { module = "org.postgresql:postgresql", version = "42.7.14" }
 prometheusClient = { module = "io.prometheus:simpleclient", version.ref = "prometheus" }
 prometheusClientBom = { module = "io.prometheus:simpleclient_bom", version.ref = "prometheus" }
 prometheusClientCommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus" }
@@ -269,7 +269,7 @@ wireSchema = { module = "com.squareup.wire:wire-schema", version.ref = "wire" }
 binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "kotlinBinaryCompatibilityPlugin" }
 dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysisPlugin" }
 detekt = { id = "dev.detekt", version.ref = "detekt" }
-dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
+dokka = { id = "org.jetbrains.dokka", version = "2.3.0" }
 jooq = { id = "nu.studer.jooq", version = "9.0" }
 kotlinAllOpen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
 kotlinJpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
@@ -277,7 +277,7 @@ kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
 mavenPublishBase = { id = "com.vanniktech.maven.publish.base", version.ref = "mavenPublish" }
-protobuf = { id = "com.google.protobuf", version = "0.9.5" }
+protobuf = { id = "com.google.protobuf", version = "0.10.0" }
 # Use a strict version here so we don't get into an infinite loop of version updates. This version can be bumped
 # periodically whenever there are nontrivial changes to the schema-migrator plugin behaviour. Having this here is
 # not great but it allows us to use the schema-migrator gradle plugin (which is published from this codebase)
