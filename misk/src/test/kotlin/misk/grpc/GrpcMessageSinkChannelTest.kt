@@ -31,7 +31,7 @@ class GrpcMessageSinkChannelTest {
   @Test
   fun `test bridge from Channel to GrpcMessageSink HelloRequest`() = runTest {
     val channel = Channel<HelloRequest>()
-    launch { GrpcMessageSinkChannel(channel, writer).bridgeToSink() }
+    launch { GrpcMessageSinkChannel(channel, writer, coroutineContext).bridgeToSink() }
 
     channel.send(HelloRequest("localhost"))
     eventually(100.milliseconds) {
