@@ -3,6 +3,7 @@ package misk.web.extractors
 import com.squareup.wire.MessageSink
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.typeOf
 import kotlinx.coroutines.channels.BufferOverflow
@@ -18,6 +19,7 @@ import misk.web.Grpc
 import misk.web.PathPattern
 import misk.web.ResponseSink
 import misk.web.ResponseSinkChannel
+import misk.web.StreamingResponseWriteDispatcher
 import misk.web.actions.WebSocketListener
 import misk.web.interceptors.ResponseBodyMarshallerFactory
 import misk.web.marshal.Marshaller
@@ -28,6 +30,7 @@ internal class ResponseBodyFeatureBinding(
   private val responseBodyMarshaller: Marshaller<Any>,
   private val streamingResponseParameter: Int? = null,
   private val isSuspend: Boolean,
+  private val responseSinkChannelContext: CoroutineContext,
 ) : FeatureBinding {
   override fun beforeCall(subject: Subject) {
     if (streamingResponseParameter == null) return
@@ -40,6 +43,7 @@ internal class ResponseBodyFeatureBinding(
         ResponseSinkChannel(
           channel = Channel(capacity = RENDEZVOUS, onBufferOverflow = BufferOverflow.SUSPEND),
           sink = eventSink,
+          coroutineContext = responseSinkChannelContext,
         )
       } else {
         eventSink
@@ -70,8 +74,12 @@ internal class ResponseBodyFeatureBinding(
   }
 
   @Singleton
-  class Factory @Inject internal constructor(private val responseBodyMarshallerFactory: ResponseBodyMarshallerFactory) :
-    FeatureBinding.Factory {
+  class Factory
+  @Inject
+  internal constructor(
+    private val responseBodyMarshallerFactory: ResponseBodyMarshallerFactory,
+    private val streamingResponseWriteDispatcher: StreamingResponseWriteDispatcher,
+  ) : FeatureBinding.Factory {
     override fun create(
       action: Action,
       pathPattern: PathPattern,
@@ -117,6 +125,7 @@ internal class ResponseBodyFeatureBinding(
           responseBodyMarshaller = responseBodyMarshaller,
           streamingResponseParameter = streamingResponseParameterIndex,
           isSuspend = action.function.isSuspend,
+          responseSinkChannelContext = streamingResponseWriteDispatcher.dispatcher,
         )
       } else {
         val responseBodyMarshaller = responseBodyMarshallerFactory.create(action)
@@ -125,6 +134,7 @@ internal class ResponseBodyFeatureBinding(
           responseBodyMarshaller = responseBodyMarshaller,
           streamingResponseParameter = null,
           isSuspend = action.function.isSuspend,
+          responseSinkChannelContext = streamingResponseWriteDispatcher.dispatcher,
         )
       }
     }
