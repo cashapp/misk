@@ -5,4 +5,4 @@ data_source:
   password: ""
   migrations_resource: classpath:/misk/jdbc/test_transacter-mysql-migrations
   jdbc_url_query_parameters:
-    sessionVariables: "max_execution_time=5400000,sql_mode='STRICT_TRANS_TABLES'"
+    sessionVariables: "max_execution_time=5400000,sql_mode='STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO'"

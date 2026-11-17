@@ -283,17 +283,15 @@ class DataSourceConfigTest {
 
   @Test
   fun configuredSessionVariablesAreKeptWithUtc() {
-    val parameters = mapOf("sessionVariables" to "max_execution_time=5400000")
-    assertThat(
-        DataSourceConfig(DataSourceType.MYSQL, jdbc_url_query_parameters = parameters)
-          .getDataSourceProperties()["sessionVariables"]
-      )
-      .isEqualTo("time_zone='+00:00',max_execution_time=5400000")
-    assertThat(
-        DataSourceConfig(DataSourceType.TIDB, jdbc_url_query_parameters = parameters)
-          .getDataSourceProperties()["sessionVariables"]
-      )
-      .isEqualTo("max_execution_time=5400000")
+    val parameters = mapOf("sessionVariables" to "max_execution_time=5400000,sql_mode=%27ANSI_QUOTES%27")
+    for (type in listOf(DataSourceType.MYSQL, DataSourceType.VITESS_MYSQL)) {
+      assertThat(
+          DataSourceConfig(type, jdbc_url_query_parameters = parameters).getDataSourceProperties()["sessionVariables"]
+        )
+        .isEqualTo("time_zone='+00:00',max_execution_time=5400000,sql_mode='ANSI_QUOTES'")
+    }
+    assertThat(DataSourceConfig(DataSourceType.TIDB, jdbc_url_query_parameters = parameters).getDataSourceProperties())
+      .doesNotContainKey("sessionVariables")
   }
 
   @Test

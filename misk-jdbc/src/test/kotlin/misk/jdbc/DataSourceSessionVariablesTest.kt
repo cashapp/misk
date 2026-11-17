@@ -26,7 +26,7 @@ class DataSourceSessionVariablesTest {
   fun `connections keep session variables from jdbc_url_query_parameters`() {
     transacter.transactionWithSession { (connection) ->
       assertThat(sessionVariable(connection, "max_execution_time")).isEqualTo("5400000")
-      assertThat(sessionVariable(connection, "sql_mode")).isEqualTo("STRICT_TRANS_TABLES")
+      assertThat(sessionVariable(connection, "sql_mode")).isEqualTo("STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO")
     }
   }
 
