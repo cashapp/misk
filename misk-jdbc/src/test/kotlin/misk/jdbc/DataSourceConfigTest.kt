@@ -282,6 +282,21 @@ class DataSourceConfigTest {
   }
 
   @Test
+  fun configuredSessionVariablesAreKeptWithUtc() {
+    val parameters = mapOf("sessionVariables" to "max_execution_time=5400000")
+    assertThat(
+        DataSourceConfig(DataSourceType.MYSQL, jdbc_url_query_parameters = parameters)
+          .getDataSourceProperties()["sessionVariables"]
+      )
+      .isEqualTo("time_zone='+00:00',max_execution_time=5400000")
+    assertThat(
+        DataSourceConfig(DataSourceType.TIDB, jdbc_url_query_parameters = parameters)
+          .getDataSourceProperties()["sessionVariables"]
+      )
+      .isEqualTo("max_execution_time=5400000")
+  }
+
+  @Test
   fun externallyManagedMigrationsFormatIsValid() {
     // Should not throw any exception
     val config = DataSourceConfig(DataSourceType.MYSQL, migrations_format = MigrationsFormat.EXTERNALLY_MANAGED)

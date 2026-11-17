@@ -189,13 +189,23 @@ constructor(
     properties["elideSetAutoCommits"] = "true"
     properties["maintainTimeStats"] = "false"
     properties["characterEncoding"] = "UTF-8"
-    if (type == DataSourceType.MYSQL || type == DataSourceType.VITESS_MYSQL) {
-      // We set sessions to run in +0:00, aka UTC but without the dependency of the time_zone tables being installed.
-      // All our servers are configured to UTC, so this has no behavior change. Not specifying here and relying on
-      // the system default can have a huge performance penalty on large DB instances.
-      // See: https://www.facebook.com/MySQLatFacebook/posts/10152018528871696:0
-      // This is safe from Vitess 17+
-      properties["sessionVariables"] = "time_zone='+00:00'"
+    val sessionVariables = buildList {
+      if (type == DataSourceType.MYSQL || type == DataSourceType.VITESS_MYSQL) {
+        // We set sessions to run in +0:00, aka UTC but without the dependency of the time_zone tables being installed.
+        // All our servers are configured to UTC, so this has no behavior change. Not specifying here and relying on
+        // the system default can have a huge performance penalty on large DB instances.
+        // See: https://www.facebook.com/MySQLatFacebook/posts/10152018528871696:0
+        // This is safe from Vitess 17+
+        add("time_zone='+00:00'")
+      }
+      // Connector/J lets this property override the URL parameter, so include the configured session variables too.
+      // They come last so that they can still set time_zone.
+      jdbc_url_query_parameters.entries
+        .firstOrNull { it.key.equals("sessionVariables", ignoreCase = true) }
+        ?.let { add(it.value.toString()) }
+    }
+    if (sessionVariables.isNotEmpty()) {
+      properties["sessionVariables"] = sessionVariables.joinToString(",")
     }
     return properties
   }
