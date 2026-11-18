@@ -43,8 +43,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
           if (notification.cause == RemovalCause.EXPLICIT) return@removalListener
           val key = notification.key ?: return@removalListener
           val injector = notification.value ?: return@removalListener
-          runningServices.remove(key)
-          stopQuietly(listOf(injector))
+          if (runningServices.remove(key)) stopQuietly(listOf(injector))
         }
       if (maxLruSize != null) builder.maximumSize(maxLruSize.toLong())
       builder.build()
@@ -53,14 +52,18 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     // One hook stops every running reused injector at JVM exit. A hook per injector would keep an
     // evicted injector reachable until the JVM exits.
     init {
-      Runtime.getRuntime().addShutdownHook(thread(start = false) { stopRunningReusedInjectors() })
+      if (System.getenv("MISK_TEST_REUSE_INJECTOR")?.toBoolean() == true) {
+        Runtime.getRuntime().addShutdownHook(thread(start = false) { stopRunningReusedInjectors() })
+      }
     }
 
     internal fun stopRunningReusedInjectors() {
-      stopQuietly(injectedModules.asMap().filterKeys { it in runningServices }.values)
+      val running = injectedModules.asMap().filterKeys { it in runningServices }
+      stopQuietly(running.values)
+      runningServices.removeAll(running.keys)
+      injectedModules.invalidateAll(running.keys)
     }
 
-    /** Stops each injector's services within one shared timeout. A failure is logged and does not affect the others. */
     private fun stopQuietly(injectors: Collection<Injector>) {
       val serviceManagers =
         injectors.mapNotNull { injector ->
@@ -71,6 +74,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
             null
           }
         }
+      // One deadline for every wait, so slow stops overlap as they did with one hook per injector.
       val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(45)
       serviceManagers.forEach {
         try {
