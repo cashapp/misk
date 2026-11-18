@@ -14,6 +14,7 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 import misk.inject.KAbstractModule
 import misk.inject.ReusableTestModule
@@ -31,24 +32,20 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     private val runningServices = ConcurrentHashMap.newKeySet<List<Module>>()
     private val log = getLogger<MiskTestExtension>()
 
-    private val maxLruSize: Int? =
-      System.getenv("MISK_TEST_REUSE_LRU_SIZE")?.toIntOrNull()?.takeIf { it > 0 }
+    private val maxLruSize: Int? = System.getenv("MISK_TEST_REUSE_LRU_SIZE")?.toIntOrNull()?.takeIf { it > 0 }
 
     // When MISK_TEST_REUSE_LRU_SIZE is set, the cache evicts least-recently-used entries once
     // the size is exceeded; the removal listener stops services for evicted injectors. Guava's
     // cache uses ConcurrentMap internally, so callers don't need extra synchronization.
     private val injectedModules: Cache<List<Module>, Injector> = run {
-      val builder = CacheBuilder.newBuilder()
-        .removalListener<List<Module>, Injector> { notification ->
+      val builder =
+        CacheBuilder.newBuilder().removalListener<List<Module>, Injector> { notification ->
           if (notification.cause == RemovalCause.EXPLICIT) return@removalListener
           val key = notification.key ?: return@removalListener
           val injector = notification.value ?: return@removalListener
           runningServices.remove(key)
           try {
-            val serviceManager = injector
-              .getExistingBinding(Key.get(ServiceManager::class.java))
-              ?.provider?.get()
-            serviceManager?.stopAsync()?.awaitStopped(45, TimeUnit.SECONDS)
+            injector.existingServiceManager()?.stopAsync()?.awaitStopped(45, TimeUnit.SECONDS)
           } catch (e: Exception) {
             log.warn(e) { "Failed to stop services for evicted injector cache entry" }
           }
@@ -56,6 +53,41 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
       if (maxLruSize != null) builder.maximumSize(maxLruSize.toLong())
       builder.build()
     }
+
+    private val shutdownHookRegistered = AtomicBoolean(false)
+
+    /**
+     * Registers one JVM shutdown hook that stops the services of every injector still in the cache.
+     *
+     * The hook reads the cache when it runs rather than capturing a `ServiceManager` per injector. A hook per injector
+     * would keep each `ServiceManager`, and through it the whole object graph, strongly reachable for the life of the
+     * JVM, so an LRU eviction would stop the services but never free the heap they occupy.
+     */
+    private fun registerShutdownHook() {
+      if (!shutdownHookRegistered.compareAndSet(false, true)) return
+      Runtime.getRuntime()
+        .addShutdownHook(
+          thread(start = false) {
+            val serviceManagers =
+              injectedModules
+                .asMap()
+                .filterKeys { runningServices.contains(it) }
+                .values
+                .mapNotNull { it.existingServiceManager() }
+            serviceManagers.forEach { it.stopAsync() }
+            serviceManagers.forEach {
+              try {
+                it.awaitStopped(45, TimeUnit.SECONDS)
+              } catch (e: Exception) {
+                log.warn(e) { "Failed to stop services for cached injector at JVM shutdown" }
+              }
+            }
+          }
+        )
+    }
+
+    private fun Injector.existingServiceManager(): ServiceManager? =
+      getExistingBinding(Key.get(ServiceManager::class.java))?.provider?.get()
   }
 
   override fun beforeEach(context: ExtensionContext) {
@@ -95,9 +127,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     val injector =
       if (context.reuseInjector()) {
         try {
-          injectedModules.get(context.getSortedActionTestModules()) {
-            Guice.createInjector(module)
-          }
+          injectedModules.get(context.getSortedActionTestModules()) { Guice.createInjector(module) }
         } catch (e: UncheckedExecutionException) {
           throw e.cause ?: e
         }
@@ -152,7 +182,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
           }
           runningServices.add(context.getSortedActionTestModules())
           if (context.reuseInjector()) {
-            Runtime.getRuntime().addShutdownHook(thread(start = false) { serviceManager!!.stop(context) })
+            registerShutdownHook()
           }
         } catch (e: IllegalStateException) {
           // Unwrap and throw the real service failure
