@@ -24,6 +24,8 @@ import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 
+private val reuseInjectorEnabled = System.getenv("MISK_TEST_REUSE_INJECTOR")?.toBoolean() ?: false
+
 internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
   companion object {
@@ -43,16 +45,16 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
           if (notification.cause == RemovalCause.EXPLICIT) return@removalListener
           val key = notification.key ?: return@removalListener
           val injector = notification.value ?: return@removalListener
-          if (runningServices.remove(key)) stopQuietly(listOf(injector))
+          runningServices.remove(key)
+          stopQuietly(listOf(injector))
         }
       if (maxLruSize != null) builder.maximumSize(maxLruSize.toLong())
       builder.build()
     }
 
-    // One hook stops every running reused injector at JVM exit. A hook per injector would keep an
-    // evicted injector reachable until the JVM exits.
+    // The hook reads the cache at exit and holds no injector, so an evicted injector can be garbage collected.
     init {
-      if (System.getenv("MISK_TEST_REUSE_INJECTOR")?.toBoolean() == true) {
+      if (reuseInjectorEnabled) {
         Runtime.getRuntime().addShutdownHook(thread(start = false) { stopRunningReusedInjectors() })
       }
     }
@@ -74,7 +76,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
             null
           }
         }
-      // One deadline for every wait, so slow stops overlap as they did with one hook per injector.
+      // One deadline for every wait, so slow stops overlap instead of adding up.
       val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(45)
       serviceManagers.forEach {
         try {
@@ -268,8 +270,7 @@ private fun ExtensionContext.startService(): Boolean {
 //   2. The environment variable MISK_TEST_REUSE_INJECTOR is set to true
 private fun ExtensionContext.reuseInjector(): Boolean {
   return getFromStoreOrCompute("reuseInjector") {
-    (System.getenv("MISK_TEST_REUSE_INJECTOR")?.toBoolean() ?: false) &&
-      getActionTestModules().all { it is ReusableTestModule }
+    reuseInjectorEnabled && getActionTestModules().all { it is ReusableTestModule }
   }
 }
 
