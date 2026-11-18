@@ -1,6 +1,7 @@
 package misk.testing
 
 import com.google.common.util.concurrent.AbstractIdleService
+import com.google.common.util.concurrent.Service
 import com.google.inject.Injector
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -21,16 +22,8 @@ import org.junit.platform.launcher.listeners.SummaryGeneratingListener
 class ReusedInjectorEvictionTest {
   @Test
   fun `an evicted injector can be garbage collected`() {
-    assumeTrue(System.getenv("MISK_TEST_REUSE_INJECTOR") == "true")
-    assumeTrue(System.getenv("MISK_TEST_REUSE_LRU_SIZE") == "1")
-
-    System.setProperty(FIXTURE_PROPERTY, "true")
-    try {
-      runFixture(FirstFixture::class.java)
-      runFixture(SecondFixture::class.java)
-    } finally {
-      System.clearProperty(FIXTURE_PROPERTY)
-    }
+    assumeReuseWithLruSizeOfOne()
+    runFixtures(FirstFixture::class.java, SecondFixture::class.java)
 
     val evicted = firstInjector!!
     for (attempt in 1..50) {
@@ -39,6 +32,32 @@ class ReusedInjectorEvictionTest {
       Thread.sleep(100)
     }
     assertThat(evicted.get()).isNull()
+  }
+
+  @Test
+  fun `the exit hook stops the services of cached injectors`() {
+    assumeReuseWithLruSizeOfOne()
+    runFixtures(FirstFixture::class.java)
+    val service = firstInjector!!.get()!!.getInstance(IdleService::class.java)
+    assertThat(service.isRunning).isTrue()
+
+    MiskTestExtension.stopRunningReusedInjectors()
+
+    assertThat(service.state()).isEqualTo(Service.State.TERMINATED)
+  }
+
+  private fun assumeReuseWithLruSizeOfOne() {
+    assumeTrue(System.getenv("MISK_TEST_REUSE_INJECTOR") == "true")
+    assumeTrue(System.getenv("MISK_TEST_REUSE_LRU_SIZE") == "1")
+  }
+
+  private fun runFixtures(vararg fixtures: Class<*>) {
+    System.setProperty(FIXTURE_PROPERTY, "true")
+    try {
+      fixtures.forEach { runFixture(it) }
+    } finally {
+      System.clearProperty(FIXTURE_PROPERTY)
+    }
   }
 
   private fun runFixture(fixture: Class<*>) {
