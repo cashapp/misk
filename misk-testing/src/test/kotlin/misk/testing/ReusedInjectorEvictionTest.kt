@@ -9,23 +9,64 @@ import misk.ServiceManagerModule
 import misk.ServiceModule
 import misk.inject.ReusableTestModule
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Order
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty
+import org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
+import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder
+import org.junit.platform.launcher.core.LauncherFactory
+import org.junit.platform.launcher.listeners.SummaryGeneratingListener
 
-// These classes run from the `injectorReuseLruTest` task, in @Order, with injector reuse on and an LRU size of 1.
-
-private var firstInjector: WeakReference<Injector>? = null
-
-@MiskTest(startService = true)
-@Order(1)
-class ReusedInjectorEvictionSetupTest {
-  @MiskTestModule val module = FirstModule()
-
-  @Inject lateinit var injector: Injector
-
+/** Runs from the `injectorReuseLruTest` task, which turns on injector reuse with an LRU size of 1. */
+class ReusedInjectorEvictionTest {
   @Test
-  fun `records the first injector`() {
-    firstInjector = WeakReference(injector)
+  fun `an evicted injector can be garbage collected`() {
+    assumeTrue(System.getenv("MISK_TEST_REUSE_INJECTOR") == "true")
+    assumeTrue(System.getenv("MISK_TEST_REUSE_LRU_SIZE") == "1")
+
+    System.setProperty(FIXTURE_PROPERTY, "true")
+    try {
+      runFixture(FirstFixture::class.java)
+      runFixture(SecondFixture::class.java)
+    } finally {
+      System.clearProperty(FIXTURE_PROPERTY)
+    }
+
+    val evicted = firstInjector!!
+    for (attempt in 1..50) {
+      System.gc()
+      if (evicted.get() == null) break
+      Thread.sleep(100)
+    }
+    assertThat(evicted.get()).isNull()
+  }
+
+  private fun runFixture(fixture: Class<*>) {
+    val listener = SummaryGeneratingListener()
+    LauncherFactory.create()
+      .execute(LauncherDiscoveryRequestBuilder.request().selectors(selectClass(fixture)).build(), listener)
+    assertThat(listener.summary.testsSucceededCount).isEqualTo(1)
+  }
+
+  @MiskTest(startService = true)
+  @EnabledIfSystemProperty(named = FIXTURE_PROPERTY, matches = "true")
+  class FirstFixture {
+    @MiskTestModule val module = FirstModule()
+
+    @Inject lateinit var injector: Injector
+
+    @Test
+    fun `records the injector`() {
+      firstInjector = WeakReference(injector)
+    }
+  }
+
+  @MiskTest(startService = true)
+  @EnabledIfSystemProperty(named = FIXTURE_PROPERTY, matches = "true")
+  class SecondFixture {
+    @MiskTestModule val module = SecondModule()
+
+    @Test fun `evicts the first injector`() {}
   }
 
   class FirstModule : ReusableTestModule() {
@@ -34,22 +75,6 @@ class ReusedInjectorEvictionSetupTest {
       install(ServiceModule<IdleService>())
     }
   }
-}
-
-@MiskTest(startService = true)
-@Order(2)
-class ReusedInjectorEvictionTest {
-  @MiskTestModule val module = SecondModule()
-
-  @Test
-  fun `an evicted injector can be garbage collected`() {
-    for (attempt in 1..20) {
-      System.gc()
-      if (firstInjector!!.get() == null) break
-      Thread.sleep(100)
-    }
-    assertThat(firstInjector!!.get()).isNull()
-  }
 
   class SecondModule : ReusableTestModule() {
     override fun configure() {
@@ -57,11 +82,16 @@ class ReusedInjectorEvictionTest {
       install(ServiceModule<IdleService>())
     }
   }
-}
 
-@Singleton
-class IdleService @Inject constructor() : AbstractIdleService() {
-  override fun startUp() {}
+  @Singleton
+  class IdleService @Inject constructor() : AbstractIdleService() {
+    override fun startUp() {}
 
-  override fun shutDown() {}
+    override fun shutDown() {}
+  }
+
+  companion object {
+    private const val FIXTURE_PROPERTY = "misk.testing.reusedInjectorEvictionFixture"
+    private var firstInjector: WeakReference<Injector>? = null
+  }
 }

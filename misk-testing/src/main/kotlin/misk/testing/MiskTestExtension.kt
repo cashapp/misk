@@ -14,6 +14,7 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import kotlin.concurrent.thread
 import misk.inject.KAbstractModule
 import misk.inject.ReusableTestModule
@@ -30,9 +31,6 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     private val runningDependencies = ConcurrentHashMap.newKeySet<String>()
     private val runningServices = ConcurrentHashMap.newKeySet<List<Module>>()
 
-    // The shutdown hook for each running reused injector. An evicted entry's hook must be removed
-    // too, because a registered hook keeps the injector reachable until the JVM exits.
-    private val shutdownHooks = ConcurrentHashMap<List<Module>, Thread>()
     private val log = getLogger<MiskTestExtension>()
 
     private val maxLruSize: Int? = System.getenv("MISK_TEST_REUSE_LRU_SIZE")?.toIntOrNull()?.takeIf { it > 0 }
@@ -47,16 +45,34 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
           val key = notification.key ?: return@removalListener
           val injector = notification.value ?: return@removalListener
           runningServices.remove(key)
-          shutdownHooks.remove(key)?.let { Runtime.getRuntime().removeShutdownHook(it) }
           try {
-            val serviceManager = injector.getExistingBinding(Key.get(ServiceManager::class.java))?.provider?.get()
-            serviceManager?.stopAsync()?.awaitStopped(45, TimeUnit.SECONDS)
+            injector.serviceManager()?.stopAsync()?.awaitStopped(45, TimeUnit.SECONDS)
           } catch (e: Exception) {
             log.warn(e) { "Failed to stop services for evicted injector cache entry" }
           }
         }
       if (maxLruSize != null) builder.maximumSize(maxLruSize.toLong())
       builder.build()
+    }
+
+    // One hook stops every running reused injector at JVM exit. A hook per injector would keep an
+    // evicted injector reachable until the JVM exits.
+    init {
+      Runtime.getRuntime()
+        .addShutdownHook(
+          thread(start = false) {
+            val serviceManagers =
+              injectedModules.asMap().filterKeys { it in runningServices }.values.mapNotNull { it.serviceManager() }
+            serviceManagers.forEach { it.stopAsync() }
+            serviceManagers.forEach {
+              try {
+                it.awaitStopped(45, TimeUnit.SECONDS)
+              } catch (e: TimeoutException) {
+                log.warn(e) { "Timed out stopping services for a reused injector" }
+              }
+            }
+          }
+        )
     }
   }
 
@@ -151,11 +167,6 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
             }
           }
           runningServices.add(context.getSortedActionTestModules())
-          if (context.reuseInjector()) {
-            val hook = thread(start = false) { serviceManager!!.stop(context) }
-            shutdownHooks[context.getSortedActionTestModules()] = hook
-            Runtime.getRuntime().addShutdownHook(hook)
-          }
         } catch (e: IllegalStateException) {
           // Unwrap and throw the real service failure
           val suppressed = e.suppressed.firstOrNull()
@@ -265,6 +276,9 @@ private fun ExtensionContext.getExternalDependencies(): Iterable<ExternalDepende
     fieldsAnnotatedBy<MiskExternalDependency, ExternalDependency>()
   }
 }
+
+private fun Injector.serviceManager(): ServiceManager? =
+  getExistingBinding(Key.get(ServiceManager::class.java))?.provider?.get()
 
 private fun ServiceManager.stop(context: ExtensionContext) {
   this.stopAsync().awaitStopped(45, TimeUnit.SECONDS)

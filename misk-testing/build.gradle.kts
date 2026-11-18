@@ -54,6 +54,7 @@ dependencies {
 
   testImplementation(libs.kotlinTest)
   testImplementation(libs.mockitoKotlin)
+  testImplementation(libs.junitLauncher)
 }
 
 mavenPublishing {
@@ -65,12 +66,9 @@ mavenPublishing {
 val injectorReuseLruTest by tasks.registering(Test::class) {
   testClassesDirs = sourceSets.test.get().output.classesDirs
   classpath = sourceSets.test.get().runtimeClasspath
-  filter { includeTestsMatching("misk.testing.ReusedInjectorEviction*") }
-  systemProperty("junit.jupiter.testclass.order.default", "org.junit.jupiter.api.ClassOrderer\$OrderAnnotation")
+  filter { includeTestsMatching("misk.testing.ReusedInjectorEvictionTest") }
   environment("MISK_TEST_REUSE_INJECTOR", "true")
   environment("MISK_TEST_REUSE_LRU_SIZE", "1")
 }
-
-tasks.test { filter { excludeTestsMatching("misk.testing.ReusedInjectorEviction*") } }
 
 tasks.check { dependsOn(injectorReuseLruTest) }
