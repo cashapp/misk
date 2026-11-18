@@ -75,9 +75,11 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
                 .values
                 .mapNotNull { it.existingServiceManager() }
             serviceManagers.forEach { it.stopAsync() }
+            // One deadline shared by every await, so N slow injectors cost 45 seconds in total, not 45 seconds each.
+            val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(45)
             serviceManagers.forEach {
               try {
-                it.awaitStopped(45, TimeUnit.SECONDS)
+                it.awaitStopped(maxOf(0L, deadline - System.nanoTime()), TimeUnit.NANOSECONDS)
               } catch (e: Exception) {
                 log.warn(e) { "Failed to stop services for cached injector at JVM shutdown" }
               }
