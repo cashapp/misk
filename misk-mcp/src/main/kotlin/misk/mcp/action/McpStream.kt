@@ -7,6 +7,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import misk.MiskCaller
 import misk.annotation.ExperimentalMiskApi
 import misk.exceptions.WebActionException
 import misk.mcp.McpJson
@@ -31,6 +32,7 @@ class McpStream
 internal constructor(
   val server: MiskMcpServer,
   internal val httpCall: HttpCall,
+  internal val caller: MiskCaller?,
   private val sendChannel: SendChannel<ServerSentEvent>,
   private val keepAliveInterval: Duration,
 ) {
@@ -102,7 +104,9 @@ suspend fun McpStream.handleMessage(message: JSONRPCMessage) {
       if (rejection != null) {
         reject(rejection)
       } else {
-        send(withKeepAlive { withContext(McpRequestContext(this, message)) { server.dispatcher.respond(message) } })
+        send(
+          withKeepAlive { withContext(McpRequestContext(this, message, caller)) { server.dispatcher.respond(message) } }
+        )
       }
     }
     is JSONRPCNotification,

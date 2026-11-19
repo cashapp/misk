@@ -2,6 +2,7 @@ package misk.mcp.action
 
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.channels.SendChannel
+import misk.MiskCaller
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.MiskMcpServer
 import misk.scope.ActionScoped
@@ -33,7 +34,11 @@ import misk.web.sse.ServerSentEvent
  */
 @ExperimentalMiskApi
 class McpStreamManager
-internal constructor(private val mcpServer: MiskMcpServer, private val httpCall: ActionScoped<HttpCall>) {
+internal constructor(
+  private val mcpServer: MiskMcpServer,
+  private val httpCall: ActionScoped<HttpCall>,
+  private val caller: ActionScoped<MiskCaller?>,
+) {
   /**
    * Runs [block] against an [McpStream] whose responses go to [sendChannel] as Server-Sent Events (SSE).
    *
@@ -45,6 +50,7 @@ internal constructor(private val mcpServer: MiskMcpServer, private val httpCall:
       McpStream(
           server = mcpServer,
           httpCall = httpCall.get(),
+          caller = caller.get(),
           sendChannel = sendChannel,
           keepAliveInterval = mcpServer.config.keep_alive_interval_ms.milliseconds,
         )

@@ -25,6 +25,7 @@ dependencies {
   implementation(libs.loggingApi)
   implementation(project(":misk-api"))
   implementation(project(":misk-core"))
+  implementation(project(":misk-crypto"))
   implementation(project(":misk-logging"))
   implementation(project(":misk-metrics"))
   implementation(project(":misk-moshi"))
@@ -32,6 +33,7 @@ dependencies {
   implementation(libs.okHttp)
   implementation(libs.okio)
   implementation(libs.prometheusClient)
+  implementation(libs.tink)
 
   testImplementation(libs.jsonSchemaValidator)
   testImplementation(libs.junitApi)
@@ -43,6 +45,7 @@ dependencies {
   testImplementation(libs.ktorSerializationKotlinxJson)
   testImplementation(libs.mcpKotlinSdkClient)
   testImplementation(libs.mockk)
+  testImplementation(testFixtures(project(":misk-crypto")))
   testImplementation(testFixtures(project(":misk-mcp")))
   testImplementation(testFixtures(project(":misk-metrics")))
   testImplementation(project(":misk-testing"))

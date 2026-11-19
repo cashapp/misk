@@ -51,6 +51,9 @@ class McpConfig @JvmOverloads constructor(servers: Map<String, McpServerConfig> 
  * @param title Human-readable server name for clients to display.
  * @param website_url The server's website, for clients to display.
  * @param icons Icons for clients to display for the server.
+ * @param request_state_key Name of the misk-crypto MAC key that signs the `requestState` of input requests, so that
+ *   clients can't forge it. Needed only by servers whose handlers pass a state to [misk.mcp.inputRequired]; they must
+ *   install misk-crypto's `CryptoModule` with this key.
  */
 data class McpServerConfig
 @JvmOverloads
@@ -65,6 +68,7 @@ constructor(
   val title: String? = null,
   val website_url: String? = null,
   val icons: List<McpIconConfig> = emptyList(),
+  val request_state_key: String? = null,
 ) : Config
 
 /**
