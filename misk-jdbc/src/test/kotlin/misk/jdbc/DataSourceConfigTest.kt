@@ -13,6 +13,14 @@ class DataSourceConfigTest {
   private val dockerVitessPort = DefaultSettings.PORT
 
   @Test
+  fun autocommitIsDisabledForEveryTypeExceptVitessUnlessOptedIn() {
+    for (type in DataSourceType.entries) {
+      assertThat(DataSourceConfig(type).disablesAutocommit()).isEqualTo(type != DataSourceType.VITESS_MYSQL)
+      assertThat(DataSourceConfig(type, vitess_disable_autocommit = true).disablesAutocommit()).isTrue
+    }
+  }
+
+  @Test
   fun buildVitessJDBCUrlNoSSL() {
     val config = DataSourceConfig(DataSourceType.VITESS_MYSQL, port = dockerVitessPort)
     assertEquals(

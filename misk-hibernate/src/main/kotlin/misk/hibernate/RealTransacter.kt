@@ -33,9 +33,7 @@ import misk.vitess.Shard
 import misk.vitess.Shard.Companion.SINGLE_SHARD_SET
 import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
-import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.ConstraintViolationException
-import org.hibernate.exception.LockAcquisitionException
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode
 
 private val logger = getLogger<RealTransacter>()
@@ -137,6 +135,18 @@ private constructor(
     }
 
     fun cachedShards(): Set<Shard> = supplier.get().get()
+  }
+
+  /** The cached shard list. Unlike [Session.shards], this needs no session or transaction. */
+  internal fun cachedShards(): Set<Shard> = shardListFetcher.cachedShards()
+
+  internal fun cachedShards(keyspace: Keyspace): Collection<Shard> {
+    return if (!config.type.isVitess) {
+      // We always return the single shard regardless what keyspace you want shards for
+      SINGLE_SHARD_SET
+    } else {
+      cachedShards().filter { it.keyspace == keyspace }
+    }
   }
 
   private val sessionFactory
@@ -250,15 +260,17 @@ private constructor(
   }
 
   private fun <T> transactionWithRetriesInternal(block: () -> T): T {
-    val backoff = ExponentialBackoff(
-      baseDelay = Duration.ofMillis(options.minRetryDelayMillis),
-      maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
-      jitter = Duration.ofMillis(options.retryJitterMillis)
-    )
-    val retryConfig = RetryConfig.Builder(options.maxAttempts, backoff)
-      .shouldRetry { exceptionClassifier.isRetryable(it) }
-      .onRetry { attempt, e -> logger.info(e) { "$qualifierName transaction failed, retrying (attempt $attempt)" } }
-      .build()
+    val backoff =
+      ExponentialBackoff(
+        baseDelay = Duration.ofMillis(options.minRetryDelayMillis),
+        maxDelay = Duration.ofMillis(options.maxRetryDelayMillis),
+        jitter = Duration.ofMillis(options.retryJitterMillis),
+      )
+    val retryConfig =
+      RetryConfig.Builder(options.maxAttempts, backoff)
+        .shouldRetry { exceptionClassifier.isRetryable(it) }
+        .onRetry { attempt, e -> logger.info(e) { "$qualifierName transaction failed, retrying (attempt $attempt)" } }
+        .build()
     return retry(retryConfig) { block() }
   }
 
@@ -483,16 +495,9 @@ private constructor(
       return hibernateSession.get(type.java, id)
     }
 
-    override fun shards(): Set<Shard> = transacter.shardListFetcher.cachedShards()
+    override fun shards(): Set<Shard> = transacter.cachedShards()
 
-    override fun shards(keyspace: Keyspace): Collection<Shard> {
-      return if (!config.type.isVitess) {
-        // We always return the single shard regardless what keyspace you want shards for
-        SINGLE_SHARD_SET
-      } else {
-        shards().filter { it.keyspace == keyspace }
-      }
-    }
+    override fun shards(keyspace: Keyspace): Collection<Shard> = transacter.cachedShards(keyspace)
 
     @Deprecated("Use target(Destination, block) which has more explicit targeting")
     override fun <T> target(shard: Shard, function: () -> T): T = target(Destination(shard)) { _ -> function() }

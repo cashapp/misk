@@ -150,6 +150,16 @@ constructor(
    * server's default. See [TransactionIsolationLevel].
    */
   val transaction_isolation: TransactionIsolationLevel? = null,
+  /**
+   * Hand out pooled connections with autocommit disabled, as misk already does for every other [DataSourceType].
+   *
+   * [DataSourceType.VITESS_MYSQL] pools default to autocommit enabled, so every transaction costs two extra round trips
+   * (`SET autocommit=0` before it, `SET autocommit=1` after). Enable this for Vitess-compatible proxies that honour
+   * session autocommit. Any code using raw connections from this pool must then commit explicitly.
+   *
+   * Has no effect unless [type] is [DataSourceType.VITESS_MYSQL].
+   */
+  val vitess_disable_autocommit: Boolean = false,
 ) {
   init {
     if (migrations_format == MigrationsFormat.DECLARATIVE) {
@@ -160,6 +170,9 @@ constructor(
       }
     }
   }
+
+  /** Whether pooled connections start with autocommit disabled. See [vitess_disable_autocommit]. */
+  fun disablesAutocommit(): Boolean = type != DataSourceType.VITESS_MYSQL || vitess_disable_autocommit
 
   fun getDriverClassName(): String {
     return if (mysql_use_aws_secret_for_credentials) {
