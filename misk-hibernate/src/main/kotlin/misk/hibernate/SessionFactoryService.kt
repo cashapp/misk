@@ -11,7 +11,6 @@ import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.jvmName
 import misk.jdbc.DataSourceService
-import misk.jdbc.DataSourceType
 import misk.logging.getLogger
 import okio.ByteString
 import org.hibernate.SessionFactory
@@ -100,11 +99,11 @@ internal class SessionFactoryService(
       applySetting(AvailableSettings.USE_GET_GENERATED_KEYS, "true")
       applySetting(AvailableSettings.USE_NEW_ID_GENERATOR_MAPPINGS, "false")
       applySetting(AvailableSettings.JDBC_TIME_ZONE, "UTC")
-      if (config.type != DataSourceType.VITESS_MYSQL) {
+      if (config.disablesAutocommit()) {
         // This tells Hibernate that autocommit is always false, so Hibernate won't try to set it
-        // for every transaction.
+        // for every transaction. It must match the pool, see DataSourceService.
         // https://vladmihalcea.com/why-you-should-always-use-hibernate-connection-provider_disables_autocommit-for-resource-local-jpa-transactions/
-        // This setting doesn't seem to work with Vitess though...
+        // VITESS_MYSQL keeps autocommit on unless DataSourceConfig.vitess_disable_autocommit is set.
         applySetting(AvailableSettings.CONNECTION_PROVIDER_DISABLES_AUTOCOMMIT, "true")
       }
       if (config.query_timeout != null) {

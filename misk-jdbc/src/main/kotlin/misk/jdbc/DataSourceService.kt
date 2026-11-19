@@ -102,7 +102,7 @@ constructor(
     hikariConfig.maxLifetime = config.connection_max_lifetime.toMillis()
     hikariConfig.keepaliveTime = config.keepalive_time.toMillis()
 
-    if (config.type != DataSourceType.VITESS_MYSQL) {
+    if (config.disablesAutocommit()) {
       // Our Hibernate settings expect autocommit to be disabled, see
       // CONNECTION_PROVIDER_DISABLES_AUTOCOMMIT in SessionFactoryService
       hikariConfig.isAutoCommit = false

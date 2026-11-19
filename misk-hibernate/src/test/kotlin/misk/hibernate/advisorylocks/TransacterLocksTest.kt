@@ -108,3 +108,8 @@ class PostgresTransacterLocksTest : TransacterLocksTest() {
 class VitessTransacterLocksTest : TransacterLocksTest() {
   @MiskTestModule val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
 }
+
+@MiskTest(startService = true)
+class VitessAutocommitDisabledTransacterLocksTest : TransacterLocksTest() {
+  @MiskTestModule val module = MoviesTestModule(DataSourceType.VITESS_MYSQL, disableAutocommit = true)
+}
