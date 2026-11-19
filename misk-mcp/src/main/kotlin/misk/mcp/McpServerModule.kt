@@ -3,9 +3,7 @@
 package misk.mcp
 
 import com.google.inject.Provider
-import jakarta.inject.Inject
 import kotlin.reflect.KClass
-import kotlinx.coroutines.channels.SendChannel
 import misk.annotation.ExperimentalMiskApi
 import misk.inject.BindingQualifier
 import misk.inject.KAbstractModule
@@ -16,12 +14,9 @@ import misk.inject.setOfType
 import misk.inject.toKey
 import misk.mcp.action.McpStreamManager
 import misk.mcp.config.McpConfig
-import misk.mcp.internal.McpJsonRpcMessageUnmarshaller
-import misk.mcp.internal.MiskStreamableHttpServerTransport
-import misk.scope.ActionScoped
-import misk.web.HttpCall
-import misk.web.marshal.Unmarshaller
-import misk.web.sse.ServerSentEvent
+import misk.mcp.internal.McpJsonRpcMessageAdapter
+import misk.mcp.protocol.JSONRPCMessage
+import misk.moshi.MoshiAdapterModule
 
 /**
  * Guice module for configuring MCP (Model Context Protocol) server functionality.
@@ -32,7 +27,6 @@ import misk.web.sse.ServerSentEvent
  *
  * The module automatically configures:
  * - Multi-binders for tools, resources, and prompts
- * - The Streamable HTTP transport factory
  * - JSON RPC message unmarshalling
  * - Metrics collection
  *
@@ -146,22 +140,6 @@ private constructor(
 
     val mcpMetricsProvider = binder().getProvider(McpMetrics::class.java)
 
-    // Bind the factories for the transports
-    val streamableHttpServerTransportFactoryKey = keyOf<MiskStreamableHttpServerTransport.Factory>(qualifier)
-    bind(streamableHttpServerTransportFactoryKey)
-      .toProvider(
-        object : Provider<MiskStreamableHttpServerTransport.Factory> {
-          @Inject lateinit var httpCall: ActionScoped<HttpCall>
-
-          override fun get() =
-            object : MiskStreamableHttpServerTransport.Factory {
-              override fun create(sendChannel: SendChannel<ServerSentEvent>) =
-                MiskStreamableHttpServerTransport(call = httpCall.get(), sendChannel = sendChannel)
-            }
-        }
-      )
-    val streamableHttpServerTransportFactoryProvider = binder().getProvider(streamableHttpServerTransportFactoryKey)
-
     // Create a qualified binding for the MiskMcpServer
     val serverKey = keyOf<MiskMcpServer>(qualifier)
     bind(serverKey).toProvider {
@@ -181,12 +159,7 @@ private constructor(
 
     // Create a qualified binding for the McpStreamManager
     val streamManagerKey = keyOf<McpStreamManager>(qualifier)
-    bind(streamManagerKey)
-      .toProvider(
-        Provider {
-          McpStreamManager(streamableHttpServerTransportFactoryProvider.get(), mcpServer = mcpServerProvider.get())
-        }
-      )
+    bind(streamManagerKey).toProvider(Provider { McpStreamManager(mcpServerProvider.get()) })
   }
 
   companion object {
@@ -278,8 +251,7 @@ private constructor(
 
   private class CommonModule() : KInstallOnceModule() {
     override fun configure() {
-      // Install the Unmarshaller for MCP JSON RPC messages. This uses the kotlin-sdk provided deserializer
-      multibind<Unmarshaller.Factory>().to<McpJsonRpcMessageUnmarshaller.Factory>()
+      install(MoshiAdapterModule<JSONRPCMessage>(McpJsonRpcMessageAdapter))
     }
   }
 }

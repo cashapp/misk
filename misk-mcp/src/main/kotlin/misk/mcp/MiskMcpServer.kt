@@ -1,59 +1,33 @@
+@file:OptIn(ExperimentalMiskApi::class)
+
 package misk.mcp
 
 import com.google.inject.Provider
-import io.modelcontextprotocol.kotlin.sdk.server.ClientConnection
-import io.modelcontextprotocol.kotlin.sdk.server.Server
-import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
-import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequest
-import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
-import io.modelcontextprotocol.kotlin.sdk.types.Implementation
-import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
-import io.modelcontextprotocol.kotlin.sdk.types.Tool
-import io.modelcontextprotocol.kotlin.sdk.types.ToolAnnotations
-import kotlin.time.TimeSource
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.config.McpServerConfig
-import misk.mcp.config.asPrompts
-import misk.mcp.config.asResources
-import misk.mcp.config.asTools
-import misk.mcp.internal.build
+import misk.mcp.internal.McpDispatcher
+import misk.mcp.internal.UriTemplate
+import misk.mcp.protocol.Implementation
+import misk.mcp.protocol.Prompt
+import misk.mcp.protocol.Resource
+import misk.mcp.protocol.ResourceTemplate
+import misk.mcp.protocol.ServerCapabilities
+import misk.mcp.protocol.Tool
+import misk.mcp.protocol.ToolAnnotations
 
 /**
- * Misk implementation of a Model Context Protocol (MCP) server.
+ * Misk's Model Context Protocol (MCP) server.
  *
- * This class extends the MCP Kotlin SDK's [Server] class to provide MCP server capabilities within the Misk framework.
- * It handles both client-to-server events (tool calls, resource reads, prompt requests) and server-to-client events
- * (resource update notifications, logging).
+ * The server serves the registered [McpTool], [McpResource], [McpResourceTemplate] and [McpPrompt] implementations to
+ * MCP clients over Streamable HTTP. It speaks both protocol eras:
+ * - **Modern** (2026-07-28): stateless requests that carry the protocol version and client capabilities in `_meta`.
+ *   Clients learn about the server with `server/discover`.
+ * - **Legacy** (2025-11-25 and earlier): clients open with `initialize`. The server keeps no state between requests.
  *
- * The Misk dependency injection system automatically configures the server with registered tools, resources, and
- * prompts, and the server exposes them to MCP clients through JSON-RPC 2.0 messages over Server-Sent Events (SSE).
+ * Each handler runs inline on the web action's coroutine, so `ActionScoped` values and coroutine context elements that
+ * the web action installs are visible to it.
  *
- * ## Key Features
- * - **Tool Execution**: Handles client requests to execute registered [McpTool] implementations
- * - **Resource Access**: Serves registered [McpResource] content to clients
- * - **Prompt Templates**: Provides registered [McpPrompt] templates for client use
- * - **Capability Negotiation**: The server automatically configures capabilities based on registered components
- * - **Metrics Integration**: Automatically wires up all registered tools to [McpMetrics] for monitoring tool execution
- *   latency and outcomes
- *
- * ## Client-to-Server Events
- *
- * The server handles these incoming client requests:
- * - `tools/call` - Execute a registered tool with provided arguments
- * - `resources/read` - Read content from a registered resource
- * - `prompts/get` - Retrieve a prompt template with optional arguments
- * - `resources/subscribe` - Subscribe to resource update notifications (if enabled)
- *
- * ## Server-to-Client Events
- *
- * The server can send these events to clients:
- * - `resources/updated` - Notify clients of resource changes (when subscriptions are enabled)
- * - `logging` - Send log messages to clients for debugging
- *
- * ## Usage
- *
- * [McpServerModule] typically creates and manages the server, and web actions access it through
- * [misk.mcp.action.McpStreamManager]:
+ * [McpServerModule] creates the server, and web actions use it through [misk.mcp.action.McpStreamManager]:
  * ```kotlin
  * class MyMcpWebAction @Inject constructor(
  *   private val mcpStreamManager: McpStreamManager
@@ -64,34 +38,15 @@ import misk.mcp.internal.build
  *     @RequestBody message: JSONRPCMessage,
  *     sendChannel: SendChannel<ServerSentEvent>
  *   ) {
- *     mcpStreamManager.withSseChannel(sendChannel) {
- *       // 'this' is MiskMcpServer - handle the client message
- *       handleMessage(message)
- *     }
+ *     mcpStreamManager.withSseChannel(sendChannel) { handleMessage(message) }
  *   }
  * }
  * ```
  *
- * ## Configuration
+ * The server advertises the tools, resources and prompts capabilities when at least one of each kind is registered.
+ * Every tool call records [McpMetrics.mcpToolHandlerLatency].
  *
- * The server automatically determines capabilities from the [McpServerConfig] and registered components:
- * - The server enables tools capability if any [McpTool] implementations are registered
- * - The server enables resources capability if any [McpResource] or [McpResourceTemplate] implementations are
- *   registered
- * - The server enables prompts capability if any [McpPrompt] implementations are registered
- *
- * @param name The unique name identifier for this MCP server instance
- * @param config Configuration settings including version and capability flags
- * @param tools Set of tool implementations to register with the server
- * @param resources Set of resource implementations to register with the server
- * @param resourceTemplates Set of resource template implementations to register with the server
- * @param prompts Set of prompt implementations to register with the server
- * @param instructionsProvider Optional provider for server instructions text
- * @see misk.mcp.action.McpStreamManager For managing SSE streams and server lifecycle
- * @see McpTool For implementing executable tools
- * @see McpResource For implementing accessible resources
- * @see McpResourceTemplate For implementing parameterized resource templates
- * @see McpPrompt For implementing prompt templates
+ * @see misk.mcp.action.McpStreamManager For handling requests in web actions
  */
 @ExperimentalMiskApi
 class MiskMcpServer
@@ -103,97 +58,69 @@ internal constructor(
   resources: Set<McpResource>,
   resourceTemplates: Set<McpResourceTemplate>,
   prompts: Set<McpPrompt>,
-  instructionsProvider: Provider<String>? = null,
-  private val mcpMetrics: McpMetrics,
-) :
-  Server(
-    Implementation(name = name, version = version),
-    ServerOptions(
-      capabilities =
-        ServerCapabilities(
-          experimental = null,
-          completions = null,
-          logging = null,
-          prompts = if (prompts.isNotEmpty()) config.prompts.asPrompts() else null,
-          resources =
-            if (resources.isNotEmpty() || resourceTemplates.isNotEmpty()) config.resources.asResources() else null,
-          tools = if (tools.isNotEmpty()) config.tools.asTools() else null,
-        ),
-      enforceStrictCapabilities = config.enforce_strict_capabilities,
-    ),
-    instructionsProvider = instructionsProvider?.let { { it.get() } },
-  ) {
+  private val instructionsProvider: Provider<String>? = null,
+  internal val mcpMetrics: McpMetrics,
+) {
+  val serverInfo: Implementation = Implementation(name = name, version = version)
 
-  init {
-    prompts.forEach { prompt ->
-      addPrompt(
-        name = prompt.name,
-        description = prompt.description,
-        arguments = prompt.arguments,
-        promptProvider = { request -> prompt.handler(request) },
-      )
-    }
+  val capabilities: ServerCapabilities =
+    ServerCapabilities(
+      tools = if (tools.isNotEmpty()) ServerCapabilities.Tools() else null,
+      resources =
+        if (resources.isNotEmpty() || resourceTemplates.isNotEmpty()) ServerCapabilities.Resources() else null,
+      prompts = if (prompts.isNotEmpty()) ServerCapabilities.Prompts() else null,
+    )
 
-    resources.forEach { resource ->
-      addResource(
-        uri = resource.uri,
-        name = resource.name,
-        description = resource.description,
-        mimeType = resource.mimeType,
-        readHandler = { request -> resource.handler(request) },
-      )
-    }
+  val instructions: String?
+    get() = instructionsProvider?.get()
 
-    resourceTemplates.forEach { template ->
-      addResourceTemplate(
-        uriTemplate = template.uriTemplate,
-        name = template.name,
-        description = template.description,
-        mimeType = template.mimeType,
-        readHandler = { request, variables -> template.handler(request, variables) },
-      )
-    }
+  internal val tools: Map<String, RegisteredTool> =
+    tools.sortedBy { it.name }.associate { it.name to RegisteredTool(it, it.toTool()) }
 
-    tools.forEach { tool ->
-      addTool(
-        tool =
-          Tool.build(tool.name, tool.inputSchema) {
-            description = tool.description
-            tool.outputSchema?.let { outputSchema = it }
-            annotations =
-              ToolAnnotations.build {
-                title = tool.title
-                readOnlyHint = tool.readOnlyHint
-                destructiveHint = tool.destructiveHint
-                idempotentHint = tool.idempotentHint
-                openWorldHint = tool.openWorldHint
-              }
-            tool.meta?.let { meta = it }
-          },
-        handler = metricReportingHandler(tool.name, tool::handler),
-      )
-    }
-  }
+  internal val resources: Map<String, RegisteredResource> =
+    resources.associate { it.uri to RegisteredResource(it, it.toResource()) }
 
-  private fun metricReportingHandler(
-    toolName: String,
-    handler: suspend (CallToolRequest) -> CallToolResult,
-  ): suspend ClientConnection.(CallToolRequest) -> CallToolResult {
-    return { request ->
-      val mark = TimeSource.Monotonic.markNow()
-      var outcome = McpMetrics.ToolCallOutcome.Success
+  internal val resourceTemplates: List<RegisteredResourceTemplate> =
+    resourceTemplates.map { RegisteredResourceTemplate(it, it.toResourceTemplate(), UriTemplate(it.uriTemplate)) }
 
-      try {
-        handler(request).also { result ->
-          outcome = if (result.isError == true) McpMetrics.ToolCallOutcome.Error else McpMetrics.ToolCallOutcome.Success
-        }
-      } catch (ex: Exception) {
-        outcome = McpMetrics.ToolCallOutcome.Exception
-        throw ex
-      } finally {
-        val duration = mark.elapsedNow()
-        mcpMetrics.mcpToolHandlerLatency(duration, name, version, toolName, outcome)
-      }
-    }
-  }
+  internal val prompts: Map<String, RegisteredPrompt> =
+    prompts.associate { it.name to RegisteredPrompt(it, it.toPrompt()) }
+
+  internal val dispatcher = McpDispatcher(this)
+
+  internal class RegisteredTool(val handler: McpTool<*>, val definition: Tool)
+
+  internal class RegisteredResource(val handler: McpResource, val definition: Resource)
+
+  internal class RegisteredResourceTemplate(
+    val handler: McpResourceTemplate,
+    val definition: ResourceTemplate,
+    val uriTemplate: UriTemplate,
+  )
+
+  internal class RegisteredPrompt(val handler: McpPrompt, val definition: Prompt)
 }
+
+private fun McpTool<*>.toTool() =
+  Tool(
+    name = name,
+    inputSchema = inputSchema,
+    description = description,
+    outputSchema = outputSchema,
+    annotations =
+      ToolAnnotations(
+        title = title,
+        readOnlyHint = readOnlyHint,
+        destructiveHint = destructiveHint,
+        idempotentHint = idempotentHint,
+        openWorldHint = openWorldHint,
+      ),
+    meta = meta,
+  )
+
+private fun McpResource.toResource() = Resource(uri = uri, name = name, description = description, mimeType = mimeType)
+
+private fun McpResourceTemplate.toResourceTemplate() =
+  ResourceTemplate(uriTemplate = uriTemplate, name = name, description = description, mimeType = mimeType)
+
+private fun McpPrompt.toPrompt() = Prompt(name = name, description = description, arguments = arguments)
