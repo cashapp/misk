@@ -26,10 +26,8 @@ import misk.mcp.config.McpConfig
 import misk.mcp.config.McpServerConfig
 import misk.mcp.protocol.CallToolResult
 import misk.mcp.protocol.JSONRPCMessage
-import misk.mcp.protocol.JSONRPCRequest
 import misk.mcp.protocol.JSONRPCResponse
 import misk.mcp.protocol.McpMethod
-import misk.mcp.protocol.RequestId
 import misk.mcp.protocol.TextContent
 import misk.mcp.testing.McpTestClient
 import misk.scope.ActionScoped
@@ -67,14 +65,12 @@ internal class McpInlineDispatchTest {
   fun `tools see the action's scope and context, and handleMessage waits for them`() = runBlocking {
     val client = McpTestClient(OkHttpClient(), jettyService.httpServerUrl.resolve("/mcp")!!)
     val request =
-      JSONRPCRequest(
-        id = RequestId(1),
-        method = McpMethod.TOOLS_CALL,
-        params =
-          buildJsonObject {
-            put("name", "context")
-            putJsonObject("arguments") {}
-          },
+      client.newRequest(
+        McpMethod.TOOLS_CALL,
+        buildJsonObject {
+          put("name", "context")
+          putJsonObject("arguments") {}
+        },
       )
 
     val response = client.send(request, mapOf("X-Caller" to "caller"))

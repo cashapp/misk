@@ -271,14 +271,14 @@ internal class McpProtocolTest {
   companion object {
     const val SERVER_NAME = "mcp-protocol-test"
 
-    fun mcpTestModule(vararg features: Module): Module =
+    fun mcpTestModule(vararg features: Module, config: McpServerConfig = McpServerConfig("1.0.0")): Module =
       object : KAbstractModule() {
         override fun configure() {
           // Before McpServerModule, so the tests also check that the JSON unmarshaller misk installs decodes MCP
           // messages
           install(WebServerTestingModule())
           install(MiskTestingServiceModule())
-          install(McpServerModule.create(SERVER_NAME, McpConfig(mapOf(SERVER_NAME to McpServerConfig("1.0.0")))))
+          install(McpServerModule.create(SERVER_NAME, McpConfig(mapOf(SERVER_NAME to config))))
           features.forEach { install(it) }
           install(WebActionModule.create<McpServerActionTestPostAction>())
         }
