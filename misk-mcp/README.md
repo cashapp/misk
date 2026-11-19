@@ -35,25 +35,13 @@ class MyAppModule : KAbstractModule() {
 
 ## Web Action Integration
 
-To expose MCP functionality through HTTP endpoints, you need to create web actions using the MCP annotations and install the appropriate WebActionModule. The misk-mcp module supports two transport protocols:
-
-### Transport Options
-
-#### StreamableHTTP Transport
-Uses HTTP POST requests with Server-Sent Events (SSE) for streaming responses:
-- **`@McpPost`** (Required): Handles incoming MCP requests from clients
-- **`@McpGet`** (Optional): Enables out-of-band server-to-client notifications
-- **`@McpDelete`** (Optional): Allows clients to explicitly delete an existing stateful session
-
-#### WebSocket Transport  
-Uses persistent WebSocket connections for full bidirectional communication:
-- **`@McpWebSocket`** (Required): Handles all MCP communication over WebSocket
-
-### StreamableHTTP Transport Example
+To expose MCP functionality through HTTP, create a web action annotated with `@McpPost` and install it with a
+WebActionModule. misk-mcp serves the Streamable HTTP transport: clients POST JSON-RPC messages and the server responds
+with Server-Sent Events (SSE).
 
 ```kotlin
 @ExperimentalMiskApi
-class MyMcpSseAction @Inject constructor(
+class MyMcpPostAction @Inject constructor(
   private val mcpStreamManager: McpStreamManager
 ) : WebAction {
 
@@ -66,66 +54,8 @@ class MyMcpSseAction @Inject constructor(
       handleMessage(message)
     }
   }
-
-  @McpGet  
-  suspend fun streamServerEvents(
-    sendChannel: SendChannel<ServerSentEvent>
-  ) {
-    mcpStreamManager.withSseChannel(sendChannel) {
-      // Stream server-initiated events to client
-    }
-  }
-
-  @McpDelete
-  suspend fun terminateSession(
-    @RequestHeaders headers: Headers,
-    sendChannel: SendChannel<ServerSentEvent>
-  ) {
-    val sessionId = headers[SESSION_ID_HEADER] ?: throw IllegalArgumentException("Missing session ID")
-    // Any session state should be cleaned up here
-  }
 }
 ```
-
-### WebSocket Transport Example
-
-```kotlin
-@ExperimentalMiskApi
-class MyMcpWebSocketAction @Inject constructor(
-  private val mcpStreamManager: McpStreamManager
-) : WebAction {
-
-  @McpWebSocket
-  fun handleWebSocket(webSocket: WebSocket): WebSocketListener {
-    return mcpStreamManager.withWebSocket(webSocket)
-  }
-}
-```
-
-### Transport Comparison
-
-| Feature | StreamableHTTP Transport | WebSocket Transport |
-|---------|--------------------------|-------------------|
-| **Connection Type** | HTTP POST + SSE streaming | Persistent WebSocket |
-| **Communication** | Client→Server (POST)<br/>Server→Client (SSE) | Full bidirectional |
-| **Complexity** | Multiple endpoints | Single endpoint |
-| **Session Management** | Optional via headers | Built-in connection state |
-| **Use Cases** | Traditional web apps<br/>Request-response patterns | Real-time applications<br/>Interactive AI tools |
-| **Client Support** | Universal HTTP support | WebSocket support required |
-
-### Choosing a Transport
-
-**Use StreamableHTTP Transport when:**
-- Building traditional web applications
-- Need maximum client compatibility
-- Implementing request-response patterns
-- Want explicit control over session management
-
-**Use WebSocket Transport when:**
-- Building real-time interactive applications
-- Need bidirectional communication
-- Want simplified connection management
-- Implementing conversational AI interfaces
 
 **Important**: You must install a WebActionModule to register your MCP web actions:
 
@@ -146,208 +76,7 @@ class MyAppModule : KAbstractModule() {
 }
 ```
 
-Without the WebActionModule installation, your `@McpPost`, `@McpGet`, and `@McpDelete` annotated methods will not be registered as HTTP endpoints.
-
-## Stateful Sessions (Optional)
-
-The MCP server supports stateful sessions using the `Mcp-Session-Id` header. This is optional and allows clients (like LLMs) to maintain context across multiple requests.
-
-```kotlin
-const val SESSION_ID_HEADER = "Mcp-Session-Id"
-```
-
-When a client includes the `Mcp-Session-Id` header in requests:
-- The server maintains session state between requests
-- Server-to-client notifications can be sent via the `@McpGet` endpoint
-- Sessions can be explicitly terminated using the `@McpDelete` endpoint
-
-If no session ID is provided, the server operates in a stateless mode where each request is independent.
-
-## Session Management
-
-The MCP server provides comprehensive session management capabilities following the [MCP specification section 2.5](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#session-management). Sessions enable stateful interactions between clients and servers, allowing for context preservation across multiple requests.
-
-### Installing Session Management
-
-To enable session management, implement the `McpSessionHandler` interface and install it using `McpSessionHandlerModule`:
-
-```kotlin
-@Singleton
-class RedisSessionHandler @Inject constructor(
-  private val redis: RedisClient
-) : McpSessionHandler {
-  
-  override suspend fun initialize(): String {
-    // Generate a unique, cryptographically secure session ID
-    val sessionId = UUID.randomUUID().toString()
-    redis.setex("session:$sessionId", 3600, "active") // 1 hour expiry
-    return sessionId
-  }
-  
-  override suspend fun isActive(sessionId: String): Boolean {
-    return redis.exists("session:$sessionId")
-  }
-  
-  override suspend fun terminate(sessionId: String) {
-    redis.del("session:$sessionId")
-    // Clean up any session-related resources
-  }
-}
-```
-
-Install the session handler in your module:
-
-```kotlin
-@ExperimentalMiskApi
-class MyAppModule : KAbstractModule() {
-  override fun configure() {
-    // Install MCP server module
-    install(McpServerModule.create("my_server", config.mcp))
-    
-    // Install session handler
-    install(McpSessionHandlerModule.create<RedisSessionHandler>())
-    
-    // Install other MCP components
-    install(McpToolModule.create<MyTool>())
-  }
-}
-```
-
-### Framework Integration
-
-When a session handler is installed, the framework automatically:
-
-- Calls `initialize()` when a new session is needed
-- Calls `isActive()` to validate existing sessions before processing requests
-- Includes the session ID in the `Mcp-Session-Id` response header
-- Manages session lifecycle across requests
-
-### Accessing Session IDs in Tools
-
-Use `McpSessionId` to access the current session ID within your MCP tools:
-
-```kotlin
-@ExperimentalMiskApi
-@Singleton
-class SessionAwareTool @Inject constructor(
-  private val sessionId: Provider<McpSessionId>,
-  private val userService: UserService
-) : McpTool<UserDataInput>() {
-  
-  override val name = "get_user_data"
-  override val description = "Retrieves user data for the current session"
-  
-  override suspend fun handle(input: UserDataInput): ToolResult {
-    val currentSessionId = sessionId.get().get()
-    val userData = userService.getUserDataForSession(currentSessionId)
-    
-    return ToolResult(
-      TextContent("User data: ${userData.name} (Session: $currentSessionId)")
-    )
-  }
-}
-```
-
-### Session Termination
-
-Sessions can be terminated in several ways:
-
-#### Client-Directed Termination
-
-Clients can terminate sessions using the `@McpDelete` endpoint:
-
-```kotlin
-@McpDelete
-suspend fun terminateSession(
-  @RequestHeaders headers: Headers,
-  sendChannel: SendChannel<ServerSentEvent>
-) {
-  val sessionId = headers[SESSION_ID_HEADER] ?: throw IllegalArgumentException("Missing session ID")
-  
-  // Session handler will be called automatically to clean up
-  // Additional cleanup can be performed here if needed
-}
-```
-
-#### Programmatic Termination
-
-Server code can terminate sessions directly:
-
-```kotlin
-@Singleton
-class MyService @Inject constructor(
-  private val sessionHandler: McpSessionHandler
-) {
-  
-  suspend fun cleanupExpiredSessions() {
-    val expiredSessions = findExpiredSessions()
-    expiredSessions.forEach { sessionId ->
-      sessionHandler.terminate(sessionId)
-    }
-  }
-}
-```
-
-### Session Storage Examples
-
-
-#### Database Session Handler
-
-```kotlin
-@Singleton
-class DatabaseSessionHandler @Inject constructor(
-  private val sessionDao: SessionDao
-) : McpSessionHandler {
-  
-  override suspend fun initialize(): String {
-    val sessionId = UUID.randomUUID().toString()
-    sessionDao.createSession(
-      Session(
-        id = sessionId,
-        createdAt = Clock.System.now(),
-        expiresAt = Clock.System.now().plus(1.hours)
-      )
-    )
-    return sessionId
-  }
-  
-  override suspend fun isActive(sessionId: String): Boolean {
-    val session = sessionDao.findById(sessionId) ?: return false
-    return session.expiresAt > Clock.System.now()
-  }
-  
-  override suspend fun terminate(sessionId: String) {
-    sessionDao.deleteById(sessionId)
-  }
-}
-```
-
-### Multi-Tenant Session Management
-
-For multi-tenant applications, use annotation-based session handlers:
-
-```kotlin
-// Define tenant-specific annotations
-@Qualifier
-annotation class TenantA
-
-@Qualifier  
-annotation class TenantB
-
-// Install tenant-specific session handlers
-install(McpSessionHandlerModule.create<TenantASessionHandler>(TenantA::class))
-install(McpSessionHandlerModule.create<TenantBSessionHandler>(TenantB::class))
-```
-
-### Security Considerations
-
-When implementing session management:
-
-- **Unique Session IDs**: Use cryptographically secure random session identifiers
-- **Session Expiration**: Implement appropriate session timeouts
-- **Concurrent Access**: Ensure thread-safe session storage and access
-- **Cleanup**: Properly clean up session resources to prevent memory leaks
-- **Validation**: Always validate session IDs before processing requests
+Without the WebActionModule installation, your `@McpPost` annotated methods will not be registered as HTTP endpoints.
 
 ## Configuration
 
