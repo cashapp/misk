@@ -24,37 +24,79 @@ import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 
+private val reuseInjectorEnabled = System.getenv("MISK_TEST_REUSE_INJECTOR")?.toBoolean() ?: false
+
 internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
   companion object {
     private val runningDependencies = ConcurrentHashMap.newKeySet<String>()
     private val runningServices = ConcurrentHashMap.newKeySet<List<Module>>()
+
+    // Tracked by identity, not by module key, because a module's hashCode can change after its
+    // injector is cached. A manager leaves the set once it stops, so an evicted injector can be
+    // garbage collected.
+    private val startedServiceManagers = ConcurrentHashMap.newKeySet<ServiceManager>()
+
     private val log = getLogger<MiskTestExtension>()
 
-    private val maxLruSize: Int? =
-      System.getenv("MISK_TEST_REUSE_LRU_SIZE")?.toIntOrNull()?.takeIf { it > 0 }
+    private val maxLruSize: Int? = System.getenv("MISK_TEST_REUSE_LRU_SIZE")?.toIntOrNull()?.takeIf { it > 0 }
 
     // When MISK_TEST_REUSE_LRU_SIZE is set, the cache evicts least-recently-used entries once
     // the size is exceeded; the removal listener stops services for evicted injectors. Guava's
     // cache uses ConcurrentMap internally, so callers don't need extra synchronization.
     private val injectedModules: Cache<List<Module>, Injector> = run {
-      val builder = CacheBuilder.newBuilder()
-        .removalListener<List<Module>, Injector> { notification ->
+      val builder =
+        CacheBuilder.newBuilder().removalListener<List<Module>, Injector> { notification ->
           if (notification.cause == RemovalCause.EXPLICIT) return@removalListener
           val key = notification.key ?: return@removalListener
           val injector = notification.value ?: return@removalListener
           runningServices.remove(key)
-          try {
-            val serviceManager = injector
-              .getExistingBinding(Key.get(ServiceManager::class.java))
-              ?.provider?.get()
-            serviceManager?.stopAsync()?.awaitStopped(45, TimeUnit.SECONDS)
-          } catch (e: Exception) {
-            log.warn(e) { "Failed to stop services for evicted injector cache entry" }
-          }
+          val serviceManager =
+            try {
+              injector.serviceManager()
+            } catch (e: Exception) {
+              log.warn(e) { "Failed to stop services for a reused injector" }
+              null
+            }
+          stopQuietly(listOfNotNull(serviceManager))
         }
       if (maxLruSize != null) builder.maximumSize(maxLruSize.toLong())
       builder.build()
+    }
+
+    init {
+      if (reuseInjectorEnabled) {
+        Runtime.getRuntime().addShutdownHook(thread(start = false) { stopRunningReusedInjectors() })
+      }
+    }
+
+    internal fun stopRunningReusedInjectors() {
+      stopQuietly(startedServiceManagers.toList())
+      runningServices.clear()
+      injectedModules.invalidateAll()
+    }
+
+    private fun stopQuietly(serviceManagers: Collection<ServiceManager>) {
+      val stopping =
+        serviceManagers.filter {
+          try {
+            it.stopAsync()
+            true
+          } catch (e: Exception) {
+            log.warn(e) { "Failed to stop services for a reused injector" }
+            false
+          }
+        }
+      // One deadline for every wait, so slow stops overlap instead of adding up.
+      val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(45)
+      stopping.forEach {
+        try {
+          it.awaitStopped(deadline - System.nanoTime(), TimeUnit.NANOSECONDS)
+          startedServiceManagers.remove(it)
+        } catch (e: Exception) {
+          log.warn(e) { "Failed to stop services for a reused injector" }
+        }
+      }
     }
   }
 
@@ -95,9 +137,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     val injector =
       if (context.reuseInjector()) {
         try {
-          injectedModules.get(context.getSortedActionTestModules()) {
-            Guice.createInjector(module)
-          }
+          injectedModules.get(context.getSortedActionTestModules()) { Guice.createInjector(module) }
         } catch (e: UncheckedExecutionException) {
           throw e.cause ?: e
         }
@@ -151,9 +191,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
             }
           }
           runningServices.add(context.getSortedActionTestModules())
-          if (context.reuseInjector()) {
-            Runtime.getRuntime().addShutdownHook(thread(start = false) { serviceManager!!.stop(context) })
-          }
+          if (context.reuseInjector()) startedServiceManagers.add(serviceManager!!)
         } catch (e: IllegalStateException) {
           // Unwrap and throw the real service failure
           val suppressed = e.suppressed.firstOrNull()
@@ -245,8 +283,7 @@ private fun ExtensionContext.startService(): Boolean {
 //   2. The environment variable MISK_TEST_REUSE_INJECTOR is set to true
 private fun ExtensionContext.reuseInjector(): Boolean {
   return getFromStoreOrCompute("reuseInjector") {
-    (System.getenv("MISK_TEST_REUSE_INJECTOR")?.toBoolean() ?: false) &&
-      getActionTestModules().all { it is ReusableTestModule }
+    reuseInjectorEnabled && getActionTestModules().all { it is ReusableTestModule }
   }
 }
 
@@ -263,6 +300,9 @@ private fun ExtensionContext.getExternalDependencies(): Iterable<ExternalDepende
     fieldsAnnotatedBy<MiskExternalDependency, ExternalDependency>()
   }
 }
+
+private fun Injector.serviceManager(): ServiceManager? =
+  getExistingBinding(Key.get(ServiceManager::class.java))?.provider?.get()
 
 private fun ServiceManager.stop(context: ExtensionContext) {
   this.stopAsync().awaitStopped(45, TimeUnit.SECONDS)
