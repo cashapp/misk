@@ -4,13 +4,19 @@ package misk.mcp
 
 import com.google.inject.Provider
 import misk.annotation.ExperimentalMiskApi
+import misk.mcp.config.McpIconConfig
 import misk.mcp.config.McpServerConfig
 import misk.mcp.internal.McpDispatcher
 import misk.mcp.internal.UriTemplate
+import misk.mcp.protocol.EmptyJsonObject
+import misk.mcp.protocol.Icon
 import misk.mcp.protocol.Implementation
 import misk.mcp.protocol.Prompt
+import misk.mcp.protocol.PromptReference
+import misk.mcp.protocol.Reference
 import misk.mcp.protocol.Resource
 import misk.mcp.protocol.ResourceTemplate
+import misk.mcp.protocol.ResourceTemplateReference
 import misk.mcp.protocol.ServerCapabilities
 import misk.mcp.protocol.Tool
 import misk.mcp.protocol.ToolAnnotations
@@ -58,10 +64,18 @@ internal constructor(
   resources: Set<McpResource>,
   resourceTemplates: Set<McpResourceTemplate>,
   prompts: Set<McpPrompt>,
+  completionProviders: Set<McpCompletionProvider>,
   private val instructionsProvider: Provider<String>? = null,
   internal val mcpMetrics: McpMetrics,
 ) {
-  val serverInfo: Implementation = Implementation(name = name, version = version)
+  val serverInfo: Implementation =
+    Implementation(
+      name = name,
+      version = version,
+      title = config.title,
+      websiteUrl = config.website_url,
+      icons = config.icons.map { it.toIcon() }.ifEmpty { null },
+    )
 
   val capabilities: ServerCapabilities =
     ServerCapabilities(
@@ -69,6 +83,7 @@ internal constructor(
       resources =
         if (resources.isNotEmpty() || resourceTemplates.isNotEmpty()) ServerCapabilities.Resources() else null,
       prompts = if (prompts.isNotEmpty()) ServerCapabilities.Prompts() else null,
+      completions = if (completionProviders.isNotEmpty()) EmptyJsonObject else null,
     )
 
   val instructions: String?
@@ -85,6 +100,24 @@ internal constructor(
 
   internal val prompts: Map<String, RegisteredPrompt> =
     prompts.associate { it.name to RegisteredPrompt(it, it.toPrompt()) }
+
+  internal val completionProviders: Map<String, McpCompletionProvider> =
+    completionProviders.associateBy { provider ->
+      val ref = provider.ref
+      val registered =
+        when (ref) {
+          is PromptReference -> ref.name in this.prompts
+          is ResourceTemplateReference -> this.resourceTemplates.any { it.definition.uriTemplate == ref.uri }
+        }
+      require(registered) { "${provider::class.simpleName} completes ${ref.key}, which server $name doesn't serve" }
+      ref.key
+    }
+
+  init {
+    require(this.completionProviders.size == completionProviders.size) {
+      "Server $name has more than one completion provider for the same prompt or resource template"
+    }
+  }
 
   internal val dispatcher = McpDispatcher(this)
 
@@ -104,6 +137,8 @@ internal constructor(
 private fun McpTool<*>.toTool() =
   Tool(
     name = name,
+    title = title,
+    icons = icons,
     inputSchema = inputSchema,
     description = description,
     outputSchema = outputSchema,
@@ -118,9 +153,39 @@ private fun McpTool<*>.toTool() =
     meta = meta,
   )
 
-private fun McpResource.toResource() = Resource(uri = uri, name = name, description = description, mimeType = mimeType)
+private fun McpResource.toResource() =
+  Resource(uri = uri, name = name, title = title, icons = icons, description = description, mimeType = mimeType)
 
 private fun McpResourceTemplate.toResourceTemplate() =
-  ResourceTemplate(uriTemplate = uriTemplate, name = name, description = description, mimeType = mimeType)
+  ResourceTemplate(
+    uriTemplate = uriTemplate,
+    name = name,
+    title = title,
+    icons = icons,
+    description = description,
+    mimeType = mimeType,
+  )
 
-private fun McpPrompt.toPrompt() = Prompt(name = name, description = description, arguments = arguments)
+private fun McpPrompt.toPrompt() =
+  Prompt(name = name, title = title, icons = icons, description = description, arguments = arguments)
+
+/** Identifies a prompt or resource template for completion. */
+internal val Reference.key: String
+  get() =
+    when (this) {
+      is PromptReference -> "$type:$name"
+      is ResourceTemplateReference -> "$type:$uri"
+    }
+
+private fun McpIconConfig.toIcon() =
+  Icon(
+    src = src,
+    mimeType = mime_type,
+    sizes = sizes.ifEmpty { null },
+    theme =
+      theme?.let { theme ->
+        requireNotNull(Icon.Theme.entries.find { it.name.equals(theme, ignoreCase = true) }) {
+          "Unknown MCP icon theme '$theme': use light or dark"
+        }
+      },
+  )

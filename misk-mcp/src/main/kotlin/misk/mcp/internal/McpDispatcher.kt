@@ -20,9 +20,13 @@ import misk.logging.getLogger
 import misk.mcp.McpJson
 import misk.mcp.McpMetrics
 import misk.mcp.MiskMcpServer
+import misk.mcp.key
 import misk.mcp.protocol.CallToolRequest
 import misk.mcp.protocol.CallToolRequestParams
 import misk.mcp.protocol.CallToolResult
+import misk.mcp.protocol.CompleteRequest
+import misk.mcp.protocol.CompleteRequestParams
+import misk.mcp.protocol.CompleteResult
 import misk.mcp.protocol.DEFAULT_NEGOTIATED_PROTOCOL_VERSION
 import misk.mcp.protocol.DiscoverResult
 import misk.mcp.protocol.EmptyJsonObject
@@ -45,11 +49,13 @@ import misk.mcp.protocol.McpException
 import misk.mcp.protocol.McpHeaders
 import misk.mcp.protocol.McpMetaKeys
 import misk.mcp.protocol.McpMethod
+import misk.mcp.protocol.PromptReference
 import misk.mcp.protocol.RPCError
 import misk.mcp.protocol.ReadResourceRequest
 import misk.mcp.protocol.ReadResourceRequestParams
 import misk.mcp.protocol.ReadResourceResult
 import misk.mcp.protocol.RequestMeta
+import misk.mcp.protocol.ResourceTemplateReference
 import misk.mcp.protocol.SUPPORTED_LEGACY_PROTOCOL_VERSIONS
 import misk.mcp.protocol.SUPPORTED_PROTOCOL_VERSIONS
 import misk.mcp.protocol.TextContent
@@ -260,6 +266,11 @@ internal class McpDispatcher(private val server: MiskMcpServer) {
           ReadResourceResult.serializer(),
           readResource(ReadResourceRequest(decodeParams(request, ReadResourceRequestParams.serializer())), era),
         )
+      McpMethod.COMPLETION_COMPLETE ->
+        encode(
+          CompleteResult.serializer(),
+          complete(CompleteRequest(decodeParams(request, CompleteRequestParams.serializer()))),
+        )
       else -> null
     }
   }
@@ -274,6 +285,7 @@ internal class McpDispatcher(private val server: MiskMcpServer) {
       McpMethod.RESOURCES_LIST,
       McpMethod.RESOURCES_TEMPLATES_LIST,
       McpMethod.RESOURCES_READ -> capabilities.resources != null
+      McpMethod.COMPLETION_COMPLETE -> capabilities.completions != null
       else -> false
     }
   }
@@ -329,6 +341,27 @@ internal class McpDispatcher(private val server: MiskMcpServer) {
           data = buildJsonObject { put("uri", request.uri) },
         )
     return template.handler.handler(request, match.variables)
+  }
+
+  private suspend fun complete(request: CompleteRequest): CompleteResult {
+    val provider = server.completionProviders[request.ref.key]
+    if (provider == null) {
+      val known =
+        when (val ref = request.ref) {
+          is PromptReference -> ref.name in server.prompts
+          is ResourceTemplateReference -> server.resourceTemplates.any { it.definition.uriTemplate == ref.uri }
+        }
+      if (!known) throw invalidParams("Unknown completion reference: ${request.ref.key}")
+      return CompleteResult(CompleteResult.Completion(values = emptyList(), total = 0, hasMore = false))
+    }
+    val values = provider.complete(request)
+    return CompleteResult(
+      CompleteResult.Completion(
+        values = values.take(CompleteResult.Completion.MAX_VALUES),
+        total = values.size,
+        hasMore = values.size > CompleteResult.Completion.MAX_VALUES,
+      )
+    )
   }
 
   private fun decorateModern(method: String, result: JsonObject): JsonObject {
