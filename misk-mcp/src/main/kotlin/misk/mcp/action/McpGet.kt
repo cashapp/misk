@@ -82,6 +82,10 @@ import misk.web.mediatype.MediaTypes
  * @see McpStreamManager For managing MCP streams and server lifecycle
  * @see misk.mcp.MiskMcpServer For the underlying MCP server implementation
  */
+@Deprecated(
+  "MCP 2026-07-28 removes the GET stream, and misk-mcp never sends messages on it. This will be removed when " +
+    "misk-mcp adopts that spec. Delete the @McpGet action; no replacement is needed."
+)
 @Get("/mcp")
 @ResponseContentType(MediaTypes.SERVER_EVENT_STREAM)
 @Target(AnnotationTarget.FUNCTION)

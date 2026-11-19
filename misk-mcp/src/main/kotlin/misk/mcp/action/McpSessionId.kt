@@ -2,9 +2,10 @@ package misk.mcp.action
 
 import jakarta.inject.Inject
 import misk.api.HttpRequest
+import misk.mcp.internal.SESSION_DEPRECATION
 import misk.scope.ActionScoped
 
-const val SESSION_ID_HEADER = "Mcp-Session-Id"
+@Deprecated(SESSION_DEPRECATION) const val SESSION_ID_HEADER = "Mcp-Session-Id"
 
 /**
  * Provides access to the current MCP session ID within action-scoped contexts.
@@ -46,6 +47,8 @@ const val SESSION_ID_HEADER = "Mcp-Session-Id"
  * @see misk.mcp.McpSessionHandler for session management
  * @see misk.mcp.McpSessionHandlerModule for installation
  */
+@Deprecated(SESSION_DEPRECATION)
+@Suppress("DEPRECATION")
 class McpSessionId @Inject constructor(private val httpRequest: ActionScoped<HttpRequest>) {
   /**
    * Retrieves the current MCP session ID from the request headers.

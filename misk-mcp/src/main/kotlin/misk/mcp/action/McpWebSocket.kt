@@ -1,6 +1,7 @@
 package misk.mcp.action
 
 import misk.annotation.ExperimentalMiskApi
+import misk.mcp.internal.WEBSOCKET_DEPRECATION
 import misk.web.ConnectWebSocket
 
 /**
@@ -49,4 +50,8 @@ import misk.web.ConnectWebSocket
  * @see misk.mcp.action.McpStreamManager
  * @see misk.mcp.McpServerModule
  */
-@ConnectWebSocket("/mcp") @Target(AnnotationTarget.FUNCTION) @ExperimentalMiskApi annotation class McpWebSocket
+@Deprecated(WEBSOCKET_DEPRECATION)
+@ConnectWebSocket("/mcp")
+@Target(AnnotationTarget.FUNCTION)
+@ExperimentalMiskApi
+annotation class McpWebSocket
