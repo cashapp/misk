@@ -1,54 +1,71 @@
 # misk-mcp
 
-This module provides Misk with Model Context Protocol (MCP) server capabilities, enabling AI applications to seamlessly integrate with your services through standardized tools, resources, and prompts.
+This module adds [Model Context Protocol](https://modelcontextprotocol.io/specification/2026-07-28) (MCP) servers to
+Misk services, so that AI applications can call your tools, read your resources and use your prompts.
+
+misk-mcp implements MCP itself; it doesn't depend on an MCP SDK. Its protocol types live in `misk.mcp.protocol`.
 
 ## What is MCP?
 
-The [Model Context Protocol](https://modelcontextprotocol.io/specification/2025-06-18) is an open protocol that enables seamless integration between LLM applications and external data sources and tools. MCP provides a standardized way for applications to:
+MCP is an open protocol between LLM applications (hosts and their clients) and the services that give them context
+(servers). A server offers:
 
-- **Share contextual information** with language models through resources and resource templates
-- **Expose tools and capabilities** to AI systems for function execution  
-- **Create reusable prompt templates** and workflows for users
-- **Build composable integrations** across the AI ecosystem
+- **Tools** that the model can call
+- **Resources** and **resource templates** that give the model data
+- **Prompts**: reusable templates for interactions with the model
 
-The protocol uses JSON-RPC 2.0 messages over various transports to establish communication between hosts (LLM applications), clients (connectors), and servers (your services).
+Messages are JSON-RPC 2.0. misk-mcp serves the Streamable HTTP transport: clients POST each message and the server
+answers with Server-Sent Events (SSE).
+
+## Protocol versions
+
+misk-mcp serves two eras of the protocol on the same endpoint, and picks one for each request:
+
+| Era | Versions | How clients talk |
+|-----|----------|------------------|
+| Modern | `2026-07-28` | Stateless. Every request carries `protocolVersion`, `clientInfo` and `clientCapabilities` in `_meta`. Clients discover the server with `server/discover`. |
+| Legacy | `2025-11-25`, `2025-06-18`, `2025-03-26`, `2024-11-05` | Clients open with `initialize`, then send the negotiated version in the `MCP-Protocol-Version` header. |
+
+Your tools, resources and prompts don't need to know which era a client speaks. A few features exist only in the modern
+era; this README calls them out.
+
+There are no server-side sessions and no WebSocket transport. Handlers can't send requests to the client, so the server
+doesn't support sampling, roots or logging.
 
 ## Setup
 
-Install the MCP server module in your Misk application:
+Install the MCP server module and register your MCP components:
 
 ```kotlin
 @ExperimentalMiskApi
-class MyAppModule : KAbstractModule() {
+class MyAppModule(private val config: MyAppConfig) : KAbstractModule() {
   override fun configure() {
-    // Install the MCP server module with configuration
     install(McpServerModule.create("my_server", config.mcp))
-    
-    // Register your MCP components
+
     install(McpToolModule.create<CalculatorTool>())
     install(McpResourceModule.create<DatabaseSchemaResource>())
     install(McpResourceTemplateModule.create<UserProfileResource>())
     install(McpPromptModule.create<CodeReviewPrompt>())
+    install(McpCompletionModule.create<LanguageCompletions>())
+
+    install(WebActionModule.create<MyMcpPostAction>())
   }
 }
 ```
 
-## Web Action Integration
+## Web action
 
-To expose MCP functionality through HTTP, create a web action annotated with `@McpPost` and install it with a
-WebActionModule. misk-mcp serves the Streamable HTTP transport: clients POST JSON-RPC messages and the server responds
-with Server-Sent Events (SSE).
+Serve the MCP endpoint with a web action whose method is annotated with `@McpPost`:
 
 ```kotlin
 @ExperimentalMiskApi
 class MyMcpPostAction @Inject constructor(
-  private val mcpStreamManager: McpStreamManager
+  private val mcpStreamManager: McpStreamManager,
 ) : WebAction {
-
   @McpPost
   suspend fun handleMcpRequest(
     @RequestBody message: JSONRPCMessage,
-    sendChannel: SendChannel<ServerSentEvent>
+    sendChannel: SendChannel<ServerSentEvent>,
   ) {
     mcpStreamManager.withSseChannel(sendChannel) {
       handleMessage(message)
@@ -57,609 +74,404 @@ class MyMcpPostAction @Inject constructor(
 }
 ```
 
-**Important**: You must install a WebActionModule to register your MCP web actions:
+`@McpPost` serves `POST /mcp`. Each request runs its handler on the web action's coroutine, and the response ends when
+the handler returns. Client notifications and responses get `202 Accepted`. `GET` and `DELETE` get
+`405 Method Not Allowed`, because the server has neither standalone streams nor sessions.
 
-```kotlin
-@ExperimentalMiskApi
-class MyAppModule : KAbstractModule() {
-  override fun configure() {
-    // Install MCP server module
-    install(McpServerModule.create("my_server", config.mcp))
-    
-    // Install web action module to register MCP endpoints
-    install(WebActionModule.create<MyMcpWebAction>())
-    
-    // Register your MCP components
-    install(McpToolModule.create<CalculatorTool>())
-    install(McpResourceModule.create<DatabaseSchemaResource>())
-  }
-}
-```
+The server checks each request against the Streamable HTTP rules before any handler runs. It rejects a request with a
+JSON-RPC error and an HTTP error status:
 
-Without the WebActionModule installation, your `@McpPost` annotated methods will not be registered as HTTP endpoints.
+| Status | Code | When |
+|--------|------|------|
+| 403 | `-32600` | The `Origin` header isn't in `allowed_origins` |
+| 400 | `-32020` | `MCP-Protocol-Version`, `Mcp-Method` or `Mcp-Name` doesn't match a modern request's body (values may be `=?base64?…?=` encoded), or a legacy request sends a modern version without `_meta` |
+| 400 | `-32022` | The protocol version isn't supported. `data` lists the supported versions. A legacy request with no version header means `2025-03-26`. |
+| 400 | `-32602` | A modern request lacks its `_meta` |
+| 404 | `-32601` | A modern client calls a method that the server doesn't serve |
+
+Legacy clients get unknown methods as a `-32601` error with status 200, as before.
+
+While a handler runs, the server sends an SSE comment every `keep_alive_interval_ms`. It keeps proxies from closing an
+idle stream. When the client has gone away, the comment fails to write and the server cancels the handler.
+
+### Scoping the web action
+
+Leave the web action unscoped, as above. Misk then creates a `McpStreamManager` and a `MiskMcpServer` for each request,
+so tool, resource and prompt metadata can depend on the caller.
+
+If the web action must be a `@Singleton`, inject `Provider<McpStreamManager>` and call `get()` for each request.
+Injecting `McpStreamManager` directly into a singleton also works, but then one server serves every request, so all
+metadata must be static.
 
 ## Configuration
-
-Configure your MCP server in your application's YAML configuration:
 
 ```yaml
 mcp:
   my_server:
     version: "1.0.0"
+    title: "My Service"
+    website_url: "https://my-service.example.com"
+    icons:
+      - src: "https://my-service.example.com/icon.png"
+        mime_type: "image/png"
+        sizes: ["48x48"]
+    allowed_origins:
+      - "https://app.example.com"
+    keep_alive_interval_ms: 15000
+    request_state_key: "mcp-request-state"
 ```
 
-### Configuration Options
+| Option | Default | Description |
+|--------|---------|-------------|
+| `version` | required | The server's version, reported to clients. It isn't the protocol version. |
+| `title` | none | A display name for the server. |
+| `website_url` | none | The server's website, for clients to display. |
+| `icons` | none | Icons for the server, each with a `src` (`https:` or `data:` URI) and optional `mime_type`, `sizes` and `theme` (`light` or `dark`). |
+| `allowed_origins` | any | Origins that may call the server. A request with any other `Origin` header gets a 403. Requests without an `Origin` header, as from non-browser clients, are always allowed. |
+| `keep_alive_interval_ms` | `15000` | How often to send an SSE comment while a handler runs. |
+| `request_state_key` | none | The misk-crypto MAC key that signs the state of [multi round-trip requests](#asking-the-user-for-input). |
+| `prompts`, `resources`, `tools`, `enforce_strict_capabilities` | | Deprecated and ignored. Components are registered statically, so the server never sends list-changed or resource-update notifications. |
 
-- **version**: Server version reported to clients (semantic versioning recommended)
-- **prompts**, **resources**, **tools** and **enforce_strict_capabilities**: deprecated and ignored. The server
-  registers features statically, so it never sends list-changed or resource-update notifications.
+Modern results carry `ttlMs: 0` and `cacheScope: "private"`, so clients don't cache list or read results across users.
 
-## WebAction Scoping Best Practices
+## Tools
 
-MCP WebActions can be scoped as either **unscoped** (no annotation) or **`@Singleton`**. The choice affects how `McpStreamManager` and `MiskMcpServer` instances are created.
-
-### Recommended: Unscoped WebActions (Default)
-
-**Unscoped WebActions are the preferred pattern** because they create fresh `McpStreamManager` and `MiskMcpServer` instances per request, allowing for request-specific behavior.
-
-```kotlin
-@ExperimentalMiskApi
-class MyMcpAction @Inject constructor(
-  private val mcpStreamManager: McpStreamManager  // ✅ Fresh instance per request
-) : WebAction {
-  
-  @McpPost
-  suspend fun handleMcpRequest(
-    @RequestBody message: JSONRPCMessage,
-    sendChannel: SendChannel<ServerSentEvent>
-  ) {
-    mcpStreamManager.withSseChannel(sendChannel) {
-      handleMessage(message)
-    }
-  }
-}
-```
-
-**Benefits of unscoped WebActions:**
-- Fresh server instance per request
-- Tool/resource/prompt metadata can be request-specific
-- Supports dynamic tool descriptions based on user context
-- Simpler mental model - no need for providers
-
-**Use unscoped WebActions when:**
-- Tool descriptions vary by user permissions or roles
-- Resource availability changes based on request context
-- You have multi-tenant scenarios with different tool sets
-- You want the flexibility for future dynamic behavior (recommended default)
-
-### Alternative: Singleton WebActions with Provider
-
-If you need a singleton WebAction (e.g., for expensive initialization), **you must inject `Provider<McpStreamManager>`** instead of `McpStreamManager` directly:
-
-```kotlin
-@ExperimentalMiskApi
-@Singleton
-class MyMcpAction @Inject constructor(
-  private val mcpStreamManagerProvider: Provider<McpStreamManager>  // ✅ Use Provider
-) : WebAction {
-  
-  @McpPost
-  suspend fun handleMcpRequest(
-    @RequestBody message: JSONRPCMessage,
-    sendChannel: SendChannel<ServerSentEvent>
-  ) {
-    // Get a fresh instance per request
-    mcpStreamManagerProvider.get().withSseChannel(sendChannel) {
-      handleMessage(message)
-    }
-  }
-}
-```
-
-**Important:** If you inject `McpStreamManager` directly into a `@Singleton` WebAction (without using `Provider`), you effectively create a singleton `MiskMcpServer` that is reused across all requests. While this works, it prevents request-specific tool metadata and should only be done if all your tool/resource/prompt descriptions are completely static.
-
-```kotlin
-@ExperimentalMiskApi
-@Singleton
-class MyMcpAction @Inject constructor(
-  private val mcpStreamManager: McpStreamManager  // ⚠️ Effectively singleton server
-) : WebAction {
-  // This creates ONE MiskMcpServer instance for the lifetime of the application
-  // Only use this pattern if ALL tool descriptions are static
-}
-```
-
-### Comparison
-
-| Pattern                                    | Server Lifecycle | Use Case |
-|--------------------------------------------|------------------|----------|
-| **Unscoped WebAction + Direct Injection** (Recommended)      | Fresh per request | Dynamic tool metadata, flexible, default choice |
-| **Singleton WebAction + Provider**         | Fresh per request | Expensive WebAction initialization, still supports dynamic metadata |
-| **Singleton WebAction + Direct Injection** | Singleton (one instance) | All tool/resource/prompt descriptions are completely static |
-
-**Default recommendation:** Use unscoped WebActions for the best balance of flexibility and simplicity.
-
-## Implementing MCP Components
-
-### Tools
-
-Tools are functions that AI models can execute. There are two types of tools:
-
-#### Basic McpTool
-
-Use `McpTool` when returning simple text or media content:
+Tools are functions the model can call. Extend `McpTool` to return text or media content, or `StructuredMcpTool` to
+return structured data. The input type's properties, with their `@Description`s, become the tool's input schema.
 
 ```kotlin
 @Serializable
 data class CalculatorInput(
-  @Description("The mathematical operator (\"add\", \"subtract\", \"multiply\", or \"divide\") to execute")
+  @Description("The operator: add, subtract, multiply or divide")
   val operator: String,
-  @Description("The first operand in the operation (a number)")
+  @Description("The first operand")
   val a: Double,
-  @Description("The second operand in the operation (a number)")
-  val b: Double
+  @Description("The second operand")
+  val b: Double,
 )
 
 @ExperimentalMiskApi
 @Singleton
 class CalculatorTool @Inject constructor() : McpTool<CalculatorInput>() {
   override val name = "calculator"
-  override val description = "Performs basic arithmetic operations"
-  
-  // Optional: Override tool hints to provide additional metadata to clients
-  override val title = "Basic Calculator"  // User-friendly display name
-  override val readOnlyHint = true  // This tool doesn't modify any state
-  // Note: destructiveHint and idempotentHint are only relevant when readOnlyHint = false
-  
+  override val description = "Performs basic arithmetic"
+  override val title = "Calculator"
+  override val readOnlyHint = true
+
   override suspend fun handle(input: CalculatorInput): ToolResult {
     val result = when (input.operator) {
       "add" -> input.a + input.b
       "subtract" -> input.a - input.b
       "multiply" -> input.a * input.b
       "divide" -> {
-        if (input.b == 0.0) {
-          return ToolResult(
-            TextContent("Error: Division by zero"),
-            isError = true
-          )
-        }
+        if (input.b == 0.0) return ToolResult(TextContent("Division by zero"), isError = true)
         input.a / input.b
       }
-      else -> return ToolResult(
-        TextContent("Unknown operator: ${input.operator}"),
-        isError = true
-      )
+      else -> return ToolResult(TextContent("Unknown operator: ${input.operator}"), isError = true)
     }
-    
-    return ToolResult(
-      TextContent("Result: $result")
-    )
+    return ToolResult(TextContent("Result: $result"))
   }
 }
 ```
 
-#### StructuredMcpTool
-
-Use `StructuredMcpTool` when returning structured data that AI models need to parse:
+A `StructuredMcpTool` declares an output type too, which becomes the tool's output schema:
 
 ```kotlin
 @Serializable
-data class WeatherInput(
-  @Description("The city to get weather for")
-  val city: String,
-  @Description("Temperature units: 'celsius' or 'fahrenheit'")
-  val units: String = "celsius"
-)
+data class WeatherInput(@Description("The city") val city: String)
 
 @Serializable
-data class WeatherOutput(
-  val city: String,
-  val temperature: Double,
-  val humidity: Int,
-  val conditions: String,
-  val windSpeed: Double,
-  val units: String
-)
+data class WeatherOutput(val city: String, val temperature: Double, val conditions: String)
 
 @ExperimentalMiskApi
 @Singleton
 class WeatherTool @Inject constructor(
-  private val weatherService: WeatherService
+  private val weatherService: WeatherService,
 ) : StructuredMcpTool<WeatherInput, WeatherOutput>() {
   override val name = "get_weather"
-  override val description = "Get current weather conditions for a city"
-  
-  // Optional: Override tool hints
-  override val title = "Weather Service"
-  override val readOnlyHint = true  // Only reads weather data
-  override val openWorldHint = true  // Interacts with external weather API
-  
+  override val description = "Gets the current weather in a city"
+  override val readOnlyHint = true
+  override val openWorldHint = true
+
   override suspend fun handle(input: WeatherInput): ToolResult {
-    return try {
-      val weatherData = weatherService.getCurrentWeather(input.city, input.units)
-      
-      // Return structured data - will be serialized to JSON automatically
-      ToolResult(
-        WeatherOutput(
-          city = input.city,
-          temperature = weatherData.temp,
-          humidity = weatherData.humidity,
-          conditions = weatherData.description,
-          windSpeed = weatherData.windSpeed,
-          units = input.units
-        )
-      )
-    } catch (e: CityNotFoundException) {
-      // Can still return prompt content for errors
-      ToolResult(
-        TextContent("City '${input.city}' not found"),
-        isError = true
-      )
-    }
+    val weather = weatherService.current(input.city)
+      ?: return ToolResult(TextContent("City '${input.city}' not found"), isError = true)
+    return ToolResult(WeatherOutput(input.city, weather.temperature, weather.conditions))
   }
 }
 ```
 
-#### Accessing Request Meta (RequestMeta)
+An exception thrown by a tool becomes an error result, with the text `Error executing tool <name>: <message>`. Throw
+`McpException` to answer with a JSON-RPC error instead.
 
-When a tool needs access to the inbound `CallToolRequest._meta` field — for example to read a `progressToken` so it can stream progress notifications back, or to inspect related-task metadata — extend one of the meta-aware bridge classes instead of `McpTool` / `StructuredMcpTool`:
-
-- `MetaAwareMcpTool<I>` — for tools that return `ToolResult` (text/media/error content).
-- `MetaAwareStructuredMcpTool<I, O>` — for tools that return structured `O` typed output.
-
-Authors override the meta-aware `handle(input, meta)` overload; the bridge classes seal the input-only `handle(input)` overload to delegate with `meta = null`. The framework's dispatcher routes to the meta-aware overload automatically — no annotation or registration change is needed beyond picking the right base class.
+### Tool results
 
 ```kotlin
-@Serializable
-data class LongRunningInput(
-  @Description("How many steps the operation should run for")
-  val steps: Int
-)
-
-@ExperimentalMiskApi
-@Singleton
-class LongRunningTool @Inject constructor(
-  private val notifier: ProgressNotifier,
-) : MetaAwareMcpTool<LongRunningInput>() {
-  override val name = "long_running"
-  override val description = "Performs a long-running operation with progress reporting"
-
-  override suspend fun handle(input: LongRunningInput, meta: RequestMeta?): ToolResult {
-    val token = meta?.progressToken
-    repeat(input.steps) { step ->
-      // ... do work ...
-      if (token != null) {
-        notifier.notify(token, progress = step + 1, total = input.steps)
-      }
-    }
-    return ToolResult(TextContent("Completed ${input.steps} steps"))
-  }
-}
-```
-
-Use `MetaAwareStructuredMcpTool<I, O>` the same way; build the typed result with the inherited `ToolResult(result: O, ...)` factories. The interface-level return type is `McpTool.ToolResult`, not `StructuredToolResult<O>` — the typed `O` is preserved at value construction, not at signature.
-
-Tools that don't need meta should keep extending `McpTool` / `StructuredMcpTool` — meta-awareness is strictly opt-in.
-
-Register tools:
-
-```kotlin
-install(McpToolModule.create<CalculatorTool>())
-install(McpToolModule.create<WeatherTool>())
-```
-
-#### Tool Hints
-
-Tools can provide optional hints to help clients understand their behavior and requirements:
-
-```kotlin
-@ExperimentalMiskApi
-@Singleton
-class DatabaseTool @Inject constructor(
-  private val database: Database
-) : McpTool<DatabaseInput>() {
-  override val name = "database_manager"
-  override val description = "Manages database records"
-  
-  // Tool hints provide metadata about the tool's behavior
-  override val title = "Database Manager"  // User-friendly display name
-  
-  override val readOnlyHint = false  // This tool modifies state
-  
-  // The following hints are only relevant when readOnlyHint = false:
-  override val destructiveHint = true  // May delete or overwrite data
-  override val idempotentHint = false  // Multiple calls may have different effects
-  
-  override val openWorldHint = true  // Interacts with external database
-  
-  override suspend fun handle(input: DatabaseInput): ToolResult {
-    // Implementation
-  }
-}
-```
-
-**Available Tool Hints:**
-
-- **`title`**: User-friendly display name for the tool (defaults to `name`)
-- **`readOnlyHint`**: Whether the tool only reads data without modifying state (default: `false`)
-- **`destructiveHint`**: Whether the tool may delete or overwrite data (default: `true`, only relevant when `readOnlyHint = false`)
-- **`idempotentHint`**: Whether multiple calls with same input produce same result (default: `false`, only relevant when `readOnlyHint = false`)
-- **`openWorldHint`**: Whether the tool interacts with external systems (default: `true`)
-
-These hints help AI clients:
-- Show appropriate warnings for destructive operations
-- Optimize caching for read-only tools
-- Implement retry logic for idempotent tools
-- Understand external dependencies
-
-#### Working with ToolResult
-
-Both tool types use the `ToolResult` sealed interface for type-safe result handling:
-
-```kotlin
-// Return a simple text result
 return ToolResult(TextContent("Success!"))
 
-// Return multiple content items
 return ToolResult(
   TextContent("Processing complete"),
-  ImageContent(base64Data = imageData, mimeType = "image/png")
+  ImageContent(data = base64Png, mimeType = "image/png"),
 )
 
-// Return an error result
-return ToolResult(
-  TextContent("Failed to process request"),
-  isError = true
-)
+return ToolResult(TextContent("Failed to process request"), isError = true)
 
-// Include metadata
-return ToolResult(
-  TextContent("Result with metadata"),
-  _meta = JsonObject(mapOf("processTime" to JsonPrimitive(123)))
-)
+return ToolResult(TextContent("Done"), _meta = JsonObject(mapOf("processTime" to JsonPrimitive(123))))
 
-// For StructuredMcpTool - return structured data
-return ToolResult(myOutputObject)
+// In a StructuredMcpTool
+return ToolResult(myOutput)
 ```
 
-### Resources
+### Tool hints
 
-Resources provide contextual data to AI models. Implement the `McpResource` interface:
+| Hint | Default | Meaning |
+|------|---------|---------|
+| `title` | `name` | A display name |
+| `icons` | none | Icons for clients to display |
+| `readOnlyHint` | `false` | The tool only reads data |
+| `destructiveHint` | `true` | The tool may delete or overwrite data. Relevant only when `readOnlyHint` is false. |
+| `idempotentHint` | `false` | Repeating a call with the same input has no further effect. Relevant only when `readOnlyHint` is false. |
+| `openWorldHint` | `true` | The tool reaches systems outside the service |
+
+### Request meta
+
+To read a call's `_meta`, extend `MetaAwareMcpTool<I>` or `MetaAwareStructuredMcpTool<I, O>` and override
+`handle(input, meta)`. `meta` is null when the request has no `_meta`.
+
+```kotlin
+@ExperimentalMiskApi
+class AuditedTool @Inject constructor() : MetaAwareMcpTool<AuditInput>() {
+  override val name = "audited"
+  override val description = "Records who asked"
+
+  override suspend fun handle(input: AuditInput, meta: RequestMeta?): ToolResult {
+    val client = meta?.clientInfo?.name
+    // ...
+  }
+}
+```
+
+## Progress
+
+A tool, prompt or resource can report progress while it runs with `reportProgress`. The server sends each report as a
+`notifications/progress` event on the request's stream, before the result. When the client didn't ask for progress
+with a `_meta.progressToken`, `reportProgress` does nothing.
+
+```kotlin
+override suspend fun handle(input: ImportInput): ToolResult {
+  input.files.forEachIndexed { index, file ->
+    importer.import(file)
+    reportProgress(progress = index + 1.0, total = input.files.size.toDouble(), message = "Imported $file")
+  }
+  return ToolResult(TextContent("Imported ${input.files.size} files"))
+}
+```
+
+## Resources
+
+Resources give the model data. Implement `McpResource`:
 
 ```kotlin
 @Singleton
 class DatabaseSchemaResource @Inject constructor(
-  private val schemaService: SchemaService
+  private val schemaService: SchemaService,
 ) : McpResource {
   override val uri = "schema://database/users"
-  override val name = "User Database Schema"
-  override val description = "Complete schema definition for the users database table"
+  override val name = "users_schema"
+  override val title = "Users Table Schema"
+  override val description = "The schema of the users table"
   override val mimeType = "application/json"
-  
-  override suspend fun handler(request: ReadResourceRequest): ReadResourceResult {
-    val schema = schemaService.getUserTableSchema()
-    val schemaJson = Json.encodeToString(schema)
-    
-    return ReadResourceResult(
+
+  override suspend fun handler(request: ReadResourceRequest): ReadResourceResult =
+    ReadResourceResult(
       contents = listOf(
-        ResourceContent(
-          uri = uri,
-          mimeType = mimeType,
-          text = schemaJson
-        )
+        TextResourceContents(text = schemaService.usersSchemaJson(), uri = uri, mimeType = mimeType)
       )
     )
-  }
 }
 ```
 
-Register the resource:
+### Resource templates
 
-```kotlin
-install(McpResourceModule.create<DatabaseSchemaResource>())
-```
-
-### Resource Templates
-
-Resource templates provide parameterized resources using [RFC 6570](https://datatracker.ietf.org/doc/html/rfc6570) URI templates. They allow clients to read dynamic resources by extracting variables from the URI. Implement the `McpResourceTemplate` interface:
+Resource templates serve parameterized resources through [RFC 6570](https://datatracker.ietf.org/doc/html/rfc6570) URI
+templates. misk-mcp matches `{var}` and `{+var}` expressions and passes the variables to the handler.
 
 ```kotlin
 @Singleton
 class UserProfileResource @Inject constructor(
-  private val userService: UserService
+  private val userService: UserService,
 ) : McpResourceTemplate {
   override val uriTemplate = "users://{userId}/profile"
-  override val name = "User Profile"
-  override val description = "Profile information for a specific user"
+  override val name = "user_profile"
+  override val description = "A user's profile"
   override val mimeType = "application/json"
 
-  override suspend fun handler(
-    request: ReadResourceRequest,
-    variables: Map<String, String>,
-  ): ReadResourceResult {
-    val userId = variables["userId"] ?: error("Missing userId")
-    val user = userService.getUser(userId)
-
+  override suspend fun handler(request: ReadResourceRequest, variables: Map<String, String>): ReadResourceResult {
+    val user = userService.getUser(variables.getValue("userId"))
     return ReadResourceResult(
-      contents = listOf(
-        TextResourceContents(
-          text = Json.encodeToString(user),
-          uri = request.uri,
-          mimeType = mimeType,
-        )
-      )
+      contents = listOf(TextResourceContents(text = Json.encodeToString(user), uri = request.uri, mimeType = mimeType))
     )
   }
 }
 ```
 
-Register the resource template:
+Reading an unknown resource is a `-32602` error, or `-32002` for legacy clients.
 
-```kotlin
-install(McpResourceTemplateModule.create<UserProfileResource>())
-```
+Use consistent URI schemes, such as `schema://`, `docs://`, `config://`, `data://` and `file://`. See
+[Common URI schemes](https://modelcontextprotocol.io/specification/2026-07-28/server/resources#common-uri-schemes).
 
-### Prompts
+## Prompts
 
-Prompts are reusable templates for AI interactions. Implement the `McpPrompt` interface:
+Prompts are templates for interactions with the model. Implement `McpPrompt`:
 
 ```kotlin
 @Singleton
 class CodeReviewPrompt @Inject constructor() : McpPrompt {
   override val name = "code_review"
-  override val description = "Generate a code review prompt for the given programming language and code snippet"
-  
+  override val title = "Code Review"
+  override val description = "Asks for a review of a code snippet"
   override val arguments = listOf(
-    PromptArgument(
-      name = "language",
-      description = "The programming language of the code",
-      required = true
-    ),
-    PromptArgument(
-      name = "code", 
-      description = "The code snippet to review",
-      required = true
-    ),
-    PromptArgument(
-      name = "focus",
-      description = "Specific aspects to focus on (security, performance, style)",
-      required = false
-    )
+    PromptArgument(name = "language", description = "The code's language", required = true),
+    PromptArgument(name = "code", description = "The code to review", required = true),
   )
-  
+
   override suspend fun handler(request: GetPromptRequest): GetPromptResult {
-    val args = request.params.arguments ?: emptyMap()
-    val language = args["language"] ?: "unknown"
-    val code = args["code"] ?: ""
-    val focus = args["focus"] ?: "general best practices"
-    
-    val promptText = """
-      Please review the following $language code and provide feedback focusing on $focus:
-      
-      ```$language
-      $code
-      ```
-      
-      Please provide:
-      1. Overall assessment
-      2. Specific issues or improvements  
-      3. Best practice recommendations
-    """.trimIndent()
-    
+    val args = request.params.arguments.orEmpty()
+    val text = "Review this ${args["language"]} code:\n\n${args["code"]}"
     return GetPromptResult(
-      description = "Code review prompt for $language code",
-      messages = listOf(
-        PromptMessage(
-          role = MessageRole.USER,
-          content = TextContent(text = promptText)
-        )
-      )
+      description = "Code review",
+      messages = listOf(PromptMessage(role = Role.User, content = TextContent(text))),
     )
   }
 }
 ```
 
-Register the prompt:
+The server checks that required arguments are present. A missing argument, like an unknown prompt, is a `-32602`
+error.
+
+## Completion
+
+An `McpCompletionProvider` suggests values for the arguments of one prompt, or the variables of one resource template,
+through `completion/complete`:
 
 ```kotlin
-install(McpPromptModule.create<CodeReviewPrompt>())
+class LanguageCompletions @Inject constructor() : McpCompletionProvider {
+  override val ref = PromptReference("code_review")
+
+  override suspend fun complete(request: CompleteRequest): List<String> =
+    when (request.argument.name) {
+      "language" -> listOf("java", "kotlin", "swift").filter { it.startsWith(request.argument.value) }
+      else -> emptyList()
+    }
+}
+
+install(McpCompletionModule.create<LanguageCompletions>())
 ```
 
-## Resource URI Conventions
+The server advertises the `completions` capability only when at least one provider is registered. It returns the first
+100 values, with the total count and `hasMore`. A prompt or template without a provider completes to no values, and an
+unknown reference is a `-32602` error. Each provider's `ref` must name a registered prompt or resource template, and
+only one provider may serve each.
 
-Follow consistent URI patterns for resources:
+## Asking the user for input
 
-see: https://modelcontextprotocol.io/specification/2025-06-18/server/resources#common-uri-schemes
+A tool, prompt or resource can ask the user for input partway through a request, with a *multi round-trip request*
+(MRTR). The handler ends the request with `inputRequired`. The client collects the input, usually by asking the user,
+and sends the same request again with the answers, which the handler reads with `inputResponse`:
 
-- `schema://database/table_name` - Database schemas
-- `docs://api/endpoint_name` - API documentation  
-- `config://service/setting_name` - Configuration values
-- `data://reference/dataset_name` - Reference datasets
-- `file://path/to/file` - File system resources
+```kotlin
+@Serializable
+data class Nickname(@Description("What to call you") val nickname: String)
 
-## Security Considerations
+override suspend fun handle(): ToolResult {
+  val answer = inputResponse<Nickname>("nickname")
+    ?: inputRequired { elicit<Nickname>("nickname", "What should I call you?") }
 
-MCP enables powerful capabilities through data access and code execution. Follow these security principles:
+  return when (answer.action) {
+    ElicitResult.Action.Accept -> ToolResult(TextContent("Hello, ${answer.content!!.nickname}!"))
+    ElicitResult.Action.Decline, ElicitResult.Action.Cancel -> ToolResult(TextContent("Hello!"))
+  }
+}
+```
 
-1. **User Consent**: Always require explicit user consent for data access and tool execution
-2. **Input Validation**: Validate all tool inputs and resource requests
-3. **Access Controls**: Use the right `@Authenticated` or access annotations on your MCP web actions to enforce valid access for sensitive tools and resources
-4. **Resource Isolation**: Limit resource access to appropriate scopes
-5. **Error Handling**: Avoid exposing sensitive information in error messages
+- `elicit<T>(key, message)` asks for a form whose fields are `T`'s properties. Fields can be strings, numbers, booleans
+  and enums, and `@Description` describes them.
+- `elicitUrl(key, message, url)` sends the user to a URL, for input that must not pass through the client, such as a
+  credential.
+- `elicit(key, params)` takes `ElicitRequestFormParams` or `ElicitRequestURLParams` directly.
+
+`inputRequired` never returns. It ends the request by throwing, and a handler that catches the exception still ends
+with the input request. The `catch (e: Exception)` block and the code after it still run, though, and their result is
+discarded. Keep side effects such as error logs and failure metrics out of them, and catch narrower exceptions where you
+can.
+
+Each round runs the handler from the start, so work before `inputRequired` runs again.
+To carry results to the next round, pass a state, and read it back with `requestState`:
+
+```kotlin
+@Serializable
+data class TransferState(val quoteId: String)
+
+override suspend fun handle(input: TransferInput): ToolResult {
+  val state = requestState<TransferState>()
+    ?: inputRequired(TransferState(quotes.create(input).id)) {
+      elicit<Confirmation>("confirm", "Send ${input.amount} to ${input.recipient}?")
+    }
+  val confirmation = inputResponse<Confirmation>("confirm")!!
+  // ...
+}
+```
+
+The server signs the state with the misk-crypto MAC key named by `request_state_key`, so the client can't read or
+forge it. Install misk-crypto's `CryptoModule` with that key. The state is bound to the caller and to the request's
+method and parameters, and it expires after 10 minutes. A state that fails any of these checks is a `-32602` error.
+
+The server checks the client's capabilities before it sends the input requests. A client that doesn't declare
+`elicitation.form`, or `elicitation.url` for a URL request, gets a `-32021` error whose `data.requiredCapabilities`
+lists what's missing.
+
+Only `tools/call`, `prompts/get` and `resources/read` can require input, and only from modern clients. A legacy client
+gets an error result from a tool, and a `-32021` error from a prompt or resource.
+
+## Security considerations
+
+1. **Access control**: put `@Authenticated` or another access annotation on your MCP web action.
+2. **Origins**: set `allowed_origins` when browsers can reach the server, to block DNS rebinding attacks.
+3. **Input validation**: validate tool inputs and resource URIs.
+4. **Errors**: keep sensitive details out of error messages, including the messages of exceptions that tools throw.
+5. **User consent**: hosts ask users before running tools. Use the tool hints to describe what a tool does.
 
 ## Testing
 
-Test your MCP components with type-safe inputs:
+Test a tool's logic by calling `handle` directly:
 
 ```kotlin
-@ExperimentalMiskApi
-class MyMcpTest {
-  @Test
-  fun testCalculatorTool() {
-    val tool = CalculatorTool()
-    
-    // Test successful calculation
-    val result = runBlocking { 
-      tool.handle(
-        CalculatorInput(
-          operator = "add",
-          a = 5.0,
-          b = 3.0
-        )
-      )
-    }
-    
-    // Use kotlin.test assertions as per misk standards
-    assertTrue(result is McpTool.PromptToolResult)
-    val promptResult = result as McpTool.PromptToolResult
-    assertEquals(1, promptResult.result.size)
-    assertEquals("Result: 8.0", (promptResult.result[0] as TextContent).text)
-    assertFalse(promptResult.isError)
-  }
-  
-  @Test
-  fun testWeatherTool() {
-    val weatherService = mockk<WeatherService>()
-    val tool = WeatherTool(weatherService)
-    
-    // Mock the weather service
-    coEvery { 
-      weatherService.getCurrentWeather("San Francisco", "celsius") 
-    } returns WeatherData(
-      temp = 18.5,
-      humidity = 65,
-      description = "Partly cloudy",
-      windSpeed = 12.3
-    )
-    
-    // Test structured output
-    val result = runBlocking {
-      tool.handle(
-        WeatherInput(
-          city = "San Francisco",
-          units = "celsius"
-        )
-      )
-    }
-    
-    assertTrue(result is StructuredMcpTool.StructuredToolResult<*>)
-    val structuredResult = result as StructuredMcpTool.StructuredToolResult<WeatherOutput>
-    assertEquals("San Francisco", structuredResult.result.city)
-    assertEquals(18.5, structuredResult.result.temperature)
-    assertEquals(65, structuredResult.result.humidity)
-    assertFalse(structuredResult.isError)
-  }
+@Test
+fun adds() = runBlocking {
+  val result = CalculatorTool().handle(CalculatorInput(operator = "add", a = 5.0, b = 3.0))
+
+  val content = (result as McpTool.PromptToolResult).result
+  assertEquals("Result: 8.0", (content.single() as TextContent).text)
 }
 ```
 
 ### End-to-end tests
 
-`McpTestClient`, in misk-mcp's test fixtures, calls your `@McpPost` endpoint over Streamable HTTP. It speaks the
-modern protocol by default; pass a 2025-x `protocolVersion` to test legacy clients, which open with `initialize`.
+`McpTestClient`, in misk-mcp's test fixtures, calls your `@McpPost` endpoint over Streamable HTTP. It speaks the modern
+protocol by default. Pass a legacy `protocolVersion` to test legacy clients; the client opens with `initialize` before
+its first request.
+
+```kotlin
+dependencies {
+  testImplementation(testFixtures("com.squareup.misk:misk-mcp"))
+}
+```
 
 ```kotlin
 @MiskTest(startService = true)
 class MyMcpEndpointTest {
+  @MiskTestModule val module = MyTestModule()
+
   @Inject lateinit var jettyService: JettyService
 
   @Test
@@ -673,9 +485,32 @@ class MyMcpEndpointTest {
 }
 ```
 
-## Learn More
+To test a handler that asks for input, declare the elicitation capability and pass an `InputHandler`. The client
+answers each input request and retries until the request completes:
 
-- [MCP Specification](https://modelcontextprotocol.io/specification/2025-06-18) - Official protocol specification
-- [MCP Examples](https://modelcontextprotocol.io/examples) - Example implementations
-- [MCP SDKs](https://modelcontextprotocol.io) - Available SDKs for different languages
-- [MCP Testing Tool](https://modelcontextprotocol.io/legacy/tools/inspector) - Local dashboard to test MCP server against your local running Misk service (simply run `$ npx @modelcontextprotocol/inspector`)
+```kotlin
+val client = McpTestClient(
+  OkHttpClient(),
+  url,
+  capabilities = ClientCapabilities(elicitation = ClientCapabilities.Elicitation()),
+  inputHandler = { key, request ->
+    ElicitResult(ElicitResult.Action.Accept, buildJsonObject { put("nickname", "Ada") })
+  },
+)
+```
+
+`serverInfo()` returns the server's name and version in either era. `McpTestClient.send` returns the whole response,
+including its HTTP status and progress notifications, for tests of the protocol itself. The client holds no connection
+or session, so there is nothing to close.
+
+## Migrating from kotlin-sdk
+
+misk-mcp used to build on the Kotlin MCP SDK. Its types moved to `misk.mcp.protocol` with the same names and
+constructor parameters, so most code migrates by rewriting imports. `scripts/migrate-from-kotlin-sdk.sh` rewrites them
+and lists what needs a person. See the CHANGELOG for the full list of changes.
+
+## Learn more
+
+- [MCP specification](https://modelcontextprotocol.io/specification/2026-07-28)
+- [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector): a local dashboard for testing your server
+  (`npx @modelcontextprotocol/inspector`)
