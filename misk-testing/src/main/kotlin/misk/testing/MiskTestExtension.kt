@@ -32,6 +32,11 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     private val runningDependencies = ConcurrentHashMap.newKeySet<String>()
     private val runningServices = ConcurrentHashMap.newKeySet<List<Module>>()
 
+    // Tracked by identity, not by module key, because a module's hashCode can change after its
+    // injector is cached. A manager leaves the set once it stops, so an evicted injector can be
+    // garbage collected.
+    private val startedServiceManagers = ConcurrentHashMap.newKeySet<ServiceManager>()
+
     private val log = getLogger<MiskTestExtension>()
 
     private val maxLruSize: Int? = System.getenv("MISK_TEST_REUSE_LRU_SIZE")?.toIntOrNull()?.takeIf { it > 0 }
@@ -46,13 +51,19 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
           val key = notification.key ?: return@removalListener
           val injector = notification.value ?: return@removalListener
           runningServices.remove(key)
-          stopQuietly(listOf(injector))
+          val serviceManager =
+            try {
+              injector.serviceManager()
+            } catch (e: Exception) {
+              log.warn(e) { "Failed to stop services for a reused injector" }
+              null
+            }
+          stopQuietly(listOfNotNull(serviceManager))
         }
       if (maxLruSize != null) builder.maximumSize(maxLruSize.toLong())
       builder.build()
     }
 
-    // The hook reads the cache at exit and holds no injector, so an evicted injector can be garbage collected.
     init {
       if (reuseInjectorEnabled) {
         Runtime.getRuntime().addShutdownHook(thread(start = false) { stopRunningReusedInjectors() })
@@ -60,27 +71,28 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     }
 
     internal fun stopRunningReusedInjectors() {
-      val running = injectedModules.asMap().filterKeys { it in runningServices }
-      stopQuietly(running.values)
-      runningServices.removeAll(running.keys)
-      injectedModules.invalidateAll(running.keys)
+      stopQuietly(startedServiceManagers.toList())
+      runningServices.clear()
+      injectedModules.invalidateAll()
     }
 
-    private fun stopQuietly(injectors: Collection<Injector>) {
-      val serviceManagers =
-        injectors.mapNotNull { injector ->
+    private fun stopQuietly(serviceManagers: Collection<ServiceManager>) {
+      val stopping =
+        serviceManagers.filter {
           try {
-            injector.serviceManager()?.also { it.stopAsync() }
+            it.stopAsync()
+            true
           } catch (e: Exception) {
             log.warn(e) { "Failed to stop services for a reused injector" }
-            null
+            false
           }
         }
       // One deadline for every wait, so slow stops overlap instead of adding up.
       val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(45)
-      serviceManagers.forEach {
+      stopping.forEach {
         try {
           it.awaitStopped(deadline - System.nanoTime(), TimeUnit.NANOSECONDS)
+          startedServiceManagers.remove(it)
         } catch (e: Exception) {
           log.warn(e) { "Failed to stop services for a reused injector" }
         }
@@ -179,6 +191,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
             }
           }
           runningServices.add(context.getSortedActionTestModules())
+          if (context.reuseInjector()) startedServiceManagers.add(serviceManager!!)
         } catch (e: IllegalStateException) {
           // Unwrap and throw the real service failure
           val suppressed = e.suppressed.firstOrNull()

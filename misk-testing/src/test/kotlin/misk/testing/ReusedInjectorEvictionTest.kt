@@ -46,6 +46,18 @@ class ReusedInjectorEvictionTest {
     assertThat(service.state()).isEqualTo(Service.State.TERMINATED)
   }
 
+  @Test
+  fun `the exit hook stops a cached injector whose module changed`() {
+    assumeReuseWithLruSizeOfOne()
+    runFixtures(MutableModuleFixture::class.java)
+    val service = mutatedInjector!!.get()!!.getInstance(IdleService::class.java)
+    assertThat(service.isRunning).isTrue()
+
+    MiskTestExtension.stopRunningReusedInjectors()
+
+    assertThat(service.state()).isEqualTo(Service.State.TERMINATED)
+  }
+
   private fun assumeReuseWithLruSizeOfOne() {
     assumeTrue(System.getenv("MISK_TEST_REUSE_INJECTOR") == "true")
     assumeTrue(System.getenv("MISK_TEST_REUSE_LRU_SIZE") == "1")
@@ -88,6 +100,27 @@ class ReusedInjectorEvictionTest {
     @Test fun `evicts the first injector`() {}
   }
 
+  @MiskTest(startService = true)
+  @EnabledIfSystemProperty(named = FIXTURE_PROPERTY, matches = "true")
+  class MutableModuleFixture {
+    @MiskTestModule val module = MutableModule()
+
+    @Inject lateinit var injector: Injector
+
+    @Test
+    fun `changes the module after its injector is cached`() {
+      mutatedInjector = WeakReference(injector)
+      module.label = "changed"
+    }
+  }
+
+  class MutableModule(var label: String = "initial") : ReusableTestModule() {
+    override fun configure() {
+      install(ServiceManagerModule())
+      install(ServiceModule<IdleService>())
+    }
+  }
+
   class FirstModule : ReusableTestModule() {
     override fun configure() {
       install(ServiceManagerModule())
@@ -112,5 +145,6 @@ class ReusedInjectorEvictionTest {
   companion object {
     private const val FIXTURE_PROPERTY = "misk.testing.reusedInjectorEvictionFixture"
     private var firstInjector: WeakReference<Injector>? = null
+    private var mutatedInjector: WeakReference<Injector>? = null
   }
 }
