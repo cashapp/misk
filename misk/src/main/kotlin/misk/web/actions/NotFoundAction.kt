@@ -7,6 +7,7 @@ import misk.logging.getLogger
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.BoundActionMatch
+import misk.web.Delete
 import misk.web.Get
 import misk.web.HttpCall
 import misk.web.PathParam
@@ -29,6 +30,7 @@ internal constructor(
 ) : WebAction {
   @Get("/{path:.*}")
   @Post("/{path:.*}")
+  @Delete("/{path:.*}")
   @RequestContentType(MediaTypes.ALL)
   @ResponseContentType(MediaTypes.ALL)
   @Unauthenticated
