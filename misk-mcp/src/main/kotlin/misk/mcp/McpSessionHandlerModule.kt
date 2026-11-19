@@ -3,6 +3,7 @@ package misk.mcp
 import kotlin.reflect.KClass
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
+import misk.mcp.internal.SESSION_DEPRECATION
 
 /**
  * Guice module for installing MCP session handlers for StreamableHTTP transport.
@@ -62,6 +63,8 @@ import misk.inject.keyOf
  * @see misk.mcp.action.McpGet for StreamableHTTP event streaming
  * @see misk.mcp.action.McpDelete for StreamableHTTP session termination
  */
+@Deprecated(SESSION_DEPRECATION)
+@Suppress("DEPRECATION")
 class McpSessionHandlerModule<T : McpSessionHandler>(
   private val mcpSessionHandlerClass: KClass<T>,
   private val groupAnnotationClass: KClass<out Annotation>?,

@@ -1,5 +1,7 @@
 package misk.mcp
 
+import misk.mcp.internal.SESSION_DEPRECATION
+
 /**
  * Handles MCP (Model Context Protocol) session lifecycle management for StreamableHTTP transport.
  *
@@ -44,6 +46,7 @@ package misk.mcp
  * @see misk.mcp.action.McpGet for StreamableHTTP event streaming
  * @see misk.mcp.action.McpDelete for StreamableHTTP session termination
  */
+@Deprecated(SESSION_DEPRECATION)
 interface McpSessionHandler {
   /**
    * Initializes a new MCP session and generates a unique session identifier.

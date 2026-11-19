@@ -70,6 +70,10 @@ import misk.web.mediatype.MediaTypes
  * @see McpPost For full MCP protocol request handling
  * @see McpGet For read-only MCP endpoints
  */
+@Deprecated(
+  "MCP 2026-07-28 removes sessions, so there is nothing for a client to delete. This will be removed when misk-mcp " +
+    "adopts that spec. Delete the @McpDelete action; no replacement is needed."
+)
 @Delete("/mcp")
 @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
 @Target(AnnotationTarget.FUNCTION)
