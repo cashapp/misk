@@ -295,6 +295,26 @@ class DataSourceConfigTest {
   }
 
   @Test
+  fun configuredTimeZoneComesAfterUtc() {
+    val parameters = mapOf("sessionVariables" to "time_zone='SYSTEM'")
+    assertThat(
+        DataSourceConfig(DataSourceType.MYSQL, jdbc_url_query_parameters = parameters)
+          .getDataSourceProperties()["sessionVariables"]
+      )
+      .isEqualTo("time_zone='+00:00',time_zone='SYSTEM'")
+  }
+
+  @Test
+  fun blankConfiguredSessionVariablesAreIgnored() {
+    val parameters = mapOf("sessionVariables" to " ")
+    assertThat(
+        DataSourceConfig(DataSourceType.MYSQL, jdbc_url_query_parameters = parameters)
+          .getDataSourceProperties()["sessionVariables"]
+      )
+      .isEqualTo("time_zone='+00:00'")
+  }
+
+  @Test
   fun externallyManagedMigrationsFormatIsValid() {
     // Should not throw any exception
     val config = DataSourceConfig(DataSourceType.MYSQL, migrations_format = MigrationsFormat.EXTERNALLY_MANAGED)

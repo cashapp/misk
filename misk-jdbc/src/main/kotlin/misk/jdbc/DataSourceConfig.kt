@@ -198,10 +198,12 @@ constructor(
       // This is safe from Vitess 17+
       // Connector/J lets this property override the sessionVariables URL parameter, so add the configured session
       // variables after time_zone. Decode them as Connector/J decodes URL parameters.
+      // They come last so that they can still set time_zone.
       val configuredSessionVariables =
         jdbc_url_query_parameters.entries
           .firstOrNull { it.key.equals("sessionVariables", ignoreCase = true) }
           ?.let { URLDecoder.decode(it.value.toString().trim(), Charsets.UTF_8) }
+          ?.takeIf { it.isNotBlank() }
       properties["sessionVariables"] = listOfNotNull("time_zone='+00:00'", configuredSessionVariables).joinToString(",")
     }
     return properties
