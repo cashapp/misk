@@ -11,13 +11,11 @@ import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.Tool
 import io.modelcontextprotocol.kotlin.sdk.types.ToolAnnotations
 import kotlin.time.TimeSource
-import kotlinx.coroutines.withContext
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.config.McpServerConfig
 import misk.mcp.config.asPrompts
 import misk.mcp.config.asResources
 import misk.mcp.config.asTools
-import misk.mcp.internal.McpClientConnection
 import misk.mcp.internal.build
 
 /**
@@ -35,7 +33,6 @@ import misk.mcp.internal.build
  * - **Resource Access**: Serves registered [McpResource] content to clients
  * - **Prompt Templates**: Provides registered [McpPrompt] templates for client use
  * - **Capability Negotiation**: The server automatically configures capabilities based on registered components
- * - **Session Management**: Manages multiple concurrent client sessions through SSE connections
  * - **Metrics Integration**: Automatically wires up all registered tools to [McpMetrics] for monitoring tool execution
  *   latency and outcomes
  *
@@ -79,7 +76,8 @@ import misk.mcp.internal.build
  *
  * The server automatically determines capabilities from the [McpServerConfig] and registered components:
  * - The server enables tools capability if any [McpTool] implementations are registered
- * - The server enables resources capability if any [McpResource] or [McpResourceTemplate] implementations are registered
+ * - The server enables resources capability if any [McpResource] or [McpResourceTemplate] implementations are
+ *   registered
  * - The server enables prompts capability if any [McpPrompt] implementations are registered
  *
  * @param name The unique name identifier for this MCP server instance
@@ -117,7 +115,8 @@ internal constructor(
           completions = null,
           logging = null,
           prompts = if (prompts.isNotEmpty()) config.prompts.asPrompts() else null,
-          resources = if (resources.isNotEmpty() || resourceTemplates.isNotEmpty()) config.resources.asResources() else null,
+          resources =
+            if (resources.isNotEmpty() || resourceTemplates.isNotEmpty()) config.resources.asResources() else null,
           tools = if (tools.isNotEmpty()) config.tools.asTools() else null,
         ),
       enforceStrictCapabilities = config.enforce_strict_capabilities,
@@ -131,9 +130,7 @@ internal constructor(
         name = prompt.name,
         description = prompt.description,
         arguments = prompt.arguments,
-        promptProvider = { request ->
-          withContext(McpClientConnection(this)) { prompt.handler(request) }
-        },
+        promptProvider = { request -> prompt.handler(request) },
       )
     }
 
@@ -143,9 +140,7 @@ internal constructor(
         name = resource.name,
         description = resource.description,
         mimeType = resource.mimeType,
-        readHandler = { request ->
-          withContext(McpClientConnection(this)) { resource.handler(request) }
-        },
+        readHandler = { request -> resource.handler(request) },
       )
     }
 
@@ -155,9 +150,7 @@ internal constructor(
         name = template.name,
         description = template.description,
         mimeType = template.mimeType,
-        readHandler = { request, variables ->
-          withContext(McpClientConnection(this)) { template.handler(request, variables) }
-        },
+        readHandler = { request, variables -> template.handler(request, variables) },
       )
     }
 
@@ -191,7 +184,7 @@ internal constructor(
       var outcome = McpMetrics.ToolCallOutcome.Success
 
       try {
-        withContext(McpClientConnection(this)) { handler(request) }.also { result ->
+        handler(request).also { result ->
           outcome = if (result.isError == true) McpMetrics.ToolCallOutcome.Error else McpMetrics.ToolCallOutcome.Success
         }
       } catch (ex: Exception) {

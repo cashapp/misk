@@ -3,10 +3,7 @@
 package misk.mcp
 
 import com.google.inject.Provider
-import com.google.inject.TypeLiteral
 import jakarta.inject.Inject
-import java.util.Optional
-import kotlin.jvm.optionals.getOrNull
 import kotlin.reflect.KClass
 import kotlinx.coroutines.channels.SendChannel
 import misk.annotation.ExperimentalMiskApi
@@ -14,34 +11,29 @@ import misk.inject.BindingQualifier
 import misk.inject.KAbstractModule
 import misk.inject.KInstallOnceModule
 import misk.inject.keyOf
-import misk.inject.parameterizedType
 import misk.inject.qualifier
 import misk.inject.setOfType
 import misk.inject.toKey
-import misk.inject.typeLiteral
 import misk.mcp.action.McpStreamManager
 import misk.mcp.config.McpConfig
 import misk.mcp.internal.McpJsonRpcMessageUnmarshaller
 import misk.mcp.internal.MiskStreamableHttpServerTransport
-import misk.mcp.internal.MiskWebSocketServerTransport
 import misk.scope.ActionScoped
 import misk.web.HttpCall
-import misk.web.actions.WebSocket
 import misk.web.marshal.Unmarshaller
 import misk.web.sse.ServerSentEvent
 
 /**
  * Guice module for configuring MCP (Model Context Protocol) server functionality.
  *
- * This module sets up the necessary bindings for MCP tools, resources, prompts, and transport mechanisms (WebSocket and
- * Server-Sent Events). It provides factory methods for creating configured MCP server instances with different
- * transport options and optional component grouping via [BindingQualifier] annotations.
+ * This module sets up the necessary bindings for MCP tools, resources, prompts, and the Streamable HTTP transport. It
+ * provides factory methods for creating configured MCP server instances with optional component grouping via
+ * [BindingQualifier] annotations.
  *
  * The module automatically configures:
  * - Multi-binders for tools, resources, and prompts
- * - Transport layer factories for HTTP streaming and WebSocket connections
+ * - The Streamable HTTP transport factory
  * - JSON RPC message unmarshalling
- * - Optional session handling
  * - Metrics collection
  *
  * ## Basic Usage
@@ -146,17 +138,6 @@ private constructor(
       config[name]
         ?: throw IllegalArgumentException("No MCP server configuration found for [name=$name] in [config=$config]")
 
-    // bind the Optional McpSessionHandler and get the optional provider
-    bindOptional(keyOf<McpSessionHandler>(qualifier))
-    val mcpSessionHandlerProvider: Provider<Optional<McpSessionHandler>> =
-      binder().run {
-        @Suppress("UNCHECKED_CAST")
-        val optionalType =
-          parameterizedType<Optional<*>>(McpSessionHandler::class.java).typeLiteral()
-            as TypeLiteral<Optional<McpSessionHandler>>
-        getProvider(optionalType.toKey(qualifier))
-      }
-
     // Get the providers for tools, resources, and prompts
     val promptsProvider = binder().getProvider(setOfType<McpPrompt>().toKey(qualifier))
     val resourcesProvider = binder().getProvider(setOfType<McpResource>().toKey(qualifier))
@@ -175,30 +156,11 @@ private constructor(
           override fun get() =
             object : MiskStreamableHttpServerTransport.Factory {
               override fun create(sendChannel: SendChannel<ServerSentEvent>) =
-                MiskStreamableHttpServerTransport(
-                  call = httpCall.get(),
-                  mcpSessionHandler = mcpSessionHandlerProvider.get().getOrNull(),
-                  sendChannel = sendChannel,
-                )
+                MiskStreamableHttpServerTransport(call = httpCall.get(), sendChannel = sendChannel)
             }
         }
       )
     val streamableHttpServerTransportFactoryProvider = binder().getProvider(streamableHttpServerTransportFactoryKey)
-
-    val webSocketServerTransportFactoryKey = keyOf<MiskWebSocketServerTransport.Factory>(qualifier)
-    bind(keyOf<MiskWebSocketServerTransport.Factory>(qualifier))
-      .toProvider(
-        object : Provider<MiskWebSocketServerTransport.Factory> {
-          @Inject lateinit var httpCall: ActionScoped<HttpCall>
-
-          override fun get() =
-            object : MiskWebSocketServerTransport.Factory {
-              override fun create(webSocket: WebSocket) =
-                MiskWebSocketServerTransport(call = httpCall.get(), webSocket = webSocket)
-            }
-        }
-      )
-    val webSocketServerTransportFactoryProvider = binder().getProvider(webSocketServerTransportFactoryKey)
 
     // Create a qualified binding for the MiskMcpServer
     val serverKey = keyOf<MiskMcpServer>(qualifier)
@@ -222,11 +184,7 @@ private constructor(
     bind(streamManagerKey)
       .toProvider(
         Provider {
-          McpStreamManager(
-            streamableHttpServerTransportFactoryProvider.get(),
-            webSocketServerTransportFactoryProvider.get(),
-            mcpServer = mcpServerProvider.get(),
-          )
+          McpStreamManager(streamableHttpServerTransportFactoryProvider.get(), mcpServer = mcpServerProvider.get())
         }
       )
   }

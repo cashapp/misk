@@ -5,7 +5,6 @@ package misk.mcp
 import com.google.inject.Module
 import com.google.inject.util.Modules
 import io.modelcontextprotocol.kotlin.sdk.client.Client
-import io.modelcontextprotocol.kotlin.sdk.types.ElicitResult
 import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequest
 import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequestParams
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
@@ -31,34 +30,26 @@ import misk.annotation.ExperimentalMiskApi
 import misk.inject.KAbstractModule
 import misk.mcp.action.McpPost
 import misk.mcp.action.McpStreamManager
-import misk.mcp.action.McpWebSocket
 import misk.mcp.action.handleMessage
 import misk.mcp.config.McpConfig
 import misk.mcp.config.McpServerConfig
 import misk.mcp.testing.asMcpStreamableHttpClient
-import misk.mcp.testing.asMcpWebSocketClient
 import misk.mcp.testing.prompts.KotlinDeveloperPrompt
 import misk.mcp.testing.resources.UserProfileResource
 import misk.mcp.testing.resources.WebSearchResource
 import misk.mcp.testing.tools.CalculatorTool
 import misk.mcp.testing.tools.CalculatorToolInput.Operation
 import misk.mcp.testing.tools.CalculatorToolOutput
-import misk.mcp.testing.tools.GetNicknameRequest
 import misk.mcp.testing.tools.HelloWorldTool
 import misk.mcp.testing.tools.HelloWorldToolOutput
 import misk.mcp.testing.tools.HierarchicalTool
 import misk.mcp.testing.tools.HierarchicalToolOutput
 import misk.mcp.testing.tools.KotlinSdkTool
-import misk.mcp.testing.tools.ClientConnectionTool
-import misk.mcp.testing.tools.ClientConnectionToolOutput
-import misk.mcp.testing.tools.NicknameElicitationTool
 import misk.mcp.testing.tools.ThrowingTool
 import misk.mcp.testing.tools.VersionMetadata
 import misk.mcp.testing.tools.callCalculatorTool
-import misk.mcp.testing.tools.callClientConnectionTool
 import misk.mcp.testing.tools.callHelloWorld
 import misk.mcp.testing.tools.callHierarchicalTool
-import misk.mcp.testing.tools.callNicknameTool
 import misk.mcp.testing.tools.callThrowingTool
 import misk.metrics.summaryCount
 import misk.testing.MiskTest
@@ -67,7 +58,6 @@ import misk.web.RequestBody
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebSocket
 import misk.web.jetty.JettyService
 import misk.web.sse.ServerSentEvent
 import okhttp3.OkHttpClient
@@ -94,65 +84,7 @@ internal abstract class McpServerActionTest {
 
     @BeforeEach
     fun setUp() = runBlocking {
-      mcpClient =
-        OkHttpClient().asMcpStreamableHttpClient(jettyService.httpServerUrl, "/mcp", supportsElicitation = true)
-    }
-  }
-
-  @MiskTest(startService = true)
-  class McpWebSocketServerActionTest : McpServerActionTest() {
-    @OptIn(ExperimentalMiskApi::class)
-    @Suppress("unused")
-    class McpWebSocketServerActionTestAction @Inject constructor(private val mcpStreamManager: McpStreamManager) :
-      WebAction {
-      @McpWebSocket fun handle(webSocket: WebSocket) = mcpStreamManager.withWebSocket(webSocket)
-    }
-
-    @Suppress("unused")
-    @MiskTestModule
-    val module: Module =
-      Modules.combine(mcpServerTestModule, WebActionModule.create<McpWebSocketServerActionTestAction>())
-
-    @BeforeEach
-    fun setUp() = runBlocking {
-      mcpClient = OkHttpClient().asMcpWebSocketClient(jettyService.httpServerUrl, "/mcp", supportsElicitation = true)
-    }
-
-    @Test
-    fun `test nickname tool with accept elicitation action`(): Unit = runBlocking {
-      val nickName = "Test Man"
-
-      mcpClient.setElicitationHandler {
-        ElicitResult(action = ElicitResult.Action.Accept, content = GetNicknameRequest(nickName).encode())
-      }
-
-      val response = mcpClient.callNicknameTool()
-      assertNotNull(response)
-      val content = response.content.first() as? TextContent
-      assertNotNull(content)
-      assertEquals("Hello, $nickName!", content.text)
-    }
-
-    @Test
-    fun `test nickname tool with decline elicitation action`(): Unit = runBlocking {
-      mcpClient.setElicitationHandler { ElicitResult(action = ElicitResult.Action.Decline) }
-
-      val response = mcpClient.callNicknameTool()
-      assertNotNull(response)
-      val content = response.content.first() as? TextContent
-      assertNotNull(content)
-      assertEquals("Sorry, don't know what to call you", content.text)
-    }
-
-    @Test
-    fun `test nickname tool with cancel elicitation action`(): Unit = runBlocking {
-      mcpClient.setElicitationHandler { ElicitResult(action = ElicitResult.Action.Cancel) }
-
-      val response = mcpClient.callNicknameTool()
-      assertNotNull(response)
-      val content = response.content.first() as? TextContent
-      assertNotNull(content)
-      assertEquals("Lets try again!", content.text)
+      mcpClient = OkHttpClient().asMcpStreamableHttpClient(jettyService.httpServerUrl, "/mcp")
     }
   }
 
@@ -170,9 +102,7 @@ internal abstract class McpServerActionTest {
         install(McpToolModule.create<KotlinSdkTool>())
         install(McpToolModule.create<ThrowingTool>())
         install(McpToolModule.create<HierarchicalTool>())
-        install(McpToolModule.create<NicknameElicitationTool>())
         install(McpToolModule.create<HelloWorldTool>())
-        install(McpToolModule.create<ClientConnectionTool>())
         install(McpPromptModule.create<KotlinDeveloperPrompt>())
         install(McpResourceModule.create<WebSearchResource>())
         install(McpResourceTemplateModule.create<UserProfileResource>())
@@ -188,7 +118,7 @@ internal abstract class McpServerActionTest {
   fun `test ListTools`() = runBlocking {
     val request = ListToolsRequest()
     val response = mcpClient.listTools(request)
-    assertEquals(expected = 7, actual = response.tools.size, message = "Expecting seven tools to be registered")
+    assertEquals(expected = 5, actual = response.tools.size, message = "Expecting five tools to be registered")
 
     // Check calculator tool
     val calculatorTool = response.tools.find { it.name == "calculator" }
@@ -529,15 +459,6 @@ internal abstract class McpServerActionTest {
     val structuredResult = assertNotNull(response.structuredContent).decode<HierarchicalToolOutput>()
 
     assertThat(structuredResult).isEqualTo(HierarchicalToolOutput("test"))
-  }
-
-  @Test
-  fun `test currentClientConnection is accessible in tool handler`() = runBlocking {
-    val response = mcpClient.callClientConnectionTool()
-    assertNotNull(response)
-
-    val result = assertNotNull(response.structuredContent).decode<ClientConnectionToolOutput>()
-    assertTrue(result.sessionId.isNotBlank(), "Expected a non-blank session ID from ClientConnection")
   }
 
   companion object {
