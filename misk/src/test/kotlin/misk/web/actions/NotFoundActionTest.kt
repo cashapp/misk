@@ -114,6 +114,18 @@ class NotFoundActionTest {
   }
 
   @Test
+  fun deletePathNotFound() {
+    val response = httpClient.newCall(delete("/unknown")).execute()
+    assertThat(response.code).isEqualTo(404)
+  }
+
+  @Test
+  fun deleteWrongMethod() {
+    val response = httpClient.newCall(delete("/echo")).execute()
+    assertThat(response.code).isEqualTo(405)
+  }
+
+  @Test
   fun responseMessageSuggestsContentType() {
     val wrongContentType = post("/echo", weirdMediaType, "hello")
     val response = httpClient.newCall(wrongContentType).execute()
@@ -167,6 +179,10 @@ class NotFoundActionTest {
       .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
       .header("Accept", acceptedMediaType.toString())
       .build()
+  }
+
+  private fun delete(path: String): Request {
+    return Request.Builder().delete().url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build()).build()
   }
 
   private fun get(path: String, acceptedMediaType: MediaType? = null): Request {
