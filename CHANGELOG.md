@@ -7,6 +7,50 @@ The Changelog consequently will not be updated regularly since releases only inc
 
 Major and breaking changes will still be documented in the Changelog.
 
+misk-mcp serves MCP natively
+===
+
+misk-mcp no longer depends on the Kotlin MCP SDK (`io.modelcontextprotocol:kotlin-sdk`). It implements MCP 2026-07-28,
+and still serves clients of the 2024-11-05 to 2025-11-25 versions on the same endpoint. See the
+[misk-mcp README](misk-mcp/README.md).
+
+Most code migrates by rewriting imports: the SDK's types are now in `misk.mcp.protocol`, with the same names and
+constructor parameters. `misk-mcp/scripts/migrate-from-kotlin-sdk.sh <source dir>...` rewrites them and lists what is
+left:
+
+- `io.modelcontextprotocol.kotlin.sdk.types.` → `misk.mcp.protocol.`
+- `Method.Defined.ToolsCall.value` → `McpMethod.TOOLS_CALL`, and so on
+- `DoubleSchema` → `NumberSchema`
+
+Breaking changes:
+
+- Streamable HTTP is the only transport, with no sessions. `@McpWebSocket`, `withWebSocket`, `@McpGet`, `@McpDelete`,
+  `withResponseChannel`, `McpSessionHandler`, `McpSessionHandlerModule`, `McpSessionId` and `SESSION_ID_HEADER` are
+  gone. Delete your `@McpGet`, `@McpDelete` and WebSocket actions and keep the `@McpPost` one. `GET` and `DELETE` to
+  `/mcp` get 405.
+- `MiskMcpServer` no longer extends the SDK's `Server`, and `withSseChannel` runs its block on an `McpStream` instead of
+  a `ServerSession`. `@McpPost` actions that call `handleMessage(message)` compile unchanged after the import rewrite.
+  An action that answers some requests itself, such as with an error, writes the response with `McpStream.send`.
+- `currentServerSession`, `currentClientConnection` and `createTypedElicitation` are gone. Ask for input with
+  `inputRequired` and `inputResponse`, which work only for MCP 2026-07-28 clients.
+- `asMcpStreamableHttpClient` is gone. Use `McpTestClient` from misk-mcp's test fixtures. It has no `close()`, so drop
+  the `try`/`finally` that closed the SDK client. Read the server's name and version with `serverInfo()`.
+- `CallToolResult.structuredContent` is a `JsonElement?`, since the spec allows any JSON value. Code that reads it as an
+  object needs `.jsonObject`. The script flags the reads it can find, and the compiler reports the rest as type
+  mismatches.
+- The server no longer supports sampling, roots or logging.
+- Requests that break the Streamable HTTP rules get an HTTP error status: 400 for mismatched headers or unsupported
+  protocol versions, 403 for an `Origin` outside the new `allowed_origins` config, and 404 when a 2026-07-28 client
+  calls an unknown method.
+- Unknown tools, unknown prompts and missing prompt arguments are `-32602` errors. A call to an unknown tool used to
+  return a tool result with `isError` set, so tests and clients that call a tool to check that it exists now get an
+  error instead.
+- The `list_changed`, `subscribe` and `enforce_strict_capabilities` config fields are deprecated and ignored.
+
+New: titles and icons for the server, tools, prompts and resources; `reportProgress`; completion through
+`McpCompletionProvider`; and multi round-trip requests (`inputRequired`), whose state is signed with the misk-crypto
+MAC key named by `request_state_key`.
+
 Vitess exception metric labels
 ===
 
