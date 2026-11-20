@@ -41,6 +41,7 @@ import misk.mcp.protocol.ListResourcesResult
 import misk.mcp.protocol.ListToolsRequest
 import misk.mcp.protocol.ListToolsResult
 import misk.mcp.protocol.McpException
+import misk.mcp.protocol.McpHeaders
 import misk.mcp.protocol.McpMetaKeys
 import misk.mcp.protocol.McpMethod
 import misk.mcp.protocol.PaginatedRequestParams
@@ -183,8 +184,11 @@ constructor(
   private suspend fun <T> request(method: String, params: JsonObject?, deserializer: KSerializer<T>): T =
     json.decodeFromJsonElement(deserializer, request(method, params))
 
-  private suspend fun send(method: String, params: JsonObject?): McpTestResponse =
-    send(JSONRPCRequest(id = RequestId(nextId.getAndIncrement()), method = method, params = withMeta(method, params)))
+  private suspend fun send(method: String, params: JsonObject?): McpTestResponse = send(newRequest(method, params))
+
+  /** Builds a request with the next id and, for a modern client, the protocol `_meta`, for use with [send]. */
+  fun newRequest(method: String, params: JsonObject? = null): JSONRPCRequest =
+    JSONRPCRequest(id = RequestId(nextId.getAndIncrement()), method = method, params = withMeta(method, params))
 
   /** Sends [message] as is, plus the Streamable HTTP headers derived from it and any [headers] overrides. */
   suspend fun send(message: JSONRPCMessage, headers: Map<String, String?> = emptyMap()): McpTestResponse {
@@ -230,8 +234,8 @@ constructor(
         else -> null
       }
     if (method != McpMethod.INITIALIZE)
-      put("MCP-Protocol-Version", initializeResult?.protocolVersion ?: protocolVersion)
-    if (method != null) put("Mcp-Method", method)
+      put(McpHeaders.PROTOCOL_VERSION, initializeResult?.protocolVersion ?: protocolVersion)
+    if (method != null) put(McpHeaders.METHOD, method)
     val params = (message as? JSONRPCRequest)?.params
     val name =
       when (method) {
@@ -240,7 +244,7 @@ constructor(
         McpMethod.RESOURCES_READ -> params?.get("uri")
         else -> null
       }
-    (name as? JsonPrimitive)?.contentOrNull?.let { put("Mcp-Name", encodeHeaderValue(it)) }
+    (name as? JsonPrimitive)?.contentOrNull?.let { put(McpHeaders.NAME, encodeHeaderValue(it)) }
   }
 
   private fun <T> decodeResult(deserializer: KSerializer<T>, response: McpTestResponse): T =

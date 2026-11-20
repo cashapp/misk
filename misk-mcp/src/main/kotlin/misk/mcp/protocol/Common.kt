@@ -39,6 +39,15 @@ object McpMetaKeys {
   const val SUBSCRIPTION_ID = "io.modelcontextprotocol/subscriptionId"
 }
 
+/** Streamable HTTP request headers. Values that aren't plain ASCII are sent as `=?base64?<base64 of UTF-8>?=`. */
+object McpHeaders {
+  const val PROTOCOL_VERSION = "MCP-Protocol-Version"
+  const val METHOD = "Mcp-Method"
+
+  /** The tool or prompt name, or the resource URI, of `tools/call`, `prompts/get` and `resources/read`. */
+  const val NAME = "Mcp-Name"
+}
+
 /** JSON-RPC method names. */
 object McpMethod {
   const val SERVER_DISCOVER = "server/discover"

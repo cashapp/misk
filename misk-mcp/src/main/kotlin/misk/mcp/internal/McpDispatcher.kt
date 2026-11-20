@@ -1,5 +1,8 @@
 package misk.mcp.internal
 
+import java.net.HttpURLConnection.HTTP_BAD_REQUEST
+import java.net.HttpURLConnection.HTTP_NOT_FOUND
+import java.util.Base64
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.TimeSource
 import kotlinx.serialization.KSerializer
@@ -9,6 +12,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import misk.annotation.ExperimentalMiskApi
@@ -19,6 +23,7 @@ import misk.mcp.MiskMcpServer
 import misk.mcp.protocol.CallToolRequest
 import misk.mcp.protocol.CallToolRequestParams
 import misk.mcp.protocol.CallToolResult
+import misk.mcp.protocol.DEFAULT_NEGOTIATED_PROTOCOL_VERSION
 import misk.mcp.protocol.DiscoverResult
 import misk.mcp.protocol.EmptyJsonObject
 import misk.mcp.protocol.GetPromptRequest
@@ -37,6 +42,7 @@ import misk.mcp.protocol.ListResourceTemplatesResult
 import misk.mcp.protocol.ListResourcesResult
 import misk.mcp.protocol.ListToolsResult
 import misk.mcp.protocol.McpException
+import misk.mcp.protocol.McpHeaders
 import misk.mcp.protocol.McpMetaKeys
 import misk.mcp.protocol.McpMethod
 import misk.mcp.protocol.RPCError
@@ -47,6 +53,7 @@ import misk.mcp.protocol.RequestMeta
 import misk.mcp.protocol.SUPPORTED_LEGACY_PROTOCOL_VERSIONS
 import misk.mcp.protocol.SUPPORTED_PROTOCOL_VERSIONS
 import misk.mcp.protocol.TextContent
+import okhttp3.Headers
 
 /**
  * The protocol era of one request. Modern requests carry their version in `_meta`; legacy ones rely on `initialize`.
@@ -56,9 +63,32 @@ internal enum class McpEra {
   Legacy,
 }
 
+/** A request refused before dispatch, and the HTTP status to send its error with. */
+internal class McpRejection(val status: Int, val error: JSONRPCError)
+
 /** Routes JSON-RPC requests to the server's tools, resources and prompts, inline on the caller's coroutine. */
 @OptIn(ExperimentalMiskApi::class)
 internal class McpDispatcher(private val server: MiskMcpServer) {
+
+  /**
+   * Checks [request] against its Streamable HTTP [headers] and the rules of its era. Returns null when the request may
+   * be passed to [respond].
+   */
+  fun validate(request: JSONRPCRequest, headers: Headers): McpRejection? {
+    val meta = request.meta()
+    val era = eraOf(request, meta)
+    return try {
+      validateHeaders(request, meta, era, headers)
+      if (era == McpEra.Modern) validateModern(meta)
+      if (era == McpEra.Modern && request.method != McpMethod.SERVER_DISCOVER && !capabilityEnabled(request.method)) {
+        McpRejection(HTTP_NOT_FOUND, errorFor(request, methodNotFound(request.method)))
+      } else {
+        null
+      }
+    } catch (e: McpException) {
+      McpRejection(HTTP_BAD_REQUEST, errorFor(request, e))
+    }
+  }
 
   suspend fun respond(request: JSONRPCRequest): JSONRPCMessage =
     try {
@@ -66,22 +96,17 @@ internal class McpDispatcher(private val server: MiskMcpServer) {
     } catch (e: CancellationException) {
       throw e
     } catch (e: McpException) {
-      JSONRPCError(id = request.id, error = RPCError(e.code, e.message ?: "MCP error ${e.code}", e.data))
+      errorFor(request, e)
     } catch (e: Exception) {
       logger.error(e) { "Error handling MCP request ${request.method}" }
       JSONRPCError(id = request.id, error = RPCError(RPCError.ErrorCode.INTERNAL_ERROR, e.message ?: "Internal error"))
     }
 
-  private suspend fun dispatch(request: JSONRPCRequest): JsonObject {
-    val meta = (request.params?.get("_meta") as? JsonObject)?.let(::RequestMeta)
-    return when (eraOf(request, meta)) {
-      McpEra.Modern -> {
-        validateModern(meta)
-        decorateModern(request.method, dispatchModern(request))
-      }
+  private suspend fun dispatch(request: JSONRPCRequest): JsonObject =
+    when (eraOf(request, request.meta())) {
+      McpEra.Modern -> decorateModern(request.method, dispatchModern(request))
       McpEra.Legacy -> dispatchLegacy(request)
     }
-  }
 
   private fun eraOf(request: JSONRPCRequest, meta: RequestMeta?): McpEra =
     when {
@@ -90,24 +115,83 @@ internal class McpDispatcher(private val server: MiskMcpServer) {
       else -> McpEra.Legacy
     }
 
+  /**
+   * Modern requests repeat their version, method and name in headers, which must match the body. Legacy requests carry
+   * only the version negotiated by `initialize`, or nothing, which means [DEFAULT_NEGOTIATED_PROTOCOL_VERSION].
+   */
+  private fun validateHeaders(request: JSONRPCRequest, meta: RequestMeta?, era: McpEra, headers: Headers) {
+    val headerVersion = headers[McpHeaders.PROTOCOL_VERSION]
+    when (era) {
+      McpEra.Modern -> {
+        meta?.protocolVersion?.let { expectHeader(McpHeaders.PROTOCOL_VERSION, headerVersion, it) }
+        expectHeader(McpHeaders.METHOD, headers[McpHeaders.METHOD], request.method)
+        nameOf(request)?.let { expectHeader(McpHeaders.NAME, headers[McpHeaders.NAME], it) }
+      }
+      McpEra.Legacy -> {
+        if (request.method == McpMethod.INITIALIZE) return
+        val version = headerVersion ?: DEFAULT_NEGOTIATED_PROTOCOL_VERSION
+        if (version in SUPPORTED_PROTOCOL_VERSIONS) {
+          throw McpException(
+            RPCError.ErrorCode.HEADER_MISMATCH,
+            "${McpHeaders.PROTOCOL_VERSION} is $version but the request has no _meta.${McpMetaKeys.PROTOCOL_VERSION}",
+          )
+        }
+        if (version !in SUPPORTED_LEGACY_PROTOCOL_VERSIONS) {
+          throw unsupportedVersion(SUPPORTED_LEGACY_PROTOCOL_VERSIONS, version)
+        }
+      }
+    }
+  }
+
+  private fun expectHeader(name: String, value: String?, expected: String) {
+    val actual = value?.let(::decodeHeaderValue)
+    if (actual != expected) {
+      throw McpException(
+        RPCError.ErrorCode.HEADER_MISMATCH,
+        "Header $name is ${actual?.let { "'$it'" } ?: "missing"}, but the request has '$expected'",
+      )
+    }
+  }
+
+  private fun decodeHeaderValue(value: String): String? {
+    if (!value.startsWith(BASE64_PREFIX) || !value.endsWith(BASE64_SUFFIX)) return value
+    return try {
+      String(Base64.getDecoder().decode(value.removePrefix(BASE64_PREFIX).removeSuffix(BASE64_SUFFIX)), Charsets.UTF_8)
+    } catch (e: IllegalArgumentException) {
+      null
+    }
+  }
+
+  private fun nameOf(request: JSONRPCRequest): String? {
+    val key =
+      when (request.method) {
+        McpMethod.TOOLS_CALL,
+        McpMethod.PROMPTS_GET -> "name"
+        McpMethod.RESOURCES_READ -> "uri"
+        else -> return null
+      }
+    return (request.params?.get(key) as? JsonPrimitive)?.contentOrNull
+  }
+
   private fun validateModern(meta: RequestMeta?) {
     val requested =
       meta?.protocolVersion ?: throw invalidParams("Missing required _meta field ${McpMetaKeys.PROTOCOL_VERSION}")
     if (meta[McpMetaKeys.CLIENT_CAPABILITIES] !is JsonObject) {
       throw invalidParams("Missing required _meta field ${McpMetaKeys.CLIENT_CAPABILITIES}")
     }
-    if (requested !in SUPPORTED_PROTOCOL_VERSIONS) {
-      throw McpException(
-        code = RPCError.ErrorCode.UNSUPPORTED_PROTOCOL_VERSION,
-        message = "Unsupported protocol version",
-        data =
-          buildJsonObject {
-            put("supported", JsonArray(SUPPORTED_PROTOCOL_VERSIONS.map(::JsonPrimitive)))
-            put("requested", requested)
-          },
-      )
-    }
+    if (requested !in SUPPORTED_PROTOCOL_VERSIONS) throw unsupportedVersion(SUPPORTED_PROTOCOL_VERSIONS, requested)
   }
+
+  private fun unsupportedVersion(supported: List<String>, requested: String) =
+    McpException(
+      code = RPCError.ErrorCode.UNSUPPORTED_PROTOCOL_VERSION,
+      message = "Unsupported protocol version: $requested",
+      data =
+        buildJsonObject {
+          put("supported", JsonArray(supported.map(::JsonPrimitive)))
+          put("requested", requested)
+        },
+    )
 
   private suspend fun dispatchModern(request: JSONRPCRequest): JsonObject =
     when (request.method) {
@@ -275,6 +359,11 @@ internal class McpDispatcher(private val server: MiskMcpServer) {
   private fun encode(value: Implementation): JsonElement =
     McpJson.encodeToJsonElement(Implementation.serializer(), value)
 
+  private fun JSONRPCRequest.meta(): RequestMeta? = (params?.get("_meta") as? JsonObject)?.let(::RequestMeta)
+
+  private fun errorFor(request: JSONRPCRequest, e: McpException) =
+    JSONRPCError(id = request.id, error = RPCError(e.code, e.message ?: "MCP error ${e.code}", e.data))
+
   private fun invalidParams(message: String) = McpException(RPCError.ErrorCode.INVALID_PARAMS, message)
 
   private fun methodNotFound(method: String) =
@@ -282,6 +371,9 @@ internal class McpDispatcher(private val server: MiskMcpServer) {
 
   companion object {
     private val logger = getLogger<McpDispatcher>()
+
+    private const val BASE64_PREFIX = "=?base64?"
+    private const val BASE64_SUFFIX = "?="
 
     private val CACHEABLE_METHODS =
       setOf(
