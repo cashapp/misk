@@ -23,12 +23,15 @@ import misk.mcp.protocol.CompleteRequest
 import misk.mcp.protocol.CompleteRequestParams
 import misk.mcp.protocol.CompleteResult
 import misk.mcp.protocol.DiscoverResult
+import misk.mcp.protocol.ElicitResult
 import misk.mcp.protocol.GetPromptRequest
 import misk.mcp.protocol.GetPromptRequestParams
 import misk.mcp.protocol.GetPromptResult
 import misk.mcp.protocol.Implementation
 import misk.mcp.protocol.InitializeRequestParams
 import misk.mcp.protocol.InitializeResult
+import misk.mcp.protocol.InputRequest
+import misk.mcp.protocol.InputRequiredResult
 import misk.mcp.protocol.JSONRPCError
 import misk.mcp.protocol.JSONRPCMessage
 import misk.mcp.protocol.JSONRPCNotification
@@ -78,7 +81,13 @@ constructor(
   val protocolVersion: String = LATEST_PROTOCOL_VERSION,
   val capabilities: ClientCapabilities = ClientCapabilities(),
   val clientInfo: Implementation = Implementation(name = "misk-mcp-test", version = "1.0"),
+  private val inputHandler: InputHandler? = null,
 ) {
+  /** Answers the input requests of an `input_required` result, so the client can retry the request. */
+  fun interface InputHandler {
+    suspend fun respond(key: String, request: InputRequest): ElicitResult
+  }
+
   private val nextId = AtomicLong(1)
   private val initializeMutex = Mutex()
   private var initializeResult: InitializeResult? = null
@@ -180,19 +189,47 @@ constructor(
       CompleteResult.serializer(),
     )
 
-  /** Sends a request and returns its raw result. */
+  /**
+   * Sends a request and returns its raw result. With an [InputHandler], an `input_required` result is answered and the
+   * request retried until it completes.
+   */
   suspend fun request(method: String, params: JsonObject?): JsonObject {
     if (isLegacy && method != McpMethod.INITIALIZE) initialize()
-    val response = send(method, params)
-    return when (val reply = response.reply) {
+    var roundParams = params
+    repeat(MAX_INPUT_ROUNDS) {
+      val result = resultOf(method, send(method, roundParams))
+      if (!result.isInputRequired() || inputHandler == null) return result
+      val inputRequired = json.decodeFromJsonElement(InputRequiredResult.serializer(), result)
+      val responses =
+        inputRequired.inputRequests.orEmpty().mapValues { (key, request) ->
+          json.encodeToJsonElement(ElicitResult.serializer(), inputHandler.respond(key, request))
+        }
+      roundParams =
+        JsonObject(
+          params.orEmpty() +
+            buildMap {
+              if (responses.isNotEmpty()) put("inputResponses", JsonObject(responses))
+              inputRequired.requestState?.let { put("requestState", JsonPrimitive(it)) }
+            }
+        )
+    }
+    throw IllegalStateException("$method still requires input after $MAX_INPUT_ROUNDS rounds")
+  }
+
+  private suspend fun <T> request(method: String, params: JsonObject?, deserializer: KSerializer<T>): T {
+    val result = request(method, params)
+    check(!result.isInputRequired()) { "$method requires input: pass an InputHandler to McpTestClient" }
+    return json.decodeFromJsonElement(deserializer, result)
+  }
+
+  private fun resultOf(method: String, response: McpTestResponse): JsonObject =
+    when (val reply = response.reply) {
       is JSONRPCResponse -> reply.result
       is JSONRPCError -> throw McpException(reply.error.code, reply.error.message, reply.error.data)
       else -> throw IllegalStateException("No JSON-RPC response to $method: HTTP ${response.code}")
     }
-  }
 
-  private suspend fun <T> request(method: String, params: JsonObject?, deserializer: KSerializer<T>): T =
-    json.decodeFromJsonElement(deserializer, request(method, params))
+  private fun JsonObject.isInputRequired() = (this["resultType"] as? JsonPrimitive)?.contentOrNull == "input_required"
 
   private suspend fun send(method: String, params: JsonObject?): McpTestResponse = send(newRequest(method, params))
 
@@ -270,6 +307,7 @@ constructor(
     json.encodeToJsonElement(serializer, value).jsonObject
 
   companion object {
+    private const val MAX_INPUT_ROUNDS = 10
     private val JSON_MEDIA_TYPE = "application/json".toMediaType()
 
     private val json = Json {

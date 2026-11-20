@@ -7,6 +7,7 @@ import misk.annotation.ExperimentalMiskApi
 import misk.mcp.config.McpIconConfig
 import misk.mcp.config.McpServerConfig
 import misk.mcp.internal.McpDispatcher
+import misk.mcp.internal.RequestStateCodec
 import misk.mcp.internal.UriTemplate
 import misk.mcp.protocol.EmptyJsonObject
 import misk.mcp.protocol.Icon
@@ -67,6 +68,7 @@ internal constructor(
   completionProviders: Set<McpCompletionProvider>,
   private val instructionsProvider: Provider<String>? = null,
   internal val mcpMetrics: McpMetrics,
+  internal val requestStateCodec: RequestStateCodec? = null,
 ) {
   val serverInfo: Implementation =
     Implementation(

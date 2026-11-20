@@ -3,8 +3,11 @@
 package misk.mcp
 
 import com.google.inject.Provider
+import java.time.Clock
 import kotlin.reflect.KClass
+import misk.MiskCaller
 import misk.annotation.ExperimentalMiskApi
+import misk.crypto.MacKeyManager
 import misk.inject.BindingQualifier
 import misk.inject.KAbstractModule
 import misk.inject.KInstallOnceModule
@@ -15,6 +18,7 @@ import misk.inject.toKey
 import misk.mcp.action.McpStreamManager
 import misk.mcp.config.McpConfig
 import misk.mcp.internal.McpJsonRpcMessageAdapter
+import misk.mcp.internal.RequestStateCodec
 import misk.mcp.protocol.JSONRPCMessage
 import misk.moshi.MoshiAdapterModule
 import misk.scope.ActionScoped
@@ -144,6 +148,18 @@ private constructor(
 
     val mcpMetricsProvider = binder().getProvider(McpMetrics::class.java)
 
+    // Resolve the requestState key at startup, so a missing key fails fast
+    val requestStateCodecProvider =
+      serverConfig.request_state_key?.let { keyName ->
+        val codecKey = keyOf<RequestStateCodec>(qualifier)
+        val macKeyManagerProvider = getProvider(MacKeyManager::class.java)
+        val clockProvider = getProvider(Clock::class.java)
+        bind(codecKey)
+          .toProvider(Provider { RequestStateCodec(macKeyManagerProvider.get()[keyName], clockProvider.get()) })
+          .asEagerSingleton()
+        getProvider(codecKey)
+      }
+
     // Create a qualified binding for the MiskMcpServer
     val serverKey = keyOf<MiskMcpServer>(qualifier)
     bind(serverKey).toProvider {
@@ -158,6 +174,7 @@ private constructor(
         completionProviders = completionProvidersProvider.get().toSet(),
         instructionsProvider = instructionsProvider,
         mcpMetrics = mcpMetricsProvider.get(),
+        requestStateCodec = requestStateCodecProvider?.get(),
       )
     }
     val mcpServerProvider = getProvider(serverKey)
@@ -165,7 +182,9 @@ private constructor(
     // Create a qualified binding for the McpStreamManager
     val streamManagerKey = keyOf<McpStreamManager>(qualifier)
     val httpCallProvider = getProvider(keyOf<ActionScoped<HttpCall>>())
-    bind(streamManagerKey).toProvider(Provider { McpStreamManager(mcpServerProvider.get(), httpCallProvider.get()) })
+    val callerProvider = getProvider(keyOf<ActionScoped<MiskCaller?>>())
+    bind(streamManagerKey)
+      .toProvider(Provider { McpStreamManager(mcpServerProvider.get(), httpCallProvider.get(), callerProvider.get()) })
   }
 
   companion object {
