@@ -17,6 +17,7 @@ import misk.mcp.protocol.CallToolRequest
 import misk.mcp.protocol.CallToolResult
 import misk.mcp.protocol.ContentBlock
 import misk.mcp.protocol.EmptyJsonObject
+import misk.mcp.protocol.Icon
 import misk.mcp.protocol.RequestMeta
 import misk.mcp.protocol.TextContent
 import misk.mcp.protocol.ToolSchema
@@ -153,6 +154,9 @@ abstract class McpTool<I : Any> {
    * [name] if not overridden.
    */
   open val title: String = name
+
+  /** Icons a client may show for this tool. */
+  open val icons: List<Icon>? = null
 
   /**
    * Hint indicating whether this tool performs read-only operations.

@@ -129,6 +129,7 @@ private constructor(
     newMultibinder<McpResource>(qualifier)
     newMultibinder<McpResourceTemplate>(qualifier)
     newMultibinder<McpTool<*>>(qualifier)
+    newMultibinder<McpCompletionProvider>(qualifier)
 
     val serverConfig =
       config[name]
@@ -139,6 +140,7 @@ private constructor(
     val resourcesProvider = binder().getProvider(setOfType<McpResource>().toKey(qualifier))
     val resourceTemplatesProvider = binder().getProvider(setOfType<McpResourceTemplate>().toKey(qualifier))
     val toolsProvider = binder().getProvider(setOfType<McpTool<*>>().toKey(qualifier))
+    val completionProvidersProvider = binder().getProvider(setOfType<McpCompletionProvider>().toKey(qualifier))
 
     val mcpMetricsProvider = binder().getProvider(McpMetrics::class.java)
 
@@ -153,6 +155,7 @@ private constructor(
         resources = resourcesProvider.get().toSet(),
         resourceTemplates = resourceTemplatesProvider.get().toSet(),
         prompts = promptsProvider.get().toSet(),
+        completionProviders = completionProvidersProvider.get().toSet(),
         instructionsProvider = instructionsProvider,
         mcpMetrics = mcpMetricsProvider.get(),
       )

@@ -48,6 +48,9 @@ class McpConfig @JvmOverloads constructor(servers: Map<String, McpServerConfig> 
  *   always allowed. When empty, the server accepts every origin.
  * @param keep_alive_interval_ms How often to send an SSE comment while a handler runs. It keeps idle proxies from
  *   closing the stream, and it is how the server notices that the client went away and cancels the handler.
+ * @param title Human-readable server name for clients to display.
+ * @param website_url The server's website, for clients to display.
+ * @param icons Icons for clients to display for the server.
  */
 data class McpServerConfig
 @JvmOverloads
@@ -59,6 +62,26 @@ constructor(
   @Deprecated("Ignored: the server sends no requests to clients") val enforce_strict_capabilities: Boolean = false,
   val allowed_origins: List<String> = emptyList(),
   val keep_alive_interval_ms: Long = 15_000,
+  val title: String? = null,
+  val website_url: String? = null,
+  val icons: List<McpIconConfig> = emptyList(),
+) : Config
+
+/**
+ * An icon for clients to display.
+ *
+ * @param src An `https:` or `data:` URI of the image.
+ * @param mime_type The image's MIME type, such as `image/png`, when [src] doesn't make it clear.
+ * @param sizes Sizes the image suits, such as `48x48` or `any` for SVG.
+ * @param theme `light` or `dark`, for an icon meant for one background only.
+ */
+data class McpIconConfig
+@JvmOverloads
+constructor(
+  val src: String,
+  val mime_type: String? = null,
+  val sizes: List<String> = emptyList(),
+  val theme: String? = null,
 ) : Config
 
 /**

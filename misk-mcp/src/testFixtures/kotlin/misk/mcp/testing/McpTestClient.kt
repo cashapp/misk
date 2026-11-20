@@ -19,6 +19,9 @@ import misk.mcp.protocol.CallToolRequest
 import misk.mcp.protocol.CallToolRequestParams
 import misk.mcp.protocol.CallToolResult
 import misk.mcp.protocol.ClientCapabilities
+import misk.mcp.protocol.CompleteRequest
+import misk.mcp.protocol.CompleteRequestParams
+import misk.mcp.protocol.CompleteResult
 import misk.mcp.protocol.DiscoverResult
 import misk.mcp.protocol.GetPromptRequest
 import misk.mcp.protocol.GetPromptRequestParams
@@ -168,6 +171,13 @@ constructor(
       McpMethod.RESOURCES_READ,
       encode(ReadResourceRequestParams.serializer(), request.params),
       ReadResourceResult.serializer(),
+    )
+
+  suspend fun complete(request: CompleteRequest): CompleteResult =
+    request(
+      McpMethod.COMPLETION_COMPLETE,
+      encode(CompleteRequestParams.serializer(), request.params),
+      CompleteResult.serializer(),
     )
 
   /** Sends a request and returns its raw result. */

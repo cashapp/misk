@@ -3,6 +3,7 @@ package misk.mcp
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.protocol.GetPromptRequest
 import misk.mcp.protocol.GetPromptResult
+import misk.mcp.protocol.Icon
 import misk.mcp.protocol.PromptArgument
 
 /**
@@ -112,6 +113,14 @@ interface McpPrompt {
    * this prompt template. Should be clear and concise, explaining what kind of content the prompt generates.
    */
   val description: String
+
+  /** Human-readable display name. Clients fall back to [name] when it's null. */
+  val title: String?
+    get() = null
+
+  /** Icons a client may show for this prompt. */
+  val icons: List<Icon>?
+    get() = null
 
   /**
    * List of arguments that this prompt accepts for customization.
