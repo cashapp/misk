@@ -21,7 +21,7 @@ kotlin = "2.3.10"
 kotlinBinaryCompatibilityPlugin = "0.18.1"
 ktor = "3.6.1"
 mavenPublish = "0.37.0"
-mcp = "0.13.0"
+mcp = "0.16.0"
 micrometer = "1.17.1"
 netty = "4.2.16.Final"
 okHttp = "5.4.0"
@@ -197,8 +197,6 @@ logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.36"
 logbackCore = { module = "ch.qos.logback:logback-core", version = "1.5.36" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "3.0.5" }
 mcpKotlinSdkClient = { module = "io.modelcontextprotocol:kotlin-sdk-client", version.ref = "mcp" }
-mcpKotlinSdkCore = { module = "io.modelcontextprotocol:kotlin-sdk-core", version.ref = "mcp" }
-mcpKotlinSdkServer = { module = "io.modelcontextprotocol:kotlin-sdk-server", version.ref = "mcp" }
 micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus-simpleclient", version.ref = "micrometer" }
 mockitoCore = { module = "org.mockito:mockito-core", version = "5.21.0" }

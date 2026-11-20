@@ -2,13 +2,13 @@
 
 package misk.mcp.testing.tools
 
-import io.modelcontextprotocol.kotlin.sdk.client.Client
-import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import jakarta.inject.Inject
 import kotlinx.serialization.Serializable
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.Description
 import misk.mcp.StructuredMcpTool
+import misk.mcp.protocol.TextContent
+import misk.mcp.testing.McpTestClient
 import misk.mcp.testing.tools.CalculatorToolInput.Operation
 
 @Serializable
@@ -88,7 +88,7 @@ class CalculatorTool @Inject constructor() : StructuredMcpTool<CalculatorToolInp
   }
 }
 
-suspend fun Client.callCalculatorTool(first_term: Int, second_term: Int, operation: Operation) =
+suspend fun McpTestClient.callCalculatorTool(first_term: Int, second_term: Int, operation: Operation) =
   callTool(
     name = "calculator",
     arguments = mapOf("operation" to operation.name, "first_term" to first_term, "second_term" to second_term),

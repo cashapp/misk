@@ -1,9 +1,9 @@
 package misk.mcp
 
-import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequest
-import io.modelcontextprotocol.kotlin.sdk.types.GetPromptResult
-import io.modelcontextprotocol.kotlin.sdk.types.PromptArgument
 import misk.annotation.ExperimentalMiskApi
+import misk.mcp.protocol.GetPromptRequest
+import misk.mcp.protocol.GetPromptResult
+import misk.mcp.protocol.PromptArgument
 
 /**
  * Abstraction for a prompt in the Model Context Protocol (MCP) specification.

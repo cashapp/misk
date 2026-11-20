@@ -1,14 +1,14 @@
 package misk.mcp.testing.prompts
 
-import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequest
-import io.modelcontextprotocol.kotlin.sdk.types.GetPromptResult
-import io.modelcontextprotocol.kotlin.sdk.types.PromptArgument
-import io.modelcontextprotocol.kotlin.sdk.types.PromptMessage
-import io.modelcontextprotocol.kotlin.sdk.types.Role
-import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import jakarta.inject.Inject
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.McpPrompt
+import misk.mcp.protocol.GetPromptRequest
+import misk.mcp.protocol.GetPromptResult
+import misk.mcp.protocol.PromptArgument
+import misk.mcp.protocol.PromptMessage
+import misk.mcp.protocol.Role
+import misk.mcp.protocol.TextContent
 
 @OptIn(ExperimentalMiskApi::class)
 class KotlinDeveloperPrompt @Inject constructor() : McpPrompt {

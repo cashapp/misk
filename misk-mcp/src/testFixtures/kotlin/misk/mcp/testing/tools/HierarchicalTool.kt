@@ -2,12 +2,12 @@
 
 package misk.mcp.testing.tools
 
-import io.modelcontextprotocol.kotlin.sdk.client.Client
 import jakarta.inject.Inject
 import kotlinx.serialization.Serializable
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.Description
 import misk.mcp.StructuredMcpTool
+import misk.mcp.testing.McpTestClient
 
 @Serializable
 data class HierarchicalToolInput(@Description("dummy parameter, can't have empty parameter list") val dummy: String)
@@ -31,4 +31,5 @@ class HierarchicalTool @Inject constructor() : AbstractTool<HierarchicalToolInpu
 
 @OptIn(ExperimentalMiskApi::class) abstract class AbstractTool<I : Any> : StructuredMcpTool<I, HierarchicalToolOutput>()
 
-suspend fun Client.callHierarchicalTool() = callTool(name = "hierarchical", arguments = mapOf("dummy" to "dummy"))
+suspend fun McpTestClient.callHierarchicalTool() =
+  callTool(name = "hierarchical", arguments = mapOf("dummy" to "dummy"))

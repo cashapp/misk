@@ -11,11 +11,6 @@ plugins {
 dependencies {
   api(libs.guice)
   api(libs.kotlinxSerializationJson)
-  api(libs.mcpKotlinSdkCore)
-  api(libs.mcpKotlinSdkServer){
-    exclude(group = "io.ktor", module = "ktor-server-core")
-    exclude(group = "io.ktor", module = "ktor-server-sse")
-  }
 
   api(project(":misk-actions"))
   api(project(":misk-inject"))
@@ -32,7 +27,8 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-logging"))
   implementation(project(":misk-metrics"))
-  implementation(libs.okHttp)
+  implementation(project(":misk-moshi"))
+  implementation(libs.moshiCore)
   implementation(libs.okio)
   implementation(libs.prometheusClient)
 
@@ -40,21 +36,19 @@ dependencies {
   testImplementation(libs.junitApi)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.kotlinxCoroutinesTest)
+  testImplementation(libs.ktorClientContentNegotiation)
+  testImplementation(libs.ktorClientCore)
+  testImplementation(libs.ktorClientOkhttp)
+  testImplementation(libs.ktorSerializationKotlinxJson)
+  testImplementation(libs.mcpKotlinSdkClient)
   testImplementation(libs.mockk)
   testImplementation(testFixtures(project(":misk-mcp")))
   testImplementation(testFixtures(project(":misk-metrics")))
   testImplementation(project(":misk-testing"))
 
-  testFixturesApi(libs.mcpKotlinSdkClient)
+  testFixturesApi(libs.okHttp)
+  testFixturesImplementation(libs.kotlinxCoroutinesCore)
   testFixturesImplementation(libs.kotlinxSerializationJson)
-  testFixturesApi(libs.ktorClientContentNegotiation)
-  testFixturesApi(libs.ktorClientCore)
-  testFixturesApi(libs.ktorClientEncoding)
-  testFixturesApi(libs.ktorClientLogging)
-  testFixturesApi(libs.ktorClientOkhttp)
-  testFixturesApi(libs.ktorSerializationKotlinxJson)
-
-  testFixturesImplementation(libs.ktorSerializationKotlinxJson)
 }
 
 mavenPublishing {

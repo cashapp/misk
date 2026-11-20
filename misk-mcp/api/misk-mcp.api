@@ -27,7 +27,7 @@ public abstract interface class misk/mcp/McpPrompt {
 	public abstract fun getArguments ()Ljava/util/List;
 	public abstract fun getDescription ()Ljava/lang/String;
 	public abstract fun getName ()Ljava/lang/String;
-	public abstract fun handler (Lio/modelcontextprotocol/kotlin/sdk/types/GetPromptRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun handler (Lmisk/mcp/protocol/GetPromptRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/McpPromptModule : misk/inject/KAbstractModule {
@@ -45,7 +45,7 @@ public abstract interface class misk/mcp/McpResource {
 	public fun getMimeType ()Ljava/lang/String;
 	public abstract fun getName ()Ljava/lang/String;
 	public abstract fun getUri ()Ljava/lang/String;
-	public abstract fun handler (Lio/modelcontextprotocol/kotlin/sdk/types/ReadResourceRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun handler (Lmisk/mcp/protocol/ReadResourceRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/McpResource$DefaultImpls {
@@ -67,7 +67,7 @@ public abstract interface class misk/mcp/McpResourceTemplate {
 	public fun getMimeType ()Ljava/lang/String;
 	public abstract fun getName ()Ljava/lang/String;
 	public abstract fun getUriTemplate ()Ljava/lang/String;
-	public abstract fun handler (Lio/modelcontextprotocol/kotlin/sdk/types/ReadResourceRequest;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun handler (Lmisk/mcp/protocol/ReadResourceRequest;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/McpResourceTemplate$DefaultImpls {
@@ -101,9 +101,9 @@ public final class misk/mcp/McpServerModule$Companion {
 public abstract class misk/mcp/McpTool {
 	public fun <init> ()V
 	protected final fun ToolResult (Ljava/util/List;ZLkotlinx/serialization/json/JsonObject;)Lmisk/mcp/McpTool$ToolResult;
-	protected final fun ToolResult ([Lio/modelcontextprotocol/kotlin/sdk/types/ContentBlock;ZLkotlinx/serialization/json/JsonObject;)Lmisk/mcp/McpTool$ToolResult;
+	protected final fun ToolResult ([Lmisk/mcp/protocol/ContentBlock;ZLkotlinx/serialization/json/JsonObject;)Lmisk/mcp/McpTool$ToolResult;
 	public static synthetic fun ToolResult$default (Lmisk/mcp/McpTool;Ljava/util/List;ZLkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Lmisk/mcp/McpTool$ToolResult;
-	public static synthetic fun ToolResult$default (Lmisk/mcp/McpTool;[Lio/modelcontextprotocol/kotlin/sdk/types/ContentBlock;ZLkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Lmisk/mcp/McpTool$ToolResult;
+	public static synthetic fun ToolResult$default (Lmisk/mcp/McpTool;[Lmisk/mcp/protocol/ContentBlock;ZLkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Lmisk/mcp/McpTool$ToolResult;
 	public abstract fun getDescription ()Ljava/lang/String;
 	public fun getDestructiveHint ()Z
 	public fun getIdempotentHint ()Z
@@ -113,7 +113,7 @@ public abstract class misk/mcp/McpTool {
 	public fun getReadOnlyHint ()Z
 	public fun getTitle ()Ljava/lang/String;
 	public abstract fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	protected fun toCallToolResult (Lmisk/mcp/McpTool$ToolResult;)Lio/modelcontextprotocol/kotlin/sdk/types/CallToolResult;
+	protected fun toCallToolResult (Lmisk/mcp/McpTool$ToolResult;)Lmisk/mcp/protocol/CallToolResult;
 }
 
 public final class misk/mcp/McpTool$PromptToolResult : misk/mcp/McpTool$ToolResult {
@@ -153,22 +153,25 @@ public final class misk/mcp/McpToolModule$Companion {
 public abstract class misk/mcp/MetaAwareMcpTool : misk/mcp/McpTool, misk/mcp/MetaAwareTool {
 	public fun <init> ()V
 	public final fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun handle-7zgdlzo (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun handle-fb7p_ZY (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract class misk/mcp/MetaAwareStructuredMcpTool : misk/mcp/StructuredMcpTool, misk/mcp/MetaAwareTool {
 	public fun <init> ()V
 	public final fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun handle-7zgdlzo (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun handle-fb7p_ZY (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract interface class misk/mcp/MetaAwareTool {
-	public abstract fun handle-7zgdlzo (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun handle-fb7p_ZY (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class misk/mcp/MiskMcpServer : io/modelcontextprotocol/kotlin/sdk/server/Server {
+public final class misk/mcp/MiskMcpServer {
+	public final fun getCapabilities ()Lmisk/mcp/protocol/ServerCapabilities;
 	public final fun getConfig ()Lmisk/mcp/config/McpServerConfig;
+	public final fun getInstructions ()Ljava/lang/String;
 	public final fun getName ()Ljava/lang/String;
+	public final fun getServerInfo ()Lmisk/mcp/protocol/Implementation;
 	public final fun getVersion ()Ljava/lang/String;
 }
 
@@ -176,7 +179,7 @@ public abstract class misk/mcp/StructuredMcpTool : misk/mcp/McpTool {
 	public fun <init> ()V
 	protected final fun ToolResult (Ljava/lang/Object;ZLkotlinx/serialization/json/JsonObject;)Lmisk/mcp/McpTool$ToolResult;
 	public static synthetic fun ToolResult$default (Lmisk/mcp/StructuredMcpTool;Ljava/lang/Object;ZLkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Lmisk/mcp/McpTool$ToolResult;
-	protected fun toCallToolResult (Lmisk/mcp/McpTool$ToolResult;)Lio/modelcontextprotocol/kotlin/sdk/types/CallToolResult;
+	protected fun toCallToolResult (Lmisk/mcp/McpTool$ToolResult;)Lmisk/mcp/protocol/CallToolResult;
 }
 
 public final class misk/mcp/StructuredMcpTool$StructuredToolResult : misk/mcp/McpTool$ToolResult {
@@ -201,16 +204,17 @@ public abstract class misk/mcp/StructuredMcpToolEmptyInput : misk/mcp/Structured
 public abstract interface annotation class misk/mcp/action/McpPost : java/lang/annotation/Annotation {
 }
 
-public final class misk/mcp/action/McpServerSessionsKt {
-	public static final fun handleMessage (Lio/modelcontextprotocol/kotlin/sdk/server/ServerSession;Lio/modelcontextprotocol/kotlin/sdk/types/JSONRPCMessage;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+public final class misk/mcp/action/McpStream {
+	public final fun getServer ()Lmisk/mcp/MiskMcpServer;
+	public final fun send (Lmisk/mcp/protocol/JSONRPCMessage;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/action/McpStreamKt {
+	public static final fun handleMessage (Lmisk/mcp/action/McpStream;Lmisk/mcp/protocol/JSONRPCMessage;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/action/McpStreamManager {
-	public static final field Companion Lmisk/mcp/action/McpStreamManager$Companion;
 	public final fun withSseChannel (Lkotlinx/coroutines/channels/SendChannel;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class misk/mcp/action/McpStreamManager$Companion {
 }
 
 public final class misk/mcp/config/McpConfig : java/util/LinkedHashMap, misk/config/Config {
@@ -310,13 +314,6 @@ public final class misk/mcp/config/McpToolConfig : misk/config/Config {
 
 public final class misk/mcp/internal/JsonSchemaExtensionsKt {
 	public static final fun generateJsonSchema (Lkotlin/reflect/KType;)Lkotlinx/serialization/json/JsonObject;
-}
-
-public abstract class misk/mcp/internal/MiskServerTransport : io/modelcontextprotocol/kotlin/sdk/shared/AbstractTransport {
-	public fun <init> ()V
-	public abstract fun getCall ()Lmisk/web/HttpCall;
-	public abstract fun getStreamId ()Ljava/lang/String;
-	public abstract fun handleMessage (Lio/modelcontextprotocol/kotlin/sdk/types/JSONRPCMessage;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/protocol/Annotations {
@@ -3529,16 +3526,60 @@ public final class misk/mcp/protocol/UntitledSingleSelectEnumSchema$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class misk/mcp/testing/ClientExtensionsKt {
-	public static final fun asKtorClient (Lokhttp3/OkHttpClient;)Lio/ktor/client/HttpClient;
-	public static final fun asMcpClient (Lio/modelcontextprotocol/kotlin/sdk/shared/AbstractTransport;Ljava/lang/String;Ljava/lang/String;Lio/modelcontextprotocol/kotlin/sdk/client/ClientOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun asMcpClient$default (Lio/modelcontextprotocol/kotlin/sdk/shared/AbstractTransport;Ljava/lang/String;Ljava/lang/String;Lio/modelcontextprotocol/kotlin/sdk/client/ClientOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun asMcpStreamableHttpClient (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun asMcpStreamableHttpClient$default (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun asMcpStreamableHttpTransport (Lio/ktor/client/HttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;)Lio/modelcontextprotocol/kotlin/sdk/client/StreamableHttpClientTransport;
-	public static synthetic fun asMcpStreamableHttpTransport$default (Lio/ktor/client/HttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;ILjava/lang/Object;)Lio/modelcontextprotocol/kotlin/sdk/client/StreamableHttpClientTransport;
-	public static final fun clientOptionsFor (ZZZZZ)Lio/modelcontextprotocol/kotlin/sdk/client/ClientOptions;
-	public static synthetic fun clientOptionsFor$default (ZZZZZILjava/lang/Object;)Lio/modelcontextprotocol/kotlin/sdk/client/ClientOptions;
+public final class misk/mcp/testing/McpTestClient {
+	public static final field Companion Lmisk/mcp/testing/McpTestClient$Companion;
+	public fun <init> (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;)V
+	public fun <init> (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;)V
+	public fun <init> (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Lmisk/mcp/protocol/ClientCapabilities;)V
+	public fun <init> (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Lmisk/mcp/protocol/ClientCapabilities;Lmisk/mcp/protocol/Implementation;)V
+	public synthetic fun <init> (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Lmisk/mcp/protocol/ClientCapabilities;Lmisk/mcp/protocol/Implementation;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun callTool (Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun callTool (Lmisk/mcp/protocol/CallToolRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun callTool$default (Lmisk/mcp/testing/McpTestClient;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun discover (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getCapabilities ()Lmisk/mcp/protocol/ClientCapabilities;
+	public final fun getClientInfo ()Lmisk/mcp/protocol/Implementation;
+	public final fun getPrompt (Lmisk/mcp/protocol/GetPromptRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getProtocolVersion ()Ljava/lang/String;
+	public final fun initialize (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun isLegacy ()Z
+	public final fun listPrompts (Lmisk/mcp/protocol/ListPromptsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun listPrompts$default (Lmisk/mcp/testing/McpTestClient;Lmisk/mcp/protocol/ListPromptsRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun listResourceTemplates (Lmisk/mcp/protocol/ListResourceTemplatesRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun listResourceTemplates$default (Lmisk/mcp/testing/McpTestClient;Lmisk/mcp/protocol/ListResourceTemplatesRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun listResources (Lmisk/mcp/protocol/ListResourcesRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun listResources$default (Lmisk/mcp/testing/McpTestClient;Lmisk/mcp/protocol/ListResourcesRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun listTools (Lmisk/mcp/protocol/ListToolsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun listTools$default (Lmisk/mcp/testing/McpTestClient;Lmisk/mcp/protocol/ListToolsRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun ping (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun readResource (Lmisk/mcp/protocol/ReadResourceRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun request (Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun send (Lmisk/mcp/protocol/JSONRPCMessage;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun send$default (Lmisk/mcp/testing/McpTestClient;Lmisk/mcp/protocol/JSONRPCMessage;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun serverInfo (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/testing/McpTestClient$Companion {
+	public final fun encodeHeaderValue (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class misk/mcp/testing/McpTestResponse {
+	public fun <init> (ILokhttp3/Headers;Ljava/lang/String;Ljava/util/List;Lmisk/mcp/protocol/RequestId;)V
+	public final fun component1 ()I
+	public final fun component2 ()Lokhttp3/Headers;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (ILokhttp3/Headers;Ljava/lang/String;Ljava/util/List;Lmisk/mcp/protocol/RequestId;)Lmisk/mcp/testing/McpTestResponse;
+	public static synthetic fun copy$default (Lmisk/mcp/testing/McpTestResponse;ILokhttp3/Headers;Ljava/lang/String;Ljava/util/List;Lmisk/mcp/protocol/RequestId;ILjava/lang/Object;)Lmisk/mcp/testing/McpTestResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBody ()Ljava/lang/String;
+	public final fun getCode ()I
+	public final fun getHeaders ()Lokhttp3/Headers;
+	public final fun getMessages ()Ljava/util/List;
+	public final fun getNotifications ()Ljava/util/List;
+	public final fun getReply ()Lmisk/mcp/protocol/JSONRPCMessage;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class misk/mcp/testing/prompts/KotlinDeveloperPrompt : misk/mcp/McpPrompt {
@@ -3546,7 +3587,7 @@ public final class misk/mcp/testing/prompts/KotlinDeveloperPrompt : misk/mcp/Mcp
 	public fun getArguments ()Ljava/util/List;
 	public fun getDescription ()Ljava/lang/String;
 	public fun getName ()Ljava/lang/String;
-	public fun handler (Lio/modelcontextprotocol/kotlin/sdk/types/GetPromptRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun handler (Lmisk/mcp/protocol/GetPromptRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/testing/resources/UserProfileResource : misk/mcp/McpResourceTemplate {
@@ -3555,7 +3596,7 @@ public final class misk/mcp/testing/resources/UserProfileResource : misk/mcp/Mcp
 	public fun getMimeType ()Ljava/lang/String;
 	public fun getName ()Ljava/lang/String;
 	public fun getUriTemplate ()Ljava/lang/String;
-	public fun handler (Lio/modelcontextprotocol/kotlin/sdk/types/ReadResourceRequest;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun handler (Lmisk/mcp/protocol/ReadResourceRequest;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/testing/resources/WebSearchResource : misk/mcp/McpResource {
@@ -3564,7 +3605,7 @@ public final class misk/mcp/testing/resources/WebSearchResource : misk/mcp/McpRe
 	public fun getMimeType ()Ljava/lang/String;
 	public fun getName ()Ljava/lang/String;
 	public fun getUri ()Ljava/lang/String;
-	public fun handler (Lio/modelcontextprotocol/kotlin/sdk/types/ReadResourceRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun handler (Lmisk/mcp/protocol/ReadResourceRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract class misk/mcp/testing/tools/AbstractEchoTool : misk/mcp/StructuredMcpTool {
@@ -3629,7 +3670,7 @@ public final class misk/mcp/testing/tools/CalculatorToolInput$Operation : java/l
 }
 
 public final class misk/mcp/testing/tools/CalculatorToolKt {
-	public static final fun callCalculatorTool (Lio/modelcontextprotocol/kotlin/sdk/client/Client;IILmisk/mcp/testing/tools/CalculatorToolInput$Operation;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun callCalculatorTool (Lmisk/mcp/testing/McpTestClient;IILmisk/mcp/testing/tools/CalculatorToolInput$Operation;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/testing/tools/CalculatorToolOutput {
@@ -3735,7 +3776,7 @@ public final class misk/mcp/testing/tools/HelloWorldTool : misk/mcp/StructuredMc
 }
 
 public final class misk/mcp/testing/tools/HelloWorldToolKt {
-	public static final fun callHelloWorld (Lio/modelcontextprotocol/kotlin/sdk/client/Client;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun callHelloWorld (Lmisk/mcp/testing/McpTestClient;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/testing/tools/HelloWorldToolOutput {
@@ -3801,7 +3842,7 @@ public final class misk/mcp/testing/tools/HierarchicalToolInput$Companion {
 }
 
 public final class misk/mcp/testing/tools/HierarchicalToolKt {
-	public static final fun callHierarchicalTool (Lio/modelcontextprotocol/kotlin/sdk/client/Client;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun callHierarchicalTool (Lmisk/mcp/testing/McpTestClient;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/testing/tools/HierarchicalToolOutput {
@@ -3836,8 +3877,8 @@ public final class misk/mcp/testing/tools/KotlinSdkTool : misk/mcp/McpTool {
 	public fun getDescription ()Ljava/lang/String;
 	public fun getMeta ()Lkotlinx/serialization/json/JsonObject;
 	public fun getName ()Ljava/lang/String;
-	public fun handle (Lio/modelcontextprotocol/kotlin/sdk/types/ToolSchema;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public synthetic fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun handle (Lmisk/mcp/protocol/ToolSchema;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/testing/tools/ThrowingTool : misk/mcp/McpTool {
@@ -3876,7 +3917,7 @@ public final class misk/mcp/testing/tools/ThrowingToolInput$Companion {
 }
 
 public final class misk/mcp/testing/tools/ThrowingToolKt {
-	public static final fun callThrowingTool (Lio/modelcontextprotocol/kotlin/sdk/client/Client;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun callThrowingTool (Lmisk/mcp/testing/McpTestClient;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/testing/tools/VersionMetadata {

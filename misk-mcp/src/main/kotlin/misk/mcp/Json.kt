@@ -2,7 +2,6 @@
 
 package misk.mcp
 
-import io.modelcontextprotocol.kotlin.sdk.types.EmptyJsonObject
 import kotlin.reflect.KType
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -18,6 +17,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.serializer
+import misk.mcp.protocol.EmptyJsonObject
 
 /**
  * JSON serialization instance configured for the misk-mcp module. Used to deserialize incoming MCP requests and
@@ -122,6 +122,9 @@ inline fun <T : Any> T?.encodeToString(serializer: SerializationStrategy<T>): St
  * @receiver the [JsonObject] to decode
  */
 inline fun <reified T : Any> JsonObject.decode(): T = McpJson.decodeFromJsonElement<T>(this)
+
+/** Decodes this [JsonElement], such as a tool's `structuredContent`, to an object of type [T]. */
+inline fun <reified T : Any> JsonElement.decode(): T = McpJson.decodeFromJsonElement<T>(this)
 
 /**
  * Decodes this [JsonObject] to an object of type [T] using the [McpJson] serializer and the provided [deserializer].

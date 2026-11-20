@@ -19,7 +19,7 @@ const val LATEST_LEGACY_PROTOCOL_VERSION: String = "2025-11-25"
 
 /** Legacy protocol versions, which start with an `initialize` request. */
 val SUPPORTED_LEGACY_PROTOCOL_VERSIONS: List<String> =
-  listOf(LATEST_LEGACY_PROTOCOL_VERSION, "2025-06-18", "2025-03-26")
+  listOf(LATEST_LEGACY_PROTOCOL_VERSION, "2025-06-18", "2025-03-26", "2024-11-05")
 
 /** The version assumed for a Streamable HTTP request without an `MCP-Protocol-Version` header. */
 const val DEFAULT_NEGOTIATED_PROTOCOL_VERSION: String = "2025-03-26"
