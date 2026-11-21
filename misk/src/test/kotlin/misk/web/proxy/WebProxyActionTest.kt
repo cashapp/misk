@@ -5,6 +5,7 @@ import jakarta.inject.Inject
 import java.net.HttpURLConnection
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertFailsWith
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
@@ -92,6 +93,7 @@ class WebProxyActionTest {
     }
   }
 
+  @OptIn(DelicateCoroutinesApi::class)
   @Test
   internal fun getForwardedPathMatchTrailingSlash() {
     upstreamServer.enqueue(
@@ -119,6 +121,7 @@ class WebProxyActionTest {
     }
   }
 
+  @OptIn(DelicateCoroutinesApi::class)
   @Test
   internal fun getForwardedPathMatchNoTrailingSlash() {
     upstreamServer.enqueue(
@@ -165,6 +168,7 @@ class WebProxyActionTest {
     assertThat(upstreamServer.requestCount).isZero()
   }
 
+  @OptIn(DelicateCoroutinesApi::class)
   @Test
   internal fun postForwardedPathMatchTrailingSlash() {
     upstreamServer.enqueue(
@@ -195,6 +199,7 @@ class WebProxyActionTest {
     }
   }
 
+  @OptIn(DelicateCoroutinesApi::class)
   @Test
   internal fun largeRequestIsReplayedSuccessfullyOnHttpRedirect() {
     upstreamServer.enqueue(MockResponse().setResponseCode(308).addHeader("Location", "/redirect-target"))
@@ -219,6 +224,7 @@ class WebProxyActionTest {
     }
   }
 
+  @OptIn(DelicateCoroutinesApi::class)
   @Test
   internal fun smallRequestIsReplayedSuccessfullyOnHttpRedirect() {
     upstreamServer.enqueue(MockResponse().setResponseCode(308).addHeader("Location", "/redirect-target"))
@@ -246,6 +252,7 @@ class WebProxyActionTest {
     assertThat(request2.body.readUtf8()).isEqualTo(requestBody)
   }
 
+  @OptIn(DelicateCoroutinesApi::class)
   @Test
   internal fun postForwardedPathMatchNoTrailingSlash() {
     upstreamServer.enqueue(
@@ -308,6 +315,7 @@ class WebProxyActionTest {
     assertThat(response.headers["Content-Type"]).isEqualTo(plainTextMediaType.toString())
   }
 
+  @OptIn(DelicateCoroutinesApi::class)
   @Test
   internal fun getForwardedLongPathMatchTrailingSlash() {
     upstreamServer.enqueue(
@@ -338,6 +346,7 @@ class WebProxyActionTest {
     }
   }
 
+  @OptIn(DelicateCoroutinesApi::class)
   @Test
   internal fun getForwardedSlashesOnSlashes() {
     upstreamServer.enqueue(
@@ -368,6 +377,7 @@ class WebProxyActionTest {
     }
   }
 
+  @OptIn(DelicateCoroutinesApi::class)
   @Test
   internal fun getForwardedDotDirectory() {
     upstreamServer.enqueue(

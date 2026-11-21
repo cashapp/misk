@@ -33,16 +33,9 @@ private constructor(
       val result = chain.proceed(chain.request())
       val elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS).toDouble()
 
-      if (result.body == null) {
-        emitStatusCodeMetrics(actionName, elapsedMillis, false, result)
-        return result
-      }
-
       return result
         .newBuilder()
-        .body(
-          TrailerAwareResponseBody(result.body!!) { emitStatusCodeMetrics(actionName, elapsedMillis, true, result) }
-        )
+        .body(TrailerAwareResponseBody(result.body) { emitStatusCodeMetrics(actionName, elapsedMillis, true, result) })
         .build()
     } catch (e: SocketTimeoutException) {
       val elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS).toDouble()

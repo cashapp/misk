@@ -129,7 +129,7 @@ class StaticResourceActionTest {
   fun hiRoot() {
     val response = request("/hi/")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains("<p>Hello world</p>")
+    assertThat(response.body.string()).contains("<p>Hello world</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -137,7 +137,7 @@ class StaticResourceActionTest {
   fun hiHtml() {
     val response = request("/hi/index.html")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains("<p>Hello world</p>")
+    assertThat(response.body.string()).contains("<p>Hello world</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -145,7 +145,7 @@ class StaticResourceActionTest {
   fun hiCss() {
     val response = request("/hi/main.css")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains("hello > world")
+    assertThat(response.body.string()).contains("hello > world")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_CSS)
   }
 
@@ -153,7 +153,7 @@ class StaticResourceActionTest {
   fun hiJs() {
     val response = request("/hi/app.js")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains("alert(\"hello world\")")
+    assertThat(response.body.string()).contains("alert(\"hello world\")")
     assertThat(response.header("Content-Type")).isEqualTo(APPLICATION_JAVASCRIPT)
   }
 
@@ -161,7 +161,7 @@ class StaticResourceActionTest {
   fun rootUrl() {
     val response = request("/")
     assertThat(response.code).isEqualTo(404)
-    assertThat(response.body!!.string()).contains("Nothing found at /")
+    assertThat(response.body.string()).contains("Nothing found at /")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_PLAIN_UTF8)
   }
 
@@ -169,7 +169,7 @@ class StaticResourceActionTest {
   fun noPathMatch() {
     val response = request("/not/found")
     assertThat(response.code).isEqualTo(404)
-    assertThat(response.body!!.string()).contains("Nothing found at /")
+    assertThat(response.body.string()).contains("Nothing found at /")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_PLAIN_UTF8)
   }
 
@@ -177,7 +177,7 @@ class StaticResourceActionTest {
   fun nasaCommandRoot() {
     val response = request("/nasa/command/")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains("<p>Welcome to NASA Space Command Dashboard</p>")
+    assertThat(response.body.string()).contains("<p>Welcome to NASA Space Command Dashboard</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -185,7 +185,7 @@ class StaticResourceActionTest {
   fun nasaCommandHtml() {
     val response = request("/nasa/command/index.html")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains("<p>Welcome to NASA Space Command Dashboard</p>")
+    assertThat(response.body.string()).contains("<p>Welcome to NASA Space Command Dashboard</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -193,7 +193,7 @@ class StaticResourceActionTest {
   fun nasaFuelRoot() {
     val response = request("/nasa/tabs/o2fuel/")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains("<p>Your o2fuel gauge reads: this</p>")
+    assertThat(response.body.string()).contains("<p>Your o2fuel gauge reads: this</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -201,7 +201,7 @@ class StaticResourceActionTest {
   fun nasaFuelHtml() {
     val response = request("/nasa/tabs/o2fuel/index.html")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains("<p>Your o2fuel gauge reads: this</p>")
+    assertThat(response.body.string()).contains("<p>Your o2fuel gauge reads: this</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -209,7 +209,7 @@ class StaticResourceActionTest {
   fun nasaCss() {
     val response = request("/nasa/tabs/o2fuel/tab_o2fuel.css")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains("nasa > world")
+    assertThat(response.body.string()).contains("nasa > world")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_CSS)
   }
 
@@ -217,7 +217,7 @@ class StaticResourceActionTest {
   fun nasaJs() {
     val response = request("/nasa/tabs/o2fuel/tab_o2fuel.js")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains("alert(\"nasa world\")")
+    assertThat(response.body.string()).contains("alert(\"nasa world\")")
     assertThat(response.header("Content-Type")).isEqualTo(APPLICATION_JAVASCRIPT)
   }
 
@@ -225,7 +225,7 @@ class StaticResourceActionTest {
   fun nasaCommandBadPathRedirectsToPrefixIndex() {
     val response = request("/nasa/command/another/link/here/for/anti/brevity?with=query")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains("<p>Welcome to NASA Space Command Dashboard</p>")
+    assertThat(response.body.string()).contains("<p>Welcome to NASA Space Command Dashboard</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -233,7 +233,7 @@ class StaticResourceActionTest {
   fun nasaFuelBadPathRedirectsToPrefixIndex() {
     val response = request("/nasa/tabs/o2fuel/another/link/here/for/anti/brevity?with=query")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains("<p>Your o2fuel gauge reads: this</p>")
+    assertThat(response.body.string()).contains("<p>Your o2fuel gauge reads: this</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -241,7 +241,7 @@ class StaticResourceActionTest {
   fun nasaFuelSlashesOnSlashesRedirectsToPrefixIndex() {
     val response = request("/nasa/tabs/o2fuel/////anti/brevity?with=query")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains("<p>Your o2fuel gauge reads: this</p>")
+    assertThat(response.body.string()).contains("<p>Your o2fuel gauge reads: this</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -249,7 +249,7 @@ class StaticResourceActionTest {
   fun nasaFuelSlashesOnSlashesQueryRedirectsToPrefixIndex() {
     val response = request("/nasa/tabs/o2fuel/////anti/brevity?with=query")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains("<p>Your o2fuel gauge reads: this</p>")
+    assertThat(response.body.string()).contains("<p>Your o2fuel gauge reads: this</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -257,7 +257,7 @@ class StaticResourceActionTest {
   fun nasaFuelDotDirectoryRedirectsToPrefixIndex() {
     val response = request("/nasa/tabs/o2fuel/.test/.config/.ssh/anti/brevity?with=query")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).contains("<p>Your o2fuel gauge reads: this</p>")
+    assertThat(response.body.string()).contains("<p>Your o2fuel gauge reads: this</p>")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_HTML)
   }
 
@@ -270,7 +270,7 @@ class StaticResourceActionTest {
   fun sensitiveResourceIsNotReturned() {
     val response = request("/build/path/to/code/SensitiveCode.class")
     assertThat(response.code).isEqualTo(404)
-    assertThat(response.body!!.string()).contains("Nothing found at /build/path/to/code/SensitiveCode.class")
+    assertThat(response.body.string()).contains("Nothing found at /build/path/to/code/SensitiveCode.class")
     assertThat(response.header("Content-Type")).isEqualTo(TEXT_PLAIN_UTF8)
 
     val messages = logCollector.takeMessages(StaticResourceAction::class, minLevel = Level.WARN)

@@ -79,6 +79,7 @@ class HibernateDatabaseQueryStaticActionTest {
         capabilities = AUTHORIZED_CAPABILITIES,
       )
     assertEquals(3, results.results.size)
+    @Suppress("UNCHECKED_CAST")
     assertThat(results.results.map { (it as Map<String, Any>).keys }.first())
       .containsAll(
         DbMovie::class

@@ -147,7 +147,8 @@ class BoxedStringColumnTest {
     }
   }
 
-  data class TextAndToken(@Property("text") val text: String, @Property("token") val token: GoodLuckToken) : Projection
+  data class TextAndToken(@param:Property("text") val text: String, @param:Property("token") val token: GoodLuckToken) :
+    Projection
 
   interface TextTokenQuery : Query<DbTextToken> {
     @Constraint(path = "token") fun token(token: GoodLuckToken): TextTokenQuery

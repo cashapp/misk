@@ -36,7 +36,7 @@ class SupportedHttpMethodsTest {
 
     val response = httpClient.newCall(request).execute()
     assertThat(response.isSuccessful).isTrue()
-    assertThat(response.body?.string()).isEqualTo("content")
+    assertThat(response.body.string()).isEqualTo("content")
   }
 
   @Test
@@ -49,7 +49,7 @@ class SupportedHttpMethodsTest {
 
     val response = httpClient.newCall(request).execute()
     assertThat(response.isSuccessful).isTrue()
-    assertThat(response.body?.string()).isEqualTo("created")
+    assertThat(response.body.string()).isEqualTo("created")
   }
 
   @Test
@@ -62,7 +62,7 @@ class SupportedHttpMethodsTest {
 
     val response = httpClient.newCall(request).execute()
     assertThat(response.isSuccessful).isTrue()
-    assertThat(response.body?.string()).isEqualTo("updated")
+    assertThat(response.body.string()).isEqualTo("updated")
   }
 
   @Test
@@ -75,7 +75,7 @@ class SupportedHttpMethodsTest {
 
     val response = httpClient.newCall(request).execute()
     assertThat(response.isSuccessful).isTrue()
-    assertThat(response.body?.string()).isEqualTo("updated")
+    assertThat(response.body.string()).isEqualTo("updated")
   }
 
   @Test
@@ -97,7 +97,7 @@ class SupportedHttpMethodsTest {
 
     val response = httpClient.newCall(request).execute()
     assertThat(response.isSuccessful).isTrue()
-    assertThat(response.body?.string()).isEmpty()
+    assertThat(response.body.string()).isEmpty()
   }
 
   @Test

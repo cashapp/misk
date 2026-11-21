@@ -35,21 +35,21 @@ internal class PathParamDispatchTest {
   fun pathParamsConvertToProperTypes() {
     val response = get("/objects/FILE/defaults/245")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body?.string()).isEqualTo("(type=FILE,name=defaults,version=245)")
+    assertThat(response.body.string()).isEqualTo("(type=FILE,name=defaults,version=245)")
   }
 
   @Test
   fun pathParamsConvertToGenericType() {
     val response = get("/objects/find/1234")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body?.string()).isEqualTo("(objectId=Id(t=1234))")
+    assertThat(response.body.string()).isEqualTo("(objectId=Id(t=1234))")
   }
 
   @Test
   fun pathParamsSupportExplicitPathNames() {
     val response = get("/custom-named-route")
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body?.string()).isEqualTo("routing to custom-named-route")
+    assertThat(response.body.string()).isEqualTo("routing to custom-named-route")
   }
 
   class TestModule : KAbstractModule() {

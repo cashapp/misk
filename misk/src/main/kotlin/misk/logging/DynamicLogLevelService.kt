@@ -16,7 +16,7 @@ class DynamicLogLevelService
 constructor(
   private val featureFlags: FeatureFlags,
   private val config: DynamicLoggingConfig,
-  @DynamicLogLevel private val repeatedTaskQueue: RepeatedTaskQueue,
+  @param:DynamicLogLevel private val repeatedTaskQueue: RepeatedTaskQueue,
 ) : AbstractIdleService() {
 
   private val podName = System.getenv("MY_POD_NAME")

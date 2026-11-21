@@ -32,7 +32,7 @@ internal class DisabledNotFoundActionTest {
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(404)
     // This message is created by WebActionsServlet.sendNotFound, and not the NotFoundAction
-    assertThat(response.body!!.string()).matches("Nothing found at GET http://127.0.0.1:[0-9]*/unknown")
+    assertThat(response.body.string()).matches("Nothing found at GET http://127.0.0.1:[0-9]*/unknown")
   }
 
   private fun get(path: String, acceptedMediaType: MediaType? = null): Request {

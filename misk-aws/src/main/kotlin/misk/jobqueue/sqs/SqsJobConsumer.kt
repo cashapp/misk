@@ -45,9 +45,9 @@ import org.slf4j.MDC
 internal class SqsJobConsumer
 @Inject
 internal constructor(
-  @ForSqsHandling private val handlingThreads: ExecutorService,
-  @ForSqsHandling private val taskQueue: RepeatedTaskQueue,
-  @ForSqsReceiving private val receivingThreads: ExecutorService,
+  @param:ForSqsHandling private val handlingThreads: ExecutorService,
+  @param:ForSqsHandling private val taskQueue: RepeatedTaskQueue,
+  @param:ForSqsReceiving private val receivingThreads: ExecutorService,
   private val sqsConsumerAllocator: SqsConsumerAllocator,
   private val featureFlags: FeatureFlags,
   private val metrics: SqsMetrics,

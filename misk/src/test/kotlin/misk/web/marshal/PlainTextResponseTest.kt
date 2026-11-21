@@ -134,7 +134,7 @@ internal class PlainTextResponseTest {
         assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
       }
       .response
-      .body!!
+      .body
       .string()
 
   class MessageWrapper(private val message: String) {

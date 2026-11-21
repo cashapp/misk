@@ -13,6 +13,7 @@ import misk.web.actions.WebAction
 // https://raw.githubusercontent.com/grpc/grpc/master/src/proto/grpc/reflection/v1alpha/reflection.proto
 class ServerReflectionApi @Inject constructor(private val reflector: SchemaReflector) :
   ServerReflectionServerReflectionInfoBlockingServer, WebAction {
+  @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
   @Unauthenticated
   override fun ServerReflectionInfo(
     requests: MessageSource<ServerReflectionRequest>,

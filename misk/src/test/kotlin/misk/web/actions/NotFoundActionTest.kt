@@ -95,7 +95,7 @@ class NotFoundActionTest {
     val wrongMethod = get("/echo", plainTextMediaType)
     val response = httpClient.newCall(wrongMethod).execute()
     assertThat(response.code).isEqualTo(405)
-    assertThat(response.body!!.source().readUtf8())
+    assertThat(response.body.source().readUtf8())
       .isEqualTo(
         """
         |Nothing found at /echo.
@@ -118,7 +118,7 @@ class NotFoundActionTest {
     val wrongContentType = post("/echo", weirdMediaType, "hello")
     val response = httpClient.newCall(wrongContentType).execute()
     assertThat(response.code).isEqualTo(415)
-    assertThat(response.body!!.source().readUtf8())
+    assertThat(response.body.source().readUtf8())
       .isEqualTo(
         """
         |Nothing found at /echo.
@@ -142,7 +142,7 @@ class NotFoundActionTest {
     val wrongAccept = post("/echo", plainTextMediaType, "hello", weirdMediaType)
     val response = httpClient.newCall(wrongAccept).execute()
     assertThat(response.code).isEqualTo(415)
-    assertThat(response.body!!.source().readUtf8())
+    assertThat(response.body.source().readUtf8())
       .isEqualTo(
         """
         |Nothing found at /echo.

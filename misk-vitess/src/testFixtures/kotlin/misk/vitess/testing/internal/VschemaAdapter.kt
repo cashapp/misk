@@ -19,7 +19,8 @@ class VschemaAdapter {
 
   fun fromJson(json: String): Map<String, Any> = mapAdapter.fromJson(json) ?: emptyMap()
 
-  fun toMap(value: Any?): Map<String, Any> = value as? Map<String, Any> ?: emptyMap()
+  @Suppress("UNCHECKED_CAST") fun toMap(value: Any?): Map<String, Any> = value as? Map<String, Any> ?: emptyMap()
 
+  @Suppress("UNCHECKED_CAST")
   fun toListMap(value: Any?): List<Map<String, Any>> = value as? List<Map<String, Any>> ?: emptyList()
 }

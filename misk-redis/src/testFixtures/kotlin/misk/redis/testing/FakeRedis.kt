@@ -46,7 +46,7 @@ import redis.clients.jedis.args.ListDirection
  * Caveats:
  * - FakeRedis does not support the Jedis-specific [Redis.multi] API. Use [Redis.transaction] instead.
  */
-class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis private val random: Random) :
+class FakeRedis @Inject constructor(private val clock: Clock, @param:ForFakeRedis private val random: Random) :
   Redis, TestFixture {
   /**
    * Represents a value in the key-value store. By grouping all data types that the [Redis] interface supports under a
@@ -213,7 +213,7 @@ class FakeRedis @Inject constructor(private val clock: Clock, @ForFakeRedis priv
 
   private fun randomFields(key: String, count: Long): List<Pair<String, ByteString>>? {
     checkHrandFieldCount(count)
-    return hgetAll(key)?.toList()?.shuffled(random)?.take(count.toInt())
+    return hgetAll(key).toList().shuffled(random).take(count.toInt())
   }
 
   // Cursor and count are ignored for fake implementation. All matches are always

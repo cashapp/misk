@@ -84,7 +84,7 @@ constructor(
   val client_name: String? = null,
   val writer_endpoint: RedisNodeConfig,
   val reader_endpoint: RedisNodeConfig? = null,
-  @Redact val redis_auth_password: String,
+  @param:Redact val redis_auth_password: String,
   val use_ssl: Boolean = true,
   val timeout_ms: Int = DEFAULT_TIMEOUT_MS,
   val connection_pool: RedisConnectionPoolConfig = RedisConnectionPoolConfig(),
@@ -135,7 +135,7 @@ data class RedisClusterGroupConfig
 constructor(
   val client_name: String? = null,
   val configuration_endpoint: RedisNodeConfig,
-  @Redact val redis_auth_password: String,
+  @param:Redact val redis_auth_password: String,
   val use_ssl: Boolean = true,
   val timeout_ms: Int = DEFAULT_TIMEOUT_MS,
   val connection_pool: RedisConnectionPoolConfig = RedisConnectionPoolConfig(),

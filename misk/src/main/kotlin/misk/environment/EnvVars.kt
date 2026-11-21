@@ -51,7 +51,8 @@ class RealEnvVarModule : KAbstractModule() {
  * A Fake [EnvVarLoader] that delegates to [FakeEnvironmentVariableLoader] providing an injected memory map of
  * environment variables annotated with [ForEnvVars].
  */
-internal class FakeEnvVarLoader @Inject constructor(@ForEnvVars private val vars: Map<String, String>) : EnvVarLoader {
+internal class FakeEnvVarLoader @Inject constructor(@param:ForEnvVars private val vars: Map<String, String>) :
+  EnvVarLoader {
 
   val delegate = FakeEnvironmentVariableLoader(vars.toMutableMap())
 

@@ -113,9 +113,7 @@ constructor(
  * )
  * ```
  */
-data class DashboardIndexAccessBlock
-@JvmOverloads
-constructor(
+data class DashboardIndexAccessBlock(
   val annotation: KClass<out Annotation>,
   val block:
     TagConsumer<*>.(
@@ -149,9 +147,7 @@ inline fun <reified T : Annotation> DashboardIndexAccessBlock(
  * )
  * ```
  */
-data class DashboardIndexBlock
-@JvmOverloads
-constructor(val annotation: KClass<out Annotation>, val block: TagConsumer<*>.() -> Unit)
+data class DashboardIndexBlock(val annotation: KClass<out Annotation>, val block: TagConsumer<*>.() -> Unit)
 
 inline fun <reified T : Annotation> DashboardIndexBlock(
   noinline block: TagConsumer<*>.() -> Unit

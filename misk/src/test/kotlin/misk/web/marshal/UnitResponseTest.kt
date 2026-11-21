@@ -27,7 +27,7 @@ internal class UnitResponseTest {
     with(webTestClient.get("/response/as-unit-response-body")) {
       assertThat(response.code).isEqualTo(200)
       assertThat(response.headers["Content-Type"]).isNull()
-      assertThat(response.body!!.bytes()).isEmpty()
+      assertThat(response.body.bytes()).isEmpty()
     }
   }
 
@@ -36,7 +36,7 @@ internal class UnitResponseTest {
     with(webTestClient.get("/response/as-no-response-content-type")) {
       assertThat(response.code).isEqualTo(200)
       assertThat(response.headers["Content-Type"]).isNull()
-      assertThat(response.body!!.bytes()).isEmpty()
+      assertThat(response.body.bytes()).isEmpty()
     }
   }
 
@@ -45,7 +45,7 @@ internal class UnitResponseTest {
     with(webTestClient.get("/response/as-application-json")) {
       assertThat(response.code).isEqualTo(200)
       assertThat(response.headers["Content-Type"]).isEqualTo(MediaTypes.APPLICATION_JSON)
-      assertThat(response.body!!.bytes()).isEmpty()
+      assertThat(response.body.bytes()).isEmpty()
     }
   }
 

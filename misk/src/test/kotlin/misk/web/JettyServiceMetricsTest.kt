@@ -46,7 +46,7 @@ internal class JettyServiceMetricsTest {
 
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body?.string()).isEqualTo("hi!")
+    assertThat(response.body.string()).isEqualTo("hi!")
 
     connectionMetricsCollector.refreshMetrics()
 
@@ -100,7 +100,7 @@ internal class JettyServiceMetricsTest {
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
 
-    val metrics = adapter.fromJson(response.body?.string()!!)!!
+    val metrics = adapter.fromJson(response.body.string())!!
     assertThat(metrics.queuedJobs).isEqualTo(0.0)
     assertThat(metrics.size).isEqualTo(10.0)
     assertThat(metrics.utilization).isCloseTo(0.5, Offset.offset(0.35))

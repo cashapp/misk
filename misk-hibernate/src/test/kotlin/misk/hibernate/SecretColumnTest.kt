@@ -263,10 +263,10 @@ class SecretColumnTest {
   }
 
   data class SongInfo(
-    @Property("title") val title: String,
-    @Property("length") val length: Int,
-    @Property("album") val album: ByteArray?,
-    @Property("reviewer") val reviewer: ByteArray?,
+    @param:Property("title") val title: String,
+    @param:Property("length") val length: Int,
+    @param:Property("album") val album: ByteArray?,
+    @param:Property("reviewer") val reviewer: ByteArray?,
   ) : Projection {
     override fun hashCode(): Int = Objects.hash(title, length, album, reviewer)
 

@@ -23,7 +23,7 @@ import wisp.deployment.Deployment
 
 /** Example page from Tailwind UI https://tailwindui.com/components/ecommerce/page-examples/storefront-pages */
 @Singleton
-class IndexPage @Inject constructor(@AppName private val appName: String, private val deployment: Deployment) :
+class IndexPage @Inject constructor(@param:AppName private val appName: String, private val deployment: Deployment) :
   WebAction {
   @Get("/")
   @ResponseContentType(MediaTypes.TEXT_HTML)

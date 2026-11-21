@@ -70,14 +70,14 @@ interface OperatorsMovieQuery : Query<DbMovie> {
 }
 
 data class LatestReleaseDate(
-  @Property(path = "release_date", aggregation = AggregationType.MAX) val release_date: LocalDate
+  @param:Property(path = "release_date", aggregation = AggregationType.MAX) val release_date: LocalDate
 ) : Projection
 
 data class OldestReleaseDate(
-  @Property(path = "release_date", aggregation = AggregationType.MIN) val release_date: LocalDate
+  @param:Property(path = "release_date", aggregation = AggregationType.MIN) val release_date: LocalDate
 ) : Projection
 
 data class DateWithReleaseCount(
-  @Property(path = "release_date") val release_date: LocalDate,
-  @Property(path = "name", aggregation = AggregationType.COUNT) val count: Long?,
+  @param:Property(path = "release_date") val release_date: LocalDate,
+  @param:Property(path = "name", aggregation = AggregationType.COUNT) val count: Long?,
 ) : Projection

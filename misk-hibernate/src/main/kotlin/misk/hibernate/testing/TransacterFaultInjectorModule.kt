@@ -10,8 +10,7 @@ import org.hibernate.event.spi.EventType
  * This module creates an event listener for Hibernate with several bindings, to be able to throw errors on
  * transactions.
  */
-class TransacterFaultInjectorModule @JvmOverloads constructor(private val qualifier: KClass<out Annotation>) :
-  HibernateEntityModule(qualifier) {
+class TransacterFaultInjectorModule(private val qualifier: KClass<out Annotation>) : HibernateEntityModule(qualifier) {
 
   override fun configureHibernate() {
     val key = Key.get(TransacterFaultInjector::class.java, qualifier.java)

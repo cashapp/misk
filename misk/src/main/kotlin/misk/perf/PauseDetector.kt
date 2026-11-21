@@ -26,8 +26,8 @@ internal class PauseDetector
 @Inject
 constructor(
   private val config: PauseDetectorConfig,
-  @ForPauseDetector private val ticker: Ticker,
-  @ForPauseDetector private val sleeper: Sleeper,
+  @param:ForPauseDetector private val ticker: Ticker,
+  @param:ForPauseDetector private val sleeper: Sleeper,
   val metrics: Metrics,
 ) : AbstractExecutionThreadService() {
 

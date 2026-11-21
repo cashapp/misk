@@ -24,7 +24,7 @@ internal class QueueResolver
 internal constructor(
   private val currentRegion: AwsRegion,
   private val currentAccount: AwsAccountId,
-  @AppName private val appName: String,
+  @param:AppName private val appName: String,
   private val featureFlags: FeatureFlags,
   private val sqsClientFactory: SqsClientFactory,
   private val externalQueues: Map<QueueName, AwsSqsQueueConfig>,
@@ -60,10 +60,7 @@ internal constructor(
         val queueUrl =
           sqs
             .getQueueUrl(
-              GetQueueUrlRequest.builder()
-                .queueName(sqsQueueName.value)
-                .queueOwnerAWSAccountId(accountId.value)
-                .build()
+              GetQueueUrlRequest.builder().queueName(sqsQueueName.value).queueOwnerAWSAccountId(accountId.value).build()
             )
             .queueUrl()
         ensureUrlWithProperTarget(queueUrl)

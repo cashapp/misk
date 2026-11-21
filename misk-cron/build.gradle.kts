@@ -33,6 +33,8 @@ dependencies {
   implementation(project(":misk-tailwind"))
   implementation(project(":wisp:wisp-deployment"))
 
+  compileOnly(libs.kotlinReflect)
+
   testImplementation(libs.assertj)
   testImplementation(libs.junitApi)
   testImplementation(libs.logbackClassic)

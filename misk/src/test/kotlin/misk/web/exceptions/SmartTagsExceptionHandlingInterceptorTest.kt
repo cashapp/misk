@@ -250,7 +250,7 @@ internal class SmartTagsExceptionHandlingInterceptorTest {
 
         val response = OkHttpClient().newCall(request.build()).execute()
 
-        val responseText = response.body!!.source().use { source -> source.readUtf8Line() }
+        val responseText = response.body.source().use { source -> source.readUtf8Line() }
 
         assertThat(response.code).isEqualTo(200)
         assertThat(responseText).isEqualTo("SUCCESS")

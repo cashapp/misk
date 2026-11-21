@@ -148,15 +148,15 @@ class JsonColumnTest {
   data class SettingLegacy(val place: String)
 
   data class NameAndCameos(
-    @Property("name") val name: String,
-    @Property("cameos") val cameos: List<String>,
-    @Property("setting") val setting: Setting?,
+    @param:Property("name") val name: String,
+    @param:Property("cameos") val cameos: List<String>,
+    @param:Property("setting") val setting: Setting?,
   ) : Projection
 
   data class NameAndCameosLegacy(
-    @Property("name") val name: String,
-    @Property("cameos") val cameos: List<String>,
-    @Property("setting") val setting: SettingLegacy?,
+    @param:Property("name") val name: String,
+    @param:Property("cameos") val cameos: List<String>,
+    @param:Property("setting") val setting: SettingLegacy?,
   ) : Projection
 
   interface WillFerrellMovieQuery : Query<DbWillFerrellMovie> {

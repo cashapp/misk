@@ -54,7 +54,7 @@ private constructor(
   internal constructor(
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
     private val registeredEntries: List<AccessAnnotationEntry>,
-    @ExcludeFromAllowAnyService private val excludeFromAllowAnyService: List<String>,
+    @param:ExcludeFromAllowAnyService private val excludeFromAllowAnyService: List<String>,
   ) : ApplicationInterceptor.Factory {
     override fun create(action: Action): ApplicationInterceptor? {
       // Gather all of the access annotations on this action.

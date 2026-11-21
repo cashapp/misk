@@ -251,7 +251,14 @@ subprojects {
     tasks.withType<KotlinCompile>().configureEach {
       compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
-        freeCompilerArgs.add("-Xjdk-release=17")
+        freeCompilerArgs.addAll(
+          "-Xjdk-release=17",
+          // Keep deprecations visible without failing the build: much of wisp deliberately uses its own deprecated APIs.
+          "-Xwarning-level=DEPRECATION:warning",
+          "-Xwarning-level=OVERRIDE_DEPRECATION:warning",
+          "-Xwarning-level=TYPEALIAS_EXPANSION_DEPRECATION:warning",
+        )
+        allWarningsAsErrors.set(true)
       }
     }
     tasks.withType<JavaCompile>().configureEach {

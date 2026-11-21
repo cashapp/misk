@@ -113,7 +113,7 @@ constructor(private val config: LaunchDarklyConfig, private val qualifier: KClas
 data class LaunchDarklyConfig
 @JvmOverloads
 constructor(
-  @Redact val sdk_key: String,
+  @param:Redact val sdk_key: String,
   val base_uri: String,
   val use_relay_proxy: Boolean = true,
   val ssl: HttpClientSSLConfig? = null,

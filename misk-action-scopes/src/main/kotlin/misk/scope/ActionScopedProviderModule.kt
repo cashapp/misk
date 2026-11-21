@@ -33,6 +33,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   }
 
   /** Binds an [ActionScoped] which only pulls from data seeded at the scope entry */
+  @Suppress("UNCHECKED_CAST")
   fun <T : Any> bindSeedData(type: TypeLiteral<T>) {
     bindSeedData(
       type.toKey(),
@@ -46,6 +47,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   }
 
   /** Binds an annotation qualified [ActionScoped] which only pulls from data seeded at the scope entry */
+  @Suppress("UNCHECKED_CAST")
   fun <T : Any> bindSeedData(type: TypeLiteral<T>, a: Annotation) {
     bindSeedData(
       type.toKey(),

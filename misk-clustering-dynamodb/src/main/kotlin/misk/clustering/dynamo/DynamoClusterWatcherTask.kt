@@ -30,7 +30,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 internal class DynamoClusterWatcherTask
 @Inject
 constructor(
-  @ForDynamoDbClusterWatching private val taskQueue: RepeatedTaskQueue,
+  @param:ForDynamoDbClusterWatching private val taskQueue: RepeatedTaskQueue,
   ddb: DynamoDbClient,
   private val clock: Clock,
   private val clusterWeightProvider: ClusterWeightProvider,

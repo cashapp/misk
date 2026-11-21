@@ -92,7 +92,7 @@ internal abstract class AbstractJettyShutdownTest {
     val request = Request.Builder().url(jetty.httpServerUrl.resolve("/hello")!!).build()
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body?.string()).isEqualTo("hi!")
+    assertThat(response.body.string()).isEqualTo("hi!")
   }
 
   class TestModule(private val idleTimeout: Long, private val shutdownIdleTimeout: Long? = null) : KAbstractModule() {

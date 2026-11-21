@@ -43,7 +43,7 @@ internal class UnspecifiedContentTypeTest {
     val response = httpClient.newCall(request.build()).execute()
 
     assertThat(response.code).isEqualTo(400)
-    assertThat(response.body?.string()).isEqualTo("Can't parse request: missing Content-Type header")
+    assertThat(response.body.string()).isEqualTo("Can't parse request: missing Content-Type header")
   }
 
   @Test
@@ -58,7 +58,7 @@ internal class UnspecifiedContentTypeTest {
     val response = httpClient.newCall(request.build()).execute()
 
     assertThat(response.code).isEqualTo(500)
-    assertThat(response.body?.string()).isEqualTo("internal server error")
+    assertThat(response.body.string()).isEqualTo("internal server error")
   }
 
   class PassAsString @Inject constructor() : WebAction {

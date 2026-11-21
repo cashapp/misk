@@ -26,7 +26,7 @@ constructor(
   private val clock: Clock,
   private val serviceManagerProvider: Provider<ServiceManager>,
   @JvmSuppressWildcards private val healthCheckProvider: Provider<List<HealthCheck>>,
-  @ReadinessRefreshQueue private val taskQueue: RepeatedTaskQueue,
+  @param:ReadinessRefreshQueue private val taskQueue: RepeatedTaskQueue,
 ) : AbstractIdleService() {
   @Volatile
   var status: CachedStatus? = null

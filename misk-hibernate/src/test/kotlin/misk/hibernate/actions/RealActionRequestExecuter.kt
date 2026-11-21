@@ -59,7 +59,7 @@ constructor(
     val responseAdaptor = moshi.adapter(responseClass.java)
     return when {
       response.isSuccessful -> {
-        responseAdaptor.fromJson(response.body!!.source())!!
+        responseAdaptor.fromJson(response.body.source())!!
       }
       response.code == 400 -> {
         throw BadRequestException(response.message)

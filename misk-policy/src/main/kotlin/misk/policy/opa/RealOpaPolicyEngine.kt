@@ -14,7 +14,7 @@ class RealOpaPolicyEngine
 @Inject
 constructor(
   private val opaApi: OpaApi,
-  @Named("opa-moshi") private val moshi: Moshi,
+  @param:Named("opa-moshi") private val moshi: Moshi,
   private val metrics: OpaMetrics,
   private val config: OpaConfig,
 ) : OpaPolicyEngine {

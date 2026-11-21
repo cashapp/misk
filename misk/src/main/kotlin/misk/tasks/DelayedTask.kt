@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit
 class DelayedTask(
   internal val clock: Clock,
   internal val executionTime: Instant,
-  @VisibleForTesting val task: () -> Result,
+  @param:VisibleForTesting val task: () -> Result,
 ) : Delayed {
   override fun compareTo(other: Delayed): Int {
     return getDelay(TimeUnit.MILLISECONDS).compareTo(other.getDelay(TimeUnit.MILLISECONDS))

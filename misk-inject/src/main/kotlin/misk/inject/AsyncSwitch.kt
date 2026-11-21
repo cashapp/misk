@@ -38,6 +38,7 @@ class DefaultAsyncSwitchModule : KInstallOnceModule() {
 }
 
 /** Uses the result from a provided switch to chooes between enabled and disabled instances for Guice bindings. */
+@Suppress("UNCHECKED_CAST")
 inline fun <
   reified S : Switch,
   reified Output : Any,
@@ -62,6 +63,7 @@ inline fun <
 
 /** Uses the result from a provided switch to chooes between enabled and disabled instances for Guice bindings. */
 class ConditionalProvider<S : Switch, Output : Any, Input>
+@Suppress("UNCHECKED_CAST")
 @JvmOverloads
 constructor(
   val switchKey: String,
@@ -135,6 +137,7 @@ inline fun <
 
 /** Uses the result from a provided switch to chooes between enabled and disabled types for Guice bindings. */
 class ConditionalTypedProvider<S : Switch, Output : Any, Input : Any, Enabled : Input, Disabled : Input>
+@Suppress("UNCHECKED_CAST")
 @JvmOverloads
 constructor(
   val switchKey: String,

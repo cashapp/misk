@@ -93,9 +93,9 @@ class GrpcConnectivityTest {
       assertThat(response.code).isEqualTo(200)
       assertThat(response.headers["grpc-status"]).isNull() // Sent in the trailers!
       assertThat(response.headers["grpc-encoding"]).isEqualTo("gzip")
-      assertThat(response.body!!.contentType()).isEqualTo("application/grpc".toMediaType())
+      assertThat(response.body.contentType()).isEqualTo("application/grpc".toMediaType())
 
-      val reader = GrpcMessageSource(response.body!!.source(), HelloReply.ADAPTER, response.header("grpc-encoding"))
+      val reader = GrpcMessageSource(response.body.source(), HelloReply.ADAPTER, response.header("grpc-encoding"))
       assertThat(reader.read()).isEqualTo(HelloReply("howdy, jesse!"))
       assertThat(reader.read()).isNull()
       assertThat(response.trailers()).isEqualTo(headersOf("grpc-status", "0"))
@@ -137,8 +137,8 @@ class GrpcConnectivityTest {
     response.use {
       assertThat(response.code).isEqualTo(200)
       assertThat(response.headers["grpc-encoding"]).isEqualTo("identity")
-      assertThat(response.body!!.contentType()).isEqualTo("application/grpc".toMediaType())
-      response.body?.close()
+      assertThat(response.body.contentType()).isEqualTo("application/grpc".toMediaType())
+      response.body.close()
       assertThat(response.trailers()["grpc-status"]).isEqualTo(GrpcStatus.INTERNAL.code.toString())
     }
   }
