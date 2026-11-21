@@ -35,7 +35,7 @@ class S3KeySource
 constructor(
   private val deployment: Deployment,
   defaultS3: S3Client,
-  @ExternalDataKeys val allKeyAliases: Map<KeyAlias, KeyType>,
+  @param:ExternalDataKeys val allKeyAliases: Map<KeyAlias, KeyType>,
   @Inject(optional = true)
   private val bucketNameSource: BucketNameSource =
     object : BucketNameSource {

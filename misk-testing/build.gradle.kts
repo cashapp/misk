@@ -52,6 +52,8 @@ dependencies {
   implementation(project(":wisp:wisp-deployment"))
   implementation(testFixtures(project(":misk-metrics")))
 
+  compileOnly(libs.kotlinReflect)
+
   testImplementation(libs.kotlinTest)
   testImplementation(libs.mockitoKotlin)
 }

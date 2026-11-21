@@ -32,7 +32,7 @@ class HttpClientProviderTest {
     val response = client.newCall(Request.Builder().url(mockWebServer.url("/foo")).build()).execute()
 
     assertThat(response.code).isEqualTo(200)
-    response.body?.use { body -> assertThat(body.string()).isEqualTo("hello") }
+    response.body.use { body -> assertThat(body.string()).isEqualTo("hello") }
 
     assertThat(response.headers["interceptor-header"]).isEqualTo("added by interceptor")
   }

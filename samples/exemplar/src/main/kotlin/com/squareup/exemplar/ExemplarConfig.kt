@@ -12,7 +12,7 @@ data class ExemplarConfig(
   val apiKey: Secret<String>,
   val web: WebConfig,
   val prometheus: PrometheusConfig,
-  @Redact val redacted: String,
+  @param:Redact val redacted: String,
   val audit: AuditClientConfig,
   val data_source_clusters: DataSourceClustersConfig,
 ) : Config

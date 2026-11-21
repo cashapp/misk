@@ -45,7 +45,7 @@ class ServiceMetadataActionTest {
     val response = call.execute()
 
     val responseAdaptor = moshi.adapter<ServiceMetadataAction.Response>()
-    return responseAdaptor.fromJson(response.body!!.source())!!
+    return responseAdaptor.fromJson(response.body.source())!!
   }
 
   private fun createOkHttpClient(): OkHttpClient {

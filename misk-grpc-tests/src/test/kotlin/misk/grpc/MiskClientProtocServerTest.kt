@@ -4,6 +4,7 @@ import com.google.inject.Guice
 import com.google.inject.util.Modules
 import jakarta.inject.Inject
 import jakarta.inject.Named
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.runBlocking
 import misk.MiskTestingServiceModule
@@ -43,6 +44,7 @@ class MiskClientProtocServerTest {
     }
   }
 
+  @OptIn(DelicateCoroutinesApi::class)
   @Test
   fun streamingResponse() {
     runBlocking {

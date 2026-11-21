@@ -92,7 +92,7 @@ internal class DeclarativeSchemaMigratorTest {
   @Test
   fun appliesMigrations() {
     val mainSource = config.migrations_resources!![0]
-    val librarySource = config.migrations_resources!![1]
+    val librarySource = config.migrations_resources[1]
 
     resourceLoader.put(
       "$mainSource/t1.sql",
@@ -193,7 +193,7 @@ internal class DeclarativeSchemaMigratorTest {
   @Test
   fun passRequireAllMigrations() {
     val mainSource = config.migrations_resources!![0]
-    val librarySource = config.migrations_resources!![1]
+    val librarySource = config.migrations_resources[1]
 
     resourceLoader.put(
       "$mainSource/t1.sql",
@@ -300,7 +300,7 @@ internal class DeclarativeSchemaMigratorTest {
   @Test
   fun testSqlParsing() {
     val mainSource = config.migrations_resources!![0]
-    val librarySource = config.migrations_resources!![1]
+    val librarySource = config.migrations_resources[1]
 
     resourceLoader.put(
       "$mainSource/t1.sql",

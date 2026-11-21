@@ -46,6 +46,7 @@ class FakeFeatureFlagsModule(private val qualifier: KClass<out Annotation>? = nu
     install(FakeFeatureFlagsTestFixtureModule())
 
     val key = FakeFeatureFlags::class.toKey(qualifier)
+    @Suppress("UNCHECKED_CAST")
     val overridesType =
       parameterizedType<Set<*>>(FakeFeatureFlagsOverride::class.java).typeLiteral()
         as TypeLiteral<Set<FakeFeatureFlagsOverride>>

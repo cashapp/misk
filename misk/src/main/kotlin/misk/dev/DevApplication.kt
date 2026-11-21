@@ -40,6 +40,7 @@ fun runDevApplication(
     "misk.dev.running",
     "true",
   ) // Some code may not depend on misk-core but still need to know about dev mode
+  @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN") // Any has no wait()/notifyAll()
   val lock = Object()
   var restart = false
   var javaMethod: Method? = null

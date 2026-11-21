@@ -36,7 +36,7 @@ class DynamoDbExceptionMapperTest {
   fun `service unavailable 503 for concurrency related TransactionCanceledException`() {
     val response = get("/throws/concurrency")
     Assertions.assertThat(response.code).isEqualTo(HTTP_UNAVAILABLE)
-    Assertions.assertThat(response.body?.string())
+    Assertions.assertThat(response.body.string())
       .isEqualTo(
         "DynamoDB Resource Contention Exception: " +
           "com.amazonaws.services.dynamodbv2.model." +
@@ -50,7 +50,7 @@ class DynamoDbExceptionMapperTest {
   fun `internal server error 500 for all other TransactionCanceledException`() {
     val response = get("/throws/other")
     Assertions.assertThat(response.code).isEqualTo(HTTP_INTERNAL_ERROR)
-    Assertions.assertThat(response.body?.string())
+    Assertions.assertThat(response.body.string())
       .isEqualTo(
         "Internal server error: " +
           "com.amazonaws.services.dynamodbv2.model." +
@@ -64,7 +64,7 @@ class DynamoDbExceptionMapperTest {
   fun `service unavailable 503 for concurrency related ClientExecutionTimeoutException`() {
     val response = get("/throws/timeout")
     Assertions.assertThat(response.code).isEqualTo(HTTP_UNAVAILABLE)
-    Assertions.assertThat(response.body?.string())
+    Assertions.assertThat(response.body.string())
       .isEqualTo(
         "DynamoDB Resource Contention Exception: " +
           "com.amazonaws.http.timers.client." +

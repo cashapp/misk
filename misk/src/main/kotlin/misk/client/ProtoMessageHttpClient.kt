@@ -22,10 +22,10 @@ class ProtoMessageHttpClient constructor(baseUrl: String, private val moshi: Mos
         .build()
     val response = okHttp.newCall(request).execute()
     if (response.code != 200) {
-      throw RuntimeException("request failed (${response.code} ${response.body?.string()}")
+      throw RuntimeException("request failed (${response.code} ${response.body.string()}")
     }
 
-    return response.body?.string()?.let { moshi.adapter(responseType).fromJson(it) }
+    return response.body.string().let { moshi.adapter(responseType).fromJson(it) }
       ?: throw IllegalStateException("could not parse response")
   }
 

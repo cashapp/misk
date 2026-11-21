@@ -31,14 +31,14 @@ internal class CustomExceptionMapperTest {
   fun customizeUnauthenticated() {
     val response = get("/unauthenticated")
     assertThat(response.code).isEqualTo(misk.client.HTTP_UNAUTHORIZED)
-    assertThat(response.body?.string()).isEqualTo("custom unauthenticated response!")
+    assertThat(response.body.string()).isEqualTo("custom unauthenticated response!")
   }
 
   @Test
   fun customizeUnauthorized() {
     val response = get("/unauthorized")
     assertThat(response.code).isEqualTo(misk.client.HTTP_FORBIDDEN)
-    assertThat(response.body?.string()).isEqualTo("custom unauthorized response!")
+    assertThat(response.body.string()).isEqualTo("custom unauthorized response!")
   }
 
   fun get(path: String): okhttp3.Response {

@@ -24,7 +24,7 @@ class VschemaLinterTest {
                 }
             }
         """
-      )!!
+      )
 
     assertDoesNotThrow { linter.lint(vschemaJson, "unsharded") }
   }
@@ -42,7 +42,7 @@ class VschemaLinterTest {
                 }
             }
         """
-      )!!
+      )
 
     assertDoesNotThrow { linter.lint(vschemaJson, "unsharded") }
   }
@@ -60,7 +60,7 @@ class VschemaLinterTest {
                 }
             }
         """
-      )!!
+      )
 
     val exception = assertThrows<VitessTestDbSchemaLintException> { linter.lint(vschemaJson, "unsharded") }
     assertEquals(
@@ -80,7 +80,7 @@ class VschemaLinterTest {
                 "tables": {}
             }
         """
-      )!!
+      )
 
     assertDoesNotThrow { linter.lint(vschemaJson, "unsharded") }
   }
@@ -96,7 +96,7 @@ class VschemaLinterTest {
                 "vindexes": {}
             }
         """
-      )!!
+      )
 
     val exception = assertThrows<VitessTestDbSchemaLintException> { linter.lint(vschemaJson, "sharded") }
     assertEquals(
@@ -115,7 +115,7 @@ class VschemaLinterTest {
                 "tables": {}
             }
         """
-      )!!
+      )
 
     val exception = assertThrows<VitessTestDbSchemaLintException> { linter.lint(vschemaJson, "sharded") }
     assertEquals(
@@ -137,7 +137,7 @@ class VschemaLinterTest {
               "tables": {}
           }
       """
-      )!!
+      )
 
     val exception = assertThrows<VitessTestDbSchemaLintException> { linter.lint(vschemaJson, "sharded") }
     assertEquals("The vindex `hash` in the vschema of `sharded` must contain a `type` field", exception.message)
@@ -167,7 +167,7 @@ class VschemaLinterTest {
                 "tables": {}
             }
         """
-      )!!
+      )
 
     assertDoesNotThrow { linter.lint(vschemaJson, "sharded") }
   }
@@ -196,7 +196,7 @@ class VschemaLinterTest {
                 "tables": {}
             }
         """
-      )!!
+      )
 
     assertDoesNotThrow { linter.lint(vschemaJson, "sharded") }
   }
@@ -225,7 +225,7 @@ class VschemaLinterTest {
                 "tables": {}
             }
         """
-      )!!
+      )
 
     assertDoesNotThrow { linter.lint(vschemaJson, "sharded") }
   }
@@ -321,7 +321,7 @@ class VschemaLinterTest {
                 "tables": {}
             }
         """
-      )!!
+      )
 
     assertDoesNotThrow { linter.lint(vschemaJson, "sharded") }
   }
@@ -345,7 +345,7 @@ class VschemaLinterTest {
                 "tables": {}
             }
         """
-      )!!
+      )
 
     val exception = assertThrows<VitessTestDbSchemaLintException> { linter.lint(vschemaJson, "sharded") }
     assertEquals(
@@ -372,7 +372,7 @@ class VschemaLinterTest {
         }
         """
           .trimIndent()
-      )!!
+      )
 
     val exception = assertThrows<VitessTestDbSchemaLintException> { linter.lint(vschemaJson, "sharded") }
     assertEquals(
@@ -408,7 +408,7 @@ class VschemaLinterTest {
         }
         """
           .trimIndent()
-      )!!
+      )
 
     val exception = assertThrows<VitessTestDbSchemaLintException> { linter.lint(vschemaJson, "sharded") }
     assertEquals(
@@ -442,7 +442,7 @@ class VschemaLinterTest {
         }
         """
           .trimIndent()
-      )!!
+      )
 
     assertDoesNotThrow { linter.lint(vschemaJson, "sharded") }
   }
@@ -473,7 +473,7 @@ class VschemaLinterTest {
                 }
             }
         """
-      )!!
+      )
 
     assertDoesNotThrow { linter.lint(vschemaJson, "sharded") }
   }
@@ -497,7 +497,7 @@ class VschemaLinterTest {
                 }
             }
         """
-      )!!
+      )
 
     val exception = assertThrows<VitessTestDbSchemaLintException> { linter.lint(vschemaJson, "sharded") }
     assertEquals(
@@ -530,7 +530,7 @@ class VschemaLinterTest {
                 }
             }
         """
-      )!!
+      )
 
     val exception = assertThrows<VitessTestDbSchemaLintException> { linter.lint(vschemaJson, "sharded") }
     assertEquals(
@@ -564,7 +564,7 @@ class VschemaLinterTest {
                 }
             }
         """
-      )!!
+      )
 
     val exception = assertThrows<VitessTestDbSchemaLintException> { linter.lint(vschemaJson, "sharded") }
     assertEquals(

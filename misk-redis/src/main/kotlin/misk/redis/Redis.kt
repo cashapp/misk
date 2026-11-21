@@ -785,6 +785,7 @@ interface Redis {
  *
  * https://redis.io/commands/hrandfield/#specification-of-the-behavior-when-count-is-passed
  */
+@Suppress("NOTHING_TO_INLINE")
 inline fun checkHrandFieldCount(count: Long) {
   require(count > -1) { "This Redis client does not support negative field counts for HRANDFIELD." }
   require(count > 0) { "You must request at least 1 field." }

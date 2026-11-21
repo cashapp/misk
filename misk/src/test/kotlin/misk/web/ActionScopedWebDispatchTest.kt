@@ -41,7 +41,7 @@ internal class ActionScopedWebDispatchTest {
         )
         .execute()
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).isEqualTo("hello Thor")
+    assertThat(response.body.string()).isEqualTo("hello Thor")
   }
 
   @Test
@@ -57,7 +57,7 @@ internal class ActionScopedWebDispatchTest {
         )
         .execute()
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).isEqualTo("bye Thor")
+    assertThat(response.body.string()).isEqualTo("bye Thor")
   }
 
   @Test
@@ -73,7 +73,7 @@ internal class ActionScopedWebDispatchTest {
         )
         .execute()
     assertThat(response.code).isEqualTo(200)
-    assertThat(response.body!!.string()).isEqualTo("hello Thor")
+    assertThat(response.body.string()).isEqualTo("hello Thor")
   }
 
   @Singleton

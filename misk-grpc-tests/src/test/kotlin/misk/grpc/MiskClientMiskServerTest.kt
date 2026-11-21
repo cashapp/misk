@@ -10,6 +10,7 @@ import jakarta.inject.Named
 import java.net.HttpURLConnection.HTTP_BAD_REQUEST
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.runBlocking
@@ -84,6 +85,7 @@ class MiskClientMiskServerTest {
     assertThat(callCounter.counter("default.RouteChat").get()).isEqualTo(0)
   }
 
+  @OptIn(DelicateCoroutinesApi::class)
   @Test
   fun duplexStreaming() {
     runBlocking {
@@ -109,6 +111,7 @@ class MiskClientMiskServerTest {
     assertThat(callCounter.counter("default.RouteChat").get()).isEqualTo(1)
   }
 
+  @OptIn(DelicateCoroutinesApi::class)
   @Test
   fun duplexStreamingResponseFirst() {
     routeChatGrpcAction.welcomeMessage = "welcome"

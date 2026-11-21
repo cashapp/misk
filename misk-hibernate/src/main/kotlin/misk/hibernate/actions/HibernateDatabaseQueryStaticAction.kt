@@ -91,6 +91,7 @@ constructor(
     // Use the Query/DbEntity classes from the authorized registration.
     val query = registration.queryClass ?: throw BadRequestException("[query=${metadata.queryClass}] does not exist")
     val dbEntity = registration.entityClass
+    @Suppress("UNCHECKED_CAST")
     val maxRows =
       ((request.query[QUERY_CONFIG_TYPE_NAME] as Map<String, Any>?)?.get("maxRows") as Double?)?.toInt()
         ?: queryLimitsConfig.maxMaxRows
@@ -130,7 +131,7 @@ constructor(
                 dynamicAddConstraint(
                   path = it.path,
                   operator = Operator.valueOf(it.operator),
-                  value = (value as Map<String, String>)[it.name],
+                  value = @Suppress("UNCHECKED_CAST") (value as Map<String, String>)[it.name],
                 )
               }
           }

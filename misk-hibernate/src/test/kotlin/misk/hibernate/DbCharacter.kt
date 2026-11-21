@@ -98,16 +98,16 @@ interface CharacterQuery : Query<DbCharacter> {
 }
 
 data class NameAndReleaseDate(
-  @Property("name") var name: String,
-  @Property("release_date") var releaseDate: LocalDate?,
+  @param:Property("name") var name: String,
+  @param:Property("release_date") var releaseDate: LocalDate?,
 ) : Projection
 
 data class ActorAndReleaseDate(
-  @Property("actor.name") var actorName: String,
-  @Property("movie.release_date") var movieReleaseDate: LocalDate?,
+  @param:Property("actor.name") var actorName: String,
+  @param:Property("movie.release_date") var movieReleaseDate: LocalDate?,
 ) : Projection
 
 data class ActorAndCharacterCount(
-  @Property("actor.name") var actorName: String,
-  @Property("name", aggregation = AggregationType.COUNT) var characterCount: Long?,
+  @param:Property("actor.name") var actorName: String,
+  @param:Property("name", aggregation = AggregationType.COUNT) var characterCount: Long?,
 ) : Projection

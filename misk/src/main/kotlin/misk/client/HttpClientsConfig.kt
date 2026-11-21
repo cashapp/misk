@@ -13,7 +13,7 @@ import tools.jackson.databind.annotation.JsonDeserialize
 data class HttpClientsConfig
 @JvmOverloads
 constructor(
-  @JsonAlias("hosts")
+  @param:JsonAlias("hosts")
   // Need to retain ordering, hence LinkedHashMap
   val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf(),
   val endpoints: Map<String, HttpClientEndpointConfig> = mapOf(),

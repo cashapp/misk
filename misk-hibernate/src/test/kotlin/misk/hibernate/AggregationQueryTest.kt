@@ -338,15 +338,15 @@ interface NoDataPrimitivesQuery : Query<DbPrimitiveTour> {
 }
 
 data class AllNullsAreOk(
-  @Property(path = "i1", aggregation = AggregationType.MAX) val maxi1: Long?,
-  @Property(path = "i8", aggregation = AggregationType.MAX) val maxi8: Long?,
+  @param:Property(path = "i1", aggregation = AggregationType.MAX) val maxi1: Long?,
+  @param:Property(path = "i8", aggregation = AggregationType.MAX) val maxi8: Long?,
 ) : Projection
 
 data class WrongAggregatedProjection(
-  @Property(path = "i64", aggregation = AggregationType.AVG) val average: Any,
-  @Property(path = "i64", aggregation = AggregationType.COUNT) val count: Any,
-  @Property(path = "i64", aggregation = AggregationType.COUNT_DISTINCT) val countDistinct: Any,
-  @Property(path = "i64", aggregation = AggregationType.MAX) val max: Any,
-  @Property(path = "i64", aggregation = AggregationType.MIN) val min: Any,
-  @Property(path = "i64", aggregation = AggregationType.SUM) val sum: Any,
+  @param:Property(path = "i64", aggregation = AggregationType.AVG) val average: Any,
+  @param:Property(path = "i64", aggregation = AggregationType.COUNT) val count: Any,
+  @param:Property(path = "i64", aggregation = AggregationType.COUNT_DISTINCT) val countDistinct: Any,
+  @param:Property(path = "i64", aggregation = AggregationType.MAX) val max: Any,
+  @param:Property(path = "i64", aggregation = AggregationType.MIN) val min: Any,
+  @param:Property(path = "i64", aggregation = AggregationType.SUM) val sum: Any,
 ) : Projection

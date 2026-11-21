@@ -43,7 +43,7 @@ constructor(
   val endpoints: Map<String, BackwardsCompatibleEndpointConfig> = mapOf(),
 
   // New fields
-  @JsonAlias("hosts") val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf(),
+  @param:JsonAlias("hosts") val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf(),
   val logRequests: Boolean = false,
 )
 

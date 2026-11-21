@@ -42,7 +42,7 @@ internal constructor(
   private val webActionsServlet: WebActionsServlet,
   private val webConfig: WebConfig,
   private val connectionMetricsCollector: JettyConnectionMetricsCollector,
-  @misk.web.JettyHealthService private val statisticsHandler: StatisticsHandler,
+  @param:misk.web.JettyHealthService private val statisticsHandler: StatisticsHandler,
 ) : AbstractIdleService() {
 
   private val enabled by lazy { webConfig.jettyHealthServiceEnabled(logger) }

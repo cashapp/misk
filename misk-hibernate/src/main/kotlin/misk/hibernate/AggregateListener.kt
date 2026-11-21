@@ -45,7 +45,7 @@ internal class AggregateListener(registrations: Set<ListenerRegistration>) :
   DeleteEventListener,
   FlushEntityEventListener,
   CallbackRegistryConsumer {
-  private val multimap = LinkedHashMultimap.create<EventType<*>, Provider<*>>()!!
+  private val multimap = LinkedHashMultimap.create<EventType<*>, Provider<*>>()
   private val listenerAddPolicy = LinkedHashMap<EventType<*>, BindPolicy>()
 
   init {

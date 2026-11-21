@@ -416,7 +416,7 @@ class DeadlinePropagationInterceptorTest {
     override fun <T : Any> tag(type: Class<T>, computeIfAbsent: () -> T): T =
       throw NotImplementedError("Not needed for test")
 
-    override fun addEventListener(listener: EventListener) = throw NotImplementedError("Not needed for test")
+    override fun addEventListener(eventListener: EventListener) = throw NotImplementedError("Not needed for test")
   }
 
   private class TestTimeout(private val callTimeoutMillis: Int) : okio.Timeout() {

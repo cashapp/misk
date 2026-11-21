@@ -66,5 +66,5 @@ internal class PlainTextRequestTest {
       }
       .response
       .body
-      ?.string()!!
+      .string()
 }

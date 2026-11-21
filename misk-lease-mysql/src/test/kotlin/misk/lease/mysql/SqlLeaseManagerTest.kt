@@ -56,7 +56,7 @@ class SqlLeaseManagerTest {
     assertThat(leaseA).isNotNull()
     assertThat(leaseA.isHeld()).isTrue()
     assertThat(leaseA.checkHeld()).isTrue()
-    leaseA!!.release()
+    leaseA.release()
 
     val leaseA2 = leaseManager.requestLease("a")
     assertThat(leaseA2).isNotNull()

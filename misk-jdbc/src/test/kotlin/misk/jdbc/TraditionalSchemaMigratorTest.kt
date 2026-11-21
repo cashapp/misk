@@ -103,7 +103,7 @@ internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) 
   @Test
   fun initializeAndMigrate() {
     val mainSource = config.migrations_resources!![0]
-    val librarySource = config.migrations_resources!![1]
+    val librarySource = config.migrations_resources[1]
 
     resourceLoader.put(
       "$mainSource/v1002__movies.sql",
@@ -223,7 +223,7 @@ internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) 
         .trimMargin(),
     )
     resourceLoader.put(
-      "${config.migrations_resources!![1]}/v1002__foo.sql",
+      "${config.migrations_resources[1]}/v1002__foo.sql",
       """
       |CREATE TABLE table_1 (name varchar(255))
       |"""
@@ -234,8 +234,8 @@ internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) 
       .hasMessage(
         """
           |Movies is missing migrations:
-          |  ${config.migrations_resources!![0]}/v1001__foo.sql
-          |  ${config.migrations_resources!![1]}/v1002__foo.sql
+          |  ${config.migrations_resources[0]}/v1001__foo.sql
+          |  ${config.migrations_resources[1]}/v1002__foo.sql
           |Movies has applied migrations:
           |  """
           .trimMargin()
@@ -256,7 +256,7 @@ internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) 
     traditionalSchemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf())
 
     resourceLoader.put(
-      "${config.migrations_resources!![1]}/v1002__foo.sql",
+      "${config.migrations_resources[1]}/v1002__foo.sql",
       """
       |CREATE TABLE table_1 (name varchar(255))
       |"""
@@ -267,9 +267,9 @@ internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) 
       .hasMessage(
         """
           |Movies is missing migrations:
-          |  ${config.migrations_resources!![1]}/v1002__foo.sql
+          |  ${config.migrations_resources[1]}/v1002__foo.sql
           |Movies has applied migrations:
-          |  ${config.migrations_resources!![0]}/v1001__foo.sql"""
+          |  ${config.migrations_resources[0]}/v1001__foo.sql"""
           .trimMargin()
       )
   }
@@ -284,14 +284,14 @@ internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) 
         .trimMargin(),
     )
     resourceLoader.put(
-      "${config.migrations_resources!![0]}/v1001__bar.sql",
+      "${config.migrations_resources[0]}/v1001__bar.sql",
       """
       |CREATE TABLE table_2 (name varchar(255))
       |"""
         .trimMargin(),
     )
     resourceLoader.put(
-      "${config.migrations_resources!![0]}/v1002__other.sql",
+      "${config.migrations_resources[0]}/v1002__other.sql",
       """
       |CREATE TABLE table_3 (name varchar(255))
       |"""
@@ -323,7 +323,7 @@ internal abstract class TraditionalSchemaMigratorTest(val type: DataSourceType) 
         .trimMargin(),
     )
     resourceLoader.put(
-      "${config.migrations_resources!![0]}/v1001__movies.sql",
+      "${config.migrations_resources[0]}/v1001__movies.sql",
       """
       |CREATE TABLE table_1 (name varchar(255))
       |"""

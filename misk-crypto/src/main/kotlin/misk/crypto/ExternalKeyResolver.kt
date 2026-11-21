@@ -13,7 +13,7 @@ import misk.logging.getLogger
 class ExternalKeyResolver
 @Inject
 constructor(
-  @ExternalDataKeys override val allKeyAliases: Map<KeyAlias, KeyType>,
+  @param:ExternalDataKeys override val allKeyAliases: Map<KeyAlias, KeyType>,
   private val externalKeySources: Set<ExternalKeySource>,
 ) : KeyResolver {
 

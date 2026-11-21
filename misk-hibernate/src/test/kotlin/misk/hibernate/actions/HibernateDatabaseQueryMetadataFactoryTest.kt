@@ -276,7 +276,7 @@ class HibernateDatabaseQueryMetadataFactoryTest {
   }
 
   data class NameAndReleaseDate(
-    @Property("name") var name: String,
-    @Property("release_date") var releaseDate: LocalDate?,
+    @param:Property("name") var name: String,
+    @param:Property("release_date") var releaseDate: LocalDate?,
   ) : Projection
 }

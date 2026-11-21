@@ -80,7 +80,7 @@ internal class JettyHealthCheckTest {
     healthResponses.forEach {
       val r = it.get(5, TimeUnit.SECONDS)
       assertThat(r.code).isEqualTo(200)
-      assertThat(r.body?.string()).isEqualTo("healthy")
+      assertThat(r.body.string()).isEqualTo("healthy")
     }
 
     // make sure readiness fails when the threadpool is low
@@ -105,7 +105,7 @@ internal class JettyHealthCheckTest {
 
     successes.forEach {
       assertThat(it.code).isEqualTo(200)
-      assertThat(it.body?.string()).isEqualTo("done")
+      assertThat(it.body.string()).isEqualTo("done")
     }
     assertThat(successes).hasSize(parallelRequests)
 
@@ -161,7 +161,7 @@ internal class JettyHealthCheckTest {
 
   @Qualifier internal annotation class Health
 
-  internal class BlockingAction @Inject constructor(@Requests private val phaser: Phaser) : WebAction {
+  internal class BlockingAction @Inject constructor(@param:Requests private val phaser: Phaser) : WebAction {
     @Get("/block")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun block(): String {
@@ -173,7 +173,7 @@ internal class JettyHealthCheckTest {
     }
   }
 
-  internal class HealthAction @Inject constructor(@Health private val phaser: Phaser) : WebAction {
+  internal class HealthAction @Inject constructor(@param:Health private val phaser: Phaser) : WebAction {
     @Get("/health")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun check(): String {

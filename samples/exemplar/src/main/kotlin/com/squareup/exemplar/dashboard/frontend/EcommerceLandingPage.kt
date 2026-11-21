@@ -41,7 +41,7 @@ import wisp.deployment.Deployment
 @Singleton
 class EcommerceLandingPage
 @Inject
-constructor(@AppName private val appName: String, private val deployment: Deployment) : WebAction {
+constructor(@param:AppName private val appName: String, private val deployment: Deployment) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @AdminDashboardAccess

@@ -143,9 +143,9 @@ class ProtoColumnTest {
   }
 
   data class NameAndHero(
-    @Property("name") val name: String,
-    @Property("hero") val hero: SuperHero,
-    @Property("anotherhero") val anotherhero: SuperHero?,
+    @param:Property("name") val name: String,
+    @param:Property("hero") val hero: SuperHero,
+    @param:Property("anotherhero") val anotherhero: SuperHero?,
   ) : Projection
 
   interface DbAvengersMovieQuery : Query<DbAvengersMovie> {

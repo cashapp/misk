@@ -80,7 +80,7 @@ class Http2ConnectivityTest {
     val response = call.execute()
     response.use {
       assertThat(response.protocol).isEqualTo(Protocol.HTTP_2)
-      assertThat(response.body!!.string()).isEqualTo("hello")
+      assertThat(response.body.string()).isEqualTo("hello")
     }
   }
 
@@ -92,7 +92,7 @@ class Http2ConnectivityTest {
     val response = call.execute()
     response.use {
       assertThat(response.protocol).isEqualTo(Protocol.HTTP_1_1)
-      assertThat(response.body!!.string()).isEqualTo("hello")
+      assertThat(response.body.string()).isEqualTo("hello")
     }
   }
 
@@ -102,7 +102,7 @@ class Http2ConnectivityTest {
     val response = call.execute()
     response.use {
       assertThat(response.protocol).isEqualTo(Protocol.HTTP_1_1)
-      assertThat(response.body!!.string()).isEqualTo("hello")
+      assertThat(response.body.string()).isEqualTo("hello")
     }
   }
 

@@ -10,6 +10,8 @@ dependencies {
   
     implementation(project(":misk-api"))
 
+    compileOnly(libs.kotlinReflect)
+
     testImplementation(libs.assertj)
     testImplementation(libs.junitApi)
     testImplementation(libs.logbackClassic)

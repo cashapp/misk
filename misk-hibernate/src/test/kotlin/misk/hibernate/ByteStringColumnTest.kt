@@ -109,7 +109,8 @@ class ByteStringColumnTest {
     }
   }
 
-  data class TextAndHash(@Property("text") val text: String, @Property("hash") val hash: ByteString) : Projection
+  data class TextAndHash(@param:Property("text") val text: String, @param:Property("hash") val hash: ByteString) :
+    Projection
 
   interface TextHashQuery : Query<DbTextHash> {
     @Constraint(path = "hash") fun hash(hash: ByteString): TextHashQuery

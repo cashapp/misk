@@ -150,6 +150,6 @@ internal class FormValueParameterTest {
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request.build()).execute()
     assertThat(response.code).isEqualTo(200)
-    return response.body!!.source().readUtf8()
+    return response.body.source().readUtf8()
   }
 }

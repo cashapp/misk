@@ -23,7 +23,7 @@ internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
     bindListener<TestListener>()
   }
 
-  class BarProvider @Inject internal constructor(@Named("from-seed") private val seedData: ActionScoped<String>) :
+  class BarProvider @Inject internal constructor(@param:Named("from-seed") private val seedData: ActionScoped<String>) :
     ActionScopedProvider<String> {
     override fun get(): String = "${seedData.get()} and bar"
   }
@@ -39,12 +39,12 @@ internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
     }
   }
 
-  class FooProvider @Inject internal constructor(@Named("bar") private val bar: ActionScoped<String>) :
+  class FooProvider @Inject internal constructor(@param:Named("bar") private val bar: ActionScoped<String>) :
     ActionScopedProvider<String> {
     override fun get(): String = "${bar.get()} and foo!"
   }
 
-  class ZedProvider @Inject internal constructor(@Named("from-seed") private val seedData: ActionScoped<String>) :
+  class ZedProvider @Inject internal constructor(@param:Named("from-seed") private val seedData: ActionScoped<String>) :
     ActionScopedProvider<String> {
     override fun get(): String {
       val seedData = seedData.get()
@@ -55,7 +55,8 @@ internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
 
   class NullableFooProvider
   @Inject
-  internal constructor(@Named("from-seed") private val seedData: ActionScoped<String>) : ActionScopedProvider<String?> {
+  internal constructor(@param:Named("from-seed") private val seedData: ActionScoped<String>) :
+    ActionScopedProvider<String?> {
     override fun get(): String? {
       val seedData = seedData.get()
       return if (seedData == "null") return null else "$seedData and foo"
@@ -64,7 +65,7 @@ internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
 
   class NullableBasedOnFooProvider
   @Inject
-  internal constructor(@Named("nullable-foo") private val nullableFoo: ActionScoped<String?>) :
+  internal constructor(@param:Named("nullable-foo") private val nullableFoo: ActionScoped<String?>) :
     ActionScopedProvider<String?> {
     override fun get(): String? {
       return nullableFoo.get()?.let { "from foo $it" }
@@ -78,7 +79,7 @@ internal class TestActionScopedProviderModule : ActionScopedProviderModule() {
   }
 
   @Singleton
-  class TestListener @Inject constructor(@Named("constant") private val constant: ActionScoped<String>) :
+  class TestListener @Inject constructor(@param:Named("constant") private val constant: ActionScoped<String>) :
     ActionScopeListener {
     var result: String? = null
 

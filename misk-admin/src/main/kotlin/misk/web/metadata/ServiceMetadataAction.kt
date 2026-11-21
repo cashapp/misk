@@ -34,7 +34,7 @@ class ServiceMetadataAction @Inject constructor(private val optionalBinder: Opti
    * https://github.com/google/guice/wiki/FrequentlyAskedQuestions#how-can-i-inject-optional-parameters-into-a-constructor
    */
   @Singleton
-  class OptionalBinder @Inject constructor(@AppName val appName: String, deployment: Deployment) {
+  class OptionalBinder @Inject constructor(@param:AppName val appName: String, deployment: Deployment) {
     @com.google.inject.Inject(optional = true)
     var serviceMetadata: ServiceMetadata = ServiceMetadata(appName, deployment.name)
   }
