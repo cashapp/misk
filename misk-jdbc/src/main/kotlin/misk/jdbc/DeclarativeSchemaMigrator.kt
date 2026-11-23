@@ -57,14 +57,9 @@ internal class DeclarativeSchemaMigrator(
         check(rows.next())
         rows.getString(1)
       }
-    if ("NO_AUTO_VALUE_ON_ZERO" in originalMode.split(',')) {
-      executeDdl(statement, ddl)
-      return
-    }
-
-    // Adding AUTO_INCREMENT can renumber an existing zero ID during a table rebuild.
+    // Preserve zero IDs and reject lossy conversions while allowing legacy zero-date defaults.
     statement.connection.prepareStatement("SET SESSION sql_mode = ?").use { setMode ->
-      setMode.setString(1, listOf(originalMode, "NO_AUTO_VALUE_ON_ZERO").filter { it.isNotEmpty() }.joinToString(","))
+      setMode.setString(1, "NO_AUTO_VALUE_ON_ZERO,STRICT_ALL_TABLES,NO_ENGINE_SUBSTITUTION")
       setMode.execute()
       try {
         executeDdl(statement, ddl)

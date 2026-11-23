@@ -176,18 +176,50 @@ internal class DeclarativeSchemaMigratorTest {
     }
 
   @Test
-  fun restoresSessionModeWhenAlterFails() {
-    val source = config.migrations_resources!!.first()
-    resourceLoader.put("$source/t1.sql", "CREATE TABLE table_1 (id bigint NOT NULL)")
-    declarativeSchemaMigrator.applyAll("test")
+  fun rejectsLossyAlterAndRestoresPermissiveSession() {
     dataSourceService.dataSource.connection.use { connection ->
-      connection.createStatement().use { it.executeUpdate("INSERT INTO table_1 VALUES (1), (1)") }
+      connection.createStatement().use { statement ->
+        statement.execute("SET SESSION sql_mode = 'NO_AUTO_VALUE_ON_ZERO'")
+        statement.execute("CREATE TABLE table_1 (id bigint NOT NULL PRIMARY KEY, token varchar(32) NULL)")
+        statement.executeUpdate("INSERT INTO table_1 VALUES (1, NULL)")
+      }
       connection.commit()
     }
     val originalSession = mysqlSession()
-    resourceLoader.put("$source/t1.sql", "CREATE TABLE table_1 (id bigint NOT NULL PRIMARY KEY)")
+    val source = config.migrations_resources!!.first()
+    resourceLoader.put(
+      "$source/t1.sql",
+      "CREATE TABLE table_1 (id bigint NOT NULL PRIMARY KEY, token varchar(32) NOT NULL)",
+    )
 
     assertFailsWith<SQLException> { declarativeSchemaMigrator.applyAll("test") }
+    assertThat(mysqlSession()).isEqualTo(originalSession)
+    dataSourceService.dataSource.connection.use { connection ->
+      connection.createStatement().use { statement ->
+        statement.executeQuery("SELECT token FROM table_1 WHERE id = 1").use { rows ->
+          assertThat(rows.next()).isTrue()
+          assertThat(rows.getString(1)).isNull()
+        }
+      }
+    }
+  }
+
+  @Test
+  fun appliesZeroDateDefaultAndRestoresSession() {
+    dataSourceService.dataSource.connection.use { connection ->
+      connection.createStatement().use {
+        it.execute("SET SESSION sql_mode = 'STRICT_ALL_TABLES,NO_ZERO_DATE,NO_ENGINE_SUBSTITUTION'")
+      }
+    }
+    val originalSession = mysqlSession()
+    val source = config.migrations_resources!!.first()
+    resourceLoader.put(
+      "$source/t1.sql",
+      "CREATE TABLE table_1 (id bigint PRIMARY KEY, expires_at timestamp NOT NULL DEFAULT '0000-00-00 00:00:00')",
+    )
+
+    assertThat(declarativeSchemaMigrator.applyAll("test")).isEqualTo(MigrationStatus.Success)
+    assertThat(tableExists("table_1")).isTrue()
     assertThat(mysqlSession()).isEqualTo(originalSession)
   }
 
