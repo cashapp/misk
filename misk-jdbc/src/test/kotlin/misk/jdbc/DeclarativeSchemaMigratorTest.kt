@@ -27,7 +27,7 @@ internal class DeclarativeSchemaMigratorTest {
 
   @MiskTestModule val testingModule = MiskTestingServiceModule()
 
-  @MiskTestModule val jdbcModule = JdbcModule(Movies::class, config)
+  @MiskTestModule val jdbcModule = JdbcModule(Movies::class, config.copy(fixed_pool_size = 1))
 
   data class RootConfig(val mysql_data_source: DataSourceConfig) : Config
 
@@ -133,6 +133,62 @@ internal class DeclarativeSchemaMigratorTest {
     assertThat(tableExists("table_1")).isTrue
     assertThat(tableExists("table_2")).isTrue
     assertThat(tableExists("library_table")).isTrue
+  }
+
+  @Test
+  fun preservesZeroIdWhenAddingAutoIncrement() {
+    val originalSession = mysqlSession()
+    dataSourceService.dataSource.connection.use { connection ->
+      connection.createStatement().use { statement ->
+        statement.execute("CREATE TABLE table_1 (id bigint NOT NULL PRIMARY KEY)")
+        statement.executeUpdate("INSERT INTO table_1 (id) VALUES (0)")
+      }
+      connection.commit()
+    }
+    val source = config.migrations_resources!!.first()
+    resourceLoader.put("$source/t1.sql", "CREATE TABLE table_1 (id bigint NOT NULL AUTO_INCREMENT PRIMARY KEY)")
+
+    assertThat(declarativeSchemaMigrator.applyAll("test")).isEqualTo(MigrationStatus.Success)
+
+    assertThat(mysqlSession()).isEqualTo(originalSession)
+    dataSourceService.dataSource.connection.use { connection ->
+      connection.createStatement().use { statement ->
+        statement.executeQuery("SELECT id FROM table_1").use { rows ->
+          assertThat(rows.next()).isTrue()
+          assertThat(rows.getLong(1)).isZero()
+        }
+        statement.executeQuery("SHOW COLUMNS FROM table_1 LIKE 'id'").use { rows ->
+          assertThat(rows.next()).isTrue()
+          assertThat(rows.getString("Extra")).isEqualTo("auto_increment")
+        }
+      }
+    }
+  }
+
+  private fun mysqlSession() =
+    dataSourceService.dataSource.connection.use { connection ->
+      connection.createStatement().use { statement ->
+        statement.executeQuery("SELECT CONNECTION_ID(), @@SESSION.sql_mode").use { rows ->
+          check(rows.next())
+          rows.getLong(1) to rows.getString(2)
+        }
+      }
+    }
+
+  @Test
+  fun restoresSessionModeWhenAlterFails() {
+    val source = config.migrations_resources!!.first()
+    resourceLoader.put("$source/t1.sql", "CREATE TABLE table_1 (id bigint NOT NULL)")
+    declarativeSchemaMigrator.applyAll("test")
+    dataSourceService.dataSource.connection.use { connection ->
+      connection.createStatement().use { it.executeUpdate("INSERT INTO table_1 VALUES (1), (1)") }
+      connection.commit()
+    }
+    val originalSession = mysqlSession()
+    resourceLoader.put("$source/t1.sql", "CREATE TABLE table_1 (id bigint NOT NULL PRIMARY KEY)")
+
+    assertFailsWith<SQLException> { declarativeSchemaMigrator.applyAll("test") }
+    assertThat(mysqlSession()).isEqualTo(originalSession)
   }
 
   @Test
