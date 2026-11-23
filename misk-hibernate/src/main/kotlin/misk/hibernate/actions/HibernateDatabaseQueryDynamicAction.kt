@@ -36,6 +36,7 @@ constructor(
   private val databaseQueryRegistrations: List<HibernateDatabaseQueryRegistration>,
   private val injector: Injector,
   private val queryLimitsConfig: ReflectionQuery.QueryLimitsConfig,
+  private val authorizer: HibernateDatabaseQueryAuthorizer,
 ) : WebAction {
 
   @Post(HIBERNATE_QUERY_DYNAMIC_WEBACTION_PATH)
@@ -54,7 +55,7 @@ constructor(
     val transacter = getTransacterForDatabaseQueryAction(injector, registration.entityClass)
 
     val results =
-      if (caller.isAllowed(metadata.allowedCapabilities, metadata.allowedServices)) {
+      if (authorizer.isAuthorized(caller, registration.accessAnnotationEntry)) {
         runDynamicQuery(transacter, caller.principal, request, registration)
       } else {
         throw UnauthorizedException("Unauthorized to query [dbEntity=${metadata.entityClass}]")
