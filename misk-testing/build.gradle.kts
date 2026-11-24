@@ -54,6 +54,7 @@ dependencies {
 
   testImplementation(libs.kotlinTest)
   testImplementation(libs.mockitoKotlin)
+  testImplementation(libs.junitLauncher)
 }
 
 mavenPublishing {
@@ -61,3 +62,13 @@ mavenPublishing {
     KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }
+
+val injectorReuseLruTest by tasks.registering(Test::class) {
+  testClassesDirs = sourceSets.test.get().output.classesDirs
+  classpath = sourceSets.test.get().runtimeClasspath
+  filter { includeTestsMatching("misk.testing.ReusedInjectorEvictionTest") }
+  environment("MISK_TEST_REUSE_INJECTOR", "true")
+  environment("MISK_TEST_REUSE_LRU_SIZE", "1")
+}
+
+tasks.check { dependsOn(injectorReuseLruTest) }

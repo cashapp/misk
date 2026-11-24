@@ -79,7 +79,7 @@ jobs:
         with:
           check_name: Test Report - ${{ matrix.cmd }}
           job_name: Test - ${{ matrix.cmd }}
-          report_paths: '**/build/test-results/test/TEST-*.xml'
+          report_paths: '**/build/test-results/**/TEST-*.xml'
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
   publish:
