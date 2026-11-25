@@ -41,7 +41,7 @@ dependencyAnalysis {
       ignoreSourceSet("testFixtures", "test")
       onAny {
         severity("fail")
-        exclude("org.jetbrains.kotlin:kotlin-test:1.8.21")
+        exclude("org.jetbrains.kotlin:kotlin-test:2.4.21")
         exclude(":misk-testing")
       }
     }
