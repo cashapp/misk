@@ -10,6 +10,7 @@ import misk.hibernate.DbEntity
 import misk.hibernate.Transacter
 import misk.inject.KAbstractModule
 import misk.inject.typeLiteral
+import misk.security.authz.ExcludeFromAllowAnyService
 import misk.web.WebActionModule
 import misk.web.metadata.database.DatabaseQueryMetadata
 
@@ -18,6 +19,9 @@ internal class HibernateDatabaseQueryWebActionModule : KAbstractModule() {
   override fun configure() {
     install(WebActionModule.create<HibernateDatabaseQueryDynamicAction>())
     install(WebActionModule.create<HibernateDatabaseQueryStaticAction>())
+
+    // HibernateDatabaseQueryAuthorizer injects this list, which is otherwise only declared by AccessControlModule.
+    newMultibinder<String, ExcludeFromAllowAnyService>()
   }
 
   companion object {
