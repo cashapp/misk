@@ -61,6 +61,7 @@ private fun createJedisClientConfig(
   return DefaultJedisClientConfig.builder()
     .connectionTimeoutMillis(replicationGroupConfig.timeout_ms)
     .socketTimeoutMillis(replicationGroupConfig.timeout_ms)
+    .user(replicationGroupConfig.redis_auth_username)
     .password(
       replicationGroupConfig.redis_auth_password.ifEmpty {
         check(!requiresPassword) {
