@@ -101,9 +101,12 @@ internal class McpStreamableHttpTest {
   }
 
   @Test
-  fun `GET is not allowed`() {
-    val request = Request.Builder().url(url).header("Accept", "text/event-stream").get().build()
-    OkHttpClient().newCall(request).execute().use { assertEquals(405, it.code) }
+  fun `GET and DELETE are not allowed`() {
+    for (request in listOf(Request.Builder().url(url).get(), Request.Builder().url(url).delete())) {
+      OkHttpClient().newCall(request.header("Accept", "text/event-stream").build()).execute().use {
+        assertEquals(405, it.code)
+      }
+    }
   }
 
   private fun calculatorCall() =
