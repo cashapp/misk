@@ -3,21 +3,15 @@ package misk.mcp.internal
 import io.modelcontextprotocol.kotlin.sdk.shared.TransportSendOptions
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCNotification
-import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCRequest
 import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCResponse
-import io.modelcontextprotocol.kotlin.sdk.types.Method
 import jakarta.inject.Inject
 import java.util.UUID
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlinx.coroutines.channels.SendChannel
 import misk.annotation.ExperimentalMiskApi
-import misk.exceptions.BadRequestException
-import misk.exceptions.NotFoundException
 import misk.exceptions.WebActionException
 import misk.logging.getLogger
-import misk.mcp.McpSessionHandler
-import misk.mcp.action.SESSION_ID_HEADER
 import misk.mcp.encodeToString
 import misk.web.HttpCall
 import misk.web.sse.ServerSentEvent
@@ -25,21 +19,17 @@ import misk.web.sse.ServerSentEvent
 /**
  * MCP transport implementation using Server-Sent Events (SSE) over HTTP.
  *
- * Adapts Misk's SSE infrastructure to the MCP Kotlin SDK transport interface. Handles session management for stateless
- * HTTP connections and sends JSON-RPC messages as SSE events to the client.
+ * Adapts Misk's SSE infrastructure to the MCP Kotlin SDK transport interface and sends JSON-RPC messages as SSE events
+ * to the client.
  *
  * @param call The HTTP call context
- * @param mcpSessionHandler Optional session handler for managing client sessions
  * @param sendChannel Channel for sending SSE events to the client
  */
 @OptIn(ExperimentalAtomicApi::class, ExperimentalMiskApi::class)
 internal class MiskStreamableHttpServerTransport
 @Inject
-constructor(
-  override val call: HttpCall,
-  private val mcpSessionHandler: McpSessionHandler?,
-  private val sendChannel: SendChannel<ServerSentEvent>,
-) : MiskServerTransport() {
+constructor(override val call: HttpCall, private val sendChannel: SendChannel<ServerSentEvent>) :
+  MiskServerTransport() {
 
   private val initialized: AtomicBoolean = AtomicBoolean(false)
 
@@ -77,10 +67,6 @@ constructor(
   }
 
   override suspend fun handleMessage(message: JSONRPCMessage) {
-    if (message is JSONRPCRequest) {
-      mcpSessionHandler?.handleSession(message)
-    }
-
     try {
       _onMessage.invoke(message)
     } catch (e: Exception) {
@@ -89,24 +75,6 @@ constructor(
     }
 
     message.maybeOverrideResponse()
-  }
-
-  private suspend fun McpSessionHandler.handleSession(message: JSONRPCRequest) {
-    if (message.method == Method.Defined.Initialize.value) {
-      // On an initialization request, initialize a new session for the client and return
-      // in the SESSION_ID_HEADER response header
-      val sessionId = initialize()
-      call.setResponseHeader(SESSION_ID_HEADER, sessionId)
-    } else {
-      // On non-initialization requests, validate that the session ID exists in the request
-      // and that it's a valid, active session
-      val sessionId =
-        call.requestHeaders[SESSION_ID_HEADER]
-          ?: throw BadRequestException("Missing required $SESSION_ID_HEADER header")
-      if (!isActive(sessionId)) {
-        throw NotFoundException("SessionID $SESSION_ID_HEADER does not exist")
-      }
-    }
   }
 
   private fun JSONRPCMessage.maybeOverrideResponse() =

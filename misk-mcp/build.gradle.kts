@@ -10,7 +10,6 @@ plugins {
 
 dependencies {
   api(libs.guice)
-  api(libs.jakartaInject)
   api(libs.kotlinxSerializationJson)
   api(libs.mcpKotlinSdkCore)
   api(libs.mcpKotlinSdkServer){
@@ -19,16 +18,17 @@ dependencies {
   }
 
   api(project(":misk-actions"))
-  api(project(":misk-api"))
   api(project(":misk-inject"))
   api(project(":misk"))
   api(project(":misk-config"))
   api(libs.kotlinxCoroutinesCore)
   api(libs.kotlinxSerializationCore)
 
+  implementation(libs.jakartaInject)
   implementation(libs.kotlinReflect)
 
   implementation(libs.loggingApi)
+  implementation(project(":misk-api"))
   implementation(project(":misk-core"))
   implementation(project(":misk-logging"))
   implementation(project(":misk-metrics"))
