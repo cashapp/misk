@@ -28,8 +28,9 @@ jobs:
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
-      - name: Cache npm
-        uses: actions/cache@v6
+      - name: Restore npm cache
+        id: npm-cache
+        uses: actions/cache/restore@v6
         with:
           path: .hermit/node/cache
           key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
@@ -37,6 +38,13 @@ jobs:
 
       - name: Test
         run: npm install -g @misk/cli && miskweb ci-build -e
+
+      - name: Save npm cache
+        if: github.ref == 'refs/heads/master' && steps.npm-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: .hermit/node/cache
+          key: ${{ steps.npm-cache.outputs.cache-primary-key }}
 
   jvm:
     name: Test JVM
