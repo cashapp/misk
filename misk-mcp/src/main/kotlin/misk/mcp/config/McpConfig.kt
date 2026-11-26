@@ -43,6 +43,11 @@ class McpConfig @JvmOverloads constructor(servers: Map<String, McpServerConfig> 
  * @param resources Ignored. See [McpResourceConfig].
  * @param tools Ignored. See [McpToolConfig].
  * @param enforce_strict_capabilities Ignored: the server sends no requests to clients.
+ * @param allowed_origins Origins allowed to call the server, such as `https://app.example.com`. A request with any
+ *   other `Origin` header gets a 403. Requests without an `Origin` header, such as those from non-browser clients, are
+ *   always allowed. When empty, the server accepts every origin.
+ * @param keep_alive_interval_ms How often to send an SSE comment while a handler runs. It keeps idle proxies from
+ *   closing the stream, and it is how the server notices that the client went away and cancels the handler.
  */
 data class McpServerConfig
 @JvmOverloads
@@ -52,6 +57,8 @@ constructor(
   val resources: McpResourceConfig = McpResourceConfig(),
   val tools: McpToolConfig = McpToolConfig(),
   @Deprecated("Ignored: the server sends no requests to clients") val enforce_strict_capabilities: Boolean = false,
+  val allowed_origins: List<String> = emptyList(),
+  val keep_alive_interval_ms: Long = 15_000,
 ) : Config
 
 /**

@@ -17,6 +17,8 @@ import misk.mcp.config.McpConfig
 import misk.mcp.internal.McpJsonRpcMessageAdapter
 import misk.mcp.protocol.JSONRPCMessage
 import misk.moshi.MoshiAdapterModule
+import misk.scope.ActionScoped
+import misk.web.HttpCall
 
 /**
  * Guice module for configuring MCP (Model Context Protocol) server functionality.
@@ -159,7 +161,8 @@ private constructor(
 
     // Create a qualified binding for the McpStreamManager
     val streamManagerKey = keyOf<McpStreamManager>(qualifier)
-    bind(streamManagerKey).toProvider(Provider { McpStreamManager(mcpServerProvider.get()) })
+    val httpCallProvider = getProvider(keyOf<ActionScoped<HttpCall>>())
+    bind(streamManagerKey).toProvider(Provider { McpStreamManager(mcpServerProvider.get(), httpCallProvider.get()) })
   }
 
   companion object {

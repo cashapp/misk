@@ -29,6 +29,7 @@ dependencies {
   implementation(project(":misk-metrics"))
   implementation(project(":misk-moshi"))
   implementation(libs.moshiCore)
+  implementation(libs.okHttp)
   implementation(libs.okio)
   implementation(libs.prometheusClient)
 

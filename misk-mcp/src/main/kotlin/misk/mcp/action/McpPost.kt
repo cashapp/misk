@@ -32,14 +32,11 @@ import misk.web.mediatype.MediaTypes
  * - `suspend` modifier for coroutine support
  *
  * ## MCP Protocol Support
- * Handles all standard MCP JSON-RPC 2.0 operations:
- * - **initialize**: Server capability negotiation
- * - **tools/list**: Available tool discovery
- * - **tools/call**: Tool execution requests
- * - **resources/list**: Available resource discovery
- * - **resources/read**: Resource content retrieval
- * - **prompts/list**: Available prompt discovery
- * - **prompts/get**: Prompt template retrieval
+ * Serves MCP 2026-07-28 (`server/discover`, with the protocol version in each request's `_meta`) and the 2025 versions
+ * (`initialize`, `ping`), and in both: `tools/list`, `tools/call`, `resources/list`, `resources/templates/list`,
+ * `resources/read`, `prompts/list` and `prompts/get`. See [handleMessage] for the HTTP statuses of invalid requests.
+ *
+ * `GET` and `DELETE` are not served: the server opens no standalone SSE streams and keeps no sessions.
  *
  * ## Example Usage
  *
