@@ -5,6 +5,8 @@ package misk.mcp
 import com.google.inject.Module
 import com.google.inject.util.Modules
 import io.modelcontextprotocol.kotlin.sdk.client.Client
+import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequest
+import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequestParams
 import io.modelcontextprotocol.kotlin.sdk.types.ElicitResult
 import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequest
 import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequestParams
@@ -286,6 +288,19 @@ internal abstract class McpServerActionTest {
       expected = "Hello, world!",
       actual = structuredResult.greeting,
       message = "Expected the HelloWorld tool to return the correct greeting",
+    )
+  }
+
+  @Test
+  fun `test hello world tool without arguments`() = runBlocking {
+    val response = mcpClient.callTool(CallToolRequest(CallToolRequestParams(name = "HelloWorldTool")))
+    assertNotNull(response)
+    val structuredResult = assertNotNull(response.structuredContent).decode<HelloWorldToolOutput>()
+
+    assertEquals(
+      expected = "Hello, world!",
+      actual = structuredResult.greeting,
+      message = "Expected the HelloWorld tool to succeed when arguments are omitted",
     )
   }
 

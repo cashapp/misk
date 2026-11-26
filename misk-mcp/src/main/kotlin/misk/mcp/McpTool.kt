@@ -212,9 +212,7 @@ abstract class McpTool<I : Any> {
     // Parse the input arguments from the request
     val parsedInput =
       try {
-        requireNotNull(request.arguments?.decode(inputType.serializer().cast<I>())) {
-          "No input arguments provided to tool '$name'. Expected input type: $inputType."
-        }
+        (request.arguments ?: EmptyJsonObject).decode(inputType.serializer().cast<I>())
       } catch (e: SerializationException) {
         return ToolResult(
             TextContent(
