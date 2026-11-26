@@ -16,6 +16,10 @@ env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=3 -Xmx4096m -Dorg.gradle.configureondemand=true -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
   TERM: dumb
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   js:
     name: Test JS
@@ -27,6 +31,13 @@ jobs:
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: Cache npm
+        uses: actions/cache@v6
+        with:
+          path: .hermit/node/cache
+          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
 
       - name: Test
         run: npm install -g @misk/cli && miskweb ci-build -e
@@ -70,6 +81,11 @@ jobs:
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+
       - name: Test
         run: ${{ matrix.cmd }}
 
@@ -99,6 +115,11 @@ jobs:
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: Assign a version
         id: assign_version
