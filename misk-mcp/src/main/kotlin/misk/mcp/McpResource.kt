@@ -1,6 +1,7 @@
 package misk.mcp
 
 import misk.annotation.ExperimentalMiskApi
+import misk.mcp.protocol.Icon
 import misk.mcp.protocol.ReadResourceRequest
 import misk.mcp.protocol.ReadResourceResult
 
@@ -106,6 +107,14 @@ interface McpResource {
    * Should explain what information the resource provides and in what context it would be useful.
    */
   val description: String
+
+  /** Human-readable display name. Clients fall back to [name] when it's null. */
+  val title: String?
+    get() = null
+
+  /** Icons a client may show for this resource. */
+  val icons: List<Icon>?
+    get() = null
 
   /**
    * MIME type indicating the format of the resource content.

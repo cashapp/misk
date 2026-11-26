@@ -1,6 +1,7 @@
 package misk.mcp
 
 import misk.annotation.ExperimentalMiskApi
+import misk.mcp.protocol.Icon
 import misk.mcp.protocol.ReadResourceRequest
 import misk.mcp.protocol.ReadResourceResult
 
@@ -14,7 +15,7 @@ import misk.mcp.protocol.ReadResourceResult
  * ## Implementation Requirements
  *
  * Implementations must:
- * - Provide a [uriTemplate] using RFC 6570 Level 1 syntax (simple `{variableName}` expressions)
+ * - Provide a [uriTemplate] using RFC 6570 `{variableName}` or `{+variableName}` expressions
  * - Include a human-readable [name] for the resource template
  * - Include a [description] explaining what resources this template serves
  * - Optionally specify a [mimeType] (defaults to "text/html")
@@ -55,8 +56,8 @@ import misk.mcp.protocol.ReadResourceResult
  *
  * ## URI Template Syntax
  *
- * Only RFC 6570 Level 1 syntax is supported: simple `{variableName}` expressions where each variable matches a single
- * URI path segment. Operator expressions (`{+var}`, `{#var}`, etc.) are treated as literals.
+ * Simple `{variableName}` expressions match a single URI path segment, and reserved `{+variableName}` expressions match
+ * the rest of the URI, slashes included. Other operator expressions (`{#var}`, `{?var}`, etc.) are treated as literals.
  *
  * Examples:
  * - `schema://database/{tableName}` - matches `schema://database/users`
@@ -72,7 +73,7 @@ interface McpResourceTemplate {
   /**
    * RFC 6570 URI template for this resource.
    *
-   * Uses Level 1 syntax with simple `{variableName}` expressions. Each variable matches a single URI path segment.
+   * `{variableName}` matches a single URI path segment and `{+variableName}` matches the rest of the URI.
    */
   val uriTemplate: String
 
@@ -90,6 +91,14 @@ interface McpResourceTemplate {
    * represent.
    */
   val description: String
+
+  /** Human-readable display name. Clients fall back to [name] when it's null. */
+  val title: String?
+    get() = null
+
+  /** Icons a client may show for this resource template. */
+  val icons: List<Icon>?
+    get() = null
 
   /**
    * MIME type indicating the format of the resource content.
