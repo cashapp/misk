@@ -4,18 +4,6 @@ package misk.mcp
 
 import com.google.inject.Module
 import com.google.inject.util.Modules
-import io.modelcontextprotocol.kotlin.sdk.client.Client
-import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequest
-import io.modelcontextprotocol.kotlin.sdk.types.GetPromptRequestParams
-import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
-import io.modelcontextprotocol.kotlin.sdk.types.ListPromptsRequest
-import io.modelcontextprotocol.kotlin.sdk.types.ListResourceTemplatesRequest
-import io.modelcontextprotocol.kotlin.sdk.types.ListResourcesRequest
-import io.modelcontextprotocol.kotlin.sdk.types.ListToolsRequest
-import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceRequest
-import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceRequestParams
-import io.modelcontextprotocol.kotlin.sdk.types.TextContent
-import io.modelcontextprotocol.kotlin.sdk.types.TextResourceContents
 import io.prometheus.client.CollectorRegistry
 import jakarta.inject.Inject
 import kotlin.test.Test
@@ -33,7 +21,20 @@ import misk.mcp.action.McpStreamManager
 import misk.mcp.action.handleMessage
 import misk.mcp.config.McpConfig
 import misk.mcp.config.McpServerConfig
-import misk.mcp.testing.asMcpStreamableHttpClient
+import misk.mcp.protocol.GetPromptRequest
+import misk.mcp.protocol.GetPromptRequestParams
+import misk.mcp.protocol.JSONRPCMessage
+import misk.mcp.protocol.LATEST_LEGACY_PROTOCOL_VERSION
+import misk.mcp.protocol.LATEST_PROTOCOL_VERSION
+import misk.mcp.protocol.ListPromptsRequest
+import misk.mcp.protocol.ListResourceTemplatesRequest
+import misk.mcp.protocol.ListResourcesRequest
+import misk.mcp.protocol.ListToolsRequest
+import misk.mcp.protocol.ReadResourceRequest
+import misk.mcp.protocol.ReadResourceRequestParams
+import misk.mcp.protocol.TextContent
+import misk.mcp.protocol.TextResourceContents
+import misk.mcp.testing.McpTestClient
 import misk.mcp.testing.prompts.KotlinDeveloperPrompt
 import misk.mcp.testing.resources.UserProfileResource
 import misk.mcp.testing.resources.WebSearchResource
@@ -64,28 +65,35 @@ import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 
-internal abstract class McpServerActionTest {
+@OptIn(ExperimentalMiskApi::class)
+@Suppress("unused")
+internal class McpServerActionTestPostAction @Inject constructor(private val mcpStreamManager: McpStreamManager) :
+  WebAction {
+  @McpPost
+  suspend fun mcpPost(@RequestBody message: JSONRPCMessage, sendChannel: SendChannel<ServerSentEvent>) {
+    mcpStreamManager.withSseChannel(sendChannel) { handleMessage(message) }
+  }
+}
+
+internal abstract class McpServerActionTest(private val protocolVersion: String) {
 
   @MiskTest(startService = true)
-  class McpStreamableHttpServerActionTest : McpServerActionTest() {
-    @OptIn(ExperimentalMiskApi::class)
-    @Suppress("unused")
-    class McpServerActionTestPostAction @Inject constructor(private val mcpStreamManager: McpStreamManager) :
-      WebAction {
-      @McpPost
-      suspend fun mcpPost(@RequestBody message: JSONRPCMessage, sendChannel: SendChannel<ServerSentEvent>) {
-        mcpStreamManager.withSseChannel(sendChannel) { handleMessage(message) }
-      }
-    }
-
+  class ModernMcpServerActionTest : McpServerActionTest(LATEST_PROTOCOL_VERSION) {
     @Suppress("unused")
     @MiskTestModule
     val module: Module = Modules.combine(mcpServerTestModule, WebActionModule.create<McpServerActionTestPostAction>())
+  }
 
-    @BeforeEach
-    fun setUp() = runBlocking {
-      mcpClient = OkHttpClient().asMcpStreamableHttpClient(jettyService.httpServerUrl, "/mcp")
-    }
+  @MiskTest(startService = true)
+  class LegacyMcpServerActionTest : McpServerActionTest(LATEST_LEGACY_PROTOCOL_VERSION) {
+    @Suppress("unused")
+    @MiskTestModule
+    val module: Module = Modules.combine(mcpServerTestModule, WebActionModule.create<McpServerActionTestPostAction>())
+  }
+
+  @BeforeEach
+  fun setUp() {
+    mcpClient = McpTestClient(OkHttpClient(), jettyService.httpServerUrl.resolve("/mcp")!!, protocolVersion)
   }
 
   @Inject lateinit var jettyService: JettyService
@@ -112,7 +120,7 @@ internal abstract class McpServerActionTest {
       }
     }
 
-  lateinit var mcpClient: Client
+  lateinit var mcpClient: McpTestClient
 
   @Test
   fun `test ListTools`() = runBlocking {

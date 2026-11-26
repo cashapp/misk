@@ -2,12 +2,12 @@
 
 package misk.mcp.testing.tools
 
-import io.modelcontextprotocol.kotlin.sdk.client.Client
 import jakarta.inject.Inject
 import kotlinx.serialization.Serializable
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.Description
 import misk.mcp.McpTool
+import misk.mcp.testing.McpTestClient
 
 @Serializable
 data class ThrowingToolInput(@Description("dummy parameter, can't have empty parameter list") val dummy: String)
@@ -26,4 +26,4 @@ class ThrowingTool @Inject constructor() : McpTool<ThrowingToolInput>() {
   }
 }
 
-suspend fun Client.callThrowingTool() = callTool(name = "throwing", arguments = mapOf("dummy" to "dummy"))
+suspend fun McpTestClient.callThrowingTool() = callTool(name = "throwing", arguments = mapOf("dummy" to "dummy"))

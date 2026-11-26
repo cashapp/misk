@@ -86,22 +86,13 @@ Configure your MCP server in your application's YAML configuration:
 mcp:
   my_server:
     version: "1.0.0"
-    prompts:
-      list_changed: false
-    resources:
-      subscribe: false       # Enable resource update notifications (default: false)
-      list_changed: false
-    tools:
-      list_changed: false
 ```
-
-**Note**: Currently, only a single server configuration is supported. The configuration must contain exactly one server entry.
 
 ### Configuration Options
 
 - **version**: Server version reported to clients (semantic versioning recommended)
-- **resources.subscribe**: Enable resource update notifications (default: false)
-- **list_changed**: Whether dynamic registration is supported (default: false, not currently implemented)
+- **prompts**, **resources**, **tools** and **enforce_strict_capabilities**: deprecated and ignored. The server
+  registers features statically, so it never sends list-changed or resource-update notifications.
 
 ## WebAction Scoping Best Practices
 
@@ -657,6 +648,27 @@ class MyMcpTest {
     assertEquals(18.5, structuredResult.result.temperature)
     assertEquals(65, structuredResult.result.humidity)
     assertFalse(structuredResult.isError)
+  }
+}
+```
+
+### End-to-end tests
+
+`McpTestClient`, in misk-mcp's test fixtures, calls your `@McpPost` endpoint over Streamable HTTP. It speaks the
+modern protocol by default; pass a 2025-x `protocolVersion` to test legacy clients, which open with `initialize`.
+
+```kotlin
+@MiskTest(startService = true)
+class MyMcpEndpointTest {
+  @Inject lateinit var jettyService: JettyService
+
+  @Test
+  fun callsCalculator() = runBlocking {
+    val client = McpTestClient(OkHttpClient(), jettyService.httpServerUrl.resolve("/mcp")!!)
+
+    val result = client.callTool("calculator", mapOf("operator" to "add", "a" to 5.0, "b" to 3.0))
+
+    assertEquals("Result: 8.0", (result.content.single() as TextContent).text)
   }
 }
 ```

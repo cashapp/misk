@@ -1,13 +1,13 @@
 package misk.mcp.testing.tools
 
-import io.modelcontextprotocol.kotlin.sdk.types.TextContent
-import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import jakarta.inject.Inject
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 import misk.annotation.ExperimentalMiskApi
 import misk.mcp.McpTool
 import misk.mcp.encode
+import misk.mcp.protocol.TextContent
+import misk.mcp.protocol.ToolSchema
 
 @Serializable data class VersionMetadata(val version: String)
 

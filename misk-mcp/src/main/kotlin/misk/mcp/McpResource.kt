@@ -1,8 +1,8 @@
 package misk.mcp
 
-import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceRequest
-import io.modelcontextprotocol.kotlin.sdk.types.ReadResourceResult
 import misk.annotation.ExperimentalMiskApi
+import misk.mcp.protocol.ReadResourceRequest
+import misk.mcp.protocol.ReadResourceResult
 
 /**
  * Abstraction for a resource in the Model Context Protocol (MCP) specification.
