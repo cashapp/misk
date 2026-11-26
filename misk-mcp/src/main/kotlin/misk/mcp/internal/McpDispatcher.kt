@@ -5,6 +5,7 @@ import java.net.HttpURLConnection.HTTP_NOT_FOUND
 import java.util.Base64
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.TimeSource
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonArray
@@ -17,6 +18,8 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import misk.annotation.ExperimentalMiskApi
 import misk.logging.getLogger
+import misk.mcp.InputRequiredException
+import misk.mcp.LegacyInputRequiredException
 import misk.mcp.McpJson
 import misk.mcp.McpMetrics
 import misk.mcp.MiskMcpServer
@@ -36,6 +39,7 @@ import misk.mcp.protocol.GetPromptResult
 import misk.mcp.protocol.Implementation
 import misk.mcp.protocol.InitializeRequestParams
 import misk.mcp.protocol.InitializeResult
+import misk.mcp.protocol.InputRequiredResult
 import misk.mcp.protocol.JSONRPCError
 import misk.mcp.protocol.JSONRPCMessage
 import misk.mcp.protocol.JSONRPCRequest
@@ -69,6 +73,16 @@ internal enum class McpEra {
   Legacy,
 }
 
+/** The era of this request: modern when its `_meta` declares a protocol version, or for `server/discover`. */
+internal fun JSONRPCRequest.era(): McpEra =
+  when {
+    method == McpMethod.INITIALIZE -> McpEra.Legacy
+    meta()?.protocolVersion != null || method == McpMethod.SERVER_DISCOVER -> McpEra.Modern
+    else -> McpEra.Legacy
+  }
+
+internal fun JSONRPCRequest.meta(): RequestMeta? = (params?.get("_meta") as? JsonObject)?.let(::RequestMeta)
+
 /** A request refused before dispatch, and the HTTP status to send its error with. */
 internal class McpRejection(val status: Int, val error: JSONRPCError)
 
@@ -82,7 +96,7 @@ internal class McpDispatcher(private val server: MiskMcpServer) {
    */
   fun validate(request: JSONRPCRequest, headers: Headers): McpRejection? {
     val meta = request.meta()
-    val era = eraOf(request, meta)
+    val era = request.era()
     return try {
       validateHeaders(request, meta, era, headers)
       if (era == McpEra.Modern) validateModern(meta)
@@ -103,22 +117,30 @@ internal class McpDispatcher(private val server: MiskMcpServer) {
       throw e
     } catch (e: McpException) {
       errorFor(request, e)
+    } catch (e: LegacyInputRequiredException) {
+      JSONRPCError(
+        id = request.id,
+        error = RPCError(RPCError.ErrorCode.MISSING_REQUIRED_CLIENT_CAPABILITY, e.message!!),
+      )
     } catch (e: Exception) {
       logger.error(e) { "Error handling MCP request ${request.method}" }
       JSONRPCError(id = request.id, error = RPCError(RPCError.ErrorCode.INTERNAL_ERROR, e.message ?: "Internal error"))
     }
 
   private suspend fun dispatch(request: JSONRPCRequest): JsonObject =
-    when (eraOf(request, request.meta())) {
-      McpEra.Modern -> decorateModern(request.method, dispatchModern(request))
+    when (request.era()) {
+      McpEra.Modern -> {
+        // Verify the echoed state before any handler runs, whether or not the handler reads it
+        currentCoroutineContext()[McpRequestContext]?.requestState
+        val result =
+          try {
+            dispatchModern(request)
+          } catch (e: InputRequiredException) {
+            encode(InputRequiredResult.serializer(), e.result)
+          }
+        decorateModern(request.method, result)
+      }
       McpEra.Legacy -> dispatchLegacy(request)
-    }
-
-  private fun eraOf(request: JSONRPCRequest, meta: RequestMeta?): McpEra =
-    when {
-      request.method == McpMethod.INITIALIZE -> McpEra.Legacy
-      meta?.protocolVersion != null || request.method == McpMethod.SERVER_DISCOVER -> McpEra.Modern
-      else -> McpEra.Legacy
     }
 
   /**
@@ -295,13 +317,20 @@ internal class McpDispatcher(private val server: MiskMcpServer) {
     val mark = TimeSource.Monotonic.markNow()
     var outcome = McpMetrics.ToolCallOutcome.Exception
     try {
-      return tool.handler(request).also { result ->
-        outcome = if (result.isError == true) McpMetrics.ToolCallOutcome.Error else McpMetrics.ToolCallOutcome.Success
-      }
+      return runHandler { tool.handler(request) }
+        .also { result ->
+          outcome = if (result.isError == true) McpMetrics.ToolCallOutcome.Error else McpMetrics.ToolCallOutcome.Success
+        }
     } catch (e: CancellationException) {
       throw e
     } catch (e: McpException) {
       throw e
+    } catch (e: InputRequiredException) {
+      outcome = McpMetrics.ToolCallOutcome.Success
+      throw e
+    } catch (e: LegacyInputRequiredException) {
+      outcome = McpMetrics.ToolCallOutcome.Error
+      return CallToolResult(content = listOf(TextContent(e.message!!)), isError = true)
     } catch (e: Exception) {
       logger.error(e) { "Error executing tool ${request.name}" }
       return CallToolResult(
@@ -319,12 +348,12 @@ internal class McpDispatcher(private val server: MiskMcpServer) {
     if (missing.isNotEmpty()) {
       throw invalidParams("Missing required arguments for prompt ${request.name}: ${missing.joinToString { it.name }}")
     }
-    return prompt.handler(request)
+    return runHandler { prompt.handler(request) }
   }
 
   private suspend fun readResource(request: ReadResourceRequest, era: McpEra): ReadResourceResult {
     server.resources[request.uri]?.let {
-      return it.handler.handler(request)
+      return runHandler { it.handler.handler(request) }
     }
 
     val (template, match) =
@@ -340,7 +369,22 @@ internal class McpDispatcher(private val server: MiskMcpServer) {
           message = "Resource not found",
           data = buildJsonObject { put("uri", request.uri) },
         )
-    return template.handler.handler(request, match.variables)
+    return runHandler { template.handler.handler(request, match.variables) }
+  }
+
+  /** Runs a handler, ending the request with [McpRequestContext.inputSignal] even if the handler caught it. */
+  private suspend fun <T> runHandler(handler: suspend () -> T): T {
+    val context = currentCoroutineContext()[McpRequestContext]
+    val result =
+      try {
+        handler()
+      } catch (e: CancellationException) {
+        throw e
+      } catch (e: Exception) {
+        throw context?.inputSignal ?: e
+      }
+    context?.inputSignal?.let { throw it }
+    return result
   }
 
   private suspend fun complete(request: CompleteRequest): CompleteResult {
@@ -368,7 +412,7 @@ internal class McpDispatcher(private val server: MiskMcpServer) {
     val meta = (result["_meta"] as? JsonObject).orEmpty() + (McpMetaKeys.SERVER_INFO to encode(server.serverInfo))
     return buildJsonObject {
       result.forEach { (key, value) -> put(key, value) }
-      put("resultType", "complete")
+      if ("resultType" !in result) put("resultType", "complete")
       put("_meta", JsonObject(meta))
       if (method in CACHEABLE_METHODS) {
         put("ttlMs", 0)
@@ -391,8 +435,6 @@ internal class McpDispatcher(private val server: MiskMcpServer) {
 
   private fun encode(value: Implementation): JsonElement =
     McpJson.encodeToJsonElement(Implementation.serializer(), value)
-
-  private fun JSONRPCRequest.meta(): RequestMeta? = (params?.get("_meta") as? JsonObject)?.let(::RequestMeta)
 
   private fun errorFor(request: JSONRPCRequest, e: McpException) =
     JSONRPCError(id = request.id, error = RPCError(e.code, e.message ?: "MCP error ${e.code}", e.data))

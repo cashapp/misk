@@ -7,12 +7,40 @@ public final synthetic class misk/mcp/Description$Impl : misk/mcp/Description {
 	public final synthetic fun value ()Ljava/lang/String;
 }
 
+public final class misk/mcp/ElicitResponse {
+	public fun <init> (Lmisk/mcp/protocol/ElicitResult$Action;Ljava/lang/Object;)V
+	public final fun component1 ()Lmisk/mcp/protocol/ElicitResult$Action;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (Lmisk/mcp/protocol/ElicitResult$Action;Ljava/lang/Object;)Lmisk/mcp/ElicitResponse;
+	public static synthetic fun copy$default (Lmisk/mcp/ElicitResponse;Lmisk/mcp/protocol/ElicitResult$Action;Ljava/lang/Object;ILjava/lang/Object;)Lmisk/mcp/ElicitResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAction ()Lmisk/mcp/protocol/ElicitResult$Action;
+	public final fun getContent ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class misk/mcp/EmptyInput {
 	public static final field INSTANCE Lmisk/mcp/EmptyInput;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class misk/mcp/InputRequests {
+	public fun <init> ()V
+	public final fun elicit (Ljava/lang/String;Lmisk/mcp/protocol/ElicitRequestParams;)V
+	public final fun elicitUrl (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getRequests ()Ljava/util/Map;
+}
+
+public final class misk/mcp/InputRequestsKt {
+	public static final fun decodeInputResponse (Ljava/lang/String;Lkotlinx/serialization/KSerializer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun inputRequired (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun requestStateJson (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun requireInput (Lkotlinx/serialization/json/JsonElement;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun toRequestedSchema (Lkotlin/reflect/KType;)Lmisk/mcp/protocol/RequestedSchema;
 }
 
 public final class misk/mcp/JsonKt {
@@ -343,9 +371,11 @@ public final class misk/mcp/config/McpServerConfig : misk/config/Config {
 	public fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;ZLjava/util/List;JLjava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;ZLjava/util/List;JLjava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;ZLjava/util/List;JLjava/lang/String;Ljava/lang/String;Ljava/util/List;)V
-	public synthetic fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;ZLjava/util/List;JLjava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;ZLjava/util/List;JLjava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;ZLjava/util/List;JLjava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component10 ()Ljava/util/List;
+	public final fun component11 ()Ljava/lang/String;
 	public final fun component2 ()Lmisk/mcp/config/McpPromptConfig;
 	public final fun component3 ()Lmisk/mcp/config/McpResourceConfig;
 	public final fun component4 ()Lmisk/mcp/config/McpToolConfig;
@@ -354,14 +384,15 @@ public final class misk/mcp/config/McpServerConfig : misk/config/Config {
 	public final fun component7 ()J
 	public final fun component8 ()Ljava/lang/String;
 	public final fun component9 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;ZLjava/util/List;JLjava/lang/String;Ljava/lang/String;Ljava/util/List;)Lmisk/mcp/config/McpServerConfig;
-	public static synthetic fun copy$default (Lmisk/mcp/config/McpServerConfig;Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;ZLjava/util/List;JLjava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lmisk/mcp/config/McpServerConfig;
+	public final fun copy (Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;ZLjava/util/List;JLjava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)Lmisk/mcp/config/McpServerConfig;
+	public static synthetic fun copy$default (Lmisk/mcp/config/McpServerConfig;Ljava/lang/String;Lmisk/mcp/config/McpPromptConfig;Lmisk/mcp/config/McpResourceConfig;Lmisk/mcp/config/McpToolConfig;ZLjava/util/List;JLjava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lmisk/mcp/config/McpServerConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllowed_origins ()Ljava/util/List;
 	public final fun getEnforce_strict_capabilities ()Z
 	public final fun getIcons ()Ljava/util/List;
 	public final fun getKeep_alive_interval_ms ()J
 	public final fun getPrompts ()Lmisk/mcp/config/McpPromptConfig;
+	public final fun getRequest_state_key ()Ljava/lang/String;
 	public final fun getResources ()Lmisk/mcp/config/McpResourceConfig;
 	public final fun getTitle ()Ljava/lang/String;
 	public final fun getTools ()Lmisk/mcp/config/McpToolConfig;
@@ -3611,7 +3642,8 @@ public final class misk/mcp/testing/McpTestClient {
 	public fun <init> (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;)V
 	public fun <init> (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Lmisk/mcp/protocol/ClientCapabilities;)V
 	public fun <init> (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Lmisk/mcp/protocol/ClientCapabilities;Lmisk/mcp/protocol/Implementation;)V
-	public synthetic fun <init> (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Lmisk/mcp/protocol/ClientCapabilities;Lmisk/mcp/protocol/Implementation;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Lmisk/mcp/protocol/ClientCapabilities;Lmisk/mcp/protocol/Implementation;Lmisk/mcp/testing/McpTestClient$InputHandler;)V
+	public synthetic fun <init> (Lokhttp3/OkHttpClient;Lokhttp3/HttpUrl;Ljava/lang/String;Lmisk/mcp/protocol/ClientCapabilities;Lmisk/mcp/protocol/Implementation;Lmisk/mcp/testing/McpTestClient$InputHandler;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun callTool (Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun callTool (Lmisk/mcp/protocol/CallToolRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun callTool$default (Lmisk/mcp/testing/McpTestClient;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -3643,6 +3675,10 @@ public final class misk/mcp/testing/McpTestClient {
 
 public final class misk/mcp/testing/McpTestClient$Companion {
 	public final fun encodeHeaderValue (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public abstract interface class misk/mcp/testing/McpTestClient$InputHandler {
+	public abstract fun respond (Ljava/lang/String;Lmisk/mcp/protocol/InputRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class misk/mcp/testing/McpTestResponse {
@@ -3856,6 +3892,33 @@ public final class misk/mcp/testing/tools/EchoToolV2 : misk/mcp/testing/tools/Ab
 	public fun getDescription ()Ljava/lang/String;
 }
 
+public final class misk/mcp/testing/tools/GetNicknameRequest {
+	public static final field Companion Lmisk/mcp/testing/tools/GetNicknameRequest$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/mcp/testing/tools/GetNicknameRequest;
+	public static synthetic fun copy$default (Lmisk/mcp/testing/tools/GetNicknameRequest;Ljava/lang/String;ILjava/lang/Object;)Lmisk/mcp/testing/tools/GetNicknameRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNickname ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class misk/mcp/testing/tools/GetNicknameRequest$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lmisk/mcp/testing/tools/GetNicknameRequest$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lmisk/mcp/testing/tools/GetNicknameRequest;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/GetNicknameRequest;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class misk/mcp/testing/tools/GetNicknameRequest$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class misk/mcp/testing/tools/HelloWorldTool : misk/mcp/StructuredMcpToolEmptyInput {
 	public fun <init> ()V
 	public fun getDescription ()Ljava/lang/String;
@@ -3967,6 +4030,40 @@ public final class misk/mcp/testing/tools/KotlinSdkTool : misk/mcp/McpTool {
 	public fun getName ()Ljava/lang/String;
 	public synthetic fun handle (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun handle (Lmisk/mcp/protocol/ToolSchema;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/testing/tools/NicknameElicitationTool : misk/mcp/McpToolEmptyInput {
+	public fun <init> ()V
+	public fun getDescription ()Ljava/lang/String;
+	public fun getName ()Ljava/lang/String;
+	public fun handle (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class misk/mcp/testing/tools/NicknameState {
+	public static final field Companion Lmisk/mcp/testing/tools/NicknameState$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lmisk/mcp/testing/tools/NicknameState;
+	public static synthetic fun copy$default (Lmisk/mcp/testing/tools/NicknameState;Ljava/lang/String;ILjava/lang/Object;)Lmisk/mcp/testing/tools/NicknameState;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGreeting ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class misk/mcp/testing/tools/NicknameState$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lmisk/mcp/testing/tools/NicknameState$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lmisk/mcp/testing/tools/NicknameState;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lmisk/mcp/testing/tools/NicknameState;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class misk/mcp/testing/tools/NicknameState$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class misk/mcp/testing/tools/ThrowingTool : misk/mcp/McpTool {
