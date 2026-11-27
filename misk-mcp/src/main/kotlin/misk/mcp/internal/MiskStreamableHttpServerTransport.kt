@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package misk.mcp.internal
 
 import io.modelcontextprotocol.kotlin.sdk.shared.TransportSendOptions

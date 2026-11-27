@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package misk.mcp.testing.tools
 
 import jakarta.inject.Inject

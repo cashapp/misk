@@ -7,6 +7,20 @@ The Changelog consequently will not be updated regularly since releases only inc
 
 Major and breaking changes will still be documented in the Changelog.
 
+misk-mcp WebSocket transport and sessions deprecated
+===
+
+misk-mcp is moving to MCP 2026-07-28, which makes the protocol stateless and keeps Streamable HTTP as its only HTTP
+transport. These APIs are now deprecated and will be removed when misk-mcp adopts that spec:
+
+- `@McpWebSocket` and `McpStreamManager.withWebSocket`. WebSocket is not an MCP transport. Use `@McpPost`.
+- `McpSessionHandler`, `McpSessionHandlerModule`, `McpSessionId` and `SESSION_ID_HEADER`. The spec removes sessions and
+  the `Mcp-Session-Id` header. Pass any state a tool needs across calls as an explicit tool argument.
+- `@McpGet` and `@McpDelete`. The spec removes the GET stream and session deletion. Delete these actions; no
+  replacement is needed.
+
+Behavior is unchanged.
+
 Vitess exception metric labels
 ===
 

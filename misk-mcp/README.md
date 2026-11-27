@@ -35,25 +35,13 @@ class MyAppModule : KAbstractModule() {
 
 ## Web Action Integration
 
-To expose MCP functionality through HTTP endpoints, you need to create web actions using the MCP annotations and install the appropriate WebActionModule. The misk-mcp module supports two transport protocols:
-
-### Transport Options
-
-#### StreamableHTTP Transport
-Uses HTTP POST requests with Server-Sent Events (SSE) for streaming responses:
-- **`@McpPost`** (Required): Handles incoming MCP requests from clients
-- **`@McpGet`** (Optional): Enables out-of-band server-to-client notifications
-- **`@McpDelete`** (Optional): Allows clients to explicitly delete an existing stateful session
-
-#### WebSocket Transport  
-Uses persistent WebSocket connections for full bidirectional communication:
-- **`@McpWebSocket`** (Required): Handles all MCP communication over WebSocket
-
-### StreamableHTTP Transport Example
+To expose MCP functionality over HTTP, create a web action annotated with `@McpPost` and install a `WebActionModule`
+for it. misk-mcp serves MCP over the Streamable HTTP transport: each client message is an HTTP POST, and the response
+streams back as Server-Sent Events (SSE).
 
 ```kotlin
 @ExperimentalMiskApi
-class MyMcpSseAction @Inject constructor(
+class MyMcpWebAction @Inject constructor(
   private val mcpStreamManager: McpStreamManager
 ) : WebAction {
 
@@ -66,66 +54,8 @@ class MyMcpSseAction @Inject constructor(
       handleMessage(message)
     }
   }
-
-  @McpGet  
-  suspend fun streamServerEvents(
-    sendChannel: SendChannel<ServerSentEvent>
-  ) {
-    mcpStreamManager.withSseChannel(sendChannel) {
-      // Stream server-initiated events to client
-    }
-  }
-
-  @McpDelete
-  suspend fun terminateSession(
-    @RequestHeaders headers: Headers,
-    sendChannel: SendChannel<ServerSentEvent>
-  ) {
-    val sessionId = headers[SESSION_ID_HEADER] ?: throw IllegalArgumentException("Missing session ID")
-    // Any session state should be cleaned up here
-  }
 }
 ```
-
-### WebSocket Transport Example
-
-```kotlin
-@ExperimentalMiskApi
-class MyMcpWebSocketAction @Inject constructor(
-  private val mcpStreamManager: McpStreamManager
-) : WebAction {
-
-  @McpWebSocket
-  fun handleWebSocket(webSocket: WebSocket): WebSocketListener {
-    return mcpStreamManager.withWebSocket(webSocket)
-  }
-}
-```
-
-### Transport Comparison
-
-| Feature | StreamableHTTP Transport | WebSocket Transport |
-|---------|--------------------------|-------------------|
-| **Connection Type** | HTTP POST + SSE streaming | Persistent WebSocket |
-| **Communication** | Client→Server (POST)<br/>Server→Client (SSE) | Full bidirectional |
-| **Complexity** | Multiple endpoints | Single endpoint |
-| **Session Management** | Optional via headers | Built-in connection state |
-| **Use Cases** | Traditional web apps<br/>Request-response patterns | Real-time applications<br/>Interactive AI tools |
-| **Client Support** | Universal HTTP support | WebSocket support required |
-
-### Choosing a Transport
-
-**Use StreamableHTTP Transport when:**
-- Building traditional web applications
-- Need maximum client compatibility
-- Implementing request-response patterns
-- Want explicit control over session management
-
-**Use WebSocket Transport when:**
-- Building real-time interactive applications
-- Need bidirectional communication
-- Want simplified connection management
-- Implementing conversational AI interfaces
 
 **Important**: You must install a WebActionModule to register your MCP web actions:
 
@@ -146,9 +76,33 @@ class MyAppModule : KAbstractModule() {
 }
 ```
 
-Without the WebActionModule installation, your `@McpPost`, `@McpGet`, and `@McpDelete` annotated methods will not be registered as HTTP endpoints.
+Without the WebActionModule installation, your `@McpPost` annotated method will not be registered as an HTTP endpoint.
 
-## Stateful Sessions (Optional)
+### Deprecated: WebSocket Transport
+
+> **Deprecated.** WebSocket is not an MCP transport. `@McpWebSocket` and `McpStreamManager.withWebSocket` will be
+> removed when misk-mcp adopts MCP 2026-07-28. Use `@McpPost` instead.
+
+```kotlin
+@ExperimentalMiskApi
+class MyMcpWebSocketAction @Inject constructor(
+  private val mcpStreamManager: McpStreamManager
+) : WebAction {
+
+  @McpWebSocket
+  fun handleWebSocket(webSocket: WebSocket): WebSocketListener {
+    return mcpStreamManager.withWebSocket(webSocket)
+  }
+}
+```
+
+## Stateful Sessions (Optional, Deprecated)
+
+> **Deprecated.** MCP 2026-07-28 removes sessions, the `Mcp-Session-Id` header and the GET and DELETE endpoints.
+> `McpSessionHandler`, `McpSessionHandlerModule`, `McpSessionId`, `SESSION_ID_HEADER`, `@McpGet` and `@McpDelete` will
+> be removed when misk-mcp adopts that spec. If a tool needs state across calls, return an identifier from one call
+> and accept it as a tool argument on the next. Delete `@McpGet` and `@McpDelete` actions; misk-mcp never sends
+> messages on the GET stream.
 
 The MCP server supports stateful sessions using the `Mcp-Session-Id` header. This is optional and allows clients (like LLMs) to maintain context across multiple requests.
 

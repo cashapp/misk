@@ -17,6 +17,7 @@ import misk.mcp.internal.McpServerSession
 import misk.mcp.internal.MiskServerTransport
 import misk.mcp.internal.MiskStreamableHttpServerTransport
 import misk.mcp.internal.MiskWebSocketServerTransport
+import misk.mcp.internal.WEBSOCKET_DEPRECATION
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import misk.web.sse.ServerSentEvent
@@ -219,6 +220,7 @@ internal constructor(
    * @param webSocket WebSocket connection to manage
    * @return WebSocketListener that automatically handles MCP protocol messages
    */
+  @Deprecated(WEBSOCKET_DEPRECATION)
   fun withWebSocket(webSocket: WebSocket): WebSocketListener =
     object : WebSocketListener() {
 

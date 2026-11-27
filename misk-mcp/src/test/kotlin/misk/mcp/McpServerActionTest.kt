@@ -1,3 +1,4 @@
+@file:Suppress("DEPRECATION")
 @file:OptIn(ExperimentalMiskApi::class)
 
 package misk.mcp
@@ -45,14 +46,14 @@ import misk.mcp.testing.resources.WebSearchResource
 import misk.mcp.testing.tools.CalculatorTool
 import misk.mcp.testing.tools.CalculatorToolInput.Operation
 import misk.mcp.testing.tools.CalculatorToolOutput
+import misk.mcp.testing.tools.ClientConnectionTool
+import misk.mcp.testing.tools.ClientConnectionToolOutput
 import misk.mcp.testing.tools.GetNicknameRequest
 import misk.mcp.testing.tools.HelloWorldTool
 import misk.mcp.testing.tools.HelloWorldToolOutput
 import misk.mcp.testing.tools.HierarchicalTool
 import misk.mcp.testing.tools.HierarchicalToolOutput
 import misk.mcp.testing.tools.KotlinSdkTool
-import misk.mcp.testing.tools.ClientConnectionTool
-import misk.mcp.testing.tools.ClientConnectionToolOutput
 import misk.mcp.testing.tools.NicknameElicitationTool
 import misk.mcp.testing.tools.ThrowingTool
 import misk.mcp.testing.tools.VersionMetadata

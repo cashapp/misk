@@ -16,8 +16,7 @@ import misk.web.mediatype.MediaTypes
  * ## Transport Compatibility
  *
  * **StreamableHTTP Transport Only**: This annotation is designed exclusively for StreamableHTTP transport using
- * Server-Sent Events. For WebSocket-based MCP communication, use `@McpWebSocket` instead, which handles all
- * communication over a persistent WebSocket connection.
+ * Server-Sent Events. It is the only transport misk-mcp will support once it adopts MCP 2026-07-28.
  *
  * ## Purpose
  * Implements the MCP specification requirement for "sending messages to the server" by providing an HTTP POST endpoint
@@ -30,9 +29,8 @@ import misk.web.mediatype.MediaTypes
  * - **Request Content-Type**: `application/json` (for JSON-RPC messages)
  * - **Response Content-Type**: `text/event-stream` (for Server-Sent Events (SSE) responses)
  *
- * ## Session Support
- * The endpoint accepts an optional `Mcp-Session-Id` header (referenced by [SESSION_ID_HEADER]) when stateful sessions
- * are used:
+ * ## Handling Messages
+ *
  * ```kotlin
  * @McpPost
  * suspend fun handleMcpRequest(
@@ -52,7 +50,6 @@ import misk.web.mediatype.MediaTypes
  * - `@RequestBody message: JSONRPCMessage` - For JSON-RPC 2.0 message processing
  * - `sendChannel: SendChannel<ServerSentEvent>` - For Server-Sent Events (SSE) responses
  * - `suspend` modifier for coroutine support
- * - Optional `@RequestHeaders headers: Headers` for session ID extraction
  *
  * ## MCP Protocol Support
  * Handles all standard MCP JSON-RPC 2.0 operations:
@@ -85,9 +82,6 @@ import misk.web.mediatype.MediaTypes
  * }
  * ```
  *
- * @see McpGet for server-to-client event streaming
- * @see McpDelete for session termination
- * @see SESSION_ID_HEADER for the session ID header constant
  * @see McpStreamManager For managing MCP streams and server lifecycle
  * @see misk.mcp.MiskMcpServer For the underlying MCP server implementation
  */
