@@ -4,6 +4,7 @@ import com.vanniktech.maven.publish.KotlinJvm
 plugins {
   id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish.base")
+  id("java-test-fixtures")
 }
 
 dependencies {
@@ -22,6 +23,11 @@ dependencies {
   implementation(project(":misk-logging"))
   implementation(project(":wisp:wisp-moshi"))
   implementation(libs.okio)
+
+  testFixturesApi(libs.jakartaInject)
+  testFixturesApi(project(":misk-inject"))
+  testFixturesApi(project(":misk-testing-api"))
+  testFixturesImplementation(libs.guice)
 
   testImplementation(libs.assertj)
   testImplementation(libs.guava)
