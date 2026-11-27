@@ -1,5 +1,6 @@
 package misk.jdbc
 
+import java.net.URLDecoder
 import java.sql.Connection
 import java.time.Duration
 import java.util.Properties
@@ -195,7 +196,15 @@ constructor(
       // the system default can have a huge performance penalty on large DB instances.
       // See: https://www.facebook.com/MySQLatFacebook/posts/10152018528871696:0
       // This is safe from Vitess 17+
-      properties["sessionVariables"] = "time_zone='+00:00'"
+      // Connector/J lets this property override the sessionVariables URL parameter, so add the configured session
+      // variables after time_zone. Decode them as Connector/J decodes URL parameters.
+      // They come last so that they can still set time_zone.
+      val configuredSessionVariables =
+        jdbc_url_query_parameters.entries
+          .firstOrNull { it.key.equals("sessionVariables", ignoreCase = true) }
+          ?.let { URLDecoder.decode(it.value.toString().trim(), Charsets.UTF_8) }
+          ?.takeIf { it.isNotBlank() }
+      properties["sessionVariables"] = listOfNotNull("time_zone='+00:00'", configuredSessionVariables).joinToString(",")
     }
     return properties
   }
