@@ -1,0 +1,63 @@
+public final class misk/opentelemetry/jetty/JettyJmxMetrics {
+	public static final field INSTANCE Lmisk/opentelemetry/jetty/JettyJmxMetrics;
+	public static final fun start (Lio/opentelemetry/api/OpenTelemetry;Ljavax/management/MBeanServer;)Ljava/lang/AutoCloseable;
+}
+
+public final class misk/opentelemetry/jetty/JettyMetrics {
+	public fun <init> (Lio/opentelemetry/api/OpenTelemetry;)V
+	public final fun observeStatistics (Lmisk/opentelemetry/jetty/JettyStatistics;)Ljava/lang/AutoCloseable;
+}
+
+public final class misk/opentelemetry/jetty/JettyOpenTelemetryModule : misk/inject/KAbstractModule {
+	public fun <init> (Z)V
+	public fun <init> (ZLjava/util/Set;)V
+	public fun <init> (ZLjava/util/Set;Z)V
+	public synthetic fun <init> (ZLjava/util/Set;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface class misk/opentelemetry/jetty/JettyStatistics {
+	public abstract fun dispatchTimeMaxSeconds ()D
+	public abstract fun dispatchTimeTotalSeconds ()D
+	public abstract fun dispatches ()J
+	public abstract fun dispatchesActive ()J
+	public abstract fun dispatchesActiveMax ()J
+	public abstract fun requestTimeMaxSeconds ()D
+	public abstract fun requestTimeTotalSeconds ()D
+	public abstract fun requests ()J
+	public abstract fun requestsActive ()J
+	public abstract fun requestsActiveMax ()J
+	public abstract fun responses (I)J
+	public abstract fun responsesBytes ()J
+	public abstract fun uptimeSeconds ()D
+}
+
+public final class misk/opentelemetry/jetty/OpenTelemetryConnectionMetricsModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Set;)V
+	public synthetic fun <init> (Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+}
+
+public final class misk/opentelemetry/jetty/OpenTelemetryJettyMetricsModule : misk/inject/KInstallOnceModule {
+	public fun <init> ()V
+}
+
+public final class misk/opentelemetry/jetty/ResetCarryingCounter {
+	public fun <init> (Ljava/util/function/LongSupplier;Ljava/util/function/LongSupplier;)V
+	public final fun carry ()V
+	public final fun extend (Ljava/util/function/DoubleSupplier;)D
+}
+
+public final class misk/opentelemetry/jetty/WrappingIntCounter {
+	public static final field Companion Lmisk/opentelemetry/jetty/WrappingIntCounter$Companion;
+	public fun <init> (Ljava/util/function/LongSupplier;Ljava/util/function/LongSupplier;)V
+	public final fun carry ()V
+	public final fun extend (Ljava/util/function/IntSupplier;)J
+	public static final fun neverReset ()Lmisk/opentelemetry/jetty/WrappingIntCounter;
+}
+
+public final class misk/opentelemetry/jetty/WrappingIntCounter$Companion {
+	public final fun neverReset ()Lmisk/opentelemetry/jetty/WrappingIntCounter;
+}
+
