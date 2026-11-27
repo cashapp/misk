@@ -16,6 +16,7 @@ tasks.withType<dev.detekt.gradle.Detekt>().configureEach {
 dependencies {
   api(libs.guice)
   api(libs.jakartaInject)
+  api(libs.sqldelightRuntime)
 
   api(project(":misk-inject"))
   api(project(":misk-jdbc"))

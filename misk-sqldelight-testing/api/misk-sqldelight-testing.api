@@ -33,6 +33,7 @@ public abstract interface class misk/sqldelight/testing/MoviesDatabase : app/cas
 }
 
 public final class misk/sqldelight/testing/MoviesDatabase$Companion {
+	public final fun allTableNames ()Ljava/util/List;
 	public final fun getSchema ()Lapp/cash/sqldelight/db/SqlSchema;
 	public final fun invoke (Lapp/cash/sqldelight/db/SqlDriver;)Lmisk/sqldelight/testing/MoviesDatabase;
 }
