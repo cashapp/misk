@@ -212,6 +212,10 @@ public final class misk/client/ClientNetworkInterceptorsModule : misk/inject/KAb
 	public fun <init> ()V
 }
 
+public abstract interface class misk/client/ClientOkHttpConfigurator {
+	public abstract fun configure (Lmisk/client/ClientAction;Lokhttp3/OkHttpClient$Builder;)V
+}
+
 public abstract interface class misk/client/EnvoyClientEndpointProvider {
 	public abstract fun unixSocket (Lmisk/client/HttpClientEnvoyConfig;)Ljava/io/File;
 	public abstract fun url (Lmisk/client/HttpClientEnvoyConfig;)Ljava/lang/String;
