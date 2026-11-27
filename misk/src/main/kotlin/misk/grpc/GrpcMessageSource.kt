@@ -25,6 +25,9 @@ constructor(
   private val grpcEncoding: String? = null,
   // Defaults to gRPC's standard 4 MiB maximum inbound message size.
   private val maxMessageBytes: Long = 4L * 1024 * 1024,
+  // Additional guard on top of maxMessageBytes: a decoded message may exceed a small floor only by this factor over
+  // its on-the-wire size, bounding gzip amplification. Defaults to 100:1.
+  private val maxDecompressionRatio: Long = 100,
 ) : MessageSource<T>, Closeable by source {
   override fun read(): T? {
     if (source.exhausted()) return null
@@ -55,7 +58,10 @@ constructor(
 
     val encodedMessage = Buffer().write(source, encodedLength)
 
-    return LimitedSource(messageDecoding.decode(encodedMessage), maxMessageBytes).buffer().use {
+    // Bound the decoded message by both the absolute size limit and the decompression-ratio guard, so a small
+    // compressed frame cannot inflate into a heap-exhausting message.
+    val maxDecodedBytes = minOf(maxMessageBytes, maxDecodedMessageBytes(encodedLength, maxDecompressionRatio))
+    return LimitedSource(messageDecoding.decode(encodedMessage), maxDecodedBytes).buffer().use {
       messageAdapter.decode(it)
     }
   }
