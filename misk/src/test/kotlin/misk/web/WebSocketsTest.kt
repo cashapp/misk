@@ -1,5 +1,6 @@
 package misk.web
 
+import com.squareup.protos.test.parsing.Warehouse
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
@@ -16,6 +17,7 @@ import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -46,6 +48,22 @@ internal class WebSocketsTest {
         "EchoWebSocket principal=unknown time=0.000 ns code=200 " +
           "request=JettyWebSocket\\[.* to /echo] response=EchoListener"
       )
+  }
+
+  @Test
+  fun binaryWebSocket() {
+    val client = OkHttpClient()
+
+    val request = Request.Builder().url(jettyService.httpServerUrl.resolve("/echo")!!).build()
+
+    val webSocket = client.newWebSocket(request, listener)
+    val warehouse = Warehouse.Builder().warehouse_token("WH_1").warehouse_id(42).build()
+
+    webSocket.send(warehouse.encodeByteString())
+
+    val expected = Warehouse.Builder().warehouse_token("ACK WH_1").warehouse_id(43).build()
+    val actual = listener.takeBinaryMessage()?.let { Warehouse.ADAPTER.decode(it) }
+    assertEquals(expected, actual)
   }
 
   @Test
@@ -81,6 +99,18 @@ class EchoWebSocket @Inject constructor() : WebAction {
     return object : WebSocketListener() {
       override fun onMessage(webSocket: WebSocket, text: String) {
         webSocket.send("ACK $text")
+      }
+
+      override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+        val message = Warehouse.ADAPTER.decode(bytes)
+        webSocket.send(
+          message
+            .newBuilder()
+            .warehouse_token("ACK ${message.warehouse_token}")
+            .warehouse_id(message.warehouse_id + 1)
+            .build()
+            .encodeByteString()
+        )
       }
 
       override fun toString() = "EchoListener"
