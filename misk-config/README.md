@@ -29,6 +29,47 @@ val deployment = getDeploymentFromEnvironmentVariable()
 val config = MiskConfig.load<ExemplarConfig>("exemplar", depoyment)
 ```
 
+## YAML anchors and merge keys
+
+Configuration documents support anchors (`&`) and aliases (`*`) as described in
+[YAML 1.2.2 §3.2.2.2](https://yaml.org/spec/1.2.2/#anchors-and-aliases) and
+[§7.1](https://yaml.org/spec/1.2.2/#alias-nodes). Mapping merge keys (`<<:`) follow the
+[YAML 1.1 merge-key working draft](https://yaml.org/type/merge.html). Merge keys are a compatibility
+extension, not part of YAML 1.2; see the [YAML 1.2 changes](https://yaml.org/spec/1.2.2/ext/changes/).
+
+For example:
+
+```yaml
+primary: &client
+  timeout: 30
+  retries: 3
+secondary:
+  <<: *client
+  timeout: 60
+```
+
+Here `secondary` has `timeout: 60` and `retries: 3`. Explicit keys win regardless of where `<<:` appears.
+For `<<: [*first, *second]`, the first mapping wins when both define a key. These merges are shallow:
+an explicit nested mapping replaces the inherited nested mapping.
+
+Aliases refer to the most recent preceding anchor with the same name in the same document, as required
+by YAML §7.1. Misk resolves these references before applying its usual cross-file overrides.
+An anchor in the common file cannot be referenced from an environment or override file. Anchor holders
+such as `primary` above are ordinary configuration keys and must fit the config class. Quoted `"<<"`
+and explicitly string-tagged `!!str <<` keys remain literal keys.
+
+Non-mapping merge sources are rejected, as required by the merge-key draft. Misk adds restrictions for
+its configuration tree: references are expanded into independent values, mapping keys must be scalars,
+and cyclic references are rejected. YAML itself permits cycles and shared nodes in its
+[representation graph (§3.2.1)](https://yaml.org/spec/1.2.2/#representation-graph); Misk does not preserve
+that graph identity. Expansion is limited to 100 nesting levels, 100,000 nodes, and 10,000,000 scalar
+characters per document, in addition to SnakeYAML's input and collection-alias limits. These limits are
+implementation safeguards, not YAML specification requirements.
+
+Secret and resource references still resolve through Misk's deserializers.
+This support applies to the configuration documents combined by `MiskConfig.load`, not to YAML loaded
+later through a secret or resource reference.
+
 ## Durations
 
 `java.time.Duration` properties loaded by `MiskConfig.load` require ISO-8601 strings with explicit units:
