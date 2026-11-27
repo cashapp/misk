@@ -2,6 +2,7 @@ package misk.web.actions
 
 import java.lang.reflect.Method
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.findAnnotations
 import kotlin.reflect.full.functions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -56,11 +57,43 @@ internal class ReflectTest {
 
   @Test
   internal fun annotationWithOverrides() {
-    assertThat(Square::class.functions.first { it.name == "area" }.withOverrides().findAnnotation<Tag>()!!.name)
-      .isEqualTo("square")
+    assertThat(Square::class.functions.first { it.name == "area" }.withOverrides().annotations.filterIsInstance<Tag>())
+      .containsExactly(Tag("square"), Tag("territory"), Tag("shape"))
     assertThat(Square::class.functions.first { it.name == "perimeter" }.withOverrides().findAnnotation<Tag>()).isNull()
     assertThat(Square::class.functions.first { it.name == "edgeCount" }.withOverrides().findAnnotation<Tag>()!!.name)
       .isEqualTo("polygon")
+  }
+
+  @Test
+  internal fun overriddenMethodsExcludeBridges() {
+    val bridge = InheritedGreetingAction::class.java.getDeclaredMethod("greet", Any::class.java)
+    assertThat(bridge.isBridge).isTrue()
+
+    assertThat(bridge.overrides())
+      .containsExactly(GenericGreetingAction::class.java.getDeclaredMethod("greet", Any::class.java))
+  }
+
+  @Test
+  internal fun inheritedDefaultAnnotationsExcludeBridgeCopies() {
+    val greet = InheritedGreetingAction::class.functions.single { it.name == "greet" }.withOverrides()
+
+    assertThat(greet.annotations.filterIsInstance<Tag>()).containsExactly(Tag("default"))
+    assertThat(greet.findAnnotations<RepeatableTag>()).containsExactly(RepeatableTag("first"), RepeatableTag("second"))
+
+    val message = greet.parameters.single { it.name == "message" }
+    assertThat(message.annotations.filterIsInstance<RequestPayload>()).containsExactly(RequestPayload("hello"))
+    assertThat(message.findAnnotations<RepeatableTag>())
+      .containsExactly(RepeatableTag("first"), RepeatableTag("second"))
+  }
+
+  @Test
+  internal fun equalAnnotationsOnDistinctDeclarationsArePreserved() {
+    val greet = ExplicitGreetingAction::class.functions.single { it.name == "greet" }.withOverrides()
+
+    assertThat(greet.annotations.filterIsInstance<Tag>()).containsExactly(Tag("/greet"), Tag("/greet"))
+    val message = greet.parameters.single { it.name == "message" }
+    assertThat(message.annotations.filterIsInstance<RequestPayload>())
+      .containsExactly(RequestPayload("hello"), RequestPayload("hello"))
   }
 
   @Test
@@ -110,6 +143,25 @@ internal class ReflectTest {
 
     override fun greetEmpty(message: String): String = "806"
   }
+
+  class ExplicitGreetingAction : GreetingAction {
+    @Tag("/greet") override fun greet(@RequestPayload("hello") message: String): String = message
+
+    override fun greetEmpty(message: String): String = message
+  }
+
+  interface GenericGreetingAction<T> {
+    @Tag("default")
+    @RepeatableTag("first")
+    @RepeatableTag("second")
+    fun greet(@RequestPayload("hello") @RepeatableTag("first") @RepeatableTag("second") message: T): T = message
+  }
+
+  class InheritedGreetingAction : GenericGreetingAction<String>
+
+  @Repeatable
+  @Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
+  annotation class RepeatableTag(val name: String)
 
   class Square : Polygon(), Territory {
     @Tag("square") override fun area() = error("unused")

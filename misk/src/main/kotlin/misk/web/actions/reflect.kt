@@ -15,9 +15,13 @@ import kotlin.reflect.jvm.javaMethod
  */
 internal fun <R> KFunction<R>.withOverrides(): KFunction<R> = FunctionWithOverrides(this)
 
-/** Returns the overrides of this method with overriding methods preceding overridden methods. */
+/** Returns non-bridge overrides with overriding methods preceding overridden methods. */
 internal fun Method.overrides(): Set<Method> {
-  return declaringClass.superclasses().mapNotNull { it.getOverriddenMethod(this@overrides) }.toSet()
+  return declaringClass
+    .superclasses()
+    .mapNotNull { it.getOverriddenMethod(this@overrides) }
+    .filterNot { it.isBridge }
+    .toSet()
 }
 
 /** Returns the method that [override] overrides. */
