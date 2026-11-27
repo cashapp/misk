@@ -28,8 +28,23 @@ jobs:
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
+      - name: Restore npm cache
+        id: npm-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: .hermit/node/cache
+          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
+
       - name: Test
         run: npm install -g @misk/cli && miskweb ci-build -e
+
+      - name: Save npm cache
+        if: github.ref == 'refs/heads/master' && steps.npm-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: .hermit/node/cache
+          key: ${{ steps.npm-cache.outputs.cache-primary-key }}
 
   jvm:
     name: Test JVM
@@ -70,6 +85,11 @@ jobs:
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+
       - name: Test
         run: ${{ matrix.cmd }}
 
@@ -99,6 +119,11 @@ jobs:
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: Assign a version
         id: assign_version
