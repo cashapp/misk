@@ -27,7 +27,6 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import java.time.Duration
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.runBlocking
 import misk.docker.withMiskDefaults
 import misk.testing.TestFixture
@@ -37,6 +36,7 @@ import mu.KotlinLogging
 class GoogleSpannerEmulator @Inject constructor(val config: SpannerConfig) : AbstractIdleService(), TestFixture {
   private val server: SpannerServer
   private val client: Spanner
+  private var emulatorImage = fullImageName(config.emulator.version)
 
   private var containerId: String? = null
   private var containerIsRunning = false
@@ -99,46 +99,40 @@ class GoogleSpannerEmulator @Inject constructor(val config: SpannerConfig) : Abs
     private const val HEALTH_CHECK_BACKOFF_BASE_MILLIS = 100L
     private const val HEALTH_CHECK_BACKOFF_MAX_MILLIS = 2_000L
 
-    fun pullImage() {
-      if (imagePulled.get()) {
-        return
+    fun pullImage() = pullImage(image)
+
+    @Synchronized
+    private fun pullImage(image: String) {
+      if (image in pulledImages) return
+
+      val process =
+        ProcessBuilder("docker", "pull", image)
+          .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+          .redirectError(ProcessBuilder.Redirect.INHERIT)
+          .start()
+      process.waitFor(60, TimeUnit.MINUTES)
+
+      if (process.exitValue() != 0) {
+        throw IllegalStateException(
+          "Could not pull Docker image $image for Spanner emulator. Make sure Docker is installed and running."
+        )
       }
-      synchronized(this) {
-        if (imagePulled.get()) return
 
-        val process =
-          ProcessBuilder("bash", "-c", "docker pull $image")
-            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-            .redirectError(ProcessBuilder.Redirect.INHERIT)
-            .start()
-        process.waitFor(60, TimeUnit.MINUTES)
-
-        if (process.exitValue() != 0) {
-          throw IllegalStateException(
-            "Could not pull Docker image for Spanner emulator. Make sure Docker is installed and running."
-          )
-        }
-
-        imagePulled.set(true)
-      }
+      pulledImages.add(image)
     }
 
-    private val imagePulled = AtomicBoolean()
+    private val pulledImages = mutableSetOf<String>()
   }
 
   /** Pulls a Docker container containing the Google Spanner emulator. */
   fun pullImage(imageVersion: String? = null) {
-    image = fullImageName(imageVersion)
-    Companion.pullImage()
+    val requestedImage = fullImageName(imageVersion)
+    Companion.pullImage(requestedImage)
+    emulatorImage = requestedImage
   }
 
-  private fun doStart(imageVersion: String? = null) {
-    val image =
-      if (imageVersion != null) {
-        fullImageName(imageVersion)
-      } else {
-        image
-      }
+  private fun doStart() {
+    val image = emulatorImage
     val spannerGrpcPort = ExposedPort.tcp(server.config.emulator.port)
     val spannerHttpPort = ExposedPort.tcp(server.config.emulator.port + 10)
     val ports = Ports()
@@ -157,8 +151,7 @@ class GoogleSpannerEmulator @Inject constructor(val config: SpannerConfig) : Abs
         docker.removeContainerCmd(runningContainer.id).withForce(true).exec()
       } else if (runningContainer.image != image) {
         logger.info("Docker image does not match expected image. Force removing and restarting Docker container")
-        docker.killContainerCmd(runningContainer.id)
-        docker.removeContainerCmd(runningContainer.id)
+        docker.removeContainerCmd(runningContainer.id).withForce(true).exec()
       } else {
         logger.info("Using existing Spanner container named $containerName")
         stopContainerOnExit = false

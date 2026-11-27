@@ -14,6 +14,7 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import kotlin.concurrent.thread
 import misk.inject.KAbstractModule
 import misk.inject.ReusableTestModule
@@ -178,6 +179,15 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
           try {
             serviceManager!!.startAsync().awaitHealthy(60, TimeUnit.SECONDS)
           } catch (e: Exception) {
+            if (e is TimeoutException) {
+              log.error(e) {
+                val stacks =
+                  Thread.getAllStackTraces().entries.joinToString("\n\n") { (thread, stack) ->
+                    "${thread.name} (${thread.state}):\n" + stack.joinToString("\n") { "  at $it" }
+                  }
+                "Timed out starting services for ${context.displayName}\n$stacks"
+              }
+            }
             if (context.reuseInjector()) {
               // The `ServiceManager` requires services to be in a NEW state when starting them,
               // so if services fail to start, we need to stop them and remove the injector from the cache,
@@ -188,8 +198,8 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
                 e.addSuppressed(stopError)
               }
               injectedModules.invalidate(context.getSortedActionTestModules())
-              throw e
             }
+            throw e
           }
           runningServices.add(context.getSortedActionTestModules())
           if (context.reuseInjector()) startedServiceManagers.add(serviceManager!!)
