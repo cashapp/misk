@@ -31,6 +31,10 @@ internal constructor(
     private val threadLocalUUID = ThreadLocal<UUID>()
   }
 
+  // Resolved on first close rather than injected directly, because listeners may depend on ActionScoped values.
+  // Bindings are fixed once the injector exists, so resolving once is equivalent to resolving per close.
+  private val listenerSet: Set<ActionScopeListener> by lazy { listeners.get() }
+
   /** Wraps a [kotlinx.coroutines.runBlocking] to propagate the current action scope. */
   @Deprecated(message = "don't use runBlocking explicitly", replaceWith = ReplaceWith("use suspending invocation"))
   fun <T> runBlocking(block: suspend CoroutineScope.() -> T): T {
@@ -89,13 +93,22 @@ internal constructor(
 
     val immediateValues = seedData.mapValues { (_, value) -> ImmediateLazy(value) }
 
-    val lazyValues = providers.mapValues { (key, _) ->
-      SynchronizedLazy(providerFor(key)) { providerFor(key) }
+    // Providers are resolved on first read of each key, not here: create() runs once per request, and most requests
+    // read only a few of the registered keys. Keys supplied as seed data or overrides never need their provider.
+    val lazyValues = HashMap<Key<*>, Lazy<*>>(providers.size + providerOverrides.size + seedData.size)
+    for (key in providers.keys) {
+      if (key !in seedData && key !in providerOverrides) {
+        lazyValues[key] = SynchronizedLazy { providerFor(key) }
+      }
     }
+    for ((key, provider) in providerOverrides) {
+      if (key !in seedData) {
+        lazyValues[key] = SynchronizedLazy { provider }
+      }
+    }
+    lazyValues.putAll(immediateValues)
 
-    val lazyOverrides = providerOverrides.mapValues { (_, provider) -> SynchronizedLazy(provider) }
-
-    return Instance(lazyValues + lazyOverrides + immediateValues, this)
+    return Instance(lazyValues, this)
   }
 
   /** Starts the scope on a thread with the provided instance */
@@ -123,7 +136,7 @@ internal constructor(
     }
 
     try {
-      listeners.get().forEach { it.onClose() }
+      listenerSet.forEach { it.onClose() }
     } finally {
       threadLocalInstance.remove()
 
@@ -211,11 +224,10 @@ internal constructor(
     }
 
     /**
-     * Returns a new [Instance] derived from this one with additional seed data and/or provider
-     * overrides layered on top. Already-initialized lazy values from this instance are preserved
-     * and propagate to the returned instance; uncomputed lazy cells are copied so that computing
-     * them in the returned instance does not write back into this one. Entries in [seedData] and
-     * [providerOverrides] override matching keys, with [seedData] taking precedence over
+     * Returns a new [Instance] derived from this one with additional seed data and/or provider overrides layered on
+     * top. Already-initialized lazy values from this instance are preserved and propagate to the returned instance;
+     * uncomputed lazy cells are copied so that computing them in the returned instance does not write back into this
+     * one. Entries in [seedData] and [providerOverrides] override matching keys, with [seedData] taking precedence over
      * [providerOverrides], matching the merge order of [ActionScope.create].
      */
     @JvmOverloads
@@ -223,11 +235,16 @@ internal constructor(
       seedData: Map<Key<*>, Any?> = emptyMap(),
       providerOverrides: Map<Key<*>, ActionScopedProvider<*>> = emptyMap(),
     ): Instance {
-      val isolatedLazyValues = lazyValues.mapValues { (_, lazy) ->
-        if (lazy is SynchronizedLazy && !lazy.isInitialized()) { lazy.copy() } else { lazy }
-      }
+      val isolatedLazyValues =
+        lazyValues.mapValues { (_, lazy) ->
+          if (lazy is SynchronizedLazy && !lazy.isInitialized()) {
+            lazy.copy()
+          } else {
+            lazy
+          }
+        }
       val immediateValues = seedData.mapValues { (_, value) -> ImmediateLazy(value) }
-      val lazyOverrides = providerOverrides.mapValues { (_, provider) -> SynchronizedLazy(provider) }
+      val lazyOverrides = providerOverrides.mapValues { (_, provider) -> SynchronizedLazy { provider } }
       return Instance(isolatedLazyValues + lazyOverrides + immediateValues, scope)
     }
   }
