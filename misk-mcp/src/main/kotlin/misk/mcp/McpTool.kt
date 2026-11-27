@@ -152,7 +152,8 @@ abstract class McpTool<I : Any> {
    * Provides a user-friendly display name for the tool that may be shown in user interfaces. Defaults to the tool's
    * [name] if not overridden.
    */
-  open val title: String = name
+  open val title: String
+    get() = name
 
   /**
    * Hint indicating whether this tool performs read-only operations.

@@ -257,6 +257,11 @@ internal abstract class McpServerActionTest {
     // Check HelloWorldTool
     val helloWorldTool = response.tools.find { it.name == "HelloWorldTool" }
     assertNotNull(helloWorldTool)
+    assertEquals(
+      expected = "HelloWorldTool",
+      actual = helloWorldTool.annotations?.title,
+      message = "Expected default tool title annotation to match tool name",
+    )
     assertNotNull(helloWorldTool.inputSchema)
     assertEquals(
       expected = "object",
