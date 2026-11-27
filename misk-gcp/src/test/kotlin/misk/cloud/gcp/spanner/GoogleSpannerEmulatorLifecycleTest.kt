@@ -31,7 +31,7 @@ class GoogleSpannerEmulatorLifecycleTest {
       instance_id = "test-instance",
       database = "test-database",
       emulator =
-        SpannerEmulatorConfig(enabled = true, hostname = ContainerUtil.dockerTargetOrLocalHost(), version = "1.4.9"),
+        SpannerEmulatorConfig(enabled = true, hostname = ContainerUtil.dockerTargetOrLocalHost()),
     )
 
   @MiskTestModule val module = Modules.combine(DeploymentModule(TESTING), GoogleSpannerModule(spannerConfig))
@@ -116,7 +116,7 @@ class GoogleSpannerEmulatorLifecycleTest {
     fun `pulls a Docker image of the emulator with specified version`() {
       var imageId: String? = null
 
-      emulator.pullImage("1.4.9")
+      emulator.pullImage("1.5.51")
 
       // Throws a NotFoundError if the image isn't present locally.
       assertDoesNotThrow { imageId = dockerClient.inspectImageCmd(GoogleSpannerEmulator.IMAGE_NAME).exec().id }

@@ -24,7 +24,7 @@ class GoogleSpannerEmulatorTest {
       instance_id = "test-instance",
       database = "test-database",
       emulator =
-        SpannerEmulatorConfig(enabled = true, hostname = ContainerUtil.dockerTargetOrLocalHost(), version = "1.4.9"),
+        SpannerEmulatorConfig(enabled = true, hostname = ContainerUtil.dockerTargetOrLocalHost()),
     )
 
   @MiskTestModule val module = GoogleSpannerTestModule(spannerConfig)
