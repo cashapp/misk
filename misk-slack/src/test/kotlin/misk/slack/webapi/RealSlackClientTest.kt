@@ -2,6 +2,7 @@ package misk.slack.webapi
 
 import com.google.inject.name.Names
 import com.google.inject.util.Modules
+import com.squareup.moshi.Moshi
 import jakarta.inject.Inject
 import misk.MiskTestingServiceModule
 import misk.ServiceModule
@@ -60,6 +61,7 @@ class RealSlackClientTest {
 
   @Inject lateinit var slackApi: SlackApi
   @Inject lateinit var server: MockSlackServer
+  @Inject lateinit var moshi: Moshi
 
   @Test
   fun `post message`() {
@@ -67,6 +69,25 @@ class RealSlackClientTest {
 
     val response = slackApi.postMessage(samplePostMessageJson).execute()
     assertThat(response.isSuccessful()).isTrue()
+  }
+
+  @Test
+  fun `post message omits the unfurl fields unless they are set`() {
+    // Left unset so that Slack applies its own defaults rather than this client choosing for every caller.
+    val json = moshi.adapter(PostMessageRequest::class.java).toJson(samplePostMessageJson)
+
+    assertThat(json).doesNotContain("unfurl_links").doesNotContain("unfurl_media")
+  }
+
+  @Test
+  fun `post message sends the unfurl fields when they are set`() {
+    // Slack unfurls a link to one of its own messages into a full copy of that message, so a caller linking to another
+    // Slack post needs unfurl_links to suppress it.
+    val request = samplePostMessageJson.copy(unfurl_links = false, unfurl_media = false)
+
+    val json = moshi.adapter(PostMessageRequest::class.java).toJson(request)
+
+    assertThat(json).contains("\"unfurl_links\":false").contains("\"unfurl_media\":false")
   }
 
   @Test
