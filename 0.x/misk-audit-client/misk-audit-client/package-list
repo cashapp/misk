@@ -1,0 +1,25 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:misk.audit////PointingToDeclaration/misk-audit-client/misk.audit/index.md
+$dokka.location:misk.audit/AuditClient///PointingToDeclaration/misk-audit-client/misk.audit/-audit-client/index.md
+$dokka.location:misk.audit/AuditClient/logEvent/#kotlin.String#kotlin.String#kotlin.Boolean#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.String?#java.time.Instant?/PointingToDeclaration/misk-audit-client/misk.audit/-audit-client/log-event.md
+$dokka.location:misk.audit/AuditClientConfig///PointingToDeclaration/misk-audit-client/misk.audit/-audit-client-config/index.md
+$dokka.location:misk.audit/AuditClientConfig/AuditClientConfig/#kotlin.String/PointingToDeclaration/misk-audit-client/misk.audit/-audit-client-config/-audit-client-config.md
+$dokka.location:misk.audit/AuditClientConfig/url/#/PointingToDeclaration/misk-audit-client/misk.audit/-audit-client-config/url.md
+$dokka.location:misk.audit/AuditRequestResponse///PointingToDeclaration/misk-audit-client/misk.audit/-audit-request-response/index.md
+$dokka.location:misk.audit/AuditRequestResponse/applicationName/#/PointingToDeclaration/misk-audit-client/misk.audit/-audit-request-response/application-name.md
+$dokka.location:misk.audit/AuditRequestResponse/automatedChange/#/PointingToDeclaration/misk-audit-client/misk.audit/-audit-request-response/automated-change.md
+$dokka.location:misk.audit/AuditRequestResponse/description/#/PointingToDeclaration/misk-audit-client/misk.audit/-audit-request-response/description.md
+$dokka.location:misk.audit/AuditRequestResponse/detailURL/#/PointingToDeclaration/misk-audit-client/misk.audit/-audit-request-response/detail-u-r-l.md
+$dokka.location:misk.audit/AuditRequestResponse/includeRequest/#/PointingToDeclaration/misk-audit-client/misk.audit/-audit-request-response/include-request.md
+$dokka.location:misk.audit/AuditRequestResponse/includeRequestHeaders/#/PointingToDeclaration/misk-audit-client/misk.audit/-audit-request-response/include-request-headers.md
+$dokka.location:misk.audit/AuditRequestResponse/includeReseponseHeaders/#/PointingToDeclaration/misk-audit-client/misk.audit/-audit-request-response/include-reseponse-headers.md
+$dokka.location:misk.audit/AuditRequestResponse/includeResponse/#/PointingToDeclaration/misk-audit-client/misk.audit/-audit-request-response/include-response.md
+$dokka.location:misk.audit/AuditRequestResponse/richDescription/#/PointingToDeclaration/misk-audit-client/misk.audit/-audit-request-response/rich-description.md
+$dokka.location:misk.audit/AuditRequestResponse/target/#/PointingToDeclaration/misk-audit-client/misk.audit/-audit-request-response/target.md
+$dokka.location:misk.audit/NoOpAuditClient///PointingToDeclaration/misk-audit-client/misk.audit/-no-op-audit-client/index.md
+$dokka.location:misk.audit/NoOpAuditClient/NoOpAuditClient/#/PointingToDeclaration/misk-audit-client/misk.audit/-no-op-audit-client/-no-op-audit-client.md
+$dokka.location:misk.audit/NoOpAuditClient/logEvent/#kotlin.String#kotlin.String#kotlin.Boolean#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.String?#java.time.Instant?/PointingToDeclaration/misk-audit-client/misk.audit/-no-op-audit-client/log-event.md
+$dokka.location:misk.audit/NoOpAuditClientModule///PointingToDeclaration/misk-audit-client/misk.audit/-no-op-audit-client-module/index.md
+$dokka.location:misk.audit/NoOpAuditClientModule/NoOpAuditClientModule/#/PointingToDeclaration/misk-audit-client/misk.audit/-no-op-audit-client-module/-no-op-audit-client-module.md
+misk.audit

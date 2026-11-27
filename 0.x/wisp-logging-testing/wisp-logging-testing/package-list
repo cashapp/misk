@@ -1,0 +1,13 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.logging////PointingToDeclaration/wisp-logging-testing/wisp.logging/index.md
+$dokka.location:wisp.logging/LogCollector///PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/index.md
+$dokka.location:wisp.logging/LogCollector/takeEvent/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?#kotlin.Boolean/PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/take-event.md
+$dokka.location:wisp.logging/LogCollector/takeEvent/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?/PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/take-event.md
+$dokka.location:wisp.logging/LogCollector/takeEvents/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?#kotlin.Boolean/PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/take-events.md
+$dokka.location:wisp.logging/LogCollector/takeEvents/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?/PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/take-events.md
+$dokka.location:wisp.logging/LogCollector/takeMessage/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?#kotlin.Boolean/PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/take-message.md
+$dokka.location:wisp.logging/LogCollector/takeMessage/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?/PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/take-message.md
+$dokka.location:wisp.logging/LogCollector/takeMessages/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?#kotlin.Boolean/PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/take-messages.md
+$dokka.location:wisp.logging/LogCollector/takeMessages/#kotlin.reflect.KClass[*]?#ch.qos.logback.classic.Level#kotlin.text.Regex?/PointingToDeclaration/wisp-logging-testing/wisp.logging/-log-collector/take-messages.md
+wisp.logging

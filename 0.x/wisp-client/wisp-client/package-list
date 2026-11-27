@@ -1,0 +1,18 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.client////PointingToDeclaration/wisp-client/wisp.client/index.md
+$dokka.location:wisp.client//applyDefaults/wisp.client.HttpClientConfig#wisp.client.HttpClientConfig/PointingToDeclaration/wisp-client/wisp.client/apply-defaults.md
+$dokka.location:wisp.client/UnixDomainServerSocketFactory///PointingToDeclaration/wisp-client/wisp.client/-unix-domain-server-socket-factory/index.md
+$dokka.location:wisp.client/UnixDomainServerSocketFactory/UnixDomainServerSocketFactory/#java.io.File/PointingToDeclaration/wisp-client/wisp.client/-unix-domain-server-socket-factory/-unix-domain-server-socket-factory.md
+$dokka.location:wisp.client/UnixDomainServerSocketFactory/createServerSocket/#/PointingToDeclaration/wisp-client/wisp.client/-unix-domain-server-socket-factory/create-server-socket.md
+$dokka.location:wisp.client/UnixDomainServerSocketFactory/createServerSocket/#int#int#java.net.InetAddress/PointingToDeclaration/wisp-client/wisp.client/-unix-domain-server-socket-factory/create-server-socket.md
+$dokka.location:wisp.client/UnixDomainServerSocketFactory/createServerSocket/#int#int/PointingToDeclaration/wisp-client/wisp.client/-unix-domain-server-socket-factory/create-server-socket.md
+$dokka.location:wisp.client/UnixDomainServerSocketFactory/createServerSocket/#int/PointingToDeclaration/wisp-client/wisp.client/-unix-domain-server-socket-factory/create-server-socket.md
+$dokka.location:wisp.client/UnixDomainSocketFactory///PointingToDeclaration/wisp-client/wisp.client/-unix-domain-socket-factory/index.md
+$dokka.location:wisp.client/UnixDomainSocketFactory/UnixDomainSocketFactory/#java.io.File/PointingToDeclaration/wisp-client/wisp.client/-unix-domain-socket-factory/-unix-domain-socket-factory.md
+$dokka.location:wisp.client/UnixDomainSocketFactory/createSocket/#/PointingToDeclaration/wisp-client/wisp.client/-unix-domain-socket-factory/create-socket.md
+$dokka.location:wisp.client/UnixDomainSocketFactory/createSocket/#java.lang.String#int#java.net.InetAddress#int/PointingToDeclaration/wisp-client/wisp.client/-unix-domain-socket-factory/create-socket.md
+$dokka.location:wisp.client/UnixDomainSocketFactory/createSocket/#java.lang.String#int/PointingToDeclaration/wisp-client/wisp.client/-unix-domain-socket-factory/create-socket.md
+$dokka.location:wisp.client/UnixDomainSocketFactory/createSocket/#java.net.InetAddress#int#java.net.InetAddress#int/PointingToDeclaration/wisp-client/wisp.client/-unix-domain-socket-factory/create-socket.md
+$dokka.location:wisp.client/UnixDomainSocketFactory/createSocket/#java.net.InetAddress#int/PointingToDeclaration/wisp-client/wisp.client/-unix-domain-socket-factory/create-socket.md
+wisp.client

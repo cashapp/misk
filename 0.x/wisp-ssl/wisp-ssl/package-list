@@ -1,0 +1,15 @@
+$dokka.format:gfm-v1
+$dokka.linkExtension:md
+$dokka.location:wisp.security.ssl////PointingToDeclaration/wisp-ssl/wisp.security.ssl/index.md
+$dokka.location:wisp.security.ssl/PemComboFile.Companion///PointingToDeclaration/wisp-ssl/wisp.security.ssl/-pem-combo-file/-companion/index.md
+$dokka.location:wisp.security.ssl/PemComboFile.Companion/convertPKCS1toPKCS8/#okio.ByteString/PointingToDeclaration/wisp-ssl/wisp.security.ssl/-pem-combo-file/-companion/convert-p-k-c-s1to-p-k-c-s8.md
+$dokka.location:wisp.security.ssl/PemComboFile.Companion/parse/#okio.BufferedSource#kotlin.String?/PointingToDeclaration/wisp-ssl/wisp.security.ssl/-pem-combo-file/-companion/parse.md
+$dokka.location:wisp.security.ssl/PemComboFile///PointingToDeclaration/wisp-ssl/wisp.security.ssl/-pem-combo-file/index.md
+$dokka.location:wisp.security.ssl/PemComboFile/PemComboFile/#kotlin.collections.List[okio.ByteString]#kotlin.collections.List[okio.ByteString]#kotlin.collections.List[okio.ByteString]#kotlin.String/PointingToDeclaration/wisp-ssl/wisp.security.ssl/-pem-combo-file/-pem-combo-file.md
+$dokka.location:wisp.security.ssl/PemComboFile/certificates/#/PointingToDeclaration/wisp-ssl/wisp.security.ssl/-pem-combo-file/certificates.md
+$dokka.location:wisp.security.ssl/PemComboFile/decodeCertificates/#/PointingToDeclaration/wisp-ssl/wisp.security.ssl/-pem-combo-file/decode-certificates.md
+$dokka.location:wisp.security.ssl/PemComboFile/newEmptyKeyStore/#/PointingToDeclaration/wisp-ssl/wisp.security.ssl/-pem-combo-file/new-empty-key-store.md
+$dokka.location:wisp.security.ssl/PemComboFile/passphrase/#/PointingToDeclaration/wisp-ssl/wisp.security.ssl/-pem-combo-file/passphrase.md
+$dokka.location:wisp.security.ssl/PemComboFile/privateKeys/#/PointingToDeclaration/wisp-ssl/wisp.security.ssl/-pem-combo-file/private-keys.md
+$dokka.location:wisp.security.ssl/PemComboFile/privateRsaKeys/#/PointingToDeclaration/wisp-ssl/wisp.security.ssl/-pem-combo-file/private-rsa-keys.md
+wisp.security.ssl
