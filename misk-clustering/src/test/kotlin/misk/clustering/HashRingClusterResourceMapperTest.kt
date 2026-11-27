@@ -78,7 +78,7 @@ internal class HashRingClusterResourceMapperTest {
    */
   class FakeHashFn(val hashes: Map<String, Int>) : HashFunction by Hashing.sha256() {
     override fun hashBytes(input: ByteArray): HashCode {
-      return HashCode.fromInt(hashes.getValue(String(input)).toInt())
+      return HashCode.fromInt(hashes.getValue(String(input)))
     }
   }
 }

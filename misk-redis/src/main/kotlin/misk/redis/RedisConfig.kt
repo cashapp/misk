@@ -15,7 +15,7 @@ data class RedisReplicationGroupConfig
 constructor(
   val writer_endpoint: RedisNodeConfig,
   val reader_endpoint: RedisNodeConfig,
-  @Redact val redis_auth_password: String,
+  @param:Redact val redis_auth_password: String,
   val timeout_ms: Int = Protocol.DEFAULT_TIMEOUT,
 )
 

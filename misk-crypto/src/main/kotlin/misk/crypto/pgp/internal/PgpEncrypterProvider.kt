@@ -33,6 +33,6 @@ class PgpEncrypterProvider(private val alias: KeyAlias) : Provider<PgpEncrypter>
       error("no public key suitable for encryption was found")
     }
 
-    return RealPgpEncrypter(encryptionKey!!).also { pgpEncrypterManager[key.key_name] = it }
+    return RealPgpEncrypter(encryptionKey).also { pgpEncrypterManager[key.key_name] = it }
   }
 }

@@ -61,7 +61,7 @@ abstract class AbstractGzipTest {
   fun `POST unspecified request body`() {
     val response = call(Request.Builder().url(jetty.httpServerUrl.resolve("/count")!!).post(miskHypeJson(false, 16)))
 
-    assertThat(response.body!!.string()).isEqualTo("16")
+    assertThat(response.body.string()).isEqualTo("16")
   }
 
   @Test
@@ -74,7 +74,7 @@ abstract class AbstractGzipTest {
           .post(miskHypeJson(false, 16))
       )
 
-    assertThat(response.body!!.string()).isEqualTo("16")
+    assertThat(response.body.string()).isEqualTo("16")
   }
 
   /** Gzip requests are always enabled, even if the gzip responses are not. */
@@ -87,7 +87,7 @@ abstract class AbstractGzipTest {
           .header("Content-Encoding", "gzip")
           .post(miskHypeJson(true, 16))
       )
-    assertThat(response.body!!.string()).isEqualTo("16")
+    assertThat(response.body.string()).isEqualTo("16")
   }
 
   class MiskHypeGetAction @Inject constructor() : WebAction {

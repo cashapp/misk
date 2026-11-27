@@ -506,9 +506,9 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       // Kotlin 2.3 kotlin-reflect resolves `Long::class.createType(nullable = true).javaType`
       // back to the primitive `long.class` instead of `java.lang.Long`, so we reference the
       // boxed wrappers directly.
-      private val doubleType: Class<*> = java.lang.Double::class.java
-      private val longType: Class<*> = java.lang.Long::class.java
-      private val numberType: Class<*> = java.lang.Number::class.java
+      private val doubleType: Class<*> = Double::class.javaObjectType
+      private val longType: Class<*> = Long::class.javaObjectType
+      private val numberType: Class<*> = Number::class.java
 
       private fun typeToString(type: Class<*>): String = "${type.simpleName}?"
 
@@ -701,6 +701,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
               }
             Operator.EQ_OR_IS_NULL ->
               object : QueryMethodHandler {
+                // Proxy invocations pass null for nullable parameters despite the non-null signature.
+                @Suppress("SENSELESS_COMPARISON")
                 override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
                   return if (args[0] != null) {
                     reflectionQuery.isEqual(path, args[0])

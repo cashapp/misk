@@ -166,9 +166,7 @@ constructor(
  *
  * https://api.slack.com/types/user#profile
  */
-data class UserProfileFields
-@JvmOverloads
-constructor(
+data class UserProfileFields(
   /** The display name the user has chosen to identify themselves by in their workspace profile. */
   val display_name: String?,
   /**

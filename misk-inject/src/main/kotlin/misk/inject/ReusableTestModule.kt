@@ -9,6 +9,7 @@ import kotlin.reflect.jvm.isAccessible
  * significantly faster test suite performance.
  */
 abstract class ReusableTestModule : KAbstractModule() {
+  @Suppress("UNCHECKED_CAST")
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other == null || this::class != other::class) return false
@@ -35,6 +36,7 @@ abstract class ReusableTestModule : KAbstractModule() {
    */
   open val ignorePropertiesForEquality: Set<String> = emptySet()
 
+  @Suppress("UNCHECKED_CAST")
   override fun hashCode(): Int {
     var result = javaClass.hashCode()
     for (property in this::class.memberProperties) {

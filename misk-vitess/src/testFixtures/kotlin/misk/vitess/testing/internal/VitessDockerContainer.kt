@@ -879,7 +879,7 @@ internal class VitessDockerContainer(
       }
 
       // Validate the existing network we found has the expected network type.
-      if (existingNetwork!!.driver != VITESS_DOCKER_NETWORK_TYPE) {
+      if (existingNetwork.driver != VITESS_DOCKER_NETWORK_TYPE) {
         throw VitessTestDbStartupException(
           "Network `$dockerNetworkName` exists for network id `${existingNetwork.id}` but is not of type `$VITESS_DOCKER_NETWORK_TYPE`. " +
             "Found type: `${existingNetwork.driver}`. Tear down the existing network to use this version of VitessTestDb."

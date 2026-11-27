@@ -358,10 +358,10 @@ class TransformedColumnTest {
   }
 
   data class ManyTypesProjection(
-    @Property("intField") val intField: Int,
-    @Property("doubleField") val doubleField: Double,
-    @Property("stringField") val stringField: String,
-    @Property("byteArrayField") val byteArrayField: ByteArray,
+    @param:Property("intField") val intField: Int,
+    @param:Property("doubleField") val doubleField: Double,
+    @param:Property("stringField") val stringField: String,
+    @param:Property("byteArrayField") val byteArrayField: ByteArray,
   ) : Projection {
     override fun hashCode(): Int = Objects.hash(intField, doubleField, stringField, byteArrayField)
 

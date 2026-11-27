@@ -83,7 +83,7 @@ class WebActionsServletTest {
           .url(jettyService.httpServerUrl.newBuilder().encodedPath("/fooasdf/").build())
           .patch("bar".toRequestBody())
       )
-    assertThat(response.body?.string()).contains("Nothing found at PATCH", "fooasdf")
+    assertThat(response.body.string()).contains("Nothing found at PATCH", "fooasdf")
   }
 
   internal class WebActionsServletNetworkInterceptor : NetworkInterceptor {

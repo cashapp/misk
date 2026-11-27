@@ -14,7 +14,7 @@ internal class ReflectTest {
         Square::class.java,
         Polygon::class.java,
         Territory::class.java,
-        Object::class.java,
+        Any::class.java,
         Shape::class.java,
       )
   }
@@ -51,7 +51,7 @@ internal class ReflectTest {
         shape.declaredMethod("edgeCount", int),
       )
     assertThat(square.declaredMethod("toString", void).overrides())
-      .containsExactly(square.declaredMethod("toString", void), Object::class.java.declaredMethod("toString", string))
+      .containsExactly(square.declaredMethod("toString", void), Any::class.java.declaredMethod("toString", string))
   }
 
   @Test

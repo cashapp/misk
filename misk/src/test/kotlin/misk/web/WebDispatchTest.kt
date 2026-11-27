@@ -44,7 +44,7 @@ internal class WebDispatchTest {
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
 
-    val responseContent = response.body!!.source()
+    val responseContent = response.body.source()
     assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message).isEqualTo("post hello my friend")
   }
 
@@ -56,7 +56,7 @@ internal class WebDispatchTest {
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
 
-    val responseContent = response.body!!.source().readString(Charsets.UTF_8)
+    val responseContent = response.body.source().readString(Charsets.UTF_8)
     assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message).isEqualTo("get hello my_friend")
   }
 
@@ -69,7 +69,7 @@ internal class WebDispatchTest {
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
 
-    val responseContent = response.body!!.source().readString(Charsets.UTF_8)
+    val responseContent = response.body.source().readString(Charsets.UTF_8)
     assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message).isEqualTo("get hello my_friend")
   }
 
@@ -94,7 +94,7 @@ internal class WebDispatchTest {
         .newCall(Request.Builder().get().url(serverUrlBuilder().encodedPath("/multi/hello/my_friend").build()).build())
         .execute()
     assertThat(getResponse.code).isEqualTo(200)
-    assertThat(helloByeJsonAdapter.fromJson(getResponse.body!!.source())!!.message).isEqualTo("get hello my_friend")
+    assertThat(helloByeJsonAdapter.fromJson(getResponse.body.source())!!.message).isEqualTo("get hello my_friend")
 
     val response =
       httpClient
@@ -108,7 +108,7 @@ internal class WebDispatchTest {
         )
         .execute()
     assertThat(response.code).isEqualTo(200)
-    assertThat(helloByeJsonAdapter.fromJson(response.body!!.source())!!.message).isEqualTo("post hello my friend")
+    assertThat(helloByeJsonAdapter.fromJson(response.body.source())!!.message).isEqualTo("post hello my friend")
   }
 
   @Test

@@ -57,7 +57,7 @@ internal class Guice7IntegrationTest {
     try {
       val webTestClient = injector.getInstance<WebTestClient>()
       val response = webTestClient.post(path = "/count", body = "[\"foo\",\"miskhype\",\"miskhype\"]").response
-      assertThat(response.body?.string()?.toInt()).isEqualTo(2)
+      assertThat(response.body.string().toInt()).isEqualTo(2)
     } finally {
       serviceManager.stopAsync().awaitStopped(60, TimeUnit.SECONDS)
     }

@@ -122,7 +122,7 @@ class DashboardMetadataActionTest {
     val response = call.execute()
 
     val responseAdaptor = moshi.adapter<DashboardMetadataAction.Response>()
-    return responseAdaptor.fromJson(response.body!!.source())!!
+    return responseAdaptor.fromJson(response.body.source())!!
   }
 
   private fun createOkHttpClient(): OkHttpClient {

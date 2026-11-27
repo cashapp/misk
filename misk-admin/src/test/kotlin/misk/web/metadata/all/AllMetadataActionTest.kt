@@ -21,6 +21,7 @@ class AllMetadataActionTest {
   // TODO fix this test to rely on Misk injected moshi to generate response and assert against JSON instead of
   // toString()
   //    so then can remove the manual fix in ServiceGraphBuilder.kt
+  @Suppress("UNCHECKED_CAST")
   @Test
   fun `get all`() {
     val actual = action.getAll("all")
@@ -78,6 +79,7 @@ class AllMetadataActionTest {
     assertConfig(actualConfig)
   }
 
+  @Suppress("UNCHECKED_CAST")
   private fun assertConfig(actualConfig: Metadata) {
     assertThat(actualConfig.metadata as Map<String, String?>).containsKey("Effective Config")
     assertEquals(

@@ -62,9 +62,9 @@ internal class JsonForProtoEndpointsTest {
 
     val response = httpClient.newCall(request).execute()
     response.use {
-      val responseBody = moshi.adapter(Warehouse::class.java).fromJson(response.body!!.source())
+      val responseBody = moshi.adapter(Warehouse::class.java).fromJson(response.body.source())
       assertThat(responseBody).isEqualTo(expectedResponseBody)
-      assertThat(response.body!!.contentType().toString()).isEqualTo("application/json;charset=utf-8")
+      assertThat(response.body.contentType().toString()).isEqualTo("application/json;charset=utf-8")
     }
   }
 
@@ -83,9 +83,9 @@ internal class JsonForProtoEndpointsTest {
 
     val response = httpClient.newCall(request).execute()
     response.use {
-      val responseBody = moshi.adapter(Warehouse::class.java).fromJson(response.body!!.source())
+      val responseBody = moshi.adapter(Warehouse::class.java).fromJson(response.body.source())
       assertThat(responseBody).isEqualTo(expectedResponseBody)
-      assertThat(response.body!!.contentType().toString()).isEqualTo("application/json;charset=utf-8")
+      assertThat(response.body.contentType().toString()).isEqualTo("application/json;charset=utf-8")
     }
   }
 
@@ -102,9 +102,9 @@ internal class JsonForProtoEndpointsTest {
 
     val response = httpClient.newCall(request).execute()
     response.use {
-      val responseBody = Warehouse.ADAPTER.decode(response.body!!.source())
+      val responseBody = Warehouse.ADAPTER.decode(response.body.source())
       assertThat(responseBody).isEqualTo(expectedResponseBody)
-      assertThat(response.body!!.contentType()).isEqualTo(MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE)
+      assertThat(response.body.contentType()).isEqualTo(MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE)
     }
   }
 

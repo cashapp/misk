@@ -410,22 +410,13 @@ object MiskConfig {
     override fun setupModule(context: SetupContext?) {
       addDeserializer(String::class.java, ResourceAwareDeserializer<String>(resourceLoader, mapperProvider))
       addDeserializer(Int::class.java, ResourceAwareDeserializer<Int>(resourceLoader, mapperProvider))
-      addDeserializer(Integer::class.java, ResourceAwareDeserializer<Integer>(resourceLoader, mapperProvider))
+      addDeserializer(Int::class.javaObjectType, ResourceAwareDeserializer<Int>(resourceLoader, mapperProvider))
       addDeserializer(Long::class.java, ResourceAwareDeserializer<Long>(resourceLoader, mapperProvider))
-      addDeserializer(
-        java.lang.Long::class.java,
-        ResourceAwareDeserializer<java.lang.Long>(resourceLoader, mapperProvider),
-      )
+      addDeserializer(Long::class.javaObjectType, ResourceAwareDeserializer<Long>(resourceLoader, mapperProvider))
       addDeserializer(Float::class.java, ResourceAwareDeserializer<Float>(resourceLoader, mapperProvider))
-      addDeserializer(
-        java.lang.Float::class.java,
-        ResourceAwareDeserializer<java.lang.Float>(resourceLoader, mapperProvider),
-      )
+      addDeserializer(Float::class.javaObjectType, ResourceAwareDeserializer<Float>(resourceLoader, mapperProvider))
       addDeserializer(Boolean::class.java, ResourceAwareDeserializer<Boolean>(resourceLoader, mapperProvider))
-      addDeserializer(
-        java.lang.Boolean::class.java,
-        ResourceAwareDeserializer<java.lang.Boolean>(resourceLoader, mapperProvider),
-      )
+      addDeserializer(Boolean::class.javaObjectType, ResourceAwareDeserializer<Boolean>(resourceLoader, mapperProvider))
 
       super.setupModule(context)
     }
@@ -465,6 +456,7 @@ object MiskConfig {
     val mapperProvider: () -> ObjectMapper,
     val type: JavaType? = null,
   ) : ValueDeserializer<T>() {
+    @Suppress("UNCHECKED_CAST")
     override fun deserialize(jsonParser: JsonParser, deserializationContext: DeserializationContext): T? {
       if (type == null) {
         // This only happens if ObjectMapper does not call createContextual for this property.
@@ -608,17 +600,17 @@ object MiskConfig {
     if (currentToken() != JsonToken.VALUE_STRING) {
       return when (rawClass) {
         Int::class.java,
-        java.lang.Integer::class.java -> valueAsInt
+        Int::class.javaObjectType -> valueAsInt
         Double::class.java,
-        java.lang.Double::class.java -> valueAsDouble
+        Double::class.javaObjectType -> valueAsDouble
         Float::class.java,
-        java.lang.Float::class.java -> valueAsDouble.toFloat()
+        Float::class.javaObjectType -> valueAsDouble.toFloat()
         Long::class.java,
-        java.lang.Long::class.java -> valueAsLong
+        Long::class.javaObjectType -> valueAsLong
         Byte::class.java,
-        java.lang.Byte::class.java -> valueAsInt.toByte()
+        Byte::class.javaObjectType -> valueAsInt.toByte()
         Boolean::class.java,
-        java.lang.Boolean::class.java -> valueAsBoolean
+        Boolean::class.javaObjectType -> valueAsBoolean
         else -> null
       }
     }
@@ -627,17 +619,17 @@ object MiskConfig {
     val converted =
       when (rawClass) {
         Int::class.java,
-        java.lang.Integer::class.java -> text.trim().toIntOrNull()
+        Int::class.javaObjectType -> text.trim().toIntOrNull()
         Double::class.java,
-        java.lang.Double::class.java -> text.trim().toDoubleOrNull()
+        Double::class.javaObjectType -> text.trim().toDoubleOrNull()
         Float::class.java,
-        java.lang.Float::class.java -> text.trim().toFloatOrNull()
+        Float::class.javaObjectType -> text.trim().toFloatOrNull()
         Long::class.java,
-        java.lang.Long::class.java -> text.trim().toLongOrNull()
+        Long::class.javaObjectType -> text.trim().toLongOrNull()
         Byte::class.java,
-        java.lang.Byte::class.java -> text.trim().toByteOrNull()
+        Byte::class.javaObjectType -> text.trim().toByteOrNull()
         Boolean::class.java,
-        java.lang.Boolean::class.java -> text.toBooleanOrNull()
+        Boolean::class.javaObjectType -> text.toBooleanOrNull()
         else -> return null
       }
 
@@ -663,7 +655,7 @@ object MiskConfig {
 
   /** YAML 1.1 spelled booleans several ways; YAML 1.2 does not, so point at the likely cause. */
   private fun booleanHint(rawClass: Class<*>, text: String): String {
-    val isBoolean = rawClass == Boolean::class.java || rawClass == java.lang.Boolean::class.java
+    val isBoolean = rawClass == Boolean::class.java || rawClass == Boolean::class.javaObjectType
     if (!isBoolean) return ""
     return if (text.trim().lowercase(Locale.ROOT) in YAML_1_1_BOOLEANS) {
       ". YAML 1.2 reads $text as a string, not a boolean; use true or false"
@@ -678,20 +670,20 @@ object MiskConfig {
     when (type.rawClass) {
       String::class.java -> this
       Int::class.java -> this.toInt()
-      java.lang.Integer::class.java -> this.toInt()
+      Int::class.javaObjectType -> this.toInt()
       Double::class.java -> this.toDouble()
-      java.lang.Double::class.java -> this.toDouble()
+      Double::class.javaObjectType -> this.toDouble()
       Float::class.java -> this.toFloat()
-      java.lang.Float::class.java -> this.toFloat()
+      Float::class.javaObjectType -> this.toFloat()
       Long::class.java -> this.toLong()
-      java.lang.Long::class.java -> this.toLong()
+      Long::class.javaObjectType -> this.toLong()
       Byte::class.java -> this.toByte()
-      java.lang.Byte::class.java -> this.toByte()
+      Byte::class.javaObjectType -> this.toByte()
       ByteArray::class.java -> this.toByteArray()
       // The numeric conversions above throw on bad input; String.toBoolean() instead answers false for anything that
       // is not "true", so an env var of "yes" or "1" would silently disable a flag. Reject it the same way.
       Boolean::class.java -> this.toBooleanOrThrow()
-      java.lang.Boolean::class.java -> this.toBooleanOrThrow()
+      Boolean::class.javaObjectType -> this.toBooleanOrThrow()
       else -> null
     }
 

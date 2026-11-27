@@ -16,7 +16,7 @@ constructor(
    * > Note: We will attempt to automatically grab credentials from the environment where applicable, or ignore setting
    * > credentials for emulator development.
    */
-  @Redact val credentials: Credentials? = null,
+  @param:Redact val credentials: Credentials? = null,
 
   /** Name of the database to connect to within the Spanner instance. */
   val database: String,

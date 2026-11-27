@@ -50,28 +50,28 @@ internal class ExceptionMapperTest {
   fun returnsMessageOnServerError() {
     val response = get("/throws/action/503")
     assertThat(response.code).isEqualTo(HTTP_UNAVAILABLE)
-    assertThat(response.body?.string()).isEqualTo("you asked for an error")
+    assertThat(response.body.string()).isEqualTo("you asked for an error")
   }
 
   @Test
   fun returnsMessageOnClientErrors() {
     val response = get("/throws/action/403")
     assertThat(response.code).isEqualTo(HTTP_FORBIDDEN)
-    assertThat(response.body?.string()).isEqualTo("you asked for an error")
+    assertThat(response.body.string()).isEqualTo("you asked for an error")
   }
 
   @Test
   fun handlesUnmappedErrorsAsInternalServerError() {
     val response = get("/throws/unmapped-error")
     assertThat(response.code).isEqualTo(HTTP_INTERNAL_ERROR)
-    assertThat(response.body?.string()).isEqualTo("internal server error")
+    assertThat(response.body.string()).isEqualTo("internal server error")
   }
 
   @Test
   fun doesNotPropagateGrpcError() {
     val response = get("/throws/grpc-error")
     assertThat(response.code).isEqualTo(HTTP_INTERNAL_ERROR)
-    assertThat(response.body?.string()).isEqualTo("internal server error")
+    assertThat(response.body.string()).isEqualTo("internal server error")
     val loggedError =
       logCollector.takeMessage(loggerClass = ExceptionHandlingInterceptor::class, minLevel = Level.ERROR)
     assertThat(loggedError).isEqualTo("exception dispatching to ExceptionMapperTest.ThrowsGrpcError")
@@ -81,14 +81,14 @@ internal class ExceptionMapperTest {
   fun returnsMessageOnUnauthenticated() {
     val response = get("/unauthenticated")
     assertThat(response.code).isEqualTo(misk.client.HTTP_UNAUTHORIZED)
-    assertThat(response.body?.string()).isEqualTo("unauthenticated")
+    assertThat(response.body.string()).isEqualTo("unauthenticated")
   }
 
   @Test
   fun returnsMessageOnUnauthorized() {
     val response = get("/unauthorized")
     assertThat(response.code).isEqualTo(misk.client.HTTP_FORBIDDEN)
-    assertThat(response.body?.string()).isEqualTo("unauthorized")
+    assertThat(response.body.string()).isEqualTo("unauthorized")
   }
 
   fun get(path: String): okhttp3.Response {

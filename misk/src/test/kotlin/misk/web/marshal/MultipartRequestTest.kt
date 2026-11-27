@@ -45,7 +45,7 @@ internal class MultipartRequestTest {
 
     assertThat(response.code).isEqualTo(200)
     assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    val body = response.body?.string()!!
+    val body = response.body.string()
     assertThat(body)
       .isEqualTo(
         """
@@ -73,7 +73,7 @@ internal class MultipartRequestTest {
     val response = httpClient.newCall(request.build()).execute()
 
     assertThat(response.code).isEqualTo(400)
-    val body = response.body?.string()!!
+    val body = response.body.string()
     assertThat(body).isEqualTo("required boundary parameter missing")
   }
 

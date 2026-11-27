@@ -84,7 +84,7 @@ internal class VitessExceptionHandler(registry: CollectorRegistry? = null) : SQL
       val message =
         "Hikari exception adjudicate: " +
           "errorCode=${sqlException.errorCode}, " +
-          "state=${sqlException?.sqlState ?: "null"}, " +
+          "state=${sqlException.sqlState ?: "null"}, " +
           "message=${sqlException.message}, " +
           "adjudicate=$result"
       if (result == SQLExceptionOverride.Override.DO_NOT_EVICT) {

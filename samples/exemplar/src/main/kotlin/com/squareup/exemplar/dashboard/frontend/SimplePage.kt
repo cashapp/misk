@@ -16,7 +16,7 @@ import misk.web.mediatype.MediaTypes
 
 /** Example page from Tailwind UI https://tailwindui.com/components/ecommerce/page-examples/storefront-pages */
 @Singleton
-class SimplePage @Inject constructor(@AppName private val appName: String) : WebAction {
+class SimplePage @Inject constructor(@param:AppName private val appName: String) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @AdminDashboardAccess

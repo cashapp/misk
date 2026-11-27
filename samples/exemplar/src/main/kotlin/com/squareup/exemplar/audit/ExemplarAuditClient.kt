@@ -28,7 +28,7 @@ constructor(
   private val clock: Clock,
   private val callerProvider: ActionScoped<MiskCaller?>,
   private val deployment: Deployment,
-  @AppName private val appName: String,
+  @param:AppName private val appName: String,
 ) : AuditClient {
   private val okHttpClient = OkHttpClient()
   private val adapter = moshi.adapter<Event>()

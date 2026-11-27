@@ -34,12 +34,12 @@ class ResponseContentTypeTest {
     val requestForJson = get("/hello/jeff", MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
     val jsonResponse = httpClient.newCall(requestForJson).execute()
     assertThat(jsonResponse.code).isEqualTo(200)
-    assertThat(jsonResponse.body!!.string()).isEqualTo("""{"message":"howdy, jeff"}""")
+    assertThat(jsonResponse.body.string()).isEqualTo("""{"message":"howdy, jeff"}""")
 
     val requestForProto = get("/hello/jeff", MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE)
     val protoResponse = httpClient.newCall(requestForProto).execute()
     assertThat(protoResponse.code).isEqualTo(200)
-    assertThat(protoResponse.body!!.string())
+    assertThat(protoResponse.body.string())
       .isEqualTo(HelloReply("howdy, jeff").encodeByteString().string(Charset.defaultCharset()))
   }
 
@@ -50,12 +50,12 @@ class ResponseContentTypeTest {
     val headerlessRequest = get("/hello-json/jeff")
     val headerlessResponse = httpClient.newCall(headerlessRequest).execute()
     assertThat(headerlessResponse.code).isEqualTo(200)
-    assertThat(headerlessResponse.body!!.string()).isEqualTo("""{"message":"howdy, jeff"}""")
+    assertThat(headerlessResponse.body.string()).isEqualTo("""{"message":"howdy, jeff"}""")
 
     val requestForJson = get("/hello-json/jeff", MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
     val jsonResponse = httpClient.newCall(requestForJson).execute()
     assertThat(jsonResponse.code).isEqualTo(200)
-    assertThat(jsonResponse.body!!.string()).isEqualTo("""{"message":"howdy, jeff"}""")
+    assertThat(jsonResponse.body.string()).isEqualTo("""{"message":"howdy, jeff"}""")
 
     val requestForProto = get("/hello-json/jeff", MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE)
     val protoResponse = httpClient.newCall(requestForProto).execute()
@@ -69,7 +69,7 @@ class ResponseContentTypeTest {
     val headerlessRequest = get("/hello/jeff")
     val headerlessResponse = httpClient.newCall(headerlessRequest).execute()
     assertThat(headerlessResponse.code).isEqualTo(200)
-    assertThat(headerlessResponse.body!!.string()).isEqualTo("""{"message":"howdy, jeff"}""")
+    assertThat(headerlessResponse.body.string()).isEqualTo("""{"message":"howdy, jeff"}""")
   }
 
   class TestModule : KAbstractModule() {

@@ -19,9 +19,7 @@ import misk.web.v2.DashboardIndexAction.Companion.titlecase
 import wisp.deployment.Deployment
 
 /** Configuration for dashboard page layout behavior. */
-data class DashboardLayoutConfig @JvmOverloads constructor(
-  val enableTurbo: Boolean = true,
-)
+data class DashboardLayoutConfig @JvmOverloads constructor(val enableTurbo: Boolean = true)
 
 /**
  * Builds dashboard UI for index homepage.
@@ -32,7 +30,7 @@ class DashboardPageLayout
 @Inject
 constructor(
   private val allHomeUrls: List<DashboardHomeUrl>,
-  @AppName private val appName: String,
+  @param:AppName private val appName: String,
   private val allNavbarItem: List<DashboardNavbarItem>,
   private val allTabs: List<DashboardTab>,
   private val callerProvider: ActionScoped<MiskCaller?>,

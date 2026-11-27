@@ -45,12 +45,13 @@ class WebActionFactory
 @Inject
 constructor(
   private val injector: Injector,
-  @BeforeContentEncoding private val beforeContentEncodingNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
-  @ForContentEncoding private val forContentEncodingNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
+  @param:BeforeContentEncoding
+  private val beforeContentEncodingNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
+  @param:ForContentEncoding private val forContentEncodingNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
   private val userProvidedApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>,
   private val userProvidedNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
-  @MiskDefault private val miskNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
-  @MiskDefault private val miskApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>,
+  @param:MiskDefault private val miskNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
+  @param:MiskDefault private val miskApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>,
   private val webActionBindingFactory: WebActionBinding.Factory,
   private val scope: ActionScope,
   private val actionScopeSeedDataTransformerFactories: List<WebActionSeedDataTransformerFactory>,
@@ -76,7 +77,7 @@ constructor(
             it.findAnnotation<ConnectWebSocket>() != null ||
             it.findAnnotation<WireRpc>() != null
         ) {
-          it as? KFunction<*> ?: throw IllegalArgumentException("expected $it to be a function")
+          it
         } else null
       }
 
@@ -231,10 +232,9 @@ constructor(
   }
 
   /**
-   * Returns a copy of [action] that converts a gRPC action into a protobuf POST action, or null
-   * if the action is not a gRPC action or does not have @EnableUnframedRequests. This enables a
-   * single gRPC action ([WireRpc] or [Grpc]) to accept plain HTTP POST with
-   * `application/x-protobuf` content type (unframed protobuf, without gRPC framing).
+   * Returns a copy of [action] that converts a gRPC action into a protobuf POST action, or null if the action is not a
+   * gRPC action or does not have @EnableUnframedRequests. This enables a single gRPC action ([WireRpc] or [Grpc]) to
+   * accept plain HTTP POST with `application/x-protobuf` content type (unframed protobuf, without gRPC framing).
    */
   private fun transformActionIntoProtobufPost(action: Action): Action? {
     if (action.dispatchMechanism != DispatchMechanism.GRPC) return null

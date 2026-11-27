@@ -288,7 +288,6 @@ constructor(
               when (jobHandler) {
                 is SuspendingJobHandler -> runBlocking { jobHandler.handleJob(validJobs.single()) }
                 is BlockingJobHandler -> jobHandler.handleJob(validJobs.single())
-                else -> error("Unknown job handler type $jobHandler")
               }
             when (jobStatus) {
               JobStatus.OK -> job.acknowledged = true

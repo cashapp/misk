@@ -60,7 +60,7 @@ class SingleRequestThreadTest {
     client
       .newCall(Request.Builder().url(jetty.httpsServerUrl!!.resolve("/hello/${HelloAction.SPECIAL_MESSAGE}")!!).build())
       .execute()
-      .body!!
+      .body
       .string()
 
     // Verify MDC tag survived to the request/response log

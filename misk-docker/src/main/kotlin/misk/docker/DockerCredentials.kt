@@ -12,8 +12,8 @@ import okio.Path.Companion.toPath
 internal data class DockerConfig @JvmOverloads constructor(val credsStore: String? = null)
 
 data class DockerCredential(
-  @Json(name = "Username") val username: String?,
-  @Json(name = "Secret") val password: String?,
+  @param:Json(name = "Username") val username: String?,
+  @param:Json(name = "Secret") val password: String?,
 )
 
 /** A helper class for fetching docker credentials, necessary when pulling docker images. */

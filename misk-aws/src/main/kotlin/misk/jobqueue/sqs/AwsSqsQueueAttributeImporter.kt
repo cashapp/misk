@@ -18,7 +18,7 @@ constructor(
   private val leaseManager: LeaseManager,
   private val metrics: SqsMetrics,
   private val queues: QueueResolver,
-  @ForSqsHandling private val taskQueue: RepeatedTaskQueue,
+  @param:ForSqsHandling private val taskQueue: RepeatedTaskQueue,
 ) {
 
   val running = AtomicBoolean(true)

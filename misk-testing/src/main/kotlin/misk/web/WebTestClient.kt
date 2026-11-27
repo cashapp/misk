@@ -61,7 +61,7 @@ class WebTestClient @Inject constructor(private val moshi: Moshi, private val je
   }
 
   data class WebTestResponse(val response: Response, private val moshi: Moshi) {
-    fun <T : Any> parseJson(tClass: KClass<T>): T = moshi.adapter(tClass.java).fromJson(response.body!!.source())!!
+    fun <T : Any> parseJson(tClass: KClass<T>): T = moshi.adapter(tClass.java).fromJson(response.body.source())!!
 
     inline fun <reified T : Any> parseJson(): T = this.parseJson(T::class)
   }

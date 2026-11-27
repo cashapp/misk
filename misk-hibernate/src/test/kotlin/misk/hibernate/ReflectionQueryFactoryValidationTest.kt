@@ -150,7 +150,7 @@ class ReflectionQueryFactoryValidationTest {
     @Select fun listAsProjection(session: Session): List<MalformedPathOnParameter>
   }
 
-  data class MalformedPathOnParameter(@Property(path = ".name") var name: String) : Projection
+  data class MalformedPathOnParameter(@param:Property(path = ".name") var name: String) : Projection
 
   @Test
   fun inParameterIsNotVarargOrCollection() {

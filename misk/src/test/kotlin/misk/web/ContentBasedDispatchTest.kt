@@ -97,7 +97,7 @@ internal class ContentBasedDispatchTest {
     val request = newRequest("/hello-bytes", grpcMediaType, body)
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
-    val responseContent = response.body!!.source()
+    val responseContent = response.body.source()
     val strResp = String(responseContent.readByteString().toByteArray())
     assertThat(strResp).isEqualTo("Test")
     val trailers = response.trailers()
@@ -118,7 +118,7 @@ internal class ContentBasedDispatchTest {
     assertThat(response.code).isEqualTo(404)
     assertThat(response.message).isEqualTo("Not Found")
     assertThat(response.headers["Content-Type"]).isEqualTo("text/plain;charset=utf-8")
-    assertThat(response.body!!.string()).startsWith("Nothing found at")
+    assertThat(response.body.string()).startsWith("Nothing found at")
   }
 
   @Test
@@ -211,7 +211,7 @@ internal class ContentBasedDispatchTest {
     val request = newRequest("/hello", contentType, content!!.toRequestBody(contentType), acceptedMediaType.toString())
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
-    return response.body!!
+    return response.body
   }
 
   private fun newRequest(
@@ -224,7 +224,7 @@ internal class ContentBasedDispatchTest {
       Request.Builder().post(requestBody).url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
 
     if (acceptedMediaType != null) {
-      request.header("Accept", acceptedMediaType.toString())
+      request.header("Accept", acceptedMediaType)
     }
 
     request.header("Content-Type", contentType.toString())

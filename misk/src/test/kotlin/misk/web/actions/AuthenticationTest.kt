@@ -267,7 +267,7 @@ class AuthenticationTest {
     capabilities?.let { requestBuilder.header(FakeCallerAuthenticator.CAPABILITIES_HEADER, capabilities) }
     val call = client.newCall(requestBuilder.build())
     val response = call.execute()
-    return response.body!!.string()
+    return response.body.string()
   }
 
   private fun createOkHttpClient(): OkHttpClient {

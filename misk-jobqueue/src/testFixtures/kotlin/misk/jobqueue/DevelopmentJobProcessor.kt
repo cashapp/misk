@@ -13,7 +13,7 @@ import misk.tasks.Status
 internal class DevelopmentJobProcessor
 @Inject
 constructor(
-  @ForDevelopmentHandling private val taskQueue: RepeatedTaskQueue,
+  @param:ForDevelopmentHandling private val taskQueue: RepeatedTaskQueue,
   private val fakeJobQueue: FakeJobQueue,
   private val serviceManagerProvider: Provider<ServiceManager>,
 ) : AbstractIdleService() {
