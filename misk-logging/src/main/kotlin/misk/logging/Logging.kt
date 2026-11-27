@@ -117,6 +117,9 @@ fun <T> withTags(vararg tags: Tag, includeTagsOnExceptionLogs: Boolean = false, 
  * Tags are only returned for the throwable that escaped the block, or one wrapping it as a cause. Any `Throwable` is
  * covered, including `Error`s.
  *
+ * Tags are held per thread. In coroutines, log the exception before switching dispatcher (or catch it inside the
+ * block): a thread hop between the throw and the log loses the tags.
+ *
  * Within Misk this is already built into both WebAction (`misk.web.exceptions.ExceptionHandlingInterceptor`) and
  * `misk.jobqueue.sqs.SqsJobConsumer`. These can be used as an example to extend for any other incoming "event"
  * consumers within a service such as Kafka, scheduled tasks, temporal workflows, etc.
