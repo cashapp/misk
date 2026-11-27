@@ -2,10 +2,12 @@ package misk.jdbc
 
 import java.io.File
 import java.sql.ResultSet
+import java.sql.SQLException
+import java.sql.Statement
 import java.util.regex.Pattern
 import misk.logging.getLogger
-import misk.spirit.Spirit
 import misk.resources.ResourceLoader
+import misk.spirit.Spirit
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
 import net.sf.jsqlparser.statement.create.table.CreateTable
 
@@ -35,11 +37,11 @@ internal class DeclarativeSchemaMigrator(
       if (ddl != null) {
         dataSourceService.dataSource.connection.use { conn ->
           conn.createStatement().use { stmt ->
-            // Spirit outputs multiple DDL statements (one per line), execute each individually.
-            ddl.lines()
-              .map { it.trim() }
-              .filter { it.isNotBlank() }
-              .forEach { stmt.execute(it) }
+            if (connector.config().type == DataSourceType.MYSQL) {
+              applyMysqlDdl(stmt, ddl)
+            } else {
+              executeDdl(stmt, ddl)
+            }
           }
         }
       }
@@ -47,6 +49,36 @@ internal class DeclarativeSchemaMigrator(
     }
 
     return if (appliedMigrations) MigrationStatus.Success else MigrationStatus.Empty
+  }
+
+  private fun applyMysqlDdl(statement: Statement, ddl: String) {
+    val originalMode =
+      statement.executeQuery("SELECT @@SESSION.sql_mode").use { rows ->
+        check(rows.next())
+        rows.getString(1)
+      }
+    // Preserve zero IDs and reject lossy conversions while allowing legacy zero-date defaults.
+    statement.connection.prepareStatement("SET SESSION sql_mode = ?").use { setMode ->
+      setMode.setString(1, "NO_AUTO_VALUE_ON_ZERO,STRICT_ALL_TABLES,NO_ENGINE_SUBSTITUTION")
+      setMode.execute()
+      try {
+        executeDdl(statement, ddl)
+      } finally {
+        // The datasource also lends this connection to application code.
+        try {
+          setMode.setString(1, originalMode)
+          setMode.execute()
+        } catch (e: SQLException) {
+          statement.connection.abort(Runnable::run)
+          throw e
+        }
+      }
+    }
+  }
+
+  private fun executeDdl(statement: Statement, ddl: String) {
+    // Spirit outputs one statement per line.
+    ddl.lineSequence().map { it.trim() }.filter { it.isNotBlank() }.forEach { statement.execute(it) }
   }
 
   override fun requireAll(): MigrationStatus {
@@ -141,13 +173,11 @@ internal class DeclarativeSchemaMigrator(
   /**
    * Removes MySQL `VISIBLE`/`INVISIBLE` index and column attributes before parsing.
    *
-   * JSqlParser does not understand MySQL visibility attributes and fails on statements like
-   * `KEY idx (col) INVISIBLE`, but this validation only extracts table and column names, which
-   * visibility never affects. Backtick-quoted identifiers are left untouched, so a column
-   * named `visible` or `invisible` still parses correctly.
+   * JSqlParser does not understand MySQL visibility attributes and fails on statements like `KEY idx (col) INVISIBLE`,
+   * but this validation only extracts table and column names, which visibility never affects. Backtick-quoted
+   * identifiers are left untouched, so a column named `visible` or `invisible` still parses correctly.
    */
-  private fun stripVisibilityAttributes(sql: String): String =
-    VISIBILITY_ATTRIBUTE_REGEX.replace(sql, "")
+  private fun stripVisibilityAttributes(sql: String): String = VISIBILITY_ATTRIBUTE_REGEX.replace(sql, "")
 
   /** Helper function to parse database and extract actual tables and columns */
   private fun appliedMigrations(): Map<String, Set<String>> {
