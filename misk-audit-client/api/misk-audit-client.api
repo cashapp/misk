@@ -35,9 +35,11 @@ public final class misk/audit/FakeAuditClient : misk/testing/FakeFixture, misk/a
 	public static final field Companion Lmisk/audit/FakeAuditClient$Companion;
 	public static final field DEFAULT_USER Ljava/lang/String;
 	public fun <init> (Lmisk/audit/FakeAuditClient$OptionalBinder;)V
+	public final fun captureHttpRequest ()Lmisk/audit/FakeAuditRequestCapture;
 	public final fun getEnableLogging ()Z
 	public final fun getSentEvents ()Ljava/util/concurrent/LinkedBlockingDeque;
 	public fun logEvent (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Instant;)V
+	public fun reset ()V
 	public final fun setEnableLogging (Z)V
 }
 
@@ -93,6 +95,17 @@ public final class misk/audit/FakeAuditClientModule : misk/inject/KAbstractModul
 	public fun <init> ()V
 }
 
+public final class misk/audit/FakeAuditRequestCapture : java/lang/AutoCloseable {
+	public final fun applyTo (Lokhttp3/Request$Builder;)V
+	public final fun awaitCompleted (Ljava/time/Duration;)Lmisk/audit/RecordedAuditRequest;
+	public fun close ()V
+}
+
+public final class misk/audit/FakeAuditRequestCompletionModule : misk/scope/ActionScopedProviderModule {
+	public fun <init> ()V
+	public fun configureProviders ()V
+}
+
 public final class misk/audit/NoOpAuditClient : misk/audit/AuditClient {
 	public fun <init> ()V
 	public fun logEvent (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Instant;)V
@@ -100,5 +113,10 @@ public final class misk/audit/NoOpAuditClient : misk/audit/AuditClient {
 
 public final class misk/audit/NoOpAuditClientModule : misk/inject/KAbstractModule {
 	public fun <init> ()V
+}
+
+public final class misk/audit/RecordedAuditRequest {
+	public final fun getEvents ()Ljava/util/List;
+	public final fun getStatusCode ()I
 }
 

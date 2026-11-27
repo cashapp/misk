@@ -12,6 +12,7 @@ import misk.web.MiskWebModule
 import misk.web.WebConfig
 import misk.web.WithMiskCaller
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import wisp.deployment.TESTING
 
@@ -22,6 +23,13 @@ class FakeAuditClientTest {
 
   @Inject lateinit var client: FakeAuditClient
   @Inject lateinit var logCollector: LogCollector
+
+  @Test
+  fun `HTTP capture requires explicit completion module`() {
+    assertThatThrownBy { client.captureHttpRequest() }
+      .isInstanceOf(IllegalStateException::class.java)
+      .hasMessageContaining("FakeAuditRequestCompletionModule")
+  }
 
   @Test
   fun `happy path`() {
