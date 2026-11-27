@@ -1,6 +1,6 @@
 # wisp-logging
 
-Convenience functions on top of [kotlin-logging](https://github.com/MicroUtils/kotlin-logging/).
+Convenience functions on top of [kotlin-logging](https://github.com/oshai/kotlin-logging).
 
 ## Usage
 
