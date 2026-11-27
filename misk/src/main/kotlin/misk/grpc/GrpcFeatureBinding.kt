@@ -17,6 +17,7 @@ import misk.web.FeatureBinding
 import misk.web.FeatureBinding.Claimer
 import misk.web.FeatureBinding.Subject
 import misk.web.PathPattern
+import misk.web.StreamingResponseWriteDispatcher
 import misk.web.WebConfig
 import misk.web.extractors.StringConverter
 import misk.web.mediatype.MediaTypes
@@ -28,6 +29,7 @@ internal class GrpcFeatureBinding(
   private val streamingResponse: Boolean,
   private val isSuspend: Boolean,
   private val grpcMessageSourceChannelContext: CoroutineContext,
+  private val grpcMessageSinkChannelContext: CoroutineContext,
   private val grpcEncoding: String,
   private val minMessageToCompress: Long,
   private val maxInboundMessageBytes: Long,
@@ -75,6 +77,7 @@ internal class GrpcFeatureBinding(
           GrpcMessageSinkChannel(
             channel = Channel(capacity = RENDEZVOUS, onBufferOverflow = BufferOverflow.SUSPEND),
             sink = messageSink,
+            coroutineContext = grpcMessageSinkChannelContext,
           )
         } else {
           messageSink
@@ -118,7 +121,10 @@ internal class GrpcFeatureBinding(
   }
 
   @Singleton
-  class Factory @Inject internal constructor(webConfig: WebConfig) : FeatureBinding.Factory {
+  class Factory
+  @Inject
+  internal constructor(webConfig: WebConfig, streamingResponseWriteDispatcher: StreamingResponseWriteDispatcher) :
+    FeatureBinding.Factory {
 
     /**
      * This dispatcher is sized to the jetty thread pool size to make sure that no requests that are currently scheduled
@@ -129,6 +135,8 @@ internal class GrpcFeatureBinding(
         parallelism = webConfig.jetty_max_thread_pool_size,
         name = "GrpcMessageSourceChannel.bridgeFromSource",
       )
+
+    private val grpcMessageSinkChannelDispatcher = streamingResponseWriteDispatcher.dispatcher
 
     private val grpcEncoding = if (webConfig.grpcGzip) "gzip" else "identity"
 
@@ -181,6 +189,7 @@ internal class GrpcFeatureBinding(
           streamingResponse = streamingResponse,
           isSuspend = isSuspend,
           grpcMessageSourceChannelContext = grpcMessageSourceChannelDispatcher,
+          grpcMessageSinkChannelContext = grpcMessageSinkChannelDispatcher,
           grpcEncoding = grpcEncoding,
           minMessageToCompress = minMessageToCompress,
           maxInboundMessageBytes = maxInboundMessageBytes,
@@ -194,6 +203,7 @@ internal class GrpcFeatureBinding(
           streamingResponse = streamingResponse,
           isSuspend = isSuspend,
           grpcMessageSourceChannelContext = grpcMessageSourceChannelDispatcher,
+          grpcMessageSinkChannelContext = grpcMessageSinkChannelDispatcher,
           grpcEncoding = grpcEncoding,
           minMessageToCompress = minMessageToCompress,
           maxInboundMessageBytes = maxInboundMessageBytes,

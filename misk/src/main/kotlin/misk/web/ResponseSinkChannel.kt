@@ -1,12 +1,19 @@
 package misk.web
 
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.runInterruptible
 
-internal class ResponseSinkChannel<T : Any>(private val channel: Channel<T>, private val sink: ResponseSink<T>) :
-  SendChannel<T> by channel {
+internal class ResponseSinkChannel<T : Any>(
+  private val channel: Channel<T>,
+  private val sink: ResponseSink<T>,
+  private val coroutineContext: CoroutineContext,
+) : SendChannel<T> by channel {
 
-  suspend fun bridgeToSink() = channel.consumeEach { runInterruptible { sink.write(it) } }
+  /**
+   * Bridges the channel to the sink, running each write on [coroutineContext] so a slow reader doesn't block the
+   * action's event loop. See [StreamingResponseWriteDispatcher].
+   */
+  suspend fun bridgeToSink() = channel.consumeEach { runInterruptibleWrite(coroutineContext) { sink.write(it) } }
 }
