@@ -83,9 +83,14 @@ interface Transacter {
   fun <T> withLock(lockKey: String, block: () -> T): T
 }
 
-fun Transacter.shards() = transaction { it.shards() }
+/**
+ * Returns the cached shard list. A [RealTransacter] reads its cache directly rather than opening a transaction, which
+ * would cost a pooled connection and a commit round trip to return data already in memory.
+ */
+fun Transacter.shards(): Set<Shard> = if (this is RealTransacter) cachedShards() else transaction { it.shards() }
 
-fun Transacter.shards(keyspace: Keyspace) = transaction { it.shards(keyspace) }
+fun Transacter.shards(keyspace: Keyspace): Collection<Shard> =
+  if (this is RealTransacter) cachedShards(keyspace) else transaction { it.shards(keyspace) }
 
 /**
  * Commits a transaction with operations of [block].

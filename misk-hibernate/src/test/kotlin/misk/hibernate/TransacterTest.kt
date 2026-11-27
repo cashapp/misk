@@ -6,6 +6,7 @@ import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
+import javax.sql.DataSource
 import kotlin.test.assertFailsWith
 import misk.exceptions.UnauthorizedException
 import misk.hibernate.VitessTestExtensions.save
@@ -314,6 +315,14 @@ abstract class TransacterTest {
     val exception =
       assertFailsWith<IllegalStateException> { transacter.transaction { transacter.noRetries().transaction {} } }
     assertThat(exception).hasMessage("Attempted to start a nested session")
+  }
+
+  @Test
+  fun shardsDoesNotStartATransaction() {
+    // Reading the cached shard list must not open a session, so it works inside another transaction.
+    val shards = transacter.transaction { transacter.readOnly().shards() }
+    assertThat(shards).isNotEmpty
+    assertThat(transacter.transaction { transacter.shards(shards.first().keyspace) }).contains(shards.first())
   }
 
   @Test
@@ -664,6 +673,26 @@ class VitessMySQLTransacterTest : TransacterTest() {
   @MiskExternalDependency private val dockerVitess = DockerVitess()
 
   @MiskTestModule val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
+  @Inject @Movies lateinit var dataSource: DataSource
+
+  @Test
+  fun pooledConnectionsKeepAutocommitEnabledByDefault() {
+    dataSource.connection.use { assertThat(it.autoCommit).isTrue }
+  }
+}
+
+/** Runs every transacter test against Vitess with [misk.jdbc.DataSourceConfig.vitess_disable_autocommit] set. */
+@MiskTest(startService = true)
+class VitessMySQLAutocommitDisabledTransacterTest : TransacterTest() {
+  @MiskExternalDependency private val dockerVitess = DockerVitess()
+
+  @MiskTestModule val module = MoviesTestModule(DataSourceType.VITESS_MYSQL, disableAutocommit = true)
+  @Inject @Movies lateinit var dataSource: DataSource
+
+  @Test
+  fun pooledConnectionsStartWithAutocommitDisabled() {
+    dataSource.connection.use { assertThat(it.autoCommit).isFalse }
+  }
 }
 
 @MiskTest(startService = true)

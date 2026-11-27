@@ -26,6 +26,7 @@ class MoviesTestModule(
       }
     },
   private val installHealthChecks: Boolean = true,
+  private val disableAutocommit: Boolean = false,
 ) : KAbstractModule() {
   override fun configure() {
     install(LogCollectorModule())
@@ -33,8 +34,8 @@ class MoviesTestModule(
     install(DeploymentModule(TESTING))
 
     val config = MiskConfig.load<MoviesConfig>("moviestestmodule", TESTING)
-    val writerConfig = selectDataSourceConfig(config)
-    val readerConfig = selectReaderDataSourceConfig(config)
+    val writerConfig = selectDataSourceConfig(config).withAutocommitSetting()
+    val readerConfig = selectReaderDataSourceConfig(config).withAutocommitSetting()
     install(HibernateTestingModule(Movies::class, scaleSafetyChecks = scaleSafetyChecks))
     install(
       HibernateModule(
@@ -46,6 +47,9 @@ class MoviesTestModule(
     )
     install(entitiesModule)
   }
+
+  private fun DataSourceConfig.withAutocommitSetting(): DataSourceConfig =
+    if (disableAutocommit) copy(vitess_disable_autocommit = true) else this
 
   internal fun selectDataSourceConfig(config: MoviesConfig): DataSourceConfig {
     if (singleTransactionMode && type == DataSourceType.VITESS_MYSQL) {
